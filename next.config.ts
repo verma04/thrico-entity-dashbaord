@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/admin/:path*",
+        destination: "/:path*",
+      },
+    ];
+  },
 };
+
 
 export default withNextIntl(nextConfig);

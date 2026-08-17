@@ -163,3 +163,5 @@ export * from "./shopify";
 export * from "./woocommerce";
 export * from "./roles";
 export * from "./hr";
+export * from "./crm";
+

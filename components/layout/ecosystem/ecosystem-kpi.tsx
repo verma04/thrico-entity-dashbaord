@@ -185,7 +185,7 @@ export function EcosystemKPI({
                 <TrendingDown className="h-2.5 w-2.5" />
               )}
               {isPositive ? "+" : ""}
-              {typeof trend === "number" ? trend.toFixed(1) : trend}%
+              {typeof trend === "number" ? trend?.toFixed(1) : trend}%
             </div>
           )}
         </div>
@@ -193,14 +193,19 @@ export function EcosystemKPI({
 
       {/* Subtle sparkline in the background at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none opacity-30 mix-blend-multiply dark:mix-blend-lighten">
-        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          minWidth={1}
+          minHeight={1}
+        >
           <AreaChart
             data={chartData}
             margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
           >
             <defs>
               <linearGradient
-                id={`gradient-${title.replace(/\s+/g, "")}`}
+                id={`gradient-${title?.replace(/\s+/g, "")}`}
                 x1="0"
                 y1="0"
                 x2="0"
@@ -230,7 +235,7 @@ export function EcosystemKPI({
               }
               strokeWidth={1.5}
               fillOpacity={1}
-              fill={`url(#gradient-${title.replace(/\s+/g, "")})`}
+              fill={`url(#gradient-${title?.replace(/\s+/g, "")})`}
               isAnimationActive={true}
               dot={false}
             />
@@ -243,7 +248,7 @@ export function EcosystemKPI({
   const wrapperClasses = cn(
     "relative flex flex-col p-3 rounded-[12px] border transition-all duration-300 hover:shadow-sm overflow-hidden",
     currentStyle.bg,
-    href ? "cursor-pointer hover:border-primary/50 group" : ""
+    href ? "cursor-pointer hover:border-primary/50 group" : "",
   );
 
   if (href) {
@@ -254,9 +259,5 @@ export function EcosystemKPI({
     );
   }
 
-  return (
-    <div className={wrapperClasses}>
-      {content}
-    </div>
-  );
+  return <div className={wrapperClasses}>{content}</div>;
 }

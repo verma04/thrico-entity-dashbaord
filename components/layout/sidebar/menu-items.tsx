@@ -8,7 +8,9 @@ import {
   GitPullRequest,
   CreditCard,
   User2,
+  Contact2,
   BellDotIcon,
+
   PaintBucketIcon,
   Rocket,
   LogOutIcon,
@@ -1129,6 +1131,12 @@ export const integrationsItems = [
     icon: <Zap size={18} />,
   },
   {
+    key: "int-crm",
+    label: "CRM Hub",
+    path: "/integrations/crm",
+    icon: <Contact2 size={18} />,
+  },
+  {
     key: "int-shopify",
     label: "Shopify",
     path: "/integrations/shopify/user",
@@ -1141,6 +1149,7 @@ export const integrationsItems = [
     icon: <Store size={18} />,
   },
 ];
+
 
 export const mobileAppItems = [
   {

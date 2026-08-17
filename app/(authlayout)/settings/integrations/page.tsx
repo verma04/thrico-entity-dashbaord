@@ -4,13 +4,29 @@ import React, { useState, useMemo } from "react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import {
   ShopifyIntegrationCard,
   WooCommerceIntegrationCard,
   HRIntegrationCard,
+  CRMIntegrationCard,
+  SlackIntegrationCard,
+  ZoomIntegrationCard,
+  GoogleMeetIntegrationCard,
+  SendGridIntegrationCard,
+  DeveloperApiCard,
 } from "@/components/settings/integrations";
-import { HR_PROVIDERS_CONFIG, HRProviderMetaConfig, useGetHRProviders } from "@/graphql/actions";
+import {
+  HR_PROVIDERS_CONFIG,
+  HRProvider,
+  useGetHRProviders,
+  useGetHRConnections,
+  CRM_PROVIDERS_CONFIG,
+  CRMProvider,
+  useGetCRMProviders,
+  useGetCRMConnections,
+  useGetShopifyConnection,
+  useGetWooCommerceConnection,
+} from "@/graphql/actions";
 import {
   Search,
   Blocks,
@@ -24,6 +40,12 @@ import {
   ShoppingBag,
   ArrowRight,
   Briefcase,
+  Contact2,
+  CheckCircle2,
+  MessageSquare,
+  Terminal,
+  Activity,
+  Plus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,28 +55,49 @@ import { cn } from "@/lib/utils";
 interface IntegrationItem {
   id: string;
   name: string;
-  category: "ecommerce";
+  category: "ecommerce" | "crm" | "hr" | "communication" | "developer";
   categoryLabel: string;
   description: string;
+  isConnected: boolean;
   component: React.ReactNode;
 }
 
 export default function IntegrationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("connected");
 
-  const { data: hrProvidersData, loading: hrLoading } = useGetHRProviders();
+  // Fetch connection statuses across all integration categories
+  const { data: shopifyData } = useGetShopifyConnection();
+  const isShopifyConnected = !!shopifyData?.shopifyConnection?.id;
+
+  const { data: wooData } = useGetWooCommerceConnection();
+  const isWooConnected = !!wooData?.wooCommerceConnection?.id;
+
+  const { data: hrProvidersData } = useGetHRProviders();
+  const { data: hrConnectionsData } = useGetHRConnections();
   const hrProviders = hrProvidersData?.getHRProviders || [];
+  const hrConnections = hrConnectionsData?.getHRConnections || [];
 
-  const integrations: IntegrationItem[] = useMemo(
-    () => [
+  const { data: crmProvidersData } = useGetCRMProviders();
+  const { data: crmConnectionsData } = useGetCRMConnections();
+  const crmProviders =
+    crmProvidersData?.getCRMProviders &&
+    crmProvidersData.getCRMProviders.length > 0
+      ? crmProvidersData.getCRMProviders
+      : Object.values(CRMProvider).map((p) => ({ provider: p }));
+  const crmConnections = crmConnectionsData?.getCRMConnections || [];
+
+  // Build full integrations registry with live connected state
+  const integrations: IntegrationItem[] = useMemo(() => {
+    return [
       {
         id: "shopify",
         name: "Shopify",
         category: "ecommerce",
         categoryLabel: "E-Commerce",
         description:
-          "Sync products, customers, and checkout orders in real-time.",
+          "Sync products, customers, and checkout orders from your online store directly with Thrico in real-time.",
+        isConnected: isShopifyConnected,
         component: <ShopifyIntegrationCard />,
       },
       {
@@ -63,29 +106,122 @@ export default function IntegrationsPage() {
         category: "ecommerce",
         categoryLabel: "E-Commerce",
         description:
-          "Sync WordPress WooCommerce catalog, customers, and orders via REST API keys.",
+          "Sync WordPress WooCommerce store catalog, member purchases, and orders via REST API keys.",
+        isConnected: isWooConnected,
         component: <WooCommerceIntegrationCard />,
       },
-      ...hrProviders
+      ...(crmProviders
         .map((meta: any) => {
-          const config = HR_PROVIDERS_CONFIG[meta.provider];
+          const config = CRM_PROVIDERS_CONFIG[meta.provider as CRMProvider];
           if (!config) return null;
+          const isConn = crmConnections.some(
+            (c: any) =>
+              c.provider === meta.provider && c.status === "CONNECTED",
+          );
           return {
-            id: meta.provider.toLowerCase(),
+            id: `crm-${meta.provider.toLowerCase()}`,
+            name: meta.name || config.name,
+            category: "crm" as const,
+            categoryLabel: "CRM & Pipeline",
+            description: config.description,
+            isConnected: isConn,
+            component: <CRMIntegrationCard providerKey={config.provider} />,
+          };
+        })
+        .filter(Boolean) as IntegrationItem[]),
+      ...(hrProviders
+        .map((meta: any) => {
+          const config = HR_PROVIDERS_CONFIG[meta.provider as HRProvider];
+          if (!config) return null;
+          const isConn = hrConnections.some(
+            (c: any) =>
+              c.provider === meta.provider && c.status === "CONNECTED",
+          );
+          return {
+            id: `hr-${meta.provider.toLowerCase()}`,
             name: meta.name || config.name,
             category: "hr" as const,
             categoryLabel: "HR & Directory",
             description: config.description,
+            isConnected: isConn,
             component: <HRIntegrationCard providerKey={config.provider} />,
           };
         })
-        .filter(Boolean) as IntegrationItem[],
-    ],
-    [hrProviders],
+        .filter(Boolean) as IntegrationItem[]),
+      {
+        id: "slack",
+        name: "Slack",
+        category: "communication",
+        categoryLabel: "Communication",
+        description:
+          "Send real-time alerts, member activity updates, and system notifications directly to workspace channels.",
+        isConnected: false,
+        component: <SlackIntegrationCard />,
+      },
+      {
+        id: "zoom",
+        name: "Zoom",
+        category: "communication",
+        categoryLabel: "Communication",
+        description:
+          "Connect Zoom to automatically create and manage meeting rooms for webinars, coaching calls, and virtual sessions.",
+        isConnected: false,
+        component: <ZoomIntegrationCard />,
+      },
+      {
+        id: "google-meet",
+        name: "Google Meet",
+        category: "communication",
+        categoryLabel: "Communication",
+        description:
+          "Auto-generate secure Google Meet video links for events, coaching sessions, and community calls.",
+        isConnected: false,
+        component: <GoogleMeetIntegrationCard />,
+      },
+      {
+        id: "sendgrid",
+        name: "SendGrid",
+        category: "communication",
+        categoryLabel: "Communication",
+        description:
+          "Deliver high-deliverability transactional emails, event reminders, and member onboarding emails.",
+        isConnected: false,
+        component: <SendGridIntegrationCard />,
+      },
+      {
+        id: "developer-api",
+        name: "MCP & Webhooks",
+        category: "developer",
+        categoryLabel: "Developer Tools",
+        description:
+          "Connect AI agents via Model Context Protocol or configure secure event triggers and webhooks.",
+        isConnected: true,
+        component: <DeveloperApiCard />,
+      },
+    ];
+  }, [
+    isShopifyConnected,
+    isWooConnected,
+    hrProviders,
+    hrConnections,
+    crmProviders,
+    crmConnections,
+  ]);
+
+  const connectedCount = useMemo(
+    () => integrations.filter((i) => i.isConnected).length,
+    [integrations],
   );
 
+  // Categories list without "All" - starts with Connected, then all specific categories
   const categories = [
-    { id: "all", label: "All Apps", icon: Layers, count: integrations.length },
+    {
+      id: "connected",
+      label: "Connected",
+      icon: CheckCircle2,
+      count: connectedCount,
+      highlight: true,
+    },
     {
       id: "ecommerce",
       label: "E-Commerce",
@@ -93,41 +229,71 @@ export default function IntegrationsPage() {
       count: integrations.filter((i) => i.category === "ecommerce").length,
     },
     {
+      id: "crm",
+      label: "CRM & Pipeline",
+      icon: Contact2,
+      count: integrations.filter((i) => i.category === "crm").length,
+    },
+    {
       id: "hr",
       label: "HR & Directory",
       icon: Briefcase,
       count: integrations.filter((i) => i.category === "hr").length,
     },
+    {
+      id: "communication",
+      label: "Communication",
+      icon: MessageSquare,
+      count: integrations.filter((i) => i.category === "communication").length,
+    },
+    {
+      id: "developer",
+      label: "Developer Tools",
+      icon: Terminal,
+      count: integrations.filter((i) => i.category === "developer").length,
+    },
   ];
 
+  // Filtered lists based on search & active category
   const filteredIntegrations = useMemo(() => {
-    return integrations.filter((integration) => {
-      const matchesCategory =
-        selectedCategory === "all" || integration.category === selectedCategory;
-      const matchesSearch =
-        integration.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        integration.categoryLabel
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        integration.description
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
+    return integrations
+      .filter((integration) => {
+        const matchesCategory =
+          selectedCategory === "connected"
+            ? integration.isConnected
+            : integration.category === selectedCategory;
+
+        const matchesSearch =
+          integration.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          integration.categoryLabel
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          integration.description
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+
+        return matchesCategory && matchesSearch;
+      })
+      .sort((a, b) => {
+        // In category views, sort connected ones first
+        if (a.isConnected && !b.isConnected) return -1;
+        if (!a.isConnected && b.isConnected) return 1;
+        return 0;
+      });
   }, [integrations, selectedCategory, searchQuery]);
 
   return (
     <EcosystemWrapper>
       <EcosystemHeader
         title="App Integrations"
-        description="Connect third-party platforms, configure event webhooks, and automate data synchronization."
+        description="Connect third-party platforms, configure event webhooks, and automate bidirectional data synchronization."
         breadcrumbs={[
           { label: "Settings", href: "/settings" },
           { label: "Integrations" },
         ]}
         icon={Blocks}
         badgeText="Ecosystem & APIs"
-        showLiveIndicator={false}
+        showLiveIndicator={connectedCount > 0}
       />
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
@@ -136,31 +302,39 @@ export default function IntegrationsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               {
-                label: "Available Apps",
+                label: "Active Connections",
+                value: connectedCount,
+                sub: connectedCount > 0 ? "Real-time Sync" : "Ready to Connect",
+                icon: Activity,
+                iconClass:
+                  connectedCount > 0
+                    ? "text-emerald-500"
+                    : "text-muted-foreground",
+                subClass:
+                  connectedCount > 0
+                    ? "text-emerald-600 dark:text-emerald-400 font-semibold"
+                    : "text-muted-foreground",
+                hasLivePulse: connectedCount > 0,
+              },
+              {
+                label: "Available Platforms",
                 value: integrations.length,
-                sub: "Services",
+                sub: "Supported Services",
                 icon: Blocks,
-                iconClass: "text-muted-foreground",
-              },
-              {
-                label: "Auto-Sync Engine",
-                value: "Active",
-                sub: "Real-time",
-                icon: Zap,
-                iconClass: "text-amber-500",
-                subClass: "text-emerald-600 dark:text-emerald-400",
-              },
-              {
-                label: "Store Sync",
-                value: "Catalog",
-                sub: "Products & Orders",
-                icon: RefreshCw,
                 iconClass: "text-indigo-500",
               },
               {
-                label: "Security",
+                label: "Sync Engine",
+                value: "Auto-Sync",
+                sub: "Real-time Webhooks",
+                icon: Zap,
+                iconClass: "text-amber-500",
+                subClass: "text-amber-600 dark:text-amber-400",
+              },
+              {
+                label: "Tenant Security",
                 value: "Encrypted",
-                sub: "OAuth & Keys",
+                sub: "AES-256 & TLS 1.3",
                 icon: ShieldCheck,
                 iconClass: "text-emerald-500",
               },
@@ -175,15 +349,23 @@ export default function IntegrationsPage() {
                   </span>
                   <stat.icon
                     className={cn(
-                      "h-3.5 w-3.5 opacity-70 transition-transform duration-300 group-hover:scale-110",
+                      "h-3.5 w-3.5 opacity-75 transition-transform duration-300 group-hover:scale-110",
                       stat.iconClass,
                     )}
                   />
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-bold text-foreground tracking-tight">
-                    {stat.value}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {stat.hasLivePulse && (
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                      </span>
+                    )}
+                    <span className="text-xl font-bold text-foreground tracking-tight">
+                      {stat.value}
+                    </span>
+                  </div>
                   <span
                     className={cn(
                       "text-[11px] font-medium",
@@ -197,9 +379,9 @@ export default function IntegrationsPage() {
             ))}
           </div>
 
-          {/* Filters Row */}
+          {/* Filters & Search Row */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-            {/* Category Pills */}
+            {/* Category Navigation Pills (Active, then all categories) */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
               {categories.map((cat) => {
                 const isSelected = selectedCategory === cat.id;
@@ -213,15 +395,29 @@ export default function IntegrationsPage() {
                       isSelected
                         ? "bg-foreground text-background border-foreground shadow-sm font-semibold"
                         : "bg-card text-muted-foreground hover:text-foreground border-border/50 hover:border-border/80 hover:bg-muted/40",
+                      cat.highlight &&
+                        !isSelected &&
+                        cat.count > 0 &&
+                        "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10",
                     )}
                   >
-                    <CatIcon className="h-3.5 w-3.5 opacity-70" />
+                    <CatIcon
+                      className={cn(
+                        "h-3.5 w-3.5 opacity-70",
+                        cat.highlight &&
+                          cat.count > 0 &&
+                          !isSelected &&
+                          "text-emerald-500 opacity-100",
+                      )}
+                    />
                     <span>{cat.label}</span>
                     <span
                       className={cn(
                         "text-[10px] font-semibold tabular-nums px-1.5 py-0.5 rounded-md ml-0.5",
                         isSelected
                           ? "bg-background/20 text-background"
+                          : cat.highlight && cat.count > 0
+                          ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold"
                           : "bg-muted text-muted-foreground",
                       )}
                     >
@@ -232,7 +428,7 @@ export default function IntegrationsPage() {
               })}
             </div>
 
-            {/* Search */}
+            {/* Search Input */}
             <div className="relative w-full sm:w-64 shrink-0">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
               <Input
@@ -245,7 +441,7 @@ export default function IntegrationsPage() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 transition-colors duration-150"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 transition-colors duration-150 cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -253,57 +449,123 @@ export default function IntegrationsPage() {
             </div>
           </div>
 
-          {/* Integrations Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredIntegrations.map((integration) => (
-              <React.Fragment key={integration.id}>
-                {integration.component}
-              </React.Fragment>
-            ))}
+          {/* Cards Grid */}
+          <div className="space-y-4">
+            {/* Header info for connected category */}
+            {selectedCategory === "connected" && filteredIntegrations.length > 0 && (
+              <div className="flex items-center justify-between pb-1">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <p className="text-[13px] font-semibold text-foreground">
+                    Active & Connected Platforms ({filteredIntegrations.length})
+                  </p>
+                </div>
+                <p className="text-[11.5px] text-muted-foreground hidden sm:block">
+                  Live data sync & background webhooks active
+                </p>
+              </div>
+            )}
+
+            {/* Integrations Grid with Uniform/Balanced layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+              {filteredIntegrations.map((integration) => (
+                <div key={integration.id} className="h-full">
+                  {integration.component}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Empty State */}
-          {filteredIntegrations.length === 0 && (
+          {/* Empty State for Connected Tab when no connections exist yet */}
+          {selectedCategory === "connected" && filteredIntegrations.length === 0 && !searchQuery && (
+            <div className="p-12 flex flex-col items-center text-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/30">
+              <div className="h-12 w-12 rounded-2xl bg-muted/80 flex items-center justify-center mb-4">
+                <Activity className="h-5 w-5 text-muted-foreground/50" />
+              </div>
+              <p className="text-[14px] font-semibold text-foreground">
+                No Connected Integrations
+              </p>
+              <p className="text-[13px] text-muted-foreground mt-1.5 max-w-md leading-relaxed">
+                Connect your E-Commerce stores, CRM pipelines, or HR directories from the categories above to enable real-time synchronization.
+              </p>
+              <div className="flex items-center gap-2 mt-5 flex-wrap justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                  onClick={() => setSelectedCategory("ecommerce")}
+                >
+                  <ShoppingBag className="h-3.5 w-3.5" />
+                  Browse E-Commerce
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                  onClick={() => setSelectedCategory("crm")}
+                >
+                  <Contact2 className="h-3.5 w-3.5" />
+                  Browse CRM
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                  onClick={() => setSelectedCategory("hr")}
+                >
+                  <Briefcase className="h-3.5 w-3.5" />
+                  Browse HR
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State for Searches with 0 results */}
+          {filteredIntegrations.length === 0 && (searchQuery || (selectedCategory !== "connected")) && (
             <div className="p-14 flex flex-col items-center text-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/30">
-              <div className="h-12 w-12 rounded-xl bg-muted/80 flex items-center justify-center mb-4">
+              <div className="h-12 w-12 rounded-2xl bg-muted/80 flex items-center justify-center mb-4">
                 <Inbox className="h-5 w-5 text-muted-foreground/50" />
               </div>
               <p className="text-[14px] font-semibold text-foreground">
                 No matching integrations
               </p>
               <p className="text-[13px] text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
-                We couldn't find any tools matching "{searchQuery}". Try a
-                different search term or clear your filters.
+                {searchQuery
+                  ? `We couldn't find any tools matching "${searchQuery}". Try a different search term or clear your filters.`
+                  : "No integrations found in this category."}
               </p>
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-5 h-8 text-[12px] rounded-lg gap-1.5"
+                className="mt-5 h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
                 onClick={() => {
                   setSearchQuery("");
-                  setSelectedCategory("all");
+                  setSelectedCategory("connected");
                 }}
               >
-                Reset Filters
+                Reset Search
                 <ArrowRight className="h-3 w-3 opacity-50" />
               </Button>
             </div>
           )}
 
-          {/* Footer Note */}
+          {/* Footer Security Note */}
           <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/20 border border-border/40 text-xs">
             <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
               <ShieldCheck className="h-4 w-4 text-emerald-500" />
             </div>
             <div className="space-y-0.5 text-muted-foreground leading-relaxed">
               <p className="font-semibold text-foreground text-[13px]">
-                Enterprise Integration Security
+                Enterprise Multi-Tenant Integration Security
               </p>
               <p className="text-[12px] leading-[1.6]">
                 All third-party data synchronizations are encrypted end-to-end
                 via TLS 1.3. API credentials and OAuth tokens are strictly
-                isolated per tenant workspace and never exposed in client
-                bundles.
+                isolated per tenant workspace with AES-256-GCM encryption and
+                never exposed in client bundles.
               </p>
             </div>
           </div>
@@ -312,3 +574,5 @@ export default function IntegrationsPage() {
     </EcosystemWrapper>
   );
 }
+
+
