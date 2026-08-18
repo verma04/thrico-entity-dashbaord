@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useFormik, FormikProvider, FieldArray } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
@@ -66,6 +66,7 @@ interface MediaPreviewItem {
   url: string;
   name: string;
   size: number;
+  bgColor?: string;
 }
 
 interface PostCreationFormProps {
@@ -142,17 +143,58 @@ export function PostCreationForm({
 
   const { values, errors, touched, setFieldValue, isSubmitting } = formik;
 
+  // Extract dominant color from an image URL using canvas sampling
+  const extractDominantColor = useCallback((imageUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) { resolve("rgba(120,120,120,0.15)"); return; }
+          canvas.width = 8;
+          canvas.height = 8;
+          ctx.drawImage(img, 0, 0, 8, 8);
+          const data = ctx.getImageData(0, 0, 8, 8).data;
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            count++;
+          }
+          r = Math.round(r / count);
+          g = Math.round(g / count);
+          b = Math.round(b / count);
+          resolve(`rgba(${r},${g},${b},0.18)`);
+        } catch {
+          resolve("rgba(120,120,120,0.15)");
+        }
+      };
+      img.onerror = () => resolve("rgba(120,120,120,0.15)");
+      img.src = imageUrl;
+    });
+  }, []);
+
   // Handle file uploads for media
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    const newItems: MediaPreviewItem[] = files.map((file) => ({
-      id: Math.random().toString(36).substring(7),
-      file,
-      url: URL.createObjectURL(file),
-      name: file.name,
-      size: file.size,
-    }));
+    const newItems: MediaPreviewItem[] = await Promise.all(
+      files.map(async (file) => {
+        const url = URL.createObjectURL(file);
+        const bgColor = await extractDominantColor(url);
+        return {
+          id: Math.random().toString(36).substring(7),
+          file,
+          url,
+          name: file.name,
+          size: file.size,
+          bgColor,
+        };
+      })
+    );
     setMediaList((prev) => [...prev, ...newItems]);
   };
 
@@ -230,7 +272,7 @@ export function PostCreationForm({
       {mediaList.length > 0 && (
         <div
           className={cn(
-            "rounded-xl overflow-hidden border border-border/80 bg-muted/30 grid gap-1.5",
+            "rounded-xl overflow-hidden border border-border/80 grid gap-1.5",
             mediaList.length === 1
               ? "grid-cols-1"
               : mediaList.length === 2
@@ -239,11 +281,15 @@ export function PostCreationForm({
           )}
         >
           {mediaList.slice(0, 4).map((m, idx) => (
-            <div key={m.id} className="relative aspect-video bg-muted overflow-hidden">
+            <div
+              key={m.id}
+              className="relative aspect-video overflow-hidden rounded-lg"
+              style={{ backgroundColor: m.bgColor || "rgba(120,120,120,0.15)" }}
+            >
               <img
                 src={m.url}
                 alt={m.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
               {idx === 3 && mediaList.length > 4 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-sm">
@@ -727,12 +773,13 @@ export function PostCreationForm({
                       {mediaList.map((item) => (
                         <div
                           key={item.id}
-                          className="group/img relative rounded-xl overflow-hidden border border-border bg-card aspect-square shadow-2xs"
+                          className="group/img relative rounded-xl overflow-hidden border border-border aspect-square shadow-2xs"
+                          style={{ backgroundColor: item.bgColor || "rgba(120,120,120,0.15)" }}
                         >
                           <img
                             src={item.url}
                             alt={item.name}
-                            className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain group-hover/img:scale-105 transition-transform duration-300"
                           />
                           <button
                             type="button"

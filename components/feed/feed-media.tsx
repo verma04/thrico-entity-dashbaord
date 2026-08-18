@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -11,8 +11,61 @@ interface FeedMediaProps {
   media: { url: string }[];
 }
 
+// Extract the dominant/average color from an image URL via canvas sampling
+function useDominantColors(media: { url: string }[]) {
+  const [colors, setColors] = useState<Record<number, string>>({});
+
+  const extractColor = useCallback((imageUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) { resolve("rgba(120,120,120,0.15)"); return; }
+          canvas.width = 8;
+          canvas.height = 8;
+          ctx.drawImage(img, 0, 0, 8, 8);
+          const data = ctx.getImageData(0, 0, 8, 8).data;
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            count++;
+          }
+          r = Math.round(r / count);
+          g = Math.round(g / count);
+          b = Math.round(b / count);
+          resolve(`rgba(${r},${g},${b},0.22)`);
+        } catch {
+          resolve("rgba(120,120,120,0.15)");
+        }
+      };
+      img.onerror = () => resolve("rgba(120,120,120,0.15)");
+      img.src = imageUrl;
+    });
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    media.forEach((m, idx) => {
+      extractColor(getPreferredMediaUrl(m.url)).then((color) => {
+        if (!cancelled) {
+          setColors((prev) => ({ ...prev, [idx]: color }));
+        }
+      });
+    });
+    return () => { cancelled = true; };
+  }, [media, extractColor]);
+
+  return colors;
+}
+
 export default function FeedMedia({ media }: FeedMediaProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const bgColors = useDominantColors(media);
 
   if (!media || media.length === 0) return null;
 
@@ -34,16 +87,17 @@ export default function FeedMedia({ media }: FeedMediaProps) {
 
   return (
     <>
-      <div className="mt-3 overflow-hidden rounded-xl border border-border/60 bg-muted/20">
+      <div className="mt-3 overflow-hidden rounded-xl border border-border/60">
         {totalCount === 1 && (
           <div
-            className="relative aspect-video max-h-[460px] w-full cursor-pointer overflow-hidden bg-muted group/media"
+            className="relative aspect-video max-h-[460px] w-full cursor-pointer overflow-hidden group/media"
+            style={{ backgroundColor: bgColors[0] || "rgba(120,120,120,0.15)" }}
             onClick={() => setSelectedImageIndex(0)}
           >
             <img
               src={getPreferredMediaUrl(media[0].url)}
               alt="Post image"
-              className="h-full w-full object-cover transition-transform duration-500 group-hover/media:scale-[1.02]"
+              className="h-full w-full object-contain transition-transform duration-500 group-hover/media:scale-[1.02]"
               loading="lazy"
             />
             <div className="absolute inset-0 bg-black/0 transition-colors group-hover/media:bg-black/10 flex items-center justify-center">
@@ -55,17 +109,18 @@ export default function FeedMedia({ media }: FeedMediaProps) {
         )}
 
         {totalCount === 2 && (
-          <div className="grid grid-cols-2 gap-1 bg-border/40">
+          <div className="grid grid-cols-2 gap-1">
             {media.slice(0, 2).map((m, index) => (
               <div
                 key={index}
-                className="relative aspect-4/3 cursor-pointer overflow-hidden bg-muted group/media"
+                className="relative aspect-4/3 cursor-pointer overflow-hidden group/media"
+                style={{ backgroundColor: bgColors[index] || "rgba(120,120,120,0.15)" }}
                 onClick={() => setSelectedImageIndex(index)}
               >
                 <img
                   src={getPreferredMediaUrl(m.url)}
                   alt={`Post image ${index + 1}`}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover/media:scale-105"
+                  className="h-full w-full object-contain transition-transform duration-500 group-hover/media:scale-105"
                   loading="lazy"
                 />
               </div>
@@ -74,15 +129,16 @@ export default function FeedMedia({ media }: FeedMediaProps) {
         )}
 
         {totalCount === 3 && (
-          <div className="grid grid-cols-2 gap-1 bg-border/40">
+          <div className="grid grid-cols-2 gap-1">
             <div
-              className="relative aspect-square sm:aspect-auto sm:row-span-2 cursor-pointer overflow-hidden bg-muted group/media"
+              className="relative aspect-square sm:aspect-auto sm:row-span-2 cursor-pointer overflow-hidden group/media"
+              style={{ backgroundColor: bgColors[0] || "rgba(120,120,120,0.15)" }}
               onClick={() => setSelectedImageIndex(0)}
             >
               <img
                 src={getPreferredMediaUrl(media[0].url)}
                 alt="Post image 1"
-                className="h-full w-full object-cover transition-transform duration-500 group-hover/media:scale-105"
+                className="h-full w-full object-contain transition-transform duration-500 group-hover/media:scale-105"
                 loading="lazy"
               />
             </div>
@@ -90,13 +146,14 @@ export default function FeedMedia({ media }: FeedMediaProps) {
               {media.slice(1, 3).map((m, index) => (
                 <div
                   key={index + 1}
-                  className="relative aspect-4/3 cursor-pointer overflow-hidden bg-muted group/media"
+                  className="relative aspect-4/3 cursor-pointer overflow-hidden group/media"
+                  style={{ backgroundColor: bgColors[index + 1] || "rgba(120,120,120,0.15)" }}
                   onClick={() => setSelectedImageIndex(index + 1)}
                 >
                   <img
                     src={getPreferredMediaUrl(m.url)}
                     alt={`Post image ${index + 2}`}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover/media:scale-105"
+                    className="h-full w-full object-contain transition-transform duration-500 group-hover/media:scale-105"
                     loading="lazy"
                   />
                 </div>
@@ -106,17 +163,18 @@ export default function FeedMedia({ media }: FeedMediaProps) {
         )}
 
         {totalCount >= 4 && (
-          <div className="grid grid-cols-2 gap-1 bg-border/40">
+          <div className="grid grid-cols-2 gap-1">
             {media.slice(0, 4).map((m, index) => (
               <div
                 key={index}
-                className="relative aspect-4/3 cursor-pointer overflow-hidden bg-muted group/media"
+                className="relative aspect-4/3 cursor-pointer overflow-hidden group/media"
+                style={{ backgroundColor: bgColors[index] || "rgba(120,120,120,0.15)" }}
                 onClick={() => setSelectedImageIndex(index)}
               >
                 <img
                   src={getPreferredMediaUrl(m.url)}
                   alt={`Post image ${index + 1}`}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover/media:scale-105"
+                  className="h-full w-full object-contain transition-transform duration-500 group-hover/media:scale-105"
                   loading="lazy"
                 />
                 {index === 3 && totalCount > 4 && (
@@ -181,4 +239,3 @@ export default function FeedMedia({ media }: FeedMediaProps) {
     </>
   );
 }
-
