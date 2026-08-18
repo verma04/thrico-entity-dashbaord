@@ -1,8 +1,7 @@
 "use client";
-import AdminFeed from "@/components/feed/all-feed";
 
-function page() {
-  return <AdminFeed />;
+import FeedManage from "@/components/feed/feed-manage";
+
+export default function AllFeedPage() {
+  return <FeedManage feedType="all" />;
 }
-
-export default page;

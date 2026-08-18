@@ -8,11 +8,6 @@ import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check"
 function FeedRootLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
-      key: "",
-      label: "Overview",
-      icon: <LayoutDashboard className="h-4 w-4" />,
-    },
-    {
       key: "all",
       label: "Community Feed",
       icon: <Radio className="h-4 w-4" />,

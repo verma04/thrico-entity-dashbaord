@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   Briefcase,
   ShoppingBag,
@@ -13,10 +14,14 @@ import {
   LucideIcon,
   Pin,
   Upload,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import type {
+  ExportCsvScope,
+  ExportCsvFormat,
+} from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { toast } from "sonner";
 
@@ -27,6 +32,65 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { cn } from "@/lib/utils";
+
+const TAB_CONFIG: Record<
+  string,
+  {
+    label: string;
+    title: string;
+    description: string;
+    badgeText: string;
+    icon: LucideIcon;
+  }
+> = {
+  all: {
+    label: "Global Feed",
+    title: "Global Feed",
+    description:
+      "Explore announcements, discussions, and updates across your entire community ecosystem.",
+    badgeText: "Real-time Feed",
+    icon: Globe,
+  },
+  pinned: {
+    label: "Pinned",
+    title: "Pinned Announcements",
+    description:
+      "High-priority announcements and pinned posts for your community.",
+    badgeText: "Pinned Posts",
+    icon: Pin,
+  },
+  admin: {
+    label: "Admin",
+    title: "Admin Posts",
+    description:
+      "Official updates and announcements published by community managers.",
+    badgeText: "Admin Feed",
+    icon: ShieldCheck,
+  },
+  moments: {
+    label: "Moments",
+    title: "Video Moments",
+    description:
+      "Short-form videos, highlights, and reels shared by community members.",
+    badgeText: "Video Feed",
+    icon: Sparkles,
+  },
+  jobs: {
+    label: "Jobs",
+    title: "Job Opportunities",
+    description:
+      "Career openings, internships, and hiring posts in your ecosystem.",
+    badgeText: "Career Feed",
+    icon: Briefcase,
+  },
+  listing: {
+    label: "Listing",
+    title: "Marketplace Listings",
+    description: "Products, services, and offers listed by community members.",
+    badgeText: "Marketplace Feed",
+    icon: ShoppingBag,
+  },
+};
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data: feedData } = useNumberOfFeeds();
@@ -42,7 +106,8 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   const feeds = allFeedData?.getAllFeed || [];
   const router = useRouter();
   const pathname = usePathname();
-  const activeTab = pathname.split("/")[2] || "all";
+  const activeTabKey = pathname.split("/")[2] || "all";
+  const activeConfig = TAB_CONFIG[activeTabKey] || TAB_CONFIG.all;
 
   const tabs: {
     key: string;
@@ -56,26 +121,23 @@ function RootLayout({ children }: { children: React.ReactNode }) {
       count: feedData?.numberOfFeeds,
       icon: Globe,
     },
-    { key: "pinned", label: "Pinned", count: undefined, icon: Pin },
-    { key: "admin", label: "Admin", count: undefined, icon: ShieldCheck },
-    { key: "moments", label: "Moments", count: undefined, icon: Sparkles },
-    { key: "jobs", label: "Jobs", count: undefined, icon: Briefcase },
-    { key: "listing", label: "Listing", count: undefined, icon: ShoppingBag },
+    { key: "pinned", label: "Pinned", icon: Pin },
+    { key: "admin", label: "Admin", icon: ShieldCheck },
+    { key: "moments", label: "Moments", icon: Sparkles },
+    { key: "jobs", label: "Jobs", icon: Briefcase },
+    { key: "listing", label: "Listing", icon: ShoppingBag },
   ];
 
   return (
-    <EcosystemWrapper
-      anonymized-1="feed"
-      className="animate-in fade-in duration-700"
-    >
+    <EcosystemWrapper className="animate-in fade-in duration-700">
       <EcosystemHeader
-        title="Community Feed"
-        description="Share updates, stay connected, and explore activities across your community ecosystem."
-        icon={Activity}
-        badgeText="Real-time Feed"
+        title={activeConfig.title}
+        description={activeConfig.description}
+        icon={activeConfig.icon || Activity}
+        badgeText={activeConfig.badgeText}
         breadcrumbs={[
           { label: "Feed", href: "/feed" },
-          { label: "Content Feed" },
+          { label: activeConfig.label },
         ]}
         actions={
           <div className="flex items-center gap-2">
@@ -89,7 +151,16 @@ function RootLayout({ children }: { children: React.ReactNode }) {
               <Upload className="h-3.5 w-3.5" />
               Export
             </Button>
-            <PostModal />
+            <Button
+              asChild
+              size="sm"
+              className="h-9 px-3 gap-1.5 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xs text-xs font-semibold rounded-lg"
+            >
+              <Link href="/feed/create">
+                <Plus className="h-3.5 w-3.5" />
+                Create Post
+              </Link>
+            </Button>
           </div>
         }
       />
@@ -105,13 +176,13 @@ function RootLayout({ children }: { children: React.ReactNode }) {
               onClick={() => router.push(`/feed/${tab.key}`)}
               className={cn(
                 "group/tab relative flex items-center gap-1.5 px-4 py-3 text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap",
-                activeTab === tab.key
+                activeTabKey === tab.key
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
               {/* Active underline indicator */}
-              {activeTab === tab.key && (
+              {activeTabKey === tab.key && (
                 <motion.div
                   layoutId="feed-tab-underline"
                   className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground dark:bg-white"
@@ -127,7 +198,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
               <tab.icon
                 className={cn(
                   "h-3.5 w-3.5 transition-colors duration-150",
-                  activeTab === tab.key
+                  activeTabKey === tab.key
                     ? "text-foreground"
                     : "text-muted-foreground group-hover/tab:text-foreground",
                 )}
@@ -141,7 +212,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                 <span
                   className={cn(
                     "ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[10px] font-medium transition-colors",
-                    activeTab === tab.key
+                    activeTabKey === tab.key
                       ? "bg-foreground/10 text-foreground"
                       : "bg-muted text-muted-foreground group-hover/tab:bg-muted/80",
                   )}
@@ -153,7 +224,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
           ))}
         </div>
       </EcosystemActionBar>
-      <EcosystemContainer className="mt-8 space-y-6">
+      <EcosystemContainer className="mt-3 space-y-3">
         <div className="transition-all duration-500">{children}</div>
       </EcosystemContainer>
 
@@ -165,22 +236,48 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         totalCount={feedData?.numberOfFeeds || feeds.length}
         onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
           if (feeds.length === 0) {
-            toast.error("Nothing to export", { description: "No feed posts found." });
+            toast.error("Nothing to export", {
+              description: "No feed posts found.",
+            });
             return;
           }
           const csv = buildCsv(feeds, [
-            { header: "Author First Name", getValue: (p: any) => p.user?.firstName || "" },
-            { header: "Author Last Name", getValue: (p: any) => p.user?.lastName || "" },
-            { header: "Content / Description", getValue: (p: any) => p.description || "" },
+            {
+              header: "Author First Name",
+              getValue: (p: any) => p.user?.firstName || "",
+            },
+            {
+              header: "Author Last Name",
+              getValue: (p: any) => p.user?.lastName || "",
+            },
+            {
+              header: "Content / Description",
+              getValue: (p: any) => p.description || "",
+            },
             { header: "Source", getValue: (p: any) => p.source || "" },
             { header: "Privacy", getValue: (p: any) => p.privacy || "" },
-            { header: "Reactions", getValue: (p: any) => p.totalReactions ?? 0 },
+            {
+              header: "Reactions",
+              getValue: (p: any) => p.totalReactions ?? 0,
+            },
             { header: "Comments", getValue: (p: any) => p.totalComment ?? 0 },
             { header: "Reshares", getValue: (p: any) => p.totalReShare ?? 0 },
-            { header: "Created At", getValue: (p: any) => p.createdAt ? new Date(parseInt(p.createdAt)).toISOString().slice(0, 10) : "" },
+            {
+              header: "Created At",
+              getValue: (p: any) =>
+                p.createdAt
+                  ? new Date(parseInt(p.createdAt)).toISOString().slice(0, 10)
+                  : "",
+            },
           ]);
-          downloadCsv(csv, `community-feed-${new Date().toISOString().slice(0, 10)}`, format);
-          toast.success("Export ready", { description: `${feeds.length} post${feeds.length !== 1 ? "s" : ""} exported.` });
+          downloadCsv(
+            csv,
+            `community-feed-${new Date().toISOString().slice(0, 10)}`,
+            format,
+          );
+          toast.success("Export ready", {
+            description: `${feeds.length} post${feeds.length !== 1 ? "s" : ""} exported.`,
+          });
         }}
       />
     </EcosystemWrapper>
