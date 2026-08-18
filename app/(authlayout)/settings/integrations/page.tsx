@@ -14,6 +14,10 @@ import {
   GoogleMeetIntegrationCard,
   SendGridIntegrationCard,
   DeveloperApiCard,
+  FedenaIntegrationCard,
+  EntabCampusCareIntegrationCard,
+  MyClassCampusIntegrationCard,
+  MasterSoftERPIntegrationCard,
 } from "@/components/settings/integrations";
 import {
   HR_PROVIDERS_CONFIG,
@@ -46,6 +50,7 @@ import {
   Terminal,
   Activity,
   Plus,
+  GraduationCap,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -55,7 +60,7 @@ import { cn } from "@/lib/utils";
 interface IntegrationItem {
   id: string;
   name: string;
-  category: "ecommerce" | "crm" | "hr" | "communication" | "developer";
+  category: "ecommerce" | "crm" | "hr" | "erp" | "communication" | "developer";
   categoryLabel: string;
   description: string;
   isConnected: boolean;
@@ -149,6 +154,46 @@ export default function IntegrationsPage() {
         })
         .filter(Boolean) as IntegrationItem[]),
       {
+        id: "fedena",
+        name: "Fedena ERP",
+        category: "erp",
+        categoryLabel: "ERP & Campus",
+        description:
+          "Synchronize students, faculty batches, attendance records, and academic course structures from Fedena School & College ERP.",
+        isConnected: false,
+        component: <FedenaIntegrationCard />,
+      },
+      {
+        id: "campuscare",
+        name: "Entab CampusCare",
+        category: "erp",
+        categoryLabel: "ERP & Campus",
+        description:
+          "Connect Entab CampusCare to seamlessly import student master directory, parent contacts, classes, and academic rosters.",
+        isConnected: false,
+        component: <EntabCampusCareIntegrationCard />,
+      },
+      {
+        id: "myclasscampus",
+        name: "MyClassCampus",
+        category: "erp",
+        categoryLabel: "ERP & Campus",
+        description:
+          "Automate student profile syncing, department structures, faculty directories, and institute notifications with MyClassCampus.",
+        isConnected: false,
+        component: <MyClassCampusIntegrationCard />,
+      },
+      {
+        id: "mastersoft",
+        name: "MasterSoft ERP",
+        category: "erp",
+        categoryLabel: "ERP & Campus",
+        description:
+          "Integrate MasterSoft Centralized Campus Management System (CCMS) for university-level student, faculty, and academic record synchronization.",
+        isConnected: false,
+        component: <MasterSoftERPIntegrationCard />,
+      },
+      {
         id: "slack",
         name: "Slack",
         category: "communication",
@@ -221,6 +266,12 @@ export default function IntegrationsPage() {
       icon: CheckCircle2,
       count: connectedCount,
       highlight: true,
+    },
+    {
+      id: "erp",
+      label: "ERP & Campus",
+      icon: GraduationCap,
+      count: integrations.filter((i) => i.category === "erp").length,
     },
     {
       id: "ecommerce",
@@ -417,8 +468,8 @@ export default function IntegrationsPage() {
                         isSelected
                           ? "bg-background/20 text-background"
                           : cat.highlight && cat.count > 0
-                          ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold"
-                          : "bg-muted text-muted-foreground",
+                            ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold"
+                            : "bg-muted text-muted-foreground",
                       )}
                     >
                       {cat.count}
@@ -452,22 +503,24 @@ export default function IntegrationsPage() {
           {/* Cards Grid */}
           <div className="space-y-4">
             {/* Header info for connected category */}
-            {selectedCategory === "connected" && filteredIntegrations.length > 0 && (
-              <div className="flex items-center justify-between pb-1">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                  <p className="text-[13px] font-semibold text-foreground">
-                    Active & Connected Platforms ({filteredIntegrations.length})
+            {selectedCategory === "connected" &&
+              filteredIntegrations.length > 0 && (
+                <div className="flex items-center justify-between pb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                    <p className="text-[13px] font-semibold text-foreground">
+                      Active & Connected Platforms (
+                      {filteredIntegrations.length})
+                    </p>
+                  </div>
+                  <p className="text-[11.5px] text-muted-foreground hidden sm:block">
+                    Live data sync & background webhooks active
                   </p>
                 </div>
-                <p className="text-[11.5px] text-muted-foreground hidden sm:block">
-                  Live data sync & background webhooks active
-                </p>
-              </div>
-            )}
+              )}
 
             {/* Integrations Grid with Uniform/Balanced layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -480,77 +533,91 @@ export default function IntegrationsPage() {
           </div>
 
           {/* Empty State for Connected Tab when no connections exist yet */}
-          {selectedCategory === "connected" && filteredIntegrations.length === 0 && !searchQuery && (
-            <div className="p-12 flex flex-col items-center text-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/30">
-              <div className="h-12 w-12 rounded-2xl bg-muted/80 flex items-center justify-center mb-4">
-                <Activity className="h-5 w-5 text-muted-foreground/50" />
+          {selectedCategory === "connected" &&
+            filteredIntegrations.length === 0 &&
+            !searchQuery && (
+              <div className="p-12 flex flex-col items-center text-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/30">
+                <div className="h-12 w-12 rounded-2xl bg-muted/80 flex items-center justify-center mb-4">
+                  <Activity className="h-5 w-5 text-muted-foreground/50" />
+                </div>
+                <p className="text-[14px] font-semibold text-foreground">
+                  No Connected Integrations
+                </p>
+                <p className="text-[13px] text-muted-foreground mt-1.5 max-w-md leading-relaxed">
+                  Connect your E-Commerce stores, CRM pipelines, or HR
+                  directories from the categories above to enable real-time
+                  synchronization.
+                </p>
+                <div className="flex items-center gap-2 mt-5 flex-wrap justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                    onClick={() => setSelectedCategory("erp")}
+                  >
+                    <GraduationCap className="h-3.5 w-3.5" />
+                    Browse ERP & Campus
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                    onClick={() => setSelectedCategory("ecommerce")}
+                  >
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                    Browse E-Commerce
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                    onClick={() => setSelectedCategory("crm")}
+                  >
+                    <Contact2 className="h-3.5 w-3.5" />
+                    Browse CRM
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                    onClick={() => setSelectedCategory("hr")}
+                  >
+                    <Briefcase className="h-3.5 w-3.5" />
+                    Browse HR
+                  </Button>
+                </div>
               </div>
-              <p className="text-[14px] font-semibold text-foreground">
-                No Connected Integrations
-              </p>
-              <p className="text-[13px] text-muted-foreground mt-1.5 max-w-md leading-relaxed">
-                Connect your E-Commerce stores, CRM pipelines, or HR directories from the categories above to enable real-time synchronization.
-              </p>
-              <div className="flex items-center gap-2 mt-5 flex-wrap justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
-                  onClick={() => setSelectedCategory("ecommerce")}
-                >
-                  <ShoppingBag className="h-3.5 w-3.5" />
-                  Browse E-Commerce
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
-                  onClick={() => setSelectedCategory("crm")}
-                >
-                  <Contact2 className="h-3.5 w-3.5" />
-                  Browse CRM
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
-                  onClick={() => setSelectedCategory("hr")}
-                >
-                  <Briefcase className="h-3.5 w-3.5" />
-                  Browse HR
-                </Button>
-              </div>
-            </div>
-          )}
+            )}
 
           {/* Empty State for Searches with 0 results */}
-          {filteredIntegrations.length === 0 && (searchQuery || (selectedCategory !== "connected")) && (
-            <div className="p-14 flex flex-col items-center text-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/30">
-              <div className="h-12 w-12 rounded-2xl bg-muted/80 flex items-center justify-center mb-4">
-                <Inbox className="h-5 w-5 text-muted-foreground/50" />
+          {filteredIntegrations.length === 0 &&
+            (searchQuery || selectedCategory !== "connected") && (
+              <div className="p-14 flex flex-col items-center text-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/30">
+                <div className="h-12 w-12 rounded-2xl bg-muted/80 flex items-center justify-center mb-4">
+                  <Inbox className="h-5 w-5 text-muted-foreground/50" />
+                </div>
+                <p className="text-[14px] font-semibold text-foreground">
+                  No matching integrations
+                </p>
+                <p className="text-[13px] text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
+                  {searchQuery
+                    ? `We couldn't find any tools matching "${searchQuery}". Try a different search term or clear your filters.`
+                    : "No integrations found in this category."}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-5 h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("connected");
+                  }}
+                >
+                  Reset Search
+                  <ArrowRight className="h-3 w-3 opacity-50" />
+                </Button>
               </div>
-              <p className="text-[14px] font-semibold text-foreground">
-                No matching integrations
-              </p>
-              <p className="text-[13px] text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
-                {searchQuery
-                  ? `We couldn't find any tools matching "${searchQuery}". Try a different search term or clear your filters.`
-                  : "No integrations found in this category."}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-5 h-8 text-[12px] rounded-lg gap-1.5 cursor-pointer"
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedCategory("connected");
-                }}
-              >
-                Reset Search
-                <ArrowRight className="h-3 w-3 opacity-50" />
-              </Button>
-            </div>
-          )}
+            )}
 
           {/* Footer Security Note */}
           <div className="flex items-start gap-3.5 p-4 rounded-xl bg-muted/20 border border-border/40 text-xs">
@@ -574,5 +641,3 @@ export default function IntegrationsPage() {
     </EcosystemWrapper>
   );
 }
-
-

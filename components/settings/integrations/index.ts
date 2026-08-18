@@ -7,5 +7,6 @@ export * from "./zoom-integration-card";
 export * from "./hr-integration-card";
 export * from "./crm-integration-card";
 export * from "./sendgrid-integration-card";
+export * from "./erp-integration-card";
 
 export * from "./developer-api-card";

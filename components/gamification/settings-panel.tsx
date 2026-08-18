@@ -59,6 +59,7 @@ export function SettingsPanel() {
 
   const [localSettings, setLocalSettings] = useState({ ...settings });
   const [hasChanged, setHasChanged] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (serverSettingsData?.getGamificationSettings) {
@@ -114,8 +115,12 @@ export function SettingsPanel() {
           },
         },
       });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
     } catch (error: any) {
       toast.success("Configuration updated successfully");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
     }
   };
 
@@ -561,11 +566,11 @@ export function SettingsPanel() {
           {/* Floating Action Bar */}
           <FloatingSavePanel
             hasChanged={hasChanged}
-            saved={false}
+            saved={saved}
             isSaving={isSaving}
             onSave={handleSave}
             onReset={handleReset}
-            title="Save Engine Settings"
+            title="Unsaved Engine Settings"
             description="You have unsaved changes to the gamification rules and notification settings."
             buttonText="Save Settings"
           />
