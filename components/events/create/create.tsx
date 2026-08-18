@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { EventsCreationForm } from "./events-creation-form";
 import { useAddEvent } from "@/graphql/actions/events";
-import { AnimatePresence, motion } from "framer-motion";
+import { FixedInsetMotionContainer } from "@/components/ui/fixed-inset-motion-container";
 
 const Create = ({}) => {
   const router = useRouter();
@@ -49,26 +49,20 @@ const Create = ({}) => {
     <>
       <CtaButton onClick={() => setOpen(true)}>Create</CtaButton>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "100%" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 z-50 bg-background"
-          >
-            <EventsCreationForm
-              initialValues={{}}
-              loading={loading}
-              onFinish={onFinish}
-              onCancel={onClose}
-              cover={cover}
-              setCover={setCover}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <FixedInsetMotionContainer
+        open={open}
+        onClose={onClose}
+        zIndex="z-50"
+      >
+        <EventsCreationForm
+          initialValues={{}}
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onClose}
+          cover={cover}
+          setCover={setCover}
+        />
+      </FixedInsetMotionContainer>
     </>
   );
 };

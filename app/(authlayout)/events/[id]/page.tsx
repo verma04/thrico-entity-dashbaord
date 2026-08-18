@@ -8,7 +8,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useEventById, useUpdateEvent } from "@/graphql/actions/events";
 import { EventsCreationForm } from "@/components/events/create/events-creation-form";
 import moment from "moment";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { useModuleStore } from "@/store/useModuleStore";
 
 function EventGeneralInfo() {
@@ -16,7 +17,6 @@ function EventGeneralInfo() {
   const params = useParams();
   const eventId = params?.id as string;
   const router = useRouter();
-  const { toast } = useToast();
 
   const [cover, setCover] = useState<any>(null);
 
@@ -25,10 +25,10 @@ function EventGeneralInfo() {
 
   const [updateEvent, { loading: updating }] = useUpdateEvent({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: `${singularName} updated successfully`,
-      });
+      toast.success(`${singularName} updated successfully`);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || `Failed to update ${singularName.toLowerCase()}`);
     },
   });
 
@@ -36,8 +36,8 @@ function EventGeneralInfo() {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <p className="text-xs">
             Loading {singularName.toLowerCase()} details...
           </p>
         </div>

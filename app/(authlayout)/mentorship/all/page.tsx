@@ -2,16 +2,13 @@
 
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
-
-
-import React from "react";
-import { MentorsManager } from "@/components/mentorship/mentors-manager";
+import MentorsManage from "@/components/mentorship/manage/mentors-manage";
 
 function AllMentorsPage() {
-  return <MentorsManager />;
+  return <MentorsManage status="ALL" />;
 }
 
 export default withSubscriptionCheck(
   withModulePermission(AllMentorsPage, "MENTORSHIP", "canRead"),
-  "mentorship"
+  "mentorship",
 );

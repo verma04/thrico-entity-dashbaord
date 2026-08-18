@@ -1,6 +1,10 @@
 export { default as CommunitiesManage } from "./communities-manage";
 export { default } from "./communities-manage";
 export * from "./communities-manage";
+export * from "./communities-manage-ui";
 export * from "./communities-list";
 export * from "./community-card";
+export * from "./community-card-compact";
+export * from "./community-grid";
 export * from "./community-actions";
+export * from "./export-communities-modal";

@@ -820,6 +820,7 @@ export const modules = [
         label: "Reported Items",
         path: "/surveys/reports",
       },
+      { key: "sur-audit", label: "Audit Log", path: "/surveys/audit-log" },
       { key: "sur-settings", label: "Settings", path: "/surveys/settings" },
     ],
   },

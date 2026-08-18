@@ -7,7 +7,7 @@ import {
   useChangeListingStatus,
   useEditListing,
 } from "@/graphql/actions/listing";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -32,7 +32,6 @@ export default function ListingSettingsPage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { toast } = useToast();
 
   const { data, loading } = useListingDetails({
     variables: {
@@ -45,34 +44,21 @@ export default function ListingSettingsPage() {
 
   const [changeStatus, { loading: updatingStatus }] = useChangeListingStatus({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: `${singularName} status updated.`,
-      });
+      toast.success(`${singularName} status updated.`);
     },
     onError: (err: any) => {
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update status",
-        variant: "destructive",
-      });
+      toast.error(err.message || "Failed to update status");
     },
   });
 
   const [updateListing, { loading: updating }] = useEditListing({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: `${singularName} updated successfully`,
-      });
+      toast.success(`${singularName} updated successfully`);
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description:
-          error.message || `Failed to update ${singularName.toLowerCase()}`,
-        variant: "destructive",
-      });
+      toast.error(
+        error.message || `Failed to update ${singularName.toLowerCase()}`,
+      );
     },
   });
 

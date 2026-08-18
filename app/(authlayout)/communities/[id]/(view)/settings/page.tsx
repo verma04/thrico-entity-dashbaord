@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCommunityById, updateCommunity } from "@/graphql/actions/group";
 import { CommunityCreationForm } from "@/components/communities/add/community-creation-form";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function CommunitySettings() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { toast } = useToast();
 
   const [cover, setCover] = useState<any>(null);
 
@@ -26,17 +26,10 @@ export default function CommunitySettings() {
 
   const [updateInfo, { loading: updating }] = updateCommunity({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: "Community updated successfully",
-      });
+      toast.success("Community settings updated successfully");
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update community",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Failed to update community");
     },
   });
 
@@ -44,8 +37,8 @@ export default function CommunitySettings() {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
-          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm">Loading community details...</p>
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <p className="text-xs">Loading community details...</p>
         </div>
       </div>
     );

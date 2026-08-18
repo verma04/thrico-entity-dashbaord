@@ -1,8 +1,7 @@
 "use client";
 
 import Manage from "@/components/communities/settings/manage";
-import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getCommunityById } from "@/graphql/actions/group";
 
 import {

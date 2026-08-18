@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -29,6 +29,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Loader2,
   Users,
   UserPlus,
@@ -37,19 +45,14 @@ import {
   ShieldCheck,
   Check,
   X,
+  Search,
+  RefreshCw,
+  LayoutGrid,
+  List as ListIcon,
 } from "lucide-react";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import moment from "moment";
-
-/** Safely format a createdAt value (Unix-ms timestamp or ISO string) using moment. */
-function safeParseMemberDate(value: any): string {
-  if (!value) return "Unknown";
-  const m = /^\d+$/.test(String(value))
-    ? moment(Number(value))
-    : moment(value);
-  return m.isValid() ? m.format("MMM D, YYYY") : "Unknown";
-}
 import {
   getCommunityMembers,
   getCommunityMemberRequests,
@@ -58,12 +61,13 @@ import {
   approveCommunityMemberRequest,
   rejectCommunityMemberRequest,
 } from "@/graphql/actions/group/members";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const ROLES = [
-  { value: "ADMIN", label: "Admin", color: "bg-red-50 text-red-700 border-red-200" },
-  { value: "MANAGER", label: "Manager", color: "bg-purple-50 text-purple-700 border-purple-200" },
-  { value: "MODERATOR", label: "Moderator", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  { value: "USER", label: "Member", color: "bg-zinc-50 text-zinc-600 border-zinc-200" },
+  { value: "ADMIN", label: "Admin", color: "bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border-red-200 dark:border-red-800" },
+  { value: "MANAGER", label: "Manager", color: "bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200 dark:border-purple-800" },
+  { value: "MODERATOR", label: "Moderator", color: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200 dark:border-blue-800" },
+  { value: "USER", label: "Member", color: "bg-muted text-muted-foreground border-border/80" },
 ];
 
 function getRoleBadge(role: string) {
@@ -71,84 +75,112 @@ function getRoleBadge(role: string) {
   return found ?? ROLES[3];
 }
 
-import { useModuleStore } from "@/store/useModuleStore";
+function safeParseMemberDate(value: any): string {
+  if (!value) return "Unknown";
+  const m = /^\d+$/.test(String(value)) ? moment(Number(value)) : moment(value);
+  return m.isValid() ? m.format("MMM D, YYYY") : "Unknown";
+}
 
 export default function MembersPage() {
   const singularName = useModuleStore((state) => state.communitySingularName);
   const params = useParams();
   const communityId = params?.id as string;
-  const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState("all-members");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [view, setView] = useState<"grid" | "list">("list");
   const [removingMember, setRemovingMember] = useState<{ userId: string; name: string } | null>(null);
-  const [pendingRoleChange, setPendingRoleChange] = useState<{ userId: string; name: string; role: string; roleLabel: string } | null>(null);
+  const [pendingRoleChange, setPendingRoleChange] = useState<{
+    userId: string;
+    name: string;
+    role: string;
+    roleLabel: string;
+  } | null>(null);
   const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
 
-  // — Queries —
-  const { data: membersData, loading: membersLoading, fetchMore: fetchMoreMembers, refetch: refetchMembers } =
-    getCommunityMembers({
-      variables: { communityId, limit: 10, offset: 0 },
-      fetchPolicy: "cache-and-network",
-      skip: activeTab !== "all-members",
-    });
+  // Queries
+  const {
+    data: membersData,
+    loading: membersLoading,
+    fetchMore: fetchMoreMembers,
+    refetch: refetchMembers,
+  } = getCommunityMembers({
+    variables: { communityId, limit: 20, offset: 0 },
+    fetchPolicy: "cache-and-network",
+    skip: !communityId,
+  });
 
-  const { data: requestsData, loading: requestsLoading, fetchMore: fetchMoreRequests, refetch: refetchRequests } =
-    getCommunityMemberRequests({
-      variables: { communityId, limit: 10, offset: 0 },
-      fetchPolicy: "cache-and-network",
-      skip: activeTab !== "requests",
-    });
+  const {
+    data: requestsData,
+    loading: requestsLoading,
+    fetchMore: fetchMoreRequests,
+    refetch: refetchRequests,
+  } = getCommunityMemberRequests({
+    variables: { communityId, limit: 20, offset: 0 },
+    fetchPolicy: "cache-and-network",
+    skip: !communityId,
+  });
 
-  // — Mutations —
+  // Mutations
   const [doRemove, { loading: removing }] = removeCommunityMember({
     onCompleted: () => {
-      toast({ title: "Member removed successfully" });
+      toast.success("Member removed successfully");
       setRemovingMember(null);
       refetchMembers();
     },
     onError: (err: any) =>
-      toast({ title: "Error removing member", description: err.message, variant: "destructive" }),
+      toast.error(err.message || "Failed to remove member"),
   });
 
   const [doChangeRole, { loading: roleSaving }] = changeCommunityMemberRole({
     onCompleted: () => {
-      toast({ title: "Role updated successfully" });
+      toast.success("Role updated successfully");
       setPendingRoleChange(null);
       refetchMembers();
     },
     onError: (err: any) =>
-      toast({ title: "Error updating role", description: err.message, variant: "destructive" }),
+      toast.error(err.message || "Failed to update role"),
   });
 
   const [doApproveRequest] = approveCommunityMemberRequest({
     onCompleted: () => {
-      toast({ title: "Request approved successfully" });
+      toast.success("Request approved successfully");
       setProcessingRequestId(null);
       refetchMembers();
       refetchRequests();
     },
     onError: (err: any) => {
-      toast({ title: "Error approving request", description: err.message, variant: "destructive" });
+      toast.error(err.message || "Failed to approve request");
       setProcessingRequestId(null);
-    }
+    },
   });
 
   const [doRejectRequest] = rejectCommunityMemberRequest({
     onCompleted: () => {
-      toast({ title: "Request rejected successfully" });
+      toast.success("Request rejected successfully");
       setProcessingRequestId(null);
       refetchRequests();
     },
     onError: (err: any) => {
-      toast({ title: "Error rejecting request", description: err.message, variant: "destructive" });
+      toast.error(err.message || "Failed to reject request");
       setProcessingRequestId(null);
-    }
+    },
   });
 
   const membersList = membersData?.getCommunityMembers?.data ?? [];
   const membersTotalCount = membersData?.getCommunityMembers?.totalCount ?? 0;
   const requestsList = requestsData?.getCommunityMemberRequests?.data ?? [];
   const requestsTotalCount = requestsData?.getCommunityMemberRequests?.totalCount ?? 0;
+
+  const filteredMembers = useMemo(() => {
+    if (!searchTerm.trim()) return membersList;
+    const term = searchTerm.toLowerCase();
+    return membersList.filter((m: any) => {
+      const name = `${m.user?.firstName || ""} ${m.user?.lastName || ""}`.toLowerCase();
+      const role = (m.role || "").toLowerCase();
+      return name.includes(term) || role.includes(term);
+    });
+  }, [membersList, searchTerm]);
 
   const handleLoadMoreMembers = () =>
     fetchMoreMembers({
@@ -182,114 +214,297 @@ export default function MembersPage() {
     });
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">Members</h1>
-        <p className="text-muted-foreground mt-1">
-          Manage {singularName.toLowerCase()} members and pending join requests.
-        </p>
-      </header>
+    <div className="space-y-6">
+      {/* ─── Top Control Strip ────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/60 backdrop-blur-sm border border-border/70 rounded-xl p-4 shadow-sm">
+        <div>
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
+            {singularName} Members
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage membership directory, role assignments, and pending join requests.
+          </p>
+        </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-background border border-border/40 rounded-xl p-1">
-          <TabsTrigger value="all-members" className="gap-2 rounded-lg">
-            <Users className="h-4 w-4" />
-            All Members
-            {membersTotalCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs rounded-md">
-                {membersTotalCount}
-              </Badge>
-            )}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search member..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-8 pl-8 pr-3 text-xs w-[160px] sm:w-[190px] bg-background"
+            />
+          </div>
+
+          {/* View Mode Toggle: Grid / List */}
+          <Tabs
+            value={view}
+            onValueChange={(v) => setView(v as "grid" | "list")}
+            className="bg-muted p-0.5 rounded-lg border border-border shrink-0"
+          >
+            <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
+              <TabsTrigger
+                value="grid"
+                className="h-7 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1"
+              >
+                <LayoutGrid className="h-3 w-3" />
+                Grid
+              </TabsTrigger>
+              <TabsTrigger
+                value="list"
+                className="h-7 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1"
+              >
+                <ListIcon className="h-3 w-3" />
+                List
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              refetchMembers();
+              refetchRequests();
+            }}
+            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            title="Refresh list"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* ─── Tabs Navigation ──────────────────────────────────────────────── */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="h-8 bg-muted/60 border border-border/60 rounded-lg p-0.5 gap-0.5">
+          <TabsTrigger
+            value="all-members"
+            className="h-7 px-3 rounded-md text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-foreground gap-1.5"
+          >
+            <Users className="h-3.5 w-3.5" />
+            Directory
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] rounded">
+              {membersTotalCount}
+            </Badge>
           </TabsTrigger>
-          <TabsTrigger value="requests" className="gap-2 rounded-lg">
-            <UserPlus className="h-4 w-4" />
-            Requests
+          <TabsTrigger
+            value="requests"
+            className="h-7 px-3 rounded-md text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm text-muted-foreground data-[state=active]:text-foreground gap-1.5"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            Join Requests
             {requestsTotalCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs rounded-md bg-orange-100 text-orange-700 hover:bg-orange-100">
+              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] rounded bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300">
                 {requestsTotalCount}
               </Badge>
             )}
           </TabsTrigger>
         </TabsList>
 
-        {/* ─── ALL MEMBERS ─── */}
-        <TabsContent value="all-members" className="space-y-3">
+        {/* ─── All Members Tab ──────────────────────────────────────────────── */}
+        <TabsContent value="all-members" className="space-y-3 focus-visible:outline-none">
           {membersLoading && membersList.length === 0 ? (
             <div className="flex justify-center p-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : membersList.length === 0 ? (
-            <Card className="border-dashed shadow-none bg-transparent">
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 rounded-2xl bg-muted/50 mb-4 ring-1 ring-border/40">
-                  <Users className="h-8 w-8 text-muted-foreground/40" />
-                </div>
-                <p className="text-base font-semibold">No members found</p>
-                <p className="text-sm text-muted-foreground">This {singularName.toLowerCase()} has no active members yet.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {membersList.map((member: any) => {
+          ) : filteredMembers.length === 0 ? (
+            <div className="bg-card border border-dashed border-border/80 rounded-xl p-12 text-center text-xs text-muted-foreground">
+              <Users className="h-8 w-8 mx-auto opacity-40 mb-2" />
+              <p className="font-medium text-foreground">No members found</p>
+              <p className="text-muted-foreground mt-0.5">
+                {searchTerm
+                  ? "No members matched your search query."
+                  : `This ${singularName.toLowerCase()} has no active members yet.`}
+              </p>
+            </div>
+          ) : view === "grid" ? (
+            /* ─── GRID VIEW ─────────────────────────────────────────────── */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filteredMembers.map((member: any) => {
                 const badge = getRoleBadge(member.role);
+                const fullName = `${member.user?.firstName || ""} ${member.user?.lastName || ""}`.trim();
+                const initial =
+                  member.user?.firstName?.charAt(0) ||
+                  member.user?.lastName?.charAt(0) ||
+                  "M";
+
                 return (
-                  <Card key={member.id} className="border-none shadow-sm shadow-black/[0.02] ring-1 ring-border/40 overflow-hidden hover:ring-primary/20 transition-all rounded-xl">
-                    <CardContent className="p-4 sm:p-5">
-                      <div className="flex items-center gap-4">
+                  <div
+                    key={member.id || member.userId}
+                    className="bg-card border border-border/80 hover:border-border rounded-xl p-3.5 shadow-sm transition-all flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <UserProfileHoverCard user={member.user ?? {}}>
+                        <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0 cursor-pointer">
+                          <AvatarImage src={member.user?.avatar ?? ""} />
+                          <AvatarFallback className="bg-muted text-muted-foreground text-xs font-bold">
+                            {initial}
+                          </AvatarFallback>
+                        </Avatar>
+                      </UserProfileHoverCard>
+
+                      <div className="flex flex-col min-w-0">
                         <UserProfileHoverCard user={member.user ?? {}}>
-                          <Avatar className="h-11 w-11 border border-border/50 ring-1 ring-black/[0.04] cursor-pointer">
-                            <AvatarImage src={member.user?.avatar ?? ""} />
-                            <AvatarFallback className="bg-primary/5 text-primary font-bold text-sm">
-                              {(member.user?.firstName?.[0] ?? "") + (member.user?.lastName?.[0] ?? "")}
-                            </AvatarFallback>
-                          </Avatar>
+                          <span className="text-xs font-semibold text-foreground truncate hover:text-primary transition-colors cursor-pointer">
+                            {fullName || "Anonymous Member"}
+                          </span>
                         </UserProfileHoverCard>
+                        <span className="text-[11px] text-muted-foreground truncate">
+                          Joined {safeParseMemberDate(member.createdAt)}
+                        </span>
+                      </div>
+                    </div>
 
-                        <div className="flex-1 min-w-0">
-                          <UserProfileHoverCard user={member.user ?? {}}>
-                            <span className="font-semibold text-sm cursor-pointer hover:underline text-foreground">
-                              {member.user?.firstName} {member.user?.lastName}
-                            </span>
-                          </UserProfileHoverCard>
-                          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
-                            Joined {safeParseMemberDate(member.createdAt)}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0 rounded ${badge.color}`}
+                      >
+                        {badge.label}
+                      </Badge>
 
-                        <div className="flex items-center gap-2 shrink-0">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground">
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44 text-xs">
+                          <DropdownMenuLabel className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                            Manage Member
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="gap-2 text-xs">
+                              <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
+                              Change Role
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-36 text-xs">
+                              {ROLES.map((r) => (
+                                <DropdownMenuItem
+                                  key={r.value}
+                                  disabled={member.role === r.value}
+                                  className="text-xs"
+                                  onSelect={() =>
+                                    setPendingRoleChange({
+                                      userId: member.userId,
+                                      name: fullName,
+                                      role: r.value,
+                                      roleLabel: r.label,
+                                    })
+                                  }
+                                >
+                                  {r.label}
+                                  {member.role === r.value && (
+                                    <span className="ml-auto text-[10px] text-muted-foreground font-semibold">Active</span>
+                                  )}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive gap-2 text-xs"
+                            onSelect={() =>
+                              setRemovingMember({
+                                userId: member.userId,
+                                name: fullName,
+                              })
+                            }
+                          >
+                            <UserX className="h-3.5 w-3.5" />
+                            Remove Member
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* ─── LIST VIEW ─────────────────────────────────────────────── */
+            <div className="border border-border/80 rounded-xl overflow-hidden bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/30">
+                    <TableHead className="text-xs">Member</TableHead>
+                    <TableHead className="text-xs">Role</TableHead>
+                    <TableHead className="text-xs">Joined Date</TableHead>
+                    <TableHead className="text-right text-xs">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredMembers.map((member: any) => {
+                    const badge = getRoleBadge(member.role);
+                    const fullName = `${member.user?.firstName || ""} ${member.user?.lastName || ""}`.trim();
+                    const initial =
+                      member.user?.firstName?.charAt(0) ||
+                      member.user?.lastName?.charAt(0) ||
+                      "M";
+
+                    return (
+                      <TableRow key={member.id || member.userId}>
+                        <TableCell className="py-3">
+                          <div className="flex items-center gap-2.5">
+                            <UserProfileHoverCard user={member.user ?? {}}>
+                              <Avatar className="h-8 w-8 rounded-lg border border-border/60 shrink-0 cursor-pointer">
+                                <AvatarImage src={member.user?.avatar ?? ""} />
+                                <AvatarFallback className="bg-muted text-muted-foreground text-xs font-bold">
+                                  {initial}
+                                </AvatarFallback>
+                              </Avatar>
+                            </UserProfileHoverCard>
+                            <UserProfileHoverCard user={member.user ?? {}}>
+                              <span className="text-xs font-semibold text-foreground hover:text-primary transition-colors cursor-pointer truncate">
+                                {fullName || "Anonymous Member"}
+                              </span>
+                            </UserProfileHoverCard>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-3">
                           <Badge
                             variant="outline"
-                            className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${badge.color}`}
+                            className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0 rounded ${badge.color}`}
                           >
                             {badge.label}
                           </Badge>
-
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground py-3">
+                          {safeParseMemberDate(member.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-right py-3">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground">
-                                <MoreVertical className="h-4 w-4" />
+                              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground">
+                                <MoreVertical className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl">
-                              <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Actions</DropdownMenuLabel>
+                            <DropdownMenuContent align="end" className="w-44 text-xs">
+                              <DropdownMenuLabel className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                                Manage Member
+                              </DropdownMenuLabel>
                               <DropdownMenuSeparator />
 
-                              {/* Change Role submenu */}
                               <DropdownMenuSub>
-                                <DropdownMenuSubTrigger className="gap-2 font-medium text-sm rounded-lg">
-                                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                                <DropdownMenuSubTrigger className="gap-2 text-xs">
+                                  <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
                                   Change Role
                                 </DropdownMenuSubTrigger>
-                                <DropdownMenuSubContent className="rounded-xl shadow-xl">
+                                <DropdownMenuSubContent className="w-36 text-xs">
                                   {ROLES.map((r) => (
                                     <DropdownMenuItem
                                       key={r.value}
                                       disabled={member.role === r.value}
-                                      className="font-medium text-sm rounded-lg"
+                                      className="text-xs"
                                       onSelect={() =>
                                         setPendingRoleChange({
                                           userId: member.userId,
-                                          name: `${member.user?.firstName} ${member.user?.lastName}`,
+                                          name: fullName,
                                           role: r.value,
                                           roleLabel: r.label,
                                         })
@@ -297,7 +512,7 @@ export default function MembersPage() {
                                     >
                                       {r.label}
                                       {member.role === r.value && (
-                                        <span className="ml-auto text-xs text-muted-foreground font-semibold">Current</span>
+                                        <span className="ml-auto text-[10px] text-muted-foreground font-semibold">Active</span>
                                       )}
                                     </DropdownMenuItem>
                                   ))}
@@ -306,161 +521,168 @@ export default function MembersPage() {
 
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                className="text-red-600 focus:text-red-700 focus:bg-red-50 gap-2 font-medium text-sm rounded-lg"
+                                className="text-destructive focus:text-destructive gap-2 text-xs"
                                 onSelect={() =>
                                   setRemovingMember({
                                     userId: member.userId,
-                                    name: `${member.user?.firstName} ${member.user?.lastName}`,
+                                    name: fullName,
                                   })
                                 }
                               >
-                                <UserX className="h-4 w-4" />
+                                <UserX className="h-3.5 w-3.5" />
                                 Remove Member
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
-              {membersList.length < membersTotalCount && (
-                <Button
-                  variant="outline"
-                  onClick={handleLoadMoreMembers}
-                  disabled={membersLoading}
-                  className="w-full mt-2 h-12 rounded-xl border-dashed border-2 hover:border-primary/40 hover:bg-primary/5 text-muted-foreground font-semibold transition-all"
-                >
-                  {membersLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  Load More Members
-                </Button>
-              )}
-            </>
+          {membersList.length < membersTotalCount && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLoadMoreMembers}
+              disabled={membersLoading}
+              className="w-full h-8 text-xs text-muted-foreground border-dashed"
+            >
+              {membersLoading && <Loader2 className="h-3 w-3 animate-spin mr-1.5" />}
+              Load More Members ({membersList.length} of {membersTotalCount})
+            </Button>
           )}
         </TabsContent>
 
-        {/* ─── REQUESTS ─── */}
-        <TabsContent value="requests" className="space-y-3">
+        {/* ─── Join Requests Tab ────────────────────────────────────────────── */}
+        <TabsContent value="requests" className="space-y-3 focus-visible:outline-none">
           {requestsLoading && requestsList.length === 0 ? (
             <div className="flex justify-center p-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : requestsList.length === 0 ? (
-            <Card className="border-dashed shadow-none bg-transparent">
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 rounded-2xl bg-muted/50 mb-4 ring-1 ring-border/40">
-                  <UserPlus className="h-8 w-8 text-muted-foreground/40" />
-                </div>
-                <p className="text-base font-semibold">No pending requests</p>
-                <p className="text-sm text-muted-foreground">
-                  No users are currently waiting to join this {singularName.toLowerCase()}.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="bg-card border border-dashed border-border/80 rounded-xl p-12 text-center text-xs text-muted-foreground">
+              <UserPlus className="h-8 w-8 mx-auto opacity-40 mb-2" />
+              <p className="font-medium text-foreground">No pending requests</p>
+              <p className="text-muted-foreground mt-0.5">
+                No users are currently waiting to join this {singularName.toLowerCase()}.
+              </p>
+            </div>
           ) : (
-            <>
-              {requestsList.map((request: any) => (
-                <Card key={request.id} className="border-none shadow-sm shadow-black/[0.02] ring-1 ring-border/40 overflow-hidden hover:ring-primary/20 transition-all rounded-xl">
-                  <CardContent className="p-4 sm:p-5">
-                    <div className="flex items-center gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {requestsList.map((request: any) => {
+                const fullName = `${request.user?.firstName || ""} ${request.user?.lastName || ""}`.trim();
+                const initial =
+                  request.user?.firstName?.charAt(0) ||
+                  request.user?.lastName?.charAt(0) ||
+                  "R";
+
+                return (
+                  <div
+                    key={request.id || request.userId}
+                    className="bg-card border border-border/80 rounded-xl p-3.5 shadow-sm flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
                       <UserProfileHoverCard user={request.user ?? {}}>
-                        <Avatar className="h-11 w-11 border border-border/50 ring-1 ring-black/[0.04] cursor-pointer">
+                        <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0 cursor-pointer">
                           <AvatarImage src={request.user?.avatar ?? ""} />
-                          <AvatarFallback className="bg-primary/5 text-primary font-bold text-sm">
-                            {(request.user?.firstName?.[0] ?? "") + (request.user?.lastName?.[0] ?? "")}
+                          <AvatarFallback className="bg-muted text-muted-foreground text-xs font-bold">
+                            {initial}
                           </AvatarFallback>
                         </Avatar>
                       </UserProfileHoverCard>
 
-                      <div className="flex-1 min-w-0">
+                      <div className="flex flex-col min-w-0">
                         <UserProfileHoverCard user={request.user ?? {}}>
-                          <span className="font-semibold text-sm cursor-pointer hover:underline text-foreground">
-                            {request.user?.firstName} {request.user?.lastName}
+                          <span className="text-xs font-semibold text-foreground truncate hover:text-primary transition-colors cursor-pointer">
+                            {fullName || "Anonymous Applicant"}
                           </span>
                         </UserProfileHoverCard>
-                        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
+                        <span className="text-[11px] text-muted-foreground truncate">
                           Requested {safeParseMemberDate(request.createdAt)}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="h-8 gap-1 rounded-lg bg-green-600 hover:bg-green-700 text-white"
-                          onClick={() => {
-                            setProcessingRequestId(request.userId);
-                            doApproveRequest({
-                              variables: { communityId, userId: request.userId },
-                            });
-                          }}
-                          disabled={processingRequestId === request.userId}
-                        >
-                          {processingRequestId === request.userId ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Check className="h-4 w-4" />
-                          )}
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-8 gap-1 rounded-lg text-red-600 border-red-200 hover:border-red-300 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            setProcessingRequestId(request.userId);
-                            doRejectRequest({
-                              variables: { communityId, userId: request.userId },
-                            });
-                          }}
-                          disabled={processingRequestId === request.userId}
-                        >
-                          {processingRequestId === request.userId ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <X className="h-4 w-4" />
-                          )}
-                          Reject
-                        </Button>
+                        </span>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
 
-              {requestsList.length < requestsTotalCount && (
-                <Button
-                  variant="outline"
-                  onClick={handleLoadMoreRequests}
-                  disabled={requestsLoading}
-                  className="w-full mt-2 h-12 rounded-xl border-dashed border-2 hover:border-primary/40 hover:bg-primary/5 text-muted-foreground font-semibold transition-all"
-                >
-                  {requestsLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                  Load More Requests
-                </Button>
-              )}
-            </>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 px-2 text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={() => {
+                          setProcessingRequestId(request.userId);
+                          doApproveRequest({
+                            variables: { communityId, userId: request.userId },
+                          });
+                        }}
+                        disabled={processingRequestId === request.userId}
+                      >
+                        {processingRequestId === request.userId ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Check className="h-3 w-3" />
+                        )}
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2 text-xs gap-1 text-destructive hover:bg-destructive/10 border-destructive/30"
+                        onClick={() => {
+                          setProcessingRequestId(request.userId);
+                          doRejectRequest({
+                            variables: { communityId, userId: request.userId },
+                          });
+                        }}
+                        disabled={processingRequestId === request.userId}
+                      >
+                        {processingRequestId === request.userId ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <X className="h-3 w-3" />
+                        )}
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {requestsList.length < requestsTotalCount && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLoadMoreRequests}
+              disabled={requestsLoading}
+              className="w-full h-8 text-xs text-muted-foreground border-dashed"
+            >
+              {requestsLoading && <Loader2 className="h-3 w-3 animate-spin mr-1.5" />}
+              Load More Requests ({requestsList.length} of {requestsTotalCount})
+            </Button>
           )}
         </TabsContent>
       </Tabs>
 
-      {/* ─── REMOVE CONFIRM DIALOG ─── */}
+      {/* ─── Remove Member Confirmation Dialog ────────────────────────────── */}
       <AlertDialog open={!!removingMember} onOpenChange={() => setRemovingMember(null)}>
-        <AlertDialogContent className="rounded-2xl">
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Member</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base font-semibold">Remove Member</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
               Are you sure you want to remove{" "}
-              <strong className="font-semibold text-foreground">{removingMember?.name}</strong> from this
-              {singularName.toLowerCase()}? They will lose all access immediately.
+              <strong className="font-semibold text-foreground">{removingMember?.name}</strong> from this{" "}
+              {singularName.toLowerCase()}? They will lose access immediately.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="h-8 text-xs">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 text-xs shadow-sm"
               onClick={() =>
                 doRemove({
                   variables: { communityId, userId: removingMember?.userId },
@@ -468,30 +690,28 @@ export default function MembersPage() {
               }
               disabled={removing}
             >
-              {removing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {removing && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
               Remove Member
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* ─── CHANGE ROLE CONFIRM DIALOG ─── */}
+      {/* ─── Change Role Confirmation Dialog ──────────────────────────────── */}
       <AlertDialog open={!!pendingRoleChange} onOpenChange={() => setPendingRoleChange(null)}>
-        <AlertDialogContent className="rounded-2xl">
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Change Member Role</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to change{" "}
-              <strong className="font-semibold text-foreground">{pendingRoleChange?.name}</strong>'s role
-              to{" "}
-              <strong className="font-semibold text-foreground">{pendingRoleChange?.roleLabel}</strong>?
-              This will update their permissions in the {singularName.toLowerCase()} immediately.
+            <AlertDialogTitle className="text-base font-semibold">Change Member Role</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to assign the role of{" "}
+              <strong className="font-semibold text-foreground">{pendingRoleChange?.roleLabel}</strong> to{" "}
+              <strong className="font-semibold text-foreground">{pendingRoleChange?.name}</strong>?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={roleSaving} className="rounded-xl">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={roleSaving} className="h-8 text-xs">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="rounded-xl shadow-sm"
+              className="h-8 text-xs shadow-sm"
               onClick={() => {
                 if (!pendingRoleChange) return;
                 doChangeRole({
@@ -504,8 +724,8 @@ export default function MembersPage() {
               }}
               disabled={roleSaving}
             >
-              {roleSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Confirm Change
+              {roleSaving && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+              Confirm Role
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

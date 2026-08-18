@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Star,
@@ -8,18 +8,13 @@ import {
   ThumbsDown,
   CheckCircle2,
   Filter,
-  ArrowUpDown,
   MoreVertical,
-  Trash,
+  Trash2,
   Edit,
   Loader2,
+  RefreshCw,
+  Sparkles,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -30,7 +25,6 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -57,9 +51,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
-
+import moment from "moment";
 import {
   getCommunityRatings,
   deleteCommunityRating,
@@ -70,7 +64,6 @@ import {
 export default function CommunityRatings() {
   const params = useParams();
   const communityId = params?.id as string;
-  const { toast } = useToast();
 
   const [sortBy, setSortBy] = useState("newest");
   const [filterRating, setFilterRating] = useState("all");
@@ -84,54 +77,43 @@ export default function CommunityRatings() {
   const { data, loading, fetchMore, refetch } = getCommunityRatings({
     variables: {
       communityId,
-      limit: 10,
+      limit: 15,
       offset: 0,
       sortBy,
       filterRating,
     },
     fetchPolicy: "cache-and-network",
+    skip: !communityId,
   });
 
   const [delRating, { loading: deleting }] = deleteCommunityRating({
     onCompleted: () => {
-      toast({ title: "Rating deleted successfully" });
+      toast.success("Review deleted successfully");
       setDeleteRatingId(null);
       refetch();
     },
     onError: (err: any) => {
-      toast({
-        title: "Error deleting rating",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast.error(err.message || "Failed to delete review");
     },
   });
 
   const [updRating, { loading: updating }] = updateCommunityRating({
     onCompleted: () => {
-      toast({ title: "Rating updated successfully" });
+      toast.success("Review updated successfully");
       setEditRatingId(null);
+      refetch();
     },
     onError: (err: any) => {
-      toast({
-        title: "Error updating rating",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast.error(err.message || "Failed to update review");
     },
   });
 
   const [voteRating] = voteCommunityRatingHelpfulness({
     onCompleted: () => {
-      // Data is refetched or cache is updated, for now just refetch
       refetch();
     },
     onError: (err: any) => {
-      toast({
-        title: "Error voting on rating",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast.error(err.message || "Failed to vote on review");
     },
   });
 
@@ -185,15 +167,15 @@ export default function CommunityRatings() {
     });
   };
 
-  const renderStars = (rating: number, size = "h-4 w-4") => {
+  const renderStars = (rating: number, size = "h-3.5 w-3.5") => {
     return (
       <div className="flex items-center gap-0.5">
-        {Array.from({ length: 5 }, (_, i) => (
+        {[1, 2, 3, 4, 5].map((i) => (
           <Star
             key={i}
             className={cn(
               size,
-              i < Math.floor(rating)
+              i <= Math.round(rating)
                 ? "fill-amber-400 text-amber-400"
                 : "fill-muted text-muted"
             )}
@@ -214,7 +196,7 @@ export default function CommunityRatings() {
   };
 
   const calcPercentage = (count: number, total: number) =>
-    total > 0 ? (count / total) * 100 : 0;
+    total > 0 ? Math.round((count / total) * 100) : 0;
 
   const ratingData = [
     { stars: 5, count: summary.fiveStar, percentage: calcPercentage(summary.fiveStar, summary.totalRatings) },
@@ -225,292 +207,305 @@ export default function CommunityRatings() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* ─── Top Control Strip ────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/60 backdrop-blur-sm border border-border/70 rounded-xl p-4 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Ratings & Reviews
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Detailed feedback from the community members.
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
+            Ratings & Feedback
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Member reviews, satisfaction scores, and feedback distribution.
           </p>
         </div>
-      </header>
 
-      {/* Main Content - Overview & Reviews */}
-      <div className="space-y-8">
-        <Card className="border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 rounded-2xl overflow-hidden bg-gradient-to-br from-card to-amber-50/20">
-          <CardContent className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-              <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-4">
-                <div className="space-y-1">
-                  <span className="text-7xl font-black tracking-tighter text-foreground">
-                    {summary.averageRating || "0.0"}
-                  </span>
-                  <div className="flex justify-center md:justify-start">
-                    {renderStars(Number(summary.averageRating) || 0, "h-6 w-6")}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                    {totalCount} Total Ratings
-                  </span>
-                </div>
+        <div className="flex items-center gap-2">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[125px] h-8 text-xs bg-background">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent className="text-xs">
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="helpful">Most Helpful</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterRating} onValueChange={setFilterRating}>
+            <SelectTrigger className="w-[125px] h-8 text-xs bg-background">
+              <div className="flex items-center gap-1.5 text-xs">
+                <Filter className="h-3 w-3 text-muted-foreground" />
+                <SelectValue placeholder="Rating" />
               </div>
+            </SelectTrigger>
+            <SelectContent className="text-xs">
+              <SelectItem value="all">All Stars</SelectItem>
+              <SelectItem value="5">5 Stars</SelectItem>
+              <SelectItem value="4">4 Stars</SelectItem>
+              <SelectItem value="3">3 Stars</SelectItem>
+              <SelectItem value="2">2 Stars</SelectItem>
+              <SelectItem value="1">1 Star</SelectItem>
+            </SelectContent>
+          </Select>
 
-              <div className="space-y-3">
-                {ratingData.map((item) => (
-                  <div
-                    key={item.stars}
-                    className="flex items-center gap-4 group"
-                  >
-                    <div className="flex items-center gap-1.5 w-10">
-                      <span className="text-sm font-bold text-foreground">
-                        {item.stars}
-                      </span>
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    </div>
-                    <Progress
-                      value={item.percentage}
-                      className="h-2 flex-1 bg-muted group-hover:bg-muted/80 transition-colors [&>div]:bg-amber-500"
-                    />
-                    <span className="text-[11px] font-bold text-muted-foreground w-8 tabular-nums">
-                      {item.count}
-                    </span>
-                  </div>
-                ))}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            title="Refresh reviews"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* ─── 2-Column Shopify Layout (1/3 Score Breakdown + 2/3 Reviews Feed) ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* ─── Left Column (1/3 Rating Summary) ─────────────────────────────── */}
+        <div className="space-y-4">
+          <div className="bg-card border border-border/80 rounded-xl p-5 shadow-sm space-y-5">
+            <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <h3 className="text-sm font-semibold text-foreground">Score Summary</h3>
+            </div>
+
+            <div className="flex items-baseline gap-3">
+              <span className="text-5xl font-extrabold tracking-tight text-foreground tabular-nums">
+                {summary.averageRating ? summary.averageRating.toFixed(1) : "0.0"}
+              </span>
+              <div className="space-y-1">
+                {renderStars(summary.averageRating, "h-4 w-4")}
+                <p className="text-[11px] text-muted-foreground">
+                  {summary.totalRatings} total reviews
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between pb-2">
-          <div className="flex items-center gap-3">
-            <h3 className="font-semibold text-lg">Reviews List</h3>
-          </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-[160px] bg-card rounded-xl">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
-                  <SelectValue placeholder="Sort by" />
+            {/* Rating Bars Distribution */}
+            <div className="space-y-2 pt-2 border-t border-border/40">
+              {ratingData.map((item) => (
+                <div key={item.stars} className="flex items-center gap-2 text-xs">
+                  <span className="w-12 text-[11px] text-muted-foreground flex items-center gap-1 shrink-0">
+                    {item.stars} <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  </span>
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
+                  <span className="w-8 text-[11px] text-muted-foreground text-right tabular-nums">
+                    {item.count}
+                  </span>
                 </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-xl">
-                <SelectItem value="newest" className="rounded-lg">Newest First</SelectItem>
-                <SelectItem value="oldest" className="rounded-lg">Oldest First</SelectItem>
-                <SelectItem value="helpful" className="rounded-lg">Most Helpful</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={filterRating} onValueChange={setFilterRating}>
-              <SelectTrigger className="w-full sm:w-[140px] bg-card rounded-xl">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-                  <SelectValue placeholder="Filter stars" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-xl">
-                <SelectItem value="all" className="rounded-lg">All Ratings</SelectItem>
-                <SelectItem value="5" className="rounded-lg">5 Stars</SelectItem>
-                <SelectItem value="4" className="rounded-lg">4 Stars</SelectItem>
-                <SelectItem value="3" className="rounded-lg">3 Stars</SelectItem>
-                <SelectItem value="2" className="rounded-lg">2 Stars</SelectItem>
-                <SelectItem value="1" className="rounded-lg">1 Star</SelectItem>
-              </SelectContent>
-            </Select>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* ─── Right Column (2/3 Reviews List) ──────────────────────────────── */}
+        <div className="lg:col-span-2 space-y-3">
           {loading && ratingsList.length === 0 ? (
             <div className="flex justify-center p-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : ratingsList.length === 0 ? (
-            <div className="text-center p-12 border border-dashed rounded-2xl bg-card/50">
-              <Star className="h-8 w-8 text-muted-foreground/40 mx-auto mb-4" />
-              <p className="text-base font-semibold">No ratings found</p>
-              <p className="text-sm text-muted-foreground">Be the first to review this community.</p>
+            <div className="bg-card border border-dashed border-border/80 rounded-xl p-12 text-center text-xs text-muted-foreground">
+              <Star className="h-8 w-8 mx-auto opacity-40 mb-2" />
+              <p className="font-medium text-foreground">No reviews found</p>
+              <p className="text-muted-foreground mt-0.5">
+                {filterRating !== "all"
+                  ? "No reviews match the selected star filter."
+                  : "Community members have not submitted any reviews yet."}
+              </p>
             </div>
           ) : (
-            ratingsList.map((review: any) => (
-              <Card
-                key={review.id}
-                className="border-none shadow-sm shadow-black/[0.02] ring-1 ring-border/40 overflow-hidden group hover:ring-primary/20 transition-all relative rounded-2xl"
-              >
-                <CardContent className="p-6">
-                  <div className="absolute top-4 right-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground rounded-lg">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-xl shadow-xl min-w-[140px]">
-                        <DropdownMenuItem onClick={() => openEditDialog(review)} className="rounded-lg font-medium">
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-red-600 focus:bg-red-50 focus:text-red-700 rounded-lg font-medium"
-                          onClick={() => setDeleteRatingId(review.id)}
-                        >
-                          <Trash className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+            <>
+              {ratingsList.map((review: any) => {
+                const fullName = `${review.user?.firstName || ""} ${review.user?.lastName || ""}`.trim();
+                const initial =
+                  review.user?.firstName?.charAt(0) ||
+                  review.user?.lastName?.charAt(0) ||
+                  "U";
 
-                  <div className="flex gap-5">
-                    <UserProfileHoverCard user={review.user || {}}>
-                      <div className="cursor-pointer shrink-0 mt-1">
-                        <Avatar className="h-12 w-12 border border-border/50 ring-1 ring-black/[0.04]">
-                          <AvatarImage src={review.user?.avatar || ""} />
-                          <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
-                            {(review.user?.firstName?.[0] || "") + (review.user?.lastName?.[0] || "")}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    </UserProfileHoverCard>
-                    <div className="flex-1 space-y-3">
-                      <div className="flex flex-col pr-8">
-                        <div className="flex items-center gap-2">
-                          <UserProfileHoverCard user={review.user || {}}>
-                            <span className="font-semibold text-base text-foreground cursor-pointer hover:underline">
-                              {review.user?.firstName} {review.user?.lastName}
+                return (
+                  <div
+                    key={review.id}
+                    className="bg-card border border-border/80 hover:border-border rounded-xl p-4 shadow-sm transition-all space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <UserProfileHoverCard user={review.user ?? {}}>
+                          <Avatar className="h-8 w-8 rounded-lg border border-border/60 cursor-pointer">
+                            <AvatarImage src={review.user?.avatar ?? ""} />
+                            <AvatarFallback className="bg-muted text-muted-foreground text-xs font-bold">
+                              {initial}
+                            </AvatarFallback>
+                          </Avatar>
+                        </UserProfileHoverCard>
+
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <UserProfileHoverCard user={review.user ?? {}}>
+                              <span className="text-xs font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">
+                                {fullName || "Anonymous Member"}
+                              </span>
+                            </UserProfileHoverCard>
+                            {review.isVerified && (
+                              <Badge
+                                variant="outline"
+                                className="px-1.5 py-0 text-[9px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                              >
+                                Verified
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {renderStars(review.rating, "h-3 w-3")}
+                            <span className="text-[10px] text-muted-foreground">
+                              {moment(Number(review.createdAt) || review.createdAt).fromNow()}
                             </span>
-                          </UserProfileHoverCard>
-                          {review.isVerified && (
-                            <Badge
-                              variant="outline"
-                              className="px-1.5 py-0 h-5 gap-1 bg-blue-50 text-blue-700 border-blue-200 text-[10px] uppercase tracking-wider font-semibold rounded-md"
-                            >
-                              <CheckCircle2 className="h-3 w-3" />
-                              Verified
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 mt-1">
-                          {renderStars(review.rating, "h-3.5 w-3.5")}
-                          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                            {new Date(Number(review.createdAt)).toLocaleDateString()}
-                          </span>
+                          </div>
                         </div>
                       </div>
 
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        {review.review || "No review text provided."}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground">
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-32 text-xs">
+                          <DropdownMenuItem onClick={() => openEditDialog(review)} className="text-xs gap-1.5">
+                            <Edit className="h-3.5 w-3.5" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive text-xs gap-1.5"
+                            onClick={() => setDeleteRatingId(review.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {review.review && (
+                      <p className="text-xs text-foreground/90 leading-relaxed pl-11">
+                        {review.review}
                       </p>
+                    )}
 
-                      <div className="flex items-center gap-2 pt-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2.5 text-xs font-semibold gap-1.5 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 transition-colors rounded-lg"
-                          onClick={() => handleVote(review.id, true)}
-                        >
-                          <ThumbsUp className="h-3.5 w-3.5" />
-                          Helpful ({review.helpfulCount || 0})
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2.5 text-xs font-semibold gap-1.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg"
-                          onClick={() => handleVote(review.id, false)}
-                        >
-                          <ThumbsDown className="h-3.5 w-3.5" />
-                          Not helpful ({review.unhelpfulCount || 0})
-                        </Button>
-                      </div>
+                    <div className="flex items-center gap-2 pl-11 pt-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-[11px] font-medium gap-1 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
+                        onClick={() => handleVote(review.id, true)}
+                      >
+                        <ThumbsUp className="h-3 w-3" />
+                        Helpful ({review.helpfulCount || 0})
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-[11px] font-medium gap-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleVote(review.id, false)}
+                      >
+                        <ThumbsDown className="h-3 w-3" />
+                        Not helpful ({review.unhelpfulCount || 0})
+                      </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
+                );
+              })}
 
-          {ratingsList.length < totalCount && (
-            <Button
-              variant="outline"
-              onClick={handleLoadMore}
-              disabled={loading}
-              className="w-full h-12 rounded-xl border-dashed border-2 hover:border-primary/40 hover:bg-primary/5 text-muted-foreground font-semibold transition-all"
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Load More Reviews
-            </Button>
+              {ratingsList.length < totalCount && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLoadMore}
+                  disabled={loading}
+                  className="w-full h-8 text-xs text-muted-foreground border-dashed"
+                >
+                  {loading && <Loader2 className="h-3 w-3 animate-spin mr-1.5" />}
+                  Load More Reviews ({ratingsList.length} of {totalCount})
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
 
-      {/* Edit Dialog */}
+      {/* ─── Edit Review Dialog ────────────────────────────────────────────── */}
       <Dialog open={!!editRatingId} onOpenChange={(o) => !o && setEditRatingId(null)}>
-        <DialogContent className="rounded-2xl">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Rating</DialogTitle>
+            <DialogTitle className="text-base font-semibold">Edit Review</DialogTitle>
           </DialogHeader>
-          <div className="space-y-5 py-4">
-            <div className="space-y-2.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rating (Stars)</Label>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-foreground">Score Rating</Label>
               <Select value={String(editRatingValue)} onValueChange={(v) => setEditRatingValue(Number(v))}>
-                <SelectTrigger className="rounded-xl h-11">
-                  <SelectValue placeholder="Select rating" />
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Rating" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl shadow-xl">
+                <SelectContent className="text-xs">
                   {[5, 4, 3, 2, 1].map((val) => (
-                    <SelectItem key={val} value={String(val)} className="rounded-lg">
+                    <SelectItem key={val} value={String(val)}>
                       {val} Stars
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Review Text</Label>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-foreground">Review Content</Label>
               <Textarea
                 value={editReviewText}
                 onChange={(e) => setEditReviewText(e.target.value)}
-                placeholder="Share your thoughts..."
-                rows={5}
-                className="rounded-xl resize-none"
+                placeholder="Share your experience..."
+                rows={4}
+                className="text-xs resize-none"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditRatingId(null)} className="rounded-xl">Cancel</Button>
-            <Button onClick={handleUpdate} disabled={updating} className="rounded-xl shadow-sm">
-              {updating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" size="sm" onClick={() => setEditRatingId(null)} className="h-8 text-xs">
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleUpdate} disabled={updating} className="h-8 text-xs">
+              {updating && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
               Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Alert Dialog */}
+      {/* ─── Delete Review Dialog ──────────────────────────────────────────── */}
       <AlertDialog open={!!deleteRatingId} onOpenChange={(o) => !o && setDeleteRatingId(null)}>
-        <AlertDialogContent className="rounded-2xl">
+        <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this review
-              from the community.
+            <AlertDialogTitle className="text-base font-semibold">Delete Review</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-muted-foreground">
+              This review will be permanently deleted and score aggregates will be recalculated.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting} className="rounded-xl">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel disabled={deleting} className="h-8 text-xs">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 text-xs shadow-sm"
               disabled={deleting}
               onClick={(e) => {
                 e.preventDefault();
                 delRating({ variables: { id: deleteRatingId } });
               }}
             >
-              {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              {deleting ? "Deleting..." : "Delete Rating"}
+              {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

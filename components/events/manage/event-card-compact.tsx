@@ -5,13 +5,11 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import moment from "moment";
 import {
-  Calendar,
   MapPin,
   Users,
   Clock,
   Globe,
   CheckCircle2,
-  Sparkles,
 } from "lucide-react";
 import { Event } from "@/graphql/actions/events";
 import { EventActions } from "./event-actions";
@@ -123,8 +121,10 @@ export function EventCardCompact({ event }: EventCardCompactProps) {
 
   const coverUrl =
     !imgError && event.cover
-      ? `https://cdn.thrico.network/${event.cover}`
-      : "https://cdn.thrico.network/defaultEventCover.png";
+      ? event.cover.startsWith("http")
+        ? event.cover
+        : `https://cdn.thrico.network/${event.cover}`
+      : null;
 
   return (
     <div
@@ -137,62 +137,96 @@ export function EventCardCompact({ event }: EventCardCompactProps) {
         style={{ backgroundColor: typeInfo.bar }}
       />
 
-      {/* ── Top Cover Image Area ────────────────────────────────────────── */}
-      <div className="relative h-28 sm:h-32 w-full overflow-hidden bg-muted">
-        <Image
-          src={coverUrl}
-          alt={event.title || "Event cover"}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 25vw, 20vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={() => setImgError(true)}
-        />
+      {/* ── Top Area (Image or Header Tags) ─────────────────────────────── */}
+      {coverUrl ? (
+        <div className="relative h-28 sm:h-32 w-full overflow-hidden bg-muted">
+          <Image
+            src={coverUrl}
+            alt={event.title || "Event cover"}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 25vw, 20vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImgError(true)}
+          />
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-        {/* Floating Date Badge (Top-Left) */}
-        {startDate && (
-          <div className="absolute top-2.5 left-2.5 bg-card/95 backdrop-blur-md border border-border/50 rounded-lg px-2 py-1 text-center shadow-xs leading-none">
-            <div className="text-[8px] font-black uppercase tracking-wider text-primary">
-              {startDate.format("MMM")}
+          {/* Floating Date Badge (Top-Left) */}
+          {startDate && (
+            <div className="absolute top-2.5 left-2.5 bg-card/95 backdrop-blur-md border border-border/50 rounded-lg px-2 py-1 text-center shadow-xs leading-none">
+              <div className="text-[8px] font-black uppercase tracking-wider text-primary">
+                {startDate.format("MMM")}
+              </div>
+              <div className="text-xs font-black text-foreground mt-0.5">
+                {startDate.format("DD")}
+              </div>
             </div>
-            <div className="text-xs font-black text-foreground mt-0.5">
-              {startDate.format("DD")}
+          )}
+
+          {/* Action button (Top-Right) */}
+          <div className="absolute top-2 right-2 z-10">
+            <div className="bg-background/80 hover:bg-background backdrop-blur-md rounded-md shadow-xs transition-colors">
+              <EventActions event={event} />
             </div>
           </div>
-        )}
 
-        {/* Action button (Top-Right) */}
-        <div className="absolute top-2 right-2 z-10">
-          <div className="bg-background/80 hover:bg-background backdrop-blur-md rounded-md shadow-xs transition-colors">
+          {/* Type & Status pills on bottom of image */}
+          <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
+            <span
+              className={cn(
+                "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-tight backdrop-blur-md border shadow-2xs",
+                typeInfo.bg,
+              )}
+            >
+              {typeInfo.label}
+            </span>
+
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold backdrop-blur-md bg-black/50 text-white border border-white/10 shadow-2xs",
+              )}
+            >
+              <span
+                className={cn("h-1.5 w-1.5 rounded-full shrink-0", statusInfo.dot)}
+              />
+              {statusInfo.label}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="p-3 pb-0 flex items-center justify-between gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {startDate && (
+              <div className="bg-card border border-border/60 rounded-md px-2 py-0.5 flex items-center gap-1 shadow-2xs">
+                <span className="text-[9px] font-black uppercase tracking-wider text-primary">
+                  {startDate.format("MMM DD")}
+                </span>
+              </div>
+            )}
+
+            <span
+              className={cn(
+                "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-tight border",
+                typeInfo.bg,
+              )}
+            >
+              {typeInfo.label}
+            </span>
+
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-muted text-muted-foreground border border-border">
+              <span
+                className={cn("h-1.5 w-1.5 rounded-full shrink-0", statusInfo.dot)}
+              />
+              {statusInfo.label}
+            </span>
+          </div>
+
+          <div className="bg-background/80 hover:bg-background rounded-md transition-colors shrink-0">
             <EventActions event={event} />
           </div>
         </div>
-
-        {/* Type & Status pills on bottom of image */}
-        <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
-          <span
-            className={cn(
-              "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-tight backdrop-blur-md border shadow-2xs",
-              typeInfo.bg,
-            )}
-          >
-            {typeInfo.label}
-          </span>
-
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold backdrop-blur-md bg-black/50 text-white border border-white/10 shadow-2xs",
-            )}
-          >
-            <span
-              className={cn("h-1.5 w-1.5 rounded-full shrink-0", statusInfo.dot)}
-            />
-            {statusInfo.label}
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* ── Card Content Body ───────────────────────────────────────────── */}
       <div className="p-3 space-y-2 flex-1 flex flex-col justify-between">
@@ -264,3 +298,5 @@ export function EventCardCompact({ event }: EventCardCompactProps) {
     </div>
   );
 }
+
+export default EventCardCompact;

@@ -599,7 +599,7 @@ export function ChildSidebarContainer({
         )}
 
         {/* ── MAIN CONTENT ── */}
-        <SidebarInset className="bg-transparent overflow-hidden flex flex-col h-[calc(100vh-64px)] min-w-0 flex-1 relative z-0">
+        <SidebarInset className="bg-transparent overflow-hidden flex flex-col h-[calc(100vh-64px)] min-w-0 flex-1 relative">
           <main className="flex-1 w-full min-w-0 overflow-y-auto">{children}</main>
         </SidebarInset>
       </div>

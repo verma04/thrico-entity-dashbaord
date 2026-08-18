@@ -1,16 +1,31 @@
 "use client";
-import * as React from "react";
 
+import * as React from "react";
+import { LayoutDashboard, Radio, History, Settings } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
-import { Command } from "lucide-react";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-function RootLayout({ children }: { children: React.ReactNode }) {
+function FeedRootLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
+      key: "",
+      label: "Overview",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
       key: "all",
-      label: "Feed",
-      icon: <Command className="h-4 w-4 mr-2" />,
+      label: "Community Feed",
+      icon: <Radio className="h-4 w-4" />,
+    },
+    {
+      key: "reports",
+      label: "Reports",
+      icon: <History className="h-4 w-4" />,
+    },
+    {
+      key: "settings/visibility",
+      label: "Settings",
+      icon: <Settings className="h-4 w-4" />,
     },
   ];
 
@@ -21,4 +36,4 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(RootLayout, "feed");
+export default withSubscriptionCheck(FeedRootLayout, "feed");

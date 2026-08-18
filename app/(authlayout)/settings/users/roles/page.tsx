@@ -1,5 +1,5 @@
+import React, { Suspense } from "react";
 import RolesTab from "@/components/settings/rebac/roles-tab";
-
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,7 +8,11 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  return <RolesTab />;
+  return (
+    <Suspense fallback={null}>
+      <RolesTab />
+    </Suspense>
+  );
 };
 
 export default page;

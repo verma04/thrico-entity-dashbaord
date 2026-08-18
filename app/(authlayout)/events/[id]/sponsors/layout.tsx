@@ -1,9 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePathname, useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 
 const tabItems = [
   {

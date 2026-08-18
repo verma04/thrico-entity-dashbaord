@@ -334,28 +334,99 @@ export function AdminTableDate({
 const STATUS_COLORS: Record<string, string> = {
   APPROVED: "bg-emerald-50 text-emerald-700 border-emerald-200",
   ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  COMPLETED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  CUSTOM: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  SUCCESS: "bg-emerald-50 text-emerald-700 border-emerald-200",
   PENDING: "bg-amber-50  text-amber-700  border-amber-200",
+  WARNING: "bg-amber-50  text-amber-700  border-amber-200",
   DISABLED: "bg-orange-50 text-orange-700 border-orange-200",
   PAUSED: "bg-orange-50 text-orange-700 border-orange-200",
   REJECTED: "bg-red-50    text-red-700    border-red-200",
   BLOCKED: "bg-rose-50   text-rose-700   border-rose-200",
+  DESTRUCTIVE: "bg-red-50    text-red-700    border-red-200",
+  FAILED: "bg-red-50    text-red-700    border-red-200",
+  ERROR: "bg-red-50    text-red-700    border-red-200",
   EXPIRED: "bg-slate-50  text-slate-500  border-slate-200",
   CLOSED: "bg-slate-50  text-slate-500  border-slate-200",
+  INACTIVE: "bg-slate-50  text-slate-500  border-slate-200",
+  SYSTEM: "bg-slate-50 text-slate-600 border-slate-200",
+  NEUTRAL: "bg-slate-50 text-slate-600 border-slate-200",
   DRAFT: "bg-sky-50    text-sky-700    border-sky-200",
+  INFO: "bg-sky-50    text-sky-700    border-sky-200",
 };
 
 export function AdminStatusBadge({
   status,
   className,
   children,
+  variant,
 }: {
-  status: string;
+  status?: any;
   className?: string;
   children?: React.ReactNode;
+  variant?: "success" | "warning" | "destructive" | "neutral" | "info" | string;
 }) {
+  const normalizedStatus = (
+    typeof status === "string"
+      ? status
+      : typeof status === "boolean"
+        ? status
+          ? "ACTIVE"
+          : "INACTIVE"
+        : status != null
+          ? String(status)
+          : ""
+  ).toUpperCase();
+
+  const variantKey = variant ? String(variant).toUpperCase() : undefined;
+
   const color =
-    STATUS_COLORS[status?.toUpperCase()] ??
+    (variantKey ? STATUS_COLORS[variantKey] : undefined) ??
+    STATUS_COLORS[normalizedStatus] ??
     "bg-slate-50 text-slate-600 border-slate-200";
+
+  const isGreen =
+    normalizedStatus === "APPROVED" ||
+    normalizedStatus === "ACTIVE" ||
+    normalizedStatus === "COMPLETED" ||
+    normalizedStatus === "CUSTOM" ||
+    normalizedStatus === "SUCCESS" ||
+    variantKey === "SUCCESS";
+
+  const isAmber =
+    normalizedStatus === "PENDING" ||
+    normalizedStatus === "WARNING" ||
+    variantKey === "WARNING";
+
+  const isRed =
+    normalizedStatus === "REJECTED" ||
+    normalizedStatus === "BLOCKED" ||
+    normalizedStatus === "DESTRUCTIVE" ||
+    normalizedStatus === "FAILED" ||
+    normalizedStatus === "ERROR" ||
+    variantKey === "DESTRUCTIVE";
+
+  const isOrange =
+    normalizedStatus === "DISABLED" ||
+    normalizedStatus === "PAUSED";
+
+  const isSky =
+    normalizedStatus === "DRAFT" ||
+    normalizedStatus === "INFO" ||
+    variantKey === "INFO";
+
+  const dotColor = isGreen
+    ? "bg-emerald-500"
+    : isAmber
+      ? "bg-amber-500"
+      : isRed
+        ? "bg-red-500"
+        : isOrange
+          ? "bg-orange-500"
+          : isSky
+            ? "bg-sky-500"
+            : "bg-slate-400";
+
   return (
     <span
       className={cn(
@@ -364,21 +435,17 @@ export function AdminStatusBadge({
         className,
       )}
     >
-      <span
-        className={cn(
-          "h-1.5 w-1.5 rounded-full shrink-0",
-          status?.toUpperCase() === "APPROVED" ||
-            status?.toUpperCase() === "ACTIVE"
-            ? "bg-emerald-500"
-            : status?.toUpperCase() === "PENDING"
-              ? "bg-amber-500"
-              : status?.toUpperCase() === "REJECTED" ||
-                  status?.toUpperCase() === "BLOCKED"
-                ? "bg-red-500"
-                : "bg-slate-400",
-        )}
-      />
-      {children || status}
+      <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotColor)} />
+      {children ||
+        (typeof status === "string"
+          ? status
+          : typeof status === "boolean"
+            ? status
+              ? "Active"
+              : "Inactive"
+            : status != null
+              ? String(status)
+              : "—")}
     </span>
   );
 }

@@ -164,8 +164,11 @@ export function WebsitePagesManager() {
         <AdminTableItem
           icon={Layout}
           title={row.name}
-          badge={row.slug === "home" ? "Home Page" : undefined}
-          badgeVariant="indigo"
+          badge={
+            row.slug === "home" ? (
+              <AdminTableTag variant="indigo">Home Page</AdminTableTag>
+            ) : undefined
+          }
         />
       ),
     },

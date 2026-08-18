@@ -3,7 +3,7 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useListingDetails, useChangeListingStatus } from "@/graphql/actions/listing";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -33,7 +33,6 @@ function ListingDangerZonePage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { toast } = useToast();
 
   const { data, loading } = useListingDetails({
     variables: {
@@ -46,18 +45,11 @@ function ListingDangerZonePage() {
 
   const [changeStatus, { loading: disabling }] = useChangeListingStatus({
     onCompleted: () => {
-      toast({
-        title: `${singularName} Disabled`,
-        description: `The ${singularName.toLowerCase()} has been permanently disabled.`,
-      });
+      toast.success(`The ${singularName.toLowerCase()} has been permanently disabled.`);
       router.push("/listing/all");
     },
     onError: (err: any) => {
-      toast({
-        title: "Error",
-        description: err.message || `Failed to disable ${singularName.toLowerCase()}`,
-        variant: "destructive",
-      });
+      toast.error(err.message || `Failed to disable ${singularName.toLowerCase()}`);
     },
   });
 

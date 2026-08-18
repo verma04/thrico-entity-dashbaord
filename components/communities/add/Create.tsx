@@ -1,11 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-
-import { FormValues } from "../ts-types";
+import { CtaButton } from "@/components/ui/cta-button";
+import { FixedInsetMotionContainer } from "@/components/ui/fixed-inset-motion-container";
 import { addCommunity } from "../../../graphql/actions/group";
 import { CommunityCreationForm } from "./community-creation-form";
 
@@ -34,28 +32,27 @@ const Create = ({}) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Create</Button>
+      <CtaButton onClick={() => setOpen(true)}>Create</CtaButton>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent
-          side="bottom"
-          className="h-screen p-0 border-none flex flex-col"
-        >
-          <CommunityCreationForm
-            initialValues={{
-              requireAdminApprovalForPosts: false,
-              allowMemberInvites: false,
-              enableEvents: false,
-              enableRatingsAndReviews: false,
-            }}
-            loading={loading}
-            onFinish={onFinish}
-            onCancel={onClose}
-            cover={cover}
-            setCover={setCover}
-          />
-        </SheetContent>
-      </Sheet>
+      <FixedInsetMotionContainer
+        open={open}
+        onClose={onClose}
+        zIndex="z-50"
+      >
+        <CommunityCreationForm
+          initialValues={{
+            requireAdminApprovalForPosts: false,
+            allowMemberInvites: false,
+            enableEvents: false,
+            enableRatingsAndReviews: false,
+          }}
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onClose}
+          cover={cover}
+          setCover={setCover}
+        />
+      </FixedInsetMotionContainer>
     </>
   );
 };

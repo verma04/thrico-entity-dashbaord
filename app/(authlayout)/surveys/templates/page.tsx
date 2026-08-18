@@ -3,21 +3,12 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { TemplateGallery } from "@/components/surveys/templates/template-gallery";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  Layout,
-  Sparkles,
-  ArrowLeft,
-  RotateCcw,
-  Search,
-  Globe,
-  ShieldCheck,
-} from "lucide-react";
+import { Sparkles, ArrowLeft } from "lucide-react";
 import { CtaButton } from "@/components/ui/cta-button";
 import { useRouter } from "next/navigation";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -27,25 +18,28 @@ function SurveyTemplatesPage() {
   const router = useRouter();
 
   return (
-    <EcosystemWrapper anonymized-1="survey-templates">
+    <EcosystemWrapper>
       <EcosystemHeader
         title="Template Gallery"
-        badgeText="Research Acceleration"
-        description={`Leverage pre-instantiated architectural ${singularName.toLowerCase()} nodes designed for high engagement and quality community insights.`}
+        badgeText="Pre-Built Blueprints"
+        description={`Accelerate research with curated ${singularName.toLowerCase()} templates designed for community feedback, ratings, and market insights.`}
         icon={Sparkles}
         breadcrumbs={[
           { label: "Surveys", href: "/surveys/all" },
           { label: "Templates" },
         ]}
-      >
-        <CtaButton variant="primary" onClick={() => router.push("/surveys")}>
-          <ArrowLeft className="h-4 w-4 text-white" />
-          Back to Survey
-        </CtaButton>
-      </EcosystemHeader>
+        actions={
+          <CtaButton onClick={() => router.push("/surveys/all")}>
+            <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+            Back to Surveys
+          </CtaButton>
+        }
+      />
 
-      <EcosystemContainer className="p-8 lg:p-12">
-        <TemplateGallery />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <Suspense fallback={null}>
+          <TemplateGallery />
+        </Suspense>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

@@ -123,9 +123,18 @@ export default function UsersTab() {
         `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
         u.email?.toLowerCase().includes(q);
 
+      const userStatus =
+        typeof u.status === "string"
+          ? u.status
+          : typeof u.status === "boolean"
+            ? u.status
+              ? "active"
+              : "inactive"
+            : "";
+
       const matchesStatus =
         statusFilter === "ALL" ||
-        u.status?.toLowerCase() === statusFilter.toLowerCase();
+        userStatus.toLowerCase() === statusFilter.toLowerCase();
 
       return matchesSearch && matchesStatus;
     });
@@ -141,8 +150,12 @@ export default function UsersTab() {
     setShowAddDialog(true);
   };
 
-  const handleUpdateStatus = (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === "active" ? "inactive" : "active";
+  const handleUpdateStatus = (id: string, currentStatus: any) => {
+    const isCurrentlyActive =
+      typeof currentStatus === "string"
+        ? currentStatus.toLowerCase() === "active"
+        : Boolean(currentStatus);
+    const newStatus = isCurrentlyActive ? "inactive" : "active";
     updateUser({ variables: { adminId: id, input: { status: newStatus } } });
   };
 
@@ -196,7 +209,10 @@ export default function UsersTab() {
       key: "status",
       header: "Status",
       cell: (user: AdminUser) => {
-        const isActive = user.status === "active";
+        const isActive =
+          typeof user.status === "string"
+            ? user.status.toLowerCase() === "active"
+            : Boolean(user.status);
         return (
           <AdminStatusBadge
             status={user.status}
@@ -210,7 +226,10 @@ export default function UsersTab() {
       header: "Actions",
       className: "text-right",
       cell: (user: AdminUser) => {
-        const isActive = user.status === "active";
+        const isActive =
+          typeof user.status === "string"
+            ? user.status.toLowerCase() === "active"
+            : Boolean(user.status);
         return (
           <div className="flex justify-end">
             <DropdownMenu>
@@ -386,8 +405,8 @@ export default function UsersTab() {
             { header: "First Name", getValue: (u) => u.firstName || "" },
             { header: "Last Name", getValue: (u) => u.lastName || "" },
             { header: "Email", getValue: (u) => u.email || "" },
-            { header: "Role", getValue: (u) => u.role?.name || u.role || "Member" },
-            { header: "Status", getValue: (u) => u.status || "active" },
+            { header: "Role", getValue: (u) => (typeof u.role === "object" ? u.role?.name : u.role) || "Member" },
+            { header: "Status", getValue: (u) => (typeof u.status === "string" ? u.status : u.status ? "active" : "inactive") },
           ]);
           downloadCsv(csv, `members-${new Date().toISOString().slice(0, 10)}`, format);
           sonnerToast.success("Export ready", { description: `${rows.length} member${rows.length !== 1 ? "s" : ""} exported.` });

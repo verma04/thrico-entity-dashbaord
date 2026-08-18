@@ -2,12 +2,11 @@
 
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import ForumsManage from "@/components/forums/manage/forums-manage";
 
-import Forum from "@/components/forums/forum/forum";
-
-const ForumsAllPage = () => {
-  return <Forum status={"ALL"} />;
-};
+function ForumsAllPage() {
+  return <ForumsManage status="ALL" />;
+}
 
 export default withSubscriptionCheck(
   withModulePermission(ForumsAllPage, "FORUMS", "canRead"),

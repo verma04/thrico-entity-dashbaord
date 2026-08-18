@@ -3,7 +3,7 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetJobById, useChangeJobStatus, useUpdateJob } from "@/graphql/actions/jobs";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Loader2, Settings2, CheckCircle, PauseCircle, Ban } from "lucide-react";
 import { JobCreationForm } from "@/components/jobs/create/job-creation-form";
 import { cn } from "@/lib/utils";
@@ -23,7 +22,6 @@ export default function JobSettingsPage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { toast } = useToast();
 
   const { data, loading } = useGetJobById({
     variables: { id },
@@ -32,30 +30,19 @@ export default function JobSettingsPage() {
 
   const [changeStatus, { loading: updatingStatus }] = useChangeJobStatus({
     onCompleted: () => {
-      toast({ title: "Success", description: `${singularName} status updated.` });
+      toast.success(`${singularName} status updated.`);
     },
     onError: (err: any) => {
-      toast({
-        title: "Error",
-        description: err.message || "Failed to update status",
-        variant: "destructive",
-      });
+      toast.error(err.message || "Failed to update status");
     },
   });
 
   const [updateJob, { loading: updating }] = useUpdateJob({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: `${singularName} updated successfully`,
-      });
+      toast.success(`${singularName} updated successfully`);
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || `Failed to update ${singularName.toLowerCase()}`,
-        variant: "destructive",
-      });
+      toast.error(error.message || `Failed to update ${singularName.toLowerCase()}`);
     },
   });
 

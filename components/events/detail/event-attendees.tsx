@@ -26,6 +26,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   Loader2,
@@ -36,6 +39,11 @@ import {
   Eye,
   QrCode,
   Upload,
+  LayoutGrid,
+  List as ListIcon,
+  Mail,
+  Ticket as TicketIcon,
+  CheckCircle2,
 } from "lucide-react";
 import {
   useEventAttendees,
@@ -61,6 +69,7 @@ import { toast } from "sonner";
 export default function EventAttendees({ eventId }: { eventId: string }) {
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [view, setView] = useState<"grid" | "list">("list");
 
   const { data, loading, refetch } = useEventAttendees(eventId);
   const attendees = data?.getEventAttendees || [];
@@ -419,137 +428,292 @@ export default function EventAttendees({ eventId }: { eventId: string }) {
             Manage and track all event attendees for this event
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <CardContent className="pt-6 space-y-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-9 h-9 text-xs"
               />
             </div>
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Filter attendees" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Attendees</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="waitlisted">Waitlisted</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="checked-in">Checked In</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+              <Select value={filter} onValueChange={setFilter}>
+                <SelectTrigger className="w-[160px] h-9 text-xs">
+                  <SelectValue placeholder="Filter attendees" />
+                </SelectTrigger>
+                <SelectContent className="text-xs">
+                  <SelectItem value="all">All Attendees</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="waitlisted">Waitlisted</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="checked-in">Checked In</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* View Mode Toggle: Grid / List */}
+              <Tabs
+                value={view}
+                onValueChange={(v) => setView(v as "grid" | "list")}
+                className="bg-muted p-0.5 rounded-lg border border-border shrink-0"
+              >
+                <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
+                  <TabsTrigger
+                    value="grid"
+                    className="h-8 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1.5"
+                  >
+                    <LayoutGrid className="h-3.5 w-3.5" />
+                    Grid
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="list"
+                    className="h-8 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1.5"
+                  >
+                    <ListIcon className="h-3.5 w-3.5" />
+                    List
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
 
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30">
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Ticket Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAttendees.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center py-10 text-muted-foreground"
-                    >
-                      No attendees found matching your criteria.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredAttendees.map((attendee) => (
-                    <TableRow key={attendee.id}>
-                      <TableCell className="font-medium">
-                        {attendee.user.firstName} {attendee.user.lastName}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {attendee.user.email}
-                      </TableCell>
-                      <TableCell>{attendee.ticket?.name || "N/A"}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1 items-start">
+          {filteredAttendees.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border/80 p-12 text-center text-xs text-muted-foreground bg-muted/10">
+              <p className="font-semibold text-sm text-foreground mb-1">No attendees found</p>
+              <p className="text-xs text-muted-foreground">
+                No attendees match your current filter or search criteria.
+              </p>
+            </div>
+          ) : view === "grid" ? (
+            /* ─── GRID VIEW ─────────────────────────────────────────────── */
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredAttendees.map((attendee) => {
+                const fullName = `${attendee.user?.firstName || ""} ${attendee.user?.lastName || ""}`.trim();
+                const initial = attendee.user?.firstName?.charAt(0) || attendee.user?.lastName?.charAt(0) || "A";
+                return (
+                  <div
+                    key={attendee.id}
+                    className="bg-card border border-border/80 hover:border-border rounded-xl p-4 shadow-sm flex flex-col justify-between gap-3 group transition-all"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <UserProfileHoverCard user={attendee.user ?? {}}>
+                          <Avatar className="h-11 w-11 rounded-lg border border-border/60 cursor-pointer shrink-0">
+                            <AvatarImage src={attendee.user?.avatar || ""} />
+                            <AvatarFallback className="text-xs font-bold bg-muted text-muted-foreground">
+                              {initial}
+                            </AvatarFallback>
+                          </Avatar>
+                        </UserProfileHoverCard>
+
+                        <div className="flex flex-col items-end gap-1">
                           <Badge
                             variant="outline"
-                            className={
+                            className={`text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0 ${
                               attendee.status === "CONFIRMED"
-                                ? "bg-green-500/10 text-green-600 border-green-500/20"
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                 : attendee.status === "WAITLISTED"
-                                  ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
-                                  : "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
-                            }
+                                  ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                  : "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                            }`}
                           >
                             {attendee.status}
                           </Badge>
                           {attendee.checkedIn && (
                             <Badge
                               variant="outline"
-                              className="bg-blue-500/10 text-blue-600 border-blue-500/20"
+                              className="text-[9px] bg-blue-500/10 text-blue-600 border-blue-500/20 px-1.5 py-0 font-semibold"
                             >
                               Checked In
                             </Badge>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-2"
-                            onClick={() => handlePreviewBadge(attendee)}
-                          >
-                            <Eye className="h-3 w-3" />
-                            Preview
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-2"
-                            onClick={() => printBadge(attendee)}
-                          >
-                            <Printer className="h-3 w-3" />
-                            Print
-                          </Button>
-                          <Select
-                            value={attendee.status}
-                            onValueChange={(val) =>
-                              updateStatus({
-                                variables: {
-                                  attendeeId: attendee.id,
-                                  status: val,
-                                },
-                              })
-                            }
-                          >
-                            <SelectTrigger className="h-8 w-[110px] text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="CONFIRMED">Confirm</SelectItem>
-                              <SelectItem value="WAITLISTED">
-                                Waitlist
-                              </SelectItem>
-                              <SelectItem value="PENDING">Pending</SelectItem>
-                              <SelectItem value="CANCELLED">Cancel</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                      </div>
+
+                      <div className="min-w-0">
+                        <UserProfileHoverCard user={attendee.user ?? {}}>
+                          <h4 className="text-xs font-semibold text-foreground truncate hover:text-primary transition-colors cursor-pointer">
+                            {fullName || "Attendee"}
+                          </h4>
+                        </UserProfileHoverCard>
+                        <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                          <Mail className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{attendee.user?.email || "—"}</span>
+                        </p>
+                        {attendee.ticket?.name && (
+                          <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-muted/60 text-[10px] font-medium text-foreground">
+                            <TicketIcon className="h-3 w-3 text-muted-foreground" />
+                            <span className="truncate">{attendee.ticket.name}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-[11px] gap-1 text-muted-foreground hover:text-foreground"
+                          onClick={() => handlePreviewBadge(attendee)}
+                          title="Preview Badge"
+                        >
+                          <Eye className="h-3 w-3" />
+                          Badge
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-[11px] gap-1 text-muted-foreground hover:text-foreground"
+                          onClick={() => printBadge(attendee)}
+                          title="Print Badge"
+                        >
+                          <Printer className="h-3 w-3" />
+                        </Button>
+                      </div>
+
+                      <Select
+                        value={attendee.status}
+                        onValueChange={(val) =>
+                          updateStatus({
+                            variables: {
+                              attendeeId: attendee.id,
+                              status: val,
+                            },
+                          })
+                        }
+                      >
+                        <SelectTrigger className="h-7 w-[95px] text-[10px] px-2 bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="text-xs">
+                          <SelectItem value="CONFIRMED">Confirm</SelectItem>
+                          <SelectItem value="WAITLISTED">Waitlist</SelectItem>
+                          <SelectItem value="PENDING">Pending</SelectItem>
+                          <SelectItem value="CANCELLED">Cancel</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* ─── LIST VIEW ─────────────────────────────────────────────── */
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/30">
+                    <TableHead className="text-xs">Name</TableHead>
+                    <TableHead className="text-xs">Email</TableHead>
+                    <TableHead className="text-xs">Ticket Type</TableHead>
+                    <TableHead className="text-xs">Status</TableHead>
+                    <TableHead className="text-right text-xs">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAttendees.map((attendee) => {
+                    const fullName = `${attendee.user?.firstName || ""} ${attendee.user?.lastName || ""}`.trim();
+                    const initial = attendee.user?.firstName?.charAt(0) || attendee.user?.lastName?.charAt(0) || "A";
+                    return (
+                      <TableRow key={attendee.id}>
+                        <TableCell className="font-medium py-3">
+                          <div className="flex items-center gap-2.5">
+                            <UserProfileHoverCard user={attendee.user ?? {}}>
+                              <Avatar className="h-7 w-7 rounded-md border border-border/60 cursor-pointer">
+                                <AvatarImage src={attendee.user?.avatar || ""} />
+                                <AvatarFallback className="text-[10px] font-bold bg-muted text-muted-foreground">
+                                  {initial}
+                                </AvatarFallback>
+                              </Avatar>
+                            </UserProfileHoverCard>
+                            <UserProfileHoverCard user={attendee.user ?? {}}>
+                              <span className="text-xs font-semibold text-foreground hover:text-primary transition-colors cursor-pointer truncate">
+                                {fullName || "Attendee"}
+                              </span>
+                            </UserProfileHoverCard>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs py-3">
+                          {attendee.user.email}
+                        </TableCell>
+                        <TableCell className="text-xs py-3">{attendee.ticket?.name || "N/A"}</TableCell>
+                        <TableCell className="py-3">
+                          <div className="flex items-center gap-1.5">
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0 ${
+                                attendee.status === "CONFIRMED"
+                                  ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                  : attendee.status === "WAITLISTED"
+                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                    : "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                              }`}
+                            >
+                              {attendee.status}
+                            </Badge>
+                            {attendee.checkedIn && (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] bg-blue-500/10 text-blue-600 border-blue-500/20 px-1.5 py-0 font-semibold"
+                              >
+                                Checked In
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right py-3">
+                          <div className="flex justify-end items-center gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-xs gap-1"
+                              onClick={() => handlePreviewBadge(attendee)}
+                            >
+                              <Eye className="h-3 w-3" />
+                              Preview
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-xs gap-1"
+                              onClick={() => printBadge(attendee)}
+                            >
+                              <Printer className="h-3 w-3" />
+                              Print
+                            </Button>
+                            <Select
+                              value={attendee.status}
+                              onValueChange={(val) =>
+                                updateStatus({
+                                  variables: {
+                                    attendeeId: attendee.id,
+                                    status: val,
+                                  },
+                                })
+                              }
+                            >
+                              <SelectTrigger className="h-7 w-[100px] text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent className="text-xs">
+                                <SelectItem value="CONFIRMED">Confirm</SelectItem>
+                                <SelectItem value="WAITLISTED">Waitlist</SelectItem>
+                                <SelectItem value="PENDING">Pending</SelectItem>
+                                <SelectItem value="CANCELLED">Cancel</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>

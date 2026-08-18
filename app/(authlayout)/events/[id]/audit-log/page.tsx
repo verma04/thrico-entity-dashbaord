@@ -6,13 +6,7 @@ import {
   Clock,
   Terminal,
   User,
-  Fingerprint,
-  Activity,
-  Globe,
-  RotateCcw,
   Eye,
-  ShieldX,
-  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetAuditLogs, useGetAuditLogById } from "@/graphql/actions/audit";
@@ -25,6 +19,7 @@ import {
 import { AdminTable } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
 import moment from "moment";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 export default function EventAuditLogPage() {
   const params = useParams();
@@ -168,23 +163,44 @@ export default function EventAuditLogPage() {
     {
       key: "admin",
       header: "Performed By",
-      cell: (log: any) => (
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
-            <User className="h-4 w-4 text-zinc-400" />
+      cell: (log: any) => {
+        const hasAdmin = !!log?.admin?.firstName;
+        return (
+          <div className="flex items-center gap-3">
+            {hasAdmin && log?.admin?.id ? (
+              <UserProfileHoverCard user={log.admin}>
+                <div className="flex items-center gap-3 cursor-pointer group">
+                  <div className="h-8 w-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm group-hover:ring-2 group-hover:ring-primary/20 transition-all">
+                    <User className="h-3.5 w-3.5 text-zinc-400" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors leading-none">
+                      {log.admin.firstName} {log.admin?.lastName || ""}
+                    </span>
+                    <span className="text-[10px] font-medium text-zinc-400 mt-1 uppercase tracking-tighter">
+                      {log?.ipAddress || "Internal"}
+                    </span>
+                  </div>
+                </div>
+              </UserProfileHoverCard>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
+                  <User className="h-3.5 w-3.5 text-zinc-400" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-foreground leading-none">
+                    {hasAdmin ? `${log.admin.firstName} ${log.admin?.lastName || ""}` : "System"}
+                  </span>
+                  <span className="text-[10px] font-medium text-zinc-400 mt-1 uppercase tracking-tighter">
+                    {log?.ipAddress || "Internal"}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground leading-none">
-              {log?.admin?.firstName
-                ? `${log.admin.firstName} ${log.admin?.lastName || ""}`
-                : "System"}
-            </span>
-            <span className="text-[10px] font-medium text-zinc-400 mt-1 uppercase tracking-tighter">
-              {log?.ipAddress || "Internal"}
-            </span>
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "target",

@@ -36,7 +36,7 @@ function FeedSkeleton() {
 export default function JobFeed() {
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, loading, fetchMore } = useJobFeed({
+  const { data, loading, fetchMore, refetch } = useJobFeed({
     variables: {
       input: {
         offset: 0,
@@ -90,9 +90,15 @@ export default function JobFeed() {
           <h3 className="text-base font-semibold text-foreground tracking-tight mb-1">
             No Career Openings Yet
           </h3>
-          <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+          <p className="text-xs text-muted-foreground max-w-sm mb-4 leading-relaxed">
             Career opportunities, internships, and job postings will appear here.
           </p>
+          <button
+            onClick={() => refetch()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Refresh Career Feed
+          </button>
         </div>
       ) : (
         <InfiniteScroll

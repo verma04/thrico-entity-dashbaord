@@ -1,4 +1,9 @@
-import { verification } from "../../screen/user/ts-types";
+export interface Verification {
+  id?: string;
+  isVerified?: boolean;
+  isVerifiedAt?: string;
+  verificationReason?: string;
+}
 
 export type FormValues = {
   title: string;
@@ -47,7 +52,6 @@ export interface communityEntity {
   numberOfUser: number;
   numberOfViews: number;
   status: CommunityStatus; // update if there are more statuses
-  // update if there are more statuses
   tag: string[]; // assuming tags are strings
   theme: string | null;
   title: string;
@@ -56,7 +60,7 @@ export interface communityEntity {
   communityType: string;
   joiningTerms: string;
   rules: string;
-  verification: verification;
+  verification: Verification;
   tagline: string;
   creator?: {
     id: string;

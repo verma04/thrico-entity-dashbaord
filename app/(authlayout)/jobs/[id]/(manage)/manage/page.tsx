@@ -25,7 +25,10 @@ import {
   CheckCircle2,
   GraduationCap,
   Loader2,
+  User,
 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { useModuleStore } from "@/store/useModuleStore";
 
 export default function JobManagePage() {
@@ -217,6 +220,33 @@ export default function JobManagePage() {
                     </Badge>
                   ))}
                 </div>
+              </div>
+            </>
+          )}
+
+          {job.postedBy && (
+            <>
+              <Separator className="bg-border/40" />
+              <div>
+                <p className="text-sm font-semibold mb-3">Posted By</p>
+                <UserProfileHoverCard user={job.postedBy}>
+                  <div className="inline-flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/50 hover:border-primary/40 transition-colors cursor-pointer group">
+                    <Avatar className="h-10 w-10 rounded-lg border border-border/60">
+                      <AvatarImage src={job.postedBy.avatar || ""} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                        {job.postedBy.firstName?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col pr-4">
+                      <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {job.postedBy.firstName} {job.postedBy.lastName || ""}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">
+                        Listing Organizer
+                      </span>
+                    </div>
+                  </div>
+                </UserProfileHoverCard>
               </div>
             </>
           )}

@@ -12,6 +12,7 @@ import {
   ShieldX,
   ShieldCheck,
   Search,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,13 @@ import {
 } from "@/components/shared/admin-table/admin-table";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useUrlDateRange } from "@/hooks/use-url-date-range";
+import {
+  ExportCsvModal,
+  ExportCsvScope,
+  ExportCsvFormat,
+} from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import moment from "moment";
 import { EcosystemActionBar } from "../layout/ecosystem";
@@ -53,6 +61,7 @@ export function ModuleAuditLog({
 }: ModuleAuditLogProps) {
   const [page, setPage] = useState(1);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { dateRange, handleDateChange } = useUrlDateRange(7);
 
@@ -246,6 +255,14 @@ export function ModuleAuditLog({
                 <RotateCcw
                   className={cn("h-4 w-4", logLoading && "animate-spin")}
                 />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowExportModal(true)}
+                className="h-9 gap-1.5 shrink-0 bg-white border-zinc-200 shadow-sm text-xs font-medium text-foreground px-3 rounded-xl hover:bg-zinc-50"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Export
               </Button>
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-card border border-border rounded-lg text-[10px] uppercase font-bold tracking-wider text-muted-foreground whitespace-nowrap shadow-sm h-9">
                 <span
@@ -450,6 +467,82 @@ export function ModuleAuditLog({
           </div>
         </DialogContent>
       </Dialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName={`${title.toLowerCase()} records`}
+        description={`Export ${title.toLowerCase()} records as CSV. Includes timestamp, action, administrator, IP address, target ID, and state details.`}
+        totalCount={meta.totalItems}
+        matchingCount={debouncedSearch ? meta.totalItems : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = logs;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", {
+              description: "No audit log records match the current filters.",
+            });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            {
+              header: "Date & Time",
+              getValue: (r: any) =>
+                moment(r.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+            },
+            {
+              header: "Action",
+              getValue: (r: any) => r.action || "",
+            },
+            {
+              header: "Module",
+              getValue: (r: any) => r.module || moduleKey,
+            },
+            {
+              header: "Performed By",
+              getValue: (r: any) =>
+                r?.admin?.firstName
+                  ? `${r.admin.firstName} ${r.admin?.lastName || ""}`.trim()
+                  : r?.adminId || "System",
+            },
+            {
+              header: "IP Address",
+              getValue: (r: any) => r.ipAddress || "",
+            },
+            {
+              header: "Target ID",
+              getValue: (r: any) => r.resourceId || r.targetUserId || "",
+            },
+            {
+              header: "Reason",
+              getValue: (r: any) => r.reason || "",
+            },
+            {
+              header: "Previous State",
+              getValue: (r: any) =>
+                r.previousState
+                  ? typeof r.previousState === "string"
+                    ? r.previousState
+                    : JSON.stringify(r.previousState)
+                  : "",
+            },
+            {
+              header: "New State",
+              getValue: (r: any) =>
+                r.newState
+                  ? typeof r.newState === "string"
+                    ? r.newState
+                    : JSON.stringify(r.newState)
+                  : "",
+            },
+          ]);
+
+          const filename = `${moduleKey.toLowerCase()}-audit-logs-${moment().format("YYYY-MM-DD")}`;
+          downloadCsv(csv, filename, format);
+          toast.success("Export ready", {
+            description: `${rows.length} audit log record${rows.length !== 1 ? "s" : ""} exported successfully.`,
+          });
+        }}
+      />
 
       <style jsx global>{`
         .scrollbar-hide::-webkit-scrollbar {

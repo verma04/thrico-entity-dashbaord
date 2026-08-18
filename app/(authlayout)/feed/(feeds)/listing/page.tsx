@@ -36,7 +36,7 @@ function FeedSkeleton() {
 export default function ListingFeed() {
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, loading, fetchMore } = useListingFeed({
+  const { data, loading, fetchMore, refetch } = useListingFeed({
     variables: {
       input: {
         offset: 0,
@@ -90,9 +90,15 @@ export default function ListingFeed() {
           <h3 className="text-base font-semibold text-foreground tracking-tight mb-1">
             No Marketplace Listings Yet
           </h3>
-          <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+          <p className="text-xs text-muted-foreground max-w-sm mb-4 leading-relaxed">
             Items, services, and offers listed by community members will appear here.
           </p>
+          <button
+            onClick={() => refetch()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Refresh Listings Feed
+          </button>
         </div>
       ) : (
         <InfiniteScroll

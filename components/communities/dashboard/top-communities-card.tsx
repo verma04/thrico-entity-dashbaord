@@ -97,8 +97,8 @@ export function TopCommunitiesCard({
 
                   return (
                     <div
-                      key={community.name}
-                      className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors group"
+                      key={community.id || `${community.name}-${idx}`}
+                      className="group/item flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/40 transition-colors"
                     >
                       <Link
                         href={communityHref}

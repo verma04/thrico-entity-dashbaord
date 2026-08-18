@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { EcosystemWrapper } from "@/components/layout/ecosystem";
+import {
+  EcosystemWrapper,
+  EcosystemHeader,
+  EcosystemContainer,
+} from "@/components/layout/ecosystem";
 
 const FIELDS: SettingsField[] = [
   {

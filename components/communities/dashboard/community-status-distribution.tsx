@@ -94,7 +94,7 @@ export function CommunityStatusDistribution({
         <div className="w-full space-y-2">
           {statusDistribution.map((item: StatusDistributionPoint, i: number) => (
             <div
-              key={item.name}
+              key={`${item.name}-${i}`}
               className="flex items-center justify-between p-3 rounded-[20px] bg-muted/30 border border-transparent"
             >
               <div className="flex items-center gap-2.5">

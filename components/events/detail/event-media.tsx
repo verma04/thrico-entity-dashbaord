@@ -21,7 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
-import { Upload, Plus, Video, Trash2, Edit } from "lucide-react";
+import { Upload, Plus, Video, Trash2 } from "lucide-react";
 import {
   useEventMedia,
   useAddEventMedia,

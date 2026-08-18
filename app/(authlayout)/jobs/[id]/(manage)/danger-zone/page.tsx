@@ -3,7 +3,7 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetJobById, useChangeJobStatus } from "@/graphql/actions/jobs";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -33,7 +33,6 @@ function JobDangerZonePage() {
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
-  const { toast } = useToast();
 
   const { data, loading } = useGetJobById({
     variables: { id },
@@ -42,18 +41,11 @@ function JobDangerZonePage() {
 
   const [changeStatus, { loading: disabling }] = useChangeJobStatus({
     onCompleted: () => {
-      toast({
-        title: `${singularName} Disabled`,
-        description: `The ${singularName.toLowerCase()} has been permanently disabled.`,
-      });
+      toast.success(`The ${singularName.toLowerCase()} has been permanently disabled.`);
       router.push("/jobs/all");
     },
     onError: (err: any) => {
-      toast({
-        title: "Error",
-        description: err.message || `Failed to disable ${singularName.toLowerCase()}`,
-        variant: "destructive",
-      });
+      toast.error(err.message || `Failed to disable ${singularName.toLowerCase()}`);
     },
   });
 

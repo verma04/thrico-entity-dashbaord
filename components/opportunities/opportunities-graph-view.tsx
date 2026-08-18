@@ -499,7 +499,7 @@ export function OpportunitiesGraphView() {
     const oppSkills = new Map<string, OpportunityGraphSkill[]>();
     const oppInterestedUsers = new Map<string, OpportunityGraphInterestedUser[]>();
 
-    nodesData.forEach((node) => {
+    nodesData.forEach((node: any) => {
       const opp = node.opportunity;
 
       if (node.creator) {
@@ -511,7 +511,7 @@ export function OpportunitiesGraphView() {
 
       if (node.skills) {
         oppSkills.set(opp.id, node.skills);
-        node.skills.forEach((skill) => {
+        node.skills.forEach((skill: any) => {
           const sid = skill.id;
           if (!skillOpps.has(sid)) skillOpps.set(sid, []);
           skillOpps.get(sid)!.push(opp);
@@ -522,7 +522,7 @@ export function OpportunitiesGraphView() {
 
       if (node.interestedUsers) {
         oppInterestedUsers.set(opp.id, node.interestedUsers);
-        node.interestedUsers.forEach((user) => {
+        node.interestedUsers.forEach((user: any) => {
           const uid = user.id;
           if (!interestedUserOpps.has(uid)) interestedUserOpps.set(uid, []);
           interestedUserOpps.get(uid)!.push(opp);

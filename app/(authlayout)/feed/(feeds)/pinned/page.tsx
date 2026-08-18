@@ -36,7 +36,7 @@ function FeedSkeleton() {
 export default function PinnedFeed() {
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, loading, fetchMore } = usePinnedFeed({
+  const { data, loading, fetchMore, refetch } = usePinnedFeed({
     variables: {
       input: {
         offset: 0,
@@ -90,9 +90,15 @@ export default function PinnedFeed() {
           <h3 className="text-base font-semibold text-foreground tracking-tight mb-1">
             No Pinned Posts
           </h3>
-          <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+          <p className="text-xs text-muted-foreground max-w-sm mb-4 leading-relaxed">
             Important announcements and highlighted posts pinned by admins will appear here.
           </p>
+          <button
+            onClick={() => refetch()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Refresh Pinned Feed
+          </button>
         </div>
       ) : (
         <InfiniteScroll

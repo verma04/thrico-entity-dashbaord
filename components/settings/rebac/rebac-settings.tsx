@@ -29,7 +29,7 @@ export default function RebacSettings() {
       />
 
       <EcosystemActionBar shadow="none">
-         <EcosystemActionBar.Group grow>
+         <EcosystemActionBar.Group>
             <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-xl border border-border/50 w-fit">
               {TABS.map((tab) => {
                 const Icon = tab.icon;

@@ -36,7 +36,7 @@ function FeedSkeleton() {
 export default function AdminFeed() {
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, loading, fetchMore } = useAdminFeed({
+  const { data, loading, fetchMore, refetch } = useAdminFeed({
     variables: {
       input: {
         offset: 0,
@@ -90,9 +90,15 @@ export default function AdminFeed() {
           <h3 className="text-base font-semibold text-foreground tracking-tight mb-1">
             No Admin Posts Yet
           </h3>
-          <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+          <p className="text-xs text-muted-foreground max-w-sm mb-4 leading-relaxed">
             Official announcements and updates published by community managers will appear here.
           </p>
+          <button
+            onClick={() => refetch()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Refresh Admin Feed
+          </button>
         </div>
       ) : (
         <InfiniteScroll

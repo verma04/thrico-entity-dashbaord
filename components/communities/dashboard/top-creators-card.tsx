@@ -130,7 +130,7 @@ export function TopCreatorsCard({
 
               return (
                 <div
-                  key={creator.name}
+                  key={creator.id || `${creator.name}-${idx}`}
                   className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:border-border hover:shadow-sm transition-all group"
                 >
                   {creatorId ? (

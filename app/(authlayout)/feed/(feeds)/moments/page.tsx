@@ -36,7 +36,7 @@ function FeedSkeleton() {
 export default function MomentsFeed() {
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, loading, fetchMore } = useMomentsFeed({
+  const { data, loading, fetchMore, refetch } = useMomentsFeed({
     variables: {
       input: {
         offset: 0,
@@ -90,9 +90,15 @@ export default function MomentsFeed() {
           <h3 className="text-base font-semibold text-foreground tracking-tight mb-1">
             No Moments Shared Yet
           </h3>
-          <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+          <p className="text-xs text-muted-foreground max-w-sm mb-4 leading-relaxed">
             Short-form videos and community stories will appear here.
           </p>
+          <button
+            onClick={() => refetch()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Refresh Moments Feed
+          </button>
         </div>
       ) : (
         <InfiniteScroll

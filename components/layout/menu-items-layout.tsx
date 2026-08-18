@@ -161,7 +161,9 @@ function MenuTabs({
         {sections[sectionName].map((item, idx) => {
           if (!item) return null;
           const currentIndex = globalIndex++;
-          const dragId = String(item.key || `tab-${sectionName}-${idx}-${currentIndex}`);
+          const dragId = String(
+            item.key || `tab-${sectionName}-${idx}-${currentIndex}`,
+          );
           const href =
             item.key === "dashboard" || item.key === ""
               ? `/${activeBase}`
@@ -172,7 +174,8 @@ function MenuTabs({
               key={dragId}
               item={item}
               isActive={
-                activeTab === item.key || (!!item.key && fullKey.startsWith(item.key + "/"))
+                activeTab === item.key ||
+                (!!item.key && fullKey.startsWith(item.key + "/"))
               }
               href={href}
               fullWidth={fullWidth}
@@ -181,11 +184,7 @@ function MenuTabs({
 
           if (enableReorder) {
             return (
-              <Draggable
-                key={dragId}
-                draggableId={dragId}
-                index={currentIndex}
-              >
+              <Draggable key={dragId} draggableId={dragId} index={currentIndex}>
                 {(provided) => (
                   <div
                     ref={provided.innerRef}

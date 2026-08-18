@@ -247,7 +247,7 @@ export default function EmailInvitesTab() {
           shadow="none"
           className="bg-transparent border-none py-2"
         >
-          <EcosystemActionBar.Group grow>
+          <EcosystemActionBar.Group>
             <EcosystemActionBar.Item grow className="max-w-sm">
               <EcosystemActionBar.Search
                 value={searchQuery}

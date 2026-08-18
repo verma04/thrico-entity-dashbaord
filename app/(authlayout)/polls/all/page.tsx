@@ -2,16 +2,13 @@
 
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import PollsManage from "@/components/polls/manage/polls-manage";
 
-import React from "react";
-import Poll from "@/components/polls/polls";
-import { By } from "@/components/polls/ts-types";
-
-function PollsPage() {
-  return <Poll by={By.ENTITY} />;
+function PollsAllPage() {
+  return <PollsManage status="ALL" />;
 }
 
 export default withSubscriptionCheck(
-  withModulePermission(PollsPage, "POLLS", "canRead"),
-  "polls"
+  withModulePermission(PollsAllPage, "POLLS", "canRead"),
+  "polls",
 );

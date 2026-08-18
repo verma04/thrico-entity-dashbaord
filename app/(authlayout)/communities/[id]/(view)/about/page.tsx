@@ -1,12 +1,12 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import React from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client";
 import { GET_COMMUNITY_BY_ID } from "@/graphql/quries/group/approval";
 import {
   Info,
   ShieldAlert,
-  Globe,
   CalendarDays,
   Hash,
   UserCircle,
@@ -15,20 +15,24 @@ import {
   Type,
   MapPin,
   CheckCircle2,
+  Users,
+  Settings,
+  Shield,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import moment from "moment";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function CommunityAbout() {
+  const singularName = useModuleStore((state) => state.communitySingularName);
   const { id } = useParams() as { id: string };
+  const router = useRouter();
 
   const { data, loading, error } = useQuery(GET_COMMUNITY_BY_ID, {
     variables: { input: { communityId: id } },
@@ -39,9 +43,10 @@ export default function CommunityAbout() {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 min-h-screen">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <Skeleton className="h-64 w-full rounded-2xl" />
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="lg:col-span-2 h-96 rounded-xl" />
+          <Skeleton className="h-96 rounded-xl" />
         </div>
       </div>
     );
@@ -49,8 +54,20 @@ export default function CommunityAbout() {
 
   if (error || !community) {
     return (
-      <div className="p-4 sm:p-6 min-h-screen flex items-center justify-center text-muted-foreground">
-        Failed to load community details.
+      <div className="bg-card border border-border/80 rounded-xl p-12 text-center max-w-lg mx-auto">
+        <Info className="h-10 w-10 mx-auto text-muted-foreground mb-3 opacity-60" />
+        <h3 className="text-base font-semibold">{singularName} Not Found</h3>
+        <p className="text-xs text-muted-foreground mt-1">
+          Failed to load community details. Please try again or return to the overview.
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-4"
+          onClick={() => router.push("/communities/all")}
+        >
+          Back to All Communities
+        </Button>
       </div>
     );
   }
@@ -58,140 +75,236 @@ export default function CommunityAbout() {
   const rules = community.rules || [];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <Card className="border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 overflow-hidden bg-gradient-to-br from-card to-muted/10 rounded-2xl">
-        <CardHeader className="pb-8 pt-10 px-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-primary/10 rounded-xl">
-              <Info className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-3xl font-bold tracking-tight">
-              About This Community
-            </CardTitle>
+    <div className="space-y-6">
+      {/* Top Meta Strip */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/60 backdrop-blur-sm border border-border/70 rounded-xl p-4 shadow-sm">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Overview & Mission
+            </span>
+            <Badge
+              variant={community.privacy === "PUBLIC" ? "default" : "secondary"}
+              className="px-2 py-0 text-[10px] font-semibold uppercase tracking-wider rounded-md"
+            >
+              {community.privacy || "Public"}
+            </Badge>
+            <Badge variant="outline" className="px-2 py-0 text-[10px] font-medium text-muted-foreground">
+              {community.communityType || "Virtual"}
+            </Badge>
           </div>
-          <CardDescription className="text-base text-muted-foreground leading-relaxed max-w-2xl">
-            Get to know the mission, rules, and core details that make this
-            community a unique space.
-          </CardDescription>
-        </CardHeader>
+          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
+            {community.title || `${singularName} Details`}
+          </h2>
+          {community.tagline && (
+            <p className="text-xs text-muted-foreground">{community.tagline}</p>
+          )}
+        </div>
 
-        <Separator className="bg-border/40" />
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/communities/${id}/settings`)}
+            className="h-8 text-xs font-medium gap-1.5"
+          >
+            <Settings className="h-3.5 w-3.5" />
+            Edit Info
+          </Button>
+        </div>
+      </div>
 
-        <CardContent className="p-8 space-y-12">
-          {/* Description Section */}
-          {community.description && (
-            <section className="space-y-4">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-xl">
-                <Type className="h-5 w-5 text-muted-foreground" />
-                <h2>Core Mission</h2>
-              </div>
-              <p className="text-lg text-muted-foreground leading-relaxed pl-7 border-l-2 border-primary/20">
+      {/* 2-Column Shopify Layout (2/3 Main Content + 1/3 Sidebar Specs) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* ─── Left Column (2/3) ────────────────────────────────────────── */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Mission & Description Card */}
+          <div className="bg-card border border-border/80 rounded-xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+              <Type className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Core Mission & Purpose</h3>
+            </div>
+
+            {community.description ? (
+              <p className="text-xs text-foreground/90 leading-relaxed whitespace-pre-line pl-3 border-l-2 border-primary/30">
                 {community.description}
               </p>
-            </section>
-          )}
+            ) : (
+              <p className="text-xs text-muted-foreground italic">
+                No description provided for this community yet.
+              </p>
+            )}
+          </div>
 
-          {/* Rules Section */}
-          {rules.length > 0 && (
-            <section className="space-y-6 bg-muted/20 p-6 rounded-2xl border border-border/40">
-              <div className="flex items-center gap-2 text-foreground font-semibold text-xl">
-                <ShieldAlert className="h-5 w-5 text-orange-500" />
-                <h2>Community Guidelines</h2>
+          {/* Community Guidelines & Rules Card */}
+          <div className="bg-card border border-border/80 rounded-xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                <h3 className="text-sm font-semibold text-foreground">Community Guidelines</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-1">
+              <Badge variant="secondary" className="text-[10px] font-semibold">
+                {rules.length} Rules Active
+              </Badge>
+            </div>
+
+            {rules.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {rules.map((rule: any, index: number) => (
                   <div
                     key={index}
-                    className="flex items-start gap-3 bg-card p-4 rounded-xl border border-border/40 shadow-sm transition-all hover:border-primary/30"
+                    className="flex items-start gap-2.5 p-3 rounded-lg border border-border/70 hover:border-border bg-background/50 transition-all"
                   >
-                    <div className="mt-0.5 p-1 bg-primary/10 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                    <div className="mt-0.5 p-1 bg-emerald-500/10 rounded-full shrink-0">
+                      <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-semibold text-foreground/90 leading-snug">
-                        {rule.title}
-                      </span>
-                      <span className="text-xs font-medium text-foreground/70 leading-snug">
-                        {rule.description}
-                      </span>
+                    <div className="space-y-0.5 min-w-0">
+                      <h4 className="text-xs font-semibold text-foreground truncate">
+                        {rule.title || `Rule #${index + 1}`}
+                      </h4>
+                      {rule.description && (
+                        <p className="text-[11px] text-muted-foreground line-clamp-2 leading-snug">
+                          {rule.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="py-6 text-center text-xs text-muted-foreground">
+                No explicit guidelines published yet. Standard community conduct applies.
+              </div>
+            )}
+          </div>
+        </div>
 
-          {/* Details Section */}
-          <section className="space-y-6">
-            <div className="flex items-center gap-2 text-foreground font-semibold text-xl">
-              <Hash className="h-5 w-5 text-purple-500" />
-              <h2>Quick Details</h2>
+        {/* ─── Right Column (1/3 Specs & Author) ────────────────────────── */}
+        <div className="space-y-6">
+          {/* Quick Specifications Card */}
+          <div className="bg-card border border-border/80 rounded-xl p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              <h4 className="text-sm font-semibold text-foreground">Community Specs</h4>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pl-1">
-              {[
-                {
-                  label: "Privacy",
-                  value:
-                    community.privacy === "PUBLIC" ? "Public" : "Private",
-                  icon: community.privacy === "PUBLIC" ? Unlock : Lock,
-                  color: "text-green-600",
-                  bg: "bg-green-500/10",
-                },
-                {
-                  label: "Join Condition",
-                  value: community.joiningTerms === "OPEN" ? "Anyone can join" : "Invite Only",
-                  icon: UserCircle,
-                  color: "text-blue-600",
-                  bg: "bg-blue-500/10",
-                },
-                {
-                  label: "Categories",
-                  value:
-                    community.categories && community.categories.length > 0
-                      ? community.categories.join(", ")
-                      : "General",
-                  icon: Hash,
-                  color: "text-purple-600",
-                  bg: "bg-purple-500/10",
-                },
-                {
-                  label: "Location",
-                  value: community.location || "Global",
-                  icon: community.location ? MapPin : Globe,
-                  color: "text-sky-600",
-                  bg: "bg-sky-500/10",
-                },
-                {
-                  label: "Created",
-                  value: moment(Number(community.createdAt)).format("MMM DD, YYYY"),
-                  icon: CalendarDays,
-                  color: "text-slate-600",
-                  bg: "bg-slate-500/10",
-                },
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col gap-3 p-5 rounded-2xl border border-border/40 hover:bg-muted/30 transition-colors group"
-                >
-                  <div
-                    className={`p-2.5 w-fit rounded-xl ${item.bg} ${item.color} ring-1 ring-black/[0.04] group-hover:scale-110 transition-transform`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      {item.label}
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  {community.privacy === "PUBLIC" ? (
+                    <Unlock className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : (
+                    <Lock className="h-3.5 w-3.5 text-amber-500" />
+                  )}
+                  Privacy
+                </span>
+                <span className="font-semibold text-foreground">
+                  {community.privacy === "PUBLIC" ? "Public" : "Private"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <UserCircle className="h-3.5 w-3.5 text-blue-500" />
+                  Joining Terms
+                </span>
+                <span className="font-semibold text-foreground">
+                  {community.joiningTerms === "OPEN" || community.joiningTerms === "ANYONE_CAN_JOIN"
+                    ? "Open to All"
+                    : "Invite / Request Only"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <Hash className="h-3.5 w-3.5 text-purple-500" />
+                  Categories
+                </span>
+                <span className="font-semibold text-foreground max-w-[150px] truncate text-right">
+                  {community.categories && community.categories.length > 0
+                    ? community.categories.join(", ")
+                    : "General"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-sky-500" />
+                  Location
+                </span>
+                <span className="font-semibold text-foreground truncate">
+                  {community.location || "Global / Virtual"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between py-1">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
+                  Founded
+                </span>
+                <span className="font-semibold text-foreground">
+                  {moment(Number(community.createdAt) || community.createdAt).format("MMM D, YYYY")}
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Actions Shortcuts */}
+            <div className="pt-2 flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs justify-between h-8 text-muted-foreground hover:text-foreground"
+                onClick={() => router.push(`/communities/${id}/members`)}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Users className="h-3.5 w-3.5" />
+                  View Members Roster
+                </span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs justify-between h-8 text-muted-foreground hover:text-foreground"
+                onClick={() => router.push(`/communities/${id}/rules`)}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Shield className="h-3.5 w-3.5" />
+                  Manage Rules
+                </span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Creator / Host Card with UserProfileHoverCard */}
+          {community.creator && (
+            <div className="bg-card border border-border/80 rounded-xl p-5 shadow-sm space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Community Host
+              </h4>
+              <UserProfileHoverCard user={community.creator}>
+                <div className="flex items-center gap-3 p-2 rounded-lg border border-border/60 hover:bg-muted/30 transition-all cursor-pointer">
+                  <Avatar className="h-9 w-9 rounded-lg border border-border/60">
+                    <AvatarImage src={community.creator.avatar} />
+                    <AvatarFallback className="text-xs font-bold bg-muted text-muted-foreground">
+                      {community.creator.firstName?.charAt(0) || "H"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-semibold text-foreground truncate">
+                      {community.creator.firstName} {community.creator.lastName}
                     </span>
-                    <span className="font-semibold text-sm text-foreground mt-0.5">
-                      {item.value}
+                    <span className="text-[10px] text-muted-foreground truncate">
+                      Host & Admin
                     </span>
                   </div>
                 </div>
-              ))}
+              </UserProfileHoverCard>
             </div>
-          </section>
-        </CardContent>
-      </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

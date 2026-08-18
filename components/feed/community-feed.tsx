@@ -43,7 +43,7 @@ export default function CommunityFeed({
 }) {
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, loading, fetchMore, refetch } = useCommunityFeeds({
+  const { data, loading, fetchMore } = useCommunityFeeds({
     variables: {
       input: {
         offset: 0,

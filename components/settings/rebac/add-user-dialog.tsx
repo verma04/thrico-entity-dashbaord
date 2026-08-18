@@ -101,6 +101,7 @@ export default function AddUserDialog({
       lastName: user?.lastName || "",
       email: user?.email || "",
       role: user?.role?.id || "",
+      avatar: user?.avatar || "",
     },
     enableReinitialize: true,
     validationSchema,

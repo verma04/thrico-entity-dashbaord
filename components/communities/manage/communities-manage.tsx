@@ -1,53 +1,67 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useDebounce } from "use-debounce";
-import { motion, AnimatePresence } from "framer-motion";
-import { LayoutGrid, List as ListIcon, Users, RefreshCw, Upload } from "lucide-react";
-import { toast } from "sonner";
-
-import { getCommunities } from "@/graphql/actions/group";
-import TableLoading from "@/components/layout/table-loading";
+import {
+  Users,
+  SlidersHorizontal,
+  LayoutGrid,
+  List as ListIcon,
+  Upload,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
-import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { cn } from "@/lib/utils";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { Pagination } from "@/components/shared/admin-table/admin-table";
 import { useModuleStore } from "@/store/useModuleStore";
 
-import { CommunitiesList } from "./communities-list";
-import { CommunityCard } from "./community-card";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Status options
-// ─────────────────────────────────────────────────────────────────────────────
-
-const STATUS_OPTIONS = [
-  { value: "ALL", label: "All", dot: "" },
-  { value: "APPROVED", label: "Approved", dot: "bg-emerald-500" },
-  { value: "PENDING", label: "Pending", dot: "bg-amber-500" },
-  { value: "DISABLED", label: "Disabled", dot: "bg-orange-500" },
-  { value: "REJECTED", label: "Rejected", dot: "bg-red-500" },
-  { value: "PAUSED", label: "Paused", dot: "bg-slate-400" },
-];
+import { getCommunities } from "@/graphql/actions/group";
+import Create from "@/components/communities/add/Create";
+import {
+  STATUS_TABS,
+  COMMUNITY_PRIVACY_OPTIONS,
+  SORT_OPTIONS,
+  CommunityStatusValue,
+  SectionHeader,
+  ContentArea,
+} from "./communities-manage-ui";
+import { getCommunityTableColumns } from "./communities-list";
+import { ExportCommunitiesModal } from "./export-communities-modal";
+import type { communityEntity } from "../ts-types";
 
 export interface CommunitiesManageProps {
   status?: string;
 }
 
-export function CommunitiesManage({
-  status: initialStatus,
-}: CommunitiesManageProps) {
+export function CommunitiesManage({ status: initialStatus }: CommunitiesManageProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
+  // ── Update URL parameters helper ──────────────────────────────────────────
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -56,7 +70,9 @@ export function CommunitiesManage({
           value === null ||
           value === "" ||
           value === "ALL" ||
-          value === "0"
+          value === "0" ||
+          value === "grid" ||
+          value === "newest"
         ) {
           params.delete(key);
         } else {
@@ -68,16 +84,23 @@ export function CommunitiesManage({
     [searchParams, pathname, router],
   );
 
-  const status = searchParams.get("status") || initialStatus || "ALL";
-  const setStatus = (v: string) => updateParams({ status: v, page: null });
+  // ── Derive state from URL search params ───────────────────────────────────
+  const page = Number(searchParams.get("page") || "1");
+  const limit = 24; // clean multiple for 1, 2, 3, 4, and 6 columns
+  const offset = (page - 1) * limit;
 
-  const view = (searchParams.get("view") as "grid" | "table") || "table";
-  const setView = (v: "grid" | "table") =>
-    updateParams({ view: v === "table" ? null : v });
+  const status =
+    searchParams.get("status") ||
+    initialStatus ||
+    "ALL";
 
-  const [search, setSearch] = useState(searchParams.get("q") || "");
-  const [debouncedSearch] = useDebounce(search, 500);
-  const [showExportModal, setShowExportModal] = useState(false);
+  const selectedPrivacy = searchParams.get("privacy") || "ALL";
+  const sortBy = searchParams.get("sort") || "newest";
+  const view = (searchParams.get("view") as "grid" | "list") || "grid";
+
+  // Search input state with debounce
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(searchTerm, 500);
 
   // Sync debounced search to URL
   useEffect(() => {
@@ -87,9 +110,48 @@ export function CommunitiesManage({
     }
   }, [debouncedSearch, searchParams, updateParams]);
 
-  const moduleName = useModuleStore((state) => state.communityModuleName);
-  const singularName = useModuleStore((state) => state.communitySingularName);
+  // Export Modal state
+  const [showExportModal, setShowExportModal] = useState(false);
 
+  // Column visibility for List view
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+    serial: true,
+    community: true,
+    privacy: true,
+    members: true,
+    posts: true,
+    views: true,
+    status: true,
+    verification: true,
+    created: true,
+    creator: true,
+    actions: true,
+  });
+
+  const toggleColumn = (key: string) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  // ── Setters ───────────────────────────────────────────────────────────────
+  const setStatus = (v: string) =>
+    updateParams({ status: v === "ALL" ? null : v, page: null });
+
+  const setSelectedPrivacy = (v: string) =>
+    updateParams({ privacy: v === "ALL" ? null : v, page: null });
+
+  const setSortBy = (v: string) =>
+    updateParams({ sort: v === "newest" ? null : v, page: null });
+
+  const setView = (v: "grid" | "list") =>
+    updateParams({ view: v === "grid" ? null : v });
+
+  const setPage = (p: number) =>
+    updateParams({ page: p <= 1 ? null : String(p) });
+
+  // ── Fetch Communities ─────────────────────────────────────────────────────
   const { data, loading, refetch } = getCommunities({
     variables: {
       input: {
@@ -98,208 +160,320 @@ export function CommunitiesManage({
     },
   });
 
-  const communities =
+  const allCommunities: communityEntity[] =
     data?.getCommunities?.data ||
     (Array.isArray(data?.getCommunities) ? data.getCommunities : []);
-  const totalCount = data?.getCommunities?.total ?? communities.length;
+  const totalCount = data?.getCommunities?.total ?? allCommunities.length;
 
+  // ── Filter and Sort Communities ───────────────────────────────────────────
   const filteredCommunities = useMemo(() => {
-    const q = debouncedSearch.toLowerCase().trim();
-    if (!q) return communities;
-    return communities.filter(
-      (c: any) =>
-        c.title?.toLowerCase().includes(q) ||
-        c.tagline?.toLowerCase().includes(q) ||
-        c.description?.toLowerCase().includes(q),
-    );
-  }, [communities, debouncedSearch]);
+    let list = [...allCommunities];
+
+    // Status filter
+    if (status !== "ALL") {
+      list = list.filter((c) => c.status === status);
+    }
+
+    // Privacy filter
+    if (selectedPrivacy !== "ALL") {
+      list = list.filter((c) => {
+        const isPriv =
+          c.privacy?.toUpperCase() === "PRIVATE" || (c as any).isPrivate;
+        if (selectedPrivacy === "PUBLIC") return !isPriv;
+        if (selectedPrivacy === "PRIVATE") return isPriv;
+        return true;
+      });
+    }
+
+    // Search filter
+    if (debouncedSearch) {
+      const term = debouncedSearch.toLowerCase().trim();
+      list = list.filter(
+        (c) =>
+          c.title?.toLowerCase().includes(term) ||
+          c.tagline?.toLowerCase().includes(term) ||
+          c.description?.toLowerCase().includes(term),
+      );
+    }
+
+    // Sorting
+    return list.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return (
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.createdAt || 0).getTime() -
+            new Date(b.createdAt || 0).getTime()
+          );
+        case "title":
+          return (a.title || "").localeCompare(b.title || "");
+        case "members":
+          return (b.numberOfUser || 0) - (a.numberOfUser || 0);
+        case "posts":
+          return (b.numberOfPost || 0) - (a.numberOfPost || 0);
+        case "views":
+          return (b.numberOfViews || 0) - (a.numberOfViews || 0);
+        default:
+          return 0;
+      }
+    });
+  }, [allCommunities, status, selectedPrivacy, debouncedSearch, sortBy]);
+
+  // Paginated slice for current page
+  const paginatedCommunities = useMemo(() => {
+    return filteredCommunities.slice(offset, offset + limit);
+  }, [filteredCommunities, offset, limit]);
+
+  const pageTitle =
+    status === "ALL"
+      ? moduleName
+      : `${status.charAt(0) + status.slice(1).toLowerCase()} ${moduleName}`;
+
+  const availableColumns = useMemo(
+    () => getCommunityTableColumns(singularName),
+    [singularName],
+  );
 
   return (
-    <EcosystemWrapper>
+    <EcosystemWrapper className="gap-6">
+      {/* ── Header ────────────────────────────────────────────────────────── */}
       <EcosystemHeader
-        title={moduleName}
-        badgeText={`${singularName} List`}
+        title={pageTitle}
+        badgeText={`${singularName} Hub`}
         description={
           loading
             ? `Loading ${moduleName.toLowerCase()}…`
-            : `Manage and view all ${communities.length} ${moduleName.toLowerCase()}.`
+            : `${totalCount} total ${moduleName.toLowerCase()} in your network.`
         }
         icon={Users}
         breadcrumbs={[
           { label: moduleName, href: "/communities/all" },
-          { label: "All" },
+          { label: pageTitle },
         ]}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => refetch?.()}
-              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
-            >
-              <RefreshCw
-                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
-              />
-            </Button>
-          </div>
-        }
       />
 
+      {/* ── Action / Filter Bar ───────────────────────────────────────────── */}
       <EcosystemActionBar shadow="none">
+        {/* Search */}
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
-              value={search}
-              onChange={setSearch}
-              placeholder="Search by name, tagline…"
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder={`Search ${moduleName.toLowerCase()}…`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Separator />
 
+        {/* Status Filter */}
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <EcosystemActionBar.Select
+            <Select
               value={status}
-              onValueChange={setStatus}
-              placeholder="Status"
-              options={STATUS_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: opt.label,
-                dot: opt.dot || undefined,
-              }))}
-            />
+              onValueChange={(v) => setStatus(v)}
+            >
+              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                <div className="flex items-center gap-2">
+                  {STATUS_TABS.find((t) => t.value === status)?.dot && (
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full shrink-0",
+                        STATUS_TABS.find((t) => t.value === status)?.dot,
+                      )}
+                    />
+                  )}
+                  <SelectValue placeholder="Status" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
+                {STATUS_TABS.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      {opt.dot && (
+                        <span
+                          className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0",
+                            opt.dot,
+                          )}
+                        />
+                      )}
+                      {opt.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
+
+          {/* Privacy Filter */}
+          <EcosystemActionBar.Item>
+            <Select
+              value={selectedPrivacy}
+              onValueChange={(v) => setSelectedPrivacy(v)}
+            >
+              <SelectTrigger className="w-[125px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                <SelectValue placeholder="Privacy" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[135px]">
+                {COMMUNITY_PRIVACY_OPTIONS.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
+
+          {/* Sort Filter */}
+          <EcosystemActionBar.Item>
+            <Select
+              value={sortBy}
+              onValueChange={(v) => setSortBy(v)}
+            >
+              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
+                {SORT_OPTIONS.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
+        {/* Right controls */}
         <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              onClick={() => setShowExportModal(true)}
-              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
-            >
-              <Upload className="h-3.5 w-3.5" />
-              Export
-            </Button>
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Item>
-            <EcosystemActionBar.ViewToggle
-              value={view}
-              onChange={(val) => setView(val as "grid" | "table")}
-              options={[
-                { id: "grid", label: "Grid", icon: LayoutGrid },
-                { id: "table", label: "Table", icon: ListIcon },
-              ]}
-            />
-          </EcosystemActionBar.Item>
+          {/* Columns Toggle for List View */}
+          {view === "list" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[180px]">
+                <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+                  Toggle Columns
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {availableColumns
+                  .filter((c) => c.key !== "actions")
+                  .map((col) => (
+                    <DropdownMenuCheckboxItem
+                      key={col.key}
+                      checked={visibleColumns[col.key] !== false}
+                      onCheckedChange={() => toggleColumn(col.key)}
+                      className="text-xs font-medium cursor-pointer"
+                    >
+                      {typeof col.header === "string" ? col.header : col.key}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {/* Export Button */}
+          <Button
+            variant="outline"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
+
+          {/* View Toggle */}
+          <EcosystemActionBar.ViewToggle
+            value={view}
+            onChange={(v) => setView(v as "grid" | "list")}
+            options={[
+              { id: "grid", label: "Grid", icon: LayoutGrid },
+              { id: "list", label: "List", icon: ListIcon },
+            ]}
+          />
+
+          {/* Create CTA Button */}
+          <Create />
+
+          <EcosystemActionBar.Separator />
+
+          {/* Live Status Count */}
           <EcosystemActionBar.Status active={filteredCommunities.length > 0}>
-            Showing {filteredCommunities.length} of {communities.length}{" "}
-            {moduleName}
+            Showing {filteredCommunities.length} of {totalCount} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <TableLoading />
-            </motion.div>
-          ) : (
-            <motion.div
-              key={view}
-              initial={{ opacity: 0, scale: 0.99 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.01 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-            >
-              {view === "grid" ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {filteredCommunities.map((community: any) => (
-                    <CommunityCard key={community.id} record={community} />
-                  ))}
-                  {filteredCommunities.length === 0 && (
-                    <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl bg-muted/20">
-                      <div className="h-12 w-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-3 text-muted-foreground/40">
-                        <Users className="h-6 w-6" />
-                      </div>
-                      <p className="text-sm font-semibold text-foreground">
-                        No results found
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Try adjusting your search or filters.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <CommunitiesList data={filteredCommunities} />
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* ── Content Container ─────────────────────────────────────────────── */}
+      <EcosystemContainer className="p-0 m-3 mt-0 border-none bg-transparent shadow-none ring-0 space-y-3">
+        {/* Section Header (appears when filtered by non-ALL status) */}
+        <SectionHeader
+          status={status}
+          count={filteredCommunities.length}
+          loading={loading}
+        />
+
+        {/* Content Area (Grid vs List with Motion) */}
+        <ContentArea
+          view={view}
+          loading={loading}
+          communities={paginatedCommunities}
+          visibleColumns={visibleColumns}
+          offset={offset}
+        />
+
+        {/* Pagination Controls */}
+        {!loading && filteredCommunities.length > limit && (
+          <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+            <Pagination
+              currentPage={page}
+              totalPages={Math.ceil(filteredCommunities.length / limit)}
+              totalItems={filteredCommunities.length}
+              pageSize={limit}
+              onPageChange={(p) => setPage(p)}
+            />
+          </div>
+        )}
       </EcosystemContainer>
 
-      <ExportCsvModal
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportCommunitiesModal
         open={showExportModal}
         onOpenChange={setShowExportModal}
-        entityName={moduleName.toLowerCase()}
-        description={`Export communities and groups as CSV. Includes title, description, privacy, member count, and status.`}
-        totalCount={communities.length}
+        communities={filteredCommunities}
+        totalCount={totalCount}
         matchingCount={
-          debouncedSearch.trim() || status !== "ALL"
+          debouncedSearch.trim() ||
+          status !== "ALL" ||
+          selectedPrivacy !== "ALL"
             ? filteredCommunities.length
             : undefined
         }
-        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
-          const rows = filteredCommunities;
-          if (rows.length === 0) {
-            toast.error("Nothing to export", {
-              description: `No ${moduleName.toLowerCase()} found.`,
-            });
-            return;
-          }
-          const csv = buildCsv(rows, [
-            { header: "Title", getValue: (c: any) => c.title || "" },
-            {
-              header: "Description",
-              getValue: (c: any) => c.description || "",
-            },
-            {
-              header: "Privacy",
-              getValue: (c: any) =>
-                c.privacy || (c.isPrivate ? "Private" : "Public"),
-            },
-            { header: "Status", getValue: (c: any) => c.status || "" },
-            {
-              header: "Members Count",
-              getValue: (c: any) =>
-                c.numberOfUser ?? c.membersCount ?? (c.members?.length || 0),
-            },
-            {
-              header: "Created At",
-              getValue: (c: any) =>
-                c.createdAt
-                  ? new Date(c.createdAt).toISOString().slice(0, 10)
-                  : "",
-            },
-          ]);
-          downloadCsv(
-            csv,
-            `communities-${new Date().toISOString().slice(0, 10)}`,
-            format,
-          );
-          toast.success("Export ready", {
-            description: `${rows.length} ${moduleName.toLowerCase()} exported.`,
-          });
-        }}
       />
     </EcosystemWrapper>
   );

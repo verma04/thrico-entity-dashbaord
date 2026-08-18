@@ -137,8 +137,8 @@ export default function FeedPage() {
               },
               {
                 title: "Network Velocity",
-                value: typeof kpis?.networkVelocity === "number"
-                  ? kpis.networkVelocity.toFixed(2)
+                value: typeof (kpis as any)?.networkVelocity === "number"
+                  ? (kpis as any).networkVelocity.toFixed(2)
                   : String(kpis?.networkVelocity ?? "0"),
                 trend: kpis?.velocityTrend ?? 0,
                 icon: TrendingUp,
@@ -148,8 +148,8 @@ export default function FeedPage() {
               },
               {
                 title: "Engagement Yield",
-                value: typeof kpis?.engagementYield === "number"
-                  ? kpis.engagementYield.toFixed(2)
+                value: typeof (kpis as any)?.engagementYield === "number"
+                  ? (kpis as any).engagementYield.toFixed(2)
                   : String(kpis?.engagementYield ?? "0"),
                 trend: kpis?.yieldTrend ?? 0,
                 icon: Zap,

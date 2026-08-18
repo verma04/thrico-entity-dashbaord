@@ -2,14 +2,13 @@
 
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import SurveysManage from "@/components/surveys/manage/surveys-manage";
 
-import { SurveysList } from "@/components/surveys/surveys-list";
-
-function SurveysPage() {
-  return <SurveysList />;
+function SurveysAllPage() {
+  return <SurveysManage status="ALL" />;
 }
 
 export default withSubscriptionCheck(
-  withModulePermission(SurveysPage, "SURVEYS", "canRead"),
+  withModulePermission(SurveysAllPage, "SURVEYS", "canRead"),
   "surveys",
 );

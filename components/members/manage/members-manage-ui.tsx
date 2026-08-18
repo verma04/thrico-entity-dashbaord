@@ -4,7 +4,7 @@ import { LayoutGrid, List as ListIcon, Users, UserCheck, Clock, Ban, UserX, Chec
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { MembersListCards } from "../dashboard/members-listcards";
+import { MemberGrid } from "./member-grid";
 import { UserList } from "./user-list";
 
 export const STATUS_TABS = [
@@ -157,37 +157,62 @@ export function ContentArea({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="space-y-2"
+          className="space-y-3"
         >
-          {/* Inline skeleton matching list rows */}
-          <div className="overflow-hidden rounded-xl border border-border bg-card">
-            <div className="h-10 border-b border-border bg-muted/30 px-5 flex items-center gap-4">
-              {[120, 180, 100, 80, 80, 90].map((w, i) => (
-                <Skeleton
+          {view === "grid" ? (
+            /* 4-5 column compact card skeleton */
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3.5">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div
                   key={i}
-                  className="h-2.5 rounded"
-                  style={{ width: w }}
-                />
+                  className="rounded-xl border border-border/60 bg-card overflow-hidden shadow-2xs space-y-3"
+                >
+                  <Skeleton className="h-24 sm:h-28 w-full rounded-none" />
+                  <div className="p-3 pt-0 space-y-2.5">
+                    <Skeleton className="h-3.5 w-4/5 rounded" />
+                    <div className="space-y-1.5 pt-1 border-t border-border/30">
+                      <Skeleton className="h-2.5 w-full" />
+                      <Skeleton className="h-2.5 w-3/5" />
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-border/30">
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 px-5 py-3 border-b border-border/40 last:border-0"
-              >
-                <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
-                <div className="space-y-1.5 flex-1">
-                  <Skeleton className="h-3 w-32 rounded" />
-                  <Skeleton className="h-2.5 w-20 rounded" />
-                </div>
-                <Skeleton className="h-3 w-40 rounded hidden sm:block" />
-                <Skeleton className="h-3 w-20 rounded hidden md:block" />
-                <Skeleton className="h-5 w-16 rounded-md" />
-                <Skeleton className="h-5 w-16 rounded-md hidden lg:block" />
-                <Skeleton className="h-3 w-20 rounded hidden lg:block" />
+          ) : (
+            /* List table row skeleton */
+            <div className="overflow-hidden rounded-xl border border-border bg-card">
+              <div className="h-10 border-b border-border bg-muted/30 px-5 flex items-center gap-4">
+                {[120, 180, 100, 80, 80, 90].map((w, i) => (
+                  <Skeleton
+                    key={i}
+                    className="h-2.5 rounded"
+                    style={{ width: w }}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 px-5 py-3 border-b border-border/40 last:border-0"
+                >
+                  <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <Skeleton className="h-3 w-32 rounded" />
+                    <Skeleton className="h-2.5 w-20 rounded" />
+                  </div>
+                  <Skeleton className="h-3 w-40 rounded hidden sm:block" />
+                  <Skeleton className="h-3 w-20 rounded hidden md:block" />
+                  <Skeleton className="h-5 w-16 rounded-md" />
+                  <Skeleton className="h-5 w-16 rounded-md hidden lg:block" />
+                  <Skeleton className="h-3 w-20 rounded hidden lg:block" />
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
       ) : (
         <motion.div
@@ -198,7 +223,7 @@ export function ContentArea({
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
           {view === "grid" ? (
-            <MembersListCards manualData={users} />
+            <MemberGrid users={users} />
           ) : (
             <UserList users={users} visibleColumns={visibleColumns} offset={offset} />
           )}

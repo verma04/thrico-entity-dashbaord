@@ -27,7 +27,6 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -59,13 +58,11 @@ import {
   List,
   Calendar as CalendarIcon,
   User,
-  Users,
   X,
   Trash2,
-  Edit2,
   Clock,
   MapPin,
-
+  Edit2,
 } from "lucide-react";
 import {
   useEventAgendas,
@@ -267,13 +264,19 @@ function AddSessionModal({
             <Label>Speakers</Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-start font-normal">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start font-normal"
+                >
                   {formik.values.speakerIds.length > 0
                     ? `${formik.values.speakerIds.length} speaker(s) selected`
                     : "Select speakers"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full min-w-[200px]" align="start">
+              <DropdownMenuContent
+                className="w-full min-w-[200px]"
+                align="start"
+              >
                 <DropdownMenuLabel>Event Speakers</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {speakers.length === 0 && (
@@ -408,10 +411,16 @@ export function EventAgendaList({ eventId }: { eventId: string }) {
                         {session.speakers && session.speakers.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {session.speakers.map((speaker) => (
-                              <Badge key={speaker.id} variant="outline" className="text-xs font-normal bg-background">
+                              <Badge
+                                key={speaker.id}
+                                variant="outline"
+                                className="text-xs font-normal bg-background"
+                              >
                                 <Avatar className="h-3.5 w-3.5 mr-1 -ml-1">
                                   <AvatarImage src={speaker.avatar || ""} />
-                                  <AvatarFallback className="text-[8px]">{speaker.name.charAt(0)}</AvatarFallback>
+                                  <AvatarFallback className="text-[8px]">
+                                    {speaker.name.charAt(0)}
+                                  </AvatarFallback>
                                 </Avatar>
                                 {speaker.name}
                               </Badge>

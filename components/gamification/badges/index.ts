@@ -1,0 +1,12 @@
+export { BadgesManager, default } from "./badges-manager";
+export * from "./badges-manage-ui";
+export * from "./badges-table-list";
+export * from "./badge-card-compact";
+export * from "./badges-grid";
+export * from "./badge-actions";
+export * from "./export-badges-modal";
+export * from "./badge-stats";
+export * from "./badge-icon";
+export * from "./badge-dialog";
+export * from "./badge-form";
+export * from "./badge-notification-modal";

@@ -26,6 +26,7 @@ import { result } from "../ts-types";
 
 import moment from "moment";
 import { useGetEntity } from "@/graphql/actions";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 // Simple function to generate a color from an index
 function getRandomColor(index: number): string {
@@ -131,18 +132,35 @@ export const Votes = (data: result) => {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {vote.votedBy === "USER" && (
-                          <>
-                            <Avatar>
-                              <AvatarImage src={vote?.user?.avatar} />
-                              <AvatarFallback>
-                                {vote?.user?.firstName?.charAt(0)}
-                                {vote?.user?.lastName?.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">
-                              {vote?.user?.firstName} {vote?.user?.lastName}
-                            </span>
-                          </>
+                          vote?.user?.id ? (
+                            <UserProfileHoverCard user={vote.user}>
+                              <div className="flex items-center gap-2 cursor-pointer group">
+                                <Avatar className="group-hover:ring-2 group-hover:ring-primary/20 transition-all">
+                                  <AvatarImage src={vote?.user?.avatar} />
+                                  <AvatarFallback>
+                                    {vote?.user?.firstName?.charAt(0)}
+                                    {vote?.user?.lastName?.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium group-hover:text-primary transition-colors">
+                                  {vote?.user?.firstName} {vote?.user?.lastName}
+                                </span>
+                              </div>
+                            </UserProfileHoverCard>
+                          ) : (
+                            <>
+                              <Avatar>
+                                <AvatarImage src={vote?.user?.avatar} />
+                                <AvatarFallback>
+                                  {vote?.user?.firstName?.charAt(0)}
+                                  {vote?.user?.lastName?.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium">
+                                {vote?.user?.firstName} {vote?.user?.lastName}
+                              </span>
+                            </>
+                          )
                         )}
                         {vote.votedBy === "ENTITY" && (
                           <>
