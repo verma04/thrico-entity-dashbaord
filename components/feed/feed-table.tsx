@@ -498,6 +498,7 @@ export function FeedTable({
         data={feeds}
         loading={loading}
         keyExtractor={(item) => item.id.toString()}
+        pageSize={feeds.length || 999}
         emptyIcon={MessageSquare}
         emptyTitle="No posts found"
         emptyDescription="No community posts match your current search or filter criteria."
