@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEventById, useUpdateEvent } from "@/graphql/actions/events";
@@ -38,7 +37,9 @@ function EventGeneralInfo() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
+          <p className="text-sm">
+            Loading {singularName.toLowerCase()} details...
+          </p>
         </div>
       </div>
     );
@@ -66,9 +67,7 @@ function EventGeneralInfo() {
         isActive: event?.isActive ?? false,
       }}
       initialCoverUrl={
-        event?.cover
-          ? `https://cdn.thrico.network/${event.cover}`
-          : null
+        event?.cover ? `https://cdn.thrico.network/${event.cover}` : null
       }
       loading={updating}
       onFinish={(values) => {
@@ -110,5 +109,5 @@ function EventGeneralInfo() {
 
 export default withSubscriptionCheck(
   withModulePermission(EventGeneralInfo, "EVENTS", "canRead"),
-  "events"
+  "events",
 );
