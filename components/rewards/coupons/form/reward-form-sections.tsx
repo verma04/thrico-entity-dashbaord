@@ -269,7 +269,7 @@ export function RewardFormSections({
               <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 Cover Banner
               </Label>
-              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-1 bg-zinc-50/50 dark:bg-zinc-800/30 overflow-hidden">
+              <div className="p-1 overflow-hidden">
                 <ImageUploadWithCrop
                   currentImage={formik.values.image}
                   onImageUpdate={(url) => formik.setFieldValue("image", url)}
