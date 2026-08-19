@@ -105,6 +105,13 @@ export function ChildSidebarContainer({
 
   const activeTab = getActiveTab(pathName);
 
+  // Default-open the Classifications group when on the members tab
+  useEffect(() => {
+    if (activeTab === "members") {
+      setOpenGroup("members-classifications");
+    }
+  }, [activeTab]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -600,7 +607,9 @@ export function ChildSidebarContainer({
 
         {/* ── MAIN CONTENT ── */}
         <SidebarInset className="bg-transparent overflow-hidden flex flex-col h-[calc(100vh-64px)] min-w-0 flex-1 relative">
-          <main className="flex-1 w-full min-w-0 overflow-y-auto">{children}</main>
+          <main className="flex-1 w-full min-w-0 overflow-y-auto">
+            {children}
+          </main>
         </SidebarInset>
       </div>
 

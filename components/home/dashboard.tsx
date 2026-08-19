@@ -160,17 +160,16 @@ export default function Dashboard() {
         description="Your community at a glance"
         icon={Activity}
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
               onClick={handleRefresh}
               disabled={loading || isRefreshing}
             >
@@ -183,7 +182,7 @@ export default function Dashboard() {
         }
       />
 
-      <EcosystemContainer className="p-6 lg:p-8 space-y-8">
+      <EcosystemContainer className="p-5 space-y-5">
         {/* Subscription Limit Warning Banner */}
         <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
 
@@ -207,7 +206,7 @@ export default function Dashboard() {
         />
 
         {/* 3. Moderation Overview & Module Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           <DashboardSafetyModeration
             kpis={kpis}
             DashboardSectionHeading={DashboardSectionHeading}
@@ -219,13 +218,13 @@ export default function Dashboard() {
         </div>
 
         {/* 3.5. Insights Row (Growth & Content Breakdown) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <section className="space-y-3">
             <DashboardSectionHeading title="Community Growth" />
             <DashboardGrowthChart />
           </section>
           <section className="space-y-3">
-            <DashboardSectionHeading title="CONTENT INSIGHTS" />
+            <DashboardSectionHeading title="Content Insights" />
             <DashboardContentBreakdownChart
               data={kpis?.contentTypeBreakdown || []}
               // loading={kpisLoading}
@@ -241,27 +240,27 @@ export default function Dashboard() {
         />
 
         {/* 4.5. Gamification Leaderboard + Activity Log + Impact Score */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Leaderboard */}
           <section className="space-y-3 flex flex-col h-full">
             <DashboardSectionHeading
               title="Gamification Leaderboard"
-              icon={<Trophy className="h-3.5 w-3.5 text-amber-500" />}
+              icon={<Trophy className="h-3.5 w-3.5 text-muted-foreground" />}
               rightElement={
                 <Link href="/gamification/points-and-badges/leaderboard">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
+                    className="text-xs text-primary font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
                   >
                     View all
                   </Button>
                 </Link>
               }
             />
-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-[0_1px_0_rgba(0,0,0,0.05)] flex-1">
               {loadingLeaderboard ? (
-                <div className="divide-y divide-border/40">
+                <div className="divide-y divide-border">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <div
                       key={i}
@@ -279,12 +278,12 @@ export default function Dashboard() {
                 </div>
               ) : (leaderboardData?.getLeaderboard?.entries?.length ?? 0) ===
                 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Trophy className="h-8 w-8 mb-2 opacity-30" />
-                  <span className="text-[11px]">No leaderboard data yet</span>
+                  <span className="text-xs">No leaderboard data yet</span>
                 </div>
               ) : (
-                <div className="divide-y divide-border/40">
+                <div className="divide-y divide-border">
                   {leaderboardData?.getLeaderboard?.entries?.map((entry) => {
                     const user = entry?.user;
                     const rankColors: Record<number, string> = {
@@ -296,8 +295,7 @@ export default function Dashboard() {
                       <div
                         key={`${user?.id}-${entry.rank}`}
                         className={cn(
-                          "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
-                          entry.rank === 1 && "bg-yellow-500/[0.03]",
+                          "flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors",
                         )}
                       >
                         <span
@@ -324,18 +322,18 @@ export default function Dashboard() {
                             href={`/members/${user?.id}`}
                             className="flex items-center gap-2.5 group min-w-0 flex-1"
                           >
-                            <Avatar className="h-8 w-8 border border-border/50 shadow-sm shrink-0">
+                            <Avatar className="h-8 w-8 border border-border shrink-0">
                               <AvatarImage
                                 src={`https://cdn.thrico.network/${user?.avatar}`}
                                 alt={user?.firstName}
                                 className="object-cover"
                               />
-                              <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold uppercase">
+                              <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-medium uppercase">
                                 {user?.firstName?.substring(0, 2)}
                               </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0 flex-1">
-                              <span className="text-[13px] font-semibold text-foreground truncate block group-hover:text-primary transition-colors">
+                              <span className="text-[13px] font-medium text-foreground truncate block group-hover:text-primary transition-colors">
                                 {user?.firstName} {user?.lastName}
                               </span>
                               {entry?.currentRank && (
@@ -351,9 +349,9 @@ export default function Dashboard() {
                           </Link>
                         </UserProfileHoverCard>
 
-                        <span className="text-[13px] font-bold text-foreground tabular-nums shrink-0">
+                        <span className="text-[13px] font-semibold text-foreground tabular-nums shrink-0">
                           {entry.totalPoints.toLocaleString()}
-                          <span className="text-[9px] text-muted-foreground/60 ml-0.5 font-semibold">
+                          <span className="text-xs text-muted-foreground ml-0.5 font-normal">
                             pts
                           </span>
                         </span>
@@ -369,22 +367,22 @@ export default function Dashboard() {
           <section className="space-y-3 flex flex-col h-full">
             <DashboardSectionHeading
               title="Activity Log"
-              icon={<History className="h-3.5 w-3.5 text-indigo-500" />}
+              icon={<History className="h-3.5 w-3.5 text-muted-foreground" />}
               rightElement={
                 <Link href="/gamification/points-and-badges/leaderboard">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
+                    className="text-xs text-primary font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
                   >
                     View all
                   </Button>
                 </Link>
               }
             />
-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-[0_1px_0_rgba(0,0,0,0.05)] flex-1">
               {loadingActivityLog ? (
-                <div className="divide-y divide-border/40">
+                <div className="divide-y divide-border">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                     <div key={i} className="flex items-center gap-3 px-4 py-3">
                       <div className="h-7 w-7 rounded-full bg-muted animate-pulse" />
@@ -398,19 +396,19 @@ export default function Dashboard() {
                 </div>
               ) : (activityLogData?.getGamificationActivityLog?.length ?? 0) ===
                 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <History className="h-8 w-8 mb-2 opacity-30" />
-                  <span className="text-[11px]">No activity logged yet</span>
+                  <span className="text-xs">No activity logged yet</span>
                 </div>
               ) : (
-                <div className="divide-y divide-border/40">
+                <div className="divide-y divide-border">
                   {activityLogData?.getGamificationActivityLog?.map((log) => {
                     const user = log.user;
                     const isBadge = log.type === "BADGE";
                     return (
                       <div
                         key={log.id}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent/50 transition-colors"
                       >
                         <UserProfileHoverCard
                           user={{
@@ -424,13 +422,13 @@ export default function Dashboard() {
                             href={`/members/${user?.id}`}
                             className="shrink-0"
                           >
-                            <Avatar className="h-7 w-7 border border-border/50 shadow-sm">
+                            <Avatar className="h-7 w-7 border border-border">
                               <AvatarImage
                                 src={`https://cdn.thrico.network/${user?.avatar}`}
                                 alt={user?.firstName}
                                 className="object-cover"
                               />
-                              <AvatarFallback className="bg-muted text-muted-foreground text-[9px] font-bold uppercase">
+                              <AvatarFallback className="bg-muted text-muted-foreground text-[9px] font-medium uppercase">
                                 {user?.firstName?.substring(0, 2)}
                               </AvatarFallback>
                             </Avatar>
@@ -449,15 +447,15 @@ export default function Dashboard() {
                             >
                               <Link
                                 href={`/members/${user?.id}`}
-                                className="text-[12px] font-semibold text-foreground hover:text-primary transition-colors truncate"
+                                className="text-[13px] font-medium text-foreground hover:text-primary transition-colors truncate"
                               >
                                 {user?.firstName} {user?.lastName}
                               </Link>
                             </UserProfileHoverCard>
-                            <span className="text-[10px] text-muted-foreground/50">
+                            <span className="text-xs text-muted-foreground/50">
                               ·
                             </span>
-                            <span className="text-[10px] text-muted-foreground/60 shrink-0">
+                            <span className="text-xs text-muted-foreground shrink-0">
                               {(() => {
                                 try {
                                   return formatDistanceToNow(
@@ -470,7 +468,7 @@ export default function Dashboard() {
                               })()}
                             </span>
                           </div>
-                          <p className="text-[11px] text-muted-foreground truncate leading-tight mt-0.5">
+                          <p className="text-xs text-muted-foreground truncate leading-tight mt-0.5">
                             {isBadge ? (
                               <>
                                 <Award className="inline h-3 w-3 text-indigo-500 mr-0.5 -mt-0.5" />
@@ -494,10 +492,10 @@ export default function Dashboard() {
                         {log.points !== 0 && (
                           <span
                             className={cn(
-                              "text-[12px] font-bold tabular-nums shrink-0",
+                              "text-xs font-semibold tabular-nums shrink-0 px-1.5 py-0.5 rounded-full",
                               log.points > 0
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : "text-rose-600 dark:text-rose-400",
+                                ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30"
+                                : "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/30",
                             )}
                           >
                             {log.points > 0 ? "+" : ""}
@@ -516,22 +514,22 @@ export default function Dashboard() {
           <section className="space-y-3 flex flex-col h-full">
             <DashboardSectionHeading
               title="Impact Score"
-              icon={<Users className="h-3.5 w-3.5 text-rose-500" />}
+              icon={<Users className="h-3.5 w-3.5 text-muted-foreground" />}
               rightElement={
                 <Link href="/gamification/impact-score/members">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
+                    className="text-xs text-primary font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
                   >
                     View all
                   </Button>
                 </Link>
               }
             />
-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+            <div className="rounded-xl border border-border bg-card overflow-hidden shadow-[0_1px_0_rgba(0,0,0,0.05)] flex-1">
               {loadingImpact ? (
-                <div className="divide-y divide-border/40">
+                <div className="divide-y divide-border">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <div
                       key={i}
@@ -548,12 +546,12 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (impactData?.getImpactUsers?.nodes?.length ?? 0) === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Users className="h-8 w-8 mb-2 opacity-30" />
-                  <span className="text-[11px]">No impact data yet</span>
+                  <span className="text-xs">No impact data yet</span>
                 </div>
               ) : (
-                <div className="divide-y divide-border/40">
+                <div className="divide-y divide-border">
                   {impactData?.getImpactUsers?.nodes?.map(
                     (node: any, index: number) => {
                       const user = node?.user;
@@ -567,8 +565,7 @@ export default function Dashboard() {
                         <div
                           key={`${user?.id}-${rank}`}
                           className={cn(
-                            "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
-                            rank === 1 && "bg-yellow-500/[0.03]",
+                            "flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors",
                           )}
                         >
                           <span
@@ -594,30 +591,30 @@ export default function Dashboard() {
                               href={`/members/${user?.id}`}
                               className="flex items-center gap-2.5 group min-w-0 flex-1"
                             >
-                              <Avatar className="h-8 w-8 border border-border/50 shadow-sm shrink-0">
+                              <Avatar className="h-8 w-8 border border-border shrink-0">
                                 <AvatarImage
                                   src={`https://cdn.thrico.network/${user?.avatarUrl || user?.avatar}`}
                                   alt={user?.firstName}
                                   className="object-cover"
                                 />
-                                <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold uppercase">
+                                <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-medium uppercase">
                                   {user?.firstName?.substring(0, 2)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="min-w-0 flex-1">
-                                <span className="text-[13px] font-semibold text-foreground truncate block group-hover:text-primary transition-colors">
+                                <span className="text-[13px] font-medium text-foreground truncate block group-hover:text-primary transition-colors">
                                   {user?.firstName} {user?.lastName}
                                 </span>
-                                <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                                <span className="text-xs font-medium text-muted-foreground">
                                   {node?.tier}
                                 </span>
                               </div>
                             </Link>
                           </UserProfileHoverCard>
 
-                          <span className="text-[13px] font-bold text-foreground tabular-nums shrink-0">
+                          <span className="text-[13px] font-semibold text-foreground tabular-nums shrink-0">
                             {node.score.toLocaleString()}
-                            <span className="text-[9px] text-muted-foreground/60 ml-0.5 font-semibold">
+                            <span className="text-xs text-muted-foreground ml-0.5 font-normal">
                               pts
                             </span>
                           </span>
@@ -631,6 +628,7 @@ export default function Dashboard() {
           </section>
         </div>
 
+        {/* 5. Platform Storage & Subscription Details Row */}
         {/* 5. Platform Storage & Subscription Details Row */}
         <DashboardPlatformStorage
           statsLoading={statsLoading}

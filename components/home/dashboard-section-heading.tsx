@@ -10,13 +10,13 @@ export interface DashboardSectionHeadingProps {
   description?: string;
 }
 
-export function DashboardSectionHeading({ 
-  title, 
-  icon, 
-  rightElement, 
+export function DashboardSectionHeading({
+  title,
+  icon,
+  rightElement,
   titleClassName,
   className,
-  description
+  description,
 }: DashboardSectionHeadingProps) {
   return (
     <div className={cn("flex flex-col gap-1.5 w-full", className)}>
@@ -25,10 +25,12 @@ export function DashboardSectionHeading({
         <div className="w-[3px] h-4 rounded-full bg-gradient-to-b from-primary to-primary/40 shrink-0" />
         <div className="flex items-center gap-2 shrink-0">
           {icon && <div className="shrink-0">{icon}</div>}
-          <h2 className={cn(
-            "text-[10px] font-bold text-foreground/70 uppercase tracking-[0.22em] m-0 leading-none",
-            titleClassName
-          )}>
+          <h2
+            className={cn(
+              "text-[10px] font-bold text-foreground/70 uppercase tracking-[0.22em] m-0 leading-none",
+              titleClassName,
+            )}
+          >
             {title}
           </h2>
         </div>

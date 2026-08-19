@@ -16,6 +16,7 @@ import { ExportCsvModal } from "@/components/shared/export-csv-modal";
 import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import MobileNavigation from "./mobile-navigation";
 import WebNavigation from "./web-navigation";
@@ -449,55 +450,75 @@ export default function ModuleManagement() {
 
           {/* Main card */}
           <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
-            {/* Card header with tabs + stats */}
-            <div className="px-5 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-0.5 bg-muted p-0.5 rounded-md border border-border mr-2">
-                <button
-                  onClick={() => setActiveTab("management")}
-                  className={cn(
-                    "flex items-center gap-1 h-6 px-2 rounded-sm text-[11px] font-medium transition-all",
-                    activeTab === "management"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <LayoutGrid className="h-3 w-3" />
-                  Registry
-                </button>
-                <button
-                  onClick={() => setActiveTab("navigation")}
-                  className={cn(
-                    "flex items-center gap-1 h-6 px-2 rounded-sm text-[11px] font-medium transition-all",
-                    activeTab === "navigation"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <Smartphone className="h-3 w-3" />
-                  Mobile Nav
-                </button>
-                <button
-                  onClick={() => setActiveTab("webNavigation")}
-                  className={cn(
-                    "flex items-center gap-1 h-6 px-2 rounded-sm text-[11px] font-medium transition-all",
-                    activeTab === "webNavigation"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <Monitor className="h-3 w-3" />
-                  Web Nav
-                </button>
-              </div>
+            {/* Card header with menu-item-layout styled tabs + stats */}
+            <div className="px-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-card">
+              <nav className="flex items-center gap-0 overflow-x-auto no-scrollbar">
+                {[
+                  {
+                    key: "management" as const,
+                    label: "Registry",
+                    icon: LayoutGrid,
+                  },
+                  {
+                    key: "navigation" as const,
+                    label: "Mobile Nav",
+                    icon: Smartphone,
+                  },
+                  {
+                    key: "webNavigation" as const,
+                    label: "Web Nav",
+                    icon: Monitor,
+                  },
+                ].map((tab) => {
+                  const isActive = activeTab === tab.key;
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setActiveTab(tab.key)}
+                      className={cn(
+                        "group/tab relative px-4 py-3 text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap flex items-center gap-1.5",
+                        isActive
+                          ? "text-foreground font-semibold"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "h-3.5 w-3.5 transition-colors duration-150 shrink-0",
+                          isActive
+                            ? "text-foreground"
+                            : "text-muted-foreground group-hover/tab:text-foreground",
+                        )}
+                      />
+                      <span className="leading-none">{tab.label}</span>
 
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                      {/* Active underline indicator */}
+                      {isActive && (
+                        <motion.div
+                          layoutId="modules-tab-underline"
+                          className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground dark:bg-white"
+                          transition={{
+                            type: "spring",
+                            bounce: 0.2,
+                            duration: 0.4,
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="flex items-center gap-2 py-2 sm:py-0 px-2 sm:px-0">
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-md">
                   {enabledCount} / {modules.length} active
                 </span>
-                <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
+                <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-md">
                   {webNavCount} in web nav
                 </span>
-                <span className="text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-md">
+                <span className="text-[11px] font-semibold text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 border border-violet-200 dark:border-violet-800 px-2.5 py-1 rounded-md">
                   {navCount} / 3 mobile nav
                 </span>
               </div>

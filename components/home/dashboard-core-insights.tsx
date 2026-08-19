@@ -80,7 +80,11 @@ const vitals = [
 interface DashboardCoreInsightsProps {
   loading: boolean;
   getMetric: (key: string) => any;
-  DashboardSectionHeading: React.FC<{ title: string; action?: React.ReactNode; tooltip?: string }>;
+  DashboardSectionHeading: React.FC<{
+    title: string;
+    action?: React.ReactNode;
+    tooltip?: string;
+  }>;
 }
 
 export function DashboardCoreInsights({
@@ -98,7 +102,7 @@ export function DashboardCoreInsights({
             <EcosystemKPI
               key={v.key}
               title={v.title}
-              value={loading ? "..." : item?.value ?? "0"}
+              value={loading ? "..." : (item?.value ?? "0")}
               trend={item?.change ?? 0}
               trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
               icon={v.icon}

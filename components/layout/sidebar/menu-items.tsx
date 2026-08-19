@@ -94,6 +94,10 @@ import {
   PlusCircle,
   AlertTriangle,
   Scale,
+  MapPin,
+  Building,
+  Heart,
+  Type,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -281,6 +285,48 @@ export const membersIntelligence = [
     label: "Classifications",
     path: "/members/classification",
     icon: <Tag size={18} />,
+    children: [
+      {
+        key: "members-classifications-location",
+        label: "Locations",
+        path: "/members/classification/location",
+      },
+      {
+        key: "members-classifications-experience",
+        label: "Companies",
+        path: "/members/classification/experience",
+      },
+      {
+        key: "members-classifications-education",
+        label: "Colleges",
+        path: "/members/classification/education",
+      },
+      {
+        key: "members-classifications-industries",
+        label: "Industries",
+        path: "/members/classification/industries",
+      },
+      {
+        key: "members-classifications-functions",
+        label: "Job Functions",
+        path: "/members/classification/functions",
+      },
+      {
+        key: "members-classifications-interests",
+        label: "Interests",
+        path: "/members/classification/interests",
+      },
+      {
+        key: "members-classifications-skills",
+        label: "Skills",
+        path: "/members/classification/skills",
+      },
+      {
+        key: "members-classifications-headline",
+        label: "Headlines",
+        path: "/members/classification/headline",
+      },
+    ],
   },
   {
     key: "members-reported",
@@ -975,13 +1021,13 @@ export const setupAndDesignItems = [
   },
   {
     key: "cust-mod",
-    label: "Setup Modules",
+    label: "Modules",
     path: "/settings/modules",
     icon: <Blocks size={18} />,
   },
   {
     key: "cust-int",
-    label: "Setup Integrations",
+    label: "Integrations",
     path: "/settings/integrations#setup",
     icon: <Zap size={18} />,
   },

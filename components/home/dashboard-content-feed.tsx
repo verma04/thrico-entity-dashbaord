@@ -29,7 +29,11 @@ interface DashboardContentFeedProps {
   loading: boolean;
   kpis: any;
   getMetric: (key: string) => any;
-  DashboardSectionHeading: React.FC<{ title: string; action?: React.ReactNode; tooltip?: string }>;
+  DashboardSectionHeading: React.FC<{
+    title: string;
+    action?: React.ReactNode;
+    tooltip?: string;
+  }>;
 }
 
 export function DashboardContentFeed({
@@ -51,7 +55,7 @@ export function DashboardContentFeed({
               <EcosystemKPI
                 key={v.key}
                 title={v.title}
-                value={loading ? "..." : item?.value ?? "0"}
+                value={loading ? "..." : (item?.value ?? "0")}
                 trend={item?.change ?? 0}
                 trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
                 icon={v.icon}
@@ -86,7 +90,7 @@ export function DashboardContentFeed({
           <div className="space-y-4">
             {(() => {
               const sorted = [...(kpis?.contentTypeBreakdown || [])].sort(
-                (a, b) => b.percentage - a.percentage
+                (a, b) => b.percentage - a.percentage,
               );
               return showAllContentTypes ? sorted : sorted.slice(0, 2);
             })()?.map((item, i) => {
