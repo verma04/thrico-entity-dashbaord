@@ -19,8 +19,11 @@ const colorToBorderMap: Record<string, { border: string; bg: string }> = {
   "text-amber-600": { border: "border-l-amber-500", bg: "bg-amber-500/8" },
   "text-pink-600": { border: "border-l-pink-500", bg: "bg-pink-500/8" },
   "text-cyan-600": { border: "border-l-cyan-500", bg: "bg-cyan-500/8" },
+  "text-teal-600": { border: "border-l-teal-500", bg: "bg-teal-500/8" },
+  "text-indigo-600": { border: "border-l-indigo-500", bg: "bg-indigo-500/8" },
   "text-red-600": { border: "border-l-red-500", bg: "bg-red-500/8" },
   "text-rose-600": { border: "border-l-rose-500", bg: "bg-rose-500/8" },
+  "text-slate-600": { border: "border-l-slate-500", bg: "bg-slate-500/8" },
 };
 
 export const ModulePerformanceCard = ({
@@ -47,34 +50,40 @@ export const ModulePerformanceCard = ({
     >
       <div
         className={cn(
-          "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
+          "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105",
           accent.bg,
         )}
       >
         <Icon className={cn("h-4 w-4", color)} />
       </div>
       <div className="min-w-0 flex-1">
-        <h4 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.18em] leading-none mb-1.5">
+        <h4 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.16em] leading-none mb-1.5 truncate">
           {title}
         </h4>
         <div className="flex flex-col gap-0.5">
-          {stats ? (
-            <div className="flex flex-wrap items-center gap-1.5">
+          {stats && stats.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
               {stats.map((stat, i) => {
-                const match = stat.match(/^([\d\.]+[KkMmBb]?|xxx)\s+(.*)$/i);
-                if (match) {
+                const match = stat
+                  .trim()
+                  .match(
+                    /^([+\-~]?[$€£¥₹]?[\d,]+(?:\.\d+)?[kKmMbB%]?|xxx)\s*(.*)$/i,
+                  );
+                if (match && match[1]) {
                   return (
                     <React.Fragment key={i}>
-                      <span className="flex items-baseline gap-1">
-                        <span className="text-sm font-bold text-foreground tracking-tight tabular-nums leading-none group-hover:underline">
+                      <span className="inline-flex items-baseline gap-1 shrink-0">
+                        <span className="text-[13px] font-bold text-foreground tracking-tight tabular-nums leading-none group-hover:underline">
                           {match[1]}
                         </span>
-                        <span className="text-[10px] text-muted-foreground truncate leading-none">
-                          {match[2]}
-                        </span>
+                        {match[2] && (
+                          <span className="text-[10px] font-normal text-muted-foreground leading-none">
+                            {match[2]}
+                          </span>
+                        )}
                       </span>
                       {i < stats.length - 1 && (
-                        <span className="text-muted-foreground/30 text-[10px] font-light">
+                        <span className="text-muted-foreground/30 text-[10px] font-light select-none">
                           |
                         </span>
                       )}
@@ -83,11 +92,11 @@ export const ModulePerformanceCard = ({
                 }
                 return (
                   <React.Fragment key={i}>
-                    <span className="text-sm font-bold text-foreground tracking-tight tabular-nums leading-none group-hover:underline">
+                    <span className="text-[11px] font-medium text-muted-foreground/90 truncate leading-none">
                       {stat}
                     </span>
                     {i < stats.length - 1 && (
-                      <span className="text-muted-foreground/30 text-[10px] font-light">
+                      <span className="text-muted-foreground/30 text-[10px] font-light select-none">
                         |
                       </span>
                     )}
@@ -96,7 +105,7 @@ export const ModulePerformanceCard = ({
               })}
             </div>
           ) : (
-            <span className="text-sm font-bold text-foreground tracking-tight tabular-nums leading-none group-hover:underline">
+            <span className="text-[13px] font-bold text-foreground tracking-tight tabular-nums leading-none">
               0
             </span>
           )}

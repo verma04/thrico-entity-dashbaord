@@ -3,12 +3,15 @@ import Link from "next/link";
 import {
   Users,
   MessageSquare,
-  Award,
   Calendar,
   ShoppingBag,
   Briefcase,
-  AlertTriangle,
+  Tag,
   Wallet,
+  BarChart3,
+  GraduationCap,
+  ClipboardList,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModulePerformanceCard } from "@/components/layout/ecosystem/module-performance-card";
@@ -19,70 +22,91 @@ const modulePerformanceList = [
     icon: Users,
     color: "text-blue-600",
     href: "/members",
-    stats: ["106 registered", "107 approved"],
+    stats: ["0 registered", "0 approved"],
   },
   {
     title: "Wallet",
     icon: Wallet,
     color: "text-amber-600",
-    href: "/wallet",
-    stats: ["10,000 Total", "2,500 Active"],
+    href: "/gamification/currency",
+    stats: ["0 Total", "0 Active"],
   },
   {
     title: "Referrals",
     icon: Users,
     color: "text-cyan-600",
-    href: "/referrals",
-    stats: ["106 registered", "107 approved"],
+    href: "/members/referrals",
+    stats: ["0 referrers", "0 referees"],
   },
   {
     title: "Discussions",
     icon: MessageSquare,
     color: "text-indigo-600",
-    href: "/content/discussions",
-    stats: ["230 topics", "1.2k comments"],
+    href: "/forums",
+    stats: ["0 topics", "0 comments"],
   },
   {
     title: "Polls",
-    icon: MessageSquare,
+    icon: BarChart3,
     color: "text-cyan-600",
-    href: "/content/polls",
-    stats: ["45 active", "3.2k votes"],
+    href: "/polls",
+    stats: ["0 total", "0 active"],
   },
   {
-    title: "Courses",
-    icon: Award,
-    color: "text-emerald-600",
-    href: "/content/courses",
-    stats: ["12 published", "450 enrolled"],
+    title: "Offers",
+    icon: Tag,
+    color: "text-red-600",
+    href: "/offers",
+    stats: ["0 total", "0 active"],
   },
   {
     title: "Events",
     icon: Calendar,
     color: "text-rose-600",
-    href: "/content/events",
-    stats: ["8 upcoming", "250 RSVPs"],
+    href: "/events",
+    stats: ["0 total", "0 upcoming"],
   },
   {
     title: "Marketplace",
     icon: ShoppingBag,
     color: "text-amber-600",
-    href: "/marketplace",
-    stats: ["45 listings", "$1.2k volume"],
+    href: "/listing",
+    stats: ["0 total", "0 active"],
   },
   {
     title: "Jobs",
     icon: Briefcase,
     color: "text-violet-600",
     href: "/jobs",
-    stats: ["12 open", "85 applied"],
+    stats: ["0 total", "0 active"],
   },
   {
-    title: "Offers",
-    icon: AlertTriangle,
-    color: "text-red-600",
-    href: "/content/offers",
-    stats: ["5 active", "120 claimed"],
+    title: "Communities",
+    icon: Users,
+    color: "text-emerald-600",
+    href: "/communities",
+    stats: ["0 total", "0 active"],
+  },
+  {
+    title: "Surveys",
+    icon: ClipboardList,
+    color: "text-teal-600",
+    href: "/surveys",
+    stats: ["0 total", "0 active"],
+  },
+  {
+    title: "Mentorship",
+    icon: GraduationCap,
+    color: "text-purple-600",
+    href: "/mentorship",
+    stats: ["0 applied", "0 approved"],
+  },
+  {
+    title: "Moments",
+    icon: Video,
+    color: "text-pink-600",
+    href: "/moments",
+    stats: ["0 total", "0 active"],
   },
 ];
 
@@ -123,12 +147,38 @@ export function DashboardQuickStats({
       />
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
         {visibleFeatureModules.map((mod) => {
-          const dataItem = featureModules?.find(
-            (m: any) =>
-              m.module.toLowerCase() === mod.title.toLowerCase() ||
-              m.module.includes(mod.title) ||
-              mod.title.includes(m.module),
-          );
+          const modTitle = mod.title.toLowerCase();
+          const dataItem = featureModules?.find((m: any) => {
+            if (!m?.module) return false;
+            const name = m.module.toLowerCase();
+            if (name === modTitle) return true;
+            if (
+              modTitle === "marketplace" &&
+              (name === "shop" || name === "listings" || name === "marketplace")
+            )
+              return true;
+            if (
+              modTitle === "discussions" &&
+              (name === "forums" ||
+                name === "discussion forum" ||
+                name === "discussions")
+            )
+              return true;
+            if (
+              modTitle === "wallet" &&
+              (name === "currency" ||
+                name === "gamification" ||
+                name === "wallet")
+            )
+              return true;
+            if (
+              modTitle === "mentorship" &&
+              (name === "mentors" || name === "mentorship")
+            )
+              return true;
+            return name.includes(modTitle) || modTitle.includes(name);
+          });
+
           const card = (
             <ModulePerformanceCard
               title={mod.title}
