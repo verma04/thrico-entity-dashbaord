@@ -54,35 +54,43 @@ export const usePinFeed = (options: any) => useMutation(PIN_FEED, options);
 
 export const useNumberOfFeeds = () => useQuery(NUMBER_OF_FEED);
 
-export const useAddFeed = (options: any) =>
+export const useAddFeed = (options?: any) =>
   useMutation(ADD_FEED, {
+    ...options,
     onCompleted(data) {
-      options.onCompleted();
+      options?.onCompleted?.(data);
     },
-    update(cache, { data: { addFeed } }) {
+    onError(error) {
+      options?.onError?.(error);
+    },
+    update(cache, { data }) {
+      const addFeed = data?.addFeed;
+      if (!addFeed) return;
       try {
-        const { getAllFeed }: any = cache.readQuery({
+        const cached: any = cache.readQuery({
           query: GET_ALL_FEED,
           variables: {
             input: {
               offset: 0,
-              limit: 10, // Match the limit in your Following screen
+              limit: 10,
             },
           },
         });
 
-        cache.writeQuery({
-          query: GET_ALL_FEED,
-          data: { getAllFeed: [addFeed, ...getAllFeed] },
-          variables: {
-            input: {
-              offset: 0,
-              limit: 10, // Match the limit in your Following screen
+        if (cached?.getAllFeed) {
+          cache.writeQuery({
+            query: GET_ALL_FEED,
+            data: { getAllFeed: [addFeed, ...cached.getAllFeed] },
+            variables: {
+              input: {
+                offset: 0,
+                limit: 10,
+              },
             },
-          },
-        });
+          });
+        }
       } catch (error) {
-        console.log(error);
+        console.log("Feed cache update error:", error);
       }
     },
   });

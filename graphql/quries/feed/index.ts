@@ -592,6 +592,8 @@ export const ADD_FEED = gql`
       totalReShare
       description
       createdAt
+      isPinned
+      pinnedAt
       user {
         id
         firstName

@@ -16,23 +16,43 @@ export default function CreateFeedPostPage() {
   const [addFeed, { loading }] = useAddFeed({
     onCompleted: () => {
       toast.success("Post published successfully!", {
-        description: "Your post is now live and distributed to the community feed.",
+        description:
+          "Your post is now live and distributed to the community feed.",
       });
       router.push("/feed/all");
     },
     onError: (error: any) => {
       toast.error("Failed to publish post", {
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description:
+          error.message || "An unexpected error occurred. Please try again.",
       });
     },
   });
 
   const onFinish = (values: any) => {
+    const input: any = {
+      description: values.description,
+    };
+
+    if (values.media && values.media.length > 0) {
+      input.media = values.media;
+    }
+
+    if (values.source) {
+      input.source = values.source === "feed" ? "admin" : values.source;
+    }
+
+    if (values.privacy) {
+      input.privacy = values.privacy;
+    }
+
+    if (typeof values.isPinned === "boolean") {
+      input.isPinned = values.isPinned;
+    }
+
     addFeed({
       variables: {
-        input: {
-          description: values.description,
-        },
+        input,
       },
     });
   };

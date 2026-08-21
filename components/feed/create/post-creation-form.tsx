@@ -18,9 +18,6 @@ import {
   UploadCloud,
   X,
   Eye,
-  ShieldCheck,
-  Briefcase,
-  ShoppingBag,
   Heart,
   Share2,
   Smartphone,
@@ -55,7 +52,6 @@ import {
   PolarisTipCard,
   PolarisInfoBanner,
 } from "@/components/gamification/shared/polaris-form-ui";
-import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useGetEntity } from "@/graphql/actions";
 import UserAvatar from "@/components/layout/user-avatar";
 import { cn } from "@/lib/utils";
@@ -80,8 +76,8 @@ const postSchema = Yup.object().shape({
     .required("Please enter post content")
     .min(2, "Post content must be at least 2 characters")
     .max(2000, "Post content cannot exceed 2000 characters"),
-  source: Yup.string().required("Target feed channel is required"),
-  privacy: Yup.string().required("Privacy is required"),
+  source: Yup.string().optional(),
+  privacy: Yup.string().optional(),
   isPinned: Yup.boolean(),
   postType: Yup.string().oneOf(["general", "poll", "celebration"]),
   poll: Yup.object().when("postType", {
@@ -136,7 +132,7 @@ export function PostCreationForm({
     onSubmit: (values) => {
       onFinish({
         ...values,
-        media: mediaList.map((m) => m.url),
+        media: mediaList.map((m) => m.file).filter(Boolean),
       });
     },
   });
@@ -350,7 +346,7 @@ export function PostCreationForm({
           </button>
         </div>
         <Badge variant="outline" className="text-[10px] font-medium uppercase tracking-wider">
-          {values.source}
+          Feed
         </Badge>
       </div>
     </div>
@@ -421,18 +417,6 @@ export function PostCreationForm({
               <PolarisSidebarCard title="Publishing Summary">
                 <div className="space-y-1 divide-y divide-border/40">
                   <PolarisSummaryRow
-                    label="Target Channel"
-                    value={
-                      values.source === "feed"
-                        ? "Global Feed"
-                        : values.source === "admin"
-                        ? "Admin"
-                        : values.source === "jobs"
-                        ? "Jobs"
-                        : "Marketplace"
-                    }
-                  />
-                  <PolarisSummaryRow
                     label="Post Format"
                     value={
                       values.postType === "poll"
@@ -441,10 +425,6 @@ export function PostCreationForm({
                         ? "Celebration"
                         : "Standard Post"
                     }
-                  />
-                  <PolarisSummaryRow
-                    label="Visibility"
-                    value={values.privacy === "PUBLIC" ? "Public" : "Connections"}
                   />
                   <PolarisSummaryRow
                     label="Attachments"
@@ -485,7 +465,7 @@ export function PostCreationForm({
                 <div>
                   <h3 className="text-xs font-bold text-foreground">New Post Draft</h3>
                   <p className="text-[11px] text-muted-foreground">
-                    Target: <span className="font-semibold text-foreground capitalize">{values.source} Feed</span>
+                    Publishing to <span className="font-semibold text-foreground">Community Feed</span>
                   </p>
                 </div>
               </div>
@@ -508,7 +488,7 @@ export function PostCreationForm({
             <PolarisInfoBanner
               variant="default"
               title="Publishing as Community Admin"
-              description={`This post will be published officially under ${entity?.name || "your organization"} and distributed according to the selected channel.`}
+              description={`This post will be published officially under ${entity?.name || "your organization"} and shared with your community.`}
             />
 
             {/* Post Format & Content Card */}
@@ -620,6 +600,25 @@ export function PostCreationForm({
                 <p className="text-[11px] text-muted-foreground">
                   Markdown links and external URLs will automatically display rich card previews.
                 </p>
+              </div>
+
+              {/* Pin to top switch */}
+              <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/80 bg-muted/20 mt-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Pin className="h-3.5 w-3.5 text-amber-500" />
+                    <Label className="text-xs font-semibold text-foreground cursor-pointer">
+                      Pin Announcement to Top
+                    </Label>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Highlight this announcement at the top of the feed stream.
+                  </p>
+                </div>
+                <Switch
+                  checked={values.isPinned}
+                  onCheckedChange={(val) => setFieldValue("isPinned", val)}
+                />
               </div>
             </PolarisFormCard>
 
@@ -799,105 +798,6 @@ export function PostCreationForm({
               </PolarisFormCard>
             )}
 
-            {/* Step 3: Distribution & Settings Card */}
-            <PolarisFormCard
-              step={3}
-              icon={Globe}
-              title="Distribution & Target Feed"
-              description="Choose which community feed channel this post will be categorized into."
-              badge="Audience"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Target Channel */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-foreground">
-                    Target Channel / Tab
-                  </Label>
-                  <Select
-                    value={values.source}
-                    onValueChange={(val) => setFieldValue("source", val)}
-                  >
-                    <SelectTrigger className="h-10 rounded-xl border-border text-xs">
-                      <SelectValue placeholder="Select target feed" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border">
-                      <SelectItem value="feed" className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-3.5 w-3.5 text-indigo-500" />
-                          <span>Global Community Feed</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="admin" className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                          <span>Admin Announcement</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="jobs" className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="h-3.5 w-3.5 text-emerald-500" />
-                          <span>Job & Career Opportunity</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="marketPlace" className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <ShoppingBag className="h-3.5 w-3.5 text-amber-500" />
-                          <span>Marketplace Listing</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Audience Privacy */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-foreground">
-                    Audience Privacy
-                  </Label>
-                  <Select
-                    value={values.privacy}
-                    onValueChange={(val) => setFieldValue("privacy", val)}
-                  >
-                    <SelectTrigger className="h-10 rounded-xl border-border text-xs">
-                      <SelectValue placeholder="Select privacy" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border">
-                      <SelectItem value="PUBLIC" className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span>Public (All Ecosystem Members)</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="CONNECTIONS" className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span>Connections Only</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Pin to top switch */}
-              <div className="flex items-center justify-between p-4 rounded-xl border border-border/80 bg-muted/20 mt-2">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <Pin className="h-4 w-4 text-amber-500" />
-                    <Label className="text-xs font-semibold text-foreground cursor-pointer">
-                      Pin Announcement to Top
-                    </Label>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Highlighted with a pinned badge and kept at the top of the feed stream.
-                  </p>
-                </div>
-                <Switch
-                  checked={values.isPinned}
-                  onCheckedChange={(val) => setFieldValue("isPinned", val)}
-                />
-              </div>
-            </PolarisFormCard>
           </div>
         </PolarisFormLayout>
 

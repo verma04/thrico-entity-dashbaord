@@ -74,10 +74,15 @@ export default function PostModal() {
   };
 
   const handlePost = () => {
+    const mediaFiles = fileList
+      .map((f) => f.originFileObj)
+      .filter((f): f is File => Boolean(f));
+
     add({
       variables: {
         input: {
           description: postText,
+          ...(mediaFiles.length > 0 ? { media: mediaFiles } : {}),
         },
       },
     });
