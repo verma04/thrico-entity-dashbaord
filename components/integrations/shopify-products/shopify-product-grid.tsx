@@ -7,11 +7,13 @@ import { ShopifyProductCardCompact } from "./shopify-product-card-compact";
 
 interface ShopifyProductGridProps {
   products: any[];
+  shopDomain?: string;
   refetch?: () => void;
 }
 
 export function ShopifyProductGrid({
   products,
+  shopDomain,
   refetch,
 }: ShopifyProductGridProps) {
   if (!products || products.length === 0) {
@@ -39,6 +41,7 @@ export function ShopifyProductGrid({
         <ShopifyProductCardCompact
           key={prod.id || prod.shopifyProductId}
           product={prod}
+          shopDomain={shopDomain}
           refetch={refetch}
         />
       ))}

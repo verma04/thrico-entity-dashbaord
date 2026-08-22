@@ -26,44 +26,54 @@ export const GET_MATCH_WIN_CONFIG = gql`
         key
         symbol1 {
           id
-          configId
           key
           label
           icon
           color
-          sortOrder
-          createdAt
-          updatedAt
         }
         symbol2 {
           id
-          configId
           key
           label
           icon
           color
-          sortOrder
-          createdAt
-          updatedAt
         }
         symbol3 {
           id
-          configId
           key
           label
           icon
           color
-          sortOrder
-          createdAt
-          updatedAt
         }
         type
         value
         probability
         maxWins
-        rewardId
-        reward {
+        storeDiscountRuleId
+        storeDiscountRule {
           id
+          title
+          discountValue
+          discountType
+        }
+        manualBatchId
+        manualBatch {
+          id
+          name
+          totalCount
+        }
+        digitalCardRuleId
+        digitalCardRule {
+          id
+          title
+          faceValue
+        }
+        mechanism {
+          type
+          ruleId
+          storeDiscountRuleId
+          manualBatchId
+          digitalCardRuleId
         }
         createdAt
         updatedAt
@@ -78,20 +88,25 @@ export const GET_MATCH_WIN_DATA = gql`
   query GetMatchWinData {
     getMatchWinConfig {
       id
+      entityId
       costPerPlay
       maxPlaysPerDay
       isActive
       festivalMode
       symbols {
         id
+        configId
         key
         label
         icon
         color
         sortOrder
+        createdAt
+        updatedAt
       }
       combinations {
         id
+        configId
         key
         symbol1 {
           id
@@ -118,11 +133,99 @@ export const GET_MATCH_WIN_DATA = gql`
         value
         probability
         maxWins
-        rewardId
-        reward {
+        storeDiscountRuleId
+        storeDiscountRule {
           id
+          title
+          discountValue
+          discountType
         }
+        manualBatchId
+        manualBatch {
+          id
+          name
+          totalCount
+        }
+        digitalCardRuleId
+        digitalCardRule {
+          id
+          title
+          faceValue
+        }
+        mechanism {
+          type
+          ruleId
+          storeDiscountRuleId
+          manualBatchId
+          digitalCardRuleId
+        }
+        createdAt
+        updatedAt
       }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_MATCH_WIN_COMBINATION = gql`
+  query GetMatchWinCombination($id: ID!) {
+    getMatchWinCombination(id: $id) {
+      id
+      configId
+      key
+      type
+      value
+      probability
+      maxWins
+      symbol1 {
+        id
+        key
+        label
+        icon
+        color
+      }
+      symbol2 {
+        id
+        key
+        label
+        icon
+        color
+      }
+      symbol3 {
+        id
+        key
+        label
+        icon
+        color
+      }
+      storeDiscountRuleId
+      storeDiscountRule {
+        id
+        title
+        discountValue
+        discountType
+      }
+      manualBatchId
+      manualBatch {
+        id
+        name
+        totalCount
+      }
+      digitalCardRuleId
+      digitalCardRule {
+        id
+        title
+        faceValue
+      }
+      mechanism {
+        type
+        ruleId
+        storeDiscountRuleId
+        manualBatchId
+        digitalCardRuleId
+      }
+      createdAt
       updatedAt
     }
   }
@@ -140,22 +243,9 @@ export const GET_MATCH_WIN_PLAYS = gql`
       symbolsWon
       playedAt
       user {
-        avatar
+        id
         firstName
         lastName
-      }
-    }
-  }
-`;
-
-export const INITIAL_MATCH_WIN_CONFIG = gql`
-  query InitialMatchWinConfig {
-    initialMatchWinConfig {
-      symbols {
-        key
-        label
-        icon
-        color
       }
     }
   }

@@ -15,6 +15,10 @@ export interface BadgeInput {
   action?: string;
   count?: number;
   points?: number;
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
   allowPushNotification?: boolean;
   allowEmailNotification?: boolean;
   pushNotificationTitle?: string;
@@ -32,6 +36,10 @@ export interface BadgeUpdateInput {
   module?: string;
   action?: string;
   targetValue?: number;
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
   allowPushNotification?: boolean;
   allowEmailNotification?: boolean;
   pushNotificationTitle?: string;
@@ -54,6 +62,10 @@ const CREATE_BADGE = gql`
       icon
       description
       condition
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       allowPushNotification
       allowEmailNotification
       pushNotificationTitle
@@ -80,6 +92,10 @@ const UPDATE_BADGE = gql`
       icon
       description
       condition
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       allowPushNotification
       allowEmailNotification
       pushNotificationTitle
@@ -181,6 +197,8 @@ export function useToggleBadge(options?: MutationHookOptions) {
 }
 
 // ---------------------------------------------------------
+export type MemberEligibility = "ALL" | "VERIFIED" | "TIERS" | "SPECIFIC_CUSTOMERS";
+
 export interface CreatePointRuleInput {
   source?: GamificationSourceType;
   module: string;
@@ -191,15 +209,40 @@ export interface CreatePointRuleInput {
   weeklyCap?: number | null;
   monthlyCap?: number | null;
   description?: string | null;
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
 }
 
 export interface UpdatePointRuleInput {
+  id?: string;
+  source?: GamificationSourceType;
+  module?: string;
+  action?: string;
+  trigger?: string;
   points?: number;
   dailyCap?: number | null;
   weeklyCap?: number | null;
   monthlyCap?: number | null;
   isActive?: boolean;
   description?: string | null;
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
 }
 
 const CREATE_POINT_RULE = gql`
@@ -215,6 +258,10 @@ const CREATE_POINT_RULE = gql`
       monthlyCap
       isActive
       description
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       allowPushNotification
       allowEmailNotification
       pushNotificationTitle
@@ -235,6 +282,10 @@ const UPDATE_POINT_RULE = gql`
       monthlyCap
       isActive
       description
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       allowPushNotification
       allowEmailNotification
       pushNotificationTitle

@@ -34,7 +34,7 @@ export function EcosystemActionBar({
   return (
     <div
       className={cn(
-        "relative flex flex-col sm:flex-row sm:items-center gap-2 w-full",
+        "relative flex flex-wrap items-center gap-2 w-full",
         "px-3 py-2 bg-white dark:bg-transparent border-b border-border/60",
         shadow !== "none" && "shadow-2xs",
         className,
@@ -60,7 +60,7 @@ export function EcosystemActionBarGroup({
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 min-w-0",
+        "flex flex-wrap items-center gap-1.5",
         align === "right" && "sm:ml-auto justify-end",
         align === "center" && "justify-center mx-auto",
         className,

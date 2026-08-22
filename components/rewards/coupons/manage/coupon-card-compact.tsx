@@ -3,11 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import {
-  Ticket,
   Coins,
-  Upload,
-  ExternalLink,
   Package,
+  Pencil,
+  Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import { CouponActions } from "./coupon-actions";
 import { getMechanismBadge } from "../utils";
@@ -17,20 +17,20 @@ import { cn } from "@/lib/utils";
 
 interface CouponCardCompactProps {
   reward: any;
-  onOpenUploadForReward: (rewardId: string) => void;
-  onManageVouchers: (rewardId: string) => void;
+  onOpenUploadForReward?: (rewardId: string) => void;
+  onManageVouchers?: (rewardId: string) => void;
 }
 
 export function CouponCardCompact({
   reward,
-  onOpenUploadForReward,
-  onManageVouchers,
 }: CouponCardCompactProps) {
   const mechanisms = Array.isArray(reward.rewardMechanism)
     ? reward.rewardMechanism
     : [reward.rewardMechanism || "COUPON"];
 
-  const primaryMech = getMechanismBadge(mechanisms[0] || "COUPON");
+  const primaryMech = getMechanismBadge(
+    reward.mechanism?.type || mechanisms[0] || "COUPON"
+  );
   const MechIcon = primaryMech.icon;
 
   const coverUrl = reward.image
@@ -64,7 +64,7 @@ export function CouponCardCompact({
             <span
               className={cn(
                 "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-white shadow-2xs",
-                reward.isActive ? "bg-emerald-600" : "bg-rose-600",
+                reward.isActive ? "bg-emerald-600" : "bg-rose-600"
               )}
             >
               {reward.isActive ? "Active" : "Inactive"}
@@ -74,15 +74,17 @@ export function CouponCardCompact({
               <MechIcon className="h-2.5 w-2.5" />
               {primaryMech.label}
             </span>
+
+            {(reward.eligibility?.memberEligibility || reward.memberEligibility) && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-black/60 backdrop-blur-xs text-white border border-white/20">
+                {(reward.eligibility?.memberEligibility || reward.memberEligibility).replace(/_/g, " ")}
+              </span>
+            )}
           </div>
 
           {/* Top Right Action Menu */}
           <div className="absolute top-2 right-2 bg-black/40 hover:bg-black/60 backdrop-blur-xs rounded-md transition-colors text-white">
-            <CouponActions
-              reward={reward}
-              onOpenUploadForReward={onOpenUploadForReward}
-              onManageVouchers={onManageVouchers}
-            />
+            <CouponActions reward={reward} />
           </div>
 
           {/* Bottom Left Cost on Image */}
@@ -103,14 +105,16 @@ export function CouponCardCompact({
             <AdminStatusBadge status={reward.isActive ? "APPROVED" : "DISABLED"}>
               {reward.isActive ? "Active" : "Inactive"}
             </AdminStatusBadge>
+
+            {(reward.eligibility?.memberEligibility || reward.memberEligibility) && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-muted-foreground border border-border">
+                {(reward.eligibility?.memberEligibility || reward.memberEligibility).replace(/_/g, " ")}
+              </span>
+            )}
           </div>
 
           <div className="bg-background/80 hover:bg-background rounded-md transition-colors shrink-0">
-            <CouponActions
-              reward={reward}
-              onOpenUploadForReward={onOpenUploadForReward}
-              onManageVouchers={onManageVouchers}
-            />
+            <CouponActions reward={reward} />
           </div>
         </div>
       )}
@@ -138,14 +142,14 @@ export function CouponCardCompact({
             </p>
           )}
 
-          {/* Inventory & Redeemed metrics */}
+          {/* Limits & Redeemed metrics */}
           <div className="flex items-center justify-between pt-1 border-t border-border/30 text-[10px] text-muted-foreground">
             <div className="flex items-center gap-1">
               <Package className="h-3 w-3 text-muted-foreground/70" />
               <span>
                 {reward.inventoryRequired
-                  ? `${reward.inventoryCount ?? 0} in stock`
-                  : "Unlimited"}
+                  ? `${reward.remainingVouchers ?? reward.inventoryCount ?? 0} in stock`
+                  : "On-Demand"}
               </span>
             </div>
 
@@ -155,26 +159,18 @@ export function CouponCardCompact({
           </div>
         </div>
 
-        {/* ── Card Footer: Action Shortcuts ─────────────────────────────── */}
-        <div className="flex items-center gap-1.5 pt-2 border-t border-border/40">
+        {/* ── Card Footer: Clean Edit Action ─────────────────────────────── */}
+        <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-2">
           <Button
+            asChild
             variant="outline"
             size="sm"
-            onClick={() => onManageVouchers(reward.id)}
-            className="h-7 flex-1 text-[11px] font-medium gap-1 px-2 border-border bg-card hover:bg-muted"
+            className="h-7 w-full text-[11px] font-semibold gap-1.5 px-2.5 border-border/80 bg-card hover:bg-muted"
           >
-            <Ticket className="h-3 w-3" />
-            Vouchers
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenUploadForReward(reward.id)}
-            className="h-7 text-[11px] font-medium gap-1 px-2 text-muted-foreground hover:text-foreground"
-          >
-            <Upload className="h-3 w-3" />
-            Upload
+            <Link href={`/gamification/rewards/coupons/${reward.id}/edit`}>
+              <Pencil className="h-3 w-3 text-muted-foreground" />
+              <span>Edit Reward</span>
+            </Link>
           </Button>
         </div>
       </div>

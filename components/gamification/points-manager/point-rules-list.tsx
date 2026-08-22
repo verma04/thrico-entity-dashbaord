@@ -21,7 +21,12 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getPointRuleTableColumns = (
-  modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[],
+  modules: {
+    id: string;
+    name: string;
+    icon: string;
+    type?: "MODULE" | "INTEGRATION";
+  }[],
   onEdit: (rule: PointRule) => void,
   onOpenNotifications: (rule: PointRule) => void,
   onToggleActive: (id: string) => void,
@@ -99,6 +104,16 @@ export const getPointRuleTableColumns = (
       ),
     },
     {
+      key: "eligibility",
+      header: "Eligibility",
+      cell: (rule: PointRule) => (
+        <AdminTableTag variant="fuchsia">
+          {" "}
+          {rule?.memberEligibility?.replace(/_/g, " ")}
+        </AdminTableTag>
+      ),
+    },
+    {
       key: "dailyCap",
       header: "Daily",
       cell: (rule: PointRule) => (
@@ -150,7 +165,11 @@ export const getPointRuleTableColumns = (
         return (
           <div className="flex items-center gap-1.5">
             <div
-              title={hasPush ? "Push Notification Enabled" : "Push Notification Muted"}
+              title={
+                hasPush
+                  ? "Push Notification Enabled"
+                  : "Push Notification Muted"
+              }
               className={cn(
                 "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
                 hasPush
@@ -162,7 +181,11 @@ export const getPointRuleTableColumns = (
               <span>Push</span>
             </div>
             <div
-              title={hasEmail ? "Email Notification Enabled" : "Email Notification Muted"}
+              title={
+                hasEmail
+                  ? "Email Notification Enabled"
+                  : "Email Notification Muted"
+              }
               className={cn(
                 "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
                 hasEmail
@@ -218,7 +241,12 @@ export const getPointRuleTableColumns = (
 
 export interface PointRulesListProps {
   rules: PointRule[];
-  modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
+  modules: {
+    id: string;
+    name: string;
+    icon: string;
+    type?: "MODULE" | "INTEGRATION";
+  }[];
   onEdit: (rule: PointRule) => void;
   onOpenNotifications: (rule: PointRule) => void;
   onToggleActive: (id: string) => void;

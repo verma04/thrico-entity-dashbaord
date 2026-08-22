@@ -97,6 +97,7 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
     "ALL";
 
   const mechanism = searchParams.get("mechanism") || "ALL";
+  const eligibility = searchParams.get("eligibility") || "ALL";
   const sortBy = searchParams.get("sort") || "newest";
   const view = (searchParams.get("view") as "grid" | "list") || "grid";
 
@@ -134,6 +135,7 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
     cost: true,
     inventory: true,
     redeemed: true,
+    eligibility: true,
     status: true,
     actions: true,
   });
@@ -193,6 +195,11 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
           : [r.rewardMechanism || "COUPON"];
         return mechs.includes(mechanism);
       });
+    }
+
+    // Eligibility filter
+    if (eligibility !== "ALL") {
+      list = list.filter((r) => (r.memberEligibility || "ALL") === eligibility);
     }
 
     // Search filter
@@ -392,7 +399,7 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
       <EcosystemActionBar shadow="none">
         {/* Search */}
         <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item grow className="max-w-xs">
+          <EcosystemActionBar.Item grow className="w-full sm:w-60">
             <EcosystemActionBar.Search
               value={searchTerm}
               onChange={setSearchTerm}
@@ -411,7 +418,7 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
               value={mechanism}
               onValueChange={(v) => setMechanism(v)}
             >
-              <SelectTrigger className="w-[150px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+              <SelectTrigger className="w-[140px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <SelectValue placeholder="Mechanism" />
               </SelectTrigger>
               <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[160px]">
@@ -434,7 +441,7 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
               value={status}
               onValueChange={(v) => setStatus(v)}
             >
-              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+              <SelectTrigger className="w-[125px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <div className="flex items-center gap-2">
                   {STATUS_TABS.find((t) => t.value === status)?.dot && (
                     <span
@@ -471,13 +478,51 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
             </Select>
           </EcosystemActionBar.Item>
 
+          {/* Eligibility Filter */}
+          <EcosystemActionBar.Item>
+            <Select
+              value={eligibility}
+              onValueChange={(v) => updateParams({ eligibility: v, page: null })}
+            >
+              <SelectTrigger className="w-[135px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                <SelectValue placeholder="Eligibility" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[160px]">
+                <SelectItem
+                  value="ALL"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  All Eligibilities
+                </SelectItem>
+                <SelectItem
+                  value="VERIFIED"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  Verified Only
+                </SelectItem>
+                <SelectItem
+                  value="TIERS"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  Specific Tiers
+                </SelectItem>
+                <SelectItem
+                  value="SPECIFIC_CUSTOMERS"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  Specific Customers
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
+
           {/* Sort Filter */}
           <EcosystemActionBar.Item>
             <Select
               value={sortBy}
               onValueChange={(v) => setSortBy(v)}
             >
-              <SelectTrigger className="w-[160px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[170px]">
@@ -549,12 +594,6 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
               { id: "list", label: "List", icon: ListIcon },
             ]}
           />
-
-          {/* New Reward CTA Button */}
-          <CtaButton onClick={handleCreate}>
-            <Plus className="h-3.5 w-3.5 mr-1" />
-            New Reward
-          </CtaButton>
 
           <EcosystemActionBar.Separator />
 

@@ -131,6 +131,11 @@ export const GET_ENTITY_SETTINGS = gql`
       entity
       allowNewUser
       autoApproveUser
+      sendWelcomeEmail
+      welcomeEmailSubject
+      sendApprovalEmail
+      approvalEmailSubject
+      actionEmails
       allowCommunity
       autoApproveCommunity
       autoApproveGroup
@@ -176,6 +181,11 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       entity
       allowNewUser
       autoApproveUser
+      sendWelcomeEmail
+      welcomeEmailSubject
+      sendApprovalEmail
+      approvalEmailSubject
+      actionEmails
       allowCommunity
       autoApproveCommunity
       autoApproveGroup
@@ -402,6 +412,7 @@ export const SWITCH_TO_OTHER_ACCOUNT = gql`
 export * from "./dashboard";
 export * from "./currency/currency-queries";
 export * from "./rewards/rewards-queries";
+export * from "./rewards/manual";
 export * from "./reports";
 export * from "./audit";
 export * from "./email";

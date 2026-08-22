@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Zap, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  useGetPointRules,
+  useGetPointRuleById,
   useGetEntityGamificationModules,
 } from "@/graphql/actions/gamification/gamification-quiries";
 import { useUpdatePointRule } from "@/graphql/actions/gamification/gamification-mutation";
@@ -23,15 +23,22 @@ export default function EditPointRulePage() {
   const router = useRouter();
   const ruleId = params?.id as string;
 
-  const { data, loading: fetchLoading } = useGetPointRules();
+  const { data, loading: fetchLoading } = useGetPointRuleById({
+    variables: { id: ruleId },
+    skip: !ruleId,
+  });
   const { data: moduleData } = useGetEntityGamificationModules();
   const [updatePointRule, { loading: isUpdating }] = useUpdatePointRule();
 
-  const rule = useMemo(() => {
-    return data?.getPointRules?.find((r) => r.id === ruleId);
-  }, [data, ruleId]);
+  const rule = data?.getPointRuleById;
 
   const handleUpdate = async (values: any) => {
+    const tierIds = Array.isArray(values.membershipTierId)
+      ? values.membershipTierId
+      : values.membershipTierId
+        ? [values.membershipTierId]
+        : values.eligibleTierIds || [];
+
     await updatePointRule({
       variables: {
         id: ruleId,
@@ -42,22 +49,37 @@ export default function EditPointRulePage() {
           monthlyCap: values.monthlyCap ? Number(values.monthlyCap) : null,
           description: values.description,
           isActive: values.isActive,
+          memberEligibility: values.memberEligibility || "ALL",
+          membershipTierId: tierIds,
+          eligibleTierIds: tierIds,
+          eligibleUserIds: values.eligibleUserIds || [],
           allowPushNotification: values.allowPushNotification,
           allowEmailNotification: values.allowEmailNotification,
-          pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,
-          pushNotificationBody: values.allowPushNotification ? values.pushNotificationBody : undefined,
-          emailNotificationSubject: values.allowEmailNotification ? values.emailNotificationSubject : undefined,
-          emailNotificationBody: values.allowEmailNotification ? values.emailNotificationBody : undefined,
+          pushNotificationTitle: values.allowPushNotification
+            ? values.pushNotificationTitle
+            : undefined,
+          pushNotificationBody: values.allowPushNotification
+            ? values.pushNotificationBody
+            : undefined,
+          emailNotificationSubject: values.allowEmailNotification
+            ? values.emailNotificationSubject
+            : undefined,
+          emailNotificationBody: values.allowEmailNotification
+            ? values.emailNotificationBody
+            : undefined,
         },
       },
     });
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
-  const integrations = moduleData?.getEntityGamificationModules?.integrations || [];
+  const integrations =
+    moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
-  const moduleTriggers = moduleData?.getEntityGamificationModules?.moduleTriggers || [];
-  const integrationTriggers = moduleData?.getEntityGamificationModules?.integrationTriggers || [];
+  const moduleTriggers =
+    moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers =
+    moduleData?.getEntityGamificationModules?.integrationTriggers || [];
 
   if (fetchLoading) {
     return (
@@ -71,7 +93,7 @@ export default function EditPointRulePage() {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center space-y-4">
         <h2 className="text-xl font-bold">Rule Not Found</h2>
-        <Button onClick={() => router.push("/gamification/points")}>
+        <Button onClick={() => router.push("/gamification/points-and-badges/points")}>
           Back to List
         </Button>
       </div>

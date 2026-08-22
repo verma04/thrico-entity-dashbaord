@@ -6,7 +6,7 @@ export const couponSchema = Yup.object().shape({
   tcCost: Yup.number()
     .required("Set a cost in points")
     .min(1, "Price must be at least 1 TC"),
-  discountType: Yup.string().required("Select how the reward works"),
+  discountType: Yup.string().nullable(),
   discountValue: Yup.string().nullable(),
   validityDays: Yup.number().required("Set an expiration period").min(1),
   totalUsageLimit: Yup.number().min(0),

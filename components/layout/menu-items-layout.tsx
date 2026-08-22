@@ -50,11 +50,13 @@ function TabButton({
   isActive,
   href,
   fullWidth,
+  layoutId = "menu-tab-underline",
 }: {
   item: MenuItem;
   isActive: boolean;
   href: string;
   fullWidth?: boolean;
+  layoutId?: string;
 }) {
   const content = (
     <>
@@ -64,7 +66,7 @@ function TabButton({
       {/* Active underline indicator */}
       {isActive && !item.locked && (
         <motion.div
-          layoutId="menu-tab-underline"
+          layoutId={layoutId}
           className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground dark:bg-white"
           transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
         />
@@ -175,10 +177,11 @@ function MenuTabs({
               item={item}
               isActive={
                 activeTab === item.key ||
-                (!!item.key && fullKey.startsWith(item.key + "/"))
+                (!!item.key && (fullKey === item.key || fullKey.startsWith(item.key + "/")))
               }
               href={href}
               fullWidth={fullWidth}
+              layoutId={`menu-tab-underline-${activeBase.replace(/\//g, "-")}`}
             />
           );
 
@@ -316,6 +319,10 @@ const MenuItemsLayout = ({
     }
 
     if (items.some((i) => i.key === fullKey)) return fullKey;
+    const parentMatch = items.find(
+      (i) => i.key && (fullKey.startsWith(i.key + "/") || fullKey === i.key),
+    );
+    if (parentMatch) return parentMatch.key;
     return pathParts[activeIndex + 1];
   }, [activeIndex, pathParts, hideDefaultTabs, items, fullKey]);
 

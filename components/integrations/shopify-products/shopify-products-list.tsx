@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Package } from "lucide-react";
+import { Package, ExternalLink } from "lucide-react";
 import { ShopifyProductActions } from "./shopify-product-actions";
 import {
   AdminTable,
@@ -16,6 +16,7 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getShopifyProductTableColumns = (
+  shopDomain?: string,
   refetch?: () => void,
 ): AdminTableColumn<any>[] => [
   {
@@ -28,13 +29,35 @@ export const getShopifyProductTableColumns = (
   {
     key: "product",
     header: "Product",
-    cell: (row) => (
-      <AdminTableItem
-        icon={Package}
-        title={row.title || "Untitled Product"}
-        subtitle={`ID: ${row.shopifyProductId || row.id}`}
-      />
-    ),
+    cell: (row) => {
+      const cleanId = (row.shopifyProductId || row.id || "").replace(/\D/g, "");
+      const adminUrl =
+        shopDomain && cleanId
+          ? `https://${shopDomain}/admin/products/${cleanId}`
+          : null;
+
+      return (
+        <div className="flex items-center gap-2">
+          <AdminTableItem
+            avatar={row.featuredImage || undefined}
+            icon={Package}
+            title={row.title || "Untitled Product"}
+            subtitle={`ID: ${row.shopifyProductId || row.id}`}
+          />
+          {adminUrl && (
+            <a
+              href={adminUrl}
+              target="_blank"
+              rel="noreferrer"
+              title="Open in Shopify Admin"
+              className="text-muted-foreground/60 hover:text-foreground inline-flex items-center p-1 hover:bg-muted rounded"
+            >
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+        </div>
+      );
+    },
   },
   {
     key: "status",
@@ -52,8 +75,8 @@ export const getShopifyProductTableColumns = (
   },
   {
     key: "updatedAt",
-    header: "Last Updated",
-    cell: (row) => <AdminTableDate date={row.updatedAt} />,
+    header: "Last Synced / Updated",
+    cell: (row) => <AdminTableDate date={row.updatedAt || row.createdAt} />,
   },
   {
     key: "actions",
@@ -61,7 +84,13 @@ export const getShopifyProductTableColumns = (
     headerClassName: "w-10 text-right",
     className: "text-right",
     isFixedRight: true,
-    cell: (row) => <ShopifyProductActions product={row} refetch={refetch} />,
+    cell: (row) => (
+      <ShopifyProductActions
+        product={row}
+        shopDomain={shopDomain}
+        refetch={refetch}
+      />
+    ),
   },
 ];
 
@@ -71,6 +100,7 @@ export const getShopifyProductTableColumns = (
 
 export interface ShopifyProductsListProps {
   products: any[];
+  shopDomain?: string;
   refetch?: () => void;
   visibleColumns?: Record<string, boolean>;
   offset?: number;
@@ -78,13 +108,14 @@ export interface ShopifyProductsListProps {
 
 export function ShopifyProductsList({
   products,
+  shopDomain,
   refetch,
   visibleColumns,
   offset = 0,
 }: ShopifyProductsListProps) {
   const baseColumns = React.useMemo(
-    () => getShopifyProductTableColumns(refetch),
-    [refetch],
+    () => getShopifyProductTableColumns(shopDomain, refetch),
+    [shopDomain, refetch],
   );
 
   const activeColumns = React.useMemo(() => {

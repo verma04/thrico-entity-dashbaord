@@ -12,6 +12,10 @@ export const GET_POINT_RULES = gql`
       points
       description
       isActive
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       createdAt
       updatedAt
     }
@@ -29,6 +33,10 @@ export const GET_POINT_RULE = gql`
       points
       description
       isActive
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       createdAt
       updatedAt
     }
@@ -49,6 +57,10 @@ export const GET_BADGES = gql`
       icon
       description
       condition
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       allowPushNotification
       allowEmailNotification
       pushNotificationTitle

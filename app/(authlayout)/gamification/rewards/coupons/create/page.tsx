@@ -37,11 +37,25 @@ export default function CreateCouponPage() {
       cooldownPeriod: 0,
       inventoryRequired: false,
       image: "",
+      mechanism: "INTERNAL",
+      rewardPillar: "INTERNAL",
+      selectedRuleId: "",
       rewardMechanism: ["COUPON"],
+      storeDiscountType: "FIXED_AMOUNT",
+      storeCodePrefix: "THRICO-",
+      storeMinCart: 0,
+      customerLock: true,
+      giftCardBrand: "Amazon Pay",
+      giftCardValue: 500,
+      giftCardFee: 25,
       url: "",
       howToClaim: "",
       couponType: "ONE_TO_ONE",
       couponCode: "",
+      memberEligibility: "ALL",
+      membershipTierId: [],
+      eligibleTierIds: [],
+      eligibleUserIds: [],
       isActive: true,
       status: "ACTIVE",
       expiryDate: (() => {
@@ -54,28 +68,61 @@ export default function CreateCouponPage() {
     validationSchema: couponSchema,
     onSubmit: async (values) => {
       try {
+        const tierIds = Array.isArray(values.membershipTierId)
+          ? values.membershipTierId
+          : values.membershipTierId
+            ? [values.membershipTierId]
+            : values.eligibleTierIds || [];
+
         await createReward({
           variables: {
             input: {
               title: values.title,
               description: values.description,
               howToClaim: values.howToClaim,
-              categoryId: "cat-002",
               tcCost: values.tcCost,
+              validityDays: Number(values.validityDays || 30),
               inventoryRequired: values.inventoryRequired,
-              perUserLimit: values.perUserLimit,
-              totalUsageLimit: values.totalUsageLimit,
-              minAccountAge: values.minAccountAge,
-              minActivityRequired: values.minActivityRequired,
-              blockWarnedUsers: values.blockWarnedUsers,
-              cooldownPeriod: values.cooldownPeriod,
               image: values.image,
-              rewardMechanism: Array.isArray(values.rewardMechanism)
-                ? values.rewardMechanism
-                : [values.rewardMechanism || "COUPON"],
               url: values.url,
-              couponType: values.couponType,
-              couponCode: values.couponCode,
+              eligibility: {
+                memberEligibility: values.memberEligibility || "ALL",
+                membershipTierId: tierIds,
+                eligibleTierIds: tierIds,
+                eligibleUserIds: values.eligibleUserIds || [],
+                totalUsageLimit: values.totalUsageLimit,
+                perUserLimit: values.perUserLimit,
+                minAccountAge: values.minAccountAge,
+                minActivityRequired: values.minActivityRequired,
+                blockWarnedUsers: values.blockWarnedUsers,
+                cooldownPeriod: values.cooldownPeriod,
+              },
+              mechanism: {
+                type:
+                  values.rewardPillar === "ECOMMERCE" ||
+                  values.mechanism === "ECOMMERCE"
+                    ? "STORE_DISCOUNT"
+                    : values.rewardPillar === "DIGITAL_GIFT_CARD" ||
+                        values.mechanism === "DIGITAL_GIFT_CARD"
+                      ? "DIGITAL_GIFT_CARD"
+                      : "INTERNAL_VOUCHER",
+                ruleId: values.selectedRuleId || null,
+                manualBatchId:
+                  values.rewardPillar === "INTERNAL" ||
+                  values.mechanism === "INTERNAL"
+                    ? values.selectedRuleId || null
+                    : null,
+                storeDiscountRuleId:
+                  values.rewardPillar === "ECOMMERCE" ||
+                  values.mechanism === "ECOMMERCE"
+                    ? values.selectedRuleId || null
+                    : null,
+                digitalCardRuleId:
+                  values.rewardPillar === "DIGITAL_GIFT_CARD" ||
+                  values.mechanism === "DIGITAL_GIFT_CARD"
+                    ? values.selectedRuleId || null
+                    : null,
+              },
               isActive: values.isActive,
               status: values.status,
               expiryDate: values.expiryDate || null,
@@ -114,7 +161,7 @@ export default function CreateCouponPage() {
           { label: "Create" },
         ]}
       />
-      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+      <EcosystemContainer className="h-full w-full border-none shadow-none bg-transparent p-0 ring-0">
         <PolarisFormLayout
           sidebar={<RewardPreviewSidebar formik={formik} showStrategy />}
         >

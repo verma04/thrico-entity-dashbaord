@@ -40,11 +40,14 @@ import { Pagination } from "@/components/shared/admin-table/admin-table";
 import {
   useGetShopifyProducts,
   useSyncShopifyProducts,
+  useGetShopifyConnection,
+  useGetShopifySyncStatus,
 } from "@/graphql/actions";
 import {
   STATUS_TABS,
   SORT_OPTIONS,
   ShopifyProductStatusValue,
+  ShopifyProductSyncBanner,
   SectionHeader,
   ContentArea,
 } from "./shopify-products-ui";
@@ -144,6 +147,15 @@ export function ShopifyProductsManage({
   const setPage = (p: number) =>
     updateParams({ page: p <= 1 ? null : String(p) });
 
+  // ── Fetch Shopify Connection & Sync Status ───────────────────────────────
+  const { data: connectionData, refetch: refetchConnection } =
+    useGetShopifyConnection();
+  const { data: syncStatusData } = useGetShopifySyncStatus();
+
+  const shopDomain = connectionData?.shopifyConnection?.shopDomain;
+  const lastSyncAt = connectionData?.shopifyConnection?.lastSyncAt;
+  const syncStatus = syncStatusData?.shopifySyncStatus;
+
   // ── Fetch Shopify Products ────────────────────────────────────────────────
   const { data, loading, refetch } = useGetShopifyProducts({
     input: {
@@ -157,8 +169,11 @@ export function ShopifyProductsManage({
   const handleSync = async () => {
     try {
       await syncProducts();
-      toast.success("Successfully synced Shopify products");
+      toast.success("Successfully synced Shopify products", {
+        description: "Your product catalog has been updated from Shopify.",
+      });
       refetch();
+      refetchConnection();
     } catch (err: any) {
       toast.error(err.message || "Failed to sync products");
     }
@@ -166,6 +181,22 @@ export function ShopifyProductsManage({
 
   const rawProducts = data?.getShopifyProducts?.data || [];
   const totalCount = data?.getShopifyProducts?.total ?? rawProducts.length;
+
+  const activeCount = useMemo(
+    () =>
+      rawProducts.filter(
+        (p: any) => (p.status || "ACTIVE").toUpperCase() === "ACTIVE",
+      ).length,
+    [rawProducts],
+  );
+
+  const draftCount = useMemo(
+    () =>
+      rawProducts.filter(
+        (p: any) => (p.status || "").toUpperCase() === "DRAFT",
+      ).length,
+    [rawProducts],
+  );
 
   // ── Filter and Sort Products ──────────────────────────────────────────────
   const filteredProducts = useMemo(() => {
@@ -220,8 +251,8 @@ export function ShopifyProductsManage({
       : `${status.charAt(0) + status.slice(1).toLowerCase()} Products`;
 
   const availableColumns = useMemo(
-    () => getShopifyProductTableColumns(refetch),
-    [refetch],
+    () => getShopifyProductTableColumns(shopDomain, refetch),
+    [shopDomain, refetch],
   );
 
   return (
@@ -242,6 +273,20 @@ export function ShopifyProductsManage({
           { label: "Products" },
         ]}
       />
+
+      {/* ── Real-Time Product Sync Diagnostic Info Banner ───────────────── */}
+      <div className="px-3">
+        <ShopifyProductSyncBanner
+          shopDomain={shopDomain}
+          lastSyncAt={lastSyncAt}
+          syncStatus={syncStatus}
+          totalSynced={totalCount}
+          activeCount={activeCount}
+          draftCount={draftCount}
+          syncing={syncing}
+          onSync={handleSync}
+        />
+      </div>
 
       {/* ── Action / Filter Bar ───────────────────────────────────────────── */}
       <EcosystemActionBar shadow="none">
@@ -410,6 +455,7 @@ export function ShopifyProductsManage({
           view={view}
           loading={loading}
           products={paginatedProducts}
+          shopDomain={shopDomain}
           refetch={refetch}
           visibleColumns={visibleColumns}
           offset={offset}

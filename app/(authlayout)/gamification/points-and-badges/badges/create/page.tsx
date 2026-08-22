@@ -21,6 +21,12 @@ export default function CreateBadgePage() {
   const [createBadge, { loading: isCreating }] = useCreateBadge();
 
   const handleCreate = async (values: any) => {
+    const tierIds = Array.isArray(values.membershipTierId)
+      ? values.membershipTierId
+      : values.membershipTierId
+        ? [values.membershipTierId]
+        : values.eligibleTierIds || [];
+
     const input: any = {
       source: values.type === "ACTION" ? values.source : undefined,
       name: values.name,
@@ -29,6 +35,10 @@ export default function CreateBadgePage() {
       type: values.type,
       module: values.type === "ACTION" ? values.module : undefined,
       action: values.type === "ACTION" ? values.action : undefined,
+      memberEligibility: values.memberEligibility || "ALL",
+      membershipTierId: tierIds,
+      eligibleTierIds: tierIds,
+      eligibleUserIds: values.eligibleUserIds || [],
       allowPushNotification: values.allowPushNotification,
       allowEmailNotification: values.allowEmailNotification,
       pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,

@@ -134,6 +134,10 @@ export interface Badge {
   count?: number;
   points?: number;
   condition?: any;
+  memberEligibility?: "ALL" | "VERIFIED" | "TIERS" | "SPECIFIC_CUSTOMERS";
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
   allowPushNotification?: boolean;
   allowEmailNotification?: boolean;
   pushNotificationTitle?: string;
@@ -176,6 +180,10 @@ const GET_BADGES = gql`
       action
       targetValue
       condition
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       allowPushNotification
       allowEmailNotification
       pushNotificationTitle
@@ -201,6 +209,52 @@ export function useGetBadges(
   return useQuery<GetBadgesData, GetBadgesVariables>(GET_BADGES, options);
 }
 
+export interface GetBadgeByIdData {
+  getBadgeById: Badge;
+}
+
+export const GET_BADGE_BY_ID = gql`
+  query GetBadgeById($id: ID!) {
+    getBadgeById(id: $id) {
+      id
+      source
+      name
+      description
+      icon
+      type
+      module
+      action
+      targetValue
+      condition
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
+      isActive
+      createdAt
+      updatedAt
+      userProgress {
+        id
+        progress
+        isCompleted
+        earnedAt
+      }
+    }
+  }
+`;
+
+export function useGetBadgeById(
+  options?: QueryHookOptions<GetBadgeByIdData, { id: string }>,
+) {
+  return useQuery<GetBadgeByIdData, { id: string }>(GET_BADGE_BY_ID, options);
+}
+
 // ---------------------------------------------------------
 // POINT RULES
 // ---------------------------------------------------------
@@ -217,6 +271,10 @@ export interface PointRule {
   monthlyCap?: number;
   description?: string;
   isActive: boolean;
+  memberEligibility?: "ALL" | "VERIFIED" | "TIERS" | "SPECIFIC_CUSTOMERS";
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
   allowPushNotification?: boolean;
   allowEmailNotification?: boolean;
   pushNotificationTitle?: string;
@@ -254,6 +312,10 @@ const GET_POINT_RULES = gql`
       monthlyCap
       description
       isActive
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
       allowPushNotification
       allowEmailNotification
       pushNotificationTitle
@@ -271,6 +333,49 @@ export function useGetPointRules(
 ) {
   return useQuery<GetPointRulesData, { filter?: PointRuleFilter }>(
     GET_POINT_RULES,
+    options,
+  );
+}
+
+export interface GetPointRuleByIdData {
+  getPointRuleById: PointRule;
+}
+
+export const GET_POINT_RULE_BY_ID = gql`
+  query GetPointRuleById($id: ID!) {
+    getPointRuleById(id: $id) {
+      id
+      source
+      module
+      action
+      trigger
+      points
+      dailyCap
+      weeklyCap
+      monthlyCap
+      description
+      isActive
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export function useGetPointRuleById(
+  options?: QueryHookOptions<GetPointRuleByIdData, { id: string }>,
+) {
+  return useQuery<GetPointRuleByIdData, { id: string }>(
+    GET_POINT_RULE_BY_ID,
     options,
   );
 }

@@ -10,7 +10,6 @@ import {
   User2,
   Contact2,
   BellDotIcon,
-
   PaintBucketIcon,
   Rocket,
   LogOutIcon,
@@ -499,45 +498,6 @@ export const gamificationEngine = [
     ],
   },
   {
-    key: "engagement-games",
-    label: "Member Games",
-    path: "/gamification/engagement-games",
-    isMobileOnly: true,
-    icon: <Gamepad2 size={18} />,
-    children: [
-      {
-        key: "game-dash",
-        label: "Dashboard",
-        path: "/gamification/engagement-games",
-        icon: <LayoutDashboard size={18} />,
-      },
-      {
-        key: "game-spin",
-        label: "Spin Wheel",
-        path: "/gamification/engagement-games/spin-wheel",
-        icon: <PlayCircle size={18} />,
-      },
-      {
-        key: "game-scratch",
-        label: "Scratch Card",
-        path: "/gamification/engagement-games/scratch-card",
-        icon: <Ticket size={18} />,
-      },
-      {
-        key: "game-match",
-        label: "Match & Win",
-        path: "/gamification/engagement-games/match-win",
-        icon: <Puzzle size={18} />,
-      },
-      {
-        key: "game-settings",
-        label: "Settings",
-        path: "/gamification/engagement-games/settings",
-        icon: <Settings size={18} />,
-      },
-    ],
-  },
-  {
     key: "rewards",
     label: "Rewards",
     path: "/gamification/rewards",
@@ -551,17 +511,76 @@ export const gamificationEngine = [
         icon: <LayoutDashboard size={18} />,
       },
       {
+        key: "rew-pillars",
+        label: "Reward Pillars",
+        path: "/gamification/rewards/pillars",
+        icon: <Layers size={18} />,
+        children: [
+          {
+            key: "rew-pillars-dash",
+            label: "Overview",
+            path: "/gamification/rewards/pillars",
+            icon: <LayoutDashboard size={18} />,
+          },
+          {
+            key: "rew-pillars-manual",
+            label: "Manual / Internal",
+            path: "/gamification/rewards/pillars/manual",
+            icon: <Coins size={18} />,
+          },
+          {
+            key: "rew-pillars-store",
+            label: "E-Commerce Store",
+            path: "/gamification/rewards/pillars/store",
+            icon: <ShoppingBag size={18} />,
+          },
+          {
+            key: "rew-pillars-giftcards",
+            label: "Digital Gift Cards",
+            path: "/gamification/rewards/pillars/gift-cards",
+            icon: <Gift size={18} />,
+          },
+        ],
+      },
+      {
         key: "rcoupons",
         label: "Rewards & Vouchers",
         path: "/gamification/rewards/coupons",
         icon: <Tags size={18} />,
       },
       {
-        key: "rew-coupons",
-        label: "Create Reward",
-        path: "/gamification/rewards/coupons/create",
-        icon: <PlusCircle size={18} />,
+        key: "rew-games",
+        label: "Member Games",
+        path: "/gamification/rewards/engagement-games",
+        icon: <Gamepad2 size={18} />,
+        children: [
+          {
+            key: "rew-games-dash",
+            label: "Dashboard",
+            path: "/gamification/rewards/engagement-games",
+            icon: <LayoutDashboard size={18} />,
+          },
+          {
+            key: "rew-spin",
+            label: "Spin Wheel",
+            path: "/gamification/rewards/engagement-games/spin-wheel",
+            icon: <Dices size={18} />,
+          },
+          {
+            key: "rew-scratch",
+            label: "Scratch Card",
+            path: "/gamification/rewards/engagement-games/scratch-card",
+            icon: <Ticket size={18} />,
+          },
+          {
+            key: "rew-match",
+            label: "Match & Win",
+            path: "/gamification/rewards/engagement-games/match-win",
+            icon: <Puzzle size={18} />,
+          },
+        ],
       },
+
       {
         key: "redemptions",
         label: "Redemption",
@@ -1196,7 +1215,6 @@ export const integrationsItems = [
     icon: <Store size={18} />,
   },
 ];
-
 
 export const mobileAppItems = [
   {

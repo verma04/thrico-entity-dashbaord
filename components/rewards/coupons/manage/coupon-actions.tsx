@@ -14,9 +14,8 @@ import { Button } from "@/components/ui/button";
 import {
   MoreHorizontal,
   Pencil,
-  Ticket,
-  Upload,
   Copy,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,8 +28,6 @@ export interface CouponActionsProps {
 
 export function CouponActions({
   reward,
-  onOpenUploadForReward,
-  onManageVouchers,
   trigger,
 }: CouponActionsProps) {
   const handleCopyId = (e: React.MouseEvent) => {
@@ -71,26 +68,6 @@ export function CouponActions({
           </Link>
         </DropdownMenuItem>
 
-        {onManageVouchers && (
-          <DropdownMenuItem
-            onClick={() => onManageVouchers(reward.id)}
-            className="text-xs font-medium cursor-pointer gap-2 py-1.5"
-          >
-            <Ticket className="h-3.5 w-3.5 text-muted-foreground" />
-            Manage Vouchers
-          </DropdownMenuItem>
-        )}
-
-        {onOpenUploadForReward && (
-          <DropdownMenuItem
-            onClick={() => onOpenUploadForReward(reward.id)}
-            className="text-xs font-medium cursor-pointer gap-2 py-1.5"
-          >
-            <Upload className="h-3.5 w-3.5 text-muted-foreground" />
-            Upload Vouchers
-          </DropdownMenuItem>
-        )}
-
         <DropdownMenuSeparator className="my-1" />
 
         <DropdownMenuItem
@@ -104,5 +81,3 @@ export function CouponActions({
     </DropdownMenu>
   );
 }
-
-export default CouponActions;

@@ -37,6 +37,10 @@ import {
   PolarisSummaryRow,
   PolarisTipCard,
 } from "@/components/gamification/shared/polaris-form-ui";
+import {
+  PolarisEligibilityCard,
+  toArray,
+} from "@/components/gamification/shared/polaris-eligibility-card";
 
 const ICON_CATEGORIES = [
   {
@@ -171,10 +175,31 @@ export function BadgeForm({
     }
   }, [initialValues, integrations]);
 
-  const formik = useFormik({
-    initialValues: initialValues
+  const formikInitialValues = React.useMemo(() => {
+    return initialValues
       ? {
           ...initialValues,
+          memberEligibility:
+            initialValues.memberEligibility ||
+            (initialValues.eligibleUserIds?.length
+              ? "SPECIFIC_CUSTOMERS"
+              : (Array.isArray(initialValues.membershipTierId)
+                    ? initialValues.membershipTierId.length
+                    : initialValues.membershipTierId) ||
+                  initialValues.eligibleTierIds?.length
+                ? "TIERS"
+                : "ALL"),
+          membershipTierId: Array.isArray(initialValues.membershipTierId)
+            ? initialValues.membershipTierId
+            : initialValues.membershipTierId
+              ? [initialValues.membershipTierId]
+              : initialValues.eligibleTierIds || [],
+          eligibleTierIds: Array.isArray(initialValues.membershipTierId)
+            ? initialValues.membershipTierId
+            : initialValues.membershipTierId
+              ? [initialValues.membershipTierId]
+              : initialValues.eligibleTierIds || [],
+          eligibleUserIds: initialValues.eligibleUserIds || [],
           allowPushNotification:
             initialValues.allowPushNotification !== undefined
               ? initialValues.allowPushNotification
@@ -201,6 +226,10 @@ export function BadgeForm({
           module: "",
           action: "",
           targetValue: 1,
+          memberEligibility: "ALL",
+          membershipTierId: [],
+          eligibleTierIds: [],
+          eligibleUserIds: [],
           allowPushNotification: true,
           allowEmailNotification: true,
           pushNotificationTitle: "",
@@ -208,7 +237,11 @@ export function BadgeForm({
           emailNotificationSubject: "",
           emailNotificationBody: "",
           isActive: true,
-        },
+        };
+  }, [initialValues, initialSourceType]);
+
+  const formik = useFormik({
+    initialValues: formikInitialValues,
     validationSchema: badgeSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
@@ -240,21 +273,37 @@ export function BadgeForm({
   });
 
   const allSources = React.useMemo(() => {
-    const mods = modules.map((m) => ({
-      id: m.id,
-      uuid: m.uuid,
-      name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name,
-      type: "Module",
-      icon: m.icon,
-    }));
-    const ints = integrations.map((i) => ({
-      id: i.id,
-      uuid: i.uuid,
-      slug: (i as any).slug,
-      name: i.name ? i.name.charAt(0).toUpperCase() + i.name.slice(1) : i.name,
-      type: "Integration",
-      icon: i.icon,
-    }));
+    const modsMap = new Map<string, any>();
+    (modules || []).forEach((m) => {
+      const id = String(m.id || m.uuid || m.slug || m.name || "").trim();
+      if (id && !modsMap.has(id.toLowerCase())) {
+        modsMap.set(id.toLowerCase(), {
+          id,
+          uuid: m.uuid,
+          name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : id,
+          type: "Module",
+          icon: m.icon,
+        });
+      }
+    });
+
+    const intsMap = new Map<string, any>();
+    (integrations || []).forEach((i) => {
+      const id = String(i.id || i.uuid || (i as any).slug || i.name || "").trim();
+      if (id && !intsMap.has(id.toLowerCase())) {
+        intsMap.set(id.toLowerCase(), {
+          id,
+          uuid: i.uuid,
+          slug: (i as any).slug,
+          name: i.name ? i.name.charAt(0).toUpperCase() + i.name.slice(1) : id,
+          type: "Integration",
+          icon: i.icon,
+        });
+      }
+    });
+
+    const mods = Array.from(modsMap.values());
+    const ints = Array.from(intsMap.values());
     return { modules: mods, integrations: ints, all: [...mods, ...ints] };
   }, [modules, integrations]);
 
@@ -284,7 +333,7 @@ export function BadgeForm({
       return matchValues.has(target.toLowerCase());
     };
 
-    const fromIntegrationTriggers = integrationTriggers.filter(
+    const fromIntegrationTriggers = (integrationTriggers || []).filter(
       (t) =>
         isMatch(t.integrationId) ||
         isMatch(t.moduleId) ||
@@ -292,14 +341,14 @@ export function BadgeForm({
         isMatch((t as any).integrationSlug),
     );
 
-    const fromModuleTriggers = moduleTriggers.filter(
+    const fromModuleTriggers = (moduleTriggers || []).filter(
       (t) =>
         isMatch(t.moduleId) ||
         isMatch((t as any).integrationId) ||
         isMatch((t as any).slug),
     );
 
-    const fromGenericTriggers = triggers.filter(
+    const fromGenericTriggers = (triggers || []).filter(
       (t) =>
         isMatch(t.moduleId) ||
         isMatch((t as any).integrationId) ||
@@ -313,7 +362,7 @@ export function BadgeForm({
     ];
 
     if (combined.length === 0 && sourceType === "INTEGRATION") {
-      integrationTriggers.forEach((t) => {
+      (integrationTriggers || []).forEach((t) => {
         if (
           isMatch(t.integrationId) ||
           isMatch(t.moduleId) ||
@@ -325,11 +374,14 @@ export function BadgeForm({
       });
     }
 
-    const unique = new Map();
+    const unique = new Map<string, any>();
     combined.forEach((item) => {
-      const key = item.id || item.name || item.description;
-      if (key && !unique.has(key)) {
-        unique.set(key, item);
+      const val = String(item.name || item.id || item.description || "").trim();
+      if (val && !unique.has(val.toLowerCase())) {
+        unique.set(val.toLowerCase(), {
+          ...item,
+          value: val,
+        });
       }
     });
     return Array.from(unique.values());
@@ -376,7 +428,22 @@ export function BadgeForm({
               <div className="w-full space-y-2.5 pt-1">
                 <PolarisSummaryRow label="Type" value={formik.values.type === "ACTION" ? "Action Cumulative" : "Milestone Threshold"} />
                 <PolarisSummaryRow label="Target" value={`${formik.values.targetValue || 0} ${formik.values.type === "ACTION" ? "actions" : "points"}`} />
-                <PolarisSummaryRow label="Rarity Grade" value={<span className="text-zinc-900 dark:text-zinc-100 font-bold">Legendary</span>} />
+                <PolarisSummaryRow
+                  label="Eligibility"
+                  value={
+                    formik.values.memberEligibility === "VERIFIED"
+                      ? "Verified Only"
+                      : formik.values.memberEligibility === "TIERS"
+                        ? formik.values.eligibleTierIds?.length > 0
+                          ? `${formik.values.eligibleTierIds.length} Tier(s)`
+                          : "Specific Tiers"
+                        : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                          ? formik.values.eligibleUserIds?.length > 0
+                            ? `${formik.values.eligibleUserIds.length} Customer(s)`
+                            : "Specific Customers"
+                          : "All Customers"
+                  }
+                />
                 <PolarisSummaryRow
                   label="Push Alert"
                   value={
@@ -687,15 +754,15 @@ export function BadgeForm({
                           {sourceType === "MODULE" ? "module" : "integration"}
                         </div>
                       ) : (
-                        filteredTriggers.map((t) => {
-                          const itemVal = t.name || t.id;
+                        filteredTriggers.map((t, idx) => {
+                          const itemVal = t.value || t.name || t.id;
                           return (
-                            <SelectItem key={t.id} value={itemVal}>
+                            <SelectItem key={`trig-${itemVal}-${idx}`} value={itemVal}>
                               <div className="flex flex-col py-0.5 text-left">
                                 <span className="font-medium text-xs text-zinc-900 dark:text-zinc-100">
                                   {t.name
                                     ? t.name.replace(/_/g, " ")
-                                    : t.description}
+                                    : t.description || itemVal}
                                 </span>
                                 {t.description &&
                                   t.name &&
@@ -722,9 +789,31 @@ export function BadgeForm({
           )}
         </PolarisFormCard>
 
-        {/* Card 3: Notification Settings */}
-        <PolarisFormCard
+        {/* Card 3: Member Eligibility */}
+        <PolarisEligibilityCard
           step={3}
+          eligibility={formik.values.memberEligibility || "ALL"}
+          onEligibilityChange={(val) =>
+            formik.setFieldValue("memberEligibility", val)
+          }
+          tierIds={
+            formik.values.membershipTierId ||
+            formik.values.eligibleTierIds ||
+            []
+          }
+          onTierIdsChange={(tiers) => {
+            formik.setFieldValue("eligibleTierIds", tiers);
+            formik.setFieldValue("membershipTierId", tiers);
+          }}
+          userIds={formik.values.eligibleUserIds || []}
+          onUserIdsChange={(users) => {
+            formik.setFieldValue("eligibleUserIds", users);
+          }}
+        />
+
+        {/* Card 4: Notification Settings */}
+        <PolarisFormCard
+          step={4}
           title="Notification Settings"
           description="Configure alert channels and custom notification text when members unlock this badge."
           badge="Notification Channels"

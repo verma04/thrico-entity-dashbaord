@@ -1,0 +1,93 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { Plus, ArrowRight, HelpCircle, ShoppingBag, CheckCircle2, AlertCircle, Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@apollo/client";
+import { GET_SHOPIFY_CONNECTION } from "@/graphql/actions/settings/shopify";
+
+interface StoreBannerProps {
+  onCreateClick?: () => void;
+  onHowItWorksClick?: () => void;
+}
+
+export const StoreBanner: React.FC<StoreBannerProps> = ({
+  onCreateClick,
+  onHowItWorksClick,
+}) => {
+  const { data: connectionData, loading: connectionLoading } = useQuery(
+    GET_SHOPIFY_CONNECTION,
+    { fetchPolicy: "cache-and-network" }
+  );
+
+  const shopifyConn = connectionData?.shopifyConnection;
+  const isConnected = shopifyConn?.status === "CONNECTED" || !!shopifyConn?.shopDomain;
+
+  return (
+    <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge className="bg-indigo-600 text-white font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
+              Pillar 2 • Shopify
+            </Badge>
+            {connectionLoading ? (
+              <span className="text-[11px] text-muted-foreground animate-pulse">
+                Checking store connection...
+              </span>
+            ) : isConnected ? (
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Connected: {shopifyConn?.shopDomain || "Shopify Store"}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                <AlertCircle className="h-3.5 w-3.5" />
+                <span>Store Not Connected</span>
+              </div>
+            )}
+          </div>
+
+          <h3 className="text-lg font-bold tracking-tight text-foreground">
+            E-Commerce Store Discounts
+          </h3>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Configure dynamic on-demand store discount rules. Codes are synthesized via Shopify PriceRules only when members actually win.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {onHowItWorksClick && (
+            <Button
+              variant="outline"
+              onClick={onHowItWorksClick}
+              className="text-xs font-semibold h-8 gap-1.5 border-indigo-300 dark:border-indigo-800 bg-background/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 cursor-pointer"
+            >
+              <HelpCircle className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              How Store Rewards Work
+            </Button>
+          )}
+
+          {onCreateClick && (
+            <Button
+              onClick={onCreateClick}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create Store Reward
+            </Button>
+          )}
+
+          <Link href="/integrations/shopify">
+            <Button variant="outline" className="text-xs font-medium h-8 gap-1">
+              <Link2 className="h-3 w-3" />
+              Shopify Integration
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};

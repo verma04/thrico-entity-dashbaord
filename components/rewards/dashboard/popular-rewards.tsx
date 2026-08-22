@@ -40,7 +40,7 @@ export const PopularRewards = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {displayRewards.map((r, i) => (
+            {displayRewards.map((r: any, i: number) => (
               <div key={i} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 min-w-0">

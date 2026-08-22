@@ -113,6 +113,17 @@ export const GET_SHOPIFY_PRODUCTS = gql`
         shopifyProductId
         title
         status
+        featuredImage
+        images
+        media {
+          id
+          url
+          altText
+          width
+          height
+          mediaContentType
+          position
+        }
         createdAt
         updatedAt
       }

@@ -21,6 +21,7 @@ export const useGetCurrencyStats = (timeRange: any, dateRange: any) =>
 
 export const useGetEntityCurrencyConfig = () =>
   useQuery(GET_ENTITY_CURRENCY_CONFIG);
+export const useGetCurrencyConfig = useGetEntityCurrencyConfig;
 export const useGetActivityCaps = () => useQuery(GET_ACTIVITY_CAPS);
 export const useGetTCConversionCap = () => useQuery(GET_TC_CONVERSION_CAP);
 export const useGetRedemptionCap = () => useQuery(GET_REDEMPTION_CAP);

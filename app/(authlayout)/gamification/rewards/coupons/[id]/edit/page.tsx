@@ -45,13 +45,46 @@ export default function EditRewardPage() {
       cooldownPeriod: reward?.cooldownPeriod || 0,
       inventoryRequired: reward?.inventoryRequired || false,
       image: reward?.image || "",
-      rewardMechanism: reward?.rewardMechanism || "COUPON",
+      rewardPillar:
+        reward?.rewardType === "STORE"
+          ? "ECOMMERCE"
+          : reward?.rewardType === "GIFT_CARD"
+            ? "DIGITAL_GIFT_CARD"
+            : "INTERNAL",
+      rewardMechanism: reward?.rewardMechanism || ["COUPON"],
+      storeDiscountType: "FIXED_AMOUNT",
+      storeCodePrefix: "THRICO-",
+      storeMinCart: 0,
+      giftCardBrand: reward?.brand || "Amazon Pay",
+      giftCardValue: Number(reward?.discountValue) || 500,
+      giftCardFee: (Number(reward?.discountValue) || 500) * 0.05,
       status: reward?.status || "ACTIVE",
       isActive: reward?.isActive ?? true,
       url: reward?.url || "",
       howToClaim: reward?.howToClaim || "",
       couponCode: reward?.couponCode || "",
-      couponType: reward?.couponType || "PERCENTAGE",
+      couponType: reward?.couponType || "ONE_TO_ONE",
+      memberEligibility:
+        reward?.memberEligibility ||
+        (reward?.eligibleUserIds?.length
+          ? "SPECIFIC_CUSTOMERS"
+          : (Array.isArray(reward?.membershipTierId)
+                ? reward.membershipTierId.length
+                : reward?.membershipTierId) ||
+              reward?.eligibleTierIds?.length
+            ? "TIERS"
+            : "ALL"),
+      membershipTierId: Array.isArray(reward?.membershipTierId)
+        ? reward.membershipTierId
+        : reward?.membershipTierId
+          ? [reward.membershipTierId]
+          : reward?.eligibleTierIds || [],
+      eligibleTierIds: Array.isArray(reward?.membershipTierId)
+        ? reward.membershipTierId
+        : reward?.membershipTierId
+          ? [reward.membershipTierId]
+          : reward?.eligibleTierIds || [],
+      eligibleUserIds: reward?.eligibleUserIds || [],
       expiryDate: reward?.expiryDate
         ? new Date(
             Number(reward.expiryDate)
@@ -66,6 +99,12 @@ export default function EditRewardPage() {
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
+        const tierIds = Array.isArray(values.membershipTierId)
+          ? values.membershipTierId
+          : values.membershipTierId
+            ? [values.membershipTierId]
+            : values.eligibleTierIds || [];
+
         await updateReward({
           variables: {
             updateRewardId: rewardId,
@@ -90,6 +129,10 @@ export default function EditRewardPage() {
               url: values.url,
               couponType: values.couponType,
               couponCode: values.couponCode,
+              memberEligibility: values.memberEligibility || "ALL",
+              membershipTierId: tierIds,
+              eligibleTierIds: tierIds,
+              eligibleUserIds: values.eligibleUserIds || [],
               expiryDate: values.expiryDate || null,
             },
           },

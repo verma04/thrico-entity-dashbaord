@@ -21,6 +21,12 @@ export default function CreatePointRulePage() {
   const [createPointRule, { loading: isCreating }] = useCreatePointRule();
 
   const handleCreate = async (values: any) => {
+    const tierIds = Array.isArray(values.membershipTierId)
+      ? values.membershipTierId
+      : values.membershipTierId
+        ? [values.membershipTierId]
+        : values.eligibleTierIds || [];
+
     await createPointRule({
       variables: {
         input: {
@@ -33,6 +39,10 @@ export default function CreatePointRulePage() {
           weeklyCap: values.weeklyCap ? Number(values.weeklyCap) : null,
           monthlyCap: values.monthlyCap ? Number(values.monthlyCap) : null,
           description: values.description,
+          memberEligibility: values.memberEligibility || "ALL",
+          membershipTierId: tierIds,
+          eligibleTierIds: tierIds,
+          eligibleUserIds: values.eligibleUserIds || [],
           allowPushNotification: values.allowPushNotification,
           allowEmailNotification: values.allowEmailNotification,
           pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,

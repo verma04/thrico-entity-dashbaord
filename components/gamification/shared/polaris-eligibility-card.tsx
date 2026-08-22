@@ -1,0 +1,514 @@
+"use client";
+
+import React, { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@apollo/client";
+import { Search, X, Loader2 } from "lucide-react";
+import { GET_MEMBERSHIP_TIERS } from "@/graphql/membership-tier";
+import { useSearchUserByName } from "@/graphql/actions/mentorship/mentorship-actions";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PolarisFormCard } from "@/components/gamification/shared/polaris-form-ui";
+
+export function toArray(val: any): string[] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (typeof val === "string" && val.trim()) return [val.trim()];
+  return [];
+}
+
+interface PolarisEligibilityCardProps {
+  step?: number;
+  title?: string;
+  description?: string;
+  badge?: string;
+  eligibility: string;
+  onEligibilityChange: (val: string) => void;
+  tierIds: string[] | string | undefined | null;
+  onTierIdsChange: (tierIds: string[]) => void;
+  userIds: string[] | string | undefined | null;
+  onUserIdsChange: (userIds: string[]) => void;
+  children?: React.ReactNode;
+}
+
+export function PolarisEligibilityCard({
+  step = 4,
+  title = "Eligibility",
+  description = "Specify which customers, members, or tiers can access this reward.",
+  badge,
+  eligibility = "ALL",
+  onEligibilityChange,
+  tierIds,
+  onTierIdsChange,
+  userIds,
+  onUserIdsChange,
+  children,
+}: PolarisEligibilityCardProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isBrowseOpen, setIsBrowseOpen] = useState(false);
+  const [selectedCustomersMap, setSelectedCustomersMap] = useState<
+    Record<string, { id: string; name: string; email?: string; avatar?: string }>
+  >({});
+
+  const selectedTierIds = useMemo(() => toArray(tierIds), [tierIds]);
+  const selectedUserIds = useMemo(() => toArray(userIds), [userIds]);
+
+  const { data: tiersData } = useQuery(GET_MEMBERSHIP_TIERS);
+  const membershipTiers = useMemo(
+    () => (tiersData?.getMembershipTiers || []) as any[],
+    [tiersData],
+  );
+
+  const [searchUserByName, { data: searchUserData, loading: searchingUsers }] =
+    useSearchUserByName();
+  const searchResultsUsers = useMemo(
+    () => (searchUserData?.searchUserByName || []) as any[],
+    [searchUserData],
+  );
+
+  const handleSearchChange = useCallback(
+    (val: string) => {
+      setSearchQuery(val);
+      if (eligibility === "SPECIFIC_CUSTOMERS" && val.trim().length > 0) {
+        searchUserByName({
+          variables: { name: val.trim() },
+        });
+      }
+    },
+    [eligibility, searchUserByName],
+  );
+
+  const handleSelectTier = useCallback(
+    (tierId: string) => {
+      const isSelected = selectedTierIds.includes(tierId);
+      const next = isSelected
+        ? selectedTierIds.filter((id) => id !== tierId)
+        : [...selectedTierIds, tierId];
+      onTierIdsChange(next);
+    },
+    [selectedTierIds, onTierIdsChange],
+  );
+
+  const handleSelectCustomer = useCallback(
+    (member: any) => {
+      const uid = member.user?.id || member.id;
+      const name = member.user
+        ? `${member.user.firstName || ""} ${member.user.lastName || ""}`.trim() ||
+          member.user.email
+        : member.name || uid;
+
+      const isSelected = selectedUserIds.includes(uid);
+      const next = isSelected
+        ? selectedUserIds.filter((id) => id !== uid)
+        : [...selectedUserIds, uid];
+
+      onUserIdsChange(next);
+      if (!isSelected) {
+        setSelectedCustomersMap((prev) => ({
+          ...prev,
+          [uid]: {
+            id: uid,
+            name,
+            email: member.user?.email,
+            avatar: member.user?.avatar,
+          },
+        }));
+      }
+    },
+    [selectedUserIds, onUserIdsChange],
+  );
+
+  return (
+    <>
+      <PolarisFormCard
+        step={step}
+        title={title}
+        description={description}
+        badge={badge}
+      >
+        <div className="space-y-3">
+          {/* Primary Eligibility Select */}
+          <Select
+            value={eligibility || "ALL"}
+            onValueChange={(val) => {
+              onEligibilityChange(val);
+              setSearchQuery("");
+              if (val === "ALL" || val === "VERIFIED") {
+                onTierIdsChange([]);
+                onUserIdsChange([]);
+              }
+            }}
+          >
+            <SelectTrigger
+              id="memberEligibility"
+              className="h-10 w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-xs font-normal text-zinc-900 dark:text-zinc-100 shadow-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg"
+            >
+              <SelectValue placeholder="Select eligibility" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL" className="text-xs">
+                All customers
+              </SelectItem>
+              <SelectItem value="VERIFIED" className="text-xs">
+                Specific customer segments (Verified)
+              </SelectItem>
+              <SelectItem value="TIERS" className="text-xs">
+                Specific tiers
+              </SelectItem>
+              <SelectItem value="SPECIFIC_CUSTOMERS" className="text-xs">
+                Specific customers
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* When Specific Tiers or Specific Customers is active: Search bar + Browse button */}
+          {(eligibility === "TIERS" || eligibility === "SPECIFIC_CUSTOMERS") && (
+            <div className="space-y-3 pt-0.5 animate-in fade-in-50 duration-200">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                  <Input
+                    placeholder={
+                      eligibility === "TIERS"
+                        ? "Search tiers"
+                        : "Search customers by name"
+                    }
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="h-9 pl-9 pr-8 text-xs bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 rounded-lg shadow-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {searchingUsers && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 animate-spin" />
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsBrowseOpen(true);
+                    if (
+                      eligibility === "SPECIFIC_CUSTOMERS" &&
+                      searchResultsUsers.length === 0
+                    ) {
+                      searchUserByName({
+                        variables: { name: searchQuery || "a" },
+                      });
+                    }
+                  }}
+                  className="h-9 px-4 text-xs font-medium border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-lg shrink-0"
+                >
+                  Browse
+                </Button>
+              </div>
+
+              {/* Selected Tiers List */}
+              {eligibility === "TIERS" && selectedTierIds.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {selectedTierIds.map((tierId: string) => {
+                    const tier = membershipTiers.find((t: any) => t.id === tierId);
+                    return (
+                      <span
+                        key={tierId}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                      >
+                        {tier?.badgeColor && (
+                          <span
+                            className="h-2 w-2 rounded-full shrink-0"
+                            style={{ backgroundColor: tier.badgeColor }}
+                          />
+                        )}
+                        <span>{tier?.name || tierId}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectTier(tierId);
+                          }}
+                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Selected Customers List */}
+              {eligibility === "SPECIFIC_CUSTOMERS" && selectedUserIds.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {selectedUserIds.map((userId: string) => {
+                    const saved = selectedCustomersMap[userId];
+                    const name = saved?.name || userId;
+                    const avatar = saved?.avatar;
+                    return (
+                      <span
+                        key={userId}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                      >
+                        <Avatar className="h-3.5 w-3.5">
+                          <AvatarImage src={avatar} />
+                          <AvatarFallback className="text-[8px]">
+                            {name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{name}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const next = selectedUserIds.filter((id) => id !== userId);
+                            onUserIdsChange(next);
+                          }}
+                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Inline filter preview when searching */}
+              {searchQuery.trim() && (
+                <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-1.5 bg-white dark:bg-zinc-900 shadow-sm max-h-48 overflow-y-auto space-y-0.5">
+                  {eligibility === "TIERS" ? (
+                    membershipTiers
+                      .filter((t: any) =>
+                        t.name.toLowerCase().includes(searchQuery.toLowerCase()),
+                      )
+                      .map((tier: any) => {
+                        const isSelected = selectedTierIds.includes(tier.id);
+                        return (
+                          <div
+                            key={tier.id}
+                            onClick={() => handleSelectTier(tier.id)}
+                            className="flex items-center justify-between p-2 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800/60 cursor-pointer text-xs"
+                          >
+                            <div className="flex items-center gap-2">
+                              {tier.badgeColor && (
+                                <span
+                                  className="h-2 w-2 rounded-full shrink-0"
+                                  style={{ backgroundColor: tier.badgeColor }}
+                                />
+                              )}
+                              <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                                {tier.name}
+                              </span>
+                            </div>
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none"
+                            />
+                          </div>
+                        );
+                      })
+                  ) : searchResultsUsers.length === 0 ? (
+                    <div className="p-3 text-center text-xs text-zinc-500">
+                      {searchingUsers ? "Searching customers..." : "No matching customers found."}
+                    </div>
+                  ) : (
+                    searchResultsUsers.map((m: any) => {
+                      const uid = m.user?.id || m.id;
+                      const name =
+                        `${m.user?.firstName || ""} ${m.user?.lastName || ""}`.trim() ||
+                        m.user?.email ||
+                        "Customer";
+                      const isSelected = selectedUserIds.includes(uid);
+                      return (
+                        <div
+                          key={uid}
+                          onClick={() => handleSelectCustomer(m)}
+                          className="flex items-center justify-between p-2 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800/60 cursor-pointer text-xs"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Avatar className="h-5 w-5 shrink-0">
+                              <AvatarImage src={m.user?.avatar} />
+                              <AvatarFallback className="text-[9px]">
+                                {name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="truncate">
+                              <span className="font-medium text-zinc-900 dark:text-zinc-100 block truncate">
+                                {name}
+                              </span>
+                              {m.user?.email && (
+                                <span className="text-[10px] text-zinc-400 block truncate">
+                                  {m.user.email}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <Checkbox
+                            checked={isSelected}
+                            className="pointer-events-none shrink-0 ml-2"
+                          />
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {children}
+        </div>
+      </PolarisFormCard>
+
+      {/* Browse Modal */}
+      <Dialog open={isBrowseOpen} onOpenChange={setIsBrowseOpen}>
+        <DialogContent className="max-w-md p-0 overflow-hidden bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl">
+          <DialogHeader className="p-4 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+            <DialogTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              {eligibility === "TIERS"
+                ? "Select Membership Tiers"
+                : "Select Specific Customers"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-4 space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+              <Input
+                placeholder={
+                  eligibility === "TIERS"
+                    ? "Search tiers..."
+                    : "Search customers by name..."
+                }
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="h-9 pl-9 pr-8 text-xs"
+              />
+              {searchingUsers && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 animate-spin" />
+              )}
+            </div>
+            <div className="max-h-64 overflow-y-auto space-y-1 divide-y divide-zinc-100 dark:divide-zinc-800">
+              {eligibility === "TIERS" ? (
+                membershipTiers.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-zinc-500">
+                    No membership tiers configured.
+                  </div>
+                ) : (
+                  membershipTiers
+                    .filter((t: any) =>
+                      t.name.toLowerCase().includes(searchQuery.toLowerCase()),
+                    )
+                    .map((tier: any) => {
+                      const isSelected = selectedTierIds.includes(tier.id);
+                      return (
+                        <div
+                          key={tier.id}
+                          onClick={() => handleSelectTier(tier.id)}
+                          className="flex items-center gap-3 p-2.5 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer text-xs"
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            className="pointer-events-none"
+                          />
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {tier.badgeColor && (
+                              <span
+                                className="h-2.5 w-2.5 rounded-full shrink-0"
+                                style={{ backgroundColor: tier.badgeColor }}
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <span className="font-medium text-zinc-900 dark:text-zinc-100 block truncate">
+                                {tier.name}
+                              </span>
+                              {tier.description && (
+                                <span className="text-[10px] text-zinc-400 block truncate">
+                                  {tier.description}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                )
+              ) : searchResultsUsers.length === 0 ? (
+                <div className="p-6 text-center text-xs text-zinc-500">
+                  {searchingUsers
+                    ? "Searching customers..."
+                    : "Type a name above to search customers."}
+                </div>
+              ) : (
+                searchResultsUsers.map((m: any) => {
+                  const uid = m.user?.id || m.id;
+                  const name =
+                    `${m.user?.firstName || ""} ${m.user?.lastName || ""}`.trim() ||
+                    m.user?.email ||
+                    "Customer";
+                  const isSelected = selectedUserIds.includes(uid);
+                  return (
+                    <div
+                      key={uid}
+                      onClick={() => handleSelectCustomer(m)}
+                      className="flex items-center gap-3 p-2.5 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer text-xs"
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        className="pointer-events-none"
+                      />
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <Avatar className="h-6 w-6 shrink-0">
+                          <AvatarImage src={m.user?.avatar} />
+                          <AvatarFallback className="text-[10px]">
+                            {name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100 block truncate">
+                            {name}
+                          </span>
+                          {m.user?.email && (
+                            <span className="text-[10px] text-zinc-400 block truncate">
+                              {m.user.email}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+          <DialogFooter className="p-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex items-center justify-between sm:justify-between">
+            <span className="text-[11px] text-zinc-500">
+              {eligibility === "TIERS"
+                ? `${selectedTierIds.length} tier(s) selected`
+                : `${selectedUserIds.length} customer(s) selected`}
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => setIsBrowseOpen(false)}
+              className="h-8 text-xs font-semibold"
+            >
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

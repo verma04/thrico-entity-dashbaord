@@ -46,7 +46,6 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
-  getSourceIcon,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { cn } from "@/lib/utils";
 
@@ -443,10 +442,7 @@ export function ImpactRuleForm({
                 <SelectContent>
                   {currentSourceList.map((item) => (
                     <SelectItem key={item.id || item.uuid} value={item.id || item.uuid}>
-                      <div className="flex items-center gap-2">
-                        {getSourceIcon(item.name, item.type)}
-                        <span>{item.name}</span>
-                      </div>
+                      {item.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

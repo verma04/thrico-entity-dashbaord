@@ -5,13 +5,16 @@ import {
   Package,
   Calendar,
   Clock,
+  ExternalLink,
 } from "lucide-react";
 import { ShopifyProductActions } from "./shopify-product-actions";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import moment from "moment";
 
 interface ShopifyProductCardCompactProps {
   product: any;
+  shopDomain?: string;
   refetch?: () => void;
 }
 
@@ -44,6 +47,7 @@ const STATUS_CONFIG: Record<
 
 export function ShopifyProductCardCompact({
   product,
+  shopDomain,
   refetch,
 }: ShopifyProductCardCompactProps) {
   const statusKey = product.status?.toUpperCase() || "ACTIVE";
@@ -54,6 +58,12 @@ export function ShopifyProductCardCompact({
     dot: "bg-muted-foreground",
     bar: "#6366f1",
   };
+
+  const cleanProductId = (product.shopifyProductId || product.id || "").replace(/\D/g, "");
+  const shopifyAdminUrl =
+    shopDomain && cleanProductId
+      ? `https://${shopDomain}/admin/products/${cleanProductId}`
+      : null;
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card shadow-2xs hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col justify-between group">
@@ -78,8 +88,25 @@ export function ShopifyProductCardCompact({
           </span>
         </div>
 
-        <div className="bg-background/80 hover:bg-background rounded-md transition-colors shrink-0">
-          <ShopifyProductActions product={product} refetch={refetch} />
+        <div className="flex items-center gap-1">
+          {shopifyAdminUrl && (
+            <a
+              href={shopifyAdminUrl}
+              target="_blank"
+              rel="noreferrer"
+              title="Open in Shopify Admin"
+              className="inline-flex items-center justify-center h-6 w-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+            >
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+          <div className="bg-background/80 hover:bg-background rounded-md transition-colors shrink-0">
+            <ShopifyProductActions
+              product={product}
+              shopDomain={shopDomain}
+              refetch={refetch}
+            />
+          </div>
         </div>
       </div>
 
@@ -87,8 +114,17 @@ export function ShopifyProductCardCompact({
       <div className="p-3 space-y-2.5 flex-1 flex flex-col justify-between">
         <div className="space-y-1.5">
           <div className="flex items-start gap-2.5 pt-0.5">
-            <div className="h-8 w-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
-              <Package className="h-4 w-4 text-indigo-500" />
+            <div className="h-9 w-9 rounded-lg bg-indigo-50 border border-indigo-100 dark:bg-indigo-950/40 dark:border-indigo-900/50 flex items-center justify-center shrink-0 mt-0.5 overflow-hidden">
+              {product.featuredImage ? (
+                <img
+                  src={product.featuredImage}
+                  alt={product.title || "Product"}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <Package className="h-4 w-4 text-indigo-500" />
+              )}
             </div>
 
             <div className="flex flex-col min-w-0 flex-1">

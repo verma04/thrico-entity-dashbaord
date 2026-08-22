@@ -15,25 +15,29 @@ import {
   Copy,
   Package,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export interface ShopifyProductActionsProps {
   product: any;
+  shopDomain?: string;
   refetch?: () => void;
   trigger?: React.ReactNode;
 }
 
 export function ShopifyProductActions({
   product,
+  shopDomain,
   refetch,
   trigger,
 }: ShopifyProductActionsProps) {
   const handleCopyId = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(product.shopifyProductId || product.id);
+    const id = product.shopifyProductId || product.id;
+    navigator.clipboard.writeText(id);
     toast.success("Shopify Product ID copied to clipboard", {
-      description: `ID: ${product.shopifyProductId || product.id}`,
+      description: `ID: ${id}`,
     });
   };
 
@@ -41,6 +45,18 @@ export function ShopifyProductActions({
     e.stopPropagation();
     navigator.clipboard.writeText(product.title || "");
     toast.success("Product title copied to clipboard");
+  };
+
+  const handleOpenShopify = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (shopDomain && (product.shopifyProductId || product.id)) {
+      const cleanId = (product.shopifyProductId || product.id).replace(/\D/g, "");
+      window.open(`https://${shopDomain}/admin/products/${cleanId}`, "_blank");
+    } else {
+      toast.info("Store domain not available", {
+        description: "Connect your Shopify store to open products directly in Shopify admin.",
+      });
+    }
   };
 
   return (
@@ -58,12 +74,25 @@ export function ShopifyProductActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-48 rounded-lg shadow-md border-border p-1"
+        className="w-52 rounded-lg shadow-md border-border p-1"
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">
-          Actions
+          Product Actions
         </DropdownMenuLabel>
+
+        {shopDomain && (
+          <>
+            <DropdownMenuItem
+              onClick={handleOpenShopify}
+              className="text-xs font-medium cursor-pointer gap-2 py-1.5 text-primary focus:text-primary"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-primary" />
+              View in Shopify Admin
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
 
         <DropdownMenuItem
           onClick={handleCopyId}

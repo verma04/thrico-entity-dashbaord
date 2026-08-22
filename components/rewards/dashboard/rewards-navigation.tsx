@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Trophy, ArrowRight, Ticket, Gamepad2, History, ShieldCheck } from "lucide-react";
+import { Trophy, ArrowRight, Ticket, Gamepad2, History, ShieldCheck, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RewardsNavigationProps {
@@ -49,6 +49,15 @@ const colorMap: Record<string, { icon: string; badge: string; ring: string; dot:
 export const RewardsNavigation = ({ stats }: RewardsNavigationProps) => {
   const navCards = [
     {
+      title: "Reward Pillars",
+      desc: "3 fulfillment mechanisms & funding models",
+      icon: Layers,
+      link: "/gamification/rewards/pillars",
+      color: "emerald",
+      stat: null,
+      statLabel: "3 pillars",
+    },
+    {
       title: "Rewards & Codes",
       desc: "Manage offers, vouchers & inventory",
       icon: Ticket,
@@ -61,7 +70,7 @@ export const RewardsNavigation = ({ stats }: RewardsNavigationProps) => {
       title: "Interactions",
       desc: "Spin wheel, scratch card & match games",
       icon: Gamepad2,
-      link: "/gamification/engagement-games",
+      link: "/gamification/rewards/engagement-games",
       color: "violet",
       stat: null,
       statLabel: "3 types",
@@ -71,7 +80,7 @@ export const RewardsNavigation = ({ stats }: RewardsNavigationProps) => {
       desc: "Full log of all claimed rewards",
       icon: History,
       link: "/gamification/rewards/redemptions",
-      color: "emerald",
+      color: "sky",
       stat: stats?.totalRedemptions || 0,
       statLabel: "total",
     },

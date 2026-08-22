@@ -1,5 +1,14 @@
 import React from "react";
-import { Edit, Trash2, Info, Coins, Ticket, XCircle } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Info,
+  Coins,
+  Ticket,
+  Gift,
+  ShoppingBag,
+  RotateCcw,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScratchRewardTier, REWARD_BADGE, REWARD_ICON, REWARD_LABELS } from "./types";
+import {
+  ScratchRewardTier,
+  REWARD_BADGE,
+  REWARD_ICON,
+  REWARD_LABELS,
+} from "./types";
 import {
   Tooltip,
   TooltipContent,
@@ -50,7 +64,7 @@ export function TiersTable({
                 Reward Type
               </TableHead>
               <TableHead className="h-10 text-xs font-semibold">
-                Value
+                Value / Prize
               </TableHead>
               <TableHead className="h-10 text-xs font-semibold text-center">
                 Active
@@ -105,19 +119,49 @@ export function TiersTable({
                     <span
                       className={cn(
                         "text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 w-fit border",
-                        REWARD_BADGE[tier.rewardType],
+                        REWARD_BADGE[tier.rewardType] || REWARD_BADGE.COINS,
                       )}
                     >
-                      {REWARD_ICON[tier.rewardType]}
-                      {REWARD_LABELS[tier.rewardType]}
+                      {REWARD_ICON[tier.rewardType] || REWARD_ICON.COINS}
+                      {REWARD_LABELS[tier.rewardType] || tier.rewardType}
                     </span>
                   </TableCell>
                   <TableCell className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
                     {tier.rewardType === "COINS" &&
                       `${tier.rewardValue} ${currencyName}`}
-                    {tier.rewardType === "VOUCHER" && "Voucher Coupon"}
                     {tier.rewardType === "NO_REWARDS" && (
                       <span className="text-zinc-400">—</span>
+                    )}
+                    {(tier.rewardType === "INTERNAL_VOUCHER" ||
+                      tier.rewardType === "VOUCHER") && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-5 w-5 rounded bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center border border-blue-200 shrink-0">
+                          <Ticket className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate max-w-[140px]">
+                          {tier.reward?.title || tier.label}
+                        </span>
+                      </div>
+                    )}
+                    {tier.rewardType === "GIFT_CARD" && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-5 w-5 rounded bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center border border-purple-200 shrink-0">
+                          <Gift className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <span className="text-xs font-semibold text-purple-950 dark:text-purple-200 truncate max-w-[140px]">
+                          {tier.label || `₹${tier.rewardValue} Gift Card`}
+                        </span>
+                      </div>
+                    )}
+                    {tier.rewardType === "ECOMMERCE" && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-5 w-5 rounded bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 shrink-0">
+                          <ShoppingBag className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <span className="text-xs font-semibold text-emerald-950 dark:text-emerald-200 truncate max-w-[140px]">
+                          {tier.label || `${tier.rewardValue}% Off Store`}
+                        </span>
+                      </div>
                     )}
                   </TableCell>
                   <TableCell className="text-center">

@@ -102,6 +102,7 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
     "ALL";
 
   const selectedModule = searchParams.get("module") || "ALL";
+  const eligibility = searchParams.get("eligibility") || "ALL";
   const sortBy = searchParams.get("sort") || "newest";
   const view = (searchParams.get("view") as "grid" | "list") || "grid";
 
@@ -268,6 +269,11 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
             (s) => (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
           )?.uuid?.toLowerCase() === b.module?.toLowerCase(),
       );
+    }
+
+    // Eligibility filter
+    if (eligibility !== "ALL") {
+      list = list.filter((b) => (b.memberEligibility || "ALL") === eligibility);
     }
 
     // Search filter
@@ -474,6 +480,44 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
                     </div>
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
+
+          {/* Eligibility Filter */}
+          <EcosystemActionBar.Item>
+            <Select
+              value={eligibility}
+              onValueChange={(v) => updateParams({ eligibility: v, page: null })}
+            >
+              <SelectTrigger className="w-[145px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                <SelectValue placeholder="Eligibility" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[160px]">
+                <SelectItem
+                  value="ALL"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  All Eligibilities
+                </SelectItem>
+                <SelectItem
+                  value="VERIFIED"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  Verified Only
+                </SelectItem>
+                <SelectItem
+                  value="TIERS"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  Specific Tiers
+                </SelectItem>
+                <SelectItem
+                  value="SPECIFIC_CUSTOMERS"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                >
+                  Specific Customers
+                </SelectItem>
               </SelectContent>
             </Select>
           </EcosystemActionBar.Item>

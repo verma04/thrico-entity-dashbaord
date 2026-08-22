@@ -5,56 +5,76 @@ import { AppDataTable } from "@/components/ui/app-data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit2, Plus, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  MatchWinSymbol,
+  MatchWinCombination,
+  REWARD_BADGE,
+  REWARD_ICON,
+  REWARD_LABELS,
+  resolveGameRewardType,
+} from "./types";
 import { PrizeIcon } from "./prize-icon";
-import { MatchWinCombination, MatchWinSymbol } from "./types";
+import { Edit2, Trash2, Ticket, Gift, ShoppingBag, Coins, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // ── Symbols Table ─────────────────────────────────────
 
 interface SymbolsTableProps {
   symbols: MatchWinSymbol[];
   onEdit: (s: MatchWinSymbol) => void;
+  onDelete: (id: string) => void;
+  onAdd: () => void;
 }
 
-export const SymbolsTable = ({ symbols, onEdit }: SymbolsTableProps) => {
+export const SymbolsTable = ({
+  symbols,
+  onEdit,
+  onDelete,
+  onAdd,
+}: SymbolsTableProps) => {
   const columns = useMemo<ColumnDef<MatchWinSymbol>[]>(
     () => [
       {
         accessorKey: "key",
-        header: "Key",
+        header: "Symbol Key",
         cell: ({ row }) => (
-          <code className="font-mono text-[10px] bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded-md text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider">
+          <code className="font-mono text-xs bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-1.5 py-0.5 rounded-md text-zinc-700 dark:text-zinc-300 font-semibold">
             {row.original.key}
           </code>
-        ),
-      },
-      {
-        accessorKey: "icon",
-        header: "Visual Icon",
-        cell: ({ row }) => (
-          <div className="p-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 w-fit shadow-xs">
-            <PrizeIcon
-              iconName={row.original.icon}
-              color={row.original.color}
-            />
-          </div>
         ),
       },
       {
         accessorKey: "label",
         header: "Display Label",
         cell: ({ row }) => (
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
+          <span className="font-bold text-zinc-900 dark:text-zinc-100 text-xs">
             {row.original.label}
           </span>
         ),
       },
       {
-        id: "actions",
-        header: "Actions",
+        id: "visual",
+        header: "Visual Icon",
         cell: ({ row }) => (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-xs flex items-center justify-center w-7 h-7">
+              <PrizeIcon
+                iconName={row.original.icon}
+                color={row.original.color}
+                className="h-4 w-4"
+              />
+            </div>
+            <span className="text-[11px] text-zinc-400 font-mono">
+              {row.original.icon}
+            </span>
+          </div>
+        ),
+      },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Actions</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="icon"
@@ -63,11 +83,19 @@ export const SymbolsTable = ({ symbols, onEdit }: SymbolsTableProps) => {
             >
               <Edit2 className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+              onClick={() => onDelete(row.original.id || "")}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
           </div>
         ),
       },
     ],
-    [onEdit],
+    [onEdit, onDelete],
   );
 
   return (
@@ -152,20 +180,39 @@ export const CombinationsTable = ({
       },
       {
         id: "reward",
-        header: "Reward",
-        cell: ({ row }) => (
-          <div className="flex flex-col">
-            <span className="font-bold text-zinc-900 dark:text-zinc-100 text-xs">
-              {row.original.type === "NO_REWARDS"
-                ? "—"
-                : `${row.original.value} ${
-                    row.original.type === "COINS" || row.original.type === "TC"
-                      ? currencyName
-                      : row.original.type
-                  }`}
-            </span>
-          </div>
-        ),
+        header: "Reward Type & Value",
+        cell: ({ row }) => {
+          const uiType = resolveGameRewardType({
+            type: row.original.type,
+            reward: row.original.reward,
+          });
+
+          return (
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 w-fit border shrink-0",
+                  REWARD_BADGE[uiType] || REWARD_BADGE.COINS,
+                )}
+              >
+                {REWARD_ICON[uiType] || REWARD_ICON.COINS}
+                {REWARD_LABELS[uiType] || uiType}
+              </span>
+              <span className="font-bold text-zinc-900 dark:text-zinc-100 text-xs truncate">
+                {uiType === "COINS" && `${row.original.value} ${currencyName}`}
+                {uiType === "NO_REWARDS" && "—"}
+                {uiType === "INTERNAL_VOUCHER" &&
+                  (row.original.reward?.title || "Voucher Coupon")}
+                {uiType === "GIFT_CARD" &&
+                  (row.original.reward?.title ||
+                    `₹${row.original.value} Gift Card`)}
+                {uiType === "ECOMMERCE" &&
+                  (row.original.reward?.title ||
+                    `${row.original.value}% Off Store`)}
+              </span>
+            </div>
+          );
+        },
       },
       {
         accessorKey: "probability",

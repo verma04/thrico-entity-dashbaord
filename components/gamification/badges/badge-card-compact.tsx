@@ -89,6 +89,12 @@ export function BadgeCardCompact({
           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-muted-foreground border border-border">
             {isAction ? "Action" : "Points"}
           </span>
+
+          {badge.memberEligibility && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-muted-foreground border border-border">
+              {badge.memberEligibility.replace(/_/g, " ")}
+            </span>
+          )}
         </div>
 
         <div className="bg-background/80 hover:bg-background rounded-md transition-colors shrink-0">

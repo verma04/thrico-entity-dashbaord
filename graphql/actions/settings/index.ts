@@ -1,4 +1,10 @@
-import { useMutation, useQuery } from "@apollo/client";
+import {
+  useMutation,
+  useQuery,
+  type QueryHookOptions,
+  type MutationHookOptions,
+  type MutationFunctionOptions,
+} from "@apollo/client";
 import {
   GET_ENTITY_SETTINGS,
   UPDATE_ENTITY_SETTINGS,
@@ -12,6 +18,20 @@ export interface EntitySettings {
   entity: string;
   allowNewUser: boolean;
   autoApproveUser: boolean;
+  sendWelcomeEmail?: boolean;
+  welcomeEmailSubject?: string;
+  sendApprovalEmail?: boolean;
+  approvalEmailSubject?: string;
+  actionEmails?: Array<{
+    id?: string;
+    slug: string;
+    type: "welcome" | "approval" | "custom";
+    title?: string;
+    enabled: boolean;
+    subject: string;
+    html?: string;
+    json?: string;
+  }>;
   allowCommunity: boolean;
   autoApproveCommunity: boolean;
   autoApproveGroup: boolean;
@@ -57,6 +77,20 @@ export interface GetEntitySettingsResponse {
 export interface UpdateEntitySettingsInput {
   allowNewUser?: boolean;
   autoApproveUser?: boolean;
+  sendWelcomeEmail?: boolean;
+  welcomeEmailSubject?: string;
+  sendApprovalEmail?: boolean;
+  approvalEmailSubject?: string;
+  actionEmails?: Array<{
+    id?: string;
+    slug: string;
+    type: "welcome" | "approval" | "custom";
+    title?: string;
+    enabled: boolean;
+    subject: string;
+    html?: string;
+    json?: string;
+  }>;
   allowCommunity?: boolean;
   autoApproveCommunity?: boolean;
   autoApproveGroup?: boolean;
@@ -116,35 +150,52 @@ export interface UpdateEntitySettingsResponse {
 }
 
 // Custom hook to get entity settings
-export const useGetEntitySettings = (options?: any) =>
-  useQuery<GetEntitySettingsResponse>(GET_ENTITY_SETTINGS, options);
+export const useGetEntitySettings = (
+  options?: QueryHookOptions<GetEntitySettingsResponse>
+) => useQuery<GetEntitySettingsResponse>(GET_ENTITY_SETTINGS, options);
 
 // Custom hook to update entity settings
-export const useUpdateEntitySettings = (options?: any) => {
+export const useUpdateEntitySettings = (
+  options?: MutationHookOptions<
+    UpdateEntitySettingsResponse,
+    { input: UpdateEntitySettingsInput }
+  >
+) => {
   const [mutate, result] = useMutation<
     UpdateEntitySettingsResponse,
     { input: UpdateEntitySettingsInput }
   >(UPDATE_ENTITY_SETTINGS, options);
 
-  const wrappedMutate = (mutationOptions: any) => {
+  const wrappedMutate = (
+    mutationOptions?: MutationFunctionOptions<
+      UpdateEntitySettingsResponse,
+      { input: UpdateEntitySettingsInput }
+    >
+  ) => {
     if (mutationOptions?.variables?.input) {
-      const { __typename, id, entity, ...rest } = mutationOptions.variables.input;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const inputObj = mutationOptions.variables.input as any;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { __typename, id, entity, ...rest } = inputObj;
       return mutate({
         ...mutationOptions,
         variables: {
           ...mutationOptions.variables,
-          input: rest,
+          input: rest as UpdateEntitySettingsInput,
         },
       });
     }
     return mutate(mutationOptions);
   };
 
-  return [wrappedMutate, result] as any;
+  return [wrappedMutate, result] as const;
 };
 
 // Custom hook to update feed order
-export const useUpdateFeedOrder = (options?: any) =>
+export const useUpdateFeedOrder = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  options?: MutationHookOptions<any, any>
+) =>
   useMutation(UPDATE_FEED_ORDER, {
     ...options,
     refetchQueries: [{ query: GET_ENTITY_SETTINGS }],
@@ -152,12 +203,16 @@ export const useUpdateFeedOrder = (options?: any) =>
   });
 
 // Custom hook to update feed entity name
-export const useUpdateFeedEntityName = (options?: any) =>
+export const useUpdateFeedEntityName = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  options?: MutationHookOptions<any, any>
+) =>
   useMutation(UPDATE_FEED_ENTITY_NAME, {
     ...options,
     refetchQueries: [{ query: GET_ENTITY_SETTINGS }],
     awaitRefetchQueries: true,
   });
+
 
 export * from "./shopify";
 export * from "./woocommerce";

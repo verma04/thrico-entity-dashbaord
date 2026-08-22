@@ -4,8 +4,15 @@ import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { Zap, Bell, Mail } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Zap,
+  Bell,
+  Mail,
+  Users,
+  ShieldCheck,
+  Crown,
+  Check,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,8 +36,12 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
-  getSourceIcon,
 } from "@/components/gamification/shared/polaris-form-ui";
+import {
+  PolarisEligibilityCard,
+  toArray,
+} from "@/components/gamification/shared/polaris-eligibility-card";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const pointRuleSchema = Yup.object().shape({
   module: Yup.string().required("Please select a module or integration"),
@@ -42,6 +53,10 @@ const pointRuleSchema = Yup.object().shape({
   dailyCap: Yup.number().nullable(),
   weeklyCap: Yup.number().nullable(),
   monthlyCap: Yup.number().nullable(),
+  memberEligibility: Yup.string().optional(),
+  membershipTierId: Yup.array().of(Yup.string()).optional(),
+  eligibleTierIds: Yup.array().of(Yup.string()).optional(),
+  eligibleUserIds: Yup.array().of(Yup.string()).optional(),
   description: Yup.string().max(200, "Description too long"),
   allowPushNotification: Yup.boolean().optional(),
   allowEmailNotification: Yup.boolean().optional(),
@@ -103,10 +118,33 @@ export function PointRuleForm({
     }
   }, [initialValues, integrations]);
 
-  const formik = useFormik({
-    initialValues: initialValues
+  const formikInitialValues = React.useMemo(() => {
+    return initialValues
       ? {
           ...initialValues,
+          memberEligibility:
+            initialValues.memberEligibility ||
+            (initialValues.eligibleUserIds?.length
+              ? "SPECIFIC_CUSTOMERS"
+              : (Array.isArray(initialValues.membershipTierId)
+                    ? initialValues.membershipTierId.length
+                    : initialValues.membershipTierId) ||
+                  initialValues.eligibleTierIds?.length
+                ? "TIERS"
+                : initialValues.isVerifiedOnly
+                  ? "VERIFIED"
+                  : "ALL"),
+          membershipTierId: Array.isArray(initialValues.membershipTierId)
+            ? initialValues.membershipTierId
+            : initialValues.membershipTierId
+              ? [initialValues.membershipTierId]
+              : initialValues.eligibleTierIds || [],
+          eligibleTierIds: Array.isArray(initialValues.membershipTierId)
+            ? initialValues.membershipTierId
+            : initialValues.membershipTierId
+              ? [initialValues.membershipTierId]
+              : initialValues.eligibleTierIds || [],
+          eligibleUserIds: initialValues.eligibleUserIds || [],
           allowPushNotification:
             initialValues.allowPushNotification !== undefined
               ? initialValues.allowPushNotification
@@ -115,32 +153,37 @@ export function PointRuleForm({
             initialValues.allowEmailNotification !== undefined
               ? initialValues.allowEmailNotification
               : true,
-          pushNotificationTitle:
-            initialValues.pushNotificationTitle ?? "",
-          pushNotificationBody:
-            initialValues.pushNotificationBody ?? "",
+          pushNotificationTitle: initialValues.pushNotificationTitle ?? "",
+          pushNotificationBody: initialValues.pushNotificationBody ?? "",
           emailNotificationSubject:
             initialValues.emailNotificationSubject ?? "",
-          emailNotificationBody:
-            initialValues.emailNotificationBody ?? "",
+          emailNotificationBody: initialValues.emailNotificationBody ?? "",
         }
       : {
-      source: initialSourceType,
-      module: "",
-      action: "",
-      trigger: "FIRST_TIME",
-      points: 10,
-      dailyCap: 10,
-      weeklyCap: 70,
-      monthlyCap: 210,
-      description: "",
-      allowPushNotification: true,
-      allowEmailNotification: true,
-      pushNotificationTitle: "",
-      pushNotificationBody: "",
-      emailNotificationSubject: "",
-      emailNotificationBody: "",
-    },
+          source: initialSourceType,
+          module: "",
+          action: "",
+          trigger: "FIRST_TIME",
+          points: 10,
+          dailyCap: 10,
+          weeklyCap: 70,
+          monthlyCap: 210,
+          memberEligibility: "ALL",
+          membershipTierId: [],
+          eligibleTierIds: [],
+          eligibleUserIds: [],
+          description: "",
+          allowPushNotification: true,
+          allowEmailNotification: true,
+          pushNotificationTitle: "",
+          pushNotificationBody: "",
+          emailNotificationSubject: "",
+          emailNotificationBody: "",
+        };
+  }, [initialValues, initialSourceType]);
+
+  const formik = useFormik({
+    initialValues: formikInitialValues,
     validationSchema: pointRuleSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
@@ -164,21 +207,37 @@ export function PointRuleForm({
   });
 
   const allSources = React.useMemo(() => {
-    const mods = modules.map((m) => ({
-      id: m.id,
-      uuid: m.uuid,
-      name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name,
-      type: "Module",
-      icon: m.icon,
-    }));
-    const ints = integrations.map((i) => ({
-      id: i.id,
-      uuid: i.uuid,
-      slug: (i as any).slug,
-      name: i.name ? i.name.charAt(0).toUpperCase() + i.name.slice(1) : i.name,
-      type: "Integration",
-      icon: i.icon,
-    }));
+    const modsMap = new Map<string, any>();
+    (modules || []).forEach((m) => {
+      const id = String(m.id || m.uuid || m.slug || m.name || "").trim();
+      if (id && !modsMap.has(id.toLowerCase())) {
+        modsMap.set(id.toLowerCase(), {
+          id,
+          uuid: m.uuid,
+          name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : id,
+          type: "Module",
+          icon: m.icon,
+        });
+      }
+    });
+
+    const intsMap = new Map<string, any>();
+    (integrations || []).forEach((i) => {
+      const id = String(i.id || i.uuid || (i as any).slug || i.name || "").trim();
+      if (id && !intsMap.has(id.toLowerCase())) {
+        intsMap.set(id.toLowerCase(), {
+          id,
+          uuid: i.uuid,
+          slug: (i as any).slug,
+          name: i.name ? i.name.charAt(0).toUpperCase() + i.name.slice(1) : id,
+          type: "Integration",
+          icon: i.icon,
+        });
+      }
+    });
+
+    const mods = Array.from(modsMap.values());
+    const ints = Array.from(intsMap.values());
     return { modules: mods, integrations: ints, all: [...mods, ...ints] };
   }, [modules, integrations]);
 
@@ -193,22 +252,26 @@ export function PointRuleForm({
       (s) =>
         s.id?.toLowerCase() === selected.toLowerCase() ||
         (s.uuid && s.uuid.toLowerCase() === selected.toLowerCase()) ||
-        ((s as any).slug && (s as any).slug.toLowerCase() === selected.toLowerCase()),
+        ((s as any).slug &&
+          (s as any).slug.toLowerCase() === selected.toLowerCase()),
     );
 
     const matchValues = new Set<string>();
     matchValues.add(selected.toLowerCase());
     if (selectedSource?.id) matchValues.add(selectedSource.id.toLowerCase());
-    if (selectedSource?.uuid) matchValues.add(selectedSource.uuid.toLowerCase());
-    if ((selectedSource as any)?.slug) matchValues.add((selectedSource as any).slug.toLowerCase());
-    if (selectedSource?.name) matchValues.add(selectedSource.name.toLowerCase());
+    if (selectedSource?.uuid)
+      matchValues.add(selectedSource.uuid.toLowerCase());
+    if ((selectedSource as any)?.slug)
+      matchValues.add((selectedSource as any).slug.toLowerCase());
+    if (selectedSource?.name)
+      matchValues.add(selectedSource.name.toLowerCase());
 
     const isMatch = (target?: string | null) => {
       if (!target) return false;
       return matchValues.has(target.toLowerCase());
     };
 
-    const fromIntegrationTriggers = integrationTriggers.filter(
+    const fromIntegrationTriggers = (integrationTriggers || []).filter(
       (t) =>
         isMatch(t.integrationId) ||
         isMatch(t.moduleId) ||
@@ -216,14 +279,14 @@ export function PointRuleForm({
         isMatch((t as any).integrationSlug),
     );
 
-    const fromModuleTriggers = moduleTriggers.filter(
+    const fromModuleTriggers = (moduleTriggers || []).filter(
       (t) =>
         isMatch(t.moduleId) ||
         isMatch((t as any).integrationId) ||
         isMatch((t as any).slug),
     );
 
-    const fromGenericTriggers = triggers.filter(
+    const fromGenericTriggers = (triggers || []).filter(
       (t) =>
         isMatch(t.moduleId) ||
         isMatch((t as any).integrationId) ||
@@ -237,7 +300,7 @@ export function PointRuleForm({
     ];
 
     if (combined.length === 0 && sourceType === "INTEGRATION") {
-      integrationTriggers.forEach((t) => {
+      (integrationTriggers || []).forEach((t) => {
         if (
           isMatch(t.integrationId) ||
           isMatch(t.moduleId) ||
@@ -249,11 +312,14 @@ export function PointRuleForm({
       });
     }
 
-    const unique = new Map();
+    const unique = new Map<string, any>();
     combined.forEach((item) => {
-      const key = item.id || item.name || item.description;
-      if (key && !unique.has(key)) {
-        unique.set(key, item);
+      const val = String(item.name || item.id || item.description || "").trim();
+      if (val && !unique.has(val.toLowerCase())) {
+        unique.set(val.toLowerCase(), {
+          ...item,
+          value: val,
+        });
       }
     });
     return Array.from(unique.values());
@@ -269,15 +335,15 @@ export function PointRuleForm({
   const selectedSourceItem = allSources.all.find(
     (s) =>
       s.id?.toLowerCase() === formik.values.module?.toLowerCase() ||
-      (s.uuid && s.uuid.toLowerCase() === formik.values.module?.toLowerCase()) ||
-      ((s as any).slug && (s as any).slug.toLowerCase() === formik.values.module?.toLowerCase()),
+      (s.uuid &&
+        s.uuid.toLowerCase() === formik.values.module?.toLowerCase()) ||
+      ((s as any).slug &&
+        (s as any).slug.toLowerCase() === formik.values.module?.toLowerCase()),
   );
 
   const selectedTriggerItem = filteredTriggers.find(
     (t) => t.id === formik.values.action || t.name === formik.values.action,
   );
-
-
 
   const readableActionName = (
     selectedTriggerItem?.name ||
@@ -291,7 +357,10 @@ export function PointRuleForm({
       sidebar={
         <>
           {/* Live Customer Simulator Card */}
-          <PolarisSidebarCard title="Customer Experience Preview" badge="Live Simulator">
+          <PolarisSidebarCard
+            title="Customer Experience Preview"
+            badge="Live Simulator"
+          >
             {/* Simulated Customer Notification Toast */}
             <div className="p-4 rounded-xl bg-zinc-900 text-white dark:bg-zinc-950 border border-zinc-800 shadow-md relative overflow-hidden">
               <div className="flex items-start gap-3">
@@ -308,7 +377,11 @@ export function PointRuleForm({
                     You just earned points for {readableActionName}.
                   </p>
                   <p className="text-[10px] text-zinc-400">
-                    Channel: {selectedSourceItem?.name || (sourceType === "MODULE" ? "Platform Module" : "Integration")}
+                    Channel:{" "}
+                    {selectedSourceItem?.name ||
+                      (sourceType === "MODULE"
+                        ? "Platform Module"
+                        : "Integration")}
                   </p>
                 </div>
               </div>
@@ -316,11 +389,58 @@ export function PointRuleForm({
 
             {/* Structured Rule Breakdown */}
             <div className="space-y-2.5 pt-1">
-              <PolarisSummaryRow label="Channel Origin" value={selectedSourceItem?.name || "Unspecified"} />
-              <PolarisSummaryRow label="Target Trigger" value={formik.values.trigger === "FIRST_TIME" ? "First Time Only" : "Recurring"} />
-              <PolarisSummaryRow label="Daily Payout Cap" value={formik.values.dailyCap ? `${formik.values.dailyCap} times / user` : "Unlimited"} />
-              <PolarisSummaryRow label="Weekly Payout Cap" value={formik.values.weeklyCap ? `${formik.values.weeklyCap} times / user` : "Unlimited"} />
-              <PolarisSummaryRow label="Monthly Payout Cap" value={formik.values.monthlyCap ? `${formik.values.monthlyCap} times / user` : "Unlimited"} />
+              <PolarisSummaryRow
+                label="Channel Origin"
+                value={selectedSourceItem?.name || "Unspecified"}
+              />
+              <PolarisSummaryRow
+                label="Target Trigger"
+                value={
+                  formik.values.trigger === "FIRST_TIME"
+                    ? "First Time Only"
+                    : "Recurring"
+                }
+              />
+              <PolarisSummaryRow
+                label="Eligibility"
+                value={
+                  formik.values.memberEligibility === "VERIFIED"
+                    ? "Verified Only"
+                    : formik.values.memberEligibility === "TIERS"
+                      ? formik.values.eligibleTierIds?.length > 0
+                        ? `${formik.values.eligibleTierIds.length} Tier(s)`
+                        : "Specific Tiers"
+                      : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                        ? formik.values.eligibleUserIds?.length > 0
+                          ? `${formik.values.eligibleUserIds.length} Customer(s)`
+                          : "Specific Customers"
+                        : "All Customers"
+                }
+              />
+              <PolarisSummaryRow
+                label="Daily Payout Cap"
+                value={
+                  formik.values.dailyCap
+                    ? `${formik.values.dailyCap} times / user`
+                    : "Unlimited"
+                }
+              />
+              <PolarisSummaryRow
+                label="Weekly Payout Cap"
+                value={
+                  formik.values.weeklyCap
+                    ? `${formik.values.weeklyCap} times / user`
+                    : "Unlimited"
+                }
+              />
+              <PolarisSummaryRow
+                label="Monthly Payout Cap"
+                value={
+                  formik.values.monthlyCap
+                    ? `${formik.values.monthlyCap} times / user`
+                    : "Unlimited"
+                }
+              />
               <PolarisSummaryRow
                 label="Push Alert"
                 value={
@@ -332,7 +452,9 @@ export function PointRuleForm({
                         : "text-zinc-400 dark:text-zinc-500",
                     )}
                   >
-                    {formik.values.allowPushNotification ? "Enabled" : "Disabled"}
+                    {formik.values.allowPushNotification
+                      ? "Enabled"
+                      : "Disabled"}
                   </span>
                 }
               />
@@ -347,7 +469,9 @@ export function PointRuleForm({
                         : "text-zinc-400 dark:text-zinc-500",
                     )}
                   >
-                    {formik.values.allowEmailNotification ? "Enabled" : "Disabled"}
+                    {formik.values.allowEmailNotification
+                      ? "Enabled"
+                      : "Disabled"}
                   </span>
                 }
                 isLast
@@ -356,7 +480,9 @@ export function PointRuleForm({
           </PolarisSidebarCard>
 
           <PolarisTipCard>
-            Calibrate your point values so high-friction actions (like store purchases or reviews) grant higher point rewards compared to high-frequency actions (like comments or likes).
+            Calibrate your point values so high-friction actions (like store
+            purchases or reviews) grant higher point rewards compared to
+            high-frequency actions (like comments or likes).
           </PolarisTipCard>
         </>
       }
@@ -382,201 +508,215 @@ export function PointRuleForm({
             disabled={isEdit}
           />
 
-                {/* Target Source and Triggering Action Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="module" className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                      {sourceType === "MODULE" ? "Target Module" : "Target App / Store"}
-                    </Label>
-                    <Select
-                      onValueChange={(val) => {
-                        formik.setFieldValue("module", val);
-                        formik.setFieldValue("action", "");
-                      }}
-                      value={
-                        currentSourceList.find(
-                          (item) =>
-                            item.id?.toLowerCase() ===
-                              formik.values.module?.toLowerCase() ||
-                            item.uuid?.toLowerCase() ===
-                              formik.values.module?.toLowerCase() ||
-                            (item as any).slug?.toLowerCase() ===
-                              formik.values.module?.toLowerCase(),
-                        )?.id || formik.values.module
-                      }
-                      disabled={isEdit}
+          {/* Target Source and Triggering Action Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="module"
+                className="text-xs font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                {sourceType === "MODULE"
+                  ? "Target Module"
+                  : "Target App / Store"}
+              </Label>
+              <Select
+                onValueChange={(val) => {
+                  formik.setFieldValue("module", val);
+                  formik.setFieldValue("action", "");
+                }}
+                value={
+                  currentSourceList.find(
+                    (item) =>
+                      item.id?.toLowerCase() ===
+                        formik.values.module?.toLowerCase() ||
+                      item.uuid?.toLowerCase() ===
+                        formik.values.module?.toLowerCase() ||
+                      (item as any).slug?.toLowerCase() ===
+                        formik.values.module?.toLowerCase(),
+                  )?.id || formik.values.module
+                }
+                disabled={isEdit}
+              >
+                <SelectTrigger
+                  id="module"
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                >
+                  <SelectValue
+                    placeholder={
+                      sourceType === "MODULE"
+                        ? "Select platform module"
+                        : "Select connected app"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentSourceList.map((item, idx) => (
+                    <SelectItem
+                      key={`src-${item.id}-${idx}`}
+                      value={item.id}
+                      className="text-xs"
                     >
-                      <SelectTrigger
-                        id="module"
-                        className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                      >
-                        <SelectValue
-                          placeholder={
-                            sourceType === "MODULE"
-                              ? "Select platform module"
-                              : "Select connected app"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {currentSourceList.map((item) => (
-                          <SelectItem key={item.id} value={item.id} className="text-xs">
-                            <div className="flex items-center gap-2">
-                              {getSourceIcon(item.name, item.type)}
-                              <span>{item.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {formik.touched.module && formik.errors.module && (
-                      <p className="text-[11px] text-rose-500 font-medium">
-                        {formik.errors.module as string}
-                      </p>
-                    )}
-                  </div>
+                      {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formik.touched.module && formik.errors.module && (
+                <p className="text-[11px] text-rose-500 font-medium">
+                  {formik.errors.module as string}
+                </p>
+              )}
+            </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="action" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Trigger Event <span className="text-rose-500">*</span>
-                    </Label>
-                    <Select
-                      onValueChange={(val) => {
-                        formik.setFieldValue("action", val);
-                        const trig = filteredTriggers.find(
-                          (t) =>
-                            (t.name || t.id) === val ||
-                            t.id === val ||
-                            t.name === val,
-                        );
-                        if (trig && !formik.values.description) {
-                          formik.setFieldValue(
-                            "description",
-                            trig.description || trig.name || "",
-                          );
-                        }
-                      }}
-                      value={
-                        filteredTriggers.find(
-                          (t) =>
-                            t.id === formik.values.action ||
-                            t.name === formik.values.action ||
-                            (t.name || t.id) === formik.values.action,
-                        )?.name ||
-                        filteredTriggers.find(
-                          (t) =>
-                            t.id === formik.values.action ||
-                            t.name === formik.values.action ||
-                            (t.name || t.id) === formik.values.action,
-                        )?.id ||
-                        formik.values.action
-                      }
-                      disabled={!formik.values.module || isEdit}
-                    >
-                      <SelectTrigger
-                        id="action"
-                        className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                      >
-                        <SelectValue
-                          placeholder={
-                            formik.values.module
-                              ? "Choose trigger action"
-                              : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredTriggers.length === 0 ? (
-                          <div className="p-3 text-xs text-zinc-500 text-center">
-                            No trigger events found for this source
-                          </div>
-                        ) : (
-                          filteredTriggers.map((t) => {
-                            const itemVal = t.name || t.id;
-                            return (
-                              <SelectItem key={t.id} value={itemVal} className="text-xs">
-                                <div className="flex flex-col py-0.5 text-left">
-                                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                                    {t.name
-                                      ? t.name.replace(/_/g, " ")
-                                      : t.description}
-                                  </span>
-                                  {t.description &&
-                                    t.name &&
-                                    t.description !== t.name && (
-                                      <span className="text-[10px] text-zinc-400 dark:text-zinc-500 line-clamp-1">
-                                        {t.description}
-                                      </span>
-                                    )}
-                                </div>
-                              </SelectItem>
-                            );
-                          })
-                        )}
-                      </SelectContent>
-                    </Select>
-                    {formik.touched.action && formik.errors.action && (
-                      <p className="text-[11px] text-rose-500 font-medium">
-                        {formik.errors.action as string}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Cadence & Description */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="trigger" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Reward Cadence
-                    </Label>
-                    <Select
-                      onValueChange={(val) => formik.setFieldValue("trigger", val)}
-                      value={formik.values.trigger}
-                      disabled={isEdit}
-                    >
-                      <SelectTrigger
-                        id="trigger"
-                        className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
-                      >
-                        <SelectValue placeholder="Select trigger cadence" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="FIRST_TIME" className="text-xs">
-                          <div className="flex flex-col text-left py-0.5">
-                            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                              First-time Action (One-off milestone)
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="action"
+                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              >
+                Trigger Event <span className="text-rose-500">*</span>
+              </Label>
+              <Select
+                onValueChange={(val) => {
+                  formik.setFieldValue("action", val);
+                  const trig = filteredTriggers.find(
+                    (t) =>
+                      t.value === val ||
+                      (t.name || t.id) === val ||
+                      t.id === val ||
+                      t.name === val,
+                  );
+                  if (trig && !formik.values.description) {
+                    formik.setFieldValue(
+                      "description",
+                      trig.description || trig.name || "",
+                    );
+                  }
+                }}
+                value={
+                  filteredTriggers.find(
+                    (t) =>
+                      t.value === formik.values.action ||
+                      t.id === formik.values.action ||
+                      t.name === formik.values.action ||
+                      (t.name || t.id) === formik.values.action,
+                  )?.value || formik.values.action
+                }
+                disabled={!formik.values.module || isEdit}
+              >
+                <SelectTrigger
+                  id="action"
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                >
+                  <SelectValue
+                    placeholder={
+                      formik.values.module
+                        ? "Choose trigger action"
+                        : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredTriggers.length === 0 ? (
+                    <div className="p-3 text-xs text-zinc-500 text-center">
+                      No trigger events found for this source
+                    </div>
+                  ) : (
+                    filteredTriggers.map((t, idx) => {
+                      const itemVal = t.value || t.name || t.id;
+                      return (
+                        <SelectItem
+                          key={`trig-${itemVal}-${idx}`}
+                          value={itemVal}
+                          className="text-xs"
+                        >
+                          <div className="flex flex-col py-0.5 text-left">
+                            <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                              {t.name
+                                ? t.name.replace(/_/g, " ")
+                                : t.description || itemVal}
                             </span>
-                            <span className="text-[10px] text-zinc-500">
-                              Rewarded only once per user account lifetime
-                            </span>
+                            {t.description &&
+                              t.name &&
+                              t.description !== t.name && (
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-500 line-clamp-1">
+                                  {t.description}
+                                </span>
+                              )}
                           </div>
                         </SelectItem>
-                        <SelectItem value="RECURRING" className="text-xs">
-                          <div className="flex flex-col text-left py-0.5">
-                            <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                              Recurring (Every instance)
-                            </span>
-                            <span className="text-[10px] text-zinc-500">
-                              Rewarded each time, bounded by velocity limits
-                            </span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      );
+                    })
+                  )}
+                </SelectContent>
+              </Select>
+              {formik.touched.action && formik.errors.action && (
+                <p className="text-[11px] text-rose-500 font-medium">
+                  {formik.errors.action as string}
+                </p>
+              )}
+            </div>
+          </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Merchant Note / Description
-                    </Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Explain under what conditions this point rule applies..."
-                      {...formik.getFieldProps("description")}
-                      className="min-h-[70px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium shadow-none resize-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                    />
-                  </div>
-                </div>
+          {/* Cadence & Description */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="trigger"
+                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              >
+                Reward Cadence
+              </Label>
+              <Select
+                onValueChange={(val) => formik.setFieldValue("trigger", val)}
+                value={formik.values.trigger}
+                disabled={isEdit}
+              >
+                <SelectTrigger
+                  id="trigger"
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                >
+                  <SelectValue placeholder="Select trigger cadence" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FIRST_TIME" className="text-xs">
+                    <div className="flex flex-col text-left py-0.5">
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        First-time Action (One-off milestone)
+                      </span>
+                      <span className="text-[10px] text-zinc-500">
+                        Rewarded only once per user account lifetime
+                      </span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="RECURRING" className="text-xs">
+                    <div className="flex flex-col text-left py-0.5">
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        Recurring (Every instance)
+                      </span>
+                      <span className="text-[10px] text-zinc-500">
+                        Rewarded each time, bounded by velocity limits
+                      </span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="description"
+                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              >
+                Merchant Note / Description
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Explain under what conditions this point rule applies..."
+                {...formik.getFieldProps("description")}
+                className="min-h-[70px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium shadow-none resize-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+              />
+            </div>
+          </div>
         </PolarisFormCard>
 
         {/* Card 2: Point Economics & Payout Values */}
@@ -586,39 +726,42 @@ export function PointRuleForm({
           description="Define the point reward value credited to the member upon action completion."
           badge="Instant Credit"
         >
-                <div className="space-y-3">
-                  <Label htmlFor="points" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                    Points Awarded per Event
-                  </Label>
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <div className="relative flex-1">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-900 dark:text-zinc-100">
-                        <Zap className="h-4 w-4" />
-                      </div>
-                      <Input
-                        id="points"
-                        type="number"
-                        min="1"
-                        {...formik.getFieldProps("points")}
-                        className="h-11 pl-10 pr-16 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-base font-bold text-zinc-900 dark:text-zinc-100 shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                      />
-                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                        PTS
-                      </div>
-                    </div>
-
-                    <PolarisPresetChips
-                      presets={POINT_PRESETS}
-                      currentValue={Number(formik.values.points)}
-                      onSelect={(v) => formik.setFieldValue("points", v)}
-                    />
-                  </div>
-                  {formik.touched.points && formik.errors.points && (
-                    <p className="text-[11px] text-rose-500 font-medium">
-                      {formik.errors.points as string}
-                    </p>
-                  )}
+          <div className="space-y-3">
+            <Label
+              htmlFor="points"
+              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+            >
+              Points Awarded per Event
+            </Label>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-900 dark:text-zinc-100">
+                  <Zap className="h-4 w-4" />
                 </div>
+                <Input
+                  id="points"
+                  type="number"
+                  min="1"
+                  {...formik.getFieldProps("points")}
+                  className="h-11 pl-10 pr-16 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-base font-bold text-zinc-900 dark:text-zinc-100 shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                  PTS
+                </div>
+              </div>
+
+              <PolarisPresetChips
+                presets={POINT_PRESETS}
+                currentValue={Number(formik.values.points)}
+                onSelect={(v) => formik.setFieldValue("points", v)}
+              />
+            </div>
+            {formik.touched.points && formik.errors.points && (
+              <p className="text-[11px] text-rose-500 font-medium">
+                {formik.errors.points as string}
+              </p>
+            )}
+          </div>
         </PolarisFormCard>
 
         {/* Card 3: Velocity & Anti-Abuse Frequency Controls */}
@@ -664,21 +807,45 @@ export function PointRuleForm({
           </div>
         </PolarisFormCard>
 
-        {/* Card 4: Notification Settings */}
-        <PolarisFormCard
+        {/* Card 4: Eligibility (Shopify Polaris UI) */}
+        <PolarisEligibilityCard
           step={4}
+          eligibility={formik.values.memberEligibility || "ALL"}
+          onEligibilityChange={(val) =>
+            formik.setFieldValue("memberEligibility", val)
+          }
+          tierIds={
+            formik.values.membershipTierId ||
+            formik.values.eligibleTierIds ||
+            []
+          }
+          onTierIdsChange={(tiers) => {
+            formik.setFieldValue("eligibleTierIds", tiers);
+            formik.setFieldValue("membershipTierId", tiers);
+          }}
+          userIds={formik.values.eligibleUserIds || []}
+          onUserIdsChange={(users) => {
+            formik.setFieldValue("eligibleUserIds", users);
+          }}
+        />
+
+        {/* Card 5: Notification Settings */}
+        <PolarisFormCard
+          step={5}
           title="Notification Settings"
           description="Configure alert channels and custom notification text when members earn points from this rule."
           badge="Notification Channels"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Push Notification Panel */}
-            <div className={cn(
-              "rounded-xl border transition-all p-4 space-y-4",
-              formik.values.allowPushNotification
-                ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
-                : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75"
-            )}>
+            <div
+              className={cn(
+                "rounded-xl border transition-all p-4 space-y-4",
+                formik.values.allowPushNotification
+                  ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
+                  : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75",
+              )}
+            >
               <div
                 onClick={() =>
                   formik.setFieldValue(
@@ -708,7 +875,8 @@ export function PointRuleForm({
                     </Label>
                   </div>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                    Send an instant push notification to user's device when points are awarded from this rule.
+                    Send an instant push notification to user's device when
+                    points are awarded from this rule.
                   </p>
                 </div>
               </div>
@@ -716,7 +884,10 @@ export function PointRuleForm({
               {formik.values.allowPushNotification && (
                 <div className="space-y-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-700/80 animate-in fade-in-50 duration-200">
                   <div className="space-y-1.5">
-                    <Label htmlFor="pushNotificationTitle" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="pushNotificationTitle"
+                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Push Notification Title
                     </Label>
                     <Input
@@ -727,7 +898,10 @@ export function PointRuleForm({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="pushNotificationBody" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="pushNotificationBody"
+                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Push Notification Message
                     </Label>
                     <Textarea
@@ -769,12 +943,14 @@ export function PointRuleForm({
             </div>
 
             {/* Email Notification Panel */}
-            <div className={cn(
-              "rounded-xl border transition-all p-4 space-y-4",
-              formik.values.allowEmailNotification
-                ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
-                : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75"
-            )}>
+            <div
+              className={cn(
+                "rounded-xl border transition-all p-4 space-y-4",
+                formik.values.allowEmailNotification
+                  ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
+                  : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75",
+              )}
+            >
               <div
                 onClick={() =>
                   formik.setFieldValue(
@@ -804,7 +980,8 @@ export function PointRuleForm({
                     </Label>
                   </div>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                    Send an email notification when user earns points from this rule.
+                    Send an email notification when user earns points from this
+                    rule.
                   </p>
                 </div>
               </div>
@@ -812,7 +989,10 @@ export function PointRuleForm({
               {formik.values.allowEmailNotification && (
                 <div className="space-y-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-700/80 animate-in fade-in-50 duration-200">
                   <div className="space-y-1.5">
-                    <Label htmlFor="emailNotificationSubject" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="emailNotificationSubject"
+                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Email Subject
                     </Label>
                     <Input
@@ -823,7 +1003,10 @@ export function PointRuleForm({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="emailNotificationBody" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="emailNotificationBody"
+                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Email Message / Content
                     </Label>
                     <Textarea
@@ -885,5 +1068,3 @@ export function PointRuleForm({
     </PolarisFormLayout>
   );
 }
-
-

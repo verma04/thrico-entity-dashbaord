@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Award, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  useGetBadges,
+  useGetBadgeById,
   useGetEntityGamificationModules,
 } from "@/graphql/actions/gamification/gamification-quiries";
 import { useUpdateBadge } from "@/graphql/actions/gamification/gamification-mutation";
@@ -24,15 +24,22 @@ export default function EditBadgePage() {
   const router = useRouter();
   const badgeId = params?.id as string;
 
-  const { data: badgeData, loading: fetchLoading } = useGetBadges();
+  const { data: badgeData, loading: fetchLoading } = useGetBadgeById({
+    variables: { id: badgeId },
+    skip: !badgeId,
+  });
   const { data: moduleData } = useGetEntityGamificationModules();
   const [updateBadge, { loading: isUpdating }] = useUpdateBadge();
 
-  const badge = useMemo(() => {
-    return badgeData?.getBadges?.find((b) => b.id === badgeId);
-  }, [badgeData, badgeId]);
+  const badge = badgeData?.getBadgeById;
 
   const handleUpdate = async (values: any) => {
+    const tierIds = Array.isArray(values.membershipTierId)
+      ? values.membershipTierId
+      : values.membershipTierId
+        ? [values.membershipTierId]
+        : values.eligibleTierIds || [];
+
     const res = await updateBadge({
       variables: {
         id: badgeId,
@@ -45,6 +52,10 @@ export default function EditBadgePage() {
           module: values.module || "SYSTEM",
           action: values.action || "POINTS_THRESHOLD",
           targetValue: Number(values.targetValue),
+          memberEligibility: values.memberEligibility || "ALL",
+          membershipTierId: tierIds,
+          eligibleTierIds: tierIds,
+          eligibleUserIds: values.eligibleUserIds || [],
           allowPushNotification: values.allowPushNotification,
           allowEmailNotification: values.allowEmailNotification,
           pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,

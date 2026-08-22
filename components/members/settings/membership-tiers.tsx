@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   GET_MEMBERSHIP_TIERS,
@@ -15,6 +15,12 @@ import {
   ChevronDown,
   ChevronUp,
   Upload,
+  LayoutGrid,
+  List as ListIcon,
+  Search,
+  X,
+  Users,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
@@ -22,7 +28,11 @@ import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TierMembersList from "./tier-members-list";
+import { TierCard, TierSkeletonGrid } from "./tier-card";
+import { TierMembersModal } from "./tier-members-modal";
 import {
   Table,
   TableBody,
@@ -58,13 +68,29 @@ export default function MembershipTiers() {
   const { data, loading, refetch } = useQuery(GET_MEMBERSHIP_TIERS);
   const [deleteTier] = useMutation(DELETE_MEMBERSHIP_TIER);
 
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<any>(null);
   const [expandedTierId, setExpandedTierId] = useState<string | null>(null);
   const [tierToDelete, setTierToDelete] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedTierForMembers, setSelectedTierForMembers] = useState<any | null>(null);
 
-  const tiers = data?.getMembershipTiers || [];
+  const rawTiers: any[] = data?.getMembershipTiers || [];
+
+  const filteredTiers = useMemo(() => {
+    if (!searchQuery.trim()) return rawTiers;
+    const q = searchQuery.toLowerCase().trim();
+    return rawTiers.filter((tier: any) => {
+      const nameMatch = tier.name?.toLowerCase().includes(q);
+      const descMatch = tier.description?.toLowerCase().includes(q);
+      const benefitsMatch = Array.isArray(tier.benefits)
+        ? tier.benefits.some((b: string) => b.toLowerCase().includes(q))
+        : false;
+      return nameMatch || descMatch || benefitsMatch;
+    });
+  }, [rawTiers, searchQuery]);
 
   const handleOpenModal = (tier: any = null) => {
     setEditingTier(tier);
@@ -119,54 +145,123 @@ export default function MembershipTiers() {
       />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
-        <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
-          <Table>
-            <TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Tier</TableHead>
-                <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Description</TableHead>
-                <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Privileges</TableHead>
-                <TableHead className="text-right text-[11px] font-bold uppercase tracking-wider text-zinc-500">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
-              {loading ? (
-                Array.from({ length: 3 }).map((_, index) => (
-                  <TableRow key={`skeleton-${index}`}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="w-8 h-8 rounded-full" />
-                        <Skeleton className="h-4 w-[100px]" />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-[150px]" />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Skeleton className="h-5 w-[60px] rounded-full" />
-                        <Skeleton className="h-5 w-[60px] rounded-full" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Skeleton className="h-8 w-8 rounded-md" />
-                        <Skeleton className="h-8 w-8 rounded-md" />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : tiers.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-center py-12 text-zinc-400 text-xs font-medium"
-                  >
-                    No membership tiers created yet. Click "Create Tier" to get started.
-                  </TableCell>
+        {/* Controls Toolbar: Search & View Toggle */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search tiers by name, perks, or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-9 h-9 text-xs bg-card border-border"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between sm:justify-end gap-3">
+            <span className="text-xs text-muted-foreground font-medium">
+              {filteredTiers.length} {filteredTiers.length === 1 ? "Tier" : "Tiers"}
+            </span>
+
+            {/* Grid / List View Toggle */}
+            <Tabs
+              value={viewMode}
+              onValueChange={(v) => setViewMode(v as "grid" | "list")}
+              className="bg-muted p-0.5 rounded-lg border border-border"
+            >
+              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
+                <TabsTrigger
+                  value="grid"
+                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-2xs data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                >
+                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
+                  Grid
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-2xs data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                >
+                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
+                  List
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
+
+        {/* Content View: Grid vs List */}
+        {loading ? (
+          viewMode === "grid" ? (
+            <TierSkeletonGrid />
+          ) : (
+            <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs p-6 space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
+              ))}
+            </div>
+          )
+        ) : filteredTiers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 bg-card rounded-2xl border border-dashed border-border text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-muted-foreground">
+              <Award className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-foreground">
+                {searchQuery ? "No matching tiers found" : "No membership tiers created yet"}
+              </h3>
+              <p className="text-xs text-muted-foreground max-w-sm">
+                {searchQuery
+                  ? "Try clearing your search query or looking for different keywords."
+                  : "Create your first membership tier to start organizing members and rewarding them with privileges."}
+              </p>
+            </div>
+            {!searchQuery && (
+              <Button
+                type="button"
+                onClick={() => handleOpenModal()}
+                className="h-8 px-3 text-xs font-semibold gap-1.5 mt-2"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Create Tier
+              </Button>
+            )}
+          </div>
+        ) : viewMode === "grid" ? (
+          /* Grid View */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
+            {filteredTiers.map((tier: any) => (
+              <TierCard
+                key={tier.id}
+                tier={tier}
+                onEdit={() => handleOpenModal(tier)}
+                onDelete={() => setTierToDelete(tier.id)}
+                onViewMembers={() => setSelectedTierForMembers(tier)}
+              />
+            ))}
+          </div>
+        ) : (
+          /* List View (Table) */
+          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
+            <Table>
+              <TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Tier</TableHead>
+                  <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Description</TableHead>
+                  <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Privileges</TableHead>
+                  <TableHead className="text-right text-[11px] font-bold uppercase tracking-wider text-zinc-500">Actions</TableHead>
                 </TableRow>
-              ) : (
-                tiers.map((tier: any) => (
+              </TableHeader>
+              <TableBody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+                {filteredTiers.map((tier: any) => (
                   <React.Fragment key={tier.id}>
                     <TableRow className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                       <TableCell>
@@ -183,17 +278,31 @@ export default function MembershipTiers() {
                             />
                           ) : (
                             <div
-                              className="w-8 h-8 rounded-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+                              className="w-8 h-8 rounded-full flex items-center justify-center border"
+                              style={{
+                                backgroundColor: `${tier.badgeColor || "#6366f1"}15`,
+                                borderColor: `${tier.badgeColor || "#6366f1"}40`,
+                              }}
                             >
                               <Award
                                 className="h-4 w-4"
-                                style={{ color: tier.badgeColor || "currentColor" }}
+                                style={{ color: tier.badgeColor || "#6366f1" }}
                               />
                             </div>
                           )}
-                          <span className="text-zinc-900 dark:text-zinc-100">
-                            {tier.name}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-zinc-900 dark:text-zinc-100">
+                              {tier.name}
+                            </span>
+                            {tier.isDefault && (
+                              <Badge
+                                variant="outline"
+                                className="text-[9px] py-0 px-1 h-3.5 font-semibold text-emerald-600 bg-emerald-500/10 border-emerald-500/20"
+                              >
+                                Default
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="max-w-[220px] truncate text-xs text-zinc-500 dark:text-zinc-400 font-medium">
@@ -202,7 +311,7 @@ export default function MembershipTiers() {
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {tier.benefits?.length === 1 &&
-                          tier.benefits[0].includes("<") ? (
+                          tier.benefits[0]?.includes("<") ? (
                             <Badge variant="secondary" className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold">
                               Custom Perks
                             </Badge>
@@ -268,6 +377,12 @@ export default function MembershipTiers() {
                               >
                                 <Edit2 className="h-3.5 w-3.5 mr-2" /> Edit Tier
                               </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setSelectedTierForMembers(tier)}
+                                className="text-xs font-semibold cursor-pointer"
+                              >
+                                <Users className="h-3.5 w-3.5 mr-2" /> Manage Members
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => setTierToDelete(tier.id)}
@@ -296,12 +411,13 @@ export default function MembershipTiers() {
                       </TableRow>
                     )}
                   </React.Fragment>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
+        {/* Create / Edit Tier Modal */}
         <TierModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -309,6 +425,14 @@ export default function MembershipTiers() {
           onSuccess={refetch}
         />
 
+        {/* View/Manage Members Modal (for Grid View & Quick Action) */}
+        <TierMembersModal
+          isOpen={!!selectedTierForMembers}
+          onClose={() => setSelectedTierForMembers(null)}
+          tier={selectedTierForMembers}
+        />
+
+        {/* Delete Tier Confirmation Dialog */}
         <AlertDialog open={!!tierToDelete} onOpenChange={(open) => !open && setTierToDelete(null)}>
           <AlertDialogContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <AlertDialogHeader>
@@ -331,27 +455,28 @@ export default function MembershipTiers() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {/* Export CSV Modal */}
         <ExportCsvModal
           open={showExportModal}
           onOpenChange={setShowExportModal}
           entityName="membership tiers"
           description="Export all membership tier definitions, privilege lists, badge colors, and icons as CSV."
-          totalCount={tiers.length}
+          totalCount={rawTiers.length}
           onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
-            if (tiers.length === 0) {
+            if (rawTiers.length === 0) {
               toast.error("Nothing to export", { description: "No membership tiers created yet." });
               return;
             }
-            const csv = buildCsv(tiers, [
+            const csv = buildCsv(rawTiers, [
               { header: "Name", getValue: (t) => t.name || "" },
               { header: "Description", getValue: (t) => t.description || "" },
               { header: "Privileges", getValue: (t) => Array.isArray(t.benefits) ? t.benefits.join(" | ") : "" },
               { header: "Badge Color", getValue: (t) => t.badgeColor || "" },
               { header: "Badge Icon", getValue: (t) => t.badgeIcon || "" },
-              { header: "Members Count", getValue: (t) => t.membersCount ?? "" },
+              { header: "Is Default", getValue: (t) => t.isDefault ? "Yes" : "No" },
             ]);
             downloadCsv(csv, `membership-tiers-${new Date().toISOString().slice(0, 10)}`, format);
-            toast.success("Export ready", { description: `${tiers.length} tier${tiers.length !== 1 ? "s" : ""} exported.` });
+            toast.success("Export ready", { description: `${rawTiers.length} tier${rawTiers.length !== 1 ? "s" : ""} exported.` });
           }}
         />
       </EcosystemContainer>

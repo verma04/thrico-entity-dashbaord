@@ -56,13 +56,20 @@ export const getRewardTableColumns = (
     key: "mechanism",
     header: "Mechanism",
     cell: (reward) => {
-      const mechanisms = Array.isArray(reward.rewardMechanism)
-        ? reward.rewardMechanism
-        : [reward.rewardMechanism || "COUPON"];
-      const primaryMech = getMechanismBadge(mechanisms[0] || "COUPON");
+      const mechType =
+        reward.mechanism?.type ||
+        (Array.isArray(reward.rewardMechanism)
+          ? reward.rewardMechanism[0]
+          : reward.rewardMechanism) ||
+        "INTERNAL_VOUCHER";
+      const primaryMech = getMechanismBadge(mechType);
+      const MechIcon = primaryMech.icon;
       return (
-        <AdminTableTag variant="indigo">
-          {primaryMech.label}
+        <AdminTableTag variant={primaryMech.variant || "indigo"}>
+          <span className="inline-flex items-center gap-1">
+            <MechIcon className="h-3 w-3 shrink-0" />
+            <span>{primaryMech.label}</span>
+          </span>
         </AdminTableTag>
       );
     },
@@ -100,6 +107,21 @@ export const getRewardTableColumns = (
         {reward.redeemedCount ?? 0}
       </span>
     ),
+  },
+  {
+    key: "eligibility",
+    header: "Eligibility",
+    cell: (reward) => {
+      const eligibility =
+        reward.eligibility?.memberEligibility ||
+        reward.memberEligibility ||
+        "ALL";
+      return (
+        <AdminTableTag variant="purple">
+          {eligibility.replace(/_/g, " ")}
+        </AdminTableTag>
+      );
+    },
   },
   {
     key: "status",

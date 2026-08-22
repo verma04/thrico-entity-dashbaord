@@ -349,24 +349,6 @@ export function RewardsGalleryTab({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  {reward.inventoryRequired && (
-                    <Button
-                      onClick={() => onOpenUploadForReward(reward.id)}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 px-4 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl border-border bg-card"
-                    >
-                      <Upload className="h-3.5 w-3.5" /> Upload Batch
-                    </Button>
-                  )}
-                  <Button
-                    onClick={() => onManageVouchers(reward.id)}
-                    variant="outline"
-                    size="sm"
-                    className="h-8 px-4 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl border-border bg-card"
-                  >
-                    <Ticket className="h-3.5 w-3.5" /> Vouchers
-                  </Button>
                   <Link
                     href={`/gamification/rewards/coupons/${reward.id}/edit`}
                   >

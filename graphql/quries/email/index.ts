@@ -80,11 +80,18 @@ export const SEND_EMAIL = gql`
 `;
 
 export const CREATE_EMAIL_TEMPLATE = gql`
-  mutation CreateTemplate($name: String!, $subject: String!, $html: String!, $json: String) {
-    createEmailTemplate(input: { name: $name, subject: $subject, html: $html, json: $json }) {
+  mutation CreateTemplate($input: CreateEmailTemplateInput!) {
+    createEmailTemplate(input: $input) {
       id
       name
+      slug
+      subject
+      html
       json
+      isActive
+      isDeletable
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -122,11 +129,16 @@ export const GET_EMAIL_TEMPLATE = gql`
 `;
 
 export const UPDATE_EMAIL_TEMPLATE = gql`
-  mutation UpdateTemplate($id: ID!, $name: String!, $subject: String!, $html: String!, $json: String) {
-    updateEmailTemplate(input: { id: $id, name: $name, subject: $subject, html: $html, json: $json }) {
+  mutation UpdateTemplate($input: UpdateEmailTemplateInput!) {
+    updateEmailTemplate(input: $input) {
       id
       name
+      slug
       subject
+      html
+      json
+      isActive
+      isDeletable
       updatedAt
     }
   }

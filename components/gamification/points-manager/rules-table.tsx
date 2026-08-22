@@ -133,6 +133,15 @@ export function RulesTable({
       ),
     },
     {
+      key: "eligibility",
+      header: "Eligibility",
+      cell: (rule: PointRule) => (
+        <AdminTableTag variant="zinc">
+          {rule.memberEligibility || "ALL"}
+        </AdminTableTag>
+      ),
+    },
+    {
       key: "dailyCap",
       header: "Daily",
       cell: (rule: PointRule) => (

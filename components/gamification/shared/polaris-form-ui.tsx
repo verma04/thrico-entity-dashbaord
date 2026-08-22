@@ -240,6 +240,7 @@ interface PolarisPresetChipsProps {
   currentValue: number;
   onSelect: (value: number) => void;
   prefix?: string;
+  suffix?: string;
 }
 
 export function PolarisPresetChips({
@@ -247,6 +248,7 @@ export function PolarisPresetChips({
   currentValue,
   onSelect,
   prefix = "+",
+  suffix = "",
 }: PolarisPresetChipsProps) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
@@ -264,6 +266,7 @@ export function PolarisPresetChips({
         >
           {prefix}
           {preset}
+          {suffix}
         </button>
       ))}
     </div>
@@ -452,7 +455,7 @@ export function PolarisFormLayout({
   return (
     <div
       className={cn(
-        "max-w-[1040px] mx-auto w-full px-4 sm:px-6 py-5 space-y-6 pb-24",
+        "max-w-[1040px] mx-auto w-full px-0 sm:px-0 py-5 space-y-6 pb-24",
         className,
       )}
     >
@@ -498,3 +501,5 @@ export function getSourceIcon(name?: string, type?: string) {
   }
   return <Layers className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />;
 }
+
+export { PolarisEligibilityCard, toArray } from "./polaris-eligibility-card";

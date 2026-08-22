@@ -1,8 +1,8 @@
-import { useMutation, useQuery } from "@apollo/client";
 import {
   GET_SCRATCH_CONFIG,
   GET_SCRATCH_PRIZES,
   GET_SCRATCH_PLAYS,
+  GET_SCRATCH_PRIZE_BY_ID,
 } from "../../quries/rewards/scratch-card/queries";
 import {
   UPSERT_SCRATCH_CONFIG,
@@ -10,10 +10,21 @@ import {
   UPDATE_SCRATCH_PRIZE,
   DELETE_SCRATCH_PRIZE,
 } from "../../quries/rewards/scratch-card/mutations";
+import { useMutation, useQuery } from "@apollo/client";
 
 export const useGetScratchCardConfig = () => useQuery(GET_SCRATCH_CONFIG);
 
 export const useGetScratchCardPrizes = () => useQuery(GET_SCRATCH_PRIZES);
+
+export const useGetScratchCardPrizeById = (
+  variables: { id: string },
+  options?: any,
+) =>
+  useQuery(GET_SCRATCH_PRIZE_BY_ID, {
+    variables,
+    skip: !variables?.id,
+    ...options,
+  });
 
 export const useUpdateScratchCardConfig = (options?: any) =>
   useMutation(UPSERT_SCRATCH_CONFIG, {

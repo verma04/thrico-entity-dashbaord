@@ -28,6 +28,11 @@ export type { DateRangeInput };
 export * from "./spin-wheel";
 export * from "./scratch-card";
 export * from "./match-win";
+export { useGetEntityCurrencyConfig, useGetCurrencyConfig } from "../currency";
+export * from "./manual";
+export * from "./store";
+export * from "./gift-cards";
+
 
 export const useGetRewards = (variables?: {
   status?: string;

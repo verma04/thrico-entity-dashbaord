@@ -132,6 +132,17 @@ export const getBadgeTableColumns = (
       },
     },
     {
+      key: "eligibility",
+      header: "Eligibility",
+      cell: (badge: Badge) => (
+        <AdminTableTag variant="fuchsia">
+          {badge.memberEligibility
+            ? badge.memberEligibility.replace(/_/g, " ")
+            : "ALL"}
+        </AdminTableTag>
+      ),
+    },
+    {
       key: "notifications",
       header: "Alerts",
       cell: (badge: Badge) => {

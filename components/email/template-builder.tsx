@@ -1355,7 +1355,9 @@ export default function TemplateBuilder({
       if (id) {
         // --- Edit Mode ---
         const { data } = await updateTemplate({
-          variables: { id, name, subject, html, json },
+          variables: {
+            input: { id, name, subject, html, json },
+          },
         });
 
         if (data?.updateEmailTemplate?.id) {
@@ -1368,7 +1370,9 @@ export default function TemplateBuilder({
       } else {
         // --- Create Mode ---
         const { data } = await createTemplate({
-          variables: { name, subject, html, json },
+          variables: {
+            input: { name, subject, html, json },
+          },
         });
 
         if (data?.createEmailTemplate?.id) {

@@ -13,30 +13,59 @@ export const GET_REWARDS = gql`
       image
       tcCost
       inventoryRequired
-      perUserLimit
-      totalUsageLimit
-      minAccountAge
-      cooldownPeriod
-      category {
-        id
-        name
-      }
-      discountType
-      discountValue
-      validityDays
       status
       isActive
-      rewardMechanism
-      createdAt
+      totalVouchers
+      remainingVouchers
+      redeemedCount
+      validityDays
       expiryDate
-      updatedAt
       url
       howToClaim
       couponCode
-      couponType
-      remainingVouchers
-      totalVouchers
-      redeemedCount
+
+      eligibility {
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        totalUsageLimit
+        perUserLimit
+        minAccountAge
+        minActivityRequired
+        blockWarnedUsers
+        cooldownPeriod
+      }
+
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
+      }
+
+      storeDiscountRule {
+        id
+        title
+        discountValue
+      }
+
+      manualBatch {
+        id
+        name
+        totalCount
+      }
+
+      digitalCardRule {
+        id
+        title
+        faceValue
+        totalCost
+      }
+
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -50,32 +79,59 @@ export const GET_REWARD_BY_ID = gql`
       image
       tcCost
       inventoryRequired
-      perUserLimit
-      totalUsageLimit
-      minAccountAge
-      minActivityRequired
-      blockWarnedUsers
-      cooldownPeriod
       status
-      category {
-        id
-        name
-      }
       isActive
       totalVouchers
       remainingVouchers
       redeemedCount
-      createdAt
-      updatedAt
       validityDays
-      discountType
-      discountValue
-      rewardMechanism
+      expiryDate
       url
       howToClaim
-      couponType
       couponCode
-      expiryDate
+
+      eligibility {
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        totalUsageLimit
+        perUserLimit
+        minAccountAge
+        minActivityRequired
+        blockWarnedUsers
+        cooldownPeriod
+      }
+
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
+      }
+
+      storeDiscountRule {
+        id
+        title
+        discountValue
+      }
+
+      manualBatch {
+        id
+        name
+        totalCount
+      }
+
+      digitalCardRule {
+        id
+        title
+        faceValue
+        totalCost
+      }
+
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -202,32 +258,59 @@ export const CREATE_REWARD = gql`
       image
       tcCost
       inventoryRequired
-      perUserLimit
-      totalUsageLimit
-      minAccountAge
-      minActivityRequired
-      blockWarnedUsers
-      cooldownPeriod
       status
-      category {
-        id
-        name
-      }
       isActive
       totalVouchers
       remainingVouchers
       redeemedCount
-      createdAt
-      updatedAt
       validityDays
-      discountType
-      discountValue
-      rewardMechanism
+      expiryDate
       url
       howToClaim
-      couponType
       couponCode
-      expiryDate
+
+      eligibility {
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        totalUsageLimit
+        perUserLimit
+        minAccountAge
+        minActivityRequired
+        blockWarnedUsers
+        cooldownPeriod
+      }
+
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
+      }
+
+      storeDiscountRule {
+        id
+        title
+        discountValue
+      }
+
+      manualBatch {
+        id
+        name
+        totalCount
+      }
+
+      digitalCardRule {
+        id
+        title
+        faceValue
+        totalCost
+      }
+
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -237,14 +320,44 @@ export const UPDATE_REWARD = gql`
     updateReward(id: $updateRewardId, input: $input) {
       id
       title
+      description
+      image
+      tcCost
+      inventoryRequired
       status
       isActive
-      rewardMechanism
+      totalVouchers
+      remainingVouchers
+      redeemedCount
+      validityDays
+      expiryDate
       url
       howToClaim
-      couponType
       couponCode
-      expiryDate
+
+      eligibility {
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        totalUsageLimit
+        perUserLimit
+        minAccountAge
+        minActivityRequired
+        blockWarnedUsers
+        cooldownPeriod
+      }
+
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
+      }
+
+      createdAt
+      updatedAt
     }
   }
 `;

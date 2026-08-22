@@ -7,9 +7,9 @@ export const GET_SPIN_WHEEL_CONFIG = gql`
       entityId
       costPerSpin
       maxSpinsPerDay
+      maxItems
+      maxWheelItems
       isActive
-      campaignStartDate
-      campaignEndDate
       createdAt
       updatedAt
     }
@@ -28,13 +28,37 @@ export const GET_SPIN_WHEEL_PRIZES = gql`
       color
       sortOrder
       isActive
-      rewardId
+      storeDiscountRuleId
+      manualBatchId
+      digitalCardRuleId
       createdAt
       updatedAt
-      reward {
+
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
+      }
+
+      storeDiscountRule {
         id
         title
-        description
+        discountValue
+      }
+
+      manualBatch {
+        id
+        name
+        totalCount
+      }
+
+      digitalCardRule {
+        id
+        title
+        faceValue
+        totalCost
       }
     }
   }

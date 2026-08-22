@@ -10,6 +10,10 @@ import {
   Network,
   BarChart3,
   Gamepad2,
+  Dices,
+  RectangleHorizontal,
+  RefreshCw,
+  Layers,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
@@ -32,12 +36,22 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
       icon: <LayoutDashboard className="h-4 w-4" />,
     },
     {
+      key: "pillars",
+      label: "Reward Pillars",
+      icon: <Layers className="h-4 w-4" />,
+    },
+    {
       key: "coupons",
       label: `${rewardsModuleName} & Vouchers`,
       icon: <Ticket className="h-4 w-4" />,
       section: "Manage",
     },
-
+    {
+      key: "engagement-games",
+      label: "Interactions",
+      icon: <Gamepad2 className="h-4 w-4" />,
+      section: "Games",
+    },
     {
       key: "redemptions",
       label: "Redemptions",
@@ -56,15 +70,13 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
       icon: <Network className="h-4 w-4" />,
       section: "Partnerships",
     },
-    {
-      key: "coupons/create",
-      label: `Create ${rewardsSingularName}`,
-      icon: <Plus className="h-4 w-4" />,
-      section: "Actions",
-    },
   ];
 
-  const { getOrderedTabs, onReorder } = useTabOrder("REWARDS", useRewardsLayoutStore, items);
+  const { getOrderedTabs, onReorder } = useTabOrder(
+    "REWARDS",
+    useRewardsLayoutStore,
+    items,
+  );
   const orderedItems = getOrderedTabs(items);
 
   return (

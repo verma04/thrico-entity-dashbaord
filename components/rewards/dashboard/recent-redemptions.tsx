@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { History, Clock, ArrowRight } from "lucide-react";
+import { History, Clock, ArrowRight, Ticket, ShoppingBag, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,6 +40,10 @@ export const RecentRedemptions = ({ redemptions, redemptionsLoading }: RecentRed
                 lastName: act.user?.lastName,
                 avatar: act.user?.avatar,
               };
+
+              const isStore = act.reward?.rewardType === "STORE" || act.metadata?.provider === "SHOPIFY";
+              const isGiftCard = act.reward?.rewardType === "GIFT_CARD" || act.metadata?.provider === "GIFT_CARD";
+
               return (
                 <div
                   key={i}
@@ -58,14 +62,29 @@ export const RecentRedemptions = ({ redemptions, redemptionsLoading }: RecentRed
                           className="object-cover"
                         />
                         <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-semibold group-hover/item:bg-indigo-50 group-hover/item:text-indigo-600 transition-colors">
-                          {act.user?.firstName?.charAt(0)}
+                          {act.user?.firstName?.charAt(0) || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-semibold text-foreground truncate leading-none hover:underline">
-                          {act.user?.firstName} {act.user?.lastName}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-[12px] font-semibold text-foreground truncate leading-none hover:underline">
+                            {act.user?.firstName} {act.user?.lastName}
+                          </p>
+                          {isGiftCard ? (
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-violet-100 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 font-bold">
+                              Gift Card
+                            </span>
+                          ) : isStore ? (
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold">
+                              Store
+                            </span>
+                          ) : (
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold">
+                              Voucher
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground truncate leading-none mt-1">
                           {act.reward?.title}
                         </p>
                       </div>
@@ -96,11 +115,11 @@ export const RecentRedemptions = ({ redemptions, redemptionsLoading }: RecentRed
         </div>
 
         <div className="mt-4 pt-4 border-t border-border">
-          <Link href="rewards/redemptions ">
+          <Link href="/gamification/rewards/redemptions">
             <Button
               variant="outline"
               size="sm"
-              className="w-full gap-2 rounded-lg"
+              className="w-full gap-2 rounded-lg cursor-pointer text-xs font-semibold"
             >
               View full history
               <ArrowRight className="h-3.5 w-3.5" />

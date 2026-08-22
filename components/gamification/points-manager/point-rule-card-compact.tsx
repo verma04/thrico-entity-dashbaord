@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Zap,
-  Coins,
-  Bell,
-  Mail,
-  Settings,
-} from "lucide-react";
+import { Zap, Coins, Bell, Mail, Settings } from "lucide-react";
 import { PointRule } from "@/graphql/actions";
 import { PointRuleActions } from "./point-rule-actions";
 import { Switch } from "@/components/ui/switch";
@@ -17,7 +11,12 @@ import { cn } from "@/lib/utils";
 
 interface PointRuleCardCompactProps {
   rule: PointRule;
-  modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
+  modules: {
+    id: string;
+    name: string;
+    icon: string;
+    type?: "MODULE" | "INTEGRATION";
+  }[];
   onEdit: (rule: PointRule) => void;
   onOpenNotifications: (rule: PointRule) => void;
   onToggleActive: (id: string) => void;
@@ -81,6 +80,12 @@ export function PointRuleCardCompact({
           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-muted-foreground border border-border">
             {isRecurring ? "Recurring" : "One-Off"}
           </span>
+
+          {rule.memberEligibility && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-muted-foreground border border-border">
+              {rule.memberEligibility.replace(/_/g, " ")}
+            </span>
+          )}
         </div>
 
         <div className="bg-background/80 hover:bg-background rounded-md transition-colors shrink-0">
@@ -108,8 +113,7 @@ export function PointRuleCardCompact({
             </div>
 
             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-bold shrink-0">
-              <Coins className="h-3 w-3" />
-              +{rule.points.toLocaleString()} PTS
+              <Coins className="h-3 w-3" />+{rule.points.toLocaleString()} PTS
             </div>
           </div>
 
@@ -123,15 +127,24 @@ export function PointRuleCardCompact({
           <div className="flex items-center justify-between pt-1 text-[10px] text-muted-foreground">
             <div className="flex items-center gap-2">
               <span>
-                Daily: <strong className="text-foreground">{rule.dailyCap ? `${rule.dailyCap}x` : "∞"}</strong>
+                Daily:{" "}
+                <strong className="text-foreground">
+                  {rule.dailyCap ? `${rule.dailyCap}x` : "∞"}
+                </strong>
               </span>
               <span>•</span>
               <span>
-                Weekly: <strong className="text-foreground">{rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}</strong>
+                Weekly:{" "}
+                <strong className="text-foreground">
+                  {rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}
+                </strong>
               </span>
               <span>•</span>
               <span>
-                Monthly: <strong className="text-foreground">{rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}</strong>
+                Monthly:{" "}
+                <strong className="text-foreground">
+                  {rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}
+                </strong>
               </span>
             </div>
 
