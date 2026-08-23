@@ -7,6 +7,7 @@ import {
   useCreateImpactRule,
   useGetImpactTemplates,
 } from "@/graphql/actions/impact";
+import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/gamification-quiries";
 import { GET_IMPACT_RULES } from "@/graphql/quries/impact";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";

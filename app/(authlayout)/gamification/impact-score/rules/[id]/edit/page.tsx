@@ -7,6 +7,7 @@ import {
   useGetImpactRuleById,
   useGetImpactTemplates,
 } from "@/graphql/actions/impact";
+import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/gamification-quiries";
 import { useMutation, gql } from "@apollo/client";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
