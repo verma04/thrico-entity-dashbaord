@@ -241,7 +241,6 @@ export default function CreateSpinWheelSegmentPage() {
         <FloatingSavePanel
           hasChanged={formik.dirty || true}
           isSaving={loading}
-          disabled={isLimitReached}
           onSave={formik.handleSubmit}
           onReset={() =>
             router.push("/gamification/rewards/engagement-games/spin-wheel")

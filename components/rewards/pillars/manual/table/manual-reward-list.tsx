@@ -228,6 +228,7 @@ interface ManualRewardListProps {
   loading: boolean;
   currencyName?: string;
   visibleColumns?: Record<string, boolean>;
+  offset?: number;
   onSimulateWin?: (reward: ManualRewardItem) => void;
   onManagePool?: (reward: ManualRewardItem) => void;
   onCreateClick?: () => void;
@@ -238,6 +239,7 @@ export function ManualRewardList({
   loading,
   currencyName,
   visibleColumns,
+  offset = 0,
   onSimulateWin,
   onManagePool,
   onCreateClick,
@@ -264,6 +266,8 @@ export function ManualRewardList({
         emptyTitle="No Internal Vouchers Found"
         emptyDescription="No manual vouchers match your current filters or query."
         enableColumnToggle
+        pageSize={100}
+        baseIndex={offset}
       />
     </div>
   );

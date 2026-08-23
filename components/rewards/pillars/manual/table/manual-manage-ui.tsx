@@ -139,6 +139,7 @@ export function ContentArea({
   rewards,
   currencyName,
   visibleColumns,
+  offset = 0,
   onSimulateWin,
   onManagePool,
   onCreateClick,
@@ -148,6 +149,7 @@ export function ContentArea({
   rewards: ManualRewardItem[];
   currencyName: string;
   visibleColumns?: Record<string, boolean>;
+  offset?: number;
   onSimulateWin?: (reward: ManualRewardItem) => void;
   onManagePool?: (reward: ManualRewardItem) => void;
   onCreateClick?: () => void;
@@ -234,6 +236,7 @@ export function ContentArea({
               loading={false}
               currencyName={currencyName}
               visibleColumns={visibleColumns}
+              offset={offset}
               onSimulateWin={onSimulateWin}
               onManagePool={onManagePool}
               onCreateClick={onCreateClick}

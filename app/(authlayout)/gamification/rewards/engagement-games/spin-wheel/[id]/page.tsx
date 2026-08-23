@@ -275,7 +275,7 @@ export default function EditSpinWheelSegmentPage() {
         />
 
         {/* ── Form Body & Preview Sidebar Layout ────────────────────────── */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto px-4 max-w-7xl mx-auto w-full space-y-4">
           <PolarisFormLayout
             sidebar={
               <SpinSegmentPreviewSidebar

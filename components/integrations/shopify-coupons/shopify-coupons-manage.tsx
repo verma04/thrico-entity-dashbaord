@@ -10,6 +10,7 @@ import {
   List as ListIcon,
   Upload,
   RefreshCw,
+  Plus,
 } from "lucide-react";
 import {
   Select,
@@ -389,6 +390,15 @@ export function ShopifyCouponsManage({
               { id: "list", label: "List", icon: ListIcon },
             ]}
           />
+
+          {/* Create Discount Button */}
+          <Button
+            onClick={() => router.push("/integrations/shopify/coupons/create")}
+            className="h-8 gap-1.5 shrink-0 bg-[#005bd3] hover:bg-[#004bb0] text-white text-xs font-semibold px-3 shadow-xs transition-colors rounded-md cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Create discount
+          </Button>
 
           {/* Refresh CTA Button */}
           <CtaButton onClick={handleRefresh} disabled={loading}>

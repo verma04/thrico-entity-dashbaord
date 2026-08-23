@@ -76,7 +76,12 @@ export function ManualRewardsManage({
     (updates: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams.toString());
       for (const [key, value] of Object.entries(updates)) {
-        if (value === null || value === "" || value === "ALL") {
+        if (
+          value === null ||
+          value === "" ||
+          value === "ALL" ||
+          (key === "page" && value === "1")
+        ) {
           params.delete(key);
         } else {
           params.set(key, value);
@@ -102,7 +107,7 @@ export function ManualRewardsManage({
   const view = (searchParams.get("view") as "grid" | "list") || "list";
   const status: ManualStatusValue =
     (searchParams.get("status") as ManualStatusValue) || "ALL";
-  const page = Number(searchParams.get("page") || "1");
+  const rawPage = Number(searchParams.get("page") || "1");
   const limit = 12;
 
   const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -226,11 +231,14 @@ export function ManualRewardsManage({
     });
   }, [allRewards, status, debouncedSearch]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredRewards.length / limit));
+  const safePage = Math.min(Math.max(1, isNaN(rawPage) ? 1 : rawPage), totalPages);
+  const offset = (safePage - 1) * limit;
+
   // Pagination slice
   const paginatedRewards = useMemo(() => {
-    const start = (page - 1) * limit;
-    return filteredRewards.slice(start, start + limit);
-  }, [filteredRewards, page, limit]);
+    return filteredRewards.slice(offset, offset + limit);
+  }, [filteredRewards, offset, limit]);
 
   const handleSimulateWin = (reward: ManualRewardItem) => {
     toast.success(`Win Simulated: ${reward.title}`, {
@@ -481,7 +489,14 @@ export function ManualRewardsManage({
 
               {/* Status Indicator */}
               <EcosystemActionBar.Status active={filteredRewards.length > 0}>
-                Showing {paginatedRewards.length} of {filteredRewards.length} Offers
+                Showing{" "}
+                {filteredRewards.length === 0
+                  ? 0
+                  : `${offset + 1}–${Math.min(
+                      offset + limit,
+                      filteredRewards.length
+                    )}`}{" "}
+                of {filteredRewards.length} Offers
               </EcosystemActionBar.Status>
             </EcosystemActionBar.Group>
           </EcosystemActionBar>
@@ -535,17 +550,18 @@ export function ManualRewardsManage({
             rewards={paginatedRewards}
             currencyName={currencyName}
             visibleColumns={visibleColumns}
+            offset={offset}
             onSimulateWin={handleSimulateWin}
             onManagePool={handleManagePool}
             onCreateClick={handleOpenCreate}
           />
 
           {/* ── Bottom Pagination ────────────────────────────────────── */}
-          {!batchesLoading && filteredRewards.length > limit && (
+          {!batchesLoading && totalPages > 1 && (
             <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-xs">
               <Pagination
-                currentPage={page}
-                totalPages={Math.ceil(filteredRewards.length / limit)}
+                currentPage={safePage}
+                totalPages={totalPages}
                 totalItems={filteredRewards.length}
                 pageSize={limit}
                 onPageChange={(p) => updateParams({ page: String(p) })}

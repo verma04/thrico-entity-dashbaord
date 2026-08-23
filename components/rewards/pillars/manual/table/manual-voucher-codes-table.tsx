@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import {
   Ticket,
   Copy,
@@ -72,12 +74,46 @@ export const VOUCHER_STATUS_FILTERS = [
 ] as const;
 
 export function ManualVoucherCodesTable() {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<string>("ALL");
-  const [couponType, setCouponType] = useState<string>("ALL");
-  const [rewardId, setRewardId] = useState<string>("ALL");
-  const [page, setPage] = useState(1);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Helper: update URL query params seamlessly
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (
+          value === null ||
+          value === "" ||
+          value === "ALL" ||
+          (key === "page" && value === "1")
+        ) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router]
+  );
+
+  const status = searchParams.get("vStatus") || "ALL";
+  const couponType = searchParams.get("couponType") || "ALL";
+  const rewardId = searchParams.get("rewardId") || "ALL";
+  const rawPage = Number(searchParams.get("page") || "1");
   const limit = 20;
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 300);
+
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null, page: null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
 
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [selectedVoucher, setSelectedVoucher] = useState<ManualVoucher | null>(
@@ -95,15 +131,15 @@ export function ManualVoucherCodesTable() {
   // Filter input object for GraphQL
   const filterInput = useMemo(() => {
     const f: any = {
-      page,
+      page: Math.max(1, isNaN(rawPage) ? 1 : rawPage),
       limit,
     };
-    if (search.trim()) f.search = search.trim();
+    if (debouncedSearch.trim()) f.search = debouncedSearch.trim();
     if (status !== "ALL") f.status = status as ManualVoucherStatus;
     if (couponType !== "ALL") f.couponType = couponType as ManualCouponType;
     if (rewardId !== "ALL") f.rewardId = rewardId;
     return f;
-  }, [search, status, couponType, rewardId, page, limit]);
+  }, [debouncedSearch, status, couponType, rewardId, rawPage, limit]);
 
   // Execute live query
   const { data, loading, refetch } = useGetManualVouchers({
@@ -112,7 +148,9 @@ export function ManualVoucherCodesTable() {
 
   const vouchers: ManualVoucher[] = data?.getManualVouchers?.items || [];
   const total = data?.getManualVouchers?.total || 0;
-  const totalPages = data?.getManualVouchers?.totalPages || 1;
+  const totalPages = Math.max(1, data?.getManualVouchers?.totalPages || 1);
+  const safePage = Math.min(Math.max(1, isNaN(rawPage) ? 1 : rawPage), totalPages);
+  const offset = (safePage - 1) * limit;
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -187,7 +225,7 @@ export function ManualVoucherCodesTable() {
       header: "S.No",
       headerClassName: "w-12 text-center",
       className: "text-center text-[11px] font-medium text-muted-foreground",
-      cell: (_, index) => (page - 1) * limit + index + 1,
+      cell: (_, index) => index + 1,
     },
     {
       key: "code",
@@ -368,10 +406,7 @@ export function ManualVoucherCodesTable() {
           <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
               value={search}
-              onChange={(v) => {
-                setSearch(v);
-                setPage(1);
-              }}
+              onChange={setSearch}
               placeholder="Search by voucher code, card number..."
             />
           </EcosystemActionBar.Item>
@@ -385,8 +420,7 @@ export function ManualVoucherCodesTable() {
             <Select
               value={status}
               onValueChange={(v) => {
-                setStatus(v);
-                setPage(1);
+                updateParams({ vStatus: v, page: null });
               }}
             >
               <SelectTrigger className="w-[155px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs">
@@ -431,8 +465,7 @@ export function ManualVoucherCodesTable() {
             <Select
               value={couponType}
               onValueChange={(v) => {
-                setCouponType(v);
-                setPage(1);
+                updateParams({ couponType: v, page: null });
               }}
             >
               <SelectTrigger className="w-[140px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs">
@@ -452,8 +485,7 @@ export function ManualVoucherCodesTable() {
               <Select
                 value={rewardId}
                 onValueChange={(v) => {
-                  setRewardId(v);
-                  setPage(1);
+                  updateParams({ rewardId: v, page: null });
                 }}
               >
                 <SelectTrigger className="w-[160px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs">
@@ -497,17 +529,21 @@ export function ManualVoucherCodesTable() {
         emptyIcon={Ticket}
         emptyTitle="No Voucher Codes Found"
         emptyDescription="No manual voucher entries match your current search or filter criteria. Create or import vouchers to populate your ledger."
+        pageSize={100}
+        baseIndex={offset}
       />
 
       {/* Pagination Bar */}
       {totalPages > 1 && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          totalItems={total}
-          pageSize={limit}
-          onPageChange={setPage}
-        />
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+          <Pagination
+            currentPage={safePage}
+            totalPages={totalPages}
+            totalItems={total}
+            pageSize={limit}
+            onPageChange={(p) => updateParams({ page: String(p) })}
+          />
+        </div>
       )}
 
       {/* Full Voucher Details Inspection Modal */}

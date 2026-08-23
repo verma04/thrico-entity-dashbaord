@@ -11,17 +11,9 @@ import {
   ShoppingBag,
   Gift,
   Layers,
-  CheckCircle2,
-  Clock,
-  Sparkles,
-  SlidersHorizontal,
-  LayoutGrid,
-  List as ListIcon,
   Receipt,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -68,123 +60,7 @@ const PILLAR_TABS = [
     value: "PILLAR_3",
     label: "Digital Gift Cards",
     icon: Gift,
-    dot: "bg-violet-500",
-  },
-];
-
-// Rich mock data blended with live query
-const DEFAULT_REDEMPTIONS: Redemption[] = [
-  {
-    id: "RED-10941",
-    user: {
-      id: "usr-1",
-      firstName: "Rahul",
-      lastName: "Sharma",
-      email: "rahul.sharma@example.com",
-      avatar: "",
-    },
-    reward: {
-      id: "gc-1",
-      title: "₹500 Amazon Gift Card",
-      brand: "Amazon Pay",
-      rewardType: "GIFT_CARD",
-    },
-    pillar: "PILLAR_3",
-    faceValue: 500,
-    serviceFee: 25,
-    totalCost: 525,
-    status: "DELIVERED",
-    claimedAt: "2026-08-20T11:42:00Z",
-    createdAt: "2026-08-20T11:42:00Z",
-    metadata: {
-      voucherCode: "AMZN-8942-1049-K492",
-      pin: "84920491",
-      idempotencyKey: "REW-AMZ-USR982-SPIN31",
-      provider: "GIFT_CARD",
-      gameSource: "Spin the Wheel",
-    },
-  },
-  {
-    id: "RED-10940",
-    user: {
-      id: "usr-2",
-      firstName: "Priya",
-      lastName: "Patel",
-      email: "priya.p@example.com",
-      avatar: "",
-    },
-    reward: {
-      id: "sr-1",
-      title: "₹100 Flat Order Discount",
-      brand: "Shopify",
-      rewardType: "STORE",
-    },
-    pillar: "PILLAR_2",
-    faceValue: 100,
-    status: "REDEEMED",
-    claimedAt: "2026-08-20T10:15:00Z",
-    createdAt: "2026-08-20T10:15:00Z",
-    metadata: {
-      voucherCode: "THRICO-100-8K4P7X",
-      provider: "SHOPIFY",
-      gameSource: "Scratch Card",
-    },
-  },
-  {
-    id: "RED-10939",
-    user: {
-      id: "usr-3",
-      firstName: "Ananya",
-      lastName: "Verma",
-      email: "ananya.v@example.com",
-      avatar: "",
-    },
-    reward: {
-      id: "mr-1",
-      title: "VIP Summer Community Pass",
-      rewardType: "INTERNAL",
-    },
-    pillar: "PILLAR_1",
-    ecUsed: 50,
-    tcUsed: 50,
-    status: "FULFILLED",
-    claimedAt: "2026-08-19T16:30:00Z",
-    createdAt: "2026-08-19T16:30:00Z",
-    metadata: {
-      voucherCode: "VIP-SUMMER-9042",
-      provider: "INTERNAL",
-      gameSource: "Milestone Drop",
-    },
-  },
-  {
-    id: "RED-10938",
-    user: {
-      id: "usr-4",
-      firstName: "Vikram",
-      lastName: "Singh",
-      email: "vikram.s@example.com",
-      avatar: "",
-    },
-    reward: {
-      id: "gc-3",
-      title: "₹250 Swiggy Money Card",
-      brand: "Swiggy",
-      rewardType: "GIFT_CARD",
-    },
-    pillar: "PILLAR_3",
-    faceValue: 250,
-    serviceFee: 12.5,
-    totalCost: 262.5,
-    status: "DELIVERED",
-    claimedAt: "2026-08-19T14:10:00Z",
-    createdAt: "2026-08-19T14:10:00Z",
-    metadata: {
-      voucherCode: "SWIGGY-7729-1904",
-      pin: "20948192",
-      idempotencyKey: "REW-SWIGGY-USR401-MATCH12",
-      provider: "GIFT_CARD",
-      gameSource: "Match Win",
-    },
+    dot: "bg-purple-500",
   },
 ];
 
@@ -231,31 +107,44 @@ export default function RedemptionsPage() {
     pagination: { page: pageParam, limit: 100 },
   });
 
-  // Combine live data with default records
+  // Map live GraphQL data
   const allRedemptions: Redemption[] = useMemo(() => {
-    const liveList = (data?.getRedemptions || []).map((r: any) => ({
-      id: r.id,
-      user: r.user,
-      reward: r.reward,
-      ecUsed: r.ecUsed,
-      tcUsed: r.tcUsed,
-      totalCost: r.totalCost,
-      claimedAt: r.claimedAt,
-      createdAt: r.createdAt,
-      status: r.status,
-      pillar: r.reward?.rewardType === "GIFT_CARD" ? "PILLAR_3" : r.reward?.rewardType === "STORE" ? "PILLAR_2" : "PILLAR_1",
-      metadata: r.metadata,
-    }));
+    return (data?.getRedemptions || []).map((r: any) => {
+      const provider = (r.metadata?.provider || "").toUpperCase();
+      const rewardType = (r.reward?.rewardType || "").toUpperCase();
+      let pillar: "PILLAR_1" | "PILLAR_2" | "PILLAR_3" = "PILLAR_1";
 
-    if (liveList.length === 0) return DEFAULT_REDEMPTIONS;
-
-    const merged = [...liveList];
-    for (const def of DEFAULT_REDEMPTIONS) {
-      if (!merged.some((m) => m.id === def.id)) {
-        merged.push(def);
+      if (
+        rewardType === "GIFT_CARD" ||
+        provider === "GIFT_CARD" ||
+        provider === "THRICO" ||
+        provider === "XOXODAY"
+      ) {
+        pillar = "PILLAR_3";
+      } else if (
+        rewardType === "STORE" ||
+        provider === "SHOPIFY" ||
+        provider === "STORE"
+      ) {
+        pillar = "PILLAR_2";
       }
-    }
-    return merged;
+
+      return {
+        id: r.id,
+        user: r.user,
+        reward: r.reward,
+        ecUsed: r.ecUsed,
+        tcUsed: r.tcUsed,
+        faceValue: r.faceValue || r.metadata?.faceValue,
+        serviceFee: r.serviceFee || r.metadata?.serviceFee,
+        totalCost: r.totalCost,
+        claimedAt: r.claimedAt,
+        createdAt: r.createdAt,
+        status: r.status,
+        pillar,
+        metadata: r.metadata,
+      };
+    });
   }, [data]);
 
   // Tab counts
@@ -277,10 +166,18 @@ export default function RedemptionsPage() {
       if (pillarParam === "PILLAR_3" && r.pillar !== "PILLAR_3") return false;
 
       // Status filter
-      if (statusParam === "COMPLETED" && !["DELIVERED", "REDEEMED", "FULFILLED", "SUCCESS", "APPROVED"].includes(r.status?.toUpperCase())) {
+      if (
+        statusParam === "COMPLETED" &&
+        !["DELIVERED", "REDEEMED", "FULFILLED", "SUCCESS", "APPROVED", "COMPLETED"].includes(
+          r.status?.toUpperCase()
+        )
+      ) {
         return false;
       }
-      if (statusParam === "PENDING" && !["PENDING", "RESERVED"].includes(r.status?.toUpperCase())) {
+      if (
+        statusParam === "PENDING" &&
+        !["PENDING", "RESERVED"].includes(r.status?.toUpperCase())
+      ) {
         return false;
       }
 
@@ -290,8 +187,17 @@ export default function RedemptionsPage() {
         const memberName = `${r.user?.firstName || ""} ${r.user?.lastName || ""}`.toLowerCase();
         const memberEmail = (r.user?.email || "").toLowerCase();
         const rewardTitle = (r.reward?.title || "").toLowerCase();
-        const code = (r.metadata?.voucherCode || "").toLowerCase();
-        return memberName.includes(s) || memberEmail.includes(s) || rewardTitle.includes(s) || code.includes(s);
+        const code = (
+          r.metadata?.voucherCode ||
+          r.metadata?.couponCode ||
+          ""
+        ).toLowerCase();
+        return (
+          memberName.includes(s) ||
+          memberEmail.includes(s) ||
+          rewardTitle.includes(s) ||
+          code.includes(s)
+        );
       }
 
       return true;
@@ -347,11 +253,11 @@ export default function RedemptionsPage() {
           </span>
         </div>
 
-        <div className="p-3.5 rounded-xl border border-violet-200/60 dark:border-violet-900/40 bg-violet-50/20 dark:bg-violet-950/10 space-y-1">
-          <span className="text-[10px] text-violet-800 dark:text-violet-300 uppercase tracking-wider font-bold">
+        <div className="p-3.5 rounded-xl border border-purple-200/60 dark:border-purple-900/40 bg-purple-50/20 dark:bg-purple-950/10 space-y-1">
+          <span className="text-[10px] text-purple-800 dark:text-purple-300 uppercase tracking-wider font-bold">
             Pillar 3 • Digital Gift Cards
           </span>
-          <span className="text-lg font-bold text-violet-700 dark:text-violet-300 font-mono block">
+          <span className="text-lg font-bold text-purple-700 dark:text-purple-300 font-mono block">
             {tabCounts.PILLAR_3}
           </span>
         </div>
@@ -502,7 +408,7 @@ export default function RedemptionsPage() {
         open={showExportModal}
         onOpenChange={setShowExportModal}
         entityName="redemptions"
-        description="Export multi-pillar redemption history as a CSV file. Includes member info, reward title, pillar source, cost, voucher code, and date."
+        description="Export multi-pillar redemption history as a CSV file. Includes member info, reward title, pillar source, cost, voucher code, PIN, and date."
         totalCount={allRedemptions.length}
         matchingCount={filteredRedemptions.length}
         onExport={(scope: ExportCsvScope, format: ExportCsvFormat) => {
@@ -525,7 +431,9 @@ export default function RedemptionsPage() {
             { header: "Total Cost (₹)", getValue: (r) => r.totalCost || r.faceValue || 0 },
             { header: "Coins Spent",    getValue: (r) => r.ecUsed || r.tcUsed || 0 },
             { header: "Status",         getValue: (r) => r.status || "" },
-            { header: "Voucher Code",   getValue: (r) => r.metadata?.voucherCode || "" },
+            { header: "Voucher Code",   getValue: (r) => r.metadata?.voucherCode || r.metadata?.couponCode || "" },
+            { header: "Card PIN",       getValue: (r) => r.metadata?.pin || r.metadata?.cardPin || "" },
+            { header: "Provider",       getValue: (r) => r.metadata?.provider || "" },
             { header: "Idempotency Key", getValue: (r) => r.metadata?.idempotencyKey || "" },
             { header: "Game Source",    getValue: (r) => r.metadata?.gameSource || "" },
             { header: "Claimed Date",   getValue: (r) => r.claimedAt ? new Date(r.claimedAt).toISOString().slice(0, 19) : "" },
