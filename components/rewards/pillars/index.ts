@@ -1,4 +1,9 @@
 export { PillarsHero } from "./pillars-hero";
+export { PillarsBanner } from "./pillars-banner";
+export { PillarsGrowthChart } from "./pillars-growth-chart";
+export { PillarsDistributionChart } from "./pillars-distribution-chart";
+export { PillarsCardsGrid } from "./pillars-cards-grid";
+export { PillarsLiveFeed } from "./pillars-live-feed";
 export { PillarsComparisonTable } from "./pillars-comparison-table";
 export { PillarOneManual } from "./pillar-one-manual";
 export * from "./manual";

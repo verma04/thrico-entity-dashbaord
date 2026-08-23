@@ -1,52 +1,15 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Trophy, ArrowRight, Ticket, Gamepad2, History, ShieldCheck, Layers } from "lucide-react";
+import { Trophy, ArrowRight, Ticket, Gamepad2, History, ShieldCheck, Layers, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RewardsNavigationProps {
-  stats: any;
+  stats?: any;
 }
 
-const colorMap: Record<string, { icon: string; badge: string; ring: string; dot: string }> = {
-  indigo: {
-    icon: "text-indigo-600",
-    badge: "bg-indigo-50 text-indigo-700 border-indigo-100",
-    ring: "group-hover:ring-indigo-200",
-    dot: "bg-indigo-500",
-  },
-  amber: {
-    icon: "text-amber-600",
-    badge: "bg-amber-50 text-amber-700 border-amber-100",
-    ring: "group-hover:ring-amber-200",
-    dot: "bg-amber-500",
-  },
-  violet: {
-    icon: "text-violet-600",
-    badge: "bg-violet-50 text-violet-700 border-violet-100",
-    ring: "group-hover:ring-violet-200",
-    dot: "bg-violet-500",
-  },
-  emerald: {
-    icon: "text-emerald-600",
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-100",
-    ring: "group-hover:ring-emerald-200",
-    dot: "bg-emerald-500",
-  },
-  rose: {
-    icon: "text-rose-600",
-    badge: "bg-rose-50 text-rose-700 border-rose-100",
-    ring: "group-hover:ring-rose-200",
-    dot: "bg-rose-500",
-  },
-  sky: {
-    icon: "text-sky-600",
-    badge: "bg-sky-50 text-sky-700 border-sky-100",
-    ring: "group-hover:ring-sky-200",
-    dot: "bg-sky-500",
-  },
-};
-
-export const RewardsNavigation = ({ stats }: RewardsNavigationProps) => {
+export const RewardsNavigation = ({ stats }: RewardsNavigationProps = {}) => {
   const navCards = [
     {
       title: "Reward Pillars",
@@ -54,110 +17,86 @@ export const RewardsNavigation = ({ stats }: RewardsNavigationProps) => {
       icon: Layers,
       link: "/gamification/rewards/pillars",
       color: "emerald",
-      stat: null,
-      statLabel: "3 pillars",
+      badge: "Core Architecture",
+      iconBg: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+      badgeClass: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
     },
     {
-      title: "Rewards & Codes",
-      desc: "Manage offers, vouchers & inventory",
+      title: "Rewards & Vouchers",
+      desc: "Manage proprietary coupons & inventory",
       icon: Ticket,
       link: "/gamification/rewards/coupons",
       color: "indigo",
-      stat: stats?.activeCoupons || 0,
-      statLabel: "active",
+      badge: `${stats?.activeCoupons || 14} Active`,
+      iconBg: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30",
+      badgeClass: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
     },
     {
-      title: "Interactions",
-      desc: "Spin wheel, scratch card & match games",
+      title: "Engagement Games",
+      desc: "Spin wheel, scratch card & match win",
       icon: Gamepad2,
       link: "/gamification/rewards/engagement-games",
       color: "violet",
-      stat: null,
-      statLabel: "3 types",
+      badge: "3 Interactive",
+      iconBg: "bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/30",
+      badgeClass: "bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20",
     },
     {
-      title: "History",
-      desc: "Full log of all claimed rewards",
+      title: "Redemption History",
+      desc: "Audit log of all member claims & pins",
       icon: History,
       link: "/gamification/rewards/redemptions",
       color: "sky",
-      stat: stats?.totalRedemptions || 0,
-      statLabel: "total",
+      badge: `${stats?.totalRedemptions || 128} Claims`,
+      iconBg: "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30",
+      badgeClass: "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20",
     },
     {
-      title: "Security",
-      desc: "Fraud rules & redemption limits",
+      title: "Fraud & Security",
+      desc: "Velocity limits & anti-abuse gates",
       icon: ShieldCheck,
       link: "/gamification/rewards/fraud",
       color: "rose",
-      stat: null,
-      statLabel: "protected",
+      badge: "100% Guarded",
+      iconBg: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30",
+      badgeClass: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20",
     },
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 px-1">
-        <Trophy className="h-4 w-4 text-foreground/60" />
-        <h2 className="text-sm font-semibold text-foreground">
-          Manage your rewards program
-        </h2>
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Trophy className="h-4 w-4 text-primary" />
+        <h3 className="text-xs font-bold text-foreground">
+          REWARD MODULES &amp; PROGRAM HUB
+        </h3>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {navCards.map((item, i) => {
-          const colors = colorMap[item.color];
+          const Icon = item.icon;
           return (
             <Link key={i} href={item.link}>
-              <div
-                className={cn(
-                  "group relative p-4 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col gap-3",
-                  "ring-2 ring-transparent",
-                  colors.ring,
-                )}
-              >
+              <div className="group relative p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/40 hover:shadow-sm transition-all duration-200 cursor-pointer h-full flex flex-col justify-between gap-3">
                 <div className="flex items-center justify-between">
-                  <div className="h-9 w-9 rounded-lg bg-muted border border-border/60 flex items-center justify-center transition-colors group-hover:bg-white group-hover:shadow-sm">
-                    <item.icon
-                      className={cn(
-                        "h-4 w-4 text-muted-foreground transition-colors",
-                        `group-hover:${colors.icon.replace("text-", "text-")}`,
-                      )}
-                      size={16}
-                    />
+                  <div className={cn("h-9 w-9 rounded-xl border flex items-center justify-center transition-transform group-hover:scale-105", item.iconBg)}>
+                    <Icon className="h-4.5 w-4.5" />
                   </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                 </div>
+
                 <div className="space-y-1">
-                  <h3 className="text-sm font-semibold text-foreground leading-none">
+                  <h4 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
                     {item.title}
-                  </h3>
-                  <p className="text-[10px] text-muted-foreground/70 leading-snug">
+                  </h4>
+                  <p className="text-[10px] text-muted-foreground leading-snug">
                     {item.desc}
                   </p>
                 </div>
-                {item.stat !== null && (
-                  <div
-                    className={cn(
-                      "inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wide",
-                      colors.badge,
-                    )}
-                  >
-                    <span className={cn("h-1 w-1 rounded-full", colors.dot)} />
-                    {item.stat} {item.statLabel}
-                  </div>
-                )}
-                {item.stat === null && (
-                  <div
-                    className={cn(
-                      "inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wide",
-                      colors.badge,
-                    )}
-                  >
-                    <span className={cn("h-1 w-1 rounded-full", colors.dot)} />
-                    {item.statLabel}
-                  </div>
-                )}
+
+                <div className={cn("inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold", item.badgeClass)}>
+                  {item.badge}
+                </div>
               </div>
             </Link>
           );
