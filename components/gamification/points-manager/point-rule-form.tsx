@@ -12,32 +12,8 @@ import {
   ShieldCheck,
   Crown,
   Check,
-  ChevronsUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { toast } from "sonner";
 import {
@@ -50,6 +26,11 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisSelect,
+  PolarisCombobox,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import {
   PolarisEligibilityCard,
@@ -123,8 +104,6 @@ export function PointRuleForm({
   const [sourceType, setSourceType] = useState<"MODULE" | "INTEGRATION">(
     initialSourceType,
   );
-  const [isModulePopoverOpen, setIsModulePopoverOpen] = useState(false);
-  const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
 
   useEffect(() => {
     if (initialValues?.module) {
@@ -534,264 +513,77 @@ export function PointRuleForm({
           />
 
           {/* Target Source and Triggering Action Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
             {/* Searchable Target Module Combobox */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="module"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-              >
-                {sourceType === "MODULE"
-                  ? "Target Module"
-                  : "Target App / Store"}
-              </label>
-              <Popover open={isModulePopoverOpen} onOpenChange={setIsModulePopoverOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    id="module"
-                    disabled={isEdit}
-                    className={cn(
-                      "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
-                      !formik.values.module && "text-[#8c9196] dark:text-zinc-500",
-                      isEdit && "opacity-60 cursor-not-allowed",
-                    )}
-                  >
-                    <span className="truncate">
-                      {selectedSourceItem?.name ||
-                        (sourceType === "MODULE"
-                          ? "Select platform module..."
-                          : "Select connected app...")}
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-800"
-                  align="start"
-                >
-                  <Command className="border-none">
-                    <CommandInput
-                      placeholder={
-                        sourceType === "MODULE"
-                          ? "Search platform modules..."
-                          : "Search connected apps..."
-                      }
-                      className="h-10 text-[13px]"
-                    />
-                    <CommandList className="max-h-[240px]">
-                      <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
-                        No {sourceType === "MODULE" ? "modules" : "apps"} found.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {currentSourceList.map((item, idx) => {
-                          const isSelected =
-                            item.id?.toLowerCase() ===
-                              formik.values.module?.toLowerCase() ||
-                            item.uuid?.toLowerCase() ===
-                              formik.values.module?.toLowerCase() ||
-                            (item as any).slug?.toLowerCase() ===
-                              formik.values.module?.toLowerCase();
-                          return (
-                            <CommandItem
-                              key={`src-${item.id}-${idx}`}
-                              value={item.name || item.id}
-                              onSelect={() => {
-                                formik.setFieldValue("module", item.id);
-                                formik.setFieldValue("action", "");
-                                setIsModulePopoverOpen(false);
-                              }}
-                              className="flex items-center justify-between text-[13px] font-medium cursor-pointer py-2 px-3"
-                            >
-                              <span>{item.name}</span>
-                              {isSelected && (
-                                <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
-                              )}
-                            </CommandItem>
-                          );
-                        })}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {formik.touched.module && formik.errors.module && (
-                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                  {formik.errors.module as string}
-                </p>
-              )}
-            </div>
+            <PolarisCombobox
+              id="module"
+              label={sourceType === "MODULE" ? "Target Module" : "Target App / Store"}
+              placeholder={sourceType === "MODULE" ? "Select platform module..." : "Select connected app..."}
+              searchPlaceholder={sourceType === "MODULE" ? "Search platform modules..." : "Search connected apps..."}
+              options={currentSourceList.map((item) => ({
+                value: item.id || item.uuid || (item as any).slug,
+                label: item.name,
+              }))}
+              value={formik.values.module}
+              disabled={isEdit}
+              onChange={(val) => {
+                formik.setFieldValue("module", val);
+                formik.setFieldValue("action", "");
+              }}
+              error={formik.touched.module && formik.errors.module ? (formik.errors.module as string) : undefined}
+            />
 
             {/* Searchable Trigger Event Combobox */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="action"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-              >
-                Trigger Event <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
-              <Popover open={isActionPopoverOpen} onOpenChange={setIsActionPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    id="action"
-                    disabled={!formik.values.module || isEdit}
-                    className={cn(
-                      "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
-                      !formik.values.action && "text-[#8c9196] dark:text-zinc-500",
-                      (!formik.values.module || isEdit) && "opacity-60 cursor-not-allowed",
-                    )}
-                  >
-                    <span className="truncate">
-                      {selectedTriggerItem
-                        ? (selectedTriggerItem.name
-                            ? selectedTriggerItem.name.replace(/_/g, " ")
-                            : selectedTriggerItem.description ||
-                              selectedTriggerItem.value ||
-                              formik.values.action)
-                        : (formik.values.module
-                            ? "Choose trigger action..."
-                            : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`)}
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-800"
-                  align="start"
-                >
-                  <Command className="border-none">
-                    <CommandInput
-                      placeholder="Search trigger event..."
-                      className="h-10 text-[13px]"
-                    />
-                    <CommandList className="max-h-[240px]">
-                      {filteredTriggers.length === 0 ? (
-                        <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
-                          No trigger events found for this source
-                        </CommandEmpty>
-                      ) : (
-                        <>
-                          <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
-                            No matching trigger event found.
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {filteredTriggers.map((t, idx) => {
-                              const itemVal = t.value || t.name || t.id;
-                              const isSelected =
-                                formik.values.action === itemVal ||
-                                formik.values.action === t.id ||
-                                formik.values.action === t.name;
-                              return (
-                                <CommandItem
-                                  key={`trig-${itemVal}-${idx}`}
-                                  value={`${t.name || ""} ${t.description || ""} ${itemVal}`}
-                                  onSelect={() => {
-                                    formik.setFieldValue("action", itemVal);
-                                    if (!formik.values.description) {
-                                      formik.setFieldValue(
-                                        "description",
-                                        t.description || t.name || "",
-                                      );
-                                    }
-                                    setIsActionPopoverOpen(false);
-                                  }}
-                                  className="flex items-center justify-between text-[13px] font-medium cursor-pointer py-2 px-3"
-                                >
-                                  <div className="flex flex-col py-0.5 text-left min-w-0 pr-2">
-                                    <span className="font-medium text-[#303030] dark:text-zinc-100 truncate">
-                                      {t.name
-                                        ? t.name.replace(/_/g, " ")
-                                        : t.description || itemVal}
-                                    </span>
-                                    {t.description &&
-                                      t.name &&
-                                      t.description !== t.name && (
-                                        <span className="text-[11px] text-[#616161] dark:text-zinc-400 line-clamp-1">
-                                          {t.description}
-                                        </span>
-                                      )}
-                                  </div>
-                                  {isSelected && (
-                                    <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100 shrink-0" />
-                                  )}
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {formik.touched.action && formik.errors.action && (
-                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                  {formik.errors.action as string}
-                </p>
-              )}
-            </div>
+            <PolarisCombobox
+              id="action"
+              label="Trigger Event"
+              required
+              placeholder={formik.values.module ? "Choose trigger action..." : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`}
+              searchPlaceholder="Search trigger event..."
+              options={filteredTriggers.map((t) => {
+                const itemVal = t.value || t.name || t.id;
+                const label = t.name ? t.name.replace(/_/g, " ") : (t.description || itemVal);
+                return {
+                  value: itemVal,
+                  label: label,
+                  badge: t.type || undefined,
+                };
+              })}
+              value={formik.values.action}
+              disabled={!formik.values.module || isEdit}
+              onChange={(val) => {
+                formik.setFieldValue("action", val);
+                const found = filteredTriggers.find((t) => (t.value || t.name || t.id) === val);
+                if (!formik.values.description && found) {
+                  formik.setFieldValue("description", found.description || found.name || "");
+                }
+              }}
+              error={formik.touched.action && formik.errors.action ? (formik.errors.action as string) : undefined}
+            />
           </div>
 
           {/* Cadence & Description */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-            <div className="space-y-1.5">
-              <label
-                htmlFor="trigger"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-              >
-                Reward Cadence
-              </label>
-              <Select
-                onValueChange={(val) => formik.setFieldValue("trigger", val)}
-                value={formik.values.trigger}
-                disabled={isEdit}
-              >
-                <SelectTrigger
-                  id="trigger"
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500"
-                >
-                  <SelectValue placeholder="Select trigger cadence" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FIRST_TIME" className="text-[13px]">
-                    <div className="flex flex-col text-left py-0.5">
-                      <span className="font-semibold text-[#303030] dark:text-zinc-100">
-                        First-time Action (One-off milestone)
-                      </span>
-                      <span className="text-[11px] text-[#616161] dark:text-zinc-400">
-                        Rewarded only once per user account lifetime
-                      </span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="RECURRING" className="text-[13px]">
-                    <div className="flex flex-col text-left py-0.5">
-                      <span className="font-semibold text-[#303030] dark:text-zinc-100">
-                        Recurring (Every instance)
-                      </span>
-                      <span className="text-[11px] text-[#616161] dark:text-zinc-400">
-                        Rewarded each time, bounded by velocity limits
-                      </span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <PolarisSelect
+              id="trigger"
+              label="Reward Cadence"
+              value={formik.values.trigger}
+              disabled={isEdit}
+              onChange={(val) => formik.setFieldValue("trigger", val)}
+              options={[
+                { value: "FIRST_TIME", label: "First-time Action (One-off milestone)" },
+                { value: "RECURRING", label: "Recurring (Every instance)" },
+              ]}
+            />
 
-            <div className="space-y-1.5">
-              <label
-                htmlFor="description"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-              >
-                Merchant Note / Description
-              </label>
-              <Textarea
-                id="description"
-                placeholder="Explain under what conditions this point rule applies..."
-                {...formik.getFieldProps("description")}
-                className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none resize-none focus-visible:ring-1 focus-visible:ring-[#005bd3] dark:focus-visible:ring-blue-500"
-              />
-            </div>
+            <PolarisTextarea
+              id="description"
+              label="Merchant Note / Description"
+              placeholder="Explain under what conditions this point rule applies..."
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
           </div>
         </PolarisFormCard>
 
@@ -803,27 +595,21 @@ export function PointRuleForm({
           badge="Instant Credit"
         >
           <div className="space-y-2">
-            <label
-              htmlFor="points"
-              className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-            >
-              Points Awarded per Event
-            </label>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#616161] dark:text-zinc-400">
-                  <Zap className="h-4 w-4" />
-                </div>
-                <Input
+            <PolarisLabel required>Points Awarded per Event</PolarisLabel>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <div className="flex-1">
+                <PolarisInput
                   id="points"
+                  name="points"
                   type="number"
                   min="1"
-                  {...formik.getFieldProps("points")}
-                  className="h-[40px] pl-9 pr-14 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none focus-visible:ring-1 focus-visible:ring-[#005bd3] dark:focus-visible:ring-blue-500"
+                  prefix={<Zap className="h-3.5 w-3.5" />}
+                  suffix="PTS"
+                  value={formik.values.points}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.points && formik.errors.points ? (formik.errors.points as string) : undefined}
                 />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[12px] font-semibold text-[#616161] dark:text-zinc-400 uppercase tracking-wider">
-                  PTS
-                </div>
               </div>
 
               <PolarisPresetChips
@@ -832,11 +618,6 @@ export function PointRuleForm({
                 onSelect={(v) => formik.setFieldValue("points", v)}
               />
             </div>
-            {formik.touched.points && formik.errors.points && (
-              <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                {formik.errors.points as string}
-              </p>
-            )}
           </div>
         </PolarisFormCard>
 
@@ -852,7 +633,7 @@ export function PointRuleForm({
             description="Caps define the maximum number of rewarded occurrences per individual user account. Leave a cap blank or set to 0 for unconstrained earning."
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <PolarisCapInput
               id="dailyCap"
               label="Daily Cap"
@@ -912,11 +693,11 @@ export function PointRuleForm({
           description="Configure alert channels and custom notification text when members earn points from this rule."
           badge="Notification Channels"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {/* Push Notification Panel */}
             <div
               className={cn(
-                "rounded-[8px] border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-3.5 space-y-3.5",
                 formik.values.allowPushNotification
                   ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
                   : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
@@ -929,7 +710,7 @@ export function PointRuleForm({
                     !formik.values.allowPushNotification,
                   )
                 }
-                className="flex items-start gap-3 cursor-pointer select-none"
+                className="flex items-start gap-2.5 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -941,16 +722,16 @@ export function PointRuleForm({
                   />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                  <div className="flex items-center gap-1.5">
+                    <Bell className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />
                     <label
                       htmlFor="allowPushNotification"
-                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
+                      className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow push notification for user
                     </label>
                   </div>
-                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[15px]">
                     Send an instant push notification to user's device when
                     points are awarded from this rule.
                   </p>
@@ -958,35 +739,25 @@ export function PointRuleForm({
               </div>
 
               {formik.values.allowPushNotification && (
-                <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="pushNotificationTitle"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Push Notification Title
-                    </label>
-                    <Input
-                      id="pushNotificationTitle"
-                      placeholder="e.g. ⚡ Points Earned!"
-                      {...formik.getFieldProps("pushNotificationTitle")}
-                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="pushNotificationBody"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Push Notification Message
-                    </label>
-                    <Textarea
-                      id="pushNotificationBody"
-                      placeholder="e.g. You just earned {{points}} points!"
-                      {...formik.getFieldProps("pushNotificationBody")}
-                      className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] resize-none"
-                    />
-                  </div>
+                <div className="space-y-2.5 pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
+                  <PolarisInput
+                    id="pushNotificationTitle"
+                    name="pushNotificationTitle"
+                    label="Push Notification Title"
+                    placeholder="e.g. ⚡ Points Earned!"
+                    value={formik.values.pushNotificationTitle}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <PolarisTextarea
+                    id="pushNotificationBody"
+                    name="pushNotificationBody"
+                    label="Push Notification Message"
+                    placeholder="e.g. You just earned {{points}} points!"
+                    value={formik.values.pushNotificationBody}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
                   <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
                     <span>Variables:</span>
                     <button
@@ -997,7 +768,7 @@ export function PointRuleForm({
                           `${formik.values.pushNotificationBody} {{points}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{points}}"}
                     </button>
@@ -1009,7 +780,7 @@ export function PointRuleForm({
                           `${formik.values.pushNotificationBody} {{userName}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{userName}}"}
                     </button>
@@ -1021,7 +792,7 @@ export function PointRuleForm({
             {/* Email Notification Panel */}
             <div
               className={cn(
-                "rounded-[8px] border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-3.5 space-y-3.5",
                 formik.values.allowEmailNotification
                   ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
                   : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
@@ -1034,7 +805,7 @@ export function PointRuleForm({
                     !formik.values.allowEmailNotification,
                   )
                 }
-                className="flex items-start gap-3 cursor-pointer select-none"
+                className="flex items-start gap-2.5 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -1046,16 +817,16 @@ export function PointRuleForm({
                   />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />
                     <label
                       htmlFor="allowEmailNotification"
-                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
+                      className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow email notification
                     </label>
                   </div>
-                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[15px]">
                     Send an email notification when user earns points from this
                     rule.
                   </p>
@@ -1063,35 +834,25 @@ export function PointRuleForm({
               </div>
 
               {formik.values.allowEmailNotification && (
-                <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="emailNotificationSubject"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Email Subject
-                    </label>
-                    <Input
-                      id="emailNotificationSubject"
-                      placeholder="e.g. You've earned {{points}} points!"
-                      {...formik.getFieldProps("emailNotificationSubject")}
-                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="emailNotificationBody"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Email Message / Content
-                    </label>
-                    <Textarea
-                      id="emailNotificationBody"
-                      placeholder="e.g. Great job! You have earned {{points}} points on our platform."
-                      {...formik.getFieldProps("emailNotificationBody")}
-                      className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] resize-none"
-                    />
-                  </div>
+                <div className="space-y-2.5 pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
+                  <PolarisInput
+                    id="emailNotificationSubject"
+                    name="emailNotificationSubject"
+                    label="Email Subject"
+                    placeholder="e.g. You've earned {{points}} points!"
+                    value={formik.values.emailNotificationSubject}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <PolarisTextarea
+                    id="emailNotificationBody"
+                    name="emailNotificationBody"
+                    label="Email Message / Content"
+                    placeholder="e.g. Great job! You have earned {{points}} points on our platform."
+                    value={formik.values.emailNotificationBody}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
                   <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
                     <span>Variables:</span>
                     <button
@@ -1102,7 +863,7 @@ export function PointRuleForm({
                           `${formik.values.emailNotificationBody} {{points}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{points}}"}
                     </button>
@@ -1114,7 +875,7 @@ export function PointRuleForm({
                           `${formik.values.emailNotificationBody} {{userName}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{userName}}"}
                     </button>

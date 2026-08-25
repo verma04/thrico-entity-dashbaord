@@ -198,21 +198,21 @@ export function PolarisEligibilityCard({
           >
             <SelectTrigger
               id="memberEligibility"
-              className="h-[40px] w-full bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-normal text-[#303030] dark:text-zinc-100 shadow-none focus:ring-1 focus:ring-[#005bd3] focus:border-[#005bd3] rounded-[8px]"
+              className="h-[34px] w-full bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[12.5px] font-normal text-[#303030] dark:text-zinc-100 shadow-none focus:ring-1 focus:ring-[#005bd3] focus:border-[#005bd3] rounded-[6px]"
             >
               <SelectValue placeholder="Select eligibility" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL" className="text-[13px]">
+              <SelectItem value="ALL" className="text-[12.5px]">
                 All customers
               </SelectItem>
-              <SelectItem value="VERIFIED" className="text-[13px]">
+              <SelectItem value="VERIFIED" className="text-[12.5px]">
                 Specific customer segments (Verified)
               </SelectItem>
-              <SelectItem value="TIERS" className="text-[13px]">
+              <SelectItem value="TIERS" className="text-[12.5px]">
                 Specific tiers
               </SelectItem>
-              <SelectItem value="SPECIFIC_CUSTOMERS" className="text-[13px]">
+              <SelectItem value="SPECIFIC_CUSTOMERS" className="text-[12.5px]">
                 Specific customers
               </SelectItem>
             </SelectContent>
@@ -220,10 +220,10 @@ export function PolarisEligibilityCard({
 
           {/* When Specific Tiers or Specific Customers is active: Search bar + Browse button */}
           {(eligibility === "TIERS" || eligibility === "SPECIFIC_CUSTOMERS") && (
-            <div className="space-y-3 pt-0.5 animate-in fade-in-50 duration-200">
+            <div className="space-y-2.5 pt-0.5 animate-in fade-in-50 duration-200">
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161]" />
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161]" />
                   <Input
                     placeholder={
                       eligibility === "TIERS"
@@ -232,10 +232,10 @@ export function PolarisEligibilityCard({
                     }
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    className="h-[40px] pl-9 pr-8 text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] shadow-none focus:ring-1 focus:ring-[#005bd3] focus:border-[#005bd3]"
+                    className="h-[34px] pl-8 pr-7 text-[12.5px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[6px] shadow-none focus:ring-1 focus:ring-[#005bd3] focus:border-[#005bd3]"
                   />
                   {searchingUsers && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161] animate-spin" />
+                    <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#616161] animate-spin" />
                   )}
                 </div>
                 <Button
@@ -252,7 +252,7 @@ export function PolarisEligibilityCard({
                       });
                     }
                   }}
-                  className="h-[40px] px-4 text-[13.5px] font-medium border-[#aeb4b9] dark:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 text-[#303030] dark:text-zinc-200 rounded-[8px] shrink-0"
+                  className="h-[34px] px-3 text-[12.5px] font-medium border-[#aeb4b9] dark:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 text-[#303030] dark:text-zinc-200 rounded-[6px] shrink-0"
                 >
                   Browse
                 </Button>
