@@ -44,23 +44,23 @@ export function PolarisFormCard({
   return (
     <div
       className={cn(
-        "rounded-[12px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-4 transition-all duration-150",
+        "rounded-[10px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-3.5 transition-all duration-150",
         className,
       )}
     >
-      <div className="mb-3">
+      <div className="mb-2.5">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {Icon && (
-              <Icon className="h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
+              <Icon className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400 shrink-0" />
             )}
-            <h3 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100 leading-[20px]">
+            <h3 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 leading-[18px]">
               {title}
             </h3>
             {badge && (
               <Badge
                 variant="outline"
-                className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[11px] font-medium px-2 py-0.5 rounded-[6px]"
+                className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[10.5px] font-medium px-1.5 py-0.2 rounded-[4px]"
               >
                 {badge}
               </Badge>
@@ -68,12 +68,12 @@ export function PolarisFormCard({
           </div>
         </div>
         {description && (
-          <p className="text-[12.5px] text-[#616161] dark:text-zinc-400 mt-1 leading-[18px]">
+          <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
             {description}
           </p>
         )}
       </div>
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-3.5">{children}</div>
     </div>
   );
 }
@@ -99,22 +99,22 @@ export function PolarisInfoBanner({
   return (
     <div
       className={cn(
-        "flex items-start gap-2.5 p-3 rounded-[8px] bg-[#f6f6f7] dark:bg-zinc-800/50 border border-[#d2d5d9] dark:border-zinc-700 text-[12.5px] text-[#616161] dark:text-zinc-300",
+        "flex items-start gap-2 p-2.5 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800/50 border border-[#d2d5d9] dark:border-zinc-700 text-[11.5px] text-[#616161] dark:text-zinc-300",
         className,
       )}
     >
-      <Icon className="h-4 w-4 text-[#616161] dark:text-zinc-400 mt-0.5 shrink-0" />
-      <div className="space-y-0.5 leading-[18px]">
+      <Icon className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400 mt-0.5 shrink-0" />
+      <div className="space-y-0.5 leading-[16px]">
         {title && (
-          <p className="font-semibold text-[#303030] dark:text-zinc-100 text-[13px]">
+          <p className="font-semibold text-[#303030] dark:text-zinc-100 text-[12px]">
             {title}
           </p>
         )}
-        <p className="text-[12.5px] text-[#616161] dark:text-zinc-400">
+        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
           {description}
         </p>
         {tips && tips.length > 0 && (
-          <ul className="list-disc pl-4 space-y-1 mt-1 text-[12px] text-[#616161] dark:text-zinc-400">
+          <ul className="list-disc pl-3.5 space-y-0.5 mt-1 text-[11px] text-[#616161] dark:text-zinc-400">
             {tips.map((t, idx) => (
               <li key={idx}>{t}</li>
             ))}
@@ -152,13 +152,13 @@ export function PolarisOriginPicker({
   if (integrationsCount === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2">
       <button
         type="button"
         disabled={disabled}
         onClick={() => onSelect("MODULE")}
         className={cn(
-          "flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+          "flex items-start gap-2.5 p-3 rounded-[6px] border text-left transition-all cursor-pointer",
           sourceType === "MODULE"
             ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
             : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
@@ -167,27 +167,27 @@ export function PolarisOriginPicker({
       >
         <div
           className={cn(
-            "p-2 rounded-[6px] shrink-0 border",
+            "p-1.5 rounded-[5px] shrink-0 border",
             sourceType === "MODULE"
               ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
               : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
           )}
         >
-          <Layers className="h-4 w-4" />
+          <Layers className="h-3.5 w-3.5" />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+            <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
               {moduleLabel}
             </span>
             <Badge
               variant="outline"
-              className="text-[10px] h-4 px-1.5 font-bold bg-white dark:bg-zinc-900 text-[#616161] border-[#d2d5d9] rounded-[4px]"
+              className="text-[9.5px] h-3.5 px-1 font-bold bg-white dark:bg-zinc-900 text-[#616161] border-[#d2d5d9] rounded-[3px]"
             >
               {modulesCount}
             </Badge>
           </div>
-          <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+          <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[15px]">
             {moduleDescription}
           </p>
         </div>
@@ -198,7 +198,7 @@ export function PolarisOriginPicker({
         disabled={disabled}
         onClick={() => onSelect("INTEGRATION")}
         className={cn(
-          "flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+          "flex items-start gap-2.5 p-3 rounded-[6px] border text-left transition-all cursor-pointer",
           sourceType === "INTEGRATION"
             ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
             : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
@@ -207,27 +207,27 @@ export function PolarisOriginPicker({
       >
         <div
           className={cn(
-            "p-2 rounded-[6px] shrink-0 border",
+            "p-1.5 rounded-[5px] shrink-0 border",
             sourceType === "INTEGRATION"
               ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
               : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
           )}
         >
-          <Boxes className="h-4 w-4" />
+          <Boxes className="h-3.5 w-3.5" />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+            <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
               {integrationLabel}
             </span>
             <Badge
               variant="outline"
-              className="text-[10px] h-4 px-1.5 font-bold bg-white dark:bg-zinc-900 text-[#616161] border-[#d2d5d9] rounded-[4px]"
+              className="text-[9.5px] h-3.5 px-1 font-bold bg-white dark:bg-zinc-900 text-[#616161] border-[#d2d5d9] rounded-[3px]"
             >
               {integrationsCount}
             </Badge>
           </div>
-          <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+          <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[15px]">
             {integrationDescription}
           </p>
         </div>
@@ -272,7 +272,7 @@ export function PolarisPresetChips({
           type="button"
           onClick={() => handleSelect(preset)}
           className={cn(
-            "h-7 px-2.5 rounded-[6px] text-[12px] font-medium border transition-all cursor-pointer",
+            "h-6 px-2 rounded-[5px] text-[11px] font-medium border transition-all cursor-pointer",
             Number(activeValue) === preset
               ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 font-bold shadow-xs"
               : "bg-[#f6f6f7] dark:bg-zinc-800 border-[#d2d5d9] dark:border-zinc-700 text-[#303030] dark:text-zinc-300 hover:bg-[#e4e5e7] dark:hover:bg-zinc-700",
@@ -312,21 +312,21 @@ export function PolarisCapInput({
   return (
     <div
       className={cn(
-        "p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-1.5",
+        "p-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-1",
         className,
       )}
     >
       <div className="flex items-center justify-between">
         <label
           htmlFor={id}
-          className="text-[11px] font-semibold uppercase tracking-wider text-[#616161] dark:text-zinc-400 select-none cursor-pointer"
+          className="text-[10px] font-semibold uppercase tracking-wider text-[#616161] dark:text-zinc-400 select-none cursor-pointer"
         >
           {label}
         </label>
         <button
           type="button"
           onClick={onClear}
-          className="text-[10.5px] text-[#616161] hover:text-[#303030] dark:text-zinc-400 dark:hover:text-zinc-200 cursor-pointer font-medium"
+          className="text-[10px] text-[#616161] hover:text-[#303030] dark:text-zinc-400 dark:hover:text-zinc-200 cursor-pointer font-medium"
         >
           Unlimited
         </button>
@@ -340,9 +340,9 @@ export function PolarisCapInput({
           value={value ?? ""}
           onChange={onChange}
           onBlur={onBlur}
-          className="h-[36px] bg-[#f6f6f7] dark:bg-zinc-900/50 border-[#d2d5d9] dark:border-zinc-700 text-[13px] font-medium shadow-none rounded-[6px] focus-visible:ring-1 focus-visible:ring-[#005bd3] dark:focus-visible:ring-blue-500 pr-14"
+          className="h-[32px] bg-[#f6f6f7] dark:bg-zinc-900/50 border-[#d2d5d9] dark:border-zinc-700 text-[12px] font-medium shadow-none rounded-[5px] focus-visible:ring-1 focus-visible:ring-[#005bd3] dark:focus-visible:ring-blue-500 pr-12"
         />
-        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[#616161] dark:text-zinc-400 font-medium pointer-events-none">
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#616161] dark:text-zinc-400 font-medium pointer-events-none">
           {periodSuffix}
         </span>
       </div>
@@ -371,23 +371,23 @@ export function PolarisSidebarCard({
   return (
     <div
       className={cn(
-        "rounded-[12px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-4 space-y-3",
+        "rounded-[10px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-3.5 space-y-2.5",
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-[#e1e3e5] dark:border-zinc-800 pb-2.5">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2 border-b border-[#e1e3e5] dark:border-zinc-800 pb-2">
+        <div className="flex items-center gap-1.5">
           {Icon && (
-            <Icon className="h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
+            <Icon className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400 shrink-0" />
           )}
-          <h4 className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 leading-[18px]">
+          <h4 className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 leading-[16px]">
             {title}
           </h4>
         </div>
         {badge && (
           <Badge
             variant="outline"
-            className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[10.5px] font-semibold px-2 py-0.5 rounded-[4px]"
+            className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[10px] font-semibold px-1.5 py-0.2 rounded-[4px]"
           >
             {badge}
           </Badge>
@@ -417,7 +417,7 @@ export function PolarisSummaryRow({
   return (
     <div
       className={cn(
-        "flex items-center justify-between py-1.5 text-[12.5px]",
+        "flex items-center justify-between py-1 text-[11.5px]",
         !isLast && "border-b border-[#f1f2f3] dark:border-zinc-800/80",
         className,
       )}
@@ -456,23 +456,23 @@ export function PolarisTipCard({
   return (
     <div
       className={cn(
-        "rounded-[12px] border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-4",
+        "rounded-[10px] border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-3",
         className,
       )}
     >
       <div className="flex items-start gap-2">
-        <Icon className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+        <Icon className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
         <div>
-          <h4 className="text-[13px] font-semibold text-amber-800 dark:text-amber-300 leading-[18px]">
+          <h4 className="text-[12px] font-semibold text-amber-800 dark:text-amber-300 leading-[16px]">
             {title}
           </h4>
           {children && (
-            <div className="text-[12.5px] text-amber-700 dark:text-amber-400 mt-1 leading-[18px]">
+            <div className="text-[11.5px] text-amber-700 dark:text-amber-400 mt-0.5 leading-[16px]">
               {children}
             </div>
           )}
           {tips && tips.length > 0 && (
-            <ul className="list-disc pl-4 space-y-1 mt-1 text-[12px] text-amber-700 dark:text-amber-400">
+            <ul className="list-disc pl-3.5 space-y-0.5 mt-1 text-[11px] text-amber-700 dark:text-amber-400">
               {tips.map((t, idx) => (
                 <li key={idx}>{t}</li>
               ))}
@@ -499,14 +499,14 @@ export function PolarisFormLayout({
   return (
     <div
       className={cn(
-        "max-w-[1280px] mx-auto w-full px-0 sm:px-0 py-2 space-y-4 pb-28",
+        "max-w-[1280px] mx-auto w-full px-0 sm:px-0 py-2 space-y-3.5 pb-28",
         className,
       )}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start relative">
-        <div className="lg:col-span-8 space-y-4 min-w-0">{children}</div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start relative">
+        <div className="lg:col-span-8 space-y-3.5 min-w-0">{children}</div>
         {sidebar && (
-          <div className="lg:col-span-4 space-y-4 self-start sticky top-6 z-20">
+          <div className="lg:col-span-4 space-y-3.5 self-start sticky top-6 z-20">
             {sidebar}
           </div>
         )}
@@ -524,12 +524,12 @@ export function getSourceIcon(name?: string, type?: string) {
     lower.includes("order")
   ) {
     return (
-      <ShoppingBag className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
+      <ShoppingBag className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
     );
   }
   if (lower.includes("feed") || lower.includes("post")) {
     return (
-      <MessageSquare className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
+      <MessageSquare className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
     );
   }
   if (
@@ -537,15 +537,17 @@ export function getSourceIcon(name?: string, type?: string) {
     lower.includes("community") ||
     lower.includes("user")
   ) {
-    return <Users className="h-4 w-4 text-[#303030] dark:text-zinc-100" />;
+    return <Users className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />;
   }
   if (lower.includes("event")) {
-    return <Calendar className="h-4 w-4 text-[#303030] dark:text-zinc-100" />;
+    return (
+      <Calendar className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+    );
   }
   if (type === "Integration") {
-    return <Boxes className="h-4 w-4 text-[#303030] dark:text-zinc-100" />;
+    return <Boxes className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />;
   }
-  return <Layers className="h-4 w-4 text-[#616161] dark:text-zinc-400" />;
+  return <Layers className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />;
 }
 
 export { PolarisEligibilityCard, toArray } from "./polaris-eligibility-card";
@@ -557,6 +559,8 @@ export {
   PolarisInput,
   PolarisTextarea,
   PolarisSelect,
+  PolarisMultiSelect,
+  PolarisCombobox,
   PolarisFormSkeleton,
 } from "@/components/ui/platform/polaris-primitives";
 export type {
@@ -565,5 +569,7 @@ export type {
   PolarisInputProps,
   PolarisTextareaProps,
   PolarisSelectProps,
+  PolarisMultiSelectProps,
+  PolarisComboboxProps,
   PolarisFormSkeletonProps,
 } from "@/components/ui/platform/polaris-primitives";
