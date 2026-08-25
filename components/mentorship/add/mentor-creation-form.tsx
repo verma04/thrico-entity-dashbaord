@@ -5,8 +5,6 @@ import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -22,35 +20,20 @@ import {
   Globe,
   CheckCircle2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useSearchUserByName } from "@/graphql/actions/mentorship/mentorship-actions";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@apollo/client";
 import { GET_ALL_MENTOR_CATEGORY } from "@/graphql/quries/mentorship/category";
 import { GET_ALL_MENTOR_SKILLS } from "@/graphql/quries/mentorship/skills";
+import { PolarisMultiSelect } from "@/components/ui/platform/polaris-primitives";
 import {
-  PolarisCard,
-  PolarisInput,
-  PolarisTextarea,
-  PolarisLabel,
-  PolarisSelect,
-  PolarisMultiSelect,
-  PolarisCombobox,
-} from "@/components/ui/platform/polaris-primitives";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useModuleStore } from "@/store/useModuleStore";
 import { notify } from "@/lib/notify";
 import {
@@ -59,6 +42,9 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 
 export function MentorCreationForm({
@@ -171,31 +157,31 @@ export function MentorCreationForm({
               badge="Live Profile"
               icon={Sparkles}
             >
-              <div className="flex flex-col items-center text-center p-3.5 bg-[#f6f6f7]/60 dark:bg-zinc-900/60 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800">
+              <div className="flex flex-col items-center text-center p-3 bg-[#f6f6f7]/60 dark:bg-zinc-900/60 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800">
                 {/* Avatar */}
-                <div className="h-20 w-20 rounded-full bg-[#e1e3e5] dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-700 shadow-xs mb-3">
+                <div className="h-16 w-16 rounded-full bg-[#e1e3e5] dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-700 shadow-2xs mb-2.5">
                   {selectedUser?.user?.avatar ? (
                     <Image
                       src={`https://cdn.thrico.network/${selectedUser.user.avatar}`}
                       alt="Avatar"
-                      width={80}
-                      height={80}
+                      width={64}
+                      height={64}
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <User className="h-9 w-9 text-[#8c9196]" />
+                    <User className="h-7 w-7 text-[#8c9196]" />
                   )}
                 </div>
 
-                <h3 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100 truncate max-w-full">
+                <h3 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 truncate max-w-full">
                   {formik.values.displayName || `New ${singularName}`}
                 </h3>
-                <p className="text-[12px] font-medium text-[#616161] dark:text-zinc-400 mt-0.5 truncate max-w-full">
+                <p className="text-[11px] font-medium text-[#616161] dark:text-zinc-400 mt-0.5 truncate max-w-full">
                   {formik.values.intro || "One-liner intro"}
                 </p>
                 {formik.values.isTopMentor && (
-                  <Badge className="mt-2.5 bg-amber-400 text-amber-950 border-none text-[10px] font-bold px-2 py-0.5 flex items-center gap-1 rounded-[4px]">
-                    <Sparkles className="h-3 w-3" />
+                  <Badge className="mt-2 bg-amber-400 text-amber-950 border-none text-[9.5px] font-bold px-1.5 py-0.5 flex items-center gap-1 rounded-[3px]">
+                    <Sparkles className="h-2.5 w-2.5" />
                     Top {singularName}
                   </Badge>
                 )}
@@ -233,7 +219,7 @@ export function MentorCreationForm({
 
             {/* Direct Onboarding Notice */}
             <PolarisSidebarCard title="Direct Onboarding" icon={CheckCircle2}>
-              <div className="text-[12.5px] text-[#616161] dark:text-zinc-400 space-y-2 leading-[18px]">
+              <div className="text-[11.5px] text-[#616161] dark:text-zinc-400 space-y-1.5 leading-[16px]">
                 <p>
                   This action bypasses the standard application workflow.{" "}
                   <strong>{singularName}s</strong> added here are immediately
@@ -251,10 +237,10 @@ export function MentorCreationForm({
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           {/* Server error */}
           {submitError && (
-            <Alert variant="destructive" className="rounded-[8px]">
+            <Alert variant="destructive" className="rounded-[6px]">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Onboarding Failed</AlertTitle>
               <AlertDescription>
@@ -280,76 +266,76 @@ export function MentorCreationForm({
             badge="Required"
           >
             {!selectedUser ? (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161]" />
-                  <Input
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161]" />
+                  <input
                     placeholder="Search users by name..."
-                    className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
+                    className="w-full h-[34px] pl-8 pr-8 bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 text-[12.5px] text-[#303030] dark:text-zinc-100 rounded-[6px] outline-none focus:border-[#005bd3] focus:ring-1 focus:ring-[#005bd3]"
                     value={searchQuery}
                     onChange={handleSearch}
                   />
                   {searching && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                      <Loader2 className="h-3.5 w-3.5 text-[#616161] animate-spin" />
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {searchData?.searchUserByName?.map((user: any) => (
                     <div
                       key={user?.id}
-                      className="group flex items-center justify-between p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900 hover:border-[#aeb4b9] hover:bg-[#f6f6f7] transition-all cursor-pointer"
+                      className="group flex items-center justify-between p-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900 hover:border-[#aeb4b9] hover:bg-[#f6f6f7] transition-all cursor-pointer"
                       onClick={() => handleSelectUser(user)}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full overflow-hidden bg-[#e1e3e5] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 shrink-0">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-full overflow-hidden bg-[#e1e3e5] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 shrink-0">
                           {user?.user?.avatar ? (
                             <Image
                               src={`https://cdn.thrico.network/${user?.user?.avatar}`}
                               alt="Avatar"
-                              width={40}
-                              height={40}
+                              width={32}
+                              height={32}
                               className="h-full w-full object-cover"
                             />
                           ) : (
                             <div className="h-full w-full flex items-center justify-center">
-                              <User className="h-5 w-5 text-[#8c9196]" />
+                              <User className="h-4 w-4 text-[#8c9196]" />
                             </div>
                           )}
                         </div>
                         <div>
-                          <p className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 transition-colors">
+                          <p className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 transition-colors">
                             {user?.user?.firstName} {user?.user?.lastName}
                           </p>
                           {user?.user?.profile?.headline && (
-                            <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 font-medium">
+                            <p className="text-[11px] text-[#616161] dark:text-zinc-400 font-medium">
                               {user.user.profile.headline}
                             </p>
                           )}
                         </div>
                       </div>
-                      <div className="h-7 w-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 bg-[#303030] text-white transition-all">
-                        <Check className="h-3.5 w-3.5" />
+                      <div className="h-6 w-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 bg-[#303030] text-white transition-all">
+                        <Check className="h-3 w-3" />
                       </div>
                     </div>
                   ))}
 
                   {searchQuery.length >= 2 &&
                     searchData?.searchUserByName?.length === 0 && (
-                      <div className="text-center py-8 bg-[#f6f6f7]/40 dark:bg-zinc-900/50 rounded-[8px] border border-dashed border-[#d2d5d9] dark:border-zinc-800">
-                        <User className="h-8 w-8 text-[#8c9196] mx-auto mb-2" />
-                        <p className="text-[12px] text-[#616161] font-medium">
+                      <div className="text-center py-6 bg-[#f6f6f7]/40 dark:bg-zinc-900/50 rounded-[6px] border border-dashed border-[#d2d5d9] dark:border-zinc-800">
+                        <User className="h-6 w-6 text-[#8c9196] mx-auto mb-1.5" />
+                        <p className="text-[11.5px] text-[#616161] font-medium">
                           No users found matching &quot;{searchQuery}&quot;
                         </p>
                       </div>
                     )}
 
                   {!searchQuery && (
-                    <div className="text-center py-8">
-                      <Sparkles className="h-8 w-8 text-[#d2d5d9] dark:text-zinc-700 mx-auto mb-2" />
-                      <p className="text-[12px] text-[#616161] font-medium">
+                    <div className="text-center py-6">
+                      <Sparkles className="h-6 w-6 text-[#d2d5d9] dark:text-zinc-700 mx-auto mb-1.5" />
+                      <p className="text-[11.5px] text-[#616161] font-medium">
                         Start typing a name to find a{" "}
                         {singularName.toLowerCase()}
                       </p>
@@ -359,35 +345,35 @@ export function MentorCreationForm({
               </div>
             ) : (
               /* Selected user chip */
-              <div className="flex items-center justify-between p-3 rounded-[8px] border border-[#aeb4b9] bg-[#f6f6f7] dark:bg-zinc-800">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full overflow-hidden bg-[#e1e3e5] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 shrink-0">
+              <div className="flex items-center justify-between p-2.5 rounded-[6px] border border-[#aeb4b9] bg-[#f6f6f7] dark:bg-zinc-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-full overflow-hidden bg-[#e1e3e5] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 shrink-0">
                     {selectedUser?.user?.avatar ? (
                       <Image
                         src={`https://cdn.thrico.network/${selectedUser.user.avatar}`}
                         alt="Avatar"
-                        width={40}
-                        height={40}
+                        width={32}
+                        height={32}
                         className="h-full w-full object-cover"
                       />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-[#8c9196]" />
+                        <User className="h-4 w-4 text-[#8c9196]" />
                       </div>
                     )}
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <p className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                      <p className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
                         {selectedUser.user?.firstName}{" "}
                         {selectedUser.user?.lastName}
                       </p>
-                      <div className="h-4 w-4 rounded-full bg-[#303030] dark:bg-zinc-100 flex items-center justify-center">
-                        <Check className="h-2.5 w-2.5 text-white dark:text-zinc-900 stroke-[3px]" />
+                      <div className="h-3.5 w-3.5 rounded-full bg-[#303030] dark:bg-zinc-100 flex items-center justify-center">
+                        <Check className="h-2 w-2 text-white dark:text-zinc-900 stroke-[3px]" />
                       </div>
                     </div>
                     {selectedUser.user?.profile?.headline && (
-                      <p className="text-[11.5px] text-[#616161] font-medium">
+                      <p className="text-[11px] text-[#616161] font-medium">
                         {selectedUser.user.profile.headline}
                       </p>
                     )}
@@ -397,13 +383,13 @@ export function MentorCreationForm({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-[6px] text-xs h-8 cursor-pointer"
+                  className="text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-[4px] text-[11.5px] h-7 px-2 cursor-pointer"
                   onClick={() => {
                     setSelectedUser(null);
                     formik.resetForm();
                   }}
                 >
-                  <X className="h-3.5 w-3.5 mr-1" />
+                  <X className="h-3 w-3 mr-1" />
                   Change
                 </Button>
               </div>
@@ -418,44 +404,27 @@ export function MentorCreationForm({
             badge="Profile"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Display Name */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="displayName"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  Public Display Name{" "}
-                  <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="displayName"
-                  name="displayName"
-                  placeholder={`e.g. ${singularName} Jane Doe`}
-                  value={formik.values.displayName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.displayName && formik.errors.displayName && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.displayName as string}
-                  </p>
-                )}
-              </div>
+              <PolarisInput
+                id="displayName"
+                name="displayName"
+                label="Public Display Name"
+                required
+                placeholder={`e.g. ${singularName} Jane Doe`}
+                value={formik.values.displayName}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.displayName && formik.errors.displayName ? String(formik.errors.displayName) : undefined}
+              />
 
-              {/* Category */}
-              <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                  {singularName} Category{" "}
-                  <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
+              <div className="space-y-1">
+                <PolarisLabel required>{singularName} Category</PolarisLabel>
                 <Select
                   value={formik.values.category}
                   onValueChange={(value) =>
                     formik.setFieldValue("category", value)
                   }
                 >
-                  <SelectTrigger className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]">
+                  <SelectTrigger className="h-[34px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[12.5px] text-[#303030] dark:text-zinc-100 rounded-[6px]">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -463,7 +432,7 @@ export function MentorCreationForm({
                       <SelectItem
                         key={cat.id}
                         value={cat.id}
-                        className="text-[13px]"
+                        className="text-[12.5px]"
                       >
                         {cat.title}
                       </SelectItem>
@@ -471,7 +440,7 @@ export function MentorCreationForm({
                   </SelectContent>
                 </Select>
                 {formik.touched.category && formik.errors.category && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+                  <p className="text-[12px] text-[#d72c0d] font-normal leading-[16px]">
                     {formik.errors.category as string}
                   </p>
                 )}
@@ -479,133 +448,85 @@ export function MentorCreationForm({
             </div>
 
             {/* One-liner Intro & Greatest Achievement */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="intro"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  One-liner Intro{" "}
-                  <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="intro"
-                  name="intro"
-                  placeholder="e.g. Passionate about helping developers grow"
-                  value={formik.values.intro}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.intro && formik.errors.intro && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.intro as string}
-                  </p>
-                )}
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisInput
+                id="intro"
+                name="intro"
+                label="One-liner Intro"
+                required
+                placeholder="e.g. Passionate about helping developers grow"
+                value={formik.values.intro}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.intro && formik.errors.intro ? String(formik.errors.intro) : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="greatestAchievement"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  Greatest Achievement{" "}
-                  <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="greatestAchievement"
-                  name="greatestAchievement"
-                  placeholder="e.g. Scaled a product to 1M users"
-                  value={formik.values.greatestAchievement}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.greatestAchievement &&
-                  formik.errors.greatestAchievement && (
-                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                      {formik.errors.greatestAchievement as string}
-                    </p>
-                  )}
-              </div>
+              <PolarisInput
+                id="greatestAchievement"
+                name="greatestAchievement"
+                label="Greatest Achievement"
+                required
+                placeholder="e.g. Scaled a product to 1M users"
+                value={formik.values.greatestAchievement}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.greatestAchievement && formik.errors.greatestAchievement ? String(formik.errors.greatestAchievement) : undefined}
+              />
             </div>
 
             {/* About & Motivation */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="about"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  About Me <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Textarea
-                  id="about"
-                  name="about"
-                  placeholder="Tell us about yourself..."
-                  value={formik.values.about}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="min-h-[100px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
-                />
-                {formik.touched.about && formik.errors.about && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.about as string}
-                  </p>
-                )}
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisTextarea
+                id="about"
+                name="about"
+                label="About Me"
+                required
+                rows={3}
+                placeholder="Tell us about yourself..."
+                value={formik.values.about}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.about && formik.errors.about ? String(formik.errors.about) : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="whyDoWantBecomeMentor"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  Motivation for {moduleName}
-                </label>
-                <Textarea
-                  id="whyDoWantBecomeMentor"
-                  name="whyDoWantBecomeMentor"
-                  placeholder={`Why do you want to become a ${singularName.toLowerCase()}?`}
-                  value={formik.values.whyDoWantBecomeMentor}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="min-h-[100px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
-                />
-              </div>
+              <PolarisTextarea
+                id="whyDoWantBecomeMentor"
+                name="whyDoWantBecomeMentor"
+                label={`Motivation for ${moduleName}`}
+                rows={3}
+                placeholder={`Why do you want to become a ${singularName.toLowerCase()}?`}
+                value={formik.values.whyDoWantBecomeMentor}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
             </div>
 
             {/* Description / Bio Extras */}
-            <div className="space-y-1.5 pt-2">
-              <label
-                htmlFor="description"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-              >
-                Description / Bio Extras
-              </label>
-              <Textarea
+            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisTextarea
                 id="description"
                 name="description"
+                label="Description / Bio Extras"
+                rows={2}
                 placeholder="Any additional details you'd like to share..."
                 value={formik.values.description}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="min-h-[80px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
               />
             </div>
 
             {/* Top Mentor Toggle */}
-            <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 mt-2">
+            <div className="flex items-center justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 mt-1">
               <div className="space-y-0.5">
                 <label
                   htmlFor="isTopMentor"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none flex items-center gap-2 cursor-pointer"
+                  className="text-[12.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[18px] select-none flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                  <Sparkles className="h-3 w-3 text-amber-500" />
                   Mark as Top {singularName}
                 </label>
-                <p className="text-[11.5px] text-[#616161]">
-                  Feature this {singularName.toLowerCase()} at the top of
-                  listings
+                <p className="text-[11px] text-[#616161]">
+                  Feature this {singularName.toLowerCase()} at the top of listings
                 </p>
               </div>
               <Checkbox
@@ -614,7 +535,7 @@ export function MentorCreationForm({
                 onCheckedChange={(checked) =>
                   formik.setFieldValue("isTopMentor", checked)
                 }
-                className="h-5 w-5 rounded-[4px]"
+                className="h-4 w-4 rounded-[3px]"
               />
             </div>
           </PolarisFormCard>
@@ -652,54 +573,29 @@ export function MentorCreationForm({
             badge="Optional"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="featuredArticle"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none flex items-center gap-1.5"
-                >
-                  <LinkIcon className="h-3 w-3 text-[#616161]" />
-                  Featured Article URL
-                </label>
-                <Input
-                  id="featuredArticle"
-                  name="featuredArticle"
-                  placeholder="https://medium.com/@username/article"
-                  value={formik.values.featuredArticle}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.featuredArticle &&
-                  formik.errors.featuredArticle && (
-                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                      {formik.errors.featuredArticle as string}
-                    </p>
-                  )}
-              </div>
+              <PolarisInput
+                id="featuredArticle"
+                name="featuredArticle"
+                label="Featured Article URL"
+                placeholder="https://medium.com/@username/article"
+                prefix={<LinkIcon className="h-3.5 w-3.5 text-[#616161]" />}
+                value={formik.values.featuredArticle}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.featuredArticle && formik.errors.featuredArticle ? String(formik.errors.featuredArticle) : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="introVideo"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none flex items-center gap-1.5"
-                >
-                  <Globe className="h-3 w-3 text-[#616161]" />
-                  Intro Video URL
-                </label>
-                <Input
-                  id="introVideo"
-                  name="introVideo"
-                  placeholder="https://youtube.com/watch?v=..."
-                  value={formik.values.introVideo}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.introVideo && formik.errors.introVideo && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.introVideo as string}
-                  </p>
-                )}
-              </div>
+              <PolarisInput
+                id="introVideo"
+                name="introVideo"
+                label="Intro Video URL"
+                placeholder="https://youtube.com/watch?v=..."
+                prefix={<Globe className="h-3.5 w-3.5 text-[#616161]" />}
+                value={formik.values.introVideo}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.introVideo && formik.errors.introVideo ? String(formik.errors.introVideo) : undefined}
+              />
             </div>
           </PolarisFormCard>
 
@@ -710,23 +606,23 @@ export function MentorCreationForm({
             description="Confirm that the user has agreed to be onboarded and all information is accurate."
             badge="Required"
           >
-            <div className="flex items-start gap-4 p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
+            <div className="flex items-start gap-3 p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
               <Checkbox
                 id="agreement"
                 checked={formik.values.agreement}
                 onCheckedChange={(checked) =>
                   formik.setFieldValue("agreement", checked)
                 }
-                className="mt-0.5 h-5 w-5 rounded-[4px]"
+                className="mt-0.5 h-4 w-4 rounded-[3px]"
               />
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <label
                   htmlFor="agreement"
-                  className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer block"
+                  className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer block"
                 >
                   Confirm Onboarding Agreement
                 </label>
-                <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 font-medium leading-[16px]">
+                <p className="text-[11px] text-[#616161] dark:text-zinc-400 font-medium leading-[15px]">
                   By checking this box, you confirm that this user has agreed to
                   be a {singularName.toLowerCase()} and the information
                   provided is accurate. The {singularName.toLowerCase()} profile
@@ -735,7 +631,7 @@ export function MentorCreationForm({
               </div>
             </div>
             {formik.touched.agreement && formik.errors.agreement && (
-              <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+              <p className="text-[12px] text-[#d72c0d] font-normal leading-[16px]">
                 {formik.errors.agreement as string}
               </p>
             )}
