@@ -12,32 +12,9 @@ import {
   Bell,
   Mail,
   Check,
-  ChevronsUpDown,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -51,6 +28,11 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisSelect,
+  PolarisCombobox,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import {
   PolarisEligibilityCard,
@@ -225,10 +207,6 @@ export function BadgeForm({
   const [iconMode, setIconMode] = useState<"emoji" | "upload">("emoji");
   const [iconSearch, setIconSearch] = useState("");
   const [uploadImage, { loading: isUploading }] = useUploadImage();
-
-  const [isModulePopoverOpen, setIsModulePopoverOpen] = useState(false);
-  const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
-
   const initialSourceType = React.useMemo(() => {
     if (initialValues?.module) {
       const isIntegration = integrations.some(
@@ -597,54 +575,36 @@ export function BadgeForm({
           description="Give your achievement a name, description, and visual icon."
           badge="Badge Builder"
         >
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="flex-1 space-y-4">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="name"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Achievement Name <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="name"
-                  placeholder="e.g. Master Contributor, Early Adopter"
-                  {...formik.getFieldProps("name")}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
-                />
-                {formik.touched.name && formik.errors.name && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.name as string}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="description"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Detailed Description <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Textarea
-                  id="description"
-                  placeholder="What does a user need to do to earn this?"
-                  {...formik.getFieldProps("description")}
-                  className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none resize-none"
-                />
-                {formik.touched.description && formik.errors.description && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.description as string}
-                  </p>
-                )}
-              </div>
+          <div className="flex flex-col md:flex-row gap-5">
+            <div className="flex-1 space-y-3.5">
+              <PolarisInput
+                id="name"
+                name="name"
+                label="Achievement Name"
+                required
+                placeholder="e.g. Master Contributor, Early Adopter"
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.name && formik.errors.name ? (formik.errors.name as string) : undefined}
+              />
+              <PolarisTextarea
+                id="description"
+                name="description"
+                label="Detailed Description"
+                required
+                placeholder="What does a user need to do to earn this?"
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.description && formik.errors.description ? (formik.errors.description as string) : undefined}
+              />
             </div>
 
-            <div className="w-full md:w-[280px] space-y-3">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                Visual Representation
-              </label>
-              <div className="flex flex-col gap-3 p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
-                <div className="h-16 w-16 mx-auto bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-3xl border border-[#d2d5d9] dark:border-zinc-700 overflow-hidden">
+            <div className="w-full md:w-[260px] space-y-2.5">
+              <PolarisLabel>Visual Representation</PolarisLabel>
+              <div className="flex flex-col gap-2.5 p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
+                <div className="h-14 w-14 mx-auto bg-white dark:bg-zinc-800 rounded-xl shadow-sm flex items-center justify-center text-3xl border border-[#d2d5d9] dark:border-zinc-700 overflow-hidden">
                   {isIconImage ? (
                     <img src={getPreferredMediaUrl(formik.values.icon)} alt="Icon" className="h-full w-full object-cover" />
                   ) : (
@@ -652,12 +612,12 @@ export function BadgeForm({
                   )}
                 </div>
 
-                <div className="flex bg-white dark:bg-zinc-800 rounded-[6px] p-0.5 border border-[#d2d5d9] dark:border-zinc-700 text-[12px] font-medium">
+                <div className="flex bg-white dark:bg-zinc-800 rounded-[6px] p-0.5 border border-[#d2d5d9] dark:border-zinc-700 text-[11.5px] font-medium">
                   <button 
                     type="button" 
                     onClick={() => setIconMode("emoji")} 
                     className={cn(
-                      "flex-1 py-1 rounded-[4px] transition-all font-medium text-[12px]",
+                      "flex-1 py-1 rounded-[4px] transition-all font-medium text-[11.5px]",
                       iconMode === "emoji"
                         ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
                         : "text-[#616161] dark:text-zinc-400 hover:text-[#303030]",
@@ -669,7 +629,7 @@ export function BadgeForm({
                     type="button" 
                     onClick={() => setIconMode("upload")} 
                     className={cn(
-                      "flex-1 py-1 rounded-[4px] transition-all font-medium text-[12px]",
+                      "flex-1 py-1 rounded-[4px] transition-all font-medium text-[11.5px]",
                       iconMode === "upload"
                         ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
                         : "text-[#616161] dark:text-zinc-400 hover:text-[#303030]",
@@ -685,19 +645,19 @@ export function BadgeForm({
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161]" />
                       <Input
                         placeholder="Filter icons..."
-                        className="pl-8 h-[34px] text-[13px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 rounded-[6px]"
+                        className="pl-8 h-[34px] text-[12.5px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 rounded-[6px]"
                         value={iconSearch}
                         onChange={(e) => setIconSearch(e.target.value)}
                       />
                     </div>
-                    <div className="grid grid-cols-6 gap-1.5 max-h-[140px] overflow-y-auto pr-1">
+                    <div className="grid grid-cols-6 gap-1.5 max-h-[130px] overflow-y-auto pr-1">
                       {ICON_CATEGORIES.flatMap((c) => c.icons).map((icon) => (
                         <button
                           key={icon}
                           type="button"
                           onClick={() => formik.setFieldValue("icon", icon)}
                           className={cn(
-                            "h-7 w-7 rounded-[4px] flex items-center justify-center text-base transition-all",
+                            "h-6 w-6 rounded-[4px] flex items-center justify-center text-sm transition-all",
                             formik.values.icon === icon
                               ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
                               : "bg-white dark:bg-zinc-800 hover:bg-[#f6f6f7] dark:hover:bg-zinc-700",
@@ -709,7 +669,7 @@ export function BadgeForm({
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-[#d2d5d9] dark:border-zinc-700 rounded-[8px] p-3 gap-1 bg-white dark:bg-zinc-800 hover:bg-[#f6f6f7] dark:hover:bg-zinc-700/50 transition-colors text-center relative h-[140px]">
+                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-[#d2d5d9] dark:border-zinc-700 rounded-[8px] p-3 gap-1 bg-white dark:bg-zinc-800 hover:bg-[#f6f6f7] dark:hover:bg-zinc-700/50 transition-colors text-center relative h-[130px]">
                     <input
                       type="file"
                       accept="image/png, image/jpeg, image/svg+xml"
@@ -732,11 +692,11 @@ export function BadgeForm({
                       }}
                     />
                     {isUploading ? (
-                      <Loader2 className="h-5 w-5 text-[#303030] dark:text-zinc-100 animate-spin" />
+                      <Loader2 className="h-4 w-4 text-[#303030] dark:text-zinc-100 animate-spin" />
                     ) : (
-                      <Upload className="h-5 w-5 text-[#616161] mb-0.5" />
+                      <Upload className="h-4 w-4 text-[#616161] mb-0.5" />
                     )}
-                    <p className="text-[12px] font-medium text-[#303030] dark:text-zinc-100">Click to upload icon</p>
+                    <p className="text-[11.5px] font-medium text-[#303030] dark:text-zinc-100">Click to upload icon</p>
                     <p className="text-[10px] text-[#616161] dark:text-zinc-400">PNG, JPG, SVG</p>
                   </div>
                 )}
@@ -752,43 +712,33 @@ export function BadgeForm({
           description="Determine how this badge is algorithmically awarded."
           badge="Award Engine"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                Award Mechanism
-              </label>
-              <Select
-                value={formik.values.type}
-                onValueChange={(val) => formik.setFieldValue("type", val)}
-                disabled={isEdit}
-              >
-                <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTION" className="text-[13px]">Action Cumulative</SelectItem>
-                  <SelectItem value="POINTS" className="text-[13px]">Milestone Threshold</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <PolarisSelect
+              id="type"
+              label="Award Mechanism"
+              value={formik.values.type}
+              disabled={isEdit}
+              onChange={(val) => formik.setFieldValue("type", val)}
+              options={[
+                { value: "ACTION", label: "Action Cumulative" },
+                { value: "POINTS", label: "Milestone Threshold" },
+              ]}
+            />
 
-            <div className="space-y-1.5">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                {formik.values.type === "ACTION"
-                  ? "Required Count"
-                  : "Required Points"}
-              </label>
-              <Input
-                type="number"
-                {...formik.getFieldProps("targetValue")}
-                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
-                min={1}
-              />
-            </div>
+            <PolarisInput
+              id="targetValue"
+              name="targetValue"
+              type="number"
+              min={1}
+              label={formik.values.type === "ACTION" ? "Required Count" : "Required Points"}
+              value={formik.values.targetValue}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
           </div>
 
           {formik.values.type === "ACTION" && (
-            <div className="space-y-4 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <div className="space-y-3.5 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
               <PolarisOriginPicker
                 sourceType={sourceType}
                 onSelect={(type) => {
@@ -802,197 +752,47 @@ export function BadgeForm({
                 disabled={isEdit}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
                 {/* Searchable Target Module */}
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="module"
-                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                  >
-                    {sourceType === "MODULE"
-                      ? "Target Module"
-                      : "Target App / Store"}
-                  </label>
-                  <Popover open={isModulePopoverOpen} onOpenChange={setIsModulePopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        id="module"
-                        disabled={isEdit}
-                        className={cn(
-                          "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
-                          !formik.values.module && "text-[#8c9196] dark:text-zinc-500",
-                          isEdit && "opacity-60 cursor-not-allowed",
-                        )}
-                      >
-                        <span className="truncate">
-                          {selectedSourceItem?.name ||
-                            (sourceType === "MODULE"
-                              ? "Select platform module..."
-                              : "Select connected app...")}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-800"
-                      align="start"
-                    >
-                      <Command className="border-none">
-                        <CommandInput
-                          placeholder={
-                            sourceType === "MODULE"
-                              ? "Search platform modules..."
-                              : "Search connected apps..."
-                          }
-                          className="h-10 text-[13px]"
-                        />
-                        <CommandList className="max-h-[240px]">
-                          <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
-                            No {sourceType === "MODULE" ? "modules" : "apps"} found.
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {currentSourceList.map((item, idx) => {
-                              const isSelected =
-                                item.id?.toLowerCase() ===
-                                  formik.values.module?.toLowerCase() ||
-                                item.uuid?.toLowerCase() ===
-                                  formik.values.module?.toLowerCase() ||
-                                (item as any).slug?.toLowerCase() ===
-                                  formik.values.module?.toLowerCase();
-                              return (
-                                <CommandItem
-                                  key={`src-${item.id}-${idx}`}
-                                  value={item.name || item.id}
-                                  onSelect={() => {
-                                    formik.setFieldValue("module", item.id);
-                                    formik.setFieldValue("action", "");
-                                    setIsModulePopoverOpen(false);
-                                  }}
-                                  className="flex items-center justify-between text-[13px] font-medium cursor-pointer py-2 px-3"
-                                >
-                                  <span>{item.name}</span>
-                                  {isSelected && (
-                                    <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
-                                  )}
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  {formik.touched.module && formik.errors.module && (
-                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                      {formik.errors.module as string}
-                    </p>
-                  )}
-                </div>
+                <PolarisCombobox
+                  id="module"
+                  label={sourceType === "MODULE" ? "Target Module" : "Target App / Store"}
+                  placeholder={sourceType === "MODULE" ? "Select platform module..." : "Select connected app..."}
+                  searchPlaceholder={sourceType === "MODULE" ? "Search platform modules..." : "Search connected apps..."}
+                  options={currentSourceList.map((item) => ({
+                    value: item.id || item.uuid || (item as any).slug,
+                    label: item.name,
+                  }))}
+                  value={formik.values.module}
+                  disabled={isEdit}
+                  onChange={(val) => {
+                    formik.setFieldValue("module", val);
+                    formik.setFieldValue("action", "");
+                  }}
+                  error={formik.touched.module && formik.errors.module ? (formik.errors.module as string) : undefined}
+                />
 
                 {/* Searchable Triggering Action */}
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="action"
-                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                  >
-                    Triggering Action <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
-                  <Popover open={isActionPopoverOpen} onOpenChange={setIsActionPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        id="action"
-                        disabled={!formik.values.module || isEdit}
-                        className={cn(
-                          "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
-                          !formik.values.action && "text-[#8c9196] dark:text-zinc-500",
-                          (!formik.values.module || isEdit) && "opacity-60 cursor-not-allowed",
-                        )}
-                      >
-                        <span className="truncate">
-                          {selectedTriggerItem
-                            ? (selectedTriggerItem.name
-                                ? selectedTriggerItem.name.replace(/_/g, " ")
-                                : selectedTriggerItem.description ||
-                                  selectedTriggerItem.value ||
-                                  formik.values.action)
-                            : (formik.values.module
-                                ? "Choose trigger action..."
-                                : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`)}
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-800"
-                      align="start"
-                    >
-                      <Command className="border-none">
-                        <CommandInput
-                          placeholder="Search trigger event..."
-                          className="h-10 text-[13px]"
-                        />
-                        <CommandList className="max-h-[240px]">
-                          {filteredTriggers.length === 0 ? (
-                            <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
-                              No trigger events found for this source
-                            </CommandEmpty>
-                          ) : (
-                            <>
-                              <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
-                                No matching trigger event found.
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {filteredTriggers.map((t, idx) => {
-                                  const itemVal = t.value || t.name || t.id;
-                                  const isSelected =
-                                    formik.values.action === itemVal ||
-                                    formik.values.action === t.id ||
-                                    formik.values.action === t.name;
-                                  return (
-                                    <CommandItem
-                                      key={`trig-${itemVal}-${idx}`}
-                                      value={`${t.name || ""} ${t.description || ""} ${itemVal}`}
-                                      onSelect={() => {
-                                        formik.setFieldValue("action", itemVal);
-                                        setIsActionPopoverOpen(false);
-                                      }}
-                                      className="flex items-center justify-between text-[13px] font-medium cursor-pointer py-2 px-3"
-                                    >
-                                      <div className="flex flex-col py-0.5 text-left min-w-0 pr-2">
-                                        <span className="font-medium text-[#303030] dark:text-zinc-100 truncate">
-                                          {t.name
-                                            ? t.name.replace(/_/g, " ")
-                                            : t.description || itemVal}
-                                        </span>
-                                        {t.description &&
-                                          t.name &&
-                                          t.description !== t.name && (
-                                            <span className="text-[11px] text-[#616161] dark:text-zinc-400 line-clamp-1">
-                                              {t.description}
-                                            </span>
-                                          )}
-                                      </div>
-                                      {isSelected && (
-                                        <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100 shrink-0" />
-                                      )}
-                                    </CommandItem>
-                                  );
-                                })}
-                              </CommandGroup>
-                            </>
-                          )}
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  {formik.touched.action && formik.errors.action && (
-                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                      {formik.errors.action as string}
-                    </p>
-                  )}
-                </div>
+                <PolarisCombobox
+                  id="action"
+                  label="Triggering Action"
+                  required
+                  placeholder={formik.values.module ? "Choose trigger action..." : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`}
+                  searchPlaceholder="Search trigger event..."
+                  options={filteredTriggers.map((t) => {
+                    const itemVal = t.value || t.name || t.id;
+                    const label = t.name ? t.name.replace(/_/g, " ") : (t.description || itemVal);
+                    return {
+                      value: itemVal,
+                      label: label,
+                      badge: t.type || undefined,
+                    };
+                  })}
+                  value={formik.values.action}
+                  disabled={!formik.values.module || isEdit}
+                  onChange={(val) => formik.setFieldValue("action", val)}
+                  error={formik.touched.action && formik.errors.action ? (formik.errors.action as string) : undefined}
+                />
               </div>
             </div>
           )}
@@ -1027,11 +827,11 @@ export function BadgeForm({
           description="Configure alert channels and custom notification text when members unlock this badge."
           badge="Notification Channels"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {/* Push Notification Panel */}
             <div
               className={cn(
-                "rounded-[8px] border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-3.5 space-y-3.5",
                 formik.values.allowPushNotification
                   ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
                   : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
@@ -1044,7 +844,7 @@ export function BadgeForm({
                     !formik.values.allowPushNotification,
                   )
                 }
-                className="flex items-start gap-3 cursor-pointer select-none"
+                className="flex items-start gap-2.5 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -1056,51 +856,41 @@ export function BadgeForm({
                   />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                  <div className="flex items-center gap-1.5">
+                    <Bell className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />
                     <label
                       htmlFor="allowPushNotification"
-                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
+                      className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow push notification for user
                     </label>
                   </div>
-                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[15px]">
                     Send an instant push notification to user's device when this badge is achieved.
                   </p>
                 </div>
               </div>
 
               {formik.values.allowPushNotification && (
-                <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="pushNotificationTitle"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Push Notification Title
-                    </label>
-                    <Input
-                      id="pushNotificationTitle"
-                      placeholder="e.g. 🎉 New Badge Unlocked!"
-                      {...formik.getFieldProps("pushNotificationTitle")}
-                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="pushNotificationBody"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Push Notification Message
-                    </label>
-                    <Textarea
-                      id="pushNotificationBody"
-                      placeholder="e.g. Congratulations! You've unlocked the {{badgeName}} badge."
-                      {...formik.getFieldProps("pushNotificationBody")}
-                      className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] resize-none"
-                    />
-                  </div>
+                <div className="space-y-2.5 pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
+                  <PolarisInput
+                    id="pushNotificationTitle"
+                    name="pushNotificationTitle"
+                    label="Push Notification Title"
+                    placeholder="e.g. 🎉 New Badge Unlocked!"
+                    value={formik.values.pushNotificationTitle}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <PolarisTextarea
+                    id="pushNotificationBody"
+                    name="pushNotificationBody"
+                    label="Push Notification Message"
+                    placeholder="e.g. Congratulations! You've unlocked the {{badgeName}} badge."
+                    value={formik.values.pushNotificationBody}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
                   <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
                     <span>Variables:</span>
                     <button
@@ -1111,7 +901,7 @@ export function BadgeForm({
                           `${formik.values.pushNotificationBody} {{badgeName}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{badgeName}}"}
                     </button>
@@ -1123,7 +913,7 @@ export function BadgeForm({
                           `${formik.values.pushNotificationBody} {{userName}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{userName}}"}
                     </button>
@@ -1135,7 +925,7 @@ export function BadgeForm({
             {/* Email Notification Panel */}
             <div
               className={cn(
-                "rounded-[8px] border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-3.5 space-y-3.5",
                 formik.values.allowEmailNotification
                   ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
                   : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
@@ -1148,7 +938,7 @@ export function BadgeForm({
                     !formik.values.allowEmailNotification,
                   )
                 }
-                className="flex items-start gap-3 cursor-pointer select-none"
+                className="flex items-start gap-2.5 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -1160,51 +950,41 @@ export function BadgeForm({
                   />
                 </div>
                 <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />
                     <label
                       htmlFor="allowEmailNotification"
-                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
+                      className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow email notification
                     </label>
                   </div>
-                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[15px]">
                     Send a celebratory email notification when user achieves this badge.
                   </p>
                 </div>
               </div>
 
               {formik.values.allowEmailNotification && (
-                <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="emailNotificationSubject"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Email Subject
-                    </label>
-                    <Input
-                      id="emailNotificationSubject"
-                      placeholder="e.g. You've earned a new badge: {{badgeName}}!"
-                      {...formik.getFieldProps("emailNotificationSubject")}
-                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="emailNotificationBody"
-                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                    >
-                      Email Message / Content
-                    </label>
-                    <Textarea
-                      id="emailNotificationBody"
-                      placeholder="e.g. Great job! You have successfully unlocked the {{badgeName}} badge on our platform."
-                      {...formik.getFieldProps("emailNotificationBody")}
-                      className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] resize-none"
-                    />
-                  </div>
+                <div className="space-y-2.5 pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
+                  <PolarisInput
+                    id="emailNotificationSubject"
+                    name="emailNotificationSubject"
+                    label="Email Subject"
+                    placeholder="e.g. You've earned a new badge: {{badgeName}}!"
+                    value={formik.values.emailNotificationSubject}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <PolarisTextarea
+                    id="emailNotificationBody"
+                    name="emailNotificationBody"
+                    label="Email Message / Content"
+                    placeholder="e.g. Great job! You have successfully unlocked the {{badgeName}} badge on our platform."
+                    value={formik.values.emailNotificationBody}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
                   <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
                     <span>Variables:</span>
                     <button
@@ -1215,7 +995,7 @@ export function BadgeForm({
                           `${formik.values.emailNotificationBody} {{badgeName}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{badgeName}}"}
                     </button>
@@ -1227,7 +1007,7 @@ export function BadgeForm({
                           `${formik.values.emailNotificationBody} {{userName}}`.trim(),
                         )
                       }
-                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
+                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
                     >
                       {"{{userName}}"}
                     </button>
