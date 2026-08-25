@@ -179,12 +179,7 @@ export function RedemptionsTable({
       };
     }
 
-    // Pillar 1: Internal Voucher (Manual voucher / internal reward)
-    return {
-      label: "Internal Voucher",
-      tag: "emerald" as const,
-      icon: Ticket,
-    };
+    return null;
   };
 
   const columns = [
@@ -216,10 +211,10 @@ export function RedemptionsTable({
     },
     {
       key: "reward",
-      header: "Reward Offer & Pillar",
+      header: "Reward Offer",
       cell: (row: Redemption) => {
         const pillarInfo = getPillarInfo(row);
-        const Icon = pillarInfo.icon;
+        const Icon = pillarInfo?.icon;
 
         return (
           <div className="space-y-1">
@@ -227,12 +222,14 @@ export function RedemptionsTable({
               {row.reward?.title || "Special Reward"}
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <AdminTableTag variant={pillarInfo.tag}>
-                <span className="flex items-center gap-1">
-                  <Icon className="h-3 w-3" />
-                  {pillarInfo.label}
-                </span>
-              </AdminTableTag>
+              {pillarInfo && Icon && (
+                <AdminTableTag variant={pillarInfo.tag}>
+                  <span className="flex items-center gap-1">
+                    <Icon className="h-3 w-3" />
+                    {pillarInfo.label}
+                  </span>
+                </AdminTableTag>
+              )}
               {row.metadata?.gameSource && (
                 <span className="text-[10px] text-muted-foreground font-mono bg-muted/60 px-1.5 py-0.5 rounded border border-border/50">
                   via {row.metadata.gameSource}
@@ -270,42 +267,6 @@ export function RedemptionsTable({
             unit={currencyName}
             variant="amber"
           />
-        );
-      },
-    },
-    {
-      key: "voucherCode",
-      header: "Voucher / Coupon Code",
-      cell: (row: Redemption) => {
-        const code = row.metadata?.voucherCode || row.metadata?.couponCode;
-
-        if (!code) {
-          return (
-            <span className="text-muted-foreground text-[11px] italic">
-              Auto-Applied / In Wallet
-            </span>
-          );
-        }
-
-        return (
-          <div className="flex items-center gap-1.5 group">
-            <span className="font-mono text-[11px] bg-muted/60 px-2 py-0.5 rounded border border-border/60 font-bold text-foreground">
-              {code}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground cursor-pointer rounded"
-              onClick={() => copyToClipboard(code, "Voucher / Coupon Code")}
-              title="Copy code"
-            >
-              {copiedKey === code ? (
-                <Check className="h-3 w-3 text-emerald-600" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
-            </Button>
-          </div>
         );
       },
     },
@@ -571,9 +532,13 @@ export function RedemptionsTable({
                       Pillar Category
                     </span>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <AdminTableTag variant={getPillarInfo(selectedRedemption).tag}>
-                        {getPillarInfo(selectedRedemption).label}
-                      </AdminTableTag>
+                      {getPillarInfo(selectedRedemption) ? (
+                        <AdminTableTag variant={getPillarInfo(selectedRedemption)!.tag}>
+                          {getPillarInfo(selectedRedemption)!.label}
+                        </AdminTableTag>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Standard Reward</span>
+                      )}
                     </div>
                     {selectedRedemption.metadata?.gameSource && (
                       <span className="text-[10px] text-muted-foreground font-mono block mt-0.5">
