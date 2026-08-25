@@ -593,12 +593,6 @@ export const gamificationEngine = [
         path: "/gamification/rewards/fraud",
         icon: <AlertTriangle size={18} />,
       },
-      {
-        key: "rew-settings",
-        label: "Settings",
-        path: "/gamification/rewards/settings",
-        icon: <Settings size={18} />,
-      },
     ],
   },
   {
