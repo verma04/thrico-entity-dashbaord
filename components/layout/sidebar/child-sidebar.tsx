@@ -268,6 +268,9 @@ export function ChildSidebarContainer({
     ];
   }, [
     homeItems,
+    aiStudioItems,
+    aiSuperAgentsItems,
+    aiChatItems,
     membersIntelligence,
     feedItems,
     moderationItems,
@@ -275,11 +278,70 @@ export function ChildSidebarContainer({
     gamificationEngine,
     modulesItems,
     integrationsItems,
+    websiteItems,
     billingAndTeamItems,
     setupAndDesignItems,
     supportAndLegalItems,
     profileItems,
     flattenItems,
+  ]);
+
+  const hasCurrentTabResults = useMemo(() => {
+    if (!searchQuery.trim()) return true;
+    switch (activeTab) {
+      case "ai":
+        return (
+          filteredAiStudio.length > 0 ||
+          filteredAiSuperAgents.length > 0 ||
+          filteredAiChat.length > 0
+        );
+      case "members":
+        return filteredMembers.length > 0;
+      case "content":
+        return (
+          filteredFeed.length > 0 ||
+          filteredModeration.length > 0 ||
+          filteredReported.length > 0
+        );
+      case "gamification":
+        return filteredGamification.some(
+          (group) => (group.children || []).length > 0,
+        );
+      case "modules":
+        return filteredModules.length > 0;
+      case "website":
+        return filteredWebsite.length > 0;
+      case "settings":
+        return (
+          filteredBillingAndTeam.length > 0 ||
+          filteredSetupAndDesign.length > 0 ||
+          filteredSupportAndLegal.length > 0
+        );
+      case "email":
+        return filteredEmail.length > 0;
+      case "integrations":
+        return filteredIntegrations.length > 0;
+      default:
+        return true;
+    }
+  }, [
+    searchQuery,
+    activeTab,
+    filteredAiStudio,
+    filteredAiSuperAgents,
+    filteredAiChat,
+    filteredMembers,
+    filteredFeed,
+    filteredModeration,
+    filteredReported,
+    filteredGamification,
+    filteredModules,
+    filteredWebsite,
+    filteredBillingAndTeam,
+    filteredSetupAndDesign,
+    filteredSupportAndLegal,
+    filteredEmail,
+    filteredIntegrations,
   ]);
 
   const renderItems = (items: MenuItem[]) => (
@@ -307,8 +369,6 @@ export function ChildSidebarContainer({
       <TopNavbar
         toggleSidebar={toggleSidebar}
         isCollapsed={isCollapsed}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
         setSearchOpen={setSearchOpen}
         setLogoutOpen={setLogoutOpen}
         otherAccountsData={otherAccountsData}
@@ -325,36 +385,38 @@ export function ChildSidebarContainer({
             className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! mb-2 z-30 shadow-sm rounded-l-2xl!"
             style={{ "--sidebar-width": "210px" } as React.CSSProperties}
           >
-            <SidebarHeader className="h-10 flex items-center justify-between flex-row px-4 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
+            <SidebarHeader className="h-10 flex items-center justify-between flex-row px-3 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
               {!isCollapsed && (
-                <span className="text-lg font-bold text-neutral-900 dark:text-neutral-100 capitalize tracking-tight w-full">
+                <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 capitalize tracking-tight w-full truncate">
                   {activeTab === "gamification"
                     ? "Gamification Engine"
-                    : activeTab}
+                    : activeTab === "ai"
+                      ? "AI Studio"
+                      : activeTab}
                 </span>
               )}
               {isCollapsed && (
-                <span className="text-lg font-bold text-neutral-900 dark:text-neutral-100 capitalize text-center w-full">
+                <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 capitalize text-center w-full">
                   {activeTab[0]}
                 </span>
               )}
             </SidebarHeader>
 
-            <SidebarContent className="py-2 pb-10 px-2 overflow-x-hidden group-data-[collapsible=icon]:px-1">
+            <SidebarContent className="py-1 pb-10 px-2.5 overflow-x-hidden group-data-[collapsible=icon]:px-1">
               {!isCollapsed && (
-                <div className="mb-3 mt-1 group-data-[collapsible=icon]:hidden">
+                <div className="mb-2 mt-0.5 group-data-[collapsible=icon]:hidden">
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400 pointer-events-none" />
                     <Input
-                      placeholder="Search…"
+                      placeholder="Search..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-8 bg-neutral-100 dark:bg-neutral-900 border-transparent pl-8 pr-7 text-[12.5px] rounded-md focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-neutral-400 text-neutral-900 dark:text-neutral-100"
+                      className="h-7.5 w-full bg-neutral-100 hover:bg-neutral-100/80 focus:bg-white dark:bg-neutral-900 dark:hover:bg-neutral-900/80 dark:focus:bg-neutral-950 border border-neutral-200/80 dark:border-neutral-800 pl-8 pr-7 text-[12px] rounded-md focus-visible:ring-1 focus-visible:ring-primary/40 placeholder:text-neutral-400 text-neutral-900 dark:text-neutral-100 transition-all shadow-none"
                     />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors p-0.5"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -370,6 +432,7 @@ export function ChildSidebarContainer({
                     label="AI Studio"
                     items={filteredAiStudio}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                   <CollapsibleSection
@@ -377,6 +440,7 @@ export function ChildSidebarContainer({
                     label="Super Agents"
                     items={filteredAiSuperAgents}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                   <CollapsibleSection
@@ -384,6 +448,7 @@ export function ChildSidebarContainer({
                     label="Chat"
                     items={filteredAiChat}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                 </>
@@ -395,6 +460,7 @@ export function ChildSidebarContainer({
                   label="Members"
                   items={filteredMembers}
                   renderItems={renderItems}
+                  searchQuery={searchQuery}
                   className="mb-1"
                 />
               )}
@@ -406,6 +472,7 @@ export function ChildSidebarContainer({
                     label="Feed"
                     items={filteredFeed}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                   <CollapsibleSection
@@ -413,6 +480,7 @@ export function ChildSidebarContainer({
                     label="Moderation"
                     items={filteredModeration}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                   <CollapsibleSection
@@ -420,6 +488,7 @@ export function ChildSidebarContainer({
                     label="Reported Items"
                     items={filteredReported}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                 </>
@@ -443,6 +512,7 @@ export function ChildSidebarContainer({
                         }
                         items={groupItems}
                         renderItems={renderItems}
+                        searchQuery={searchQuery}
                         className="mb-1"
                       />
                     );
@@ -456,6 +526,7 @@ export function ChildSidebarContainer({
                   label="Modules"
                   items={filteredModules}
                   renderItems={renderItems}
+                  searchQuery={searchQuery}
                   className="mb-1"
                 />
               )}
@@ -466,6 +537,7 @@ export function ChildSidebarContainer({
                   label="Website Builder"
                   items={filteredWebsite}
                   renderItems={renderItems}
+                  searchQuery={searchQuery}
                   className="mb-1"
                 />
               )}
@@ -477,6 +549,7 @@ export function ChildSidebarContainer({
                     label="Billing & Team"
                     items={filteredBillingAndTeam}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                   <CollapsibleSection
@@ -484,6 +557,7 @@ export function ChildSidebarContainer({
                     label="Setup & Design"
                     items={filteredSetupAndDesign}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                   <CollapsibleSection
@@ -491,6 +565,7 @@ export function ChildSidebarContainer({
                     label="Support & Legal"
                     items={filteredSupportAndLegal}
                     renderItems={renderItems}
+                    searchQuery={searchQuery}
                     className="mb-1"
                   />
                 </>
@@ -502,6 +577,7 @@ export function ChildSidebarContainer({
                   label="Email"
                   items={filteredEmail}
                   renderItems={renderItems}
+                  searchQuery={searchQuery}
                   className="mb-1"
                 />
               )}
@@ -512,29 +588,18 @@ export function ChildSidebarContainer({
                   label="Integrations"
                   items={filteredIntegrations}
                   renderItems={renderItems}
+                  searchQuery={searchQuery}
                   className="mb-1"
                 />
               )}
 
-              {searchQuery.trim() &&
-                filteredHome.length === 0 &&
-                filteredFeed.length === 0 &&
-                filteredModeration.length === 0 &&
-                filteredReported.length === 0 &&
-                filteredGamification.length === 0 &&
-                filteredModules.length === 0 &&
-                filteredBillingAndTeam.length === 0 &&
-                filteredSetupAndDesign.length === 0 &&
-                filteredSupportAndLegal.length === 0 &&
-                filteredWebsite.length === 0 &&
-                filteredProfile.length === 0 &&
-                filteredIntegrations.length === 0 && (
-                  <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
-                    <p className="text-[11.5px] text-muted-foreground/50">
-                      No results found
-                    </p>
-                  </div>
-                )}
+              {searchQuery.trim() && !hasCurrentTabResults && (
+                <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
+                  <p className="text-[11.5px] text-muted-foreground/60">
+                    No results found
+                  </p>
+                </div>
+              )}
             </SidebarContent>
 
             {activeTab === "settings" && (
