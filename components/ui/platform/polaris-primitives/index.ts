@@ -23,6 +23,18 @@ export type { PolarisTextareaProps } from "./polaris-textarea";
 export { PolarisSelect } from "./polaris-select";
 export type { PolarisSelectProps, PolarisSelectOption } from "./polaris-select";
 
+export { PolarisMultiSelect } from "./polaris-multi-select";
+export type {
+  PolarisMultiSelectProps,
+  PolarisMultiSelectOption,
+} from "./polaris-multi-select";
+
+export { PolarisCombobox } from "./polaris-combobox";
+export type {
+  PolarisComboboxProps,
+  PolarisComboboxOption,
+} from "./polaris-combobox";
+
 export {
   PolarisFormSkeleton,
   Bone,

@@ -5,12 +5,10 @@ import { useRouter } from "next/navigation";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import {
   ArrowLeft,
-  Camera,
   Info,
   User,
   Calendar as CalendarIcon,
@@ -19,9 +17,6 @@ import {
   MapPin,
   Globe,
   ShieldCheck,
-  Check,
-  ChevronsUpDown,
-  X,
   AlertCircle,
 } from "lucide-react";
 
@@ -41,19 +36,14 @@ import {
   PolarisInput,
   PolarisTextarea,
   PolarisLabel,
+  PolarisSelect,
+  PolarisMultiSelect,
+  PolarisCombobox,
 } from "@/components/ui/platform/polaris-primitives";
 import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
 import { useGetSkills } from "@/graphql/quries/skills/skill-queries";
 import { useGetFunctions } from "@/graphql/quries/functions/function-queries";
 import { useGetInterests } from "@/graphql/quries/interests/interest-queries";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import {
   DetailedSkillsSection,
   skillValidationSchema,
@@ -98,11 +88,6 @@ export function MemberCreationForm({
   }, [initialValues?.avatar]);
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isIndustryPopoverOpen, setIsIndustryPopoverOpen] = useState(false);
-  const [isJobFunctionPopoverOpen, setIsJobFunctionPopoverOpen] =
-    useState(false);
-  const [isInterestPopoverOpen, setIsInterestPopoverOpen] = useState(false);
-  const [isTierPopoverOpen, setIsTierPopoverOpen] = useState(false);
 
   const { data: industryData } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
@@ -212,18 +197,6 @@ export function MemberCreationForm({
 
   const handleInputChange = (field: string, value: any) => {
     formik.setFieldValue(field, value);
-  };
-
-  const toggleArrayItem = (field: string, id: string) => {
-    const currentArray = (formik.values as any)[field] || [];
-    if (currentArray.includes(id)) {
-      formik.setFieldValue(
-        field,
-        currentArray.filter((item: string) => item !== id),
-      );
-    } else {
-      formik.setFieldValue(field, [...currentArray, id]);
-    }
   };
 
   const handleImageCropComplete = (croppedImageUrl: string) => {
@@ -365,33 +338,24 @@ export function MemberCreationForm({
 
                 {/* Gender, Language, Location, DOB */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Gender */}
-                  <div className="w-full space-y-1.5">
-                    <PolarisLabel>Gender</PolarisLabel>
-                    <div className="relative">
-                      <select
-                        value={formik.values.gender || ""}
-                        onChange={(e) =>
-                          handleInputChange("gender", e.target.value)
-                        }
-                        className="w-full h-[40px] pl-3 pr-9 text-[14px] text-[#303030] dark:text-zinc-100 bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] appearance-none cursor-pointer transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500"
-                      >
-                        <option value="" disabled>
-                          Select gender
-                        </option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Non-Binary">Non-Binary</option>
-                        <option value="Other">Other</option>
-                        <option value="Prefer not to say">
-                          Prefer not to say
-                        </option>
-                      </select>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#616161] dark:text-zinc-400">
-                        <ChevronsUpDown className="h-4 w-4" />
-                      </div>
-                    </div>
-                  </div>
+                  {/* Gender Select */}
+                  <PolarisSelect
+                    id="gender"
+                    label="Gender"
+                    placeholder="Select gender"
+                    value={formik.values.gender || ""}
+                    onChange={(val) => handleInputChange("gender", val)}
+                    options={[
+                      { value: "Male", label: "Male" },
+                      { value: "Female", label: "Female" },
+                      { value: "Non-Binary", label: "Non-Binary" },
+                      { value: "Other", label: "Other" },
+                      {
+                        value: "Prefer not to say",
+                        label: "Prefer not to say",
+                      },
+                    ]}
+                  />
 
                   <PolarisInput
                     id="language"
@@ -489,348 +453,89 @@ export function MemberCreationForm({
                 title="Taxonomy & Classification"
                 description="Assign membership tiers, industry sectors, and functional domain interests."
               >
-                {/* Membership Tier */}
-                <div className="w-full space-y-1.5">
-                  <PolarisLabel>Membership Tier</PolarisLabel>
-                  <Popover
-                    open={isTierPopoverOpen}
-                    onOpenChange={setIsTierPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ShieldCheck className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
-                          {selectedTier ? (
-                            <span className="font-medium text-[#303030] dark:text-zinc-100">
-                              {selectedTier.name}
-                            </span>
-                          ) : (
-                            <span className="text-[#8c9196] dark:text-zinc-500">
-                              Select membership tier...
-                            </span>
-                          )}
-                        </div>
-                        <ChevronsUpDown className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                    >
-                      <Command className="border-none">
-                        <CommandInput
-                          placeholder="Search membership tiers..."
-                          className="h-10 text-[13px]"
-                        />
-                        <CommandList className="max-h-[220px]">
-                          <CommandEmpty>No tier found.</CommandEmpty>
-                          <CommandGroup>
-                            <CommandItem
-                              onSelect={() => {
-                                formik.setFieldValue(
-                                  "membershipTierId",
-                                  null,
-                                );
-                                setIsTierPopoverOpen(false);
-                              }}
-                              className="text-[13px] font-medium cursor-pointer"
-                            >
-                              <span className="text-[#8c9196]">
-                                None (General Member)
-                              </span>
-                            </CommandItem>
-                            {membershipTiers.map((tier: any) => (
-                              <CommandItem
-                                key={tier.id}
-                                value={tier.name}
-                                onSelect={() => {
-                                  formik.setFieldValue(
-                                    "membershipTierId",
-                                    tier.id,
-                                  );
-                                  setIsTierPopoverOpen(false);
-                                }}
-                                className="flex items-center justify-between text-[13px] font-medium cursor-pointer"
-                              >
-                                <div className="flex items-center gap-2">
-                                  {formik.values.membershipTierId ===
-                                    tier.id && (
-                                    <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
-                                  )}
-                                  <span>{tier.name}</span>
-                                </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                {/* Membership Tier Combobox */}
+                <PolarisCombobox
+                  id="membershipTierId"
+                  label="Membership Tier"
+                  placeholder="Select membership tier..."
+                  searchPlaceholder="Search membership tiers..."
+                  value={formik.values.membershipTierId}
+                  onChange={(val) =>
+                    formik.setFieldValue("membershipTierId", val)
+                  }
+                  allowClear
+                  clearLabel="None (General Member)"
+                  icon={<ShieldCheck className="h-4 w-4" />}
+                  options={membershipTiers.map((tier: any) => ({
+                    value: tier.id,
+                    label: tier.name,
+                  }))}
+                />
+
+                {/* Industries Multi-Select */}
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                  <PolarisMultiSelect
+                    id="industryIds"
+                    label="Industries"
+                    labelAction={
+                      <span className="text-[12px] text-[#616161]">
+                        {formik.values.industryIds.length} selected
+                      </span>
+                    }
+                    placeholder="Select industries..."
+                    searchPlaceholder="Search industries..."
+                    values={formik.values.industryIds}
+                    onChange={(vals) =>
+                      formik.setFieldValue("industryIds", vals)
+                    }
+                    options={industries.map((ind: any) => ({
+                      value: ind.id,
+                      label: ind.name,
+                    }))}
+                  />
                 </div>
 
-                {/* Industries */}
-                <div className="w-full space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                  <div className="flex items-center justify-between">
-                    <PolarisLabel>Industries</PolarisLabel>
-                    <span className="text-[12px] text-[#616161]">
-                      {formik.values.industryIds.length} selected
-                    </span>
-                  </div>
-                  <Popover
-                    open={isIndustryPopoverOpen}
-                    onOpenChange={setIsIndustryPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full min-h-[40px] p-2 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between gap-2 transition-all duration-150 outline-none hover:border-[#8c9196] focus:border-[#005bd3] focus:ring-1 focus:ring-[#005bd3] cursor-pointer"
-                      >
-                        <div className="flex flex-wrap gap-1 items-center">
-                          {formik.values.industryIds.length > 0 ? (
-                            formik.values.industryIds.map((id: string) => {
-                              const item = industries.find(
-                                (ind: any) => ind.id === id,
-                              );
-                              return (
-                                <Badge
-                                  key={id}
-                                  variant="secondary"
-                                  className="bg-[#f6f6f7] text-[#303030] border border-[#d2d5d9] text-[11.5px] font-medium px-2 py-0.5 rounded-[4px] flex items-center gap-1"
-                                >
-                                  {item?.name || id}
-                                  <X
-                                    className="h-3 w-3 hover:text-red-500 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleArrayItem("industryIds", id);
-                                    }}
-                                  />
-                                </Badge>
-                              );
-                            })
-                          ) : (
-                            <span className="text-[#8c9196] text-[13.5px] px-1">
-                              Select industries...
-                            </span>
-                          )}
-                        </div>
-                        <ChevronsUpDown className="h-4 w-4 text-[#616161] shrink-0" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                    >
-                      <Command className="border-none">
-                        <CommandInput
-                          placeholder="Search industries..."
-                          className="h-10 text-[13px]"
-                        />
-                        <CommandList className="max-h-[200px]">
-                          <CommandEmpty>No industry found.</CommandEmpty>
-                          <CommandGroup>
-                            {industries.map((ind: any) => {
-                              const isSelected =
-                                formik.values.industryIds.includes(ind.id);
-                              return (
-                                <CommandItem
-                                  key={ind.id}
-                                  value={ind.name}
-                                  onSelect={() =>
-                                    toggleArrayItem("industryIds", ind.id)
-                                  }
-                                  className="flex items-center justify-between text-[13px] font-medium cursor-pointer"
-                                >
-                                  <span>{ind.name}</span>
-                                  {isSelected && (
-                                    <Check className="h-3.5 w-3.5 text-[#303030]" />
-                                  )}
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* Job Functions */}
-                <div className="w-full space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <PolarisLabel>Job Functions</PolarisLabel>
+                {/* Job Functions Multi-Select */}
+                <PolarisMultiSelect
+                  id="jobFunctionIds"
+                  label="Job Functions"
+                  labelAction={
                     <span className="text-[12px] text-[#616161]">
                       {formik.values.jobFunctionIds.length} selected
                     </span>
-                  </div>
-                  <Popover
-                    open={isJobFunctionPopoverOpen}
-                    onOpenChange={setIsJobFunctionPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full min-h-[40px] p-2 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between gap-2 transition-all duration-150 outline-none hover:border-[#8c9196] focus:border-[#005bd3] focus:ring-1 focus:ring-[#005bd3] cursor-pointer"
-                      >
-                        <div className="flex flex-wrap gap-1 items-center">
-                          {formik.values.jobFunctionIds.length > 0 ? (
-                            formik.values.jobFunctionIds.map((id: string) => {
-                              const item = jobFunctions.find(
-                                (jf: any) => jf.id === id,
-                              );
-                              return (
-                                <Badge
-                                  key={id}
-                                  variant="secondary"
-                                  className="bg-[#f6f6f7] text-[#303030] border border-[#d2d5d9] text-[11.5px] font-medium px-2 py-0.5 rounded-[4px] flex items-center gap-1"
-                                >
-                                  {item?.name || id}
-                                  <X
-                                    className="h-3 w-3 hover:text-red-500 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleArrayItem("jobFunctionIds", id);
-                                    }}
-                                  />
-                                </Badge>
-                              );
-                            })
-                          ) : (
-                            <span className="text-[#8c9196] text-[13.5px] px-1">
-                              Select job functions...
-                            </span>
-                          )}
-                        </div>
-                        <ChevronsUpDown className="h-4 w-4 text-[#616161] shrink-0" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                    >
-                      <Command className="border-none">
-                        <CommandInput
-                          placeholder="Search job functions..."
-                          className="h-10 text-[13px]"
-                        />
-                        <CommandList className="max-h-[200px]">
-                          <CommandEmpty>No function found.</CommandEmpty>
-                          <CommandGroup>
-                            {jobFunctions.map((jf: any) => {
-                              const isSelected =
-                                formik.values.jobFunctionIds.includes(jf.id);
-                              return (
-                                <CommandItem
-                                  key={jf.id}
-                                  value={jf.name}
-                                  onSelect={() =>
-                                    toggleArrayItem("jobFunctionIds", jf.id)
-                                  }
-                                  className="flex items-center justify-between text-[13px] font-medium cursor-pointer"
-                                >
-                                  <span>{jf.name}</span>
-                                  {isSelected && (
-                                    <Check className="h-3.5 w-3.5 text-[#303030]" />
-                                  )}
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                  }
+                  placeholder="Select job functions..."
+                  searchPlaceholder="Search job functions..."
+                  values={formik.values.jobFunctionIds}
+                  onChange={(vals) =>
+                    formik.setFieldValue("jobFunctionIds", vals)
+                  }
+                  options={jobFunctions.map((jf: any) => ({
+                    value: jf.id,
+                    label: jf.name,
+                  }))}
+                />
 
-                {/* Topics of Interest */}
-                <div className="w-full space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <PolarisLabel>Topics & Interests</PolarisLabel>
+                {/* Topics of Interest Multi-Select */}
+                <PolarisMultiSelect
+                  id="interestIds"
+                  label="Topics & Interests"
+                  labelAction={
                     <span className="text-[12px] text-[#616161]">
                       {formik.values.interestIds.length} selected
                     </span>
-                  </div>
-                  <Popover
-                    open={isInterestPopoverOpen}
-                    onOpenChange={setIsInterestPopoverOpen}
-                  >
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className="w-full min-h-[40px] p-2 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between gap-2 transition-all duration-150 outline-none hover:border-[#8c9196] focus:border-[#005bd3] focus:ring-1 focus:ring-[#005bd3] cursor-pointer"
-                      >
-                        <div className="flex flex-wrap gap-1 items-center">
-                          {formik.values.interestIds.length > 0 ? (
-                            formik.values.interestIds.map((id: string) => {
-                              const item = interests.find(
-                                (int: any) => int.id === id,
-                              );
-                              return (
-                                <Badge
-                                  key={id}
-                                  variant="secondary"
-                                  className="bg-[#f6f6f7] text-[#303030] border border-[#d2d5d9] text-[11.5px] font-medium px-2 py-0.5 rounded-[4px] flex items-center gap-1"
-                                >
-                                  {item?.name || id}
-                                  <X
-                                    className="h-3 w-3 hover:text-red-500 cursor-pointer"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleArrayItem("interestIds", id);
-                                    }}
-                                  />
-                                </Badge>
-                              );
-                            })
-                          ) : (
-                            <span className="text-[#8c9196] text-[13.5px] px-1">
-                              Select topics of interest...
-                            </span>
-                          )}
-                        </div>
-                        <ChevronsUpDown className="h-4 w-4 text-[#616161] shrink-0" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] p-0"
-                      align="start"
-                    >
-                      <Command className="border-none">
-                        <CommandInput
-                          placeholder="Search interests..."
-                          className="h-10 text-[13px]"
-                        />
-                        <CommandList className="max-h-[200px]">
-                          <CommandEmpty>No topic found.</CommandEmpty>
-                          <CommandGroup>
-                            {interests.map((int: any) => {
-                              const isSelected =
-                                formik.values.interestIds.includes(int.id);
-                              return (
-                                <CommandItem
-                                  key={int.id}
-                                  value={int.name}
-                                  onSelect={() =>
-                                    toggleArrayItem("interestIds", int.id)
-                                  }
-                                  className="flex items-center justify-between text-[13px] font-medium cursor-pointer"
-                                >
-                                  <span>{int.name}</span>
-                                  {isSelected && (
-                                    <Check className="h-3.5 w-3.5 text-[#303030]" />
-                                  )}
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                  }
+                  placeholder="Select topics of interest..."
+                  searchPlaceholder="Search interests..."
+                  values={formik.values.interestIds}
+                  onChange={(vals) =>
+                    formik.setFieldValue("interestIds", vals)
+                  }
+                  options={interests.map((int: any) => ({
+                    value: int.id,
+                    label: int.name,
+                  }))}
+                />
               </PolarisCard>
 
               {/* Card 3: Skills & Competencies */}

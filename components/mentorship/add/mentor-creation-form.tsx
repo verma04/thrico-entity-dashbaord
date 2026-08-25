@@ -30,12 +30,14 @@ import { useQuery } from "@apollo/client";
 import { GET_ALL_MENTOR_CATEGORY } from "@/graphql/quries/mentorship/category";
 import { GET_ALL_MENTOR_SKILLS } from "@/graphql/quries/mentorship/skills";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  PolarisCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
+  PolarisSelect,
+  PolarisMultiSelect,
+  PolarisCombobox,
+} from "@/components/ui/platform/polaris-primitives";
 import {
   Popover,
   PopoverContent,
@@ -624,123 +626,22 @@ export function MentorCreationForm({
             description={`Select the ${singularName.toLowerCase()}'s core competencies.`}
             badge="Required"
           >
-            <div className="space-y-2">
-              {/* Selected skills chips */}
-              <div className="flex flex-wrap gap-2 p-3 min-h-[48px] rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
-                {formik.values.skills.length === 0 && (
-                  <span className="text-[12.5px] text-[#8c9196] font-medium py-1 pl-1 italic">
-                    No skills selected…
-                  </span>
-                )}
-                {formik.values.skills.map((skill: string) => (
-                  <Badge
-                    key={skill}
-                    variant="secondary"
-                    className="h-7 pl-2.5 pr-1.5 bg-white dark:bg-zinc-800 border border-[#d2d5d9] text-[#303030] dark:text-zinc-200 text-[11px] font-semibold flex items-center gap-1 rounded-[4px]"
-                  >
-                    {skill}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        formik.setFieldValue(
-                          "skills",
-                          formik.values.skills.filter(
-                            (s: string) => s !== skill,
-                          ),
-                        );
-                      }}
-                      className="hover:text-[#d72c0d] rounded-sm p-0.5 transition-colors cursor-pointer"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-                <div className="ml-auto">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2.5 rounded-[4px] bg-[#303030] dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-[#202020] dark:hover:bg-zinc-200 text-[11px] font-semibold cursor-pointer"
-                      >
-                        <Search className="h-3.5 w-3.5 mr-1" />
-                        Add Skill
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-[280px] p-0 rounded-[8px] shadow-lg border-[#d2d5d9] dark:border-zinc-800"
-                      align="end"
-                    >
-                      <Command>
-                        <CommandInput
-                          placeholder="Search or add skill..."
-                          className="h-9 text-[13px]"
-                        />
-                        <CommandList className="max-h-[260px]">
-                          <CommandEmpty>
-                            <button
-                              type="button"
-                              className="w-full text-left p-3 text-[12.5px] font-bold text-primary hover:bg-primary/5 cursor-pointer"
-                              onClick={() => {
-                                const input = document.querySelector(
-                                  "[cmdk-input]",
-                                ) as HTMLInputElement;
-                                const val = input?.value;
-                                if (
-                                  val &&
-                                  !formik.values.skills.includes(val)
-                                ) {
-                                  formik.setFieldValue("skills", [
-                                    ...formik.values.skills,
-                                    val,
-                                  ]);
-                                }
-                              }}
-                            >
-                              + Add custom skill
-                            </button>
-                          </CommandEmpty>
-                          <CommandGroup heading="Available Skills">
-                            {availableSkills.map((skill: any) => (
-                              <CommandItem
-                                key={skill.id}
-                                onSelect={() => {
-                                  if (
-                                    !formik.values.skills.includes(skill.title)
-                                  ) {
-                                    formik.setFieldValue("skills", [
-                                      ...formik.values.skills,
-                                      skill.title,
-                                    ]);
-                                  }
-                                }}
-                                className="text-[13px] font-medium cursor-pointer"
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-3.5 w-3.5",
-                                    formik.values.skills.includes(skill.title)
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                                {skill.title}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-              {formik.touched.skills && formik.errors.skills && (
-                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                  {formik.errors.skills as string}
-                </p>
-              )}
-            </div>
+            <PolarisMultiSelect
+              id="skills"
+              placeholder="Select skills..."
+              searchPlaceholder="Search available skills..."
+              values={formik.values.skills}
+              onChange={(vals) => formik.setFieldValue("skills", vals)}
+              options={availableSkills.map((skill: any) => ({
+                value: skill.title || skill.name || skill.id,
+                label: skill.title || skill.name,
+              }))}
+              error={
+                formik.touched.skills && formik.errors.skills
+                  ? String(formik.errors.skills)
+                  : null
+              }
+            />
           </PolarisFormCard>
 
           {/* ── Step 4: External Links ─────────────────────────────── */}
