@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /* ─── PolarisFormCard ─── */
@@ -231,6 +232,107 @@ export function PolarisOriginPicker({
           </p>
         </div>
       </button>
+    </div>
+  );
+}
+
+/* ─── PolarisPresetChips ─── */
+export interface PolarisPresetChipsProps {
+  presets: number[];
+  currentValue: number;
+  onSelect: (value: number) => void;
+  prefix?: string;
+  className?: string;
+}
+
+export function PolarisPresetChips({
+  presets,
+  currentValue,
+  onSelect,
+  prefix = "+",
+  className,
+}: PolarisPresetChipsProps) {
+  return (
+    <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
+      {presets.map((preset) => (
+        <button
+          key={preset}
+          type="button"
+          onClick={() => onSelect(preset)}
+          className={cn(
+            "h-7 px-2.5 rounded-[6px] text-[12px] font-medium border transition-all cursor-pointer",
+            Number(currentValue) === preset
+              ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 font-bold shadow-xs"
+              : "bg-[#f6f6f7] dark:bg-zinc-800 border-[#d2d5d9] dark:border-zinc-700 text-[#303030] dark:text-zinc-300 hover:bg-[#e4e5e7] dark:hover:bg-zinc-700",
+          )}
+        >
+          {prefix}
+          {preset}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ─── PolarisCapInput ─── */
+export interface PolarisCapInputProps {
+  id: string;
+  label: string;
+  periodSuffix: string;
+  value: any;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onClear: () => void;
+  className?: string;
+}
+
+export function PolarisCapInput({
+  id,
+  label,
+  periodSuffix,
+  value,
+  onChange,
+  onBlur,
+  onClear,
+  className,
+}: PolarisCapInputProps) {
+  return (
+    <div
+      className={cn(
+        "p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-1.5",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <label
+          htmlFor={id}
+          className="text-[11px] font-semibold uppercase tracking-wider text-[#616161] dark:text-zinc-400 select-none cursor-pointer"
+        >
+          {label}
+        </label>
+        <button
+          type="button"
+          onClick={onClear}
+          className="text-[10.5px] text-[#616161] hover:text-[#303030] dark:text-zinc-400 dark:hover:text-zinc-200 cursor-pointer font-medium"
+        >
+          Unlimited
+        </button>
+      </div>
+      <div className="relative">
+        <Input
+          id={id}
+          type="number"
+          placeholder="No limit"
+          name={id}
+          value={value ?? ""}
+          onChange={onChange}
+          onBlur={onBlur}
+          className="h-[36px] bg-[#f6f6f7] dark:bg-zinc-900/50 border-[#d2d5d9] dark:border-zinc-700 text-[13px] font-medium shadow-none rounded-[6px] focus-visible:ring-1 focus-visible:ring-[#005bd3] dark:focus-visible:ring-blue-500 pr-14"
+        />
+        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[#616161] dark:text-zinc-400 font-medium pointer-events-none">
+          {periodSuffix}
+        </span>
+      </div>
     </div>
   );
 }

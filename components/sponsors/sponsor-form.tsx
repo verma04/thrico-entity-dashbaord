@@ -2,12 +2,15 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
+} from "@/components/ui/platform/polaris-primitives";
 import { Switch } from "@/components/ui/switch";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import {
@@ -23,7 +26,12 @@ import {
 } from "@/graphql/actions/sponsors";
 import { useGetSponsorCategories } from "@/graphql/actions/sponsorCategories";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
-import { HeartHandshake, Globe, Link as LinkIcon, Sparkles } from "lucide-react";
+import {
+  HeartHandshake,
+  Globe,
+  Link as LinkIcon,
+  Sparkles,
+} from "lucide-react";
 import Image from "next/image";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -137,6 +145,8 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
           {({
             values,
             setFieldValue,
+            handleChange,
+            handleBlur,
             errors,
             touched,
             dirty,
@@ -259,10 +269,7 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
                   >
                     {/* Image Upload Box */}
                     <div className="space-y-1.5">
-                      <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                        Sponsor Logo / Asset{" "}
-                        <span className="text-[#d72c0d] ml-0.5">*</span>
-                      </label>
+                      <PolarisLabel required>Sponsor Logo / Asset</PolarisLabel>
                       <div className="w-full max-w-sm">
                         <ImageUploadWithCrop
                           returnFileOnly={true}
@@ -283,50 +290,34 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
                     </div>
 
                     {/* Title */}
-                    <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                      <label
-                        htmlFor="title"
-                        className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                      >
-                        Sponsor / Organization Name{" "}
-                        <span className="text-[#d72c0d] ml-0.5">*</span>
-                      </label>
-                      <Field
-                        as={Input}
+                    <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                      <PolarisInput
                         id="title"
                         name="title"
+                        label="Sponsor / Organization Name"
+                        required
                         placeholder="e.g., Acme Innovations Corp"
-                        className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
+                        value={values.title}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={
+                          touched.title && errors.title
+                            ? String(errors.title)
+                            : null
+                        }
                       />
-                      {errors.title && touched.title && (
-                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                          {errors.title}
-                        </p>
-                      )}
                     </div>
 
                     {/* Description */}
-                    <div className="space-y-1.5">
-                      <label
-                        htmlFor="description"
-                        className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                      >
-                        Partner Profile & Offer Summary
-                      </label>
-                      <Field
-                        as={Textarea}
-                        id="description"
-                        name="description"
-                        placeholder="Brief summary about the sponsor partnership, community perks, or mission..."
-                        rows={3}
-                        className="min-h-[80px] p-3 text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] resize-none"
-                      />
-                      {errors.description && touched.description && (
-                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                          {errors.description}
-                        </p>
-                      )}
-                    </div>
+                    <PolarisTextarea
+                      id="description"
+                      name="description"
+                      label="Partner Profile & Offer Summary"
+                      placeholder="Brief summary about the sponsor partnership, community perks, or mission..."
+                      value={values.description}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                    />
                   </PolarisFormCard>
 
                   {/* Step 2: Destination Link & Taxonomy */}
@@ -338,36 +329,26 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {/* External URL */}
-                      <div className="space-y-1.5">
-                        <label
-                          htmlFor="externalUrl"
-                          className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                        >
-                          External Website Destination (URL)
-                        </label>
-                        <div className="relative">
-                          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161]" />
-                          <Field
-                            as={Input}
-                            id="externalUrl"
-                            name="externalUrl"
-                            type="url"
-                            placeholder="https://partner-website.com"
-                            className="h-[40px] pl-9 text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                          />
-                        </div>
-                        {errors.externalUrl && touched.externalUrl && (
-                          <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                            {errors.externalUrl}
-                          </p>
-                        )}
-                      </div>
+                      <PolarisInput
+                        id="externalUrl"
+                        name="externalUrl"
+                        type="url"
+                        label="External Website Destination (URL)"
+                        placeholder="https://partner-website.com"
+                        prefix={<LinkIcon className="h-4 w-4" />}
+                        value={values.externalUrl}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        error={
+                          touched.externalUrl && errors.externalUrl
+                            ? String(errors.externalUrl)
+                            : null
+                        }
+                      />
 
                       {/* Category Select */}
                       <div className="space-y-1.5">
-                        <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                          Sponsorship Category / Tier
-                        </label>
+                        <PolarisLabel>Sponsorship Category / Tier</PolarisLabel>
                         <Select
                           value={values.categoryId || "none"}
                           onValueChange={(val) =>

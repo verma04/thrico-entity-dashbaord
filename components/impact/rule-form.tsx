@@ -14,9 +14,11 @@ import {
   ShieldCheck,
   TrendingUp,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
+} from "@/components/ui/platform/polaris-primitives";
 import {
   Popover,
   PopoverContent,
@@ -32,7 +34,6 @@ import {
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
-import { toast } from "sonner";
 import {
   PolarisFormLayout,
   PolarisFormCard,
@@ -138,10 +139,14 @@ export function ImpactRuleForm({
       const isIntegration = integrations.some(
         (i) =>
           i.id === initialValues.module ||
-          i.uuid === initialValues.module ||
-          i.name?.toLowerCase() === initialValues.module?.toLowerCase(),
+          (i.uuid && i.uuid === initialValues.module) ||
+          (i.slug && i.slug === initialValues.module),
       );
-      setSourceType(isIntegration ? "INTEGRATION" : "MODULE");
+      if (isIntegration) {
+        setSourceType("INTEGRATION");
+      } else {
+        setSourceType("MODULE");
+      }
     }
   }, [initialValues, integrations]);
 
@@ -158,95 +163,76 @@ export function ImpactRuleForm({
     validationSchema: impactRuleSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      try {
-        await onSubmit(values);
-        toast.success(
-          isEdit
-            ? "Scoring rule updated successfully!"
-            : "Scoring rule created successfully!",
-        );
-        setTimeout(() => {
-          router.push("/gamification/impact-score/rules");
-        }, 1200);
-      } catch (error: any) {
-        toast.error(error.message || "Failed to save scoring rule.");
-      }
+      await onSubmit({
+        ...values,
+        sourceType,
+      });
     },
   });
 
   const allSources = useMemo(() => {
-    const mods = modules.map((m) => ({
-      id: m.id,
-      uuid: m.uuid,
-      name: m.name
-        ? m.name.charAt(0).toUpperCase() + m.name.slice(1)
-        : m.name,
-      type: "Module",
-      icon: m.icon,
-    }));
-    const ints = integrations.map((i) => ({
-      id: i.id,
-      uuid: i.uuid,
-      slug: (i as any).slug,
-      name: i.name
-        ? i.name.charAt(0).toUpperCase() + i.name.slice(1)
-        : i.name,
-      type: "Integration",
-      icon: i.icon,
-    }));
-    return { modules: mods, integrations: ints, all: [...mods, ...ints] };
+    return {
+      modules: modules || [],
+      integrations: integrations || [],
+      all: [...(modules || []), ...(integrations || [])],
+    };
   }, [modules, integrations]);
 
   const currentSourceList =
     sourceType === "MODULE" ? allSources.modules : allSources.integrations;
 
   const filteredTriggers = useMemo(() => {
-    const selected = formik.values.module;
-    if (!selected) return [];
-
+    if (!formik.values.module) return [];
     const selectedSource = allSources.all.find(
       (s) =>
-        s.id?.toLowerCase() === selected.toLowerCase() ||
-        (s.uuid && s.uuid.toLowerCase() === selected.toLowerCase()) ||
+        s.id?.toLowerCase() === formik.values.module?.toLowerCase() ||
+        (s.uuid &&
+          s.uuid.toLowerCase() === formik.values.module?.toLowerCase()) ||
         ((s as any).slug &&
-          (s as any).slug.toLowerCase() === selected.toLowerCase()),
+          (s as any).slug.toLowerCase() ===
+            formik.values.module?.toLowerCase()),
     );
 
-    const matchValues = new Set<string>();
-    matchValues.add(selected.toLowerCase());
-    if (selectedSource?.id) matchValues.add(selectedSource.id.toLowerCase());
-    if (selectedSource?.uuid)
-      matchValues.add(selectedSource.uuid.toLowerCase());
-    if ((selectedSource as any)?.slug)
-      matchValues.add((selectedSource as any).slug.toLowerCase());
-    if (selectedSource?.name)
-      matchValues.add(selectedSource.name.toLowerCase());
+    const sourceName = selectedSource?.name?.toLowerCase() || "";
+    const sourceId = selectedSource?.id?.toLowerCase() || "";
+    const sourceUuid = selectedSource?.uuid?.toLowerCase() || "";
+    const sourceSlug = (selectedSource as any)?.slug?.toLowerCase() || "";
 
-    const isMatch = (target?: string | null) => {
-      if (!target) return false;
-      return matchValues.has(target.toLowerCase());
+    const isMatch = (targetId?: string) => {
+      if (!targetId) return false;
+      const tid = targetId.toLowerCase();
+      return (
+        tid === sourceId ||
+        tid === sourceUuid ||
+        tid === sourceSlug ||
+        tid === sourceName ||
+        sourceName.includes(tid) ||
+        tid.includes(sourceName)
+      );
     };
 
     const fromIntegrationTriggers = integrationTriggers.filter(
       (t) =>
         isMatch(t.integrationId) ||
         isMatch(t.moduleId) ||
-        isMatch((t as any).slug) ||
-        isMatch((t as any).integrationSlug),
+        isMatch(t.name) ||
+        isMatch((t as any).type),
     );
 
     const fromModuleTriggers = moduleTriggers.filter(
       (t) =>
         isMatch(t.moduleId) ||
-        isMatch((t as any).integrationId) ||
-        isMatch((t as any).slug),
+        isMatch(t.module) ||
+        isMatch(t.name) ||
+        isMatch((t as any).type),
     );
 
     const fromGenericTriggers = triggers.filter(
       (t) =>
         isMatch(t.moduleId) ||
-        isMatch((t as any).integrationId) ||
-        isMatch((t as any).slug),
+        isMatch(t.integrationId) ||
+        isMatch(t.module) ||
+        isMatch(t.source),
     );
 
     const combined = [
@@ -361,7 +347,10 @@ export function ImpactRuleForm({
                 value={
                   <span className="flex items-center gap-1.5">
                     <span
-                      className={cn("h-2 w-2 rounded-full", activeCategory.dotClass)}
+                      className={cn(
+                        "h-2 w-2 rounded-full",
+                        activeCategory.dotClass,
+                      )}
                     />
                     {activeCategory.label}
                   </span>
@@ -411,7 +400,9 @@ export function ImpactRuleForm({
 
           {/* Strategy Tip */}
           <PolarisTipCard title="Impact Scoring Guidance">
-            Assign higher impact point weights to high-effort contributions (like authored articles or verified referrals) to encourage meaningful community reputation building.
+            Assign higher impact point weights to high-effort contributions
+            (like authored articles or verified referrals) to encourage
+            meaningful community reputation building.
           </PolarisTipCard>
         </>
       }
@@ -441,12 +432,11 @@ export function ImpactRuleForm({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Searchable Module Combobox */}
               <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                <PolarisLabel required>
                   {sourceType === "MODULE"
                     ? "Target Module"
-                    : "Connected Integration"}{" "}
-                  <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
+                    : "Connected Integration"}
+                </PolarisLabel>
 
                 <Popover open={moduleOpen} onOpenChange={setModuleOpen}>
                   <PopoverTrigger asChild>
@@ -530,9 +520,7 @@ export function ImpactRuleForm({
 
               {/* Searchable Action Combobox */}
               <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                  Triggering Action <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
+                <PolarisLabel required>Triggering Action</PolarisLabel>
 
                 <Popover open={actionOpen} onOpenChange={setActionOpen}>
                   <PopoverTrigger asChild>
@@ -621,9 +609,7 @@ export function ImpactRuleForm({
 
             {/* Impact Category Selector */}
             <div className="space-y-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                Impact Category Classification
-              </label>
+              <PolarisLabel>Impact Category Classification</PolarisLabel>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
                 {CATEGORIES.map((cat) => {
                   const Icon = cat.icon;
@@ -663,18 +649,15 @@ export function ImpactRuleForm({
             </div>
 
             {/* Description Textarea */}
-            <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-              <label
-                htmlFor="description"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-              >
-                Rule Notes & Context (Optional)
-              </label>
-              <Textarea
+            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisTextarea
                 id="description"
+                name="description"
+                label="Rule Notes & Context (Optional)"
                 placeholder="Explain internal criteria for when this impact scoring rule evaluates..."
-                {...formik.getFieldProps("description")}
-                className="min-h-[80px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] rounded-[8px] resize-none shadow-none"
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
               />
             </div>
           </div>
@@ -689,27 +672,23 @@ export function ImpactRuleForm({
         >
           <div className="space-y-4">
             {/* Point Input */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="points"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-              >
-                Impact Score Delta per Action <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
-              <div className="relative max-w-xs">
-                <Zap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161]" />
-                <Input
-                  id="points"
-                  type="number"
-                  {...formik.getFieldProps("points")}
-                  className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-bold text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-              </div>
-              {formik.touched.points && formik.errors.points && (
-                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                  {formik.errors.points as string}
-                </p>
-              )}
+            <div className="space-y-1.5 max-w-xs">
+              <PolarisInput
+                id="points"
+                name="points"
+                type="number"
+                label="Impact Score Delta per Action"
+                required
+                prefix={<Zap className="h-4 w-4" />}
+                value={formik.values.points}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.points && formik.errors.points
+                    ? String(formik.errors.points)
+                    : null
+                }
+              />
             </div>
 
             {/* Quick Presets */}
@@ -726,26 +705,17 @@ export function ImpactRuleForm({
             </div>
 
             {/* Custom Formula Input */}
-            <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="formula"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Custom Evaluation Formula (Optional)
-                </label>
-                <span className="text-[11px] text-[#616161]">Dynamic Multiplier</span>
-              </div>
-              <Input
+            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisInput
                 id="formula"
-                type="text"
+                name="formula"
+                label="Custom Evaluation Formula (Optional)"
                 placeholder="e.g. base * 1.5 or points * streakCount"
-                {...formik.getFieldProps("formula")}
-                className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] font-mono rounded-[8px]"
+                value={formik.values.formula}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                helperText="Leave blank to award static point delta. Advanced formulas evaluate dynamic action metadata."
               />
-              <p className="text-[12px] text-[#616161]">
-                Leave blank to award the static point delta. Advanced formulas evaluate dynamic action metadata.
-              </p>
             </div>
           </div>
         </PolarisFormCard>
@@ -758,32 +728,27 @@ export function ImpactRuleForm({
           badge="Protection"
         >
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="dailyLimit"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Daily Execution Cap per Member
-                </label>
-                <button
-                  type="button"
-                  onClick={() => formik.setFieldValue("dailyLimit", 0)}
-                  className="text-[12px] font-semibold text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100"
-                >
-                  Set to Unlimited (0)
-                </button>
-              </div>
-              <Input
+            <div className="max-w-xs">
+              <PolarisInput
                 id="dailyLimit"
+                name="dailyLimit"
                 type="number"
+                label="Daily Execution Cap per Member"
+                labelAction={
+                  <button
+                    type="button"
+                    onClick={() => formik.setFieldValue("dailyLimit", 0)}
+                    className="text-[12px] font-semibold text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 cursor-pointer"
+                  >
+                    Unlimited (0)
+                  </button>
+                }
                 placeholder="0 for unlimited"
-                {...formik.getFieldProps("dailyLimit")}
-                className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-medium text-[#303030] dark:text-zinc-100 rounded-[8px] max-w-xs"
+                value={formik.values.dailyLimit}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                helperText="Maximum executions per member per calendar day (0 for unlimited)."
               />
-              <p className="text-[12px] text-[#616161]">
-                The maximum number of times a single member can trigger this rule per calendar day. Set to 0 for unlimited.
-              </p>
             </div>
 
             <PolarisInfoBanner
@@ -808,3 +773,5 @@ export function ImpactRuleForm({
     </PolarisFormLayout>
   );
 }
+
+export default ImpactRuleForm;
