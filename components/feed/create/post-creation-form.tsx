@@ -49,6 +49,10 @@ import {
   PolarisSummaryRow,
   PolarisTipCard,
   PolarisInfoBanner,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
+  PolarisSelect,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useGetEntity } from "@/graphql/actions";
@@ -535,30 +539,13 @@ export function PostCreationForm({
               </div>
 
               {/* Textarea Description */}
-              <div className="space-y-1.5 pt-2">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="description"
-                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                  >
-                    Message Body{" "}
-                    <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
-                  <span
-                    className={cn(
-                      "text-[11.5px] font-mono",
-                      charCount > 1800
-                        ? "text-amber-600 font-bold"
-                        : "text-[#616161]",
-                    )}
-                  >
-                    {charCount} / 2000
-                  </span>
-                </div>
-                <Textarea
+              <div className="pt-2">
+                <PolarisTextarea
                   id="description"
                   name="description"
-                  rows={5}
+                  label="Message Body"
+                  required
+                  rows={4}
                   placeholder={
                     values.postType === "poll"
                       ? "Add background context or instructions for your poll..."
@@ -569,30 +556,32 @@ export function PostCreationForm({
                   value={values.description}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={cn(
-                    "text-[14px] min-h-[110px] resize-y rounded-[8px] border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 leading-[20px] text-[#303030] dark:text-zinc-100",
-                    touched.description &&
-                      errors.description &&
-                      "border-[#d72c0d]",
-                  )}
+                  error={touched.description && errors.description ? errors.description : undefined}
+                  labelAction={
+                    <span
+                      className={cn(
+                        "text-[11px] font-mono",
+                        charCount > 1800
+                          ? "text-amber-600 font-bold"
+                          : "text-[#616161]",
+                      )}
+                    >
+                      {charCount} / 2000
+                    </span>
+                  }
                 />
-                {touched.description && errors.description && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {errors.description}
-                  </p>
-                )}
               </div>
 
               {/* Pin to top switch */}
-              <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 mt-2">
+              <div className="flex items-center justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 mt-2">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <Pin className="h-3.5 w-3.5 text-amber-600" />
-                    <label className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200 cursor-pointer">
+                    <label className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-200 cursor-pointer">
                       Pin Announcement to Top
                     </label>
                   </div>
-                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400">
                     Highlight this announcement prominently at the top of the
                     community feed stream.
                   </p>
@@ -614,35 +603,21 @@ export function PostCreationForm({
                 badge="Voting Setup"
               >
                 {/* Poll Question */}
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="poll.question"
-                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                  >
-                    Poll Question{" "}
-                    <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
-                  <Input
-                    id="poll.question"
-                    name="poll.question"
-                    placeholder="e.g. Which community workshop topic would you prefer next?"
-                    value={values.poll.question}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                  />
-                  {touched.poll?.question && errors.poll?.question && (
-                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                      {errors.poll.question}
-                    </p>
-                  )}
-                </div>
+                <PolarisInput
+                  id="poll-question"
+                  name="poll.question"
+                  label="Poll Question"
+                  required
+                  placeholder="e.g. Which community workshop topic would you prefer next?"
+                  value={values.poll.question}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={touched.poll?.question && errors.poll?.question ? errors.poll.question : undefined}
+                />
 
                 {/* Poll Options List */}
                 <div className="space-y-2 pt-2">
-                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                    Poll Options (Min. 2, Max. 6)
-                  </label>
+                  <PolarisLabel>Poll Options (Min. 2, Max. 6)</PolarisLabel>
                   <FieldArray name="poll.options">
                     {({ push, remove }) => (
                       <div className="space-y-2">
@@ -654,23 +629,25 @@ export function PostCreationForm({
                             <span className="h-7 w-7 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] flex items-center justify-center text-[11px] font-bold text-[#616161] shrink-0">
                               {index + 1}
                             </span>
-                            <Input
-                              name={`poll.options.${index}.text`}
-                              placeholder={`Option ${index + 1} text...`}
-                              value={opt.text}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] flex-1"
-                            />
+                            <div className="flex-1">
+                              <PolarisInput
+                                id={`poll-opt-${index}`}
+                                name={`poll.options.${index}.text`}
+                                placeholder={`Option ${index + 1} text...`}
+                                value={opt.text}
+                                onChange={formik.handleChange}
+                                onBlur={formik.handleBlur}
+                              />
+                            </div>
                             {values.poll.options.length > 2 && (
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => remove(index)}
-                                className="h-8 w-8 text-[#616161] hover:text-[#d72c0d] shrink-0"
+                                className="h-7 w-7 text-[#616161] hover:text-[#d72c0d] shrink-0"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             )}
                           </div>
@@ -682,9 +659,9 @@ export function PostCreationForm({
                             variant="outline"
                             size="sm"
                             onClick={() => push({ text: "" })}
-                            className="h-8 px-3 rounded-[6px] text-[12px] font-semibold gap-1.5 border-dashed border-[#aeb4b9] text-[#303030] bg-white hover:bg-[#f6f6f7]"
+                            className="h-7 px-2.5 rounded-[5px] text-[11.5px] font-semibold gap-1.5 border-dashed border-[#aeb4b9] text-[#303030] bg-white hover:bg-[#f6f6f7]"
                           >
-                            <Plus className="h-3.5 w-3.5" />
+                            <Plus className="h-3 w-3" />
                             Add Option
                           </Button>
                         )}
@@ -695,28 +672,21 @@ export function PostCreationForm({
 
                 {/* Poll Duration */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                  <div className="space-y-1.5">
-                    <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                      Poll Duration
-                    </label>
-                    <Select
-                      value={String(values.poll.durationDays)}
-                      onValueChange={(val) =>
-                        setFieldValue("poll.durationDays", Number(val))
-                      }
-                    >
-                      <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]">
-                        <SelectValue placeholder="Select duration" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 Day</SelectItem>
-                        <SelectItem value="3">3 Days</SelectItem>
-                        <SelectItem value="7">1 Week (Default)</SelectItem>
-                        <SelectItem value="14">2 Weeks</SelectItem>
-                        <SelectItem value="30">1 Month</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <PolarisSelect
+                    id="poll-duration"
+                    label="Poll Duration"
+                    value={String(values.poll.durationDays)}
+                    onChange={(val) =>
+                      setFieldValue("poll.durationDays", Number(val))
+                    }
+                    options={[
+                      { value: "1", label: "1 Day" },
+                      { value: "3", label: "3 Days" },
+                      { value: "7", label: "1 Week (Default)" },
+                      { value: "14", label: "2 Weeks" },
+                      { value: "30", label: "1 Month" },
+                    ]}
+                  />
                 </div>
               </PolarisFormCard>
             ) : (
