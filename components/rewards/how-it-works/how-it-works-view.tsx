@@ -31,7 +31,9 @@ import { AntiFraudSection } from "./anti-fraud-section";
 import { LifecycleFlowSection } from "./lifecycle-flow-section";
 
 export function HowItWorksView() {
-  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName || "Rewards");
+  const rewardsModuleName = useModuleStore(
+    (state) => state.rewardsModuleName || "Rewards",
+  );
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -56,13 +58,20 @@ export function HowItWorksView() {
         actions={
           <div className="flex items-center gap-2">
             <Link href="/gamification/rewards/pillars">
-              <Button variant="outline" size="sm" className="h-9 text-xs font-semibold gap-1.5 rounded-lg shadow-2xs">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 text-xs font-semibold gap-1.5 rounded-lg shadow-2xs"
+              >
                 <Layers className="h-3.5 w-3.5" />
                 Configure Pillars
               </Button>
             </Link>
             <Link href="/gamification/rewards/coupons/create">
-              <Button size="sm" className="h-9 text-xs font-semibold gap-1.5 rounded-lg shadow-2xs">
+              <Button
+                size="sm"
+                className="h-9 text-xs font-semibold gap-1.5 rounded-lg shadow-2xs"
+              >
                 <Sparkles className="h-3.5 w-3.5" />
                 Create Reward
               </Button>
@@ -79,8 +88,12 @@ export function HowItWorksView() {
               🧭
             </div>
             <div>
-              <span className="text-xs font-bold text-foreground block">Quick Navigation & Visual Sitemap</span>
-              <span className="text-[11px] text-muted-foreground">Jump directly to any architectural component</span>
+              <span className="text-xs font-bold text-foreground block">
+                Quick Navigation & Visual Sitemap
+              </span>
+              <span className="text-[11px] text-muted-foreground">
+                Jump directly to any architectural component
+              </span>
             </div>
           </div>
 
@@ -154,8 +167,12 @@ export function HowItWorksView() {
         <div className="p-6 rounded-2xl border border-border/60 bg-muted/20 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-foreground">Ready to configure your reward ecosystem?</h3>
-              <p className="text-xs text-muted-foreground">Jump directly to setup each pillar or minigame rule in seconds.</p>
+              <h3 className="text-sm font-bold text-foreground">
+                Ready to configure your reward ecosystem?
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Jump directly to setup each pillar or minigame rule in seconds.
+              </p>
             </div>
           </div>
 
@@ -168,8 +185,12 @@ export function HowItWorksView() {
                   </div>
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                 </div>
-                <div className="text-xs font-bold text-foreground">Shopify Discounts</div>
-                <div className="text-[10px] text-muted-foreground">Setup 15% / $10 store rules</div>
+                <div className="text-xs font-bold text-foreground">
+                  Shopify Discounts
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Setup 15% / $10 store rules
+                </div>
               </Card>
             </Link>
 
@@ -181,8 +202,12 @@ export function HowItWorksView() {
                   </div>
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                 </div>
-                <div className="text-xs font-bold text-foreground">Digital Gift Cards</div>
-                <div className="text-[10px] text-muted-foreground">Amazon, Uber, Starbucks brand pool</div>
+                <div className="text-xs font-bold text-foreground">
+                  Digital Gift Cards
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Amazon, Uber, Starbucks brand pool
+                </div>
               </Card>
             </Link>
 
@@ -194,8 +219,12 @@ export function HowItWorksView() {
                   </div>
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                 </div>
-                <div className="text-xs font-bold text-foreground">Internal Vouchers</div>
-                <div className="text-[10px] text-muted-foreground">Batch upload CSV promo codes</div>
+                <div className="text-xs font-bold text-foreground">
+                  Internal Vouchers
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Batch upload CSV promo codes
+                </div>
               </Card>
             </Link>
 
@@ -207,8 +236,12 @@ export function HowItWorksView() {
                   </div>
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                 </div>
-                <div className="text-xs font-bold text-foreground">Mini-Games Hub</div>
-                <div className="text-[10px] text-muted-foreground">Launch Spin Wheel & Scratch Cards</div>
+                <div className="text-xs font-bold text-foreground">
+                  Mini-Games Hub
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Launch Spin Wheel & Scratch Cards
+                </div>
               </Card>
             </Link>
           </div>
