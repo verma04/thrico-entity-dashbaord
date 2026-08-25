@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import TierAssignMembers from "./tier-assign-members";
-import { CtaButton } from "@/components/ui/cta-button";
 
 interface TierMembersListProps {
   tierId: string;
@@ -68,37 +67,39 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
-    <div className="space-y-4 pt-4 border-t border-border mt-4">
+    <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 mt-3">
       <div className="flex justify-between items-center">
-        <h4 className="text-sm font-semibold">Tier Members ({totalCount})</h4>
+        <h4 className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+          Tier Members ({totalCount})
+        </h4>
         <TierAssignMembers tierId={tierId} onAssigned={() => refetch()} />
       </div>
 
-      <div className="border rounded-md">
+      <div className="border border-[#d2d5d9] dark:border-zinc-800 rounded-[6px] overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Member</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
+              <TableHead className="py-2 text-[11px] font-bold text-[#616161]">Member</TableHead>
+              <TableHead className="py-2 text-[11px] font-bold text-[#616161]">Email</TableHead>
+              <TableHead className="py-2 text-right text-[11px] font-bold text-[#616161]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: 3 }).map((_, index) => (
                 <TableRow key={`member-skeleton-${index}`}>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div className="flex items-center gap-2">
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                      <Skeleton className="h-4 w-[120px]" />
+                      <Skeleton className="h-6 w-6 rounded-full" />
+                      <Skeleton className="h-3 w-[100px]" />
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[180px]" />
+                  <TableCell className="py-2">
+                    <Skeleton className="h-3 w-[140px]" />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="py-2 text-right">
                     <div className="flex justify-end">
-                      <Skeleton className="h-8 w-[80px] rounded-md" />
+                      <Skeleton className="h-6 w-[60px] rounded-[4px]" />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -107,17 +108,17 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
               <TableRow>
                 <TableCell
                   colSpan={3}
-                  className="text-center py-4 text-muted-foreground"
+                  className="text-center py-4 text-[12px] text-[#8c9196]"
                 >
                   No members in this tier.
                 </TableCell>
               </TableRow>
             ) : (
               users.map((row: any) => (
-                <TableRow key={row.id}>
-                  <TableCell>
+                <TableRow key={row.id} className="hover:bg-[#f6f6f7]/50 dark:hover:bg-zinc-800/30">
+                  <TableCell className="py-2">
                     <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-6 w-6 border border-[#d2d5d9] dark:border-zinc-700">
                         <AvatarImage
                           src={
                             row.user?.avatar
@@ -125,30 +126,31 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
                               : ""
                           }
                         />
-                        <AvatarFallback>
+                        <AvatarFallback className="text-[9px]">
                           {row.user?.firstName?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium">
+                      <span className="text-[12px] font-medium text-[#303030] dark:text-zinc-100">
                         {row.user?.firstName} {row.user?.lastName}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="py-2 text-[11.5px] text-[#616161] dark:text-zinc-400">
                     {row.user?.email}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <CtaButton
+                  <TableCell className="py-2 text-right">
+                    <Button
                       variant="outline"
+                      size="sm"
                       onClick={() => {
                         setMemberToRemove(row);
                         setIsRemoveModalOpen(true);
                       }}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
+                      className="h-[26px] text-[11px] px-2 text-[#d72c0d] hover:text-[#b02209] hover:bg-rose-50 dark:hover:bg-rose-950/20 border-rose-200 dark:border-rose-900/30 rounded-[4px] cursor-pointer"
                     >
-                      <UserX className="h-4 w-4 mr-1" />
+                      <UserX className="h-3 w-3 mr-1" />
                       Remove
-                    </CtaButton>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -158,16 +160,17 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1.5 pt-1">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
+            className="h-[26px] w-[26px] p-0 rounded-[4px]"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3" />
           </Button>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[11px] text-[#616161] dark:text-zinc-400">
             Page {page + 1} of {totalPages}
           </span>
           <Button
@@ -175,19 +178,20 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
             size="sm"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
+            className="h-[26px] w-[26px] p-0 rounded-[4px]"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3" />
           </Button>
         </div>
       )}
 
       <Dialog open={isRemoveModalOpen} onOpenChange={setIsRemoveModalOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-[8px]">
           <DialogHeader>
-            <DialogTitle>Remove Member</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[14px]">Remove Member</DialogTitle>
+            <DialogDescription className="text-[12px]">
               Are you sure you want to remove{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-semibold text-[#303030] dark:text-zinc-100">
                 {memberToRemove?.user?.firstName}{" "}
                 {memberToRemove?.user?.lastName}
               </span>{" "}
@@ -197,14 +201,21 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
           <DialogFooter>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => {
                 setIsRemoveModalOpen(false);
                 setMemberToRemove(null);
               }}
+              className="h-[32px] text-[12px] rounded-[4px]"
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleRemove}>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleRemove}
+              className="h-[32px] text-[12px] rounded-[4px] bg-[#d72c0d] hover:bg-[#b02209]"
+            >
               Remove
             </Button>
           </DialogFooter>

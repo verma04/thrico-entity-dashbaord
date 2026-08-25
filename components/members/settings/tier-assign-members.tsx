@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { ASSIGN_MEMBERS_TO_TIER } from "@/graphql/membership-tier";
 import { useGetAllUser } from "@/graphql/actions/membership/membership-queries";
 import { Button } from "@/components/ui/button";
-import { CtaButton } from "@/components/ui/cta-button";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +20,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, Plus, UserPlus } from "lucide-react";
+import { Check, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 interface TierAssignMembersProps {
   tierId: string;
@@ -50,7 +48,6 @@ export default function TierAssignMembers({
   );
 
   const users = data?.getAllUser?.data || [];
-  // Filter out members that are already in this tier
   const availableUsers = users.filter(
     (u: any) => u.membershipTierId !== tierId,
   );
@@ -83,27 +80,34 @@ export default function TierAssignMembers({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <CtaButton variant="outline" className="gap-2">
-          <UserPlus className="h-4 w-4" />
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-[28px] text-[11.5px] px-2.5 font-semibold gap-1.5 border-[#aeb4b9] dark:border-zinc-700 rounded-[4px] cursor-pointer"
+        >
+          <UserPlus className="h-3 w-3" />
           Assign Members
-        </CtaButton>
+        </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Assign Members to Tier</DialogTitle>
+      <DialogContent className="sm:max-w-md rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 p-4">
+        <DialogHeader className="pb-2 border-b border-[#e1e3e5] dark:border-zinc-800">
+          <DialogTitle className="text-[13.5px] font-bold text-[#303030] dark:text-zinc-100">
+            Assign Members to Tier
+          </DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 pt-1">
           <Command
-            className="border rounded-md overflow-hidden"
+            className="border border-[#d2d5d9] dark:border-zinc-800 rounded-[6px] overflow-hidden"
             shouldFilter={false}
           >
             <CommandInput
               placeholder="Search members by name or email..."
               value={search}
               onValueChange={setSearch}
+              className="h-[34px] text-[12.5px]"
             />
-            <CommandList className="max-h-[300px]">
-              <CommandEmpty>
+            <CommandList className="max-h-[260px]">
+              <CommandEmpty className="py-4 text-[12px] text-[#8c9196] text-center">
                 {loading ? "Searching..." : "No available members found."}
               </CommandEmpty>
               <CommandGroup>
@@ -115,10 +119,10 @@ export default function TierAssignMembers({
                       key={row.id}
                       value={row.id}
                       onSelect={() => toggleSelect(row.id)}
-                      className="flex items-center justify-between px-4 py-2 cursor-pointer"
+                      className="flex items-center justify-between px-3 py-1.5 cursor-pointer text-[12px]"
                     >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6 border border-[#d2d5d9] dark:border-zinc-700">
                           <AvatarImage
                             src={
                               user?.avatar
@@ -126,28 +130,27 @@ export default function TierAssignMembers({
                                 : ""
                             }
                           />
-                          <AvatarFallback>
+                          <AvatarFallback className="text-[9px]">
                             {user?.firstName?.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium">
+                        <div>
+                          <p className="font-semibold text-[12px] text-[#303030] dark:text-zinc-100 leading-tight">
                             {user?.firstName} {user?.lastName}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
+                          </p>
+                          <p className="text-[10.5px] text-[#616161] dark:text-zinc-400">
                             {user?.email}
-                          </span>
+                          </p>
                         </div>
                       </div>
                       <div
-                        className={cn(
-                          "flex h-5 w-5 items-center justify-center rounded border",
+                        className={`h-4 w-4 rounded-[3px] border flex items-center justify-center transition-colors ${
                           isSelected
-                            ? "bg-primary border-primary text-primary-foreground"
-                            : "border-input",
-                        )}
+                            ? "bg-[#303030] border-[#303030] text-white dark:bg-zinc-100 dark:border-zinc-100 dark:text-zinc-900"
+                            : "border-[#aeb4b9] dark:border-zinc-700"
+                        }`}
                       >
-                        {isSelected && <Check className="h-3.5 w-3.5" />}
+                        {isSelected && <Check className="h-2.5 w-2.5 stroke-[3px]" />}
                       </div>
                     </CommandItem>
                   );
@@ -156,18 +159,29 @@ export default function TierAssignMembers({
             </CommandList>
           </Command>
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAssign}
-              disabled={selectedIds.length === 0 || isAssigning}
-            >
-              {isAssigning
-                ? "Assigning..."
-                : `Assign ${selectedIds.length > 0 ? `(${selectedIds.length})` : ""}`}
-            </Button>
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-[11.5px] text-[#616161]">
+              {selectedIds.length} member{selectedIds.length === 1 ? "" : "s"}{" "}
+              selected
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setOpen(false)}
+                className="h-[30px] text-[12px] rounded-[4px] cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleAssign}
+                disabled={selectedIds.length === 0 || isAssigning}
+                className="h-[30px] text-[12px] px-3 font-semibold bg-[#303030] text-white rounded-[4px] cursor-pointer hover:bg-[#202020]"
+              >
+                {isAssigning ? "Assigning..." : "Assign"}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

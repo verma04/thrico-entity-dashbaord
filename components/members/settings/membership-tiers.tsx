@@ -21,7 +21,6 @@ import {
   List as ListIcon,
   SlidersHorizontal,
   Users,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
@@ -175,8 +174,8 @@ export default function MembershipTiers() {
   };
 
   return (
-    <EcosystemWrapper className="gap-6">
-      {/* ── Header matching /members/all ──────────────────────────────────── */}
+    <EcosystemWrapper className="gap-4">
+      {/* ── Header ──────────────────────────────────────────────────────── */}
       <EcosystemHeader
         title="Membership Tiers"
         badgeText="Access & Tiers"
@@ -192,7 +191,7 @@ export default function MembershipTiers() {
         ]}
       />
 
-      {/* ── Action / Filter Bar matching /members/all ──────────────────────── */}
+      {/* ── Action / Filter Bar ─────────────────────────────────────────── */}
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
@@ -212,14 +211,14 @@ export default function MembershipTiers() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+                  className="h-[30px] gap-1.5 shrink-0 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 shadow-2xs text-[12px] font-medium text-[#303030] dark:text-zinc-200 px-2.5 rounded-[4px] cursor-pointer"
                 >
-                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  <SlidersHorizontal className="h-3 w-3" />
                   Columns
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
-                <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+              <DropdownMenuContent align="end" className="w-[180px] rounded-[6px]">
+                <DropdownMenuLabel className="text-[10px] font-bold text-[#616161] uppercase tracking-wider px-2 py-1.5">
                   Toggle Columns
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -228,7 +227,7 @@ export default function MembershipTiers() {
                     key={col.key}
                     checked={visibleColumns[col.key] !== false}
                     onCheckedChange={() => toggleColumn(col.key)}
-                    className="text-xs font-medium cursor-pointer"
+                    className="text-[12px] font-medium cursor-pointer"
                   >
                     {col.header}
                   </DropdownMenuCheckboxItem>
@@ -240,17 +239,17 @@ export default function MembershipTiers() {
           <Button
             variant="outline"
             onClick={() => setShowExportModal(true)}
-            className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            className="h-[30px] gap-1.5 shrink-0 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 shadow-2xs text-[12px] font-medium text-[#303030] dark:text-zinc-200 px-2.5 rounded-[4px] cursor-pointer"
           >
-            <Upload className="h-3.5 w-3.5" />
+            <Upload className="h-3 w-3" />
             Export
           </Button>
 
           <Button
             onClick={() => handleOpenModal()}
-            className="h-8 gap-1.5 shrink-0 bg-primary text-primary-foreground shadow-2xs text-xs font-semibold px-3"
+            className="h-[30px] gap-1.5 shrink-0 bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-2.5 rounded-[4px] cursor-pointer hover:bg-[#202020]"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-3 w-3" />
             Create Tier
           </Button>
 
@@ -269,28 +268,28 @@ export default function MembershipTiers() {
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      {/* ── Content Container matching /members/all ────────────────────────── */}
-      <EcosystemContainer className="p-0 m-3 mt-0 border-none bg-transparent shadow-none ring-0 space-y-3">
+      {/* ── Content Container ───────────────────────────────────────────── */}
+      <EcosystemContainer className="p-0 m-0 border-none bg-transparent shadow-none ring-0 space-y-3">
         {loading ? (
           view === "grid" ? (
             <TierSkeletonGrid />
           ) : (
-            <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs p-6 space-y-4">
+            <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-2xs p-4 space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                <Skeleton key={i} className="h-10 w-full rounded-[6px]" />
               ))}
             </div>
           )
         ) : filteredTiers.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4 bg-card rounded-2xl border border-dashed border-border text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-muted-foreground">
-              <Award className="h-6 w-6" />
+          <div className="flex flex-col items-center justify-center py-12 px-4 bg-white dark:bg-zinc-900 rounded-[8px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 text-center space-y-2.5">
+            <div className="w-10 h-10 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 flex items-center justify-center text-[#616161]">
+              <Award className="h-5 w-5" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-foreground">
+            <div className="space-y-0.5">
+              <h3 className="text-[13px] font-bold text-[#303030] dark:text-zinc-100">
                 {search ? "No matching tiers found" : "No membership tiers created yet"}
               </h3>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 max-w-sm">
                 {search
                   ? "Try clearing your search query or looking for different keywords."
                   : "Create your first membership tier to start organizing members and rewarding them with privileges."}
@@ -300,16 +299,16 @@ export default function MembershipTiers() {
               <Button
                 type="button"
                 onClick={() => handleOpenModal()}
-                className="h-8 px-3 text-xs font-semibold gap-1.5 mt-2"
+                className="h-[30px] px-3 text-[12px] font-semibold gap-1.5 mt-1 bg-[#303030] text-white rounded-[4px] cursor-pointer"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-3 w-3" />
                 Create Tier
               </Button>
             )}
           </div>
         ) : view === "grid" ? (
           /* Grid View */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {filteredTiers.map((tier: any) => (
               <TierCard
                 key={tier.id}
@@ -322,42 +321,42 @@ export default function MembershipTiers() {
           </div>
         ) : (
           /* List View (Table) */
-          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
+          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-2xs">
             <Table>
-              <TableHeader className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
+              <TableHeader className="bg-[#f6f6f7]/50 dark:bg-zinc-900/50 border-b border-[#e1e3e5] dark:border-zinc-800">
                 <TableRow className="hover:bg-transparent">
                   {visibleColumns.tier && (
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2">
                       Tier
                     </TableHead>
                   )}
                   {visibleColumns.description && (
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2">
                       Description
                     </TableHead>
                   )}
                   {visibleColumns.privileges && (
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2">
                       Privileges
                     </TableHead>
                   )}
                   {visibleColumns.status && (
-                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2">
                       Status
                     </TableHead>
                   )}
-                  <TableHead className="text-right text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                  <TableHead className="text-right text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2">
                     Actions
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+              <TableBody className="divide-y divide-[#e1e3e5] dark:divide-zinc-800/60">
                 {filteredTiers.map((tier: any) => (
                   <React.Fragment key={tier.id}>
-                    <TableRow className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                    <TableRow className="hover:bg-[#f6f6f7]/50 dark:hover:bg-zinc-800/30 transition-colors">
                       {visibleColumns.tier && (
-                        <TableCell>
-                          <div className="flex items-center gap-2.5 font-bold text-xs">
+                        <TableCell className="py-2.5">
+                          <div className="flex items-center gap-2 font-semibold text-[12.5px]">
                             {tier.badgeIcon ? (
                               <img
                                 src={
@@ -366,24 +365,24 @@ export default function MembershipTiers() {
                                     : `https://cdn.thrico.network/${tier.badgeIcon}`
                                 }
                                 alt={tier.name}
-                                className="w-8 h-8 rounded-full object-cover border border-zinc-200 dark:border-zinc-700"
+                                className="w-7 h-7 rounded-[4px] object-cover border border-[#d2d5d9] dark:border-zinc-700"
                               />
                             ) : (
                               <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center border"
+                                className="w-7 h-7 rounded-[4px] flex items-center justify-center border border-[#d2d5d9] dark:border-zinc-700"
                                 style={{
-                                  backgroundColor: `${tier.badgeColor || "#6366f1"}15`,
-                                  borderColor: `${tier.badgeColor || "#6366f1"}40`,
+                                  backgroundColor: `${tier.badgeColor || "#303030"}15`,
+                                  borderColor: `${tier.badgeColor || "#303030"}40`,
                                 }}
                               >
                                 <Award
-                                  className="h-4 w-4"
-                                  style={{ color: tier.badgeColor || "#6366f1" }}
+                                  className="h-3.5 w-3.5"
+                                  style={{ color: tier.badgeColor || "#303030" }}
                                 />
                               </div>
                             )}
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-zinc-900 dark:text-zinc-100">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[#303030] dark:text-zinc-100">
                                 {tier.name}
                               </span>
                             </div>
@@ -391,18 +390,18 @@ export default function MembershipTiers() {
                         </TableCell>
                       )}
                       {visibleColumns.description && (
-                        <TableCell className="max-w-[220px] truncate text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                        <TableCell className="py-2.5 max-w-[220px] truncate text-[11.5px] text-[#616161] dark:text-zinc-400 font-medium">
                           {tier.description || "—"}
                         </TableCell>
                       )}
                       {visibleColumns.privileges && (
-                        <TableCell>
+                        <TableCell className="py-2.5">
                           <div className="flex flex-wrap gap-1">
                             {tier.benefits?.length === 1 &&
                             tier.benefits[0]?.includes("<") ? (
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold"
+                                className="text-[9.5px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 text-[#303030] dark:text-zinc-400 font-semibold rounded-[3px]"
                               >
                                 Custom Perks
                               </Badge>
@@ -414,7 +413,7 @@ export default function MembershipTiers() {
                                     <Badge
                                       key={i}
                                       variant="secondary"
-                                      className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold"
+                                      className="text-[9.5px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 text-[#303030] dark:text-zinc-400 font-semibold rounded-[3px]"
                                     >
                                       {b}
                                     </Badge>
@@ -422,7 +421,7 @@ export default function MembershipTiers() {
                                 {tier.benefits?.length > 2 && (
                                   <Badge
                                     variant="secondary"
-                                    className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-semibold"
+                                    className="text-[9.5px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 text-[#616161] dark:text-zinc-400 font-semibold rounded-[3px]"
                                   >
                                     +{tier.benefits.length - 2} more
                                   </Badge>
@@ -433,23 +432,23 @@ export default function MembershipTiers() {
                         </TableCell>
                       )}
                       {visibleColumns.status && (
-                        <TableCell>
+                        <TableCell className="py-2.5">
                           {tier.isDefault ? (
                             <Badge
                               variant="outline"
-                              className="text-[10px] py-0 px-1.5 h-4 font-semibold text-emerald-600 bg-emerald-500/10 border-emerald-500/20"
+                              className="text-[9px] py-0 px-1 h-3.5 font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 rounded-[3px]"
                             >
                               Default Tier
                             </Badge>
                           ) : (
-                            <span className="text-xs text-muted-foreground font-medium">
+                            <span className="text-[11.5px] text-[#8c9196] font-medium">
                               Standard
                             </span>
                           )}
                         </TableCell>
                       )}
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <TableCell className="py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             type="button"
                             variant="outline"
@@ -459,15 +458,15 @@ export default function MembershipTiers() {
                                 expandedTierId === tier.id ? null : tier.id,
                               )
                             }
-                            className="h-8 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
+                            className="h-[28px] text-[11.5px] font-semibold border-[#aeb4b9] dark:border-zinc-700 rounded-[4px] cursor-pointer"
                           >
                             {expandedTierId === tier.id ? (
                               <>
-                                <ChevronUp className="h-3.5 w-3.5 mr-1" /> Hide Members
+                                <ChevronUp className="h-3 w-3 mr-1" /> Hide Members
                               </>
                             ) : (
                               <>
-                                <ChevronDown className="h-3.5 w-3.5 mr-1" /> View Members
+                                <ChevronDown className="h-3 w-3 mr-1" /> View Members
                               </>
                             )}
                           </Button>
@@ -476,33 +475,33 @@ export default function MembershipTiers() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                                className="h-7 w-7 text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 rounded-[4px] cursor-pointer"
                               >
-                                <MoreHorizontal className="h-4 w-4" />
+                                <MoreHorizontal className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="rounded-xl border border-zinc-200 dark:border-zinc-800"
+                              className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800"
                             >
                               <DropdownMenuItem
                                 onClick={() => handleOpenModal(tier)}
-                                className="text-xs font-semibold cursor-pointer"
+                                className="text-[12px] font-semibold cursor-pointer"
                               >
-                                <Edit2 className="h-3.5 w-3.5 mr-2" /> Edit Tier
+                                <Edit2 className="h-3 w-3 mr-2" /> Edit Tier
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => setSelectedTierForMembers(tier)}
-                                className="text-xs font-semibold cursor-pointer"
+                                className="text-[12px] font-semibold cursor-pointer"
                               >
-                                <Users className="h-3.5 w-3.5 mr-2" /> Manage Members
+                                <Users className="h-3 w-3 mr-2" /> Manage Members
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => setTierToDelete(tier.id)}
-                                className="text-xs font-semibold text-rose-600 focus:text-rose-600 focus:bg-rose-50 dark:focus:bg-rose-950/20 cursor-pointer"
+                                className="text-[12px] font-semibold text-[#d72c0d] focus:text-[#d72c0d] focus:bg-rose-50 dark:focus:bg-rose-950/20 cursor-pointer"
                               >
-                                <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete Tier
+                                <Trash2 className="h-3 w-3 mr-2" /> Delete Tier
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -512,7 +511,7 @@ export default function MembershipTiers() {
                     {expandedTierId === tier.id && (
                       <TableRow
                         key={`${tier.id}-members`}
-                        className="bg-zinc-50/50 dark:bg-zinc-900/50"
+                        className="bg-[#f6f6f7]/50 dark:bg-zinc-900/50"
                       >
                         <TableCell
                           colSpan={
@@ -522,12 +521,12 @@ export default function MembershipTiers() {
                             (visibleColumns.privileges ? 1 : 0) +
                             (visibleColumns.status ? 1 : 0)
                           }
-                          className="p-0 border-b border-zinc-100 dark:border-zinc-800"
+                          className="p-0 border-b border-[#e1e3e5] dark:border-zinc-800"
                         >
                           <div
-                            className="p-4 px-6 border-l-4"
+                            className="p-3 px-4 border-l-4"
                             style={{
-                              borderLeftColor: tier.badgeColor || "#18181b",
+                              borderLeftColor: tier.badgeColor || "#303030",
                             }}
                           >
                             <TierMembersList tierId={tier.id} />
@@ -550,7 +549,7 @@ export default function MembershipTiers() {
           onSuccess={refetch}
         />
 
-        {/* View/Manage Members Modal (for Grid View & Quick Action) */}
+        {/* View/Manage Members Modal */}
         <TierMembersModal
           isOpen={!!selectedTierForMembers}
           onClose={() => setSelectedTierForMembers(null)}
@@ -562,23 +561,23 @@ export default function MembershipTiers() {
           open={!!tierToDelete}
           onOpenChange={(open) => !open && setTierToDelete(null)}
         >
-          <AlertDialogContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          <AlertDialogContent className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <AlertDialogTitle className="text-[14px] font-bold text-[#303030] dark:text-zinc-100">
                 Delete Membership Tier?
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-xs text-zinc-500 dark:text-zinc-400">
+              <AlertDialogDescription className="text-[12px] text-[#616161] dark:text-zinc-400">
                 Are you sure you want to delete this membership tier? Existing
                 assigned members will revert to default status.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel className="h-9 text-xs font-semibold">
+              <AlertDialogCancel className="h-[32px] text-[12px] font-semibold rounded-[4px]">
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="h-9 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white"
+                className="h-[32px] text-[12px] font-bold bg-[#d72c0d] hover:bg-[#b02209] text-white rounded-[4px]"
               >
                 Delete
               </AlertDialogAction>

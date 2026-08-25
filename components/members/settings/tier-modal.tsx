@@ -16,14 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
-import { Award, Loader2, Save, Sparkles } from "lucide-react";
+import { Award, Loader2, Save } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { cn } from "@/lib/utils";
+import {
+  PolarisInput,
+  PolarisLabel,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface TierModalProps {
   isOpen: boolean;
@@ -33,7 +35,7 @@ interface TierModalProps {
 }
 
 const PRESET_COLORS = [
-  { name: "Monochrome", hex: "#18181b" },
+  { name: "Monochrome", hex: "#303030" },
   { name: "Gold", hex: "#eab308" },
   { name: "Emerald", hex: "#10b981" },
   { name: "Indigo", hex: "#6366f1" },
@@ -54,7 +56,7 @@ export function TierModal({
     initialValues: {
       name: "",
       description: "",
-      badgeColor: "#18181b",
+      badgeColor: "#303030",
       badgeIcon: "",
       benefits: "",
     },
@@ -106,7 +108,7 @@ export function TierModal({
       formik.setValues({
         name: editingTier.name,
         description: editingTier.description || "",
-        badgeColor: editingTier.badgeColor || "#18181b",
+        badgeColor: editingTier.badgeColor || "#303030",
         badgeIcon: editingTier.badgeIcon || "",
         benefits: editingTier.benefits ? editingTier.benefits.join("<br />") : "",
       });
@@ -117,18 +119,18 @@ export function TierModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-xl flex flex-col p-0 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden">
+      <DialogContent className="max-w-lg flex flex-col p-0 rounded-[10px] border border-[#d2d5d9] dark:border-zinc-800 shadow-xl overflow-hidden">
         {/* Header */}
-        <DialogHeader className="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
-              <Award className="h-4 w-4" />
+        <DialogHeader className="px-4 py-3.5 border-b border-[#e1e3e5] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-[4px] bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
+              <Award className="h-3.5 w-3.5" />
             </div>
             <div>
-              <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+              <DialogTitle className="text-[13.5px] font-bold text-[#303030] dark:text-zinc-100 leading-tight">
                 {editingTier ? "Edit Membership Tier" : "Create Membership Tier"}
               </DialogTitle>
-              <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              <DialogDescription className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5">
                 Define tier identity, distinctive insignia badge, and exclusive privileges.
               </DialogDescription>
             </div>
@@ -137,84 +139,69 @@ export function TierModal({
 
         {/* Scrollable Form Body */}
         <form onSubmit={formik.handleSubmit}>
-          <div className="p-6 space-y-4 bg-white dark:bg-zinc-950 overflow-y-auto max-h-[65vh]">
+          <div className="p-4 space-y-3 bg-white dark:bg-zinc-950 overflow-y-auto max-h-[65vh]">
             {/* Tier Name */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Tier Designation <span className="text-rose-500">*</span>
-              </Label>
-              <Input
-                name="name"
-                placeholder="e.g., Platinum Founder, VIP Tier"
-                value={formik.values.name}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-              />
-              {formik.touched.name && formik.errors.name && (
-                <p className="text-[11px] text-rose-500 font-medium">
-                  {formik.errors.name}
-                </p>
-              )}
-            </div>
+            <PolarisInput
+              id="tier-name"
+              name="name"
+              label="Tier Designation"
+              required
+              placeholder="e.g., Platinum Founder, VIP Tier"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.name && formik.errors.name ? String(formik.errors.name) : undefined}
+            />
 
             {/* Description */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Tier Summary <span className="text-zinc-400 font-normal">(Optional)</span>
-              </Label>
-              <Input
-                name="description"
-                placeholder="Brief summary of member eligibility or status..."
-                value={formik.values.description}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-              />
-            </div>
+            <PolarisInput
+              id="tier-description"
+              name="description"
+              label="Tier Summary (Optional)"
+              placeholder="Brief summary of member eligibility or status..."
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
 
             {/* Badge Color & Theme Swatches */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Tier Color Theme
-              </Label>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 flex-1">
-                  <Input
-                    type="color"
-                    name="badgeColor"
-                    className="w-10 h-10 p-1 rounded-lg border-zinc-200 dark:border-zinc-800 cursor-pointer shrink-0"
-                    value={formik.values.badgeColor}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  <Input
-                    name="badgeColor"
-                    placeholder="#18181b"
-                    value={formik.values.badgeColor}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold font-mono uppercase"
-                  />
-                </div>
+            <div className="space-y-1.5 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisLabel>Tier Color Theme</PolarisLabel>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  name="badgeColor"
+                  className="w-8 h-[34px] p-0.5 rounded-[4px] border border-[#aeb4b9] dark:border-zinc-700 cursor-pointer shrink-0"
+                  value={formik.values.badgeColor}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                <input
+                  name="badgeColor"
+                  placeholder="#303030"
+                  value={formik.values.badgeColor}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-[34px] flex-1 px-2.5 rounded-[6px] border border-[#aeb4b9] dark:border-zinc-700 text-[12.5px] font-mono uppercase bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-100 outline-none focus:border-[#005bd3] focus:ring-1 focus:ring-[#005bd3]"
+                />
               </div>
 
               {/* Quick Preset Color Chips */}
-              <div className="flex items-center gap-1.5 pt-1">
+              <div className="flex flex-wrap items-center gap-1 pt-0.5">
                 {PRESET_COLORS.map((preset) => (
                   <button
                     key={preset.hex}
                     type="button"
                     onClick={() => formik.setFieldValue("badgeColor", preset.hex)}
                     className={cn(
-                      "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold border transition-all cursor-pointer",
+                      "flex items-center gap-1 px-2 py-0.5 rounded-[4px] text-[10px] font-semibold border transition-all cursor-pointer",
                       formik.values.badgeColor?.toLowerCase() === preset.hex.toLowerCase()
-                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 shadow-xs"
-                        : "bg-zinc-50 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300",
+                        ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 border-[#303030] dark:border-zinc-100 shadow-2xs"
+                        : "bg-[#f6f6f7] dark:bg-zinc-900 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-800 hover:border-[#aeb4b9]",
                     )}
                   >
                     <span
-                      className="w-2 h-2 rounded-full shrink-0"
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
                       style={{ backgroundColor: preset.hex }}
                     />
                     {preset.name}
@@ -224,11 +211,9 @@ export function TierModal({
             </div>
 
             {/* Badge Icon / Thumbnail */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Tier Insignia / Badge Icon
-              </Label>
-              <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40">
+            <div className="space-y-1 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisLabel>Tier Insignia / Badge Icon</PolarisLabel>
+              <div className="p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
                 <ImageUploadWithCrop
                   label=""
                   currentImage={formik.values.badgeIcon}
@@ -245,43 +230,41 @@ export function TierModal({
             </div>
 
             {/* Exclusive Benefits */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Tier Benefits & Privileges
-              </Label>
-              <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50/20 dark:bg-zinc-900/20">
+            <div className="space-y-1 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisLabel>Tier Benefits & Privileges</PolarisLabel>
+              <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900">
                 <RichTextEditor
                   value={formik.values.benefits}
                   onChange={(content) =>
                     formik.setFieldValue("benefits", content)
                   }
                   placeholder="Outline VIP perks, discounted passes, priority access, or custom roles..."
-                  minHeight="140px"
+                  minHeight="110px"
                 />
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <DialogFooter className="px-6 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex items-center justify-end gap-2">
+          <DialogFooter className="px-4 py-3 border-t border-[#e1e3e5] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 flex items-center justify-end gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={formik.isSubmitting}
-              className="h-9 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
+              className="h-[32px] text-[12px] font-semibold border-[#aeb4b9] dark:border-zinc-700 rounded-[4px] cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={formik.isSubmitting || !formik.values.name.trim()}
-              className="h-9 px-4 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center gap-1.5 shadow-xs"
+              className="h-[32px] px-3 text-[12px] font-semibold bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-[#202020] dark:hover:bg-zinc-200 flex items-center gap-1.5 rounded-[4px] shadow-2xs cursor-pointer"
             >
               {formik.isSubmitting ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                <Save className="h-3.5 w-3.5" />
+                <Save className="h-3 w-3" />
               )}
               {editingTier ? "Save Changes" : "Create Tier"}
             </Button>
