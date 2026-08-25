@@ -9,12 +9,13 @@ import {
   Gift,
   CheckCircle2,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   PolarisFormCard,
   PolarisPresetChips,
+  PolarisInput,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { PillarManualSection } from "@/components/rewards/coupons/form/sections/pillars/pillar-manual-section";
 import { PillarStoreSection } from "@/components/rewards/coupons/form/sections/pillars/pillar-store-section";
@@ -317,19 +318,19 @@ export function DeliveryFulfillmentSection({
     >
       <div className="space-y-4">
         {/* ── 1. Single Unified Selector Grid ─────────────────────────────── */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-              Fulfillment Mechanism <span className="text-[#d72c0d] ml-0.5">*</span>
-            </label>
-            <span className="text-[11.5px] text-[#616161]">
+            <PolarisLabel required>
+              Fulfillment Mechanism
+            </PolarisLabel>
+            <span className="text-[11px] text-[#616161]">
               Click to select prize type
             </span>
           </div>
 
           <div
             className={cn(
-              "grid gap-2.5",
+              "grid gap-2",
               isGameMode
                 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                 : "grid-cols-1 sm:grid-cols-3",
@@ -344,7 +345,7 @@ export function DeliveryFulfillmentSection({
                   key={opt.id}
                   onClick={() => handleSelectMechanism(opt.id)}
                   className={cn(
-                    "p-3.5 rounded-[8px] border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden",
+                    "p-3 rounded-[6px] border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 relative overflow-hidden",
                     isSelected
                       ? opt.activeBorder
                       : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
@@ -354,32 +355,32 @@ export function DeliveryFulfillmentSection({
                     <div className="flex items-center gap-2 min-w-0">
                       <div
                         className={cn(
-                          "h-7 w-7 rounded-[6px] flex items-center justify-center shrink-0",
+                          "h-6 w-6 rounded-[4px] flex items-center justify-center shrink-0",
                           opt.bgColor,
                           opt.color,
                         )}
                       >
-                        <Icon className="h-3.5 w-3.5" />
+                        <Icon className="h-3 w-3" />
                       </div>
-                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
+                      <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
                         {opt.title}
                       </span>
                     </div>
 
                     {isSelected && (
                       <CheckCircle2
-                        className="h-4 w-4 shrink-0 text-[#303030] dark:text-zinc-100"
+                        className="h-3.5 w-3.5 shrink-0 text-[#303030] dark:text-zinc-100"
                       />
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800 text-[11.5px]">
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800 text-[11px]">
                     <span className="text-[#616161] truncate">
                       {opt.subtitle}
                     </span>
                     <Badge
                       variant="outline"
-                      className="text-[10px] px-1.5 py-0 font-medium shrink-0 border-[#d2d5d9]"
+                      className="text-[9.5px] px-1.5 py-0 font-medium shrink-0 border-[#d2d5d9]"
                     >
                       {opt.countLabel}
                     </Badge>
@@ -394,20 +395,19 @@ export function DeliveryFulfillmentSection({
 
         {/* Sub-panel: Points Payout */}
         {currentSelectedId === "COINS" && allowPoints && (
-          <div className="p-3.5 rounded-[8px] bg-amber-500/10 border border-amber-500/20 space-y-3 animate-in fade-in-50 duration-200">
-            <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
-              <Coins className="h-4 w-4" />
-              <span className="text-[13px] font-semibold">
+          <div className="p-3 rounded-[6px] bg-amber-500/10 border border-amber-500/20 space-y-2.5 animate-in fade-in-50 duration-200">
+            <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300">
+              <Coins className="h-3.5 w-3.5" />
+              <span className="text-[12px] font-semibold">
                 Loyalty Points Payout
               </span>
             </div>
             <div className="space-y-2">
-              <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-200">
-                Amount of {currencyName}
-              </label>
-              <Input
+              <PolarisInput
+                id="rewardValue"
                 type="number"
                 min={1}
+                label={`Amount of ${currencyName}`}
                 value={values.rewardValue || ""}
                 onChange={(e) => {
                   const val = parseInt(e.target.value) || 0;
@@ -417,7 +417,6 @@ export function DeliveryFulfillmentSection({
                     `${val} ${currencyName} Slice`,
                   );
                 }}
-                className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold"
               />
               <PolarisPresetChips
                 presets={POINT_VALUE_PRESETS}
@@ -437,14 +436,14 @@ export function DeliveryFulfillmentSection({
 
         {/* Sub-panel: Try Again */}
         {currentSelectedId === "NO_REWARDS" && allowTryAgain && (
-          <div className="p-3.5 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-3 animate-in fade-in-50 duration-200">
-            <div className="flex items-center gap-2 text-[#616161]">
-              <RotateCcw className="h-4 w-4" />
-              <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+          <div className="p-3 rounded-[6px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-2.5 animate-in fade-in-50 duration-200">
+            <div className="flex items-center gap-1.5 text-[#616161]">
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
                 Try Again (Loss) Prompt
               </span>
             </div>
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
               {TRY_AGAIN_PRESETS.map((preset) => (
                 <Button
                   key={preset}
@@ -452,7 +451,7 @@ export function DeliveryFulfillmentSection({
                   variant={values.label === preset ? "default" : "outline"}
                   size="sm"
                   className={cn(
-                    "h-8 text-[12px] rounded-[6px] cursor-pointer",
+                    "h-7 text-[11.5px] rounded-[4px] cursor-pointer",
                     values.label === preset
                       ? "bg-[#303030] text-white hover:bg-[#303030]"
                       : "border-[#aeb4b9] bg-white dark:bg-zinc-900",
@@ -498,66 +497,34 @@ export function DeliveryFulfillmentSection({
 
         {/* ── 3. Compact Supply & User Limits (Only if showSupplyLimits=true) ── */}
         {showSupplyLimits && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
-            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="totalUsageLimit"
-                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                >
-                  Total Supply Limit
-                </label>
-                <button
-                  type="button"
-                  onClick={() => formik.setFieldValue("totalUsageLimit", 0)}
-                  className="text-[11px] text-[#616161] hover:text-[#303030] cursor-pointer"
-                >
-                  Unlimited (0)
-                </button>
-              </div>
-              <div className="relative">
-                <Input
-                  id="totalUsageLimit"
-                  type="number"
-                  placeholder="0 = Unlimited"
-                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] text-[13px] font-semibold rounded-[6px]"
-                  {...formik.getFieldProps("totalUsageLimit")}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
-                  Units
-                </span>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <PolarisInput
+              id="totalUsageLimit"
+              type="number"
+              min={0}
+              label="Total Supply Limit"
+              placeholder="0 (Unlimited)"
+              suffix="UNITS"
+              labelAction={{
+                text: "Unlimited (0)",
+                onClick: () => formik.setFieldValue("totalUsageLimit", 0),
+              }}
+              {...formik.getFieldProps("totalUsageLimit")}
+            />
 
-            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="perUserLimit"
-                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                >
-                  Limit Per Member
-                </label>
-                <button
-                  type="button"
-                  onClick={() => formik.setFieldValue("perUserLimit", 0)}
-                  className="text-[11px] text-[#616161] hover:text-[#303030] cursor-pointer"
-                >
-                  Unlimited (0)
-                </button>
-              </div>
-              <div className="relative">
-                <Input
-                  id="perUserLimit"
-                  type="number"
-                  placeholder="0 = Unlimited"
-                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] text-[13px] font-semibold rounded-[6px]"
-                  {...formik.getFieldProps("perUserLimit")}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
-                  Claims/User
-                </span>
-              </div>
-            </div>
+            <PolarisInput
+              id="perUserLimit"
+              type="number"
+              min={0}
+              label="Limit Per Member"
+              placeholder="0 (Unlimited)"
+              suffix="CLAIMS"
+              labelAction={{
+                text: "Unlimited (0)",
+                onClick: () => formik.setFieldValue("perUserLimit", 0),
+              }}
+              {...formik.getFieldProps("perUserLimit")}
+            />
           </div>
         )}
       </div>

@@ -2,9 +2,9 @@
 
 import React from "react";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
-import { Input as UiInput } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
+import { PolarisInput, PolarisLabel } from "@/components/gamification/shared/polaris-form-ui";
 import { RewardInfoSection } from "./sections/reward-info-section";
 import { RewardEconomicsSection } from "./sections/reward-economics-section";
 import { DeliveryFulfillmentSection } from "@/components/rewards/shared/delivery-fulfillment-section";
@@ -28,7 +28,7 @@ export function RewardFormSections({
     const errorMsg = formik.errors[field];
     if (isTouched && errorMsg) {
       return (
-        <p className="text-[12.5px] text-[#d72c0d] font-normal mt-1 leading-[18px]">
+        <p className="text-[12px] text-[#d72c0d] font-normal mt-0.5 leading-[16px]">
           {String(errorMsg)}
         </p>
       );
@@ -37,7 +37,7 @@ export function RewardFormSections({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5">
       {/* 1. Core Reward Details & Rich Identity */}
       <RewardInfoSection formik={formik} err={err} />
 
@@ -95,138 +95,86 @@ export function RewardFormSections({
         }
       >
         {/* Embedded Anti-Abuse Guardrails */}
-        <div className="pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-3">
+        <div className="pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
+            <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
               Anti-Abuse & Gating Guardrails
             </span>
-            <span className="text-[11.5px] text-[#616161]">
+            <span className="text-[11px] text-[#616161]">
               Optional fraud protection
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="minAccountAge"
-                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                >
-                  Min Account Age (Days)
-                </label>
-                <span className="text-[11px] text-[#616161]">0 = Off</span>
-              </div>
-              <div className="relative">
-                <UiInput
-                  id="minAccountAge"
-                  type="number"
-                  min={0}
-                  placeholder="0"
-                  value={formik.values.minAccountAge || ""}
-                  onChange={(e) =>
-                    formik.setFieldValue(
-                      "minAccountAge",
-                      parseInt(e.target.value) || 0,
-                    )
-                  }
-                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[6px] font-semibold text-[#303030] dark:text-zinc-100"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
-                  Days
-                </span>
-              </div>
-              <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
-                Blocks newly registered accounts from claiming immediately.
-              </p>
-              {err("minAccountAge")}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <PolarisInput
+              id="minAccountAge"
+              type="number"
+              min={0}
+              label="Min Account Age (Days)"
+              placeholder="0 (Off)"
+              suffix="DAYS"
+              helperText="Blocks newly registered accounts from claiming immediately."
+              value={formik.values.minAccountAge || ""}
+              onChange={(e) =>
+                formik.setFieldValue(
+                  "minAccountAge",
+                  parseInt(e.target.value) || 0,
+                )
+              }
+              onBlur={formik.handleBlur}
+              error={formik.touched.minAccountAge && formik.errors.minAccountAge ? String(formik.errors.minAccountAge) : undefined}
+            />
 
-            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="cooldownPeriod"
-                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                >
-                  Claim Cooldown Period
-                </label>
-                <span className="text-[11px] text-[#616161]">0 = Off</span>
-              </div>
-              <div className="relative">
-                <UiInput
-                  id="cooldownPeriod"
-                  type="number"
-                  min={0}
-                  placeholder="0"
-                  value={formik.values.cooldownPeriod || ""}
-                  onChange={(e) =>
-                    formik.setFieldValue(
-                      "cooldownPeriod",
-                      parseInt(e.target.value) || 0,
-                    )
-                  }
-                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[6px] font-semibold text-[#303030] dark:text-zinc-100"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
-                  Hours
-                </span>
-              </div>
-              <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
-                Wait time before a member can claim this reward again.
-              </p>
-              {err("cooldownPeriod")}
-            </div>
+            <PolarisInput
+              id="cooldownPeriod"
+              type="number"
+              min={0}
+              label="Claim Cooldown Period"
+              placeholder="0 (Off)"
+              suffix="HRS"
+              helperText="Wait time before a member can claim this reward again."
+              value={formik.values.cooldownPeriod || ""}
+              onChange={(e) =>
+                formik.setFieldValue(
+                  "cooldownPeriod",
+                  parseInt(e.target.value) || 0,
+                )
+              }
+              onBlur={formik.handleBlur}
+              error={formik.touched.cooldownPeriod && formik.errors.cooldownPeriod ? String(formik.errors.cooldownPeriod) : undefined}
+            />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="minActivityRequired"
-                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-                >
-                  Min Lifetime Points Required
-                </label>
-                <span className="text-[11px] text-[#616161]">0 = Off</span>
-              </div>
-              <div className="relative">
-                <UiInput
-                  id="minActivityRequired"
-                  type="number"
-                  min={0}
-                  placeholder="0"
-                  value={
-                    formik.values.minActivityRequired ||
-                    formik.values.minActivity ||
-                    ""
-                  }
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 0;
-                    formik.setFieldValue("minActivityRequired", val);
-                    formik.setFieldValue("minActivity", val);
-                  }}
-                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[6px] font-semibold text-[#303030] dark:text-zinc-100"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
-                  PTS
-                </span>
-              </div>
-              <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
-                Minimum activity points required to unlock this reward.
-              </p>
-              {err("minActivityRequired")}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <PolarisInput
+              id="minActivityRequired"
+              type="number"
+              min={0}
+              label="Min Lifetime Points Required"
+              placeholder="0 (Off)"
+              suffix="PTS"
+              helperText="Minimum activity points required to unlock this reward."
+              value={
+                formik.values.minActivityRequired ||
+                formik.values.minActivity ||
+                ""
+              }
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || 0;
+                formik.setFieldValue("minActivityRequired", val);
+                formik.setFieldValue("minActivity", val);
+              }}
+              onBlur={formik.handleBlur}
+              error={formik.touched.minActivityRequired && formik.errors.minActivityRequired ? String(formik.errors.minActivityRequired) : undefined}
+            />
 
-            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between gap-4">
+            <div className="p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between gap-3">
               <div className="space-y-0.5">
-                <label
-                  htmlFor="blockWarnedUsers"
-                  className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200 cursor-pointer"
-                >
+                <PolarisLabel htmlFor="blockWarnedUsers">
                   Block Warned Members
-                </label>
-                <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
-                  Disallow members with active moderation warnings from
-                  redeeming.
+                </PolarisLabel>
+                <p className="text-[11px] text-[#616161] dark:text-zinc-400">
+                  Disallow members with active moderation warnings from redeeming.
                 </p>
               </div>
               <Switch
@@ -239,28 +187,18 @@ export function RewardFormSections({
             </div>
           </div>
 
-          <div className="space-y-1.5 pt-1">
-            <label
-              htmlFor="eligibilityDescription"
-              className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-            >
-              Eligibility & Gating Note
-            </label>
-            <UiInput
-              id="eligibilityDescription"
-              value={formik.values.eligibilityDescription || ""}
-              onChange={(e) =>
-                formik.setFieldValue("eligibilityDescription", e.target.value)
-              }
-              placeholder="e.g. Available only for verified VIP tier members"
-              className="h-[36px] text-[13px] bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px]"
-            />
-            <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
-              Optional note displayed to members when explaining reward
-              requirements.
-            </p>
-            {err("eligibilityDescription")}
-          </div>
+          <PolarisInput
+            id="eligibilityDescription"
+            label="Eligibility & Gating Note"
+            placeholder="e.g. Available only for verified VIP tier members"
+            helperText="Optional note displayed to members when explaining reward requirements."
+            value={formik.values.eligibilityDescription || ""}
+            onChange={(e) =>
+              formik.setFieldValue("eligibilityDescription", e.target.value)
+            }
+            onBlur={formik.handleBlur}
+            error={formik.touched.eligibilityDescription && formik.errors.eligibilityDescription ? String(formik.errors.eligibilityDescription) : undefined}
+          />
         </div>
       </PolarisEligibilityCard>
     </div>
