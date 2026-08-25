@@ -22,7 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -44,7 +43,6 @@ import {
   Calendar,
   Clock,
   Zap,
-  RotateCcw,
   CheckCircle2,
   Sliders,
   ShieldCheck,
@@ -146,14 +144,19 @@ const REFRESH_OPTIONS = [
   },
 ];
 
-export function TemplateForm() {
-  const { data: templatesData, loading: fetchingTemplate, refetch } = useGetImpactTemplates();
+interface TemplateFormProps {
+  showHeader?: boolean;
+}
+
+export function TemplateForm({ showHeader = false }: TemplateFormProps) {
+  const { data: templatesData, refetch } = useGetImpactTemplates();
   const [createTemplate, { loading: saving }] = useCreateImpactTemplate({
     refetchQueries: [{ query: GET_IMPACT_TEMPLATES }],
   });
 
   const [simulatedScore, setSimulatedScore] = useState<number>(500);
-  const [simulatedInactiveCycles, setSimulatedInactiveCycles] = useState<number>(3);
+  const [simulatedInactiveCycles, setSimulatedInactiveCycles] =
+    useState<number>(3);
 
   const defaultFormValues: FormValues = {
     name: "Default Community Template",
@@ -171,10 +174,8 @@ export function TemplateForm() {
     defaultValues: defaultFormValues,
   });
 
-  // Watch form fields for live sidebar & previews
   const watchedValues = form.watch();
   const {
-    name,
     minScore,
     maxScore,
     defaultScore,
@@ -184,9 +185,11 @@ export function TemplateForm() {
     decayPenalty,
   } = watchedValues;
 
-  // Hydrate initial values if template exists
   useEffect(() => {
-    if (templatesData?.impactTemplates && templatesData.impactTemplates.length > 0) {
+    if (
+      templatesData?.impactTemplates &&
+      templatesData.impactTemplates.length > 0
+    ) {
       const existing = templatesData.impactTemplates[0];
       form.reset({
         name: existing.name || "Default Community Template",
@@ -204,15 +207,41 @@ export function TemplateForm() {
 
   const existingTemplate = templatesData?.impactTemplates?.[0];
 
-  const handleApplyArchetype = (archetypeValues: typeof TEMPLATE_ARCHETYPES[0]["values"]) => {
-    form.setValue("name", archetypeValues.name, { shouldDirty: true, shouldValidate: true });
-    form.setValue("minScore", archetypeValues.minScore, { shouldDirty: true, shouldValidate: true });
-    form.setValue("maxScore", archetypeValues.maxScore, { shouldDirty: true, shouldValidate: true });
-    form.setValue("defaultScore", archetypeValues.defaultScore, { shouldDirty: true, shouldValidate: true });
-    form.setValue("activityWindowDays", archetypeValues.activityWindowDays, { shouldDirty: true, shouldValidate: true });
-    form.setValue("refreshFrequency", archetypeValues.refreshFrequency, { shouldDirty: true, shouldValidate: true });
-    form.setValue("decayEnabled", archetypeValues.decayEnabled, { shouldDirty: true, shouldValidate: true });
-    form.setValue("decayPenalty", archetypeValues.decayPenalty, { shouldDirty: true, shouldValidate: true });
+  const handleApplyArchetype = (
+    archetypeValues: (typeof TEMPLATE_ARCHETYPES)[0]["values"],
+  ) => {
+    form.setValue("name", archetypeValues.name, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("minScore", archetypeValues.minScore, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("maxScore", archetypeValues.maxScore, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("defaultScore", archetypeValues.defaultScore, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("activityWindowDays", archetypeValues.activityWindowDays, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("refreshFrequency", archetypeValues.refreshFrequency, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("decayEnabled", archetypeValues.decayEnabled, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("decayPenalty", archetypeValues.decayPenalty, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
     setSimulatedScore(Math.round(archetypeValues.maxScore * 0.5));
     toast.info(`Applied "${archetypeValues.name}" preset`);
   };
@@ -238,7 +267,7 @@ export function TemplateForm() {
       toast.success(
         existingTemplate
           ? "Impact Engine configuration updated successfully!"
-          : "Impact Engine template initialized successfully!"
+          : "Impact Engine template initialized successfully!",
       );
     } catch (error: any) {
       console.error(error);
@@ -246,7 +275,6 @@ export function TemplateForm() {
     }
   }
 
-  // Simulation calculations
   const simulationResults = useMemo(() => {
     const start = Number(simulatedScore) || 0;
     const penalty = decayEnabled ? Number(decayPenalty) || 0 : 0;
@@ -254,8 +282,12 @@ export function TemplateForm() {
     const totalDecay = penalty * cycles;
     const minLimit = Number(minScore) || 0;
     const maxLimit = Number(maxScore) || 1000;
-    const finalScore = Math.max(minLimit, Math.min(maxLimit, start - totalDecay));
-    const cyclesUntilMin = penalty > 0 ? Math.ceil((start - minLimit) / penalty) : Infinity;
+    const finalScore = Math.max(
+      minLimit,
+      Math.min(maxLimit, start - totalDecay),
+    );
+    const cyclesUntilMin =
+      penalty > 0 ? Math.ceil((start - minLimit) / penalty) : Infinity;
 
     return {
       start,
@@ -263,9 +295,15 @@ export function TemplateForm() {
       finalScore,
       cyclesUntilMin,
     };
-  }, [simulatedScore, simulatedInactiveCycles, decayEnabled, decayPenalty, minScore, maxScore]);
+  }, [
+    simulatedScore,
+    simulatedInactiveCycles,
+    decayEnabled,
+    decayPenalty,
+    minScore,
+    maxScore,
+  ]);
 
-  // Relative percentage for range visualizer
   const defaultScorePercentage = useMemo(() => {
     const min = Number(minScore) || 0;
     const max = Number(maxScore) || 1000;
@@ -275,10 +313,9 @@ export function TemplateForm() {
   }, [minScore, maxScore, defaultScore]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
-      {/* Header */}
-      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
-        <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 py-3">
+    <div className="w-full">
+      {showHeader && (
+        <div className="mb-4">
           <EcosystemHeader
             title="Impact Engine Configuration"
             badgeText="Scoring Ruleset"
@@ -291,153 +328,165 @@ export function TemplateForm() {
             ]}
           />
         </div>
-      </div>
+      )}
 
-      <div className="flex-1 overflow-y-auto">
-        <PolarisFormLayout
-          sidebar={
-            <div className="space-y-6">
-              {/* Simulator Card */}
-              <PolarisSidebarCard
-                title="Decay Simulator"
-                badge="Interactive"
-                icon={Sparkles}
-              >
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Simulated Member Score
-                      </Label>
-                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                        {simulatedScore} pts
-                      </span>
-                    </div>
-                    <Slider
-                      value={[simulatedScore]}
-                      onValueChange={(val) => setSimulatedScore(val[0])}
-                      min={Number(minScore) || 0}
-                      max={Number(maxScore) || 1000}
-                      step={5}
-                      className="cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Missed Inactive Cycles
-                      </Label>
-                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                        {simulatedInactiveCycles} {refreshFrequency.toLowerCase()} cycle{simulatedInactiveCycles === 1 ? "" : "s"}
-                      </span>
-                    </div>
-                    <Slider
-                      value={[simulatedInactiveCycles]}
-                      onValueChange={(val) => setSimulatedInactiveCycles(val[0])}
-                      min={1}
-                      max={12}
-                      step={1}
-                      className="cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Projected Result Box */}
-                  <div className="p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/50 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-                        Projected Score
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-zinc-400 line-through">
-                          {simulationResults.start}
-                        </span>
-                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                          {simulationResults.finalScore} pts
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-zinc-500 dark:text-zinc-400">
-                        Decay Deduction
-                      </span>
-                      <span className={cn(
-                        "font-semibold",
-                        decayEnabled && simulationResults.totalDecay > 0
-                          ? "text-rose-600 dark:text-rose-400"
-                          : "text-zinc-500"
-                      )}>
-                        {decayEnabled ? `-${simulationResults.totalDecay} pts` : "0 pts (Disabled)"}
-                      </span>
-                    </div>
-
-                    {decayEnabled && (
-                      <div className="pt-2 border-t border-zinc-200/60 dark:border-zinc-800/80 text-[10px] text-zinc-500 dark:text-zinc-400 leading-tight">
-                        Member reaches baseline minimum in ~{simulationResults.cyclesUntilMin === Infinity ? "0" : simulationResults.cyclesUntilMin} missed cycles.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </PolarisSidebarCard>
-
-              {/* Live Configuration Summary */}
-              <PolarisSidebarCard
-                title="Ruleset Summary"
-                icon={Sliders}
-              >
+      <PolarisFormLayout
+        sidebar={
+          <>
+            {/* Simulator Card */}
+            <PolarisSidebarCard
+              title="Decay Simulator"
+              badge="Interactive"
+              icon={Sparkles}
+            >
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <PolarisSummaryRow
-                    label="Score Boundary"
-                    value={`${minScore} - ${maxScore} pts`}
-                  />
-                  <PolarisSummaryRow
-                    label="Starting Score"
-                    value={`${defaultScore} pts`}
-                  />
-                  <PolarisSummaryRow
-                    label="Cycle Cadence"
-                    value={
-                      <span className="font-bold text-zinc-900 dark:text-zinc-100">
-                        {refreshFrequency}
-                      </span>
-                    }
-                  />
-                  <PolarisSummaryRow
-                    label="Grace Window"
-                    value={`${activityWindowDays} Days`}
-                  />
-                  <PolarisSummaryRow
-                    label="Decay Protection"
-                    value={
-                      decayEnabled ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-                          <CheckCircle2 className="h-3 w-3" /> -{decayPenalty} pts/cycle
-                        </span>
-                      ) : (
-                        <span className="text-zinc-400 font-medium">Inactive</span>
-                      )
-                    }
-                    isLast
+                  <div className="flex items-center justify-between">
+                    <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-300">
+                      Simulated Member Score
+                    </label>
+                    <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 font-mono">
+                      {simulatedScore} pts
+                    </span>
+                  </div>
+                  <Slider
+                    value={[simulatedScore]}
+                    onValueChange={(val) => setSimulatedScore(val[0])}
+                    min={Number(minScore) || 0}
+                    max={Number(maxScore) || 1000}
+                    step={5}
+                    className="cursor-pointer"
                   />
                 </div>
-              </PolarisSidebarCard>
 
-              {/* Economic Tip Card */}
-              <PolarisTipCard title="Impact Engine Insight">
-                Inactivity score decay maintains healthy community leaderboards by ensuring top ranks represent currently engaged members rather than inactive legacy accounts.
-              </PolarisTipCard>
-            </div>
-          }
-        >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-300">
+                      Missed Inactive Cycles
+                    </label>
+                    <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 font-mono">
+                      {simulatedInactiveCycles}{" "}
+                      {refreshFrequency.toLowerCase()} cycle
+                      {simulatedInactiveCycles === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <Slider
+                    value={[simulatedInactiveCycles]}
+                    onValueChange={(val) =>
+                      setSimulatedInactiveCycles(val[0])
+                    }
+                    min={1}
+                    max={12}
+                    step={1}
+                    className="cursor-pointer"
+                  />
+                </div>
+
+                {/* Projected Result Box */}
+                <div className="p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                      Projected Score
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12px] text-[#8c9196] line-through font-mono">
+                        {simulationResults.start}
+                      </span>
+                      <span className="text-[14px] font-bold text-[#303030] dark:text-zinc-100 font-mono">
+                        {simulationResults.finalScore} pts
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[12px]">
+                    <span className="text-[#616161] dark:text-zinc-400">
+                      Decay Deduction
+                    </span>
+                    <span
+                      className={cn(
+                        "font-semibold font-mono text-[12.5px]",
+                        decayEnabled && simulationResults.totalDecay > 0
+                          ? "text-[#d72c0d] dark:text-rose-400"
+                          : "text-[#616161]",
+                      )}
+                    >
+                      {decayEnabled
+                        ? `-${simulationResults.totalDecay} pts`
+                        : "0 pts (Disabled)"}
+                    </span>
+                  </div>
+
+                  {decayEnabled && (
+                    <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                      Member reaches baseline minimum in ~
+                      {simulationResults.cyclesUntilMin === Infinity
+                        ? "0"
+                        : simulationResults.cyclesUntilMin}{" "}
+                      missed cycles.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </PolarisSidebarCard>
+
+            {/* Live Configuration Summary */}
+            <PolarisSidebarCard
+              title="Ruleset Summary"
+              icon={Sliders}
+            >
+              <div className="space-y-1">
+                <PolarisSummaryRow
+                  label="Score Boundary"
+                  value={`${minScore} - ${maxScore} pts`}
+                />
+                <PolarisSummaryRow
+                  label="Starting Score"
+                  value={`${defaultScore} pts`}
+                />
+                <PolarisSummaryRow
+                  label="Cycle Cadence"
+                  value={
+                    <span className="font-semibold text-[#303030] dark:text-zinc-100">
+                      {refreshFrequency}
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Grace Window"
+                  value={`${activityWindowDays} Days`}
+                />
+                <PolarisSummaryRow
+                  label="Decay Protection"
+                  value={
+                    decayEnabled ? (
+                      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-[12px]">
+                        <CheckCircle2 className="h-3 w-3" /> -{decayPenalty} pts/cycle
+                      </span>
+                    ) : (
+                      <span className="text-[#616161] font-medium text-[12px]">Inactive</span>
+                    )
+                  }
+                  isLast
+                />
+              </div>
+            </PolarisSidebarCard>
+
+            {/* Economic Tip Card */}
+            <PolarisTipCard title="Impact Engine Insight">
+              Inactivity score decay maintains healthy community leaderboards by ensuring top ranks represent currently engaged members rather than inactive legacy accounts.
+            </PolarisTipCard>
+          </>
+        }
+      >
+        <div className="space-y-4">
           {/* Quick Preset Archetypes */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 flex items-center gap-1.5 select-none">
                 <Zap className="h-3.5 w-3.5 text-amber-500" />
                 Quick Preset Archetypes
-              </Label>
-              <span className="text-[11px] text-zinc-400">Click to autofill values</span>
+              </label>
+              <span className="text-[12px] text-[#616161]">Click to autofill values</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -448,23 +497,23 @@ export function TemplateForm() {
                     key={archetype.id}
                     type="button"
                     onClick={() => handleApplyArchetype(archetype.values)}
-                    className="flex flex-col text-left p-4 rounded-xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-xs transition-all cursor-pointer group"
+                    className="flex flex-col text-left p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9] hover:shadow-xs transition-all cursor-pointer group"
                   >
                     <div className="flex items-center justify-between w-full mb-2">
-                      <div className="h-7 w-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex items-center justify-center group-hover:bg-zinc-900 group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-900 transition-colors">
+                      <div className="h-7 w-7 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center group-hover:bg-[#303030] group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-900 transition-colors">
                         <Icon className="h-3.5 w-3.5" />
                       </div>
                       <Badge
                         variant="outline"
-                        className="text-[9px] font-bold border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 px-1.5 py-0.5"
+                        className="text-[10px] font-semibold border-[#d2d5d9] dark:border-zinc-700 text-[#616161] px-1.5 py-0.5 rounded-[4px]"
                       >
                         {archetype.badge}
                       </Badge>
                     </div>
-                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                       {archetype.title}
                     </span>
-                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-snug">
+                    <span className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
                       {archetype.desc}
                     </span>
                   </button>
@@ -474,7 +523,7 @@ export function TemplateForm() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Step 1: Score Boundaries & Baseline */}
               <PolarisFormCard
                 step={1}
@@ -482,135 +531,137 @@ export function TemplateForm() {
                 description="Define the numeric boundaries and initial score granted to community members."
                 badge="Core Range"
               >
-                {/* Template Name */}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Template Name
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. Standard Community Ruleset"
-                          {...field}
-                          className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                        />
-                      </FormControl>
-                      <FormDescription className="text-[11px] text-zinc-500">
-                        An administrative name identifying this impact scoring model.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Score Range Min / Max */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  {/* Template Name */}
                   <FormField
                     control={form.control}
-                    name="minScore"
+                    name="name"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                          Minimum Score Baseline
+                      <FormItem className="space-y-1.5">
+                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                          Template Name <span className="text-[#d72c0d] ml-0.5">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
+                            placeholder="e.g. Standard Community Ruleset"
                             {...field}
-                            className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-medium text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
                           />
                         </FormControl>
-                        <FormDescription className="text-[11px] text-zinc-500">
-                          Lowest score a member can reach through decay (typically 0).
+                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
+                          An administrative name identifying this impact scoring model.
                         </FormDescription>
-                        <FormMessage />
+                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
                       </FormItem>
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="maxScore"
-                    render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                          Maximum Score Ceiling
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                          />
-                        </FormControl>
-                        <FormDescription className="text-[11px] text-zinc-500">
-                          Cap for top-tier community influencers.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Max Score Presets */}
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-                    Quick Max Score Presets
-                  </Label>
-                  <PolarisPresetChips
-                    presets={MAX_SCORE_PRESETS}
-                    currentValue={Number(maxScore)}
-                    onSelect={(val) =>
-                      form.setValue("maxScore", val, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
-                    }
-                    prefix=""
-                  />
-                </div>
-
-                {/* Default Starting Score */}
-                <FormField
-                  control={form.control}
-                  name="defaultScore"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                      <FormLabel className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Default Starting Score for New Members
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                        />
-                      </FormControl>
-                      <FormDescription className="text-[11px] text-zinc-500">
-                        Initial starting score assigned immediately upon registration or onboarding.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Visual Range Indicator Bar */}
-                <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-medium text-zinc-600 dark:text-zinc-300">
-                    <span>Baseline: {minScore} pts</span>
-                    <span className="text-zinc-900 dark:text-zinc-100 font-bold">
-                      Starting: {defaultScore} pts ({Math.round(defaultScorePercentage)}%)
-                    </span>
-                    <span>Ceiling: {maxScore} pts</span>
-                  </div>
-                  <div className="relative h-2.5 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-zinc-600 to-zinc-900 dark:from-zinc-400 dark:to-zinc-100 rounded-full transition-all duration-300"
-                      style={{ width: `${defaultScorePercentage}%` }}
+                  {/* Score Range Min / Max */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="minScore"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                            Minimum Score Baseline <span className="text-[#d72c0d] ml-0.5">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
+                            />
+                          </FormControl>
+                          <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
+                            Lowest score a member can reach through decay (typically 0).
+                          </FormDescription>
+                          <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
+                        </FormItem>
+                      )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="maxScore"
+                      render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                          <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                            Maximum Score Ceiling <span className="text-[#d72c0d] ml-0.5">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
+                            />
+                          </FormControl>
+                          <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
+                            Cap for top-tier community members.
+                          </FormDescription>
+                          <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Max Score Presets */}
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                      Quick Max Score Presets
+                    </label>
+                    <PolarisPresetChips
+                      presets={MAX_SCORE_PRESETS}
+                      currentValue={Number(maxScore)}
+                      onSelect={(val) =>
+                        form.setValue("maxScore", val, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                      prefix=""
+                    />
+                  </div>
+
+                  {/* Default Starting Score */}
+                  <FormField
+                    control={form.control}
+                    name="defaultScore"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                          Default Starting Score for New Members <span className="text-[#d72c0d] ml-0.5">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
+                          Initial starting score assigned immediately upon registration or onboarding.
+                        </FormDescription>
+                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Visual Range Indicator Bar */}
+                  <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/40 space-y-1.5">
+                    <div className="flex items-center justify-between text-[12px] font-medium text-[#616161] dark:text-zinc-300">
+                      <span>Baseline: {minScore} pts</span>
+                      <span className="text-[#303030] dark:text-zinc-100 font-semibold">
+                        Starting: {defaultScore} pts ({Math.round(defaultScorePercentage)}%)
+                      </span>
+                      <span>Ceiling: {maxScore} pts</span>
+                    </div>
+                    <div className="relative h-2 w-full bg-[#d2d5d9] dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="absolute top-0 bottom-0 left-0 bg-[#303030] dark:bg-zinc-100 rounded-full transition-all duration-300"
+                        style={{ width: `${defaultScorePercentage}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </PolarisFormCard>
@@ -622,107 +673,109 @@ export function TemplateForm() {
                 description="Determine how often impact scores are re-evaluated and the inactivity grace window."
                 badge="Scheduling"
               >
-                {/* Refresh Frequency Cards */}
-                <FormField
-                  control={form.control}
-                  name="refreshFrequency"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Recalculation Frequency
-                      </FormLabel>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {REFRESH_OPTIONS.map((opt) => {
-                          const Icon = opt.icon;
-                          const isSelected = field.value === opt.value;
-                          return (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => field.onChange(opt.value)}
-                              className={cn(
-                                "flex flex-col text-left p-4 rounded-xl border transition-all cursor-pointer",
-                                isSelected
-                                  ? "border-zinc-900 bg-zinc-900/[0.03] dark:bg-zinc-100/10 ring-2 ring-zinc-900/15 dark:ring-zinc-100/20 shadow-xs"
-                                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
-                              )}
-                            >
-                              <div className="flex items-center justify-between w-full mb-2">
-                                <div
-                                  className={cn(
-                                    "h-7 w-7 rounded-lg flex items-center justify-center transition-colors",
-                                    isSelected
-                                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
-                                  )}
-                                >
-                                  <Icon className="h-3.5 w-3.5" />
-                                </div>
-                                {isSelected && (
-                                  <CheckCircle2 className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
+                <div className="space-y-4">
+                  {/* Refresh Frequency Cards */}
+                  <FormField
+                    control={form.control}
+                    name="refreshFrequency"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                          Recalculation Frequency
+                        </FormLabel>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {REFRESH_OPTIONS.map((opt) => {
+                            const Icon = opt.icon;
+                            const isSelected = field.value === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => field.onChange(opt.value)}
+                                className={cn(
+                                  "flex flex-col text-left p-3.5 rounded-[8px] border transition-all cursor-pointer",
+                                  isSelected
+                                    ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 shadow-xs ring-1 ring-[#303030] dark:ring-zinc-100"
+                                    : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                                 )}
-                              </div>
-                              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                                {opt.title}
-                              </span>
-                              <span className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-snug">
-                                {opt.desc}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              >
+                                <div className="flex items-center justify-between w-full mb-2">
+                                  <div
+                                    className={cn(
+                                      "h-7 w-7 rounded-[6px] flex items-center justify-center transition-colors",
+                                      isSelected
+                                        ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900"
+                                        : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-300",
+                                    )}
+                                  >
+                                    <Icon className="h-3.5 w-3.5" />
+                                  </div>
+                                  {isSelected && (
+                                    <CheckCircle2 className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
+                                  )}
+                                </div>
+                                <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                                  {opt.title}
+                                </span>
+                                <span className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+                                  {opt.desc}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Activity Window Days */}
-                <FormField
-                  control={form.control}
-                  name="activityWindowDays"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                      <FormLabel className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Inactivity Grace Period (Days)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                        />
-                      </FormControl>
-                      <FormDescription className="text-[11px] text-zinc-500">
-                        Number of consecutive days without eligible actions before score decay starts applying.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  {/* Activity Window Days */}
+                  <FormField
+                    control={form.control}
+                    name="activityWindowDays"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                          Inactivity Grace Period (Days) <span className="text-[#d72c0d] ml-0.5">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
+                          Number of consecutive days without eligible actions before score decay starts applying.
+                        </FormDescription>
+                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Activity Window Presets */}
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-                    Quick Grace Period Presets
-                  </Label>
-                  <PolarisPresetChips
-                    presets={WINDOW_PRESETS}
-                    currentValue={Number(activityWindowDays)}
-                    onSelect={(val) =>
-                      form.setValue("activityWindowDays", val, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
-                    }
-                    prefix=""
+                  {/* Activity Window Presets */}
+                  <div className="space-y-1.5">
+                    <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                      Quick Grace Period Presets
+                    </label>
+                    <PolarisPresetChips
+                      presets={WINDOW_PRESETS}
+                      currentValue={Number(activityWindowDays)}
+                      onSelect={(val) =>
+                        form.setValue("activityWindowDays", val, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                      prefix=""
+                    />
+                  </div>
+
+                  <PolarisInfoBanner
+                    title="Rolling Evaluation Window"
+                    description="When a member performs any qualifying action within their grace period, their decay clock automatically resets to zero."
                   />
                 </div>
-
-                <PolarisInfoBanner
-                  title="Rolling Evaluation Window"
-                  description="When a member performs any qualifying action within their grace period, their decay clock automatically resets to zero."
-                />
               </PolarisFormCard>
 
               {/* Step 3: Inactivity Decay Mechanics */}
@@ -732,77 +785,79 @@ export function TemplateForm() {
                 description="Configure automated deductions for members who remain inactive past their grace period."
                 badge="Retention Engine"
               >
-                {/* Decay Switch */}
-                <FormField
-                  control={form.control}
-                  name="decayEnabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-xl border border-zinc-200/80 dark:border-zinc-800 p-4 bg-zinc-50/50 dark:bg-zinc-900/40">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <TrendingDown className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
-                          <FormLabel className="text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
-                            Enable Automated Score Decay
-                          </FormLabel>
+                <div className="space-y-4">
+                  {/* Decay Switch */}
+                  <FormField
+                    control={form.control}
+                    name="decayEnabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 p-4 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <TrendingDown className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
+                            <FormLabel className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer">
+                              Enable Automated Score Decay
+                            </FormLabel>
+                          </div>
+                          <FormDescription className="text-[12px] text-[#616161] dark:text-zinc-400">
+                            Automatically deduct penalty points every {refreshFrequency.toLowerCase()} cycle when inactive.
+                          </FormDescription>
                         </div>
-                        <FormDescription className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                          Automatically deduct penalty points every {refreshFrequency.toLowerCase()} cycle when inactive.
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Decay Penalty Amount */}
+                  <FormField
+                    control={form.control}
+                    name="decayPenalty"
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5">
+                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                          Decay Penalty Deduction (Points per Cycle) <span className="text-[#d72c0d] ml-0.5">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            disabled={!decayEnabled}
+                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] disabled:opacity-50"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
+                          Points subtracted each {refreshFrequency.toLowerCase()} interval once past the {activityWindowDays}-day inactivity window.
                         </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Decay Penalty Amount */}
-                <FormField
-                  control={form.control}
-                  name="decayPenalty"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Decay Penalty Deduction (Points per Cycle)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          {...field}
-                          disabled={!decayEnabled}
-                          className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold disabled:opacity-50"
-                        />
-                      </FormControl>
-                      <FormDescription className="text-[11px] text-zinc-500">
-                        Points subtracted each {refreshFrequency.toLowerCase()} interval once past the {activityWindowDays}-day inactivity window.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
+                  {/* Decay Penalty Presets */}
+                  {decayEnabled && (
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                        Quick Deduction Presets
+                      </label>
+                      <PolarisPresetChips
+                        presets={DECAY_PRESETS}
+                        currentValue={Number(decayPenalty)}
+                        onSelect={(val) =>
+                          form.setValue("decayPenalty", val, {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          })
+                        }
+                        prefix="-"
+                      />
+                    </div>
                   )}
-                />
-
-                {/* Decay Penalty Presets */}
-                {decayEnabled && (
-                  <div className="space-y-2">
-                    <Label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-                      Quick Deduction Presets
-                    </Label>
-                    <PolarisPresetChips
-                      presets={DECAY_PRESETS}
-                      currentValue={Number(decayPenalty)}
-                      onSelect={(val) =>
-                        form.setValue("decayPenalty", val, {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        })
-                      }
-                      prefix="-"
-                    />
-                  </div>
-                )}
+                </div>
               </PolarisFormCard>
 
               {/* Floating Save Panel */}
@@ -834,8 +889,8 @@ export function TemplateForm() {
               />
             </form>
           </Form>
-        </PolarisFormLayout>
-      </div>
+        </div>
+      </PolarisFormLayout>
     </div>
   );
 }

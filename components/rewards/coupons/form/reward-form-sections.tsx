@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
-import { Label } from "@/components/ui/label";
 import { Input as UiInput } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
@@ -29,7 +28,7 @@ export function RewardFormSections({
     const errorMsg = formik.errors[field];
     if (isTouched && errorMsg) {
       return (
-        <p className="text-[11px] text-destructive font-medium mt-1 animate-in fade-in-50">
+        <p className="text-[12.5px] text-[#d72c0d] font-normal mt-1 leading-[18px]">
           {String(errorMsg)}
         </p>
       );
@@ -38,7 +37,7 @@ export function RewardFormSections({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 1. Core Reward Details & Rich Identity */}
       <RewardInfoSection formik={formik} err={err} />
 
@@ -70,7 +69,11 @@ export function RewardFormSections({
         onEligibilityChange={(val) =>
           formik.setFieldValue("memberEligibility", val)
         }
-        tierIds={formik.values.membershipTierId || formik.values.eligibleTierIds || []}
+        tierIds={
+          formik.values.membershipTierId ||
+          formik.values.eligibleTierIds ||
+          []
+        }
         onTierIdsChange={(tiers) => {
           formik.setFieldValue("membershipTierId", tiers);
           formik.setFieldValue("eligibleTierIds", tiers);
@@ -85,33 +88,33 @@ export function RewardFormSections({
         }
         errorMessage={
           formik.values.memberEligibility === "TIERS"
-            ? (err("membershipTierId") || err("eligibleTierIds"))
+            ? err("membershipTierId") || err("eligibleTierIds")
             : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
               ? err("eligibleUserIds")
               : null
         }
       >
         {/* Embedded Anti-Abuse Guardrails */}
-        <div className="pt-3 border-t border-border/70 space-y-3">
+        <div className="pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-xs font-bold text-foreground block">
+            <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
               Anti-Abuse & Gating Guardrails
-            </Label>
-            <span className="text-[10px] text-muted-foreground">
+            </span>
+            <span className="text-[11.5px] text-[#616161]">
               Optional fraud protection
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-xl border border-border bg-card space-y-1.5">
+            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label
+                <label
                   htmlFor="minAccountAge"
-                  className="text-xs font-semibold text-foreground"
+                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                 >
                   Min Account Age (Days)
-                </Label>
-                <span className="text-[10px] text-muted-foreground">0 = Off</span>
+                </label>
+                <span className="text-[11px] text-[#616161]">0 = Off</span>
               </div>
               <div className="relative">
                 <UiInput
@@ -121,29 +124,32 @@ export function RewardFormSections({
                   placeholder="0"
                   value={formik.values.minAccountAge || ""}
                   onChange={(e) =>
-                    formik.setFieldValue("minAccountAge", parseInt(e.target.value) || 0)
+                    formik.setFieldValue(
+                      "minAccountAge",
+                      parseInt(e.target.value) || 0,
+                    )
                   }
-                  className="h-9 bg-background border-border text-xs shadow-none font-semibold"
+                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[6px] font-semibold text-[#303030] dark:text-zinc-100"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
                   Days
                 </span>
               </div>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
                 Blocks newly registered accounts from claiming immediately.
               </p>
               {err("minAccountAge")}
             </div>
 
-            <div className="p-3.5 rounded-xl border border-border bg-card space-y-1.5">
+            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label
+                <label
                   htmlFor="cooldownPeriod"
-                  className="text-xs font-semibold text-foreground"
+                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                 >
                   Claim Cooldown Period
-                </Label>
-                <span className="text-[10px] text-muted-foreground">0 = Off</span>
+                </label>
+                <span className="text-[11px] text-[#616161]">0 = Off</span>
               </div>
               <div className="relative">
                 <UiInput
@@ -153,15 +159,18 @@ export function RewardFormSections({
                   placeholder="0"
                   value={formik.values.cooldownPeriod || ""}
                   onChange={(e) =>
-                    formik.setFieldValue("cooldownPeriod", parseInt(e.target.value) || 0)
+                    formik.setFieldValue(
+                      "cooldownPeriod",
+                      parseInt(e.target.value) || 0,
+                    )
                   }
-                  className="h-9 bg-background border-border text-xs shadow-none font-semibold"
+                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[6px] font-semibold text-[#303030] dark:text-zinc-100"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
                   Hours
                 </span>
               </div>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
                 Wait time before a member can claim this reward again.
               </p>
               {err("cooldownPeriod")}
@@ -169,15 +178,15 @@ export function RewardFormSections({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-xl border border-border bg-card space-y-1.5">
+            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label
+                <label
                   htmlFor="minActivityRequired"
-                  className="text-xs font-semibold text-foreground"
+                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                 >
                   Min Lifetime Points Required
-                </Label>
-                <span className="text-[10px] text-muted-foreground">0 = Off</span>
+                </label>
+                <span className="text-[11px] text-[#616161]">0 = Off</span>
               </div>
               <div className="relative">
                 <UiInput
@@ -185,34 +194,39 @@ export function RewardFormSections({
                   type="number"
                   min={0}
                   placeholder="0"
-                  value={formik.values.minActivityRequired || formik.values.minActivity || ""}
+                  value={
+                    formik.values.minActivityRequired ||
+                    formik.values.minActivity ||
+                    ""
+                  }
                   onChange={(e) => {
                     const val = parseInt(e.target.value) || 0;
                     formik.setFieldValue("minActivityRequired", val);
                     formik.setFieldValue("minActivity", val);
                   }}
-                  className="h-9 bg-background border-border text-xs shadow-none font-semibold"
+                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[6px] font-semibold text-[#303030] dark:text-zinc-100"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
                   PTS
                 </span>
               </div>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
                 Minimum activity points required to unlock this reward.
               </p>
               {err("minActivityRequired")}
             </div>
 
-            <div className="p-3.5 rounded-xl border border-border bg-card flex items-center justify-between gap-4">
+            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between gap-4">
               <div className="space-y-0.5">
-                <Label
+                <label
                   htmlFor="blockWarnedUsers"
-                  className="text-xs font-semibold text-foreground cursor-pointer"
+                  className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200 cursor-pointer"
                 >
                   Block Warned Members
-                </Label>
-                <p className="text-[10px] text-muted-foreground">
-                  Disallow members with active moderation warnings from redeeming.
+                </label>
+                <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+                  Disallow members with active moderation warnings from
+                  redeeming.
                 </p>
               </div>
               <Switch
@@ -225,13 +239,13 @@ export function RewardFormSections({
             </div>
           </div>
 
-          <div className="space-y-1.5 pt-0.5">
-            <Label
+          <div className="space-y-1.5 pt-1">
+            <label
               htmlFor="eligibilityDescription"
-              className="text-xs font-semibold text-foreground"
+              className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
             >
               Eligibility & Gating Note
-            </Label>
+            </label>
             <UiInput
               id="eligibilityDescription"
               value={formik.values.eligibilityDescription || ""}
@@ -239,10 +253,11 @@ export function RewardFormSections({
                 formik.setFieldValue("eligibilityDescription", e.target.value)
               }
               placeholder="e.g. Available only for verified VIP tier members"
-              className="h-9 text-xs bg-background"
+              className="h-[36px] text-[13px] bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px]"
             />
-            <p className="text-[10px] text-muted-foreground">
-              Optional note displayed to members when explaining reward requirements.
+            <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+              Optional note displayed to members when explaining reward
+              requirements.
             </p>
             {err("eligibilityDescription")}
           </div>

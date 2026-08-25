@@ -12,21 +12,27 @@ import { GET_IMPACT_RULES } from "@/graphql/quries/impact";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 import { ImpactRuleForm } from "@/components/impact/rule-form";
 
 export default function CreateImpactRulePage() {
   const router = useRouter();
-  const { data: moduleData } = useGetEntityGamificationModules();
-  const { data: templatesData } = useGetImpactTemplates();
+  const { data: moduleData, loading: modulesLoading } =
+    useGetEntityGamificationModules();
+  const { data: templatesData, loading: templatesLoading } =
+    useGetImpactTemplates();
   const [createRule, { loading: isCreating }] = useCreateImpactRule({
     refetchQueries: [{ query: GET_IMPACT_RULES }],
   });
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
-  const integrations = moduleData?.getEntityGamificationModules?.integrations || [];
+  const integrations =
+    moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
-  const moduleTriggers = moduleData?.getEntityGamificationModules?.moduleTriggers || [];
-  const integrationTriggers = moduleData?.getEntityGamificationModules?.integrationTriggers || [];
+  const moduleTriggers =
+    moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers =
+    moduleData?.getEntityGamificationModules?.integrationTriggers || [];
   const templates = templatesData?.impactTemplates || [];
 
   const handleCreate = async (values: any) => {
@@ -44,6 +50,8 @@ export default function CreateImpactRulePage() {
     });
   };
 
+  const isLoading = modulesLoading || templatesLoading;
+
   return (
     <EcosystemWrapper>
       <EcosystemHeader
@@ -59,16 +67,21 @@ export default function CreateImpactRulePage() {
         ]}
       />
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <ImpactRuleForm
-          onSubmit={handleCreate}
-          loading={isCreating}
-          modules={modules}
-          integrations={integrations}
-          triggers={triggers}
-          moduleTriggers={moduleTriggers}
-          integrationTriggers={integrationTriggers}
-          templates={templates}
-        />
+        {isLoading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : (
+          <ImpactRuleForm
+            showHeader={false}
+            onSubmit={handleCreate}
+            loading={isCreating}
+            modules={modules}
+            integrations={integrations}
+            triggers={triggers}
+            moduleTriggers={moduleTriggers}
+            integrationTriggers={integrationTriggers}
+            templates={templates}
+          />
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );

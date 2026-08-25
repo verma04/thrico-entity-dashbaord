@@ -333,7 +333,7 @@ export function PillarsLiveFeed({ loading = false, redemptions = [] }: PillarsLi
                 className={cn(
                   "py-0.5 px-1.5 text-[10px] font-bold rounded transition-all text-center cursor-pointer",
                   selectedPillarFlow === "manual"
-                    ? "bg-emerald-600 text-white shadow-2xs"
+                    ? "bg-primary text-primary-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 )}
               >
@@ -344,7 +344,7 @@ export function PillarsLiveFeed({ loading = false, redemptions = [] }: PillarsLi
                 className={cn(
                   "py-0.5 px-1.5 text-[10px] font-bold rounded transition-all text-center cursor-pointer",
                   selectedPillarFlow === "store"
-                    ? "bg-indigo-600 text-white shadow-2xs"
+                    ? "bg-primary text-primary-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 )}
               >
@@ -355,7 +355,7 @@ export function PillarsLiveFeed({ loading = false, redemptions = [] }: PillarsLi
                 className={cn(
                   "py-0.5 px-1.5 text-[10px] font-bold rounded transition-all text-center cursor-pointer",
                   selectedPillarFlow === "giftcards"
-                    ? "bg-purple-600 text-white shadow-2xs"
+                    ? "bg-primary text-primary-foreground shadow-2xs"
                     : "text-muted-foreground hover:text-foreground hover:bg-background/50"
                 )}
               >

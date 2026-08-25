@@ -5,10 +5,8 @@ import {
   useCreateOffer,
   useGetOfferCategories,
 } from "@/graphql/actions/offers";
-import { GET_OFFERS, GET_OFFER_STATS } from "@/graphql/quries/offers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -31,13 +29,8 @@ import {
   Percent,
   FileText,
   Sparkles,
-  ExternalLink,
-  ShieldCheck,
-  Clock,
-  Layers,
   Camera,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
@@ -150,7 +143,7 @@ function CreateOfferPage() {
           },
         });
       } catch (err) {
-        // Error is handled in onError
+        // Handled in onError
       }
     },
   });
@@ -201,7 +194,7 @@ function CreateOfferPage() {
           icon={Tag}
           breadcrumbs={[
             { label: moduleName, href: "/offers/all" },
-            { label: "Create" },
+            { label: `Create ${singularName}` },
           ]}
         />
 
@@ -215,9 +208,9 @@ function CreateOfferPage() {
                   badge="Live Preview"
                   icon={Sparkles}
                 >
-                  <div className="space-y-3">
+                  <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs">
                     {/* Visual Asset Preview */}
-                    <div className="aspect-[2/1] rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/80 flex items-center justify-center overflow-hidden relative group">
+                    <div className="aspect-[2/1] rounded-[6px] bg-[#e1e3e5] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 flex items-center justify-center overflow-hidden relative group">
                       {imageUrl ? (
                         <img
                           src={imageUrl}
@@ -226,15 +219,15 @@ function CreateOfferPage() {
                         />
                       ) : (
                         <div className="text-center p-4">
-                          <FileText className="h-8 w-8 text-zinc-400 dark:text-zinc-600 mx-auto mb-1.5" />
-                          <p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
+                          <FileText className="h-8 w-8 text-[#8c9196] mx-auto mb-1" />
+                          <p className="text-[11px] font-medium text-[#616161]">
                             Upload banner to preview
                           </p>
                         </div>
                       )}
                       {formik.values.discount && (
                         <div className="absolute top-2 right-2">
-                          <Badge className="bg-primary text-primary-foreground text-[10px] font-bold shadow-sm">
+                          <Badge className="bg-[#303030] dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-bold shadow-xs rounded-[4px] border-none">
                             {formik.values.discount}
                           </Badge>
                         </div>
@@ -244,7 +237,7 @@ function CreateOfferPage() {
                     {/* Headline and Details */}
                     <div>
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 leading-tight">
+                        <h4 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 leading-tight truncate">
                           {formik.values.title || `New ${singularName} Title`}
                         </h4>
                       </div>
@@ -253,20 +246,20 @@ function CreateOfferPage() {
                         {selectedCategory && (
                           <Badge
                             variant="secondary"
-                            className="bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold"
+                            className="bg-white dark:bg-zinc-800 border border-[#d2d5d9] text-[#303030] dark:text-zinc-200 text-[10px] font-semibold rounded-[4px]"
                           >
                             <Tag className="h-2.5 w-2.5 mr-1" />
                             {selectedCategory.name}
                           </Badge>
                         )}
                         {formik.values.isFeatured && (
-                          <Badge className="bg-amber-400 text-amber-950 border-none text-[10px] font-bold flex items-center gap-0.5">
+                          <Badge className="bg-amber-400 text-amber-950 border-none text-[10px] font-bold flex items-center gap-0.5 rounded-[4px]">
                             <Star className="h-2.5 w-2.5 fill-current" />
                             Featured
                           </Badge>
                         )}
                         {formik.values.isTrending && (
-                          <Badge className="bg-emerald-500 text-white border-none text-[10px] font-bold flex items-center gap-0.5">
+                          <Badge className="bg-emerald-600 text-white border-none text-[10px] font-bold flex items-center gap-0.5 rounded-[4px]">
                             <TrendingUp className="h-2.5 w-2.5" />
                             Trending
                           </Badge>
@@ -274,19 +267,19 @@ function CreateOfferPage() {
                       </div>
 
                       {formik.values.description && (
-                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-3 leading-relaxed">
+                        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-2 line-clamp-3 leading-[16px]">
                           {formik.values.description}
                         </p>
                       )}
                     </div>
 
                     {/* Summary Matrix */}
-                    <div className="space-y-1 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                       {formik.values.code && (
                         <PolarisSummaryRow
                           label="Promo Code"
                           value={
-                            <code className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[11px] font-mono font-bold">
+                            <code className="px-1.5 py-0.5 rounded-[4px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] text-[11px] font-mono font-bold text-[#303030] dark:text-zinc-100">
                               {formik.values.code}
                             </code>
                           }
@@ -328,8 +321,8 @@ function CreateOfferPage() {
                 description={`Upload an eye-catching banner image (800×400px recommended).`}
                 badge="Visuals"
               >
-                <div className="space-y-3">
-                  <div className="relative group aspect-[2/1] w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                <div className="space-y-2">
+                  <div className="relative group aspect-[2/1] w-full rounded-[8px] overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7] dark:bg-zinc-900 flex items-center justify-center">
                     <Image
                       src={
                         imageUrl ||
@@ -345,7 +338,7 @@ function CreateOfferPage() {
                         type="button"
                         variant="secondary"
                         size="sm"
-                        className="h-9 px-4 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-md border-none text-xs font-semibold shadow-md gap-2 cursor-pointer"
+                        className="h-9 px-4 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-xs border-none text-[13px] font-semibold shadow-md gap-2 cursor-pointer rounded-[6px]"
                         onClick={() =>
                           document.getElementById("offer-banner-upload")?.click()
                         }
@@ -362,7 +355,7 @@ function CreateOfferPage() {
                       onChange={handleImageUpload}
                     />
                   </div>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400">
                     Supports PNG, JPG, or WebP. Optimal ratio is 2:1 for
                     seamless cross-device rendering. Max 5MB.
                   </p>
@@ -376,26 +369,26 @@ function CreateOfferPage() {
                 description={`Provide key title, classification category, and comprehensive details.`}
                 badge="Required"
               >
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {/* Title */}
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="title"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
                       {singularName} Title{" "}
-                      <span className="text-rose-500">*</span>
-                    </Label>
+                      <span className="text-[#d72c0d] ml-0.5">*</span>
+                    </label>
                     <Input
                       id="title"
                       placeholder="e.g., 50% Off Annual Cloud Hosting Subscription"
                       value={formik.values.title}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                     />
                     {formik.touched.title && formik.errors.title && (
-                      <p className="text-[11px] text-rose-500 font-medium">
+                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                         {formik.errors.title as string}
                       </p>
                     )}
@@ -403,9 +396,9 @@ function CreateOfferPage() {
 
                   {/* Category */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Category <span className="text-rose-500">*</span>
-                    </Label>
+                    <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                      Category <span className="text-[#d72c0d] ml-0.5">*</span>
+                    </label>
                     <Select
                       value={formik.values.categoryId}
                       onValueChange={(value) =>
@@ -413,7 +406,7 @@ function CreateOfferPage() {
                       }
                       disabled={categoriesLoading}
                     >
-                      <SelectTrigger className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold">
+                      <SelectTrigger className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]">
                         <SelectValue
                           placeholder={
                             categoriesLoading
@@ -429,7 +422,7 @@ function CreateOfferPage() {
                             <SelectItem
                               key={cat.id}
                               value={cat.id}
-                              className="text-xs"
+                              className="text-[13px]"
                             >
                               {cat.name}
                             </SelectItem>
@@ -437,7 +430,7 @@ function CreateOfferPage() {
                       </SelectContent>
                     </Select>
                     {formik.touched.categoryId && formik.errors.categoryId && (
-                      <p className="text-[11px] text-rose-500 font-medium">
+                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                         {formik.errors.categoryId as string}
                       </p>
                     )}
@@ -445,13 +438,13 @@ function CreateOfferPage() {
 
                   {/* Description */}
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="description"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
                       Detailed Description{" "}
-                      <span className="text-rose-500">*</span>
-                    </Label>
+                      <span className="text-[#d72c0d] ml-0.5">*</span>
+                    </label>
                     <Textarea
                       id="description"
                       rows={4}
@@ -459,18 +452,18 @@ function CreateOfferPage() {
                       value={formik.values.description}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className="min-h-[110px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                      className="min-h-[110px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
                     />
                     <div className="flex items-center justify-between">
                       {formik.touched.description &&
                       formik.errors.description ? (
-                        <p className="text-[11px] text-rose-500 font-medium">
+                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                           {formik.errors.description as string}
                         </p>
                       ) : (
                         <span />
                       )}
-                      <p className="text-[10px] text-zinc-400 font-mono">
+                      <p className="text-[11.5px] text-[#616161] font-medium">
                         {formik.values.description.length} characters (min 20)
                       </p>
                     </div>
@@ -485,56 +478,56 @@ function CreateOfferPage() {
                 description="Configure savings amount, coupon codes, and target destination URL."
                 badge="Redemption"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Discount */}
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="discount"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
                       Discount Value / Badge
-                    </Label>
+                    </label>
                     <div className="relative">
-                      <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                      <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161]" />
                       <Input
                         id="discount"
                         placeholder="e.g., 20% OFF or $50 Credit"
                         value={formik.values.discount}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                        className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                       />
                     </div>
                   </div>
 
                   {/* Promo Code */}
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="code"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
                       Promo / Coupon Code
-                    </Label>
+                    </label>
                     <Input
                       id="code"
                       placeholder="e.g., COMMUNITY20"
                       value={formik.values.code}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className="h-10 font-mono bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold uppercase"
+                      className="h-[40px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] uppercase"
                     />
                   </div>
 
                   {/* Website URL */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label
+                    <label
                       htmlFor="website"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
                       Redemption Website URL
-                    </Label>
+                    </label>
                     <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161]" />
                       <Input
                         id="website"
                         type="url"
@@ -542,11 +535,11 @@ function CreateOfferPage() {
                         value={formik.values.website}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                        className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                       />
                     </div>
                     {formik.touched.website && formik.errors.website && (
-                      <p className="text-[11px] text-rose-500 font-medium">
+                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                         {formik.errors.website as string}
                       </p>
                     )}
@@ -561,28 +554,28 @@ function CreateOfferPage() {
                 description="Specify the active availability window for this opportunity."
                 badge="Required"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Valid From */}
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="validFrom"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
-                      Valid From <span className="text-rose-500">*</span>
-                    </Label>
+                      Valid From <span className="text-[#d72c0d] ml-0.5">*</span>
+                    </label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161] pointer-events-none" />
                       <Input
                         id="validFrom"
                         type="date"
                         value={formik.values.validFrom}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                        className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                       />
                     </div>
                     {formik.touched.validFrom && formik.errors.validFrom && (
-                      <p className="text-[11px] text-rose-500 font-medium">
+                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                         {formik.errors.validFrom as string}
                       </p>
                     )}
@@ -590,25 +583,25 @@ function CreateOfferPage() {
 
                   {/* Valid To */}
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="validTo"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
-                      Valid To <span className="text-rose-500">*</span>
-                    </Label>
+                      Valid To <span className="text-[#d72c0d] ml-0.5">*</span>
+                    </label>
                     <div className="relative">
-                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161] pointer-events-none" />
                       <Input
                         id="validTo"
                         type="date"
                         value={formik.values.validTo}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                        className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                       />
                     </div>
                     {formik.touched.validTo && formik.errors.validTo && (
-                      <p className="text-[11px] text-rose-500 font-medium">
+                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                         {formik.errors.validTo as string}
                       </p>
                     )}
@@ -623,15 +616,15 @@ function CreateOfferPage() {
                 description="Add fine print and configure platform highlight toggles."
                 badge="Optional"
               >
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {/* Terms */}
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="terms"
-                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                     >
                       Terms & Conditions
-                    </Label>
+                    </label>
                     <Textarea
                       id="terms"
                       rows={3}
@@ -639,60 +632,60 @@ function CreateOfferPage() {
                       value={formik.values.terms}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className="min-h-[80px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                      className="min-h-[80px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
                     />
                   </div>
 
                   {/* Highlights & Toggles */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <div className="flex items-center space-x-3 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 transition-colors">
+                    <div className="flex items-center space-x-3 p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
                       <Checkbox
                         id="isFeatured"
                         checked={formik.values.isFeatured}
                         onCheckedChange={(checked) =>
                           formik.setFieldValue("isFeatured", checked)
                         }
-                        className="h-4 w-4 rounded-md"
+                        className="h-4 w-4 rounded-[4px]"
                       />
-                      <Label
+                      <label
                         htmlFor="isFeatured"
                         className="flex items-center gap-2 cursor-pointer flex-1"
                       >
                         <Star className="h-4 w-4 text-amber-500" />
                         <div>
-                          <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          <div className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                             Featured {singularName}
                           </div>
-                          <div className="text-[10px] text-zinc-500">
+                          <div className="text-[11.5px] text-[#616161]">
                             Highlight in premium top carousels
                           </div>
                         </div>
-                      </Label>
+                      </label>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 transition-colors">
+                    <div className="flex items-center space-x-3 p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
                       <Checkbox
                         id="isTrending"
                         checked={formik.values.isTrending}
                         onCheckedChange={(checked) =>
                           formik.setFieldValue("isTrending", checked)
                         }
-                        className="h-4 w-4 rounded-md"
+                        className="h-4 w-4 rounded-[4px]"
                       />
-                      <Label
+                      <label
                         htmlFor="isTrending"
                         className="flex items-center gap-2 cursor-pointer flex-1"
                       >
-                        <TrendingUp className="h-4 w-4 text-emerald-500" />
+                        <TrendingUp className="h-4 w-4 text-emerald-600" />
                         <div>
-                          <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          <div className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                             Trending {singularName}
                           </div>
-                          <div className="text-[10px] text-zinc-500">
+                          <div className="text-[11.5px] text-[#616161]">
                             Display high-velocity discovery tag
                           </div>
                         </div>
-                      </Label>
+                      </label>
                     </div>
                   </div>
                 </div>

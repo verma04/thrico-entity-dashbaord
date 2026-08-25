@@ -16,34 +16,24 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
-  PolarisInfoBanner,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { ConditionBuilder } from "@/components/members/settings/rules/condition-builder";
 import { ActionBuilder } from "@/components/members/settings/rules/action-builder";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Zap,
   Sparkles,
-  Sliders,
   Filter,
   Users,
   ShieldCheck,
   CheckCircle2,
   TrendingUp,
-  Award,
-  Mail,
-  Bell,
-  Tag,
-  ArrowRight,
   School,
   Building,
-  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -52,7 +42,7 @@ interface AutomationFormProps {
   initialValues?: MemberAutomationRule | null;
   loading?: boolean;
   onSave: (
-    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput
+    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput,
   ) => Promise<void>;
   onCancel: () => void;
   isEdit?: boolean;
@@ -107,7 +97,10 @@ const PRESET_RECIPES = [
     ],
     actions: [
       { type: "ASSIGN_MEMBERSHIP_TIER" as const },
-      { type: "ADD_MEMBER_TAG" as const, tags: ["Stanford Alumni", "Class of 2026"] },
+      {
+        type: "ADD_MEMBER_TAG" as const,
+        tags: ["Stanford Alumni", "Class of 2026"],
+      },
       {
         type: "EMAIL" as const,
         emailSubject: "Welcome Stanford Alumni! 🎓",
@@ -167,17 +160,15 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
   onCancel,
   isEdit = false,
 }) => {
-  const router = useRouter();
-
   const [name, setName] = useState(initialValues?.name || "");
   const [description, setDescription] = useState(
-    initialValues?.description || ""
+    initialValues?.description || "",
   );
   const [trigger, setTrigger] = useState<MemberRuleTrigger>(
-    initialValues?.trigger || "MEMBER_JOINED"
+    initialValues?.trigger || "MEMBER_JOINED",
   );
   const [conditionOperator, setConditionOperator] = useState<"AND" | "OR">(
-    (initialValues?.conditionOperator as "AND" | "OR") || "AND"
+    (initialValues?.conditionOperator as "AND" | "OR") || "AND",
   );
   const [conditions, setConditions] = useState<MemberRuleConditionInput[]>(
     initialValues?.conditions
@@ -186,7 +177,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           operator: c.operator,
           value: c.value,
         }))
-      : []
+      : [],
   );
   const [actions, setActions] = useState<MemberRuleActionInput[]>(
     initialValues?.actions
@@ -203,10 +194,10 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           pushBody: a.pushBody,
           push: a.push,
         }))
-      : [{ type: "ASSIGN_MEMBERSHIP_TIER" }]
+      : [{ type: "ASSIGN_MEMBERSHIP_TIER" }],
   );
   const [isActive, setIsActive] = useState(
-    initialValues ? initialValues.isActive : true
+    initialValues ? initialValues.isActive : true,
   );
   const [savedState, setSavedState] = useState(false);
 
@@ -250,7 +241,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
             field: c.field,
             operator: c.operator,
             value: c.value,
-          })) || []
+          })) || [],
         ) ||
       JSON.stringify(actions) !==
         JSON.stringify(
@@ -266,7 +257,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
             pushTitle: a.pushTitle,
             pushBody: a.pushBody,
             push: a.push,
-          })) || []
+          })) || [],
         )
     );
   }, [
@@ -286,7 +277,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
       setDescription(initialValues.description || "");
       setTrigger(initialValues.trigger || "MEMBER_JOINED");
       setConditionOperator(
-        (initialValues.conditionOperator as "AND" | "OR") || "AND"
+        (initialValues.conditionOperator as "AND" | "OR") || "AND",
       );
       setConditions(
         initialValues.conditions
@@ -295,7 +286,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
               operator: c.operator,
               value: c.value,
             }))
-          : []
+          : [],
       );
       setActions(
         initialValues.actions
@@ -312,7 +303,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
               pushBody: a.pushBody,
               push: a.push,
             }))
-          : []
+          : [],
       );
       setIsActive(initialValues.isActive);
     } else {
@@ -389,66 +380,69 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
   };
 
   const selectedTriggerMeta = useMemo(() => {
-    return TRIGGER_OPTIONS.find((t) => t.value === trigger) || TRIGGER_OPTIONS[0];
+    return (
+      TRIGGER_OPTIONS.find((t) => t.value === trigger) || TRIGGER_OPTIONS[0]
+    );
   }, [trigger]);
 
   return (
     <form onSubmit={handleSubmit}>
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Live Pipeline Flow Preview */}
             <PolarisSidebarCard
               title="Workflow Pipeline"
               badge="Live Summary"
               icon={Sparkles}
             >
-              <div className="space-y-3">
+              <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs">
                 {/* Visual Step Sequence */}
-                <div className="p-3 rounded-xl bg-zinc-50/70 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 space-y-2.5">
+                <div className="p-3 rounded-[6px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-800 space-y-2">
                   {/* Step 1: Trigger */}
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-[10px]">
+                  <div className="flex items-center gap-2 text-[12.5px]">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-[10px]">
                       1
                     </div>
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    <span className="font-semibold text-[#303030] dark:text-zinc-100">
                       {selectedTriggerMeta.label}
                     </span>
                   </div>
 
                   <div className="pl-2.5">
-                    <div className="w-px h-3 bg-zinc-300 dark:bg-zinc-700" />
+                    <div className="w-px h-2.5 bg-[#d2d5d9] dark:bg-zinc-700" />
                   </div>
 
                   {/* Step 2: Conditions */}
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-5 h-5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]">
+                  <div className="flex items-center gap-2 text-[12.5px]">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/15 text-blue-700 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]">
                       2
                     </div>
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    <span className="font-semibold text-[#303030] dark:text-zinc-100">
                       {conditions.length > 0
                         ? `${conditions.length} Condition${conditions.length > 1 ? "s" : ""} (${conditionOperator})`
-                        : "All Members (No Conditions)"}
+                        : "All Members (No Filter)"}
                     </span>
                   </div>
 
                   <div className="pl-2.5">
-                    <div className="w-px h-3 bg-zinc-300 dark:bg-zinc-700" />
+                    <div className="w-px h-2.5 bg-[#d2d5d9] dark:bg-zinc-700" />
                   </div>
 
                   {/* Step 3: Actions */}
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-5 h-5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-[10px]">
+                  <div className="flex items-center gap-2 text-[12.5px]">
+                    <div className="w-5 h-5 rounded-full bg-purple-500/15 text-purple-700 dark:text-purple-400 flex items-center justify-center font-bold text-[10px]">
                       3
                     </div>
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                      {actions.length} Action{actions.length === 1 ? "" : "s"} Executed
+                    <span className="font-semibold text-[#303030] dark:text-zinc-100">
+                      {actions.length} Action{actions.length === 1 ? "" : "s"}{" "}
+                      Executed
                     </span>
                   </div>
                 </div>
 
                 {/* Summary Table Breakdown */}
-                <div className="space-y-1.5 pt-1">
+                <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                   <PolarisSummaryRow
                     label="Rule Name"
                     value={
@@ -479,10 +473,10 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
                       <Badge
                         variant="outline"
                         className={cn(
-                          "text-[10px] font-bold px-1.5 py-0.2",
+                          "text-[10px] font-bold px-1.5 py-0.2 rounded-[4px]",
                           isActive
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
-                            : "bg-zinc-100 text-zinc-500 border-zinc-300"
+                            ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
+                            : "bg-zinc-100 text-zinc-600 border-zinc-300",
                         )}
                       >
                         {isActive ? "Active" : "Paused"}
@@ -500,7 +494,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
               badge="1-Click"
               icon={Sparkles}
             >
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {PRESET_RECIPES.map((recipe, idx) => {
                   const Icon = recipe.icon;
                   return (
@@ -508,16 +502,16 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
                       key={idx}
                       type="button"
                       onClick={() => handleApplyRecipe(recipe)}
-                      className="w-full p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/40 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-left transition-all flex items-start gap-2.5 group cursor-pointer"
+                      className="w-full p-2.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 hover:border-[#aeb4b9] bg-white dark:bg-zinc-900 hover:bg-[#f6f6f7] text-left transition-all flex items-start gap-2.5 group cursor-pointer"
                     >
-                      <div className="w-6 h-6 rounded-md bg-white dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 flex items-center justify-center shrink-0 mt-0.5">
-                        <Icon className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300 group-hover:text-primary" />
+                      <div className="w-6 h-6 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <Icon className="w-3.5 h-3.5 text-[#616161] group-hover:text-[#303030]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-primary block truncate">
+                        <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 block truncate">
                           {recipe.title}
                         </span>
-                        <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                        <span className="text-[11px] text-[#616161] dark:text-zinc-400">
                           {recipe.badge} · {recipe.actions.length} Actions
                         </span>
                       </div>
@@ -529,17 +523,18 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
 
             {/* Automation Execution Logic Tip */}
             <PolarisTipCard title="Automation Best Practices" icon={TrendingUp}>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 text-[12px] text-[#616161] leading-[16px]">
                 <p>
-                  <strong>Priority-Based:</strong> Rules execute sequentially by priority rank (#1 is evaluated first).
+                  <strong>Priority-Based:</strong> Rules execute sequentially by
+                  priority rank (#1 is evaluated first).
                 </p>
                 <p>
                   <strong>Merge Tags:</strong> Use{" "}
-                  <code className="bg-zinc-200 dark:bg-zinc-800 px-1 py-0.5 rounded text-[10px]">
+                  <code className="bg-[#f6f6f7] dark:bg-zinc-800 px-1 py-0.5 rounded border border-[#d2d5d9] text-[10px] font-mono">
                     {"{{firstName}}"}
                   </code>{" "}
                   and{" "}
-                  <code className="bg-zinc-200 dark:bg-zinc-800 px-1 py-0.5 rounded text-[10px]">
+                  <code className="bg-[#f6f6f7] dark:bg-zinc-800 px-1 py-0.5 rounded border border-[#d2d5d9] text-[10px] font-mono">
                     {"{{tierName}}"}
                   </code>{" "}
                   in email bodies for instant personalization.
@@ -556,38 +551,40 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           description="Define the administrative rule title and the lifecycle event that initiates this automation."
           icon={Zap}
         >
-          <div className="space-y-4">
-            <div>
-              <Label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block mb-1.5">
-                Rule Name <span className="text-rose-500">*</span>
-              </Label>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Rule Name <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Input
                 type="text"
                 placeholder="e.g. Stanford University - Gold Tier & Welcome Flow"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-10 text-xs bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700"
+                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 required
               />
             </div>
 
-            <div>
-              <Label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block mb-1.5">
-                Description <span className="text-zinc-400 font-normal">(Optional)</span>
-              </Label>
+            <div className="space-y-1.5">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Description{" "}
+                <span className="text-[#616161] font-normal">(Optional)</span>
+              </label>
               <Textarea
                 placeholder="Describe when this rule executes and what privileges or emails it awards to matching members..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="text-xs bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 resize-none min-h-[64px]"
+                className="text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none min-h-[70px]"
               />
             </div>
 
             {/* Trigger Selector */}
-            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-              <Label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block">
-                Trigger Lifecycle Event (WHEN)
-              </Label>
+            <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Trigger Lifecycle Event (WHEN){" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {TRIGGER_OPTIONS.map((opt) => {
                   const Icon = opt.icon;
@@ -598,31 +595,28 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
                       type="button"
                       onClick={() => setTrigger(opt.value)}
                       className={cn(
-                        "p-3 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer",
+                        "p-3 rounded-[8px] border text-left flex flex-col justify-between transition-all cursor-pointer",
                         isSelected
-                          ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 shadow-xs"
-                          : "bg-zinc-50/60 dark:bg-zinc-800/40 border-zinc-200 dark:border-zinc-700/80 hover:border-zinc-300 dark:hover:border-zinc-600"
+                          ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
                       <div className="flex items-center gap-2 mb-1.5">
-                        <Icon
+                        <div
                           className={cn(
-                            "w-4 h-4",
+                            "w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 border",
                             isSelected
-                              ? "text-white dark:text-zinc-900"
-                              : "text-zinc-500"
+                              ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                              : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
                           )}
-                        />
-                        <span className="text-xs font-bold">{opt.label}</span>
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                          {opt.label}
+                        </span>
                       </div>
-                      <p
-                        className={cn(
-                          "text-[10px] leading-tight",
-                          isSelected
-                            ? "text-zinc-300 dark:text-zinc-600"
-                            : "text-zinc-500 dark:text-zinc-400"
-                        )}
-                      >
+                      <p className="text-[11px] leading-[15px] text-[#616161] dark:text-zinc-400">
                         {opt.description}
                       </p>
                     </button>
@@ -632,13 +626,14 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
             </div>
 
             {/* Active Switch */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50/50 dark:bg-zinc-800/30 border border-zinc-200/80 dark:border-zinc-800">
+            <div className="flex items-center justify-between p-3.5 rounded-[8px] bg-[#f6f6f7]/50 dark:bg-zinc-900/40 border border-[#d2d5d9] dark:border-zinc-800 mt-2">
               <div>
-                <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">
+                <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block">
                   Rule Active Status
                 </span>
-                <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                  When active, this rule will automatically evaluate matching members in real time.
+                <span className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+                  When active, this rule will automatically evaluate matching
+                  members in real time.
                 </span>
               </div>
               <Switch
@@ -657,7 +652,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           description="Filter which members qualify for this automation based on profile, education, tags, or email domain."
           icon={Filter}
         >
-          <div className="space-y-4">
+          <div className="space-y-3">
             <ConditionBuilder
               conditions={conditions}
               conditionOperator={conditionOperator}
@@ -674,13 +669,13 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           description="Configure the privileges, emails, circles, and tags that are triggered automatically for matching members."
           icon={Sparkles}
         >
-          <div className="space-y-4">
+          <div className="space-y-3">
             <ActionBuilder actions={actions} onChange={setActions} />
           </div>
         </PolarisFormCard>
       </PolarisFormLayout>
 
-      {/* Floating Save Panel (like /members/create) */}
+      {/* Floating Save Panel */}
       <FloatingSavePanel
         hasChanged={hasChanged}
         saved={savedState}
@@ -688,8 +683,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
         onSave={() => handleSubmit()}
         onReset={handleReset}
         title="Unsaved rule changes"
-        saveButtonText={isEdit ? "Update Rule" : "Create Rule"}
-        discardButtonText="Discard"
+        buttonText={isEdit ? "Update Rule" : "Create Rule"}
       />
     </form>
   );

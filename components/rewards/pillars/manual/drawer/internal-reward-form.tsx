@@ -12,13 +12,13 @@ import {
   Users,
   Zap,
   FileSpreadsheet,
+  Check,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import {
   PolarisFormLayout,
@@ -34,7 +34,6 @@ import {
   useCreateManualVoucherBatch,
   useGetManualVoucherBatchById,
   ManualCouponType,
-  CreateManualVoucherBatchInput,
 } from "@/graphql/actions/rewards/manual";
 import { ManualRewardItem } from "../table/manual-reward-card";
 import { toast } from "sonner";
@@ -75,7 +74,9 @@ const internalRewardSchema = Yup.object().shape({
     otherwise: (schema) => schema.nullable(),
   }),
   validityDays: Yup.number().min(1, "Validity days must be at least 1"),
-  url: Yup.string().url("Must be a valid URL format (e.g. https://example.com)").nullable(),
+  url: Yup.string()
+    .url("Must be a valid URL format (e.g. https://example.com)")
+    .nullable(),
 });
 
 export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
@@ -99,25 +100,38 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
     skip: !id || Boolean(initialItem),
   });
 
-  const parsedFetchedItem: ManualRewardItem | null = fetchedBatchData?.getManualVoucherBatchById
+  const parsedFetchedItem: ManualRewardItem | null = fetchedBatchData
+    ?.getManualVoucherBatchById
     ? {
         id: fetchedBatchData.getManualVoucherBatchById.id,
         title: fetchedBatchData.getManualVoucherBatchById.name,
         description: fetchedBatchData.getManualVoucherBatchById.description,
         image: fetchedBatchData.getManualVoucherBatchById.image || "",
         url: fetchedBatchData.getManualVoucherBatchById.url || "",
-        couponType: fetchedBatchData.getManualVoucherBatchById.couponType || ManualCouponType.ONE_TO_ONE,
-        couponCode: fetchedBatchData.getManualVoucherBatchById.couponType === ManualCouponType.ONE_TO_MANY ? fetchedBatchData.getManualVoucherBatchById.name : "",
+        couponType:
+          fetchedBatchData.getManualVoucherBatchById.couponType ||
+          ManualCouponType.ONE_TO_ONE,
+        couponCode:
+          fetchedBatchData.getManualVoucherBatchById.couponType ===
+          ManualCouponType.ONE_TO_MANY
+            ? fetchedBatchData.getManualVoucherBatchById.name
+            : "",
         codePrefix: "VCH",
         faceValue: fetchedBatchData.getManualVoucherBatchById.faceValue || 0,
         currency: fetchedBatchData.getManualVoucherBatchById.currency || "TC",
-        totalInventory: fetchedBatchData.getManualVoucherBatchById.totalCount || 0,
-        allocatedCount: fetchedBatchData.getManualVoucherBatchById.allocatedCount || 0,
-        redeemedCount: fetchedBatchData.getManualVoucherBatchById.redeemedCount || 0,
-        remainingCount: fetchedBatchData.getManualVoucherBatchById.remainingCount || 0,
+        totalInventory:
+          fetchedBatchData.getManualVoucherBatchById.totalCount || 0,
+        allocatedCount:
+          fetchedBatchData.getManualVoucherBatchById.allocatedCount || 0,
+        redeemedCount:
+          fetchedBatchData.getManualVoucherBatchById.redeemedCount || 0,
+        remainingCount:
+          fetchedBatchData.getManualVoucherBatchById.remainingCount || 0,
         isActive: fetchedBatchData.getManualVoucherBatchById.status === "ACTIVE",
         validityDays: 30,
-        createdAt: fetchedBatchData.getManualVoucherBatchById.createdAt || new Date().toISOString(),
+        createdAt:
+          fetchedBatchData.getManualVoucherBatchById.createdAt ||
+          new Date().toISOString(),
       }
     : null;
 
@@ -126,7 +140,8 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
   const { data: entityData } = useGetEntity();
   const rawEntityName = entityData?.getEntity?.name || "VCH";
   const defaultEntityPrefix =
-    rawEntityName.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) || "VCH";
+    rawEntityName.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) ||
+    "VCH";
 
   const formik = useFormik({
     initialValues: {
@@ -149,112 +164,121 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
         return d.toISOString().slice(0, 16);
       })(),
     },
-    enableReinitialize: true,
     validationSchema: internalRewardSchema,
+    enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const input: CreateManualVoucherBatchInput = {
-          name: values.title,
-          description: values.description,
-          image: values.image || null,
-          url: values.url || null,
-          couponType: values.couponType,
-          inventoryRequired: values.inventoryRequired,
-          faceValue: 0,
-          currency: "TC",
-          expiryDate: values.expiryDate || null,
-        };
+        if (!isEditing) {
+          const res = await createBatch({
+            variables: {
+              input: {
+                name: values.title,
+                description: values.description,
+                image: values.image || undefined,
+                url: values.url || undefined,
+                couponType: values.couponType as ManualCouponType,
+                prefix:
+                  values.couponType === ManualCouponType.ONE_TO_ONE
+                    ? values.prefix
+                    : undefined,
+                count:
+                  values.couponType === ManualCouponType.ONE_TO_ONE
+                    ? Number(values.count)
+                    : undefined,
+                totalUsageLimit:
+                  values.couponType === ManualCouponType.ONE_TO_MANY
+                    ? Number(values.totalUsageLimit) || undefined
+                    : undefined,
+                status: values.status,
+              },
+            },
+          });
 
-        if (values.couponType === ManualCouponType.ONE_TO_ONE) {
-          input.count = Math.min(
-            Math.max(Number(values.count) || 2, 2),
-            100,
-          );
-          input.prefix = (values.prefix || "VCH").trim().toUpperCase();
+          if (res.data?.createManualVoucherBatch) {
+            toast.success(
+              `Manual voucher pool '${values.title}' created successfully`,
+            );
+            setIsSaved(true);
+            onSuccess?.();
+          }
         } else {
-          input.couponCode = (values.couponCode || "PROMO")
-            .trim()
-            .toUpperCase();
-          input.totalUsageLimit = Number(values.totalUsageLimit) || 0;
-        }
-
-        await createBatch({
-          variables: {
-            input,
-          },
-        });
-
-        setIsSaved(true);
-        toast.success("Internal Voucher Batch Created Successfully!", {
-          description: `${values.title} is now active and ready for distribution.`,
-        });
-
-        if (onSuccess) {
-          setTimeout(onSuccess, 800);
+          toast.success("Manual voucher configuration updated");
+          setIsSaved(true);
+          onSuccess?.();
         }
       } catch (err: any) {
-        toast.error("Failed to create internal voucher batch", {
-          description: err.message || "An unexpected error occurred.",
-        });
+        toast.error(
+          err.message || "Failed to save internal voucher configuration.",
+        );
       }
     },
   });
 
-  React.useEffect(() => {
-    if (entityData?.getEntity?.name && !hasUserEditedPrefix) {
-      const prefix =
-        entityData.getEntity.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) || "VCH";
-      formik.setFieldValue("prefix", prefix);
-    }
-  }, [entityData?.getEntity?.name, hasUserEditedPrefix]);
-
   const isOneToOne = formik.values.couponType === ManualCouponType.ONE_TO_ONE;
 
   const handleGeneratePreviewCodes = () => {
-    const codes: string[] = [];
-    const count = Math.min(Math.max(Number(formik.values.count) || 2, 2), 100);
-    const prefix = (formik.values.prefix || "VCH").trim().toUpperCase();
-    for (let i = 0; i < Math.min(count, 5); i++) {
+    const pfx = formik.values.prefix || "VCH";
+    const sample = Array.from({ length: 4 }).map(() => {
       const rand = Math.random().toString(36).substring(2, 7).toUpperCase();
-      codes.push(`${prefix}-${rand}`);
-    }
-    setGeneratedSampleCodes(codes);
-    toast.success(
-      `Configured ${count} unique voucher slots (${prefix}-XXXXX)`,
-    );
+      return `${pfx}-${rand}`;
+    });
+    setGeneratedSampleCodes(sample);
   };
 
   return (
-    <div className="relative">
+    <div className="w-full">
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-4">
-            {/* Status & Publish Card */}
-            <PolarisSidebarCard title="Reward Status" icon={ShieldCheck}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-xs font-bold text-foreground">
-                    Active & Available
-                  </Label>
-                  <p className="text-[11px] text-muted-foreground">
-                    Visible in reward pool
-                  </p>
-                </div>
-                <Switch
-                  checked={formik.values.isActive}
-                  onCheckedChange={(val) => {
-                    formik.setFieldValue("isActive", val);
-                    formik.setFieldValue("status", val ? "ACTIVE" : "DRAFT");
-                  }}
+          <>
+            {/* Architecture Overview */}
+            <PolarisSidebarCard title="Reward Summary" icon={Layers}>
+              <div className="space-y-1">
+                <PolarisSummaryRow
+                  label="Pillar Type"
+                  value={
+                    <span className="font-semibold text-[#303030] dark:text-zinc-100">
+                      Internal / Manual
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Architecture"
+                  value={
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-semibold border-[#d2d5d9] text-[#303030] dark:text-zinc-100 rounded-[4px]"
+                    >
+                      {isOneToOne ? "1:1 Unique Pool" : "1:N Shared Code"}
+                    </Badge>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Fee Structure"
+                  value={
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      $0.00 (Zero Fees)
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Code Prefix"
+                  value={
+                    <span className="font-mono font-semibold text-[#303030] dark:text-zinc-100">
+                      {isOneToOne
+                        ? formik.values.prefix || "VCH"
+                        : formik.values.couponCode || "PROMO"}
+                    </span>
+                  }
+                  isLast
                 />
               </div>
             </PolarisSidebarCard>
 
             {/* Live Preview Card */}
             <PolarisSidebarCard title="Live Preview" icon={Sparkles}>
-              <div className="rounded-xl border border-border/80 bg-card p-3 space-y-3 shadow-xs">
+              <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 space-y-3 shadow-xs">
                 {formik.values.image ? (
-                  <div className="relative h-28 w-full rounded-lg overflow-hidden border border-border">
+                  <div className="relative h-28 w-full rounded-[6px] overflow-hidden border border-[#d2d5d9]">
                     <img
                       src={formik.values.image}
                       alt="Preview"
@@ -262,9 +286,9 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                     />
                   </div>
                 ) : (
-                  <div className="h-24 w-full rounded-lg bg-muted/40 border border-dashed border-border/70 flex flex-col items-center justify-center text-muted-foreground gap-1">
+                  <div className="h-24 w-full rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800/40 border border-dashed border-[#d2d5d9] flex flex-col items-center justify-center text-[#616161] gap-1">
                     <Ticket className="h-6 w-6 text-emerald-600/70" />
-                    <span className="text-[10px] font-medium">
+                    <span className="text-[11px] font-medium">
                       Reward Thumbnail
                     </span>
                   </div>
@@ -272,20 +296,20 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <Badge className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0">
+                    <Badge className="bg-[#303030] text-white text-[10px] font-semibold px-2 py-0 rounded-[4px]">
                       {isOneToOne ? "1:1 Unique Serials" : "1:N Shared Code"}
                     </Badge>
                   </div>
-                  <h5 className="text-xs font-bold text-foreground truncate">
+                  <h5 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
                     {formik.values.title || "Untitled Internal Reward"}
                   </h5>
-                  <p className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 line-clamp-2 leading-[16px]">
                     {formik.values.description ||
                       "Provide a reward description to see how it will appear in user wallet."}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-border/60 space-y-1">
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1">
                   <PolarisSummaryRow
                     label="Inventory"
                     value={
@@ -311,10 +335,10 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
               assigned directly to Spin Wheels, Scratch Cards, Match & Win, or
               granted directly to members.
             </PolarisTipCard>
-          </div>
+          </>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-5">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           {/* Card 1: Core Reward Identification */}
           <PolarisFormCard
             step={1}
@@ -324,12 +348,12 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
           >
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label
+                <label
                   htmlFor="title"
-                  className="text-xs font-bold text-foreground"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
                 >
-                  Reward Title <span className="text-rose-500">*</span>
-                </Label>
+                  Reward Title <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Input
                   id="title"
                   name="title"
@@ -337,22 +361,22 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   value={formik.values.title}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-10 text-xs font-medium"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
                 {formik.touched.title && formik.errors.title && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.title as string}
                   </p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <Label
+                <label
                   htmlFor="description"
-                  className="text-xs font-bold text-foreground"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
                 >
-                  Reward Description <span className="text-rose-500">*</span>
-                </Label>
+                  Reward Description <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Textarea
                   id="description"
                   name="description"
@@ -361,20 +385,20 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   value={formik.values.description}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="text-xs font-medium resize-none"
+                  className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] resize-none"
                 />
                 {formik.touched.description && formik.errors.description && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.description as string}
                   </p>
                 )}
               </div>
 
               {/* Cover Image Upload */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-foreground">
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                   Cover Artwork / Badge Image
-                </Label>
+                </label>
                 <ImageUploadWithCrop
                   currentImage={formik.values.image}
                   onImageUpdate={(cdnUrl: string) =>
@@ -385,13 +409,13 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
               </div>
 
               {/* Redemption / Claim URL */}
-              <div className="space-y-1.5">
-                <Label
+              <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <label
                   htmlFor="url"
-                  className="text-xs font-bold text-foreground"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
                 >
                   Redemption / Claim URL (Optional)
-                </Label>
+                </label>
                 <Input
                   id="url"
                   name="url"
@@ -400,14 +424,14 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   value={formik.values.url}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-10 text-xs font-medium"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
                 {formik.touched.url && formik.errors.url && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.url as string}
                   </p>
                 )}
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[12px] text-[#616161] dark:text-zinc-400">
                   External link where winners can directly apply or claim their voucher code.
                 </p>
               </div>
@@ -432,26 +456,26 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                     )
                   }
                   className={cn(
-                    "p-3 rounded-xl border transition-all cursor-pointer space-y-1.5",
+                    "p-3.5 rounded-[8px] border transition-all cursor-pointer space-y-1.5",
                     isOneToOne
-                      ? "border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/40 ring-1 ring-emerald-500/20 shadow-xs"
-                      : "border-border/70 bg-card hover:bg-muted/40",
+                      ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                      : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                   )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
+                      <div className="h-6 w-6 rounded-[4px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
                         <Ticket className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-xs font-bold text-foreground">
+                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                         ONE_TO_ONE (Unique Pool)
                       </span>
                     </div>
-                    <Badge variant="secondary" className="text-[9px] h-4">
-                      Batch Ingestion
-                    </Badge>
+                    {isOneToOne && (
+                      <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                    )}
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-snug">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                     Each winner receives an exclusive, single-use credential
                     from a pre-allocated pool.
                   </p>
@@ -465,26 +489,26 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                     )
                   }
                   className={cn(
-                    "p-3 rounded-xl border transition-all cursor-pointer space-y-1.5",
+                    "p-3.5 rounded-[8px] border transition-all cursor-pointer space-y-1.5",
                     !isOneToOne
-                      ? "border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/40 ring-1 ring-emerald-500/20 shadow-xs"
-                      : "border-border/70 bg-card hover:bg-muted/40",
+                      ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                      : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                   )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
+                      <div className="h-6 w-6 rounded-[4px] bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
                         <Users className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-xs font-bold text-foreground">
+                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                         ONE_TO_MANY (Shared Code)
                       </span>
                     </div>
-                    <Badge variant="secondary" className="text-[9px] h-4">
-                      Static Promo
-                    </Badge>
+                    {!isOneToOne && (
+                      <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                    )}
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-snug">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                     Single promotional string usable across multiple members
                     with global usage limits.
                   </p>
@@ -492,38 +516,38 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
               </div>
 
               {/* Validity Days */}
-              <div className="p-3.5 rounded-xl bg-muted/20 border border-border/70 space-y-1">
-                <Label className="text-[11px] font-bold text-muted-foreground">
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                   Validity Duration (Days)
-                </Label>
+                </label>
                 <Input
                   type="number"
                   min={1}
                   name="validityDays"
                   value={formik.values.validityDays}
                   onChange={formik.handleChange}
-                  className="h-9 text-xs font-medium"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] max-w-xs"
                 />
               </div>
 
               {/* Conditional Config based on type */}
               {isOneToOne ? (
-                <div className="p-3.5 rounded-xl bg-muted/30 border border-border/70 space-y-3">
+                <div className="p-3.5 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 flex items-center gap-1.5">
                       <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
                       Batch Auto-Generation Config
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[11.5px] text-[#616161]">
                       Will create initial voucher batch
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-[11px] font-bold text-muted-foreground">
+                      <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
                         Code Prefix
-                      </Label>
+                      </label>
                       <Input
                         placeholder={defaultEntityPrefix}
                         name="prefix"
@@ -536,18 +560,18 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                           );
                         }}
                         onBlur={formik.handleBlur}
-                        className="h-9 text-xs font-mono font-bold uppercase"
+                        className="h-[36px] text-[13px] font-mono font-semibold uppercase bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px]"
                       />
                       {formik.touched.prefix && formik.errors.prefix && (
-                        <p className="text-[11px] text-rose-500 font-medium">
+                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                           {formik.errors.prefix as string}
                         </p>
                       )}
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-[11px] font-bold text-muted-foreground">
+                      <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
                         Initial Batch Quantity (2 - 100 Codes)
-                      </Label>
+                      </label>
                       <Input
                         type="number"
                         min={2}
@@ -556,10 +580,10 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                         value={formik.values.count}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className="h-9 text-xs font-bold"
+                        className="h-[36px] text-[13px] font-semibold bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px]"
                       />
                       {formik.touched.count && formik.errors.count && (
-                        <p className="text-[11px] text-rose-500 font-medium">
+                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                           {formik.errors.count as string}
                         </p>
                       )}
@@ -572,26 +596,26 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={handleGeneratePreviewCodes}
-                      className="h-8 text-xs font-semibold gap-1.5"
+                      className="h-[32px] text-[12px] font-semibold gap-1.5 rounded-[6px] border-[#aeb4b9]"
                     >
                       <Zap className="h-3.5 w-3.5 text-amber-500" />
                       Preview Sample Series
                     </Button>
-                    <span className="text-[11px] text-muted-foreground font-mono">
+                    <span className="text-[11.5px] text-[#616161] font-mono">
                       Format: {formik.values.prefix || "VCH"}-XXXXX
                     </span>
                   </div>
 
                   {generatedSampleCodes.length > 0 && (
-                    <div className="p-2.5 rounded-lg bg-card border border-border/80 space-y-1.5">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase block">
+                    <div className="p-2.5 rounded-[6px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-700 space-y-1.5">
+                      <span className="text-[10.5px] font-semibold text-[#616161] uppercase tracking-wider block">
                         Sample Output Series
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {generatedSampleCodes.map((code, idx) => (
                           <span
                             key={idx}
-                            className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-muted/60 border border-border text-foreground"
+                            className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] text-[#303030] dark:text-zinc-100"
                           >
                             {code}
                           </span>
@@ -601,15 +625,15 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   )}
                 </div>
               ) : (
-                <div className="p-3.5 rounded-xl bg-muted/30 border border-border/70 space-y-3">
+                <div className="p-3.5 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-3">
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="couponCode"
-                      className="text-xs font-bold text-foreground"
+                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
                     >
                       Promotional Code String{" "}
-                      <span className="text-rose-500">*</span>
-                    </Label>
+                      <span className="text-[#d72c0d] ml-0.5">*</span>
+                    </label>
                     <Input
                       id="couponCode"
                       name="couponCode"
@@ -622,19 +646,19 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                         )
                       }
                       onBlur={formik.handleBlur}
-                      className="h-10 text-xs font-mono font-bold uppercase tracking-wider"
+                      className="h-[40px] text-[14px] font-mono font-bold uppercase tracking-wider bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[8px]"
                     />
                     {formik.touched.couponCode && formik.errors.couponCode && (
-                      <p className="text-[11px] text-rose-500 font-medium">
+                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                         {formik.errors.couponCode as string}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-1">
-                    <Label className="text-[11px] font-bold text-muted-foreground">
+                    <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
                       Global Usage Limit
-                    </Label>
+                    </label>
                     <Input
                       type="number"
                       min={0}
@@ -642,7 +666,7 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                       name="totalUsageLimit"
                       value={formik.values.totalUsageLimit}
                       onChange={formik.handleChange}
-                      className="h-9 text-xs font-medium"
+                      className="h-[36px] text-[13px] font-medium bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px] max-w-xs"
                     />
                   </div>
                 </div>
@@ -661,9 +685,8 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
         onReset={() => formik.resetForm()}
         title="Unsaved Internal Reward"
         description="You have pending changes to this internal reward."
-        buttonText="Publish Internal Reward"
+        buttonText={isEditing ? "Update Internal Reward" : "Publish Internal Reward"}
       />
     </div>
   );
 };
-

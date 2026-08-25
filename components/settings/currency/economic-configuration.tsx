@@ -3,12 +3,13 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Palette, Zap, ArrowRight, Calculator, Coins } from "lucide-react";
+import { Palette, Zap, Calculator, Coins } from "lucide-react";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useUpdateEntityCurrencyConfig } from "@/graphql/actions";
 import { toast } from "sonner";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { cn } from "@/lib/utils";
 import {
   PolarisFormLayout,
   PolarisFormCard,
@@ -21,7 +22,7 @@ import {
 
 interface EconomicConfigProps {
   data: any;
-  loading: boolean;
+  loading?: boolean;
 }
 
 const validationSchema = Yup.object().shape({
@@ -72,14 +73,6 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
     },
   });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-6 w-6 animate-spin text-zinc-900 dark:text-zinc-100" />
-      </div>
-    );
-  }
-
   const factor = Number(formik.values.normalizationFactor) || 1;
   const currentCurrency = formik.values.currencyName || "Points";
   const simulatedOutcome = (simulatedPoints / factor).toFixed(2);
@@ -88,7 +81,7 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
     <div className="w-full">
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <>
             {/* Live Interactive Conversion Simulator */}
             <PolarisSidebarCard
               title="Economy Simulator"
@@ -97,9 +90,9 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
             >
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
+                  <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-200">
                     Test Activity Points Earned
-                  </Label>
+                  </label>
                   <div className="relative">
                     <Input
                       type="number"
@@ -108,30 +101,30 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
                       onChange={(e) =>
                         setSimulatedPoints(Math.max(0, Number(e.target.value) || 0))
                       }
-                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-bold text-xs shadow-none pr-14"
+                      className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 font-semibold text-[14px] shadow-none pr-14 rounded-[8px]"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-bold uppercase">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161] font-bold uppercase tracking-wider">
                       PTS
                     </span>
                   </div>
                 </div>
 
                 {/* Conversion Result Card */}
-                <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/40 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-800/40 space-y-1.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#616161]">
                     Simulated Member Payout
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black font-mono text-zinc-900 dark:text-zinc-100">
+                    <span className="text-[24px] font-bold font-mono text-[#303030] dark:text-zinc-100">
                       {simulatedOutcome}
                     </span>
-                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
+                    <span className="text-[12.5px] font-bold text-[#303030] dark:text-zinc-100 uppercase tracking-wider">
                       {currentCurrency}
                     </span>
                   </div>
-                  <p className="text-[11px] text-zinc-500 leading-relaxed">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                     {simulatedPoints} raw points ÷ {factor} factor ={" "}
-                    <strong>
+                    <strong className="text-[#303030] dark:text-zinc-200">
                       {simulatedOutcome} {currentCurrency}
                     </strong>
                   </p>
@@ -156,10 +149,10 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
             <PolarisTipCard title="Tokenomics Best Practice">
               Using a normalization factor of <strong>100</strong> or <strong>50</strong> leverages reward psychology: members feel highly rewarded earning large point batches (+500 pts for placing an order), while maintaining a sane and predictable store economy.
             </PolarisTipCard>
-          </div>
+          </>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           {/* Info Banner */}
           <PolarisInfoBanner
             title="How Normalization Works"
@@ -174,50 +167,58 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
             badge="Branding"
           >
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label
+              <div className="space-y-1.5">
+                <label
                   htmlFor="currencyName"
-                  className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
                 >
-                  Display Name
-                </Label>
+                  Display Name <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <div className="relative max-w-md">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#616161]">
                     <Palette className="h-4 w-4" />
                   </div>
                   <Input
                     id="currencyName"
                     name="currencyName"
                     placeholder="e.g. Points, Credits, Gems, Coins"
-                    className="h-11 pl-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-sm font-semibold shadow-none"
+                    className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-medium text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
                     value={formik.values.currencyName}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   />
                 </div>
                 {formik.touched.currencyName && formik.errors.currencyName && (
-                  <p className="text-[11px] font-medium text-rose-500 mt-1">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.currencyName as string}
                   </p>
                 )}
               </div>
 
               {/* Quick Preset Name Chips */}
-              <div className="space-y-1.5 pt-2">
-                <Label className="text-[11px] font-semibold text-zinc-500">
+              <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
                   Quick Suggestions
-                </Label>
+                </label>
                 <div className="flex flex-wrap gap-1.5">
-                  {NAME_PRESETS.map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => formik.setFieldValue("currencyName", preset)}
-                      className="h-8 px-3 rounded-lg text-xs font-medium border bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
-                    >
-                      {preset}
-                    </button>
-                  ))}
+                  {NAME_PRESETS.map((preset) => {
+                    const isSelected = formik.values.currencyName === preset;
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => formik.setFieldValue("currencyName", preset)}
+                        className={cn(
+                          "h-[32px] px-3 rounded-[6px] text-[13px] font-medium border transition-all cursor-pointer",
+                          isSelected
+                            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold"
+                            : "bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-300 hover:border-[#8c9196]",
+                        )}
+                      >
+                        {preset}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -231,16 +232,16 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
             badge="Conversion Rate"
           >
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label
+              <div className="space-y-1.5">
+                <label
                   htmlFor="normalizationFactor"
-                  className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
                 >
-                  Normalization Factor (Divider)
-                </Label>
+                  Normalization Factor (Divider) <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <div className="relative flex-1 max-w-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#616161]">
                       <Zap className="h-4 w-4" />
                     </div>
                     <Input
@@ -248,7 +249,7 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
                       name="normalizationFactor"
                       type="number"
                       min={1}
-                      className="h-11 pl-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-base font-bold font-mono text-zinc-900 dark:text-zinc-100 shadow-none"
+                      className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold font-mono text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
                       value={formik.values.normalizationFactor}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
@@ -264,24 +265,24 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
                 </div>
                 {formik.touched.normalizationFactor &&
                   formik.errors.normalizationFactor && (
-                    <p className="text-[11px] font-medium text-rose-500 mt-1">
+                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                       {formik.errors.normalizationFactor as string}
                     </p>
                   )}
               </div>
 
               {/* Formula Visual Box */}
-              <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/40 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                  <span className="px-2 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md font-mono font-bold">
+              <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-[13px] font-medium text-[#303030] dark:text-zinc-200">
+                  <span className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-700 rounded-[6px] font-mono font-semibold">
                     100 Activity Pts
                   </span>
-                  <span className="text-zinc-400 font-bold">÷</span>
-                  <span className="px-2 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-md font-mono font-bold">
+                  <span className="text-[#616161] font-bold">÷</span>
+                  <span className="px-2.5 py-1 bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-700 rounded-[6px] font-mono font-semibold">
                     {factor}
                   </span>
-                  <span className="text-zinc-400 font-bold">=</span>
-                  <span className="px-2 py-1 bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 rounded-md font-mono font-bold">
+                  <span className="text-[#616161] font-bold">=</span>
+                  <span className="px-2.5 py-1 bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-[6px] font-mono font-semibold">
                     {(100 / factor).toFixed(2)} {currentCurrency}
                   </span>
                 </div>

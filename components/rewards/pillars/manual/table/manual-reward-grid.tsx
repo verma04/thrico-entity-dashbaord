@@ -65,7 +65,7 @@ export function ManualRewardGrid({
         {onCreateClick && (
           <Button
             onClick={onCreateClick}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-8 mt-1 shadow-xs cursor-pointer"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 mt-1 shadow-2xs cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             Create Internal Voucher

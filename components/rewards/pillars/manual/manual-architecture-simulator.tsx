@@ -87,7 +87,7 @@ export const ManualArchitectureSimulator: React.FC<ManualArchitectureSimulatorPr
 
         <Button
           onClick={onSimulateAssignment}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 font-semibold text-xs h-8 shadow-xs mt-2"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-medium text-xs h-8 shadow-2xs mt-2 cursor-pointer"
         >
           <Zap className="h-3.5 w-3.5" />
           Simulate Win & Assign Voucher

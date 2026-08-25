@@ -26,11 +26,11 @@ export const StoreBanner: React.FC<StoreBannerProps> = ({
   const isConnected = shopifyConn?.status === "CONNECTED" || !!shopifyConn?.shopDomain;
 
   return (
-    <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5">
+    <div className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5 max-w-xl">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge className="bg-indigo-600 text-white font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
+            <Badge className="bg-primary text-primary-foreground font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
               Pillar 2 • Shopify
             </Badge>
             {connectionLoading ? (
@@ -63,9 +63,9 @@ export const StoreBanner: React.FC<StoreBannerProps> = ({
             <Button
               variant="outline"
               onClick={onHowItWorksClick}
-              className="text-xs font-semibold h-8 gap-1.5 border-indigo-300 dark:border-indigo-800 bg-background/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 cursor-pointer"
+              className="text-xs font-medium h-8 gap-1.5 cursor-pointer shadow-2xs"
             >
-              <HelpCircle className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
               How Store Rewards Work
             </Button>
           )}
@@ -73,7 +73,7 @@ export const StoreBanner: React.FC<StoreBannerProps> = ({
           {onCreateClick && (
             <Button
               onClick={onCreateClick}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               Create Store Reward

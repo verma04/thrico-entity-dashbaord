@@ -14,6 +14,7 @@ import {
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { PolarisFormLayout } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { SpinSegmentFormSections } from "@/components/rewards/spin-wheel/create/spin-segment-form-sections";
@@ -183,40 +184,41 @@ export default function CreateSpinWheelSegmentPage() {
   });
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <EcosystemWrapper className="flex-col gap-4 flex min-h-screen bg-[#fafafa] dark:bg-black/10">
-        <EcosystemHeader
-          title="Add Wheel Segment"
-          badgeText="Spin & Win Segment"
-          description="Define a new prize slice, win probability, and slice color."
-          icon={Dices}
-          breadcrumbs={[
-            { label: "Gamification", href: "/gamification" },
-            { label: "Rewards", href: "/gamification/rewards" },
-            {
-              label: "Engagement Games",
-              href: "/gamification/rewards/engagement-games",
-            },
-            {
-              label: "Spin Wheel",
-              href: "/gamification/rewards/engagement-games/spin-wheel",
-            },
-            { label: "Add Wheel Segment" },
-          ]}
-        />
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Add Wheel Segment"
+        badgeText="Spin & Win Segment"
+        description="Define a new prize slice, win probability, and slice color."
+        icon={Dices}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Rewards", href: "/gamification/rewards" },
+          {
+            label: "Engagement Games",
+            href: "/gamification/rewards/engagement-games",
+          },
+          {
+            label: "Spin Wheel",
+            href: "/gamification/rewards/engagement-games/spin-wheel",
+          },
+          { label: "Add Wheel Segment" },
+        ]}
+      />
 
-        {/* ── Form Body & Preview Sidebar Layout ────────────────────────── */}
-        <div className="flex-1 overflow-y-auto px-4 max-w-7xl mx-auto w-full space-y-4">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <div className="space-y-4">
           {/* Wheel Limit Warning Banner */}
           {isLimitReached && (
-            <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/90 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 flex items-start gap-3 shadow-xs">
+            <div className="p-4 rounded-[8px] border border-rose-200 bg-rose-50/90 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 flex items-start gap-3 shadow-xs">
               <AlertTriangle className="h-5 w-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold">
+                <h4 className="text-[13px] font-semibold">
                   Wheel Capacity Reached ({currentCount}/{maxWheelItems} Segments)
                 </h4>
-                <p className="text-[11px] opacity-90 leading-relaxed">
-                  You have configured the maximum allowed number of wheel segments ({maxWheelItems}). You cannot add more segments until you remove or modify existing ones in the manager.
+                <p className="text-[12px] opacity-90 leading-relaxed">
+                  You have configured the maximum allowed number of wheel
+                  segments ({maxWheelItems}). You cannot add more segments until
+                  you remove or modify existing ones in the manager.
                 </p>
               </div>
             </div>
@@ -230,35 +232,38 @@ export default function CreateSpinWheelSegmentPage() {
               />
             }
           >
-            <SpinSegmentFormSections
-              formik={formik}
-              currencyName={currencyName}
-            />
+            <form onSubmit={formik.handleSubmit} className="space-y-4">
+              <SpinSegmentFormSections
+                formik={formik}
+                currencyName={currencyName}
+              />
+            </form>
           </PolarisFormLayout>
         </div>
+      </EcosystemContainer>
 
-        {/* ── Floating Action Bar ───────────────────────────────────────── */}
-        <FloatingSavePanel
-          hasChanged={formik.dirty || true}
-          isSaving={loading}
-          onSave={formik.handleSubmit}
-          onReset={() =>
-            router.push("/gamification/rewards/engagement-games/spin-wheel")
-          }
-          title={isLimitReached ? "Wheel Full" : "New Wheel Segment"}
-          description={
-            isLimitReached
-              ? `Maximum wheel items limit (${maxWheelItems}) reached.`
-              : "Publish this segment slice to the active spin wheel."
-          }
-          buttonText={
-            isLimitReached
-              ? `Wheel Full (${currentCount}/${maxWheelItems})`
-              : "Create Wheel Segment"
-          }
-          saved={saved}
-        />
-      </EcosystemWrapper>
-    </form>
+      {/* ── Floating Action Bar ───────────────────────────────────────── */}
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        isSaving={loading}
+        onSave={() => formik.submitForm()}
+        onReset={() => {
+          formik.resetForm();
+          setSaved(false);
+        }}
+        title={isLimitReached ? "Wheel Full" : "New Wheel Segment"}
+        description={
+          isLimitReached
+            ? `Maximum wheel items limit (${maxWheelItems}) reached.`
+            : "Publish this segment slice to the active spin wheel."
+        }
+        buttonText={
+          isLimitReached
+            ? `Wheel Full (${currentCount}/${maxWheelItems})`
+            : "Create Wheel Segment"
+        }
+        saved={saved}
+      />
+    </EcosystemWrapper>
   );
 }

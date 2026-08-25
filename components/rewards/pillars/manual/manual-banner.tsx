@@ -16,14 +16,14 @@ export const ManualBanner: React.FC<ManualBannerProps> = ({
   onHowItWorksClick,
 }) => {
   return (
-    <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-4 sm:p-5">
+    <div className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1 max-w-xl">
           <div className="flex items-center gap-1.5">
-            <Badge className="bg-emerald-600 text-white font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
+            <Badge className="bg-primary text-primary-foreground font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
               Pillar 1
             </Badge>
-            <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+            <span className="text-[11px] font-medium text-muted-foreground">
               Self-Sovereign Internal Engine
             </span>
           </div>
@@ -40,9 +40,9 @@ export const ManualBanner: React.FC<ManualBannerProps> = ({
             <Button
               variant="outline"
               onClick={onHowItWorksClick}
-              className="text-xs font-semibold h-8 gap-1.5 border-emerald-300 dark:border-emerald-800 bg-background/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 cursor-pointer"
+              className="text-xs font-medium h-8 gap-1.5 cursor-pointer shadow-2xs"
             >
-              <HelpCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
               How Manual Works
             </Button>
           )}
@@ -50,14 +50,14 @@ export const ManualBanner: React.FC<ManualBannerProps> = ({
           {onCreateClick ? (
             <Button
               onClick={onCreateClick}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               Create Internal Voucher
             </Button>
           ) : (
             <Link href="/gamification/rewards/coupons/create">
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs">
                 <Plus className="h-3.5 w-3.5" />
                 Create Internal Voucher
               </Button>

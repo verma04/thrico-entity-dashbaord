@@ -30,17 +30,17 @@ export default function PillarTwoStorePage() {
             <Button
               variant="outline"
               onClick={() => setIsHowItWorksOpen(true)}
-              className="text-xs font-semibold h-9 gap-1.5 border-indigo-300 dark:border-indigo-800 bg-background/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 cursor-pointer shadow-xs"
+              className="text-xs font-semibold h-8 gap-1.5 cursor-pointer shadow-2xs"
             >
-              <HelpCircle className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
               How Store Rewards Work
             </Button>
 
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 font-semibold text-xs h-9 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-medium text-xs h-8 shadow-2xs cursor-pointer"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               Create Store Reward
             </Button>
           </div>

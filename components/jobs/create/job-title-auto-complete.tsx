@@ -109,7 +109,10 @@ export function JobTitleAutocomplete({
                 if (onBlur) onBlur(e);
               }, 200);
             }}
-            className={cn("w-full", error && "border-destructive")}
+            className={cn(
+              "w-full h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]",
+              error && "border-[#d72c0d]",
+            )}
             autoComplete="off"
           />
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ModuleIcon } from "./module-icon";
@@ -23,32 +24,32 @@ export function RolePreview({
   groupedModules,
 }: RolePreviewProps) {
   const activeAdminScopes = Object.entries(adminAccess).filter(
-    ([key, v]) => v && key in adminAccessLabels
+    ([key, v]) => v && key in adminAccessLabels,
   );
   const activeModules = Object.entries(permissions).filter(([_, perms]) =>
-    Object.values(perms).some((v) => v)
+    Object.values(perms).some((v) => v),
   );
 
   return (
-    <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-4 space-y-4 shadow-xs">
+    <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs">
       {/* Role Identity */}
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
+        <div className="h-10 w-10 rounded-[6px] bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
           <ShieldCheck className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+          <h4 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 truncate">
             {formData.name || "Role Name"}
           </h4>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2 leading-relaxed">
+          <p className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 line-clamp-2 leading-[16px]">
             {formData.description || "No description provided"}
           </p>
         </div>
       </div>
 
       {/* Admin Access Scopes */}
-      <div className="space-y-1.5 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+      <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#616161]">
           <span className="flex items-center gap-1">
             <ShieldAlert className="h-3 w-3" />
             Admin Scopes
@@ -62,15 +63,15 @@ export function RolePreview({
             {activeAdminScopes.map(([key]) => (
               <span
                 key={key}
-                className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-zinc-900/5 text-zinc-800 dark:bg-zinc-100/10 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                className="text-[10.5px] font-medium px-2 py-0.5 rounded-[4px] bg-white text-[#303030] dark:bg-zinc-800 dark:text-zinc-200 border border-[#d2d5d9] dark:border-zinc-700"
               >
                 {adminAccessLabels[key] ?? key}
               </span>
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center h-9 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/30">
-            <p className="text-[11px] text-zinc-400 font-medium">
+          <div className="flex items-center justify-center h-9 border border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[6px] bg-[#f6f6f7]/60 dark:bg-zinc-800/30">
+            <p className="text-[11.5px] text-[#8c9196] font-medium">
               No admin scopes assigned
             </p>
           </div>
@@ -78,18 +79,20 @@ export function RolePreview({
       </div>
 
       {/* Module Permissions Summary */}
-      <div className="space-y-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+      <div className="space-y-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#616161]">
           <span>Module Access</span>
           <span>{activeModules.length} modules</span>
         </div>
 
         {activeModules.length > 0 ? (
-          <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
             {Object.entries(
               activeModules.reduce((acc: any, [moduleName, perms]) => {
                 let cat = "Other";
-                for (const [category, modules] of Object.entries(groupedModules)) {
+                for (const [category, modules] of Object.entries(
+                  groupedModules,
+                )) {
                   if (modules.includes(moduleName)) {
                     cat = category;
                     break;
@@ -98,55 +101,49 @@ export function RolePreview({
                 if (!acc[cat]) acc[cat] = [];
                 acc[cat].push([moduleName, perms]);
                 return acc;
-              }, {} as Record<string, [string, Record<string, boolean>][]>)
-            )
-              .sort(([a], [b]) => {
-                if (a === "Other") return 1;
-                if (b === "Other") return -1;
-                return a.localeCompare(b);
-              })
-              .map(([category, modulesInCategory]: [string, any]) => (
-                <div key={category} className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                    {category}
-                  </span>
-                  {modulesInCategory.map(([moduleName, perms]: [string, any]) => (
+              }, {}),
+            ).map(([category, mods]: [string, any]) => (
+              <div key={category} className="space-y-1">
+                <span className="text-[10px] font-bold text-[#8c9196] uppercase tracking-wider">
+                  {category}
+                </span>
+                <div className="space-y-1">
+                  {mods.map(([modName, perms]: [string, any]) => (
                     <div
-                      key={moduleName}
-                      className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/80"
+                      key={modName}
+                      className="flex items-center justify-between p-1.5 rounded-[4px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700"
                     >
-                      <div className="h-6 w-6 rounded bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center shrink-0">
-                        <ModuleIcon name={moduleName} className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <ModuleIcon
+                          name={modName}
+                          className="w-3 h-3 text-[#616161] shrink-0"
+                        />
+                        <span className="text-[11.5px] font-medium capitalize text-[#303030] dark:text-zinc-100 truncate">
+                          {modName.replace(/_/g, " ")}
+                        </span>
                       </div>
-                      <span className="text-xs font-semibold capitalize flex-1 truncate text-zinc-800 dark:text-zinc-200">
-                        {moduleName.replace(/_/g, " ")}
-                      </span>
-                      <div className="flex gap-0.5">
-                        {(["Read", "Create", "Edit", "Delete"] as const).map(
-                          (type) => (
+                      <div className="flex gap-0.5 shrink-0">
+                        {Object.entries(perms)
+                          .filter(([_, v]) => v)
+                          .map(([type]) => (
                             <span
                               key={type}
-                              className={`text-[9px] font-bold w-4 h-4 rounded flex items-center justify-center ${
-                                perms[type]
-                                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                                  : "bg-zinc-100 text-zinc-400 dark:bg-zinc-700/50 dark:text-zinc-500"
-                              }`}
-                              title={`${type}: ${perms[type] ? "Allowed" : "Denied"}`}
+                              className="text-[9px] font-bold px-1 py-0.2 rounded-[2px] bg-[#f6f6f7] text-[#303030] border border-[#d2d5d9] uppercase"
                             >
                               {type[0]}
                             </span>
-                          )
-                        )}
+                          ))}
                       </div>
                     </div>
                   ))}
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center h-9 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/30">
-            <p className="text-[11px] text-zinc-400 font-medium">
-              No module permissions granted
+          <div className="flex items-center justify-center h-10 border border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[6px] bg-[#f6f6f7]/60 dark:bg-zinc-800/30">
+            <p className="text-[11.5px] text-[#8c9196] font-medium">
+              No module permissions configured
             </p>
           </div>
         )}

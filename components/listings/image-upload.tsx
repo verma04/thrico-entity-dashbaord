@@ -1,8 +1,7 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
-import { Upload, X, Camera, Image as ImageIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PhotoUploadFile } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -66,12 +65,14 @@ export function ImageUpload({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => document.getElementById("listing-file-input")?.click()}
+          onClick={() =>
+            document.getElementById("listing-file-input")?.click()
+          }
           className={cn(
-            "border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all",
+            "border-2 border-dashed rounded-[8px] p-5 text-center cursor-pointer transition-all",
             isDragging
-              ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/5 dark:bg-zinc-100/5"
-              : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-zinc-50/40 dark:bg-zinc-900/40",
+              ? "border-[#303030] dark:border-zinc-100 bg-[#303030]/5 dark:bg-zinc-100/5"
+              : "border-[#d2d5d9] dark:border-zinc-800 hover:border-[#aeb4b9] dark:hover:border-zinc-600 bg-[#f6f6f7]/60 dark:bg-zinc-900/40",
           )}
         >
           <input
@@ -84,13 +85,13 @@ export function ImageUpload({
             id="listing-file-input"
           />
           <div className="flex flex-col items-center justify-center gap-1.5">
-            <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-[6px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] text-[#616161] dark:text-zinc-400 flex items-center justify-center">
               <Upload className="h-4 w-4" />
             </div>
-            <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+            <p className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200">
               Drag photos here or <span className="underline">browse files</span>
             </p>
-            <p className="text-[10px] text-zinc-400">
+            <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
               PNG, JPG, WEBP · {slotsRemaining} of {MAX_FILES} slots remaining
             </p>
           </div>
@@ -102,7 +103,7 @@ export function ImageUpload({
           {fileList.map((file, idx) => (
             <div
               key={file.uid}
-              className="relative group rounded-xl overflow-hidden aspect-square border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900"
+              className="relative group rounded-[8px] overflow-hidden aspect-square border border-[#d2d5d9] dark:border-zinc-800 bg-[#e1e3e5] dark:bg-zinc-900"
             >
               <img
                 src={file.thumbUrl || "/placeholder.svg"}
@@ -110,7 +111,7 @@ export function ImageUpload({
                 className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
               />
               {idx === 0 && (
-                <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-zinc-900/80 text-white backdrop-blur-md text-[9px] font-bold">
+                <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-[4px] bg-zinc-900/80 text-white backdrop-blur-xs text-[9px] font-semibold">
                   Primary
                 </div>
               )}
@@ -123,7 +124,7 @@ export function ImageUpload({
                     e.stopPropagation();
                     removeFile(file.uid);
                   }}
-                  className="h-7 w-7 rounded-lg bg-zinc-900/80 hover:bg-zinc-900 text-white border-none shadow-md"
+                  className="h-7 w-7 rounded-[6px] bg-zinc-900/80 hover:bg-zinc-900 text-white border-none shadow-md cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </Button>

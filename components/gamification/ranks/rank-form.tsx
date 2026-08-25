@@ -101,6 +101,7 @@ const rankSchema = Yup.object().shape({
 });
 
 interface RankFormProps {
+  showHeader?: boolean;
   initialValues?: any;
   onSubmit: (values: any) => Promise<void>;
   loading: boolean;
@@ -109,6 +110,7 @@ interface RankFormProps {
 }
 
 export function RankForm({
+  showHeader = true,
   initialValues,
   onSubmit,
   loading,
@@ -248,13 +250,13 @@ export function RankForm({
 
               <div className="space-y-1 pt-1">
                 <div className="flex items-center justify-center gap-2">
-                  <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100">
+                  <h3 className="text-[16px] font-bold text-[#303030] dark:text-zinc-100">
                     {formik.values.name || "Untitled Tier"}
                   </h3>
                 </div>
                 <Badge
                   variant="outline"
-                  className="text-[10px] font-bold px-2 py-0.5"
+                  className="text-[11px] font-semibold px-2 py-0.5 rounded-[6px]"
                   style={{
                     borderColor: `${currentThemeColor}50`,
                     color: currentThemeColor,
@@ -324,7 +326,7 @@ export function RankForm({
         </>
       }
     >
-      <form onSubmit={formik.handleSubmit} className="space-y-6">
+      <form onSubmit={formik.handleSubmit} className="space-y-4">
         {/* Card 1: Identity & Visuals */}
         <PolarisFormCard
           step={1}
@@ -334,29 +336,32 @@ export function RankForm({
         >
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Rank Name <span className="text-rose-500">*</span>
-              </Label>
+              <label
+                htmlFor="name"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
+              >
+                Rank Name <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Input
                 id="name"
                 placeholder="e.g., Bronze Explorer, Silver Champion, Diamond Master"
                 {...formik.getFieldProps("name")}
-                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none"
+                className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-medium text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
               />
               {formik.touched.name && formik.errors.name && (
-                <p className="text-[11px] text-rose-500 font-medium">
+                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                   {formik.errors.name as string}
                 </p>
               )}
             </div>
 
             {/* Color Swatches */}
-            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="space-y-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                   Theme Color & Tier Aura
-                </Label>
-                <span className="text-[11px] font-mono text-zinc-400">
+                </label>
+                <span className="text-[11px] font-mono text-[#616161]">
                   {formik.values.color}
                 </span>
               </div>
@@ -371,10 +376,10 @@ export function RankForm({
                       type="button"
                       onClick={() => formik.setFieldValue("color", preset.hex)}
                       className={cn(
-                        "group relative flex items-center gap-1.5 p-2 rounded-lg border text-left transition-all cursor-pointer",
+                        "group relative flex items-center gap-1.5 p-2 rounded-[8px] border text-left transition-all cursor-pointer",
                         isSelected
-                          ? "border-zinc-900 dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-xs ring-2 ring-zinc-900/10 dark:ring-zinc-100/20"
-                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 hover:border-zinc-300",
+                          ? "border-[#303030] dark:border-zinc-100 bg-white dark:bg-zinc-900 shadow-xs ring-1 ring-[#303030] dark:ring-zinc-100"
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:border-[#aeb4b9]",
                       )}
                     >
                       <span
@@ -383,7 +388,7 @@ export function RankForm({
                       >
                         {isSelected && <Check className="h-2.5 w-2.5 text-white stroke-[3]" />}
                       </span>
-                      <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 truncate">
+                      <span className="text-[12px] font-medium text-[#303030] dark:text-zinc-300 truncate">
                         {preset.name}
                       </span>
                     </button>
@@ -396,33 +401,33 @@ export function RankForm({
                   type="color"
                   value={formik.values.color}
                   onChange={(e) => formik.setFieldValue("color", e.target.value)}
-                  className="w-10 h-8 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 cursor-pointer shrink-0"
+                  className="w-10 h-[36px] p-0.5 rounded-[6px] border border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 cursor-pointer shrink-0"
                 />
                 <Input
                   type="text"
                   placeholder="#Hex Code"
                   value={formik.values.color}
                   onChange={(e) => formik.setFieldValue("color", e.target.value)}
-                  className="h-8 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-mono"
+                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] font-mono rounded-[6px]"
                 />
               </div>
             </div>
 
             {/* Icon / Emoji Selection */}
-            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+            <div className="space-y-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                 Rank Badge Icon
-              </Label>
+              </label>
 
-              <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 border border-zinc-200 dark:border-zinc-700 text-[11px] font-medium max-w-xs">
+              <div className="flex bg-white dark:bg-zinc-800 rounded-[6px] p-0.5 border border-[#d2d5d9] dark:border-zinc-700 text-[12px] font-medium max-w-xs">
                 <button
                   type="button"
                   onClick={() => setIconMode("emoji")}
                   className={cn(
-                    "flex-1 py-1 rounded-md transition-all font-semibold",
+                    "flex-1 py-1 rounded-[4px] transition-all font-medium text-[12px]",
                     iconMode === "emoji"
-                      ? "bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400",
+                      ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                      : "text-[#616161] dark:text-zinc-400 hover:text-[#303030]",
                   )}
                 >
                   Emoji Library
@@ -431,10 +436,10 @@ export function RankForm({
                   type="button"
                   onClick={() => setIconMode("upload")}
                   className={cn(
-                    "flex-1 py-1 rounded-md transition-all font-semibold",
+                    "flex-1 py-1 rounded-[4px] transition-all font-medium text-[12px]",
                     iconMode === "upload"
-                      ? "bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400",
+                      ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                      : "text-[#616161] dark:text-zinc-400 hover:text-[#303030]",
                   )}
                 >
                   Custom Icon
@@ -442,7 +447,7 @@ export function RankForm({
               </div>
 
               {iconMode === "emoji" ? (
-                <div className="space-y-2.5 pt-1">
+                <div className="space-y-2 pt-1">
                   <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
                     {EMOJI_CATEGORIES.map((cat, idx) => (
                       <button
@@ -450,10 +455,10 @@ export function RankForm({
                         type="button"
                         onClick={() => setSelectedCategoryIndex(idx)}
                         className={cn(
-                          "px-2.5 py-1 rounded-md text-[11px] font-semibold whitespace-nowrap transition-all cursor-pointer border",
+                          "px-2.5 py-1 rounded-[4px] text-[11px] font-medium transition-colors shrink-0",
                           selectedCategoryIndex === idx
-                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900"
-                            : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100",
+                            ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900"
+                            : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] hover:bg-[#e4e5e7]",
                         )}
                       >
                         {cat.name}
@@ -461,31 +466,26 @@ export function RankForm({
                     ))}
                   </div>
 
-                  <div className="p-3 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl max-h-[140px] overflow-y-auto">
-                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
-                      {EMOJI_CATEGORIES[selectedCategoryIndex].emojis.map((emoji) => {
-                        const isSelected = formik.values.icon === emoji;
-                        return (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => formik.setFieldValue("icon", emoji)}
-                            className={cn(
-                              "h-9 w-9 rounded-lg text-lg flex items-center justify-center transition-all cursor-pointer",
-                              isSelected
-                                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 scale-110 shadow-xs ring-2 ring-zinc-900/20"
-                                : "hover:bg-white dark:hover:bg-zinc-800 hover:scale-105",
-                            )}
-                          >
-                            <span>{emoji}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                  <div className="grid grid-cols-10 gap-1.5 p-2 rounded-[8px] bg-[#f6f6f7]/50 dark:bg-zinc-900/50 border border-[#d2d5d9] dark:border-zinc-800">
+                    {EMOJI_CATEGORIES[selectedCategoryIndex].emojis.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => formik.setFieldValue("icon", emoji)}
+                        className={cn(
+                          "h-8 rounded-[4px] flex items-center justify-center text-lg transition-all hover:scale-110",
+                          formik.values.icon === emoji
+                            ? "bg-white dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs scale-105"
+                            : "hover:bg-white/50",
+                        )}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
                   </div>
                 </div>
               ) : (
-                <div className="p-3.5 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-2">
+                <div className="space-y-2 pt-1">
                   <ImageUploadWithCrop
                     currentImage={isImage ? formik.values.icon : ""}
                     onImageUpdate={(url) => formik.setFieldValue("icon", url)}
@@ -494,7 +494,7 @@ export function RankForm({
                     recommendedHeight={128}
                     uploadButtonText="Upload Custom Rank Badge"
                   />
-                  <p className="text-[11px] text-zinc-500 leading-snug">
+                  <p className="text-[12px] text-[#616161] leading-snug">
                     Upload a 1:1 square icon (PNG, WebP, SVG). Transparent backgrounds look best.
                   </p>
                 </div>
@@ -513,36 +513,42 @@ export function RankForm({
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="minPoints" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Minimum Points <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="minPoints"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
+                >
+                  Minimum Points <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Input
                   id="minPoints"
                   type="number"
                   min={0}
                   {...formik.getFieldProps("minPoints")}
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-bold"
+                  className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
                 {formik.touched.minPoints && formik.errors.minPoints && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.minPoints as string}
                   </p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="maxPoints" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Maximum Points <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="maxPoints"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
+                >
+                  Maximum Points <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Input
                   id="maxPoints"
                   type="number"
                   min={0}
                   {...formik.getFieldProps("maxPoints")}
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-bold"
+                  className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
                 {formik.touched.maxPoints && formik.errors.maxPoints && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.maxPoints as string}
                   </p>
                 )}
@@ -551,9 +557,9 @@ export function RankForm({
 
             {/* Quick Presets */}
             <div className="space-y-1.5 pt-1">
-              <Label className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+              <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
                 Quick Span Adjuster (from min points)
-              </Label>
+              </label>
               <div className="flex flex-wrap gap-1.5">
                 {POINT_RANGE_PRESETS.map((preset) => (
                   <button
@@ -563,7 +569,7 @@ export function RankForm({
                       const min = Number(formik.values.minPoints) || 0;
                       formik.setFieldValue("maxPoints", min + preset.add);
                     }}
-                    className="h-7 px-2.5 rounded-lg text-[11px] font-medium border bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                    className="h-[30px] px-2.5 rounded-[6px] text-[12px] font-medium border bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-300 hover:border-[#8c9196] transition-all cursor-pointer"
                   >
                     {preset.label}
                   </button>
@@ -572,15 +578,15 @@ export function RankForm({
             </div>
 
             {/* Visual Threshold Bar */}
-            <div className="p-3 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
+            <div className="p-3 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 border border-[#d2d5d9] dark:border-zinc-800 rounded-[8px] space-y-1.5">
+              <div className="flex items-center justify-between text-[11.5px] font-medium text-[#616161] dark:text-zinc-400">
                 <span>Start: {Number(formik.values.minPoints).toLocaleString()} pts</span>
-                <span className="text-zinc-900 dark:text-zinc-100 font-bold">
+                <span className="text-[#303030] dark:text-zinc-100 font-semibold">
                   Span: {(Number(formik.values.maxPoints) - Number(formik.values.minPoints)).toLocaleString()} pts
                 </span>
                 <span>Cap: {Number(formik.values.maxPoints).toLocaleString()} pts</span>
               </div>
-              <div className="h-2 w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-[#d2d5d9] dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-300"
                   style={{
@@ -600,14 +606,14 @@ export function RankForm({
           description="Configure alert channels and celebratory messaging when members unlock this rank tier."
           badge="Promotion Alerts"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Push Notification */}
             <div
               className={cn(
-                "rounded-xl border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-4 space-y-4",
                 formik.values.allowPushNotification
-                  ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
-                  : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75",
+                  ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                  : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
               )}
             >
               <div
@@ -617,7 +623,7 @@ export function RankForm({
                     !formik.values.allowPushNotification,
                   )
                 }
-                className="flex items-start gap-3.5 cursor-pointer select-none"
+                className="flex items-start gap-3 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -628,53 +634,53 @@ export function RankForm({
                     }
                   />
                 </div>
-                <div className="space-y-1 flex-1">
+                <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
-                    <Label
+                    <Bell className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                    <label
                       htmlFor="allowPushNotification"
-                      className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow push notification
-                    </Label>
+                    </label>
                   </div>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                     Send an instant push alert when user advances to this rank.
                   </p>
                 </div>
               </div>
 
               {formik.values.allowPushNotification && (
-                <div className="space-y-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-700/80 animate-in fade-in-50 duration-200">
+                <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="pushNotificationTitle"
-                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                     >
                       Push Notification Title
-                    </Label>
+                    </label>
                     <Input
                       id="pushNotificationTitle"
                       placeholder="e.g. 👑 You've reached a new Rank!"
                       {...formik.getFieldProps("pushNotificationTitle")}
-                      className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
+                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="pushNotificationBody"
-                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                     >
                       Push Notification Message
-                    </Label>
+                    </label>
                     <Textarea
                       id="pushNotificationBody"
                       placeholder="e.g. Congratulations! You have been promoted to {{rankName}} tier."
                       {...formik.getFieldProps("pushNotificationBody")}
-                      className="min-h-[70px] text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 resize-none"
+                      className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] resize-none"
                     />
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
                     <span>Variables:</span>
                     <button
                       type="button"
@@ -684,7 +690,7 @@ export function RankForm({
                           `${formik.values.pushNotificationBody} {{rankName}}`.trim(),
                         )
                       }
-                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
                     >
                       {"{{rankName}}"}
                     </button>
@@ -696,7 +702,7 @@ export function RankForm({
                           `${formik.values.pushNotificationBody} {{userName}}`.trim(),
                         )
                       }
-                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
                     >
                       {"{{userName}}"}
                     </button>
@@ -708,10 +714,10 @@ export function RankForm({
             {/* Email Notification */}
             <div
               className={cn(
-                "rounded-xl border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-4 space-y-4",
                 formik.values.allowEmailNotification
-                  ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
-                  : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75",
+                  ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                  : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
               )}
             >
               <div
@@ -721,7 +727,7 @@ export function RankForm({
                     !formik.values.allowEmailNotification,
                   )
                 }
-                className="flex items-start gap-3.5 cursor-pointer select-none"
+                className="flex items-start gap-3 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -732,17 +738,17 @@ export function RankForm({
                     }
                   />
                 </div>
-                <div className="space-y-1 flex-1">
+                <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
-                    <Label
+                    <Mail className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                    <label
                       htmlFor="allowEmailNotification"
-                      className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow email notification
-                    </Label>
+                    </label>
                   </div>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                     Send a congratulatory email when user achieves this rank.
                   </p>
                 </div>

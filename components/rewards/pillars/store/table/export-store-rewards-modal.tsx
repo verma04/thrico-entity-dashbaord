@@ -152,7 +152,7 @@ export const ExportStoreRewardsModal: React.FC<ExportStoreRewardsModalProps> = (
             size="sm"
             onClick={handleExport}
             disabled={isExporting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
             {isExporting ? "Exporting..." : "Download CSV"}

@@ -9,19 +9,12 @@ import {
   Truck,
   Sparkles,
   ShoppingBag,
-  Clock,
-  ShieldCheck,
   Zap,
-  Info,
   CheckCircle2,
   Check,
-  Store,
-  ExternalLink,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -66,11 +59,15 @@ const validationSchema = Yup.object({
   title: Yup.string().required("Offer title is required"),
   description: Yup.string().required("Description is required"),
   discountType: Yup.string().required("Discount type is required"),
-  discountValue: Yup.number().min(0, "Must be positive").required("Value is required"),
+  discountValue: Yup.number()
+    .min(0, "Must be positive")
+    .required("Value is required"),
   minCartSubtotal: Yup.number().min(0, "Must be positive").nullable(),
   maxDiscountCap: Yup.number().min(0, "Must be positive").nullable(),
   codePrefix: Yup.string().required("Code prefix is required"),
-  validityDays: Yup.number().min(1, "At least 1 day").required("Validity is required"),
+  validityDays: Yup.number()
+    .min(1, "At least 1 day")
+    .required("Validity is required"),
 });
 
 export function StoreRewardForm({
@@ -85,10 +82,9 @@ export function StoreRewardForm({
   const ruleId = initialItem?.id || id;
   const isEditing = Boolean(ruleId);
 
-  const { data: fetchedRuleData, loading: isFetching } = useGetStoreDiscountRuleById(
-    id || "",
-    { skip: !id || Boolean(initialItem) }
-  );
+  const { data: fetchedRuleData } = useGetStoreDiscountRuleById(id || "", {
+    skip: !id || Boolean(initialItem),
+  });
 
   const existingRule: StoreRewardItem | null =
     initialItem || fetchedRuleData?.getStoreDiscountRuleById || null;
@@ -97,21 +93,25 @@ export function StoreRewardForm({
   const [isSaved, setIsSaved] = useState(false);
   const { data: entityData } = useGetEntity();
   const { data: currencyData } = useGetEntityCurrencyConfig();
-  const currencyCode = currencyData?.getEntityCurrencyConfig?.currencyCode || "INR";
-  const currencySymbol = currencyData?.getEntityCurrencyConfig?.currencySymbol || "₹";
+  const currencyCode =
+    currencyData?.getEntityCurrencyConfig?.currencyCode || "INR";
+  const currencySymbol =
+    currencyData?.getEntityCurrencyConfig?.currencySymbol || "₹";
 
   const [hasUserEditedPrefix, setHasUserEditedPrefix] = useState(false);
 
   const rawEntityName = entityData?.getEntity?.name || "THRICO";
   const defaultEntityPrefix =
-    (rawEntityName.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 8) || "SHOP") + "-";
+    (rawEntityName.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 8) ||
+      "SHOP") + "-";
 
   const formik = useFormik({
     initialValues: {
       title: existingRule?.title || "",
       description: existingRule?.description || "",
       image: existingRule?.image || "",
-      discountType: existingRule?.discountType || StoreDiscountType.FIXED_AMOUNT,
+      discountType:
+        existingRule?.discountType || StoreDiscountType.FIXED_AMOUNT,
       discountValue: existingRule?.discountValue ?? 100,
       minCartSubtotal: existingRule?.minCartSubtotal ?? 499,
       maxDiscountCap: existingRule?.maxDiscountCap ?? 0,
@@ -134,8 +134,12 @@ export function StoreRewardForm({
             discountType: values.discountType,
             discountValue: Number(values.discountValue),
             currency: currencyCode,
-            minCartSubtotal: values.minCartSubtotal ? Number(values.minCartSubtotal) : null,
-            maxDiscountCap: values.maxDiscountCap ? Number(values.maxDiscountCap) : null,
+            minCartSubtotal: values.minCartSubtotal
+              ? Number(values.minCartSubtotal)
+              : null,
+            maxDiscountCap: values.maxDiscountCap
+              ? Number(values.maxDiscountCap)
+              : null,
             codePrefix: values.codePrefix.trim().toUpperCase(),
             storeProvider: values.storeProvider,
             connectedDomain: values.connectedDomain?.trim() || null,
@@ -151,15 +155,10 @@ export function StoreRewardForm({
             },
           });
 
-          const updatedItem = res?.data?.updateStoreDiscountRule;
-          setIsSaved(true);
-
-          toast.success("Store Reward Rule Updated!", {
-            description: `Changes to "${values.title}" saved successfully.`,
-          });
-
-          if (onSuccess) {
-            setTimeout(() => onSuccess(updatedItem), 400);
+          if (res.data?.updateStoreDiscountRule) {
+            toast.success("Store reward blueprint updated successfully");
+            setIsSaved(true);
+            onSuccess?.(res.data.updateStoreDiscountRule);
           }
         } else {
           const createInput: CreateStoreDiscountRuleInput = {
@@ -169,8 +168,12 @@ export function StoreRewardForm({
             discountType: values.discountType,
             discountValue: Number(values.discountValue),
             currency: currencyCode,
-            minCartSubtotal: values.minCartSubtotal ? Number(values.minCartSubtotal) : null,
-            maxDiscountCap: values.maxDiscountCap ? Number(values.maxDiscountCap) : null,
+            minCartSubtotal: values.minCartSubtotal
+              ? Number(values.minCartSubtotal)
+              : null,
+            maxDiscountCap: values.maxDiscountCap
+              ? Number(values.maxDiscountCap)
+              : null,
             codePrefix: values.codePrefix.trim().toUpperCase(),
             storeProvider: values.storeProvider,
             connectedDomain: values.connectedDomain?.trim() || null,
@@ -185,82 +188,87 @@ export function StoreRewardForm({
             },
           });
 
-          const createdItem = res?.data?.createStoreDiscountRule;
-          setIsSaved(true);
-
-          toast.success("Store Reward Rule Created!", {
-            description: `PriceRule blueprint saved. Codes will synthesize on-demand when members win.`,
-          });
-
-          if (onSuccess) {
-            setTimeout(() => onSuccess(createdItem), 400);
+          if (res.data?.createStoreDiscountRule) {
+            toast.success("Store reward blueprint created successfully");
+            setIsSaved(true);
+            onSuccess?.(res.data.createStoreDiscountRule);
           }
         }
-      } catch (err: unknown) {
-        toast.error(isEditing ? "Failed to update store reward rule" : "Failed to create store reward rule", {
-          description: err instanceof Error ? err.message : "An unexpected error occurred.",
-        });
+      } catch (err: any) {
+        toast.error(
+          err.message || "Failed to save store reward configuration.",
+        );
       }
     },
   });
 
-  React.useEffect(() => {
-    if (entityData?.getEntity?.name && !hasUserEditedPrefix && !isEditing) {
-      const prefix =
-        (entityData.getEntity.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 8) || "SHOP") + "-";
-      formik.setFieldValue("codePrefix", prefix);
-    }
-  }, [entityData?.getEntity?.name, hasUserEditedPrefix, isEditing]);
-
   const getDiscountPreviewLabel = () => {
     switch (formik.values.discountType) {
       case StoreDiscountType.PERCENTAGE:
-        return `${formik.values.discountValue || 0}% OFF`;
+        return `${formik.values.discountValue}% OFF`;
       case StoreDiscountType.FREE_SHIPPING:
         return "FREE SHIPPING";
       case StoreDiscountType.FIXED_AMOUNT:
       default:
-        return `${currencySymbol}${formik.values.discountValue || 0} OFF`;
+        return `${currencySymbol}${formik.values.discountValue} OFF`;
     }
   };
 
   return (
-    <div className="relative pb-24">
+    <div className="w-full">
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-4">
-            {/* Live Discount Rule Summary Card */}
-            <PolarisSidebarCard title="Reward Summary">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 shadow-xs">
-                    <ShoppingBag className="h-4 w-4" />
+          <>
+            {/* Live Preview Card */}
+            <PolarisSidebarCard title="Store Reward Live Preview" icon={Sparkles}>
+              <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 space-y-3 shadow-xs">
+                {formik.values.image ? (
+                  <div className="relative h-28 w-full rounded-[6px] overflow-hidden border border-[#d2d5d9]">
+                    <img
+                      src={formik.values.image}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-foreground truncate">
-                      {formik.values.title || "Untitled Store Rule"}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      {formik.values.storeProvider} Integration
-                    </p>
+                ) : (
+                  <div className="h-24 w-full rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800/40 border border-dashed border-[#d2d5d9] flex flex-col items-center justify-center text-[#616161] gap-1">
+                    <ShoppingBag className="h-6 w-6 text-indigo-600/70" />
+                    <span className="text-[11px] font-medium">
+                      Reward Thumbnail
+                    </span>
                   </div>
+                )}
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Badge className="bg-[#303030] text-white text-[10px] font-semibold px-2 py-0 rounded-[4px]">
+                      {formik.values.storeProvider}
+                    </Badge>
+                  </div>
+                  <h5 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
+                    {formik.values.title || "Untitled Store Discount"}
+                  </h5>
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 line-clamp-2 leading-[16px]">
+                    {formik.values.description ||
+                      "Offer terms and discount conditions displayed to members."}
+                  </p>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200/50 dark:border-indigo-900/50 space-y-1">
+                <div className="p-2.5 rounded-[6px] bg-[#f6f6f7]/80 dark:bg-zinc-800/50 border border-[#d2d5d9] dark:border-zinc-800 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wide">
+                    <span className="text-[11px] font-semibold text-[#616161] uppercase tracking-wide">
                       Discount Value
                     </span>
-                    <Badge className="bg-indigo-600 text-white font-mono text-[9px] px-1.5 py-0">
+                    <Badge className="bg-[#303030] text-white font-mono text-[10px] px-2 py-0 rounded-[4px]">
                       {getDiscountPreviewLabel()}
                     </Badge>
                   </div>
-                  <p className="text-[11px] font-mono font-bold text-indigo-950 dark:text-indigo-100">
+                  <p className="text-[12px] font-mono font-semibold text-[#303030] dark:text-zinc-100">
                     Prefix: {formik.values.codePrefix || "SHOP-"}-XXXXX
                   </p>
                 </div>
 
-                <div className="divide-y divide-border/60">
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1">
                   <PolarisSummaryRow
                     label="Provider"
                     value={formik.values.storeProvider}
@@ -275,7 +283,11 @@ export function StoreRewardForm({
                   />
                   <PolarisSummaryRow
                     label="Single-Use Lock"
-                    value={formik.values.singleUsePerCustomer ? "Enforced" : "Disabled"}
+                    value={
+                      formik.values.singleUsePerCustomer
+                        ? "Enforced"
+                        : "Disabled"
+                    }
                   />
                   <PolarisSummaryRow
                     label="Validity"
@@ -288,40 +300,54 @@ export function StoreRewardForm({
 
             {/* Merchant Strategy Tip */}
             <PolarisTipCard title="On-Demand Synthesis">
-              Shopify/WooCommerce discount codes are synthesized only when a member wins in a game or claims a reward. This avoids bloating your store discount inventory.
+              Shopify/WooCommerce discount codes are synthesized only when a
+              member wins in a game or claims a reward. This avoids bloating
+              your store discount inventory.
             </PolarisTipCard>
-          </div>
+          </>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           {/* Architecture Notice Banner */}
-          <div className="rounded-xl border border-indigo-300 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 via-indigo-50/60 to-purple-50/40 dark:from-indigo-950/40 dark:via-indigo-950/30 dark:to-purple-950/20 p-4 sm:p-4.5 space-y-2.5 shadow-xs">
+          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 p-4 space-y-2">
             <div className="flex items-start gap-3">
-              <div className="h-8 w-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+              <div className="h-8 w-8 rounded-[6px] bg-[#303030] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                 <Zap className="h-4 w-4" />
               </div>
-              <div className="space-y-1.5 flex-1">
+              <div className="space-y-1 flex-1">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <h4 className="text-xs font-bold text-indigo-950 dark:text-indigo-200 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
                     <span>How This Rule Generates Coupons</span>
-                    <Badge className="bg-indigo-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase">
+                    <Badge className="bg-[#303030] text-white font-semibold text-[9px] px-1.5 py-0 uppercase rounded-[4px]">
                       On-Demand On-Win Only
                     </Badge>
                   </h4>
                 </div>
 
-                <p className="text-xs text-indigo-900/90 dark:text-indigo-300 leading-relaxed">
-                  Saving this rule <strong className="text-indigo-950 dark:text-white font-bold">does NOT generate thousands of codes in advance</strong>. It defines the discount blueprint, and unique single-use codes are synthesized on-demand in Shopify or WooCommerce when members win.
+                <p className="text-[12.5px] text-[#616161] dark:text-zinc-400 leading-[18px]">
+                  Saving this rule{" "}
+                  <strong className="text-[#303030] dark:text-zinc-200 font-semibold">
+                    does NOT generate thousands of codes in advance
+                  </strong>
+                  . It defines the discount blueprint, and unique single-use
+                  codes are synthesized on-demand in Shopify or WooCommerce when
+                  members win.
                 </p>
 
-                <div className="pt-1.5 border-t border-indigo-200/60 dark:border-indigo-900/60 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-indigo-900/80 dark:text-indigo-300/90">
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[12px] text-[#616161] dark:text-zinc-400">
                   <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <span><strong>When created:</strong> Only when a member wins in a game (Spin Wheel, Scratch Card) or claims a reward.</span>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>
+                      <strong>When created:</strong> Only upon member win or
+                      claim.
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <span><strong>Unique per user:</strong> Each winning member receives their own unique single-use code (e.g. <code>SHOP-8K4P7X</code>).</span>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>
+                      <strong>Unique per user:</strong> Single-use code (e.g.{" "}
+                      <code>SHOP-8K4P7X</code>).
+                    </span>
                   </div>
                 </div>
               </div>
@@ -337,46 +363,56 @@ export function StoreRewardForm({
           >
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-foreground">
-                  Reward Offer Title <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="title"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
+                >
+                  Reward Offer Title <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Input
+                  id="title"
                   name="title"
                   value={formik.values.title}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   placeholder="e.g. 100 Flat Order Discount"
-                  className="text-xs"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
                 {formik.touched.title && formik.errors.title && (
-                  <p className="text-[11px] text-red-500 font-medium">{formik.errors.title}</p>
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+                    {formik.errors.title}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-foreground">
-                  Description & Terms <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="description"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
+                >
+                  Description & Terms <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Textarea
+                  id="description"
                   name="description"
                   value={formik.values.description}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   placeholder="e.g. Applicable on all products with minimum order value of ₹499."
-                  className="text-xs min-h-[70px]"
+                  className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] resize-none"
                 />
                 {formik.touched.description && formik.errors.description && (
-                  <p className="text-[11px] text-red-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.description}
                   </p>
                 )}
               </div>
 
               {/* Cover Image Upload */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-foreground">
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                   Cover Artwork / Badge Image (Optional)
-                </Label>
+                </label>
                 <ImageUploadWithCrop
                   currentImage={formik.values.image}
                   onImageUpdate={(cdnUrl: string) =>
@@ -387,36 +423,42 @@ export function StoreRewardForm({
               </div>
 
               {/* Store Provider and Domain */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-foreground">
+                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                     E-Commerce Store Provider
-                  </Label>
+                  </label>
                   <Select
                     value={formik.values.storeProvider}
-                    onValueChange={(v) => formik.setFieldValue("storeProvider", v as StoreProvider)}
+                    onValueChange={(v) =>
+                      formik.setFieldValue("storeProvider", v as StoreProvider)
+                    }
                   >
-                    <SelectTrigger className="h-9 text-xs">
+                    <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]">
                       <SelectValue placeholder="Select provider" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={StoreProvider.SHOPIFY}>Shopify</SelectItem>
-                      <SelectItem value={StoreProvider.WOOCOMMERCE}>WooCommerce</SelectItem>
+                      <SelectItem value={StoreProvider.SHOPIFY}>
+                        Shopify
+                      </SelectItem>
+                      <SelectItem value={StoreProvider.WOOCOMMERCE}>
+                        WooCommerce
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-foreground">
-                    Connected Store Domain / URL (Optional)
-                  </Label>
+                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                    Connected Store Domain (Optional)
+                  </label>
                   <Input
                     name="connectedDomain"
                     value={formik.values.connectedDomain}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     placeholder="e.g. brand-store.myshopify.com"
-                    className="text-xs font-mono"
+                    className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                   />
                 </div>
               </div>
@@ -457,105 +499,116 @@ export function StoreRewardForm({
                   const isSelected = formik.values.discountType === item.type;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={item.type}
-                      onClick={() => formik.setFieldValue("discountType", item.type)}
+                      onClick={() =>
+                        formik.setFieldValue("discountType", item.type)
+                      }
                       className={cn(
-                        "p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5",
+                        "p-3.5 rounded-[8px] border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left",
                         isSelected
-                          ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 shadow-xs ring-1 ring-indigo-500/20"
-                          : "border-border/70 bg-card hover:bg-muted/40"
+                          ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 shadow-xs ring-1 ring-[#303030] dark:ring-zinc-100"
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
-                      <div className="flex items-center justify-between">
-                        <Icon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <div className="flex items-center justify-between w-full">
+                        <Icon className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
                         {isSelected && (
-                          <Check className="h-3.5 w-3.5 text-indigo-600" />
+                          <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
                         )}
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-foreground block">
+                        <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block">
                           {item.label}
                         </span>
-                        <span className="text-[10px] text-muted-foreground block">
+                        <span className="text-[11.5px] text-[#616161] dark:text-zinc-400 block mt-0.5">
                           {item.desc}
                         </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
 
               {/* Values Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {formik.values.discountType !== StoreDiscountType.FREE_SHIPPING && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                {formik.values.discountType !==
+                  StoreDiscountType.FREE_SHIPPING && (
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-foreground">
-                      {formik.values.discountType === StoreDiscountType.PERCENTAGE
+                    <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                      {formik.values.discountType ===
+                      StoreDiscountType.PERCENTAGE
                         ? "Discount %"
-                        : `Discount Amount (${currencySymbol})`} <span className="text-rose-500">*</span>
-                    </Label>
+                        : `Discount Amount (${currencySymbol})`}{" "}
+                      <span className="text-[#d72c0d] ml-0.5">*</span>
+                    </label>
                     <Input
                       type="number"
                       name="discountValue"
                       value={formik.values.discountValue}
                       onChange={formik.handleChange}
-                      className="text-xs font-mono font-bold"
+                      className="h-[40px] text-[14px] font-mono font-bold bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                     />
-                    {formik.touched.discountValue && formik.errors.discountValue && (
-                      <p className="text-[11px] text-red-500 font-medium">
-                        {formik.errors.discountValue as string}
-                      </p>
-                    )}
+                    {formik.touched.discountValue &&
+                      formik.errors.discountValue && (
+                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+                          {formik.errors.discountValue as string}
+                        </p>
+                      )}
                   </div>
                 )}
 
-                {formik.values.discountType === StoreDiscountType.PERCENTAGE && (
+                {formik.values.discountType ===
+                  StoreDiscountType.PERCENTAGE && (
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-foreground">
+                    <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                       Max Discount Cap ({currencySymbol})
-                    </Label>
+                    </label>
                     <Input
                       type="number"
                       name="maxDiscountCap"
                       value={formik.values.maxDiscountCap || ""}
                       onChange={formik.handleChange}
                       placeholder="0 (No limit)"
-                      className="text-xs font-mono"
+                      className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                     />
                   </div>
                 )}
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-foreground">
+                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                     Min. Cart Subtotal ({currencySymbol})
-                  </Label>
+                  </label>
                   <Input
                     type="number"
                     name="minCartSubtotal"
                     value={formik.values.minCartSubtotal || ""}
                     onChange={formik.handleChange}
                     placeholder="0 (No minimum)"
-                    className="text-xs font-mono"
+                    className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-foreground">
-                    Code Prefix <span className="text-rose-500">*</span>
-                  </Label>
+                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                    Code Prefix <span className="text-[#d72c0d] ml-0.5">*</span>
+                  </label>
                   <Input
                     name="codePrefix"
                     value={formik.values.codePrefix}
                     onChange={(e) => {
                       setHasUserEditedPrefix(true);
-                      formik.setFieldValue("codePrefix", e.target.value.toUpperCase());
+                      formik.setFieldValue(
+                        "codePrefix",
+                        e.target.value.toUpperCase(),
+                      );
                     }}
                     placeholder={defaultEntityPrefix}
-                    className="text-xs font-mono font-bold uppercase"
+                    className="h-[40px] text-[14px] font-mono font-bold uppercase bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                   />
                   {formik.touched.codePrefix && formik.errors.codePrefix && (
-                    <p className="text-[11px] text-red-500 font-medium">
+                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                       {formik.errors.codePrefix}
                     </p>
                   )}
@@ -574,33 +627,35 @@ export function StoreRewardForm({
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-bold text-foreground">
-                    Validity Period (Days) <span className="text-rose-500">*</span>
-                  </Label>
+                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                    Validity Period (Days) <span className="text-[#d72c0d] ml-0.5">*</span>
+                  </label>
                   <Input
                     type="number"
                     name="validityDays"
                     value={formik.values.validityDays}
                     onChange={formik.handleChange}
-                    className="text-xs font-mono"
+                    className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                   />
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[12px] text-[#616161] dark:text-zinc-400">
                     Calculates exact expiration date when code is synthesized.
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border/70 bg-muted/20">
+                <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-foreground block">
+                    <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
                       Single-Use per Customer Lock
                     </span>
-                    <span className="text-[10px] text-muted-foreground block">
+                    <span className="text-[12px] text-[#616161] dark:text-zinc-400 block">
                       Restricts redemption to winning member email on checkout.
                     </span>
                   </div>
                   <Switch
                     checked={formik.values.singleUsePerCustomer}
-                    onCheckedChange={(c) => formik.setFieldValue("singleUsePerCustomer", c)}
+                    onCheckedChange={(c) =>
+                      formik.setFieldValue("singleUsePerCustomer", c)
+                    }
                   />
                 </div>
               </div>
@@ -622,7 +677,11 @@ export function StoreRewardForm({
             ? `You have pending changes to "${formik.values.title || "Store Discount Rule"}".`
             : "You have pending changes to this store discount blueprint."
         }
-        buttonText={isEditing ? "Update Store Reward Blueprint" : "Save Store Reward Blueprint"}
+        buttonText={
+          isEditing
+            ? "Update Store Reward Blueprint"
+            : "Save Store Reward Blueprint"
+        }
       />
     </div>
   );

@@ -3,13 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import {
-  ShoppingBag,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  Tag,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { resolveCdnUrl } from "@/lib/shop-utils";
@@ -55,9 +49,9 @@ export function ProductPreview({ formData, imageUrl }: ProductPreviewProps) {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
+    <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
       {/* Image Carousel */}
-      <div className="relative aspect-[4/3] w-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+      <div className="relative aspect-[4/3] w-full bg-[#e1e3e5] dark:bg-zinc-800 overflow-hidden">
         <Image
           src={displayImage}
           alt="Product preview"
@@ -71,11 +65,14 @@ export function ProductPreview({ formData, imageUrl }: ProductPreviewProps) {
         {/* Badges */}
         <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
           {isOutOfStock ? (
-            <Badge variant="destructive" className="text-[10px] font-bold px-2 py-0.5">
+            <Badge
+              variant="destructive"
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-[4px]"
+            >
               Out of Stock
             </Badge>
           ) : (
-            <Badge className="bg-black/60 text-white backdrop-blur-md border-none text-[10px] font-bold px-2 py-0.5">
+            <Badge className="bg-black/75 text-white backdrop-blur-xs border-none text-[10px] font-semibold px-2 py-0.5 rounded-[4px]">
               Available
             </Badge>
           )}
@@ -84,8 +81,9 @@ export function ProductPreview({ formData, imageUrl }: ProductPreviewProps) {
         {/* Price Tag */}
         {formData.price && (
           <div className="absolute bottom-2.5 right-2.5">
-            <span className="px-2.5 py-1 rounded-lg bg-zinc-900/90 dark:bg-zinc-100/90 text-white dark:text-zinc-900 backdrop-blur-md text-xs font-extrabold shadow-sm">
-              {currencySymbol}{formData.price}
+            <span className="px-2.5 py-1 rounded-[6px] bg-zinc-900/90 dark:bg-zinc-100/90 text-white dark:text-zinc-900 backdrop-blur-xs text-[12px] font-bold shadow-xs">
+              {currencySymbol}
+              {formData.price}
             </span>
           </div>
         )}
@@ -97,63 +95,33 @@ export function ProductPreview({ formData, imageUrl }: ProductPreviewProps) {
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-full bg-black/60 hover:bg-black text-white backdrop-blur-sm"
+              className="h-7 w-7 rounded-full bg-black/60 hover:bg-black text-white backdrop-blur-xs"
               onClick={prevImage}
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7 rounded-full bg-black/60 hover:bg-black text-white backdrop-blur-sm"
+              className="h-7 w-7 rounded-full bg-black/60 hover:bg-black text-white backdrop-blur-xs"
               onClick={nextImage}
             >
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         )}
       </div>
 
       {/* Product Details */}
-      <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
-              {formData.title || "Product Name"}
-            </h3>
-            {formData.category && (
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 capitalize flex items-center gap-1">
-                <Tag className="h-3 w-3" />
-                {formData.category}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <p className="text-[11px] text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-          {formData.description || "Product description will appear here..."}
+      <div className="p-3.5 space-y-2">
+        <h4 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 truncate">
+          {formData.title || "Product Title"}
+        </h4>
+        <p className="text-[12px] text-[#616161] dark:text-zinc-400 line-clamp-2 leading-[16px]">
+          {formData.description ||
+            "Product specifications and overview will appear here..."}
         </p>
-
-        {/* Variants Summary */}
-        {formData.hasVariants && formData.options && formData.options.length > 0 && (
-          <div className="rounded-lg bg-zinc-100/80 dark:bg-zinc-800/80 p-2.5 text-xs space-y-1.5 border border-zinc-200/60 dark:border-zinc-700/60">
-            <div className="flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider text-zinc-500">
-              <ShoppingBag className="w-3 h-3" />
-              <span>Configured Options</span>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {formData.options.map((opt: any, idx: number) => (
-                <span
-                  key={idx}
-                  className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300"
-                >
-                  {opt.name}: {opt.values?.length || 0}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

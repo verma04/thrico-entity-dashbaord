@@ -51,7 +51,7 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
       borderHover: "hover:border-emerald-500/50 hover:shadow-emerald-500/10",
       iconBg: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
       badgeBg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-      btnClass: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20",
+      btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
     },
     {
       id: "store",
@@ -76,7 +76,7 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
       borderHover: "hover:border-indigo-500/50 hover:shadow-indigo-500/10",
       iconBg: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30",
       badgeBg: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
-      btnClass: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20",
+      btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
     },
     {
       id: "giftcards",
@@ -101,7 +101,7 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
       borderHover: "hover:border-violet-500/50 hover:shadow-violet-500/10",
       iconBg: "bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/30",
       badgeBg: "bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20",
-      btnClass: "bg-violet-600 hover:bg-violet-700 text-white shadow-violet-600/20",
+      btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
     },
   ];
 

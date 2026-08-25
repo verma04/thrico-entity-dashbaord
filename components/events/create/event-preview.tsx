@@ -10,8 +10,6 @@ import {
   Laptop,
   RefreshCw,
   Users,
-  Eye,
-  Star,
 } from "lucide-react";
 import moment from "moment";
 
@@ -67,9 +65,9 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
   };
 
   return (
-    <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
+    <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
       {/* Cover Image */}
-      <div className="aspect-[3/2] w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 relative">
+      <div className="aspect-[3/2] w-full overflow-hidden bg-[#e1e3e5] dark:bg-zinc-800 relative">
         <Image
           src={coverImage || "https://cdn.thrico.network/default_event.png"}
           alt="Event cover"
@@ -80,7 +78,7 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
           <Badge
             variant="secondary"
-            className="bg-black/60 text-white backdrop-blur-md border-none text-[10px] font-bold px-2 py-0.5"
+            className="bg-black/75 text-white backdrop-blur-xs border-none text-[10px] font-semibold px-2 py-0.5 rounded-[4px]"
           >
             {getEventTypeLabel(type)}
           </Badge>
@@ -88,13 +86,13 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
       </div>
 
       {/* Event Details */}
-      <div className="p-4 space-y-3">
+      <div className="p-3.5 space-y-2.5">
         <div>
-          <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+          <h3 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 truncate">
             {title || "Event Title"}
           </h3>
           {location?.name && (
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1 truncate">
+            <p className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 flex items-center gap-1 truncate">
               <MapPin className="h-3 w-3 shrink-0" />
               {location.name}
             </p>
@@ -102,49 +100,36 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
         </div>
 
         {/* Schedule Grid */}
-        <div className="grid grid-cols-2 gap-2 py-2 border-y border-zinc-100 dark:border-zinc-800 text-xs">
-          <div className="space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-              Date & Time
-            </span>
-            <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs truncate">
-              {formatDate(startDate)}
-            </p>
-            <p className="text-[11px] text-zinc-500 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatTime(startTime)}
-            </p>
+        <div className="grid grid-cols-2 gap-2 py-2 border-y border-[#e1e3e5] dark:border-zinc-800">
+          <div className="flex items-center gap-2 p-1.5 rounded-[6px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700">
+            <div className="h-6 w-6 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-700 text-[#616161] dark:text-zinc-300 flex items-center justify-center shrink-0">
+              <Calendar className="h-3 w-3" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-[#616161] font-medium">Start Date</p>
+              <p className="text-[11.5px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
+                {formatDate(startDate)}
+              </p>
+            </div>
           </div>
-          <div className="space-y-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-              Registration
-            </span>
-            <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs truncate">
-              {lastDateOfRegistration ? formatDate(lastDateOfRegistration) : "Open"}
-            </p>
-            <p className="text-[11px] text-zinc-500">Deadline</p>
-          </div>
-        </div>
 
-        {/* Counter Grid */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
-            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
-            <p className="text-[10px] text-zinc-400 font-medium">Registered</p>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
-            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
-            <p className="text-[10px] text-zinc-400 font-medium">Views</p>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
-            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
-            <p className="text-[10px] text-zinc-400 font-medium">Interested</p>
+          <div className="flex items-center gap-2 p-1.5 rounded-[6px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700">
+            <div className="h-6 w-6 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-700 text-[#616161] dark:text-zinc-300 flex items-center justify-center shrink-0">
+              <Clock className="h-3 w-3" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-[#616161] font-medium">Time</p>
+              <p className="text-[11.5px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
+                {formatTime(startTime)}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Description snippet */}
-        <div className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-3">
-          {description || "Event description will appear here..."}
+        <div className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[16px] line-clamp-3">
+          {description ||
+            "Event description will be displayed here once entered..."}
         </div>
       </div>
     </div>

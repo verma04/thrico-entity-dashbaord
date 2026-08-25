@@ -10,6 +10,7 @@ import {
   Sparkles,
   Percent,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   PolarisSidebarCard,
   PolarisTipCard,
@@ -34,7 +35,8 @@ export function SpinSegmentPreviewSidebar({
       return {
         label: "Digital Gift Card",
         tag: values.giftCardBrand || "Brand Card",
-        color: "bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300",
+        color:
+          "bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300",
         icon: Gift,
       };
     }
@@ -45,7 +47,8 @@ export function SpinSegmentPreviewSidebar({
           values.ecommerceDiscountType === "PERCENTAGE"
             ? `${values.ecommerceDiscountValue || 20}% OFF`
             : `₹${values.ecommerceDiscountValue || 100} OFF`,
-        color: "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300",
+        color:
+          "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300",
         icon: ShoppingBag,
       };
     }
@@ -53,7 +56,8 @@ export function SpinSegmentPreviewSidebar({
       return {
         label: "Internal Voucher",
         tag: "Promo Code",
-        color: "bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300",
+        color:
+          "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300",
         icon: Ticket,
       };
     }
@@ -68,7 +72,8 @@ export function SpinSegmentPreviewSidebar({
     return {
       label: "Loyalty Points",
       tag: `+${values.rewardValue || 20} ${currencyName}`,
-      color: "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300",
+      color:
+        "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300",
       icon: Coins,
     };
   };
@@ -77,65 +82,75 @@ export function SpinSegmentPreviewSidebar({
   const PillarIcon = pillarBadge.icon;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* ── Live Member Wheel Segment Preview ────────────────────────────── */}
       <PolarisSidebarCard title="Segment Preview" badge="Wheel Slice">
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
-            {/* Slice Color Header */}
+        <div className="space-y-3">
+          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs overflow-hidden flex flex-col">
+            {/* Slice Color Header Bar */}
             <div
-              className="h-2.5 w-full transition-all duration-300"
+              className="h-2 w-full transition-all duration-300"
               style={{ backgroundColor: values.color || "#4F46E5" }}
             />
 
             {/* Visual Slice Preview Card */}
-            <div className="p-5 flex flex-col items-center text-center relative bg-muted/20">
-              {/* Top Floating Badges */}
-              <div className="w-full flex items-center justify-between mb-4">
-                <span
-                  className={cn(
-                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-                    pillarBadge.color,
-                  )}
-                >
+            <div className="p-4 flex flex-col items-center text-center relative bg-[#f6f6f7]/60 dark:bg-zinc-800/40">
+              {/* Top Badges */}
+              <div className="w-full flex items-center justify-between mb-3">
+                <span className="px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider bg-[#303030] text-white">
                   {pillarBadge.label}
                 </span>
-
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-background border border-border text-foreground">
-                  {values.probability || 10}% Odds
+                <span className="text-[11px] font-mono font-bold text-[#303030] dark:text-zinc-100 flex items-center gap-1">
+                  <Percent className="h-3 w-3 text-[#616161]" />
+                  {values.probability || 10}% Win Chance
                 </span>
               </div>
 
-              {/* Prize Icon / Value */}
-              <div
-                className="h-16 w-16 rounded-2xl flex items-center justify-center mb-3 shadow-md border-2 border-white/20"
-                style={{ backgroundColor: values.color || "#4F46E5" }}
-              >
-                <PillarIcon className="h-8 w-8 text-white drop-shadow-sm" />
+              {/* Central Slice Graphic Simulation */}
+              <div className="relative my-2">
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center text-white shadow-sm transition-transform duration-300"
+                  style={{ backgroundColor: values.color || "#4F46E5" }}
+                >
+                  <PillarIcon className="h-8 w-8 text-white drop-shadow-xs" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-[#303030] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-white dark:border-zinc-800">
+                  {values.sortOrder || 1}
+                </div>
               </div>
 
-              <h4 className="text-sm font-bold text-foreground max-w-[200px] truncate">
-                {values.label || "Wheel Segment"}
+              {/* Label & Value */}
+              <h4 className="text-[15px] font-bold text-[#303030] dark:text-zinc-100 mt-2 tracking-tight">
+                {values.label || "Untitled Slice"}
               </h4>
-
-              <div className="mt-1 flex items-center gap-1.5 text-xs font-bold text-primary">
-                <span>{pillarBadge.tag}</span>
-              </div>
+              <p className="text-[12px] font-medium text-[#616161] dark:text-zinc-400 mt-0.5">
+                {pillarBadge.tag}
+              </p>
             </div>
 
-            {/* Quick Summary Rows */}
-            <div className="p-4 bg-card border-t border-border/60 space-y-2">
+            {/* Structured Summary Rows */}
+            <div className="p-3 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1">
               <PolarisSummaryRow
-                label="Fulfillment"
+                label="Prize Type"
                 value={pillarBadge.label}
               />
               <PolarisSummaryRow
-                label="Win Probability"
+                label="Probability"
                 value={`${values.probability || 10}%`}
               />
               <PolarisSummaryRow
-                label="Wheel Position"
-                value={`Order #${values.sortOrder || 1}`}
+                label="Slice Theme"
+                value={
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="h-3 w-3 rounded-full border border-[#d2d5d9]"
+                      style={{ backgroundColor: values.color || "#4F46E5" }}
+                    />
+                    <span className="font-mono text-[11px] uppercase">
+                      {values.color || "#4F46E5"}
+                    </span>
+                  </div>
+                }
               />
               <PolarisSummaryRow
                 label="Status"
@@ -147,12 +162,11 @@ export function SpinSegmentPreviewSidebar({
         </div>
       </PolarisSidebarCard>
 
-      {/* ── Strategic Advice ────────────────────────────────────────────── */}
-      <PolarisTipCard title="Strategic Probability Advice">
-        Distribute slice probabilities to achieve your desired target margin. Higher payout prizes (like high value Gift Cards) should have lower probabilities (1%–5%), while smaller point prizes keep members engaged with frequent wins.
+      {/* Strategic Guidance */}
+      <PolarisTipCard title="Wheel Economy Optimization">
+        Ensure the sum of all slice probabilities on the wheel equals 100%. High-value
+        prizes (e.g. gift cards) should ideally have a 0.5% - 2% probability.
       </PolarisTipCard>
     </div>
   );
 }
-
-export default SpinSegmentPreviewSidebar;

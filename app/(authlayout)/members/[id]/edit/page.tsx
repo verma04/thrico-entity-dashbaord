@@ -106,6 +106,7 @@ const EditMemberPage = () => {
       />
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <MemberCreationForm
+          showHeader={false}
           initialValues={initialValues}
           loading={mutationLoading}
           onFinish={onFinish}

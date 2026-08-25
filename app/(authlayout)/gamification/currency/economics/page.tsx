@@ -5,9 +5,9 @@ import { useGetEntityCurrencyConfig } from "@/graphql/actions";
 import { Coins } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { useModuleStore } from "@/store/useModuleStore";
-
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function EconomicsPage() {
   const currencyModuleName = useModuleStore(
@@ -29,7 +29,11 @@ export default function EconomicsPage() {
         ]}
       />
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <EconomicConfiguration data={data} loading={loading} />
+        {loading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : (
+          <EconomicConfiguration data={data} loading={false} />
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );

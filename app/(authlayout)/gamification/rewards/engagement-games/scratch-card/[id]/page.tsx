@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useToast } from "@/hooks/use-toast";
-import { RectangleHorizontal } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { RectangleHorizontal, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   useGetScratchCardPrizeById,
@@ -15,7 +15,9 @@ import {
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { PolarisFormLayout } from "@/components/gamification/shared/polaris-form-ui";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { ScratchTierFormSections } from "@/components/rewards/scratch-card/create/scratch-tier-form-sections";
 import { ScratchTierPreviewSidebar } from "@/components/rewards/scratch-card/create/scratch-tier-preview-sidebar";
@@ -55,7 +57,7 @@ export default function EditScratchCardTierPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const id = Array.isArray(params?.id) ? params.id[0] : (params?.id as string);
 
   const { data: prizeData, loading: prizeLoading } = useGetScratchCardPrizeById(
     {
@@ -125,7 +127,7 @@ export default function EditScratchCardTierPage() {
         giftCardValue: 0,
         giftCardFee: 0,
 
-        // Coupon-compatibility fields for pillar sub-sections
+        // Coupon-compatibility fields
         title: "",
         description: "",
         couponCode: "",
@@ -136,151 +138,147 @@ export default function EditScratchCardTierPage() {
         validityDays: 30,
         image: "",
 
-        // Supply limits
         totalUsageLimit: 0,
         perUserLimit: 0,
       };
     }
 
-    const uiType = resolveGameRewardType(prize);
-    const ruleId =
-      prize.storeDiscountRuleId ||
-      prize.manualBatchId ||
-      prize.digitalCardRuleId ||
-      prize.eligibilityRuleId ||
-      prize.mechanism?.ruleId ||
-      "";
+    const elig = prize?.eligibility || {};
+    const uIds = elig?.eligibleUserIds || [];
+    const tIds = elig?.membershipTierId || elig?.eligibleTierIds || [];
+    const mEligibility =
+      elig?.memberEligibility ||
+      (uIds.length > 0
+        ? "SPECIFIC_CUSTOMERS"
+        : tIds.length > 0
+          ? "TIERS"
+          : "ALL");
 
-    let mechCategory: "INTERNAL" | "ECOMMERCE" | "DIGITAL_GIFT_CARD" =
-      "INTERNAL";
-    if (uiType === "ECOMMERCE") {
-      mechCategory = "ECOMMERCE";
-    } else if (uiType === "GIFT_CARD") {
-      mechCategory = "DIGITAL_GIFT_CARD";
-    }
-
-    const prizeLabel = prize.label || prize.tryAgainMessage || "";
+    const derivedRewardType = resolveGameRewardType(
+      prize?.type,
+      prize?.mechanism?.type,
+    );
 
     return {
-      label: prizeLabel,
-      rewardType: uiType,
-      rewardValue: prize.value ?? prize.coinsAmount ?? 50,
-      probability: 15,
-      cardColor: "#4F46E5",
-      isActive: prize.isActive !== false,
-      rewardId: ruleId,
+      label: prize?.label || prize?.title || "",
+      rewardType: derivedRewardType,
+      rewardValue: prize?.value || 50,
+      probability: prize?.probability || 15,
+      cardColor: prize?.cardColor || "#4F46E5",
+      isActive: prize?.isActive ?? true,
+      rewardId: prize?.mechanism?.ruleId || "",
 
-      mechanism: mechCategory,
-      selectedRuleId: ruleId,
+      // Shared Delivery & Fulfillment pillar tracking
+      mechanism: (prize?.mechanism?.type === "STORE_DISCOUNT"
+        ? "ECOMMERCE"
+        : prize?.mechanism?.type === "DIGITAL_GIFT_CARD"
+          ? "DIGITAL_GIFT_CARD"
+          : prize?.type === "COINS"
+            ? "COINS"
+            : prize?.type === "NO_REWARDS"
+              ? "NO_REWARDS"
+              : "INTERNAL") as any,
+      selectedRuleId: prize?.mechanism?.ruleId || "",
 
-      memberEligibility: prize.eligibility?.memberEligibility || "ALL",
-      membershipTierId:
-        prize.eligibility?.membershipTierId ||
-        prize.eligibility?.eligibleTierIds ||
-        [],
-      eligibleTierIds:
-        prize.eligibility?.eligibleTierIds ||
-        prize.eligibility?.membershipTierId ||
-        [],
-      eligibleUserIds: prize.eligibility?.eligibleUserIds || [],
-      eligibleSegmentIds: prize.eligibility?.eligibleSegmentIds || [],
-      eligibleRoles: prize.eligibility?.eligibleRoles || [],
-      showToAllMembers: prize.eligibility?.showToAllMembers ?? true,
+      // Member Eligibility & Access Controls
+      memberEligibility: mEligibility,
+      membershipTierId: tIds,
+      eligibleTierIds: tIds,
+      eligibleUserIds: uIds,
+      eligibleSegmentIds: elig?.eligibleSegmentIds || [],
+      eligibleRoles: elig?.eligibleRoles || [],
+      showToAllMembers: elig?.showToAllMembers ?? true,
 
-      minAccountAge:
-        prize.minAccountAge || prize.eligibility?.minAccountAge || 0,
-      minActivity:
-        prize.minActivity || prize.eligibility?.minActivityRequired || 0,
-      cooldownPeriod: prize.eligibility?.cooldownPeriod || 0,
-      blockWarnedUsers: prize.eligibility?.blockWarnedUsers || false,
-      eligibilityDescription: prize.eligibilityDescription || "",
+      // Anti-Abuse & Guardrails
+      minAccountAge: elig?.minAccountAge ?? 0,
+      minActivity: elig?.minActivity ?? 0,
+      cooldownPeriod: elig?.cooldownPeriod ?? 0,
+      blockWarnedUsers: elig?.blockWarnedUsers ?? false,
+      eligibilityDescription: elig?.eligibilityDescription || "",
 
-      manualBatchId: prize.manualBatchId || ruleId || "",
-      storeDiscountRuleId: prize.storeDiscountRuleId || ruleId || "",
-      storeDiscountType:
-        prize.storeDiscountRule?.discountType || "FIXED_AMOUNT",
+      // Pillar 1: Internal Voucher
+      manualBatchId:
+        prize?.mechanism?.manualBatchId || prize?.mechanism?.ruleId || "",
+
+      // Pillar 2: Store Discount
+      storeDiscountRuleId:
+        prize?.mechanism?.storeDiscountRuleId ||
+        prize?.mechanism?.ruleId ||
+        "",
+      storeDiscountType: "FIXED_AMOUNT",
       storeCodePrefix: "THRICO-",
       storeMinCart: 0,
       customerLock: true,
-      ecommerceDiscountType:
-        prize.storeDiscountRule?.discountType === "PERCENTAGE"
-          ? "PERCENTAGE"
-          : "FIXED_AMOUNT",
-      ecommerceDiscountValue:
-        prize.storeDiscountRule?.discountValue || prize.value || 20,
-      ecommerceTitle: prize.storeDiscountRule?.title || "Store Voucher",
+      ecommerceDiscountType: "PERCENTAGE" as "PERCENTAGE" | "FIXED_AMOUNT",
+      ecommerceDiscountValue: 20,
+      ecommerceTitle: "20% Off Store Voucher",
 
-      digitalCardRuleId: prize.digitalCardRuleId || ruleId || "",
-      giftCardBrand: prize.digitalCardRule?.brandName || "",
+      // Pillar 3: Brand Digital Gift Card
+      digitalCardRuleId:
+        prize?.mechanism?.digitalCardRuleId ||
+        prize?.mechanism?.ruleId ||
+        "",
+      giftCardBrand: "",
       giftCardProductId: "",
-      giftCardDenomination:
-        prize.digitalCardRule?.faceValue || prize.value || 100,
-      giftCardValue: prize.digitalCardRule?.faceValue || prize.value || 100,
+      giftCardDenomination: 100,
+      giftCardValue: 0,
       giftCardFee: 0,
 
-      title: prizeLabel,
-      description: prize.tryAgainMessage || "",
+      // Coupon-compatibility fields
+      title: prize?.label || prize?.title || "",
+      description: "",
       couponCode: "",
       couponType: "ONE_TO_ONE",
       inventoryRequired: false,
-      discountValue: String(prize.value || ""),
+      discountValue: "",
       discountType: "Flat",
       validityDays: 30,
       image: "",
 
-      totalUsageLimit: prize.eligibility?.totalUsageLimit || 0,
-      perUserLimit: prize.eligibility?.perUserLimit || 0,
+      totalUsageLimit: 0,
+      perUserLimit: 0,
     };
   }, [prize]);
 
   const formik = useFormik({
     initialValues,
-    validationSchema: scratchTierSchema,
     enableReinitialize: true,
+    validationSchema: scratchTierSchema,
     onSubmit: async (values) => {
       try {
-        const ruleId = values.selectedRuleId || values.rewardId || null;
-
         const tierIds = Array.isArray(values.membershipTierId)
           ? values.membershipTierId
           : values.membershipTierId
             ? [values.membershipTierId]
             : values.eligibleTierIds || [];
 
-        const eligibilityInput = {
-          memberEligibility: values.memberEligibility || "ALL",
-          membershipTierId: tierIds,
-          eligibleTierIds: tierIds,
-          eligibleUserIds: values.eligibleUserIds || [],
-          eligibleSegmentIds: values.eligibleSegmentIds || [],
-          eligibleRoles: values.eligibleRoles || [],
-          minAccountAge: Number(values.minAccountAge || 0),
-          minActivityRequired: Number(values.minActivity || 0),
-          totalUsageLimit: Number(values.totalUsageLimit || 0),
-          perUserLimit: Number(values.perUserLimit || 0),
-          cooldownPeriod: Number(values.cooldownPeriod || 0),
-          blockWarnedUsers: Boolean(values.blockWarnedUsers || false),
-          showToAllMembers: Boolean(values.showToAllMembers ?? true),
-        };
+        const ruleId = values.selectedRuleId || values.rewardId || null;
 
         const baseInput: any = {
           label: values.label.trim(),
-          minAccountAge: Number(values.minAccountAge || 0),
-          minActivity: Number(values.minActivity || 0),
-          eligibilityDescription: values.eligibilityDescription || "",
-          eligibility: eligibilityInput,
+          probability: Number(values.probability || 15),
+          cardColor: values.cardColor || "#4F46E5",
           isActive: values.isActive,
+          eligibility: {
+            memberEligibility: values.memberEligibility || "ALL",
+            membershipTierId: tierIds,
+            eligibleTierIds: tierIds,
+            eligibleUserIds: values.eligibleUserIds || [],
+            minAccountAge: Number(values.minAccountAge || 0),
+            minActivity: Number(values.minActivity || 0),
+            cooldownPeriod: Number(values.cooldownPeriod || 0),
+            blockWarnedUsers: values.blockWarnedUsers,
+            eligibilityDescription: values.eligibilityDescription,
+            showToAllMembers: values.showToAllMembers ?? true,
+          },
         };
 
         if (values.rewardType === "COINS") {
           baseInput.type = "COINS";
           baseInput.value = Number(values.rewardValue || 50);
-          baseInput.coinsAmount = Number(values.rewardValue || 50);
         } else if (values.rewardType === "NO_REWARDS") {
           baseInput.type = "NO_REWARDS";
           baseInput.value = 0;
-          baseInput.tryAgainMessage =
-            values.label.trim() || "Better Luck Next Time";
         } else if (
           values.rewardType === "DIGITAL_GIFT_CARD" ||
           values.rewardType === "GIFT_CARD"
@@ -323,8 +321,8 @@ export default function EditScratchCardTierPage() {
 
         await updateTier({ variables: { id, input: baseInput } });
         toast({
-          title: "Tier updated",
-          description: "Reward tier modified successfully.",
+          title: "Tier Updated",
+          description: "Scratch card reward tier configuration saved.",
         });
         setSaved(true);
         router.push("/gamification/rewards/engagement-games/scratch-card");
@@ -338,208 +336,68 @@ export default function EditScratchCardTierPage() {
     },
   });
 
-  if (prizeLoading) {
-    return (
-      <EcosystemWrapper className="flex-col gap-4 flex min-h-screen bg-[#fafafa] dark:bg-black/10">
-        <EcosystemHeader
-          title="Loading Reward Tier..."
-          badgeText="Scratch & Win Tier"
-          description="Fetching reward prize parameters, member qualification rules, and engine configuration."
-          icon={RectangleHorizontal}
-          breadcrumbs={[
-            { label: "Gamification", href: "/gamification" },
-            { label: "Rewards", href: "/gamification/rewards" },
-            {
-              label: "Engagement Games",
-              href: "/gamification/rewards/engagement-games",
-            },
-            {
-              label: "Scratch Card",
-              href: "/gamification/rewards/engagement-games/scratch-card",
-            },
-            { label: "Edit Reward Tier" },
-          ]}
-        />
+  return (
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={prize ? `Edit · ${prize.label || prize.title}` : "Edit Scratch Tier"}
+        badgeText="Scratch & Win Tier"
+        description="Update reward prize values, member qualification rules, and engine availability."
+        icon={RectangleHorizontal}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Rewards", href: "/gamification/rewards" },
+          {
+            label: "Engagement Games",
+            href: "/gamification/rewards/engagement-games",
+          },
+          {
+            label: "Scratch Card",
+            href: "/gamification/rewards/engagement-games/scratch-card",
+          },
+          { label: prize?.label || prize?.title || "Edit Tier" },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link href="/gamification/rewards/engagement-games/scratch-card">
+              <Button
+                variant="outline"
+                className="text-[13px] font-medium h-[36px] gap-1.5 border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-100 text-[#303030] dark:text-zinc-100 cursor-pointer shadow-xs rounded-[6px]"
+              >
+                <ArrowLeft className="h-4 w-4 text-[#616161]" />
+                Back to Scratch Cards
+              </Button>
+            </Link>
+          </div>
+        }
+      />
 
-        {/* ── Skeleton Form Body & Preview Sidebar Layout ─────────────────── */}
-        <div className="flex-1 overflow-y-auto">
-          <PolarisFormLayout
-            sidebar={
-              <div className="space-y-6">
-                {/* Sidebar Card Mockup Skeleton */}
-                <div className="p-5 rounded-2xl border border-border bg-card shadow-xs space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-28" />
-                    <Skeleton className="h-4 w-12 rounded-full" />
-                  </div>
-                  <Skeleton className="aspect-[4/3] w-full rounded-xl" />
-                  <div className="space-y-2 pt-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                </div>
-
-                {/* Sidebar Details Info Skeleton */}
-                <div className="p-4 rounded-xl border border-border bg-card shadow-xs space-y-3">
-                  <Skeleton className="h-4 w-32" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-8 w-full rounded-lg" />
-                    <Skeleton className="h-8 w-full rounded-lg" />
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            <div className="space-y-6">
-              {/* Step 1 Skeleton */}
-              <div className="p-6 rounded-2xl border border-border bg-card shadow-xs space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-border">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-6 rounded-full" />
-                      <Skeleton className="h-5 w-48" />
-                    </div>
-                    <Skeleton className="h-3.5 w-72" />
-                  </div>
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Skeleton key={i} className="h-20 w-full rounded-xl" />
-                  ))}
-                </div>
-                <Skeleton className="h-28 w-full rounded-xl" />
-              </div>
-
-              {/* Step 2 Skeleton */}
-              <div className="p-6 rounded-2xl border border-border bg-card shadow-xs space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-border">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-6 rounded-full" />
-                      <Skeleton className="h-5 w-40" />
-                    </div>
-                    <Skeleton className="h-3.5 w-64" />
-                  </div>
-                  <Skeleton className="h-5 w-20 rounded-full" />
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-28" />
-                    <Skeleton className="h-10 w-full rounded-lg" />
-                  </div>
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-9 w-32 rounded-lg" />
-                  </div>
-                  <Skeleton className="h-14 w-full rounded-xl" />
-                </div>
-              </div>
-
-              {/* Step 3 Skeleton */}
-              <div className="p-6 rounded-2xl border border-border bg-card shadow-xs space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-border">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-6 rounded-full" />
-                      <Skeleton className="h-5 w-44" />
-                    </div>
-                    <Skeleton className="h-3.5 w-80" />
-                  </div>
-                  <Skeleton className="h-5 w-24 rounded-full" />
-                </div>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Skeleton className="h-24 w-full rounded-xl" />
-                    <Skeleton className="h-24 w-full rounded-xl" />
-                  </div>
-                  <Skeleton className="h-16 w-full rounded-xl" />
-                </div>
-              </div>
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        {prizeLoading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : !prize ? (
+          <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[12px] bg-white dark:bg-zinc-900 space-y-4">
+            <div className="h-14 w-14 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20 shadow-xs">
+              <RectangleHorizontal className="h-7 w-7" />
             </div>
-          </PolarisFormLayout>
-        </div>
-      </EcosystemWrapper>
-    );
-  }
-
-  if (!prize && !prizeLoading) {
-    return (
-      <EcosystemWrapper className="flex-col gap-4 flex min-h-screen bg-[#fafafa] dark:bg-black/10">
-        <EcosystemHeader
-          title="Reward Tier Not Found"
-          badgeText="Scratch & Win Tier"
-          description="The requested scratch card tier could not be found or has been deleted."
-          icon={RectangleHorizontal}
-          breadcrumbs={[
-            { label: "Gamification", href: "/gamification" },
-            { label: "Rewards", href: "/gamification/rewards" },
-            {
-              label: "Engagement Games",
-              href: "/gamification/rewards/engagement-games",
-            },
-            {
-              label: "Scratch Card",
-              href: "/gamification/rewards/engagement-games/scratch-card",
-            },
-            { label: "Not Found" },
-          ]}
-        />
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center space-y-4 max-w-sm">
-            <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center mx-auto border border-border">
-              <RectangleHorizontal className="h-7 w-7 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <h2 className="text-base font-bold text-foreground">
-                Tier Not Found
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                This scratch card reward tier does not exist or may have been removed.
+            <div className="space-y-1 max-w-sm">
+              <h3 className="text-base font-bold text-[#303030] dark:text-zinc-100">
+                Scratch Tier Not Found
+              </h3>
+              <p className="text-[13px] text-[#616161] dark:text-zinc-400">
+                This reward tier may have been deleted or the link is invalid.
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={() =>
-                router.push(
-                  "/gamification/rewards/engagement-games/scratch-card",
-                )
-              }
-              className="text-xs font-semibold"
-            >
-              Back to Scratch Cards
-            </Button>
+            <Link href="/gamification/rewards/engagement-games/scratch-card">
+              <Button
+                variant="outline"
+                className="gap-2 text-[13px] font-medium h-[36px] border-[#aeb4b9] rounded-[6px]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Scratch Cards
+              </Button>
+            </Link>
           </div>
-        </div>
-      </EcosystemWrapper>
-    );
-  }
-
-  return (
-    <form onSubmit={formik.handleSubmit}>
-      <EcosystemWrapper className="flex-col gap-4 flex min-h-screen bg-[#fafafa] dark:bg-black/10">
-        <EcosystemHeader
-          title={`Edit ${prize?.label || "Reward Tier"}`}
-          badgeText="Scratch & Win Tier"
-          description="Update reward prize values, member qualification rules, and engine availability."
-          icon={RectangleHorizontal}
-          breadcrumbs={[
-            { label: "Gamification", href: "/gamification" },
-            { label: "Rewards", href: "/gamification/rewards" },
-            {
-              label: "Engagement Games",
-              href: "/gamification/rewards/engagement-games",
-            },
-            {
-              label: "Scratch Card",
-              href: "/gamification/rewards/engagement-games/scratch-card",
-            },
-            { label: "Edit Reward Tier" },
-          ]}
-        />
-
-        {/* ── Form Body & Preview Sidebar Layout ────────────────────────── */}
-        <div className="flex-1 overflow-y-auto">
+        ) : (
           <PolarisFormLayout
             sidebar={
               <ScratchTierPreviewSidebar
@@ -548,27 +406,30 @@ export default function EditScratchCardTierPage() {
               />
             }
           >
-            <ScratchTierFormSections
-              formik={formik}
-              currencyName={currencyName}
-            />
+            <form onSubmit={formik.handleSubmit} className="space-y-4">
+              <ScratchTierFormSections
+                formik={formik}
+                currencyName={currencyName}
+              />
+            </form>
           </PolarisFormLayout>
-        </div>
+        )}
+      </EcosystemContainer>
 
-        {/* ── Floating Action Bar ───────────────────────────────────────── */}
-        <FloatingSavePanel
-          hasChanged={formik.dirty}
-          isSaving={updatingTier}
-          onSave={formik.handleSubmit}
-          onReset={() =>
-            router.push("/gamification/rewards/engagement-games/scratch-card")
-          }
-          title="Unsaved Tier Changes"
-          description="You have modified properties for this scratch card tier."
-          buttonText="Save Changes"
-          saved={saved}
-        />
-      </EcosystemWrapper>
-    </form>
+      {/* ── Floating Action Bar ───────────────────────────────────────── */}
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        isSaving={updatingTier}
+        onSave={() => formik.submitForm()}
+        onReset={() => {
+          formik.resetForm();
+          setSaved(false);
+        }}
+        title="Unsaved Tier Changes"
+        description="You have modified properties for this scratch card tier."
+        buttonText="Save Changes"
+        saved={saved}
+      />
+    </EcosystemWrapper>
   );
 }

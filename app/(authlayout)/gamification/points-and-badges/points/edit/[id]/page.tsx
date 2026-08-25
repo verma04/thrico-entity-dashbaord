@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Zap, Loader2 } from "lucide-react";
+import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   useGetPointRuleById,
@@ -13,6 +13,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { PointRuleForm } from "@/components/gamification/points-manager/point-rule-form";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 import { useModuleStore } from "@/store/useModuleStore";
 
 export default function EditPointRulePage() {
@@ -87,28 +88,55 @@ export default function EditPointRulePage() {
 
   if (fetchLoading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <EcosystemWrapper className="animate-in fade-in duration-500">
+        <EcosystemHeader
+          title="Edit Point Rule"
+          badgeText={`${gamificationModuleName || "Gamification"} Studio`}
+          description="Update the economic parameters and frequency caps for this scoring rule."
+          icon={Zap}
+          breadcrumbs={[
+            { label: "Gamification", href: "/gamification" },
+            { label: "Points", href: "/gamification/points-and-badges" },
+            { label: "Edit Rule" },
+          ]}
+        />
+        <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0 mt-3">
+          <PolarisFormSkeleton
+            showHeader={false}
+            mainCards={[
+              { fieldRows: 2, fullWidthRows: 1 },
+              { fieldRows: 1, fullWidthRows: 0 },
+              { fieldRows: 0, fullWidthRows: 3 },
+              { fieldRows: 0, fullWidthRows: 2 },
+            ]}
+            sidebarSummaryRows={6}
+            showSidebarInfo={true}
+            showSidebarTip={true}
+          />
+        </EcosystemContainer>
+      </EcosystemWrapper>
     );
   }
 
   if (!rule) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center space-y-4">
-        <h2 className="text-xl font-bold">Rule Not Found</h2>
+      <div className="min-h-screen w-full flex flex-col items-center justify-center space-y-4 bg-[#f6f6f7] dark:bg-zinc-950 p-6 text-center">
+        <h2 className="text-xl font-bold text-[#303030] dark:text-zinc-100">Rule Not Found</h2>
+        <p className="text-sm text-[#616161] dark:text-zinc-400">
+          The requested point rule could not be located or may have been deleted.
+        </p>
         <Button onClick={() => router.push("/gamification/points-and-badges/points")}>
-          Back to List
+          Back to Point Rules
         </Button>
       </div>
     );
   }
 
   return (
-    <EcosystemWrapper>
+    <EcosystemWrapper className="animate-in fade-in duration-500">
       <EcosystemHeader
         title="Edit Point Rule"
-        badgeText={`${gamificationModuleName} Studio`}
+        badgeText={`${gamificationModuleName || "Gamification"} Studio`}
         description="Update the economic parameters and frequency caps for this scoring rule."
         icon={Zap}
         breadcrumbs={[
@@ -117,8 +145,9 @@ export default function EditPointRulePage() {
           { label: "Edit Rule" },
         ]}
       />
-      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0 mt-3">
         <PointRuleForm
+          showHeader={false}
           initialValues={rule}
           onSubmit={handleUpdate}
           loading={isUpdating}

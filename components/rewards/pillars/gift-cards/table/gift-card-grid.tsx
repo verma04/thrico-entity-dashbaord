@@ -38,7 +38,7 @@ export const GiftCardGrid: React.FC<GiftCardGridProps> = ({
         {onCreateClick && (
           <Button
             onClick={onCreateClick}
-            className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             Configure Gift Card

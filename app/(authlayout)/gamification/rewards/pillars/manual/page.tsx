@@ -30,17 +30,17 @@ export default function PillarOneManualPage() {
             <Button
               variant="outline"
               onClick={() => setIsHowItWorksOpen(true)}
-              className="text-xs font-semibold h-9 gap-1.5 border-emerald-300 dark:border-emerald-800 bg-background/80 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 cursor-pointer shadow-xs"
+              className="text-xs font-semibold h-8 gap-1.5 cursor-pointer shadow-2xs"
             >
-              <HelpCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
               How Manual Works
             </Button>
 
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 font-semibold text-xs h-9 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-medium text-xs h-8 shadow-2xs cursor-pointer"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               Create Internal Voucher
             </Button>
           </div>

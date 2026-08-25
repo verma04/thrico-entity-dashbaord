@@ -6,7 +6,6 @@ import * as Yup from "yup";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -21,8 +20,6 @@ import {
   Briefcase,
   MapPin,
   DollarSign,
-  Clock,
-  Globe,
   GraduationCap,
   Sparkles,
   Trash2,
@@ -152,18 +149,20 @@ export function JobCreationForm({
     placeholder: string,
     Icon: React.ElementType,
   ) => {
-    const list = formik.values[fieldName as keyof typeof formik.values] as string[];
+    const list = formik.values[
+      fieldName as keyof typeof formik.values
+    ] as string[];
     return (
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400">
+            <div className="h-6 w-6 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 flex items-center justify-center text-[#616161] dark:text-zinc-400">
               <Icon className="h-3.5 w-3.5" />
             </div>
-            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+            <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 select-none">
               {label}
-            </Label>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+            </label>
+            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border border-[#d2d5d9]">
               {list.filter((i) => i.trim()).length}
             </span>
           </div>
@@ -172,7 +171,7 @@ export function JobCreationForm({
             variant="outline"
             size="sm"
             onClick={() => handleAddListItem(fieldName)}
-            className="h-7 px-2.5 text-xs font-semibold border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="h-[30px] px-2.5 text-[12px] font-medium border-dashed border-[#aeb4b9] text-[#303030] dark:text-zinc-300 hover:bg-[#f6f6f7] rounded-[6px]"
           >
             <Plus className="h-3 w-3 mr-1" />
             Add Item
@@ -190,7 +189,7 @@ export function JobCreationForm({
                 }
                 onBlur={formik.handleBlur}
                 name={`${fieldName}[${index}]`}
-                className="h-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium"
+                className="h-[38px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[6px]"
               />
               {list.length > 1 && (
                 <Button
@@ -198,7 +197,7 @@ export function JobCreationForm({
                   variant="ghost"
                   size="icon"
                   onClick={() => handleRemoveListItem(fieldName, index)}
-                  className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 shrink-0"
+                  className="h-8 w-8 text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-950/20 shrink-0 cursor-pointer rounded-[6px]"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -214,13 +213,18 @@ export function JobCreationForm({
     <FormikProvider value={formik}>
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Live Role Preview Card */}
-            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Preview" icon={Sparkles}>
-              <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-4 space-y-4 shadow-xs">
+            <PolarisSidebarCard
+              title={`${singularName} Preview`}
+              badge="Live Preview"
+              icon={Sparkles}
+            >
+              <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs">
                 <div className="flex items-start gap-3">
-                  <div className="h-12 w-12 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center border border-zinc-800 dark:border-zinc-200 shrink-0 overflow-hidden shadow-xs">
-                    {typeof formik.values.company === "object" && formik.values.company?.logo ? (
+                  <div className="h-10 w-10 rounded-[6px] bg-[#303030] dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center border border-zinc-800 dark:border-zinc-200 shrink-0 overflow-hidden shadow-xs">
+                    {typeof formik.values.company === "object" &&
+                    formik.values.company?.logo ? (
                       <Avatar className="h-full w-full rounded-none">
                         <AvatarImage
                           src={`https://cdn.thrico.network/${formik.values.company.logo}`}
@@ -231,14 +235,14 @@ export function JobCreationForm({
                         </AvatarFallback>
                       </Avatar>
                     ) : (
-                      <Briefcase className="h-5 w-5" />
+                      <Briefcase className="h-4 w-4" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+                    <h4 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 truncate">
                       {formik.values.title || `${singularName} Role Title`}
                     </h4>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5 truncate">
+                    <p className="text-[12px] text-[#616161] dark:text-zinc-400 flex items-center gap-1 mt-0.5 truncate">
                       <Building className="h-3 w-3 shrink-0" />
                       {getCompanyName()}
                     </p>
@@ -249,27 +253,27 @@ export function JobCreationForm({
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   <Badge
                     variant="outline"
-                    className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold"
+                    className="bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-300 border-[#d2d5d9] text-[10px] font-semibold rounded-[4px]"
                   >
                     <MapPin className="h-3 w-3 mr-1" />
                     {formatLocationName(formik.values.location)}
                   </Badge>
                   <Badge
                     variant="outline"
-                    className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-none text-[10px] font-bold"
+                    className="bg-[#303030] dark:bg-zinc-100 text-white dark:text-zinc-900 border-none text-[10px] font-bold rounded-[4px]"
                   >
                     {formik.values.workplaceType}
                   </Badge>
                   <Badge
                     variant="outline"
-                    className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold"
+                    className="bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-300 border-[#d2d5d9] text-[10px] font-semibold rounded-[4px]"
                   >
                     {formik.values.jobType}
                   </Badge>
                   {formik.values.salary && (
                     <Badge
                       variant="outline"
-                      className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold"
+                      className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 border-[#d2d5d9] text-[10px] font-semibold rounded-[4px]"
                     >
                       <DollarSign className="h-3 w-3 mr-0.5" />
                       {formik.values.salary}
@@ -278,14 +282,15 @@ export function JobCreationForm({
                 </div>
 
                 {/* Description Snippet */}
-                <div className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-3 pt-1 border-t border-zinc-100 dark:border-zinc-800">
-                  {formik.values.description || "Role overview and expectations will appear here..."}
+                <div className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[16px] line-clamp-3 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800">
+                  {formik.values.description ||
+                    "Role overview and expectations will appear here..."}
                 </div>
 
                 {/* Skills tags preview */}
                 {formik.values.skills.some((s: string) => s.trim()) && (
                   <div className="space-y-1 pt-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#616161]">
                       Core Skills
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -295,7 +300,7 @@ export function JobCreationForm({
                         .map((skill: string, i: number) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-medium"
+                            className="px-2 py-0.5 rounded-[4px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] text-[#303030] dark:text-zinc-300 text-[10px] font-medium"
                           >
                             {skill}
                           </span>
@@ -306,7 +311,7 @@ export function JobCreationForm({
               </div>
 
               {/* Structured Configuration Breakdown */}
-              <div className="space-y-1.5 pt-2">
+              <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
                   label="Role Title"
                   value={
@@ -345,12 +350,13 @@ export function JobCreationForm({
 
             {/* Role Strategy Tip */}
             <PolarisTipCard title={`${singularName} Posting Advice`}>
-              Clear compensation brackets and explicit skill tags attract 3.5× more qualified applicants from within your member ecosystem.
+              Clear compensation brackets and explicit skill tags attract 3.5×
+              more qualified applicants from within your member ecosystem.
             </PolarisTipCard>
           </div>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           {/* Step 1: Role Overview & Organization */}
           <PolarisFormCard
             step={1}
@@ -358,11 +364,15 @@ export function JobCreationForm({
             description={`Specify the role title, hiring company entity, geographic location, and compensation parameters.`}
             badge="Required"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  {singularName} Title <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="title"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  {singularName} Title{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <JobTitleAutocomplete
                   value={formik.values.title}
                   onChange={(val) => formik.setFieldValue("title", val)}
@@ -371,42 +381,50 @@ export function JobCreationForm({
                   error={!!(formik.touched.title && formik.errors.title)}
                 />
                 {formik.touched.title && formik.errors.title && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.title as string}
                   </p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="company" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Hiring Company <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="company"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Hiring Company{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <CompanyAutocompleteSelect
                   onChange={(value) =>
                     formik.setFieldValue("company", value)
                   }
                 />
                 {formik.touched.company && formik.errors.company && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.company as string}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               <div className="space-y-1.5">
-                <Label htmlFor="location" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Location / Region <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="location"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Location / Region{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161] z-10" />
                   <GooglePlacesInput
                     id="location"
                     name="location"
                     onBlur={formik.handleBlur}
                     placeholder="Search city, country or remote..."
-                    className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                     initialValue={
                       typeof formik.values.location === "object"
                         ? formik.values.location
@@ -425,23 +443,26 @@ export function JobCreationForm({
                   />
                 </div>
                 {formik.touched.location && formik.errors.location && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.location as string}
                   </p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="salary" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label
+                  htmlFor="salary"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
                   Salary / Compensation Range
-                </Label>
+                </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161]" />
                   <Input
                     id="salary"
                     name="salary"
                     placeholder="e.g., $120,000 - $150,000 / yr"
-                    className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                     value={formik.values.salary}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -451,10 +472,14 @@ export function JobCreationForm({
             </div>
 
             {/* Description Textarea */}
-            <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Role Description <span className="text-rose-500">*</span>
-              </Label>
+            <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <label
+                htmlFor="description"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+              >
+                Role Description{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Textarea
                 id="description"
                 name="description"
@@ -462,15 +487,17 @@ export function JobCreationForm({
                 value={formik.values.description}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="min-h-[120px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                className="min-h-[120px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
               />
               <div className="flex items-center justify-between">
                 {formik.touched.description && formik.errors.description ? (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.description as string}
                   </p>
-                ) : <span />}
-                <p className="text-[10px] text-zinc-400 font-medium">
+                ) : (
+                  <span />
+                )}
+                <p className="text-[11.5px] text-[#616161] font-medium">
                   {formik.values.description.length} characters (min 30)
                 </p>
               </div>
@@ -486,9 +513,10 @@ export function JobCreationForm({
           >
             {/* Workplace Arrangement Selectable Tiles */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Workplace Arrangement <span className="text-rose-500">*</span>
-              </Label>
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Workplace Arrangement{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   {
@@ -516,28 +544,30 @@ export function JobCreationForm({
                     <button
                       key={item.value}
                       type="button"
-                      onClick={() => formik.setFieldValue("workplaceType", item.value)}
+                      onClick={() =>
+                        formik.setFieldValue("workplaceType", item.value)
+                      }
                       className={cn(
-                        "relative flex flex-col items-start p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                        "relative flex flex-col items-start p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
                         isSelected
-                          ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
-                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                          ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
                       <div
                         className={cn(
-                          "h-8 w-8 rounded-lg flex items-center justify-center mb-2.5 border transition-colors",
+                          "h-8 w-8 rounded-[6px] flex items-center justify-center mb-2 border transition-colors",
                           isSelected
-                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                            : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
                         )}
                       >
                         <Icon className="h-4 w-4" />
                       </div>
-                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                         {item.label}
                       </span>
-                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                      <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
                         {item.desc}
                       </p>
                     </button>
@@ -547,18 +577,24 @@ export function JobCreationForm({
             </div>
 
             {/* Engagement Type & Experience Level Dropdowns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               <div className="space-y-1.5">
-                <Label htmlFor="jobType" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Engagement Type <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="jobType"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Engagement Type{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Select
-                  onValueChange={(value) => formik.setFieldValue("jobType", value)}
+                  onValueChange={(value) =>
+                    formik.setFieldValue("jobType", value)
+                  }
                   value={formik.values.jobType}
                 >
                   <SelectTrigger
                     id="jobType"
-                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   >
                     <SelectValue placeholder="Select engagement type" />
                   </SelectTrigger>
@@ -572,9 +608,13 @@ export function JobCreationForm({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="experienceLevel" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Seniority / Experience Level <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="experienceLevel"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Seniority / Experience Level{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Select
                   onValueChange={(value) =>
                     formik.setFieldValue("experienceLevel", value)
@@ -583,15 +623,21 @@ export function JobCreationForm({
                 >
                   <SelectTrigger
                     id="experienceLevel"
-                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   >
                     <SelectValue placeholder="Select seniority level" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ENTRY-LEVEL">Entry-level (0-2 yrs)</SelectItem>
-                    <SelectItem value="MID-LEVEL">Mid-level (3-5 yrs)</SelectItem>
+                    <SelectItem value="ENTRY-LEVEL">
+                      Entry-level (0-2 yrs)
+                    </SelectItem>
+                    <SelectItem value="MID-LEVEL">
+                      Mid-level (3-5 yrs)
+                    </SelectItem>
                     <SelectItem value="SENIOR">Senior (5-8 yrs)</SelectItem>
-                    <SelectItem value="LEAD">Lead / Manager (8+ yrs)</SelectItem>
+                    <SelectItem value="LEAD">
+                      Lead / Manager (8+ yrs)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -608,12 +654,12 @@ export function JobCreationForm({
             {/* Skills Autocomplete */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400">
+                <div className="h-6 w-6 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 flex items-center justify-center text-[#616161] dark:text-zinc-400">
                   <Briefcase className="h-3.5 w-3.5" />
                 </div>
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 select-none">
                   Required Skill Stack
-                </Label>
+                </label>
               </div>
               <SkillsAutocomplete
                 value={formik.values.skills}
@@ -621,7 +667,7 @@ export function JobCreationForm({
               />
             </div>
 
-            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               {renderListBuilder(
                 "requirements",
                 "Qualifications & Requirements",
@@ -630,7 +676,7 @@ export function JobCreationForm({
               )}
             </div>
 
-            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               {renderListBuilder(
                 "responsibilities",
                 "Key Responsibilities & Deliverables",
@@ -639,7 +685,7 @@ export function JobCreationForm({
               )}
             </div>
 
-            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               {renderListBuilder(
                 "benefits",
                 "Benefits, Perks & Allowances",

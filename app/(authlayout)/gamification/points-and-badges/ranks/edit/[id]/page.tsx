@@ -2,13 +2,14 @@
 
 import React, { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Crown, Loader2 } from "lucide-react";
+import { Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetRanks } from "@/graphql/actions/gamification/gamification-quiries";
 import { useUpdateRank } from "@/graphql/actions/gamification/gamification-mutation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 import { RankForm } from "@/components/gamification/ranks/rank-form";
 import { useModuleStore } from "@/store/useModuleStore";
 
@@ -62,29 +63,6 @@ export default function EditRankPage() {
     }
   };
 
-  if (fetchLoading) {
-    return (
-      <div className="h-screen w-full flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!rank) {
-    return (
-      <div className="h-screen w-full flex flex-col items-center justify-center space-y-4">
-        <h2 className="text-xl font-bold">Rank Tier Not Found</h2>
-        <Button
-          onClick={() =>
-            router.push("/gamification/points-and-badges/ranks")
-          }
-        >
-          Back to List
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <EcosystemWrapper>
       <EcosystemHeader
@@ -99,12 +77,28 @@ export default function EditRankPage() {
         ]}
       />
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <RankForm
-          initialValues={rank}
-          onSubmit={handleUpdate}
-          loading={isUpdating}
-          isEdit={true}
-        />
+        {fetchLoading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : !rank ? (
+          <div className="min-h-[400px] w-full flex flex-col items-center justify-center space-y-4">
+            <h2 className="text-xl font-bold">Rank Tier Not Found</h2>
+            <Button
+              onClick={() =>
+                router.push("/gamification/points-and-badges/ranks")
+              }
+            >
+              Back to List
+            </Button>
+          </div>
+        ) : (
+          <RankForm
+            showHeader={false}
+            initialValues={rank}
+            onSubmit={handleUpdate}
+            loading={isUpdating}
+            isEdit={true}
+          />
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );

@@ -9,7 +9,6 @@ import {
   Gift,
   CheckCircle2,
 } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -92,64 +91,88 @@ export function DeliveryFulfillmentSection({
     useGetManualVouchers();
   const manualVouchers = useMemo(
     () => manualVouchersData?.getManualVouchers?.items || [],
-    [manualVouchersData]
+    [manualVouchersData],
   );
 
   const { data: storeRulesData, loading: storeLoading } =
     useGetStoreDiscountRules({ page: 1, limit: 100 });
   const storeRules = useMemo(
     () => storeRulesData?.getStoreDiscountRules?.items || [],
-    [storeRulesData]
+    [storeRulesData],
   );
 
   const { data: digitalCardsData, loading: digitalCardsLoading } =
     useGetDigitalCardRules({ page: 1, limit: 100 });
   const digitalCardRules = useMemo(
     () => digitalCardsData?.getDigitalCardRules?.items || [],
-    [digitalCardsData]
+    [digitalCardsData],
   );
 
   const { data: walletData } = useGetEntityRewardWallet();
-  const walletBalance = walletData?.getEntityRewardWallet?.balance || 0;
+  const walletBalance = walletData?.getEntityRewardWallet?.balance ?? 0;
 
+  // ── Game vs Coupon Mode ───────────────────────────────────────────────────
   const isGameMode = allowPoints || allowTryAgain;
 
-  // ── Unified Selected Mechanism ────────────────────────────────────────────
+  // ── Derived Selected Option ───────────────────────────────────────────────
   const currentSelectedId: MechanismOptionId = useMemo(() => {
     if (isGameMode) {
-      const rType = values.rewardType;
-      if (rType === "COINS" && allowPoints) return "COINS";
-      if (rType === "NO_REWARDS" && allowTryAgain) return "NO_REWARDS";
-      if (rType === "STORE_DISCOUNT") return "ECOMMERCE";
-      if (rType === "DIGITAL_GIFT_CARD") return "DIGITAL_GIFT_CARD";
-      if (rType === "INTERNAL_VOUCHER") return "INTERNAL";
+      if (values.rewardType === "COINS") return "COINS";
+      if (values.rewardType === "NO_REWARDS") return "NO_REWARDS";
+      if (
+        values.rewardType === "STORE_DISCOUNT" ||
+        values[pillarField] === "ECOMMERCE"
+      )
+        return "ECOMMERCE";
+      if (
+        values.rewardType === "DIGITAL_GIFT_CARD" ||
+        values[pillarField] === "DIGITAL_GIFT_CARD"
+      )
+        return "DIGITAL_GIFT_CARD";
+      return "INTERNAL";
     }
 
-    const pVal = values[pillarField];
-    if (pVal === "ECOMMERCE" || pVal === "STORE_DISCOUNT") return "ECOMMERCE";
-    if (pVal === "DIGITAL_GIFT_CARD") return "DIGITAL_GIFT_CARD";
+    const val = values[pillarField];
+    if (val === "ECOMMERCE" || val === "STORE_DISCOUNT") return "ECOMMERCE";
+    if (val === "DIGITAL_GIFT_CARD") return "DIGITAL_GIFT_CARD";
     return "INTERNAL";
-  }, [isGameMode, values.rewardType, values[pillarField], allowPoints, allowTryAgain]);
+  }, [isGameMode, values.rewardType, values[pillarField], pillarField]);
 
+  // ── Handler for Selecting a Mechanism ─────────────────────────────────────
   const handleSelectMechanism = (id: MechanismOptionId) => {
     if (id === "COINS") {
       setFieldValue("rewardType", "COINS");
-      const val = values.rewardValue || 50;
-      setFieldValue("rewardValue", val);
-      setFieldValue("label", `${val} ${currencyName} Scratch Card`);
-      setFieldValue("selectedRuleId", "");
+      setFieldValue("category", "POINTS");
+      setFieldValue("rewardValue", values.rewardValue || 50);
+      setFieldValue("inventoryRequired", false);
+      if (
+        isGameMode &&
+        (!values.label ||
+          values.label.includes("Scratch Card") ||
+          values.label === "Better Luck Next Time")
+      ) {
+        setFieldValue("label", `${values.rewardValue || 50} ${currencyName}`);
+      }
     } else if (id === "NO_REWARDS") {
       setFieldValue("rewardType", "NO_REWARDS");
+      setFieldValue("category", "TRY_AGAIN");
       setFieldValue("rewardValue", 0);
-      setFieldValue("label", "Better Luck Next Time");
-      setFieldValue("selectedRuleId", "");
+      setFieldValue("inventoryRequired", false);
+      if (isGameMode) {
+        setFieldValue("label", "Better Luck Next Time");
+      }
     } else if (id === "INTERNAL") {
       setFieldValue("rewardType", "INTERNAL_VOUCHER");
       setFieldValue(pillarField, "INTERNAL");
-      setFieldValue("category", "VOUCHERS");
+      setFieldValue("category", "INTERNAL_VOUCHERS");
       setFieldValue("couponType", "ONE_TO_ONE");
       setFieldValue("inventoryRequired", true);
-      if (isGameMode && (!values.label || values.label.includes("Scratch Card") || values.label === "Better Luck Next Time")) {
+      if (
+        isGameMode &&
+        (!values.label ||
+          values.label.includes("Scratch Card") ||
+          values.label === "Better Luck Next Time")
+      ) {
         setFieldValue("label", "Special Reward Voucher");
       }
     } else if (id === "ECOMMERCE") {
@@ -166,7 +189,7 @@ export function DeliveryFulfillmentSection({
           "label",
           discType === "PERCENTAGE"
             ? `${discVal}% Off Store Voucher`
-            : `₹${discVal} Off Store Voucher`
+            : `₹${discVal} Off Store Voucher`,
         );
       }
     } else if (id === "DIGITAL_GIFT_CARD") {
@@ -207,7 +230,7 @@ export function DeliveryFulfillmentSection({
         color: "text-amber-600 dark:text-amber-400",
         bgColor: "bg-amber-500/10",
         activeBorder:
-          "border-amber-600 ring-1 ring-amber-600/30 bg-amber-50/20 dark:bg-amber-950/20 shadow-xs",
+          "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
       });
     }
 
@@ -221,7 +244,7 @@ export function DeliveryFulfillmentSection({
         color: "text-zinc-600 dark:text-zinc-400",
         bgColor: "bg-zinc-500/10",
         activeBorder:
-          "border-zinc-600 ring-1 ring-zinc-600/30 bg-zinc-50/20 dark:bg-zinc-950/20 shadow-xs",
+          "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
       });
     }
 
@@ -235,7 +258,7 @@ export function DeliveryFulfillmentSection({
         color: "text-emerald-600 dark:text-emerald-400",
         bgColor: "bg-emerald-500/10",
         activeBorder:
-          "border-emerald-600 ring-1 ring-emerald-600/30 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-xs",
+          "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
       },
       {
         id: "ECOMMERCE",
@@ -246,7 +269,7 @@ export function DeliveryFulfillmentSection({
         color: "text-indigo-600 dark:text-indigo-400",
         bgColor: "bg-indigo-500/10",
         activeBorder:
-          "border-indigo-600 ring-1 ring-indigo-600/30 bg-indigo-50/20 dark:bg-indigo-950/20 shadow-xs",
+          "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
       },
       {
         id: "DIGITAL_GIFT_CARD",
@@ -257,12 +280,20 @@ export function DeliveryFulfillmentSection({
         color: "text-violet-600 dark:text-violet-400",
         bgColor: "bg-violet-500/10",
         activeBorder:
-          "border-violet-600 ring-1 ring-violet-600/30 bg-violet-50/20 dark:bg-violet-950/20 shadow-xs",
-      }
+          "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
+      },
     );
 
     return list;
-  }, [allowPoints, allowTryAgain, values.rewardValue, currencyName, manualVouchers.length, storeRules.length, digitalCardRules.length]);
+  }, [
+    allowPoints,
+    allowTryAgain,
+    values.rewardValue,
+    currencyName,
+    manualVouchers.length,
+    storeRules.length,
+    digitalCardRules.length,
+  ]);
 
   const cardTitle =
     title ||
@@ -274,7 +305,8 @@ export function DeliveryFulfillmentSection({
     (isGameMode
       ? "Select the prize fulfillment mechanism and configure payout parameters or link voucher & gift card blueprints."
       : "Select the reward fulfillment pillar and link or configure voucher rules, store discount parameters, or digital brand cards.");
-  const cardBadge = badge || (isGameMode ? "3-Pillar Engine" : "Pillar Engine");
+  const cardBadge =
+    badge || (isGameMode ? "3-Pillar Engine" : "Pillar Engine");
 
   return (
     <PolarisFormCard
@@ -287,10 +319,10 @@ export function DeliveryFulfillmentSection({
         {/* ── 1. Single Unified Selector Grid ─────────────────────────────── */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-xs font-bold text-foreground block">
-              {isGameMode ? "Fulfillment Mechanism *" : "Fulfillment Mechanism *"}
-            </Label>
-            <span className="text-[10px] text-muted-foreground">
+            <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+              Fulfillment Mechanism <span className="text-[#d72c0d] ml-0.5">*</span>
+            </label>
+            <span className="text-[11.5px] text-[#616161]">
               Click to select prize type
             </span>
           </div>
@@ -300,7 +332,7 @@ export function DeliveryFulfillmentSection({
               "grid gap-2.5",
               isGameMode
                 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-1 sm:grid-cols-3"
+                : "grid-cols-1 sm:grid-cols-3",
             )}
           >
             {options.map((opt) => {
@@ -312,42 +344,42 @@ export function DeliveryFulfillmentSection({
                   key={opt.id}
                   onClick={() => handleSelectMechanism(opt.id)}
                   className={cn(
-                    "p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden",
+                    "p-3.5 rounded-[8px] border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 relative overflow-hidden",
                     isSelected
                       ? opt.activeBorder
-                      : "border-border/70 bg-card hover:border-border hover:bg-muted/20"
+                      : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                   )}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <div
                         className={cn(
-                          "h-7 w-7 rounded-lg flex items-center justify-center shrink-0",
+                          "h-7 w-7 rounded-[6px] flex items-center justify-center shrink-0",
                           opt.bgColor,
-                          opt.color
+                          opt.color,
                         )}
                       >
                         <Icon className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-xs font-bold text-foreground truncate">
+                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
                         {opt.title}
                       </span>
                     </div>
 
                     {isSelected && (
                       <CheckCircle2
-                        className={cn("h-4 w-4 shrink-0", opt.color)}
+                        className="h-4 w-4 shrink-0 text-[#303030] dark:text-zinc-100"
                       />
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 text-[10px]">
-                    <span className="text-muted-foreground truncate">
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800 text-[11.5px]">
+                    <span className="text-[#616161] truncate">
                       {opt.subtitle}
                     </span>
                     <Badge
                       variant="outline"
-                      className="text-[9px] px-1.5 py-0 font-medium shrink-0"
+                      className="text-[10px] px-1.5 py-0 font-medium shrink-0 border-[#d2d5d9]"
                     >
                       {opt.countLabel}
                     </Badge>
@@ -362,15 +394,17 @@ export function DeliveryFulfillmentSection({
 
         {/* Sub-panel: Points Payout */}
         {currentSelectedId === "COINS" && allowPoints && (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-3 animate-in fade-in-50 duration-200">
+          <div className="p-3.5 rounded-[8px] bg-amber-500/10 border border-amber-500/20 space-y-3 animate-in fade-in-50 duration-200">
             <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
               <Coins className="h-4 w-4" />
-              <span className="text-xs font-bold">Loyalty Points Payout</span>
+              <span className="text-[13px] font-semibold">
+                Loyalty Points Payout
+              </span>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-semibold">
+              <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-200">
                 Amount of {currencyName}
-              </Label>
+              </label>
               <Input
                 type="number"
                 min={1}
@@ -380,10 +414,10 @@ export function DeliveryFulfillmentSection({
                   setFieldValue("rewardValue", val);
                   setFieldValue(
                     "label",
-                    `${val} ${currencyName} Scratch Card`
+                    `${val} ${currencyName} Slice`,
                   );
                 }}
-                className="h-10 bg-background text-sm font-bold"
+                className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold"
               />
               <PolarisPresetChips
                 presets={POINT_VALUE_PRESETS}
@@ -392,7 +426,7 @@ export function DeliveryFulfillmentSection({
                   setFieldValue("rewardValue", val);
                   setFieldValue(
                     "label",
-                    `${val} ${currencyName} Scratch Card`
+                    `${val} ${currencyName} Slice`,
                   );
                 }}
                 prefix="+"
@@ -403,10 +437,10 @@ export function DeliveryFulfillmentSection({
 
         {/* Sub-panel: Try Again */}
         {currentSelectedId === "NO_REWARDS" && allowTryAgain && (
-          <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-3 animate-in fade-in-50 duration-200">
-            <div className="flex items-center gap-2 text-muted-foreground">
+          <div className="p-3.5 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-3 animate-in fade-in-50 duration-200">
+            <div className="flex items-center gap-2 text-[#616161]">
               <RotateCcw className="h-4 w-4" />
-              <span className="text-xs font-bold">
+              <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                 Try Again (Loss) Prompt
               </span>
             </div>
@@ -417,7 +451,12 @@ export function DeliveryFulfillmentSection({
                   type="button"
                   variant={values.label === preset ? "default" : "outline"}
                   size="sm"
-                  className="h-7 text-[11px] rounded-lg cursor-pointer"
+                  className={cn(
+                    "h-8 text-[12px] rounded-[6px] cursor-pointer",
+                    values.label === preset
+                      ? "bg-[#303030] text-white hover:bg-[#303030]"
+                      : "border-[#aeb4b9] bg-white dark:bg-zinc-900",
+                  )}
                   onClick={() => setFieldValue("label", preset)}
                 >
                   {preset}
@@ -459,19 +498,19 @@ export function DeliveryFulfillmentSection({
 
         {/* ── 3. Compact Supply & User Limits (Only if showSupplyLimits=true) ── */}
         {showSupplyLimits && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border/70">
-            <div className="p-3 rounded-xl border border-border/70 bg-card space-y-1.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label
+                <label
                   htmlFor="totalUsageLimit"
-                  className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                 >
                   Total Supply Limit
-                </Label>
+                </label>
                 <button
                   type="button"
                   onClick={() => formik.setFieldValue("totalUsageLimit", 0)}
-                  className="text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="text-[11px] text-[#616161] hover:text-[#303030] cursor-pointer"
                 >
                   Unlimited (0)
                 </button>
@@ -481,27 +520,27 @@ export function DeliveryFulfillmentSection({
                   id="totalUsageLimit"
                   type="number"
                   placeholder="0 = Unlimited"
-                  className="h-9 bg-muted/20 border-border text-xs font-semibold shadow-none"
+                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] text-[13px] font-semibold rounded-[6px]"
                   {...formik.getFieldProps("totalUsageLimit")}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-medium">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
                   Units
                 </span>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl border border-border/70 bg-card space-y-1.5">
+            <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label
+                <label
                   htmlFor="perUserLimit"
-                  className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+                  className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                 >
                   Limit Per Member
-                </Label>
+                </label>
                 <button
                   type="button"
                   onClick={() => formik.setFieldValue("perUserLimit", 0)}
-                  className="text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="text-[11px] text-[#616161] hover:text-[#303030] cursor-pointer"
                 >
                   Unlimited (0)
                 </button>
@@ -511,10 +550,10 @@ export function DeliveryFulfillmentSection({
                   id="perUserLimit"
                   type="number"
                   placeholder="0 = Unlimited"
-                  className="h-9 bg-muted/20 border-border text-xs font-semibold shadow-none"
+                  className="h-[36px] bg-white dark:bg-zinc-900 border-[#aeb4b9] text-[13px] font-semibold rounded-[6px]"
                   {...formik.getFieldProps("perUserLimit")}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-medium">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-[#616161]">
                   Claims/User
                 </span>
               </div>

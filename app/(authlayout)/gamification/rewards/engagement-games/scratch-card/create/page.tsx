@@ -5,11 +5,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { RectangleHorizontal, Sparkles } from "lucide-react";
+import { RectangleHorizontal } from "lucide-react";
 import { useCreateScratchCardPrize } from "@/graphql/actions/rewards";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { PolarisFormLayout } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { ScratchTierFormSections } from "@/components/rewards/scratch-card/create/scratch-tier-form-sections";
@@ -106,7 +107,7 @@ export default function CreateScratchCardTierPage() {
       giftCardValue: 0,
       giftCardFee: 0,
 
-      // Coupon-compatibility fields for pillar sub-sections
+      // Coupon-compatibility fields
       title: "",
       description: "",
       couponCode: "",
@@ -117,54 +118,45 @@ export default function CreateScratchCardTierPage() {
       validityDays: 30,
       image: "",
 
-      // Supply limits (not shown but needed by pillar sections)
       totalUsageLimit: 0,
       perUserLimit: 0,
     },
     validationSchema: scratchTierSchema,
     onSubmit: async (values) => {
       try {
-        const ruleId = values.selectedRuleId || values.rewardId || null;
-
         const tierIds = Array.isArray(values.membershipTierId)
           ? values.membershipTierId
           : values.membershipTierId
             ? [values.membershipTierId]
             : values.eligibleTierIds || [];
 
-        const eligibilityInput = {
-          memberEligibility: values.memberEligibility || "ALL",
-          membershipTierId: tierIds,
-          eligibleTierIds: tierIds,
-          eligibleUserIds: values.eligibleUserIds || [],
-          eligibleSegmentIds: values.eligibleSegmentIds || [],
-          eligibleRoles: values.eligibleRoles || [],
-          minAccountAge: Number(values.minAccountAge || 0),
-          minActivityRequired: Number(values.minActivity || 0),
-          totalUsageLimit: Number(values.totalUsageLimit || 0),
-          perUserLimit: Number(values.perUserLimit || 0),
-          cooldownPeriod: Number(values.cooldownPeriod || 0),
-          blockWarnedUsers: Boolean(values.blockWarnedUsers || false),
-          showToAllMembers: Boolean(values.showToAllMembers ?? true),
-        };
+        const ruleId = values.selectedRuleId || values.rewardId || null;
 
         const baseInput: any = {
           label: values.label.trim(),
-          minAccountAge: Number(values.minAccountAge || 0),
-          minActivity: Number(values.minActivity || 0),
-          eligibilityDescription: values.eligibilityDescription || "",
-          eligibility: eligibilityInput,
+          probability: Number(values.probability || 15),
+          cardColor: values.cardColor || "#4F46E5",
+          isActive: values.isActive,
+          eligibility: {
+            memberEligibility: values.memberEligibility || "ALL",
+            membershipTierId: tierIds,
+            eligibleTierIds: tierIds,
+            eligibleUserIds: values.eligibleUserIds || [],
+            minAccountAge: Number(values.minAccountAge || 0),
+            minActivity: Number(values.minActivity || 0),
+            cooldownPeriod: Number(values.cooldownPeriod || 0),
+            blockWarnedUsers: values.blockWarnedUsers,
+            eligibilityDescription: values.eligibilityDescription,
+            showToAllMembers: values.showToAllMembers ?? true,
+          },
         };
 
         if (values.rewardType === "COINS") {
           baseInput.type = "COINS";
           baseInput.value = Number(values.rewardValue || 50);
-          baseInput.coinsAmount = Number(values.rewardValue || 50);
         } else if (values.rewardType === "NO_REWARDS") {
           baseInput.type = "NO_REWARDS";
           baseInput.value = 0;
-          baseInput.tryAgainMessage =
-            values.label.trim() || "Better Luck Next Time";
         } else if (
           values.rewardType === "DIGITAL_GIFT_CARD" ||
           values.rewardType === "GIFT_CARD"
@@ -207,8 +199,8 @@ export default function CreateScratchCardTierPage() {
 
         await createTier({ variables: { input: baseInput } });
         toast({
-          title: "Tier created",
-          description: "Reward tier added successfully to Scratch Card engine.",
+          title: "Scratch Tier Created",
+          description: "New reward tier published to scratch engine.",
         });
         setSaved(true);
         router.push("/gamification/rewards/engagement-games/scratch-card");
@@ -223,58 +215,59 @@ export default function CreateScratchCardTierPage() {
   });
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <EcosystemWrapper className="flex-col gap-4 flex min-h-screen bg-[#fafafa] dark:bg-black/10">
-        <EcosystemHeader
-          title="Add Reward Tier"
-          badgeText="Scratch & Win Tier"
-          description="Define a new reward prize, win probability, and member eligibility parameters."
-          icon={RectangleHorizontal}
-          breadcrumbs={[
-            { label: "Gamification", href: "/gamification" },
-            { label: "Rewards", href: "/gamification/rewards" },
-            {
-              label: "Engagement Games",
-              href: "/gamification/rewards/engagement-games",
-            },
-            {
-              label: "Scratch Card",
-              href: "/gamification/rewards/engagement-games/scratch-card",
-            },
-            { label: "Add Reward Tier" },
-          ]}
-        />
-        {/* ── Form Body & Preview Sidebar Layout ────────────────────────── */}
-        <div className="flex-1 overflow-y-auto">
-          <PolarisFormLayout
-            sidebar={
-              <ScratchTierPreviewSidebar
-                formik={formik}
-                currencyName={currencyName}
-              />
-            }
-          >
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Add Scratch Tier"
+        badgeText="Scratch & Win Tier"
+        description="Configure a new reward tier, member eligibility gating, and fulfillment rules."
+        icon={RectangleHorizontal}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Rewards", href: "/gamification/rewards" },
+          {
+            label: "Engagement Games",
+            href: "/gamification/rewards/engagement-games",
+          },
+          {
+            label: "Scratch Card",
+            href: "/gamification/rewards/engagement-games/scratch-card",
+          },
+          { label: "Add Reward Tier" },
+        ]}
+      />
+
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <PolarisFormLayout
+          sidebar={
+            <ScratchTierPreviewSidebar
+              formik={formik}
+              currencyName={currencyName}
+            />
+          }
+        >
+          <form onSubmit={formik.handleSubmit} className="space-y-4">
             <ScratchTierFormSections
               formik={formik}
               currencyName={currencyName}
             />
-          </PolarisFormLayout>
-        </div>
+          </form>
+        </PolarisFormLayout>
+      </EcosystemContainer>
 
-        {/* ── Floating Action Bar ───────────────────────────────────────── */}
-        <FloatingSavePanel
-          hasChanged={formik.dirty || true}
-          isSaving={loading}
-          onSave={formik.handleSubmit}
-          onReset={() =>
-            router.push("/gamification/rewards/engagement-games/scratch-card")
-          }
-          title="New Scratch Card Tier"
-          description="Publish this reward tier to the active scratch game."
-          buttonText="Create Reward Tier"
-          saved={saved}
-        />
-      </EcosystemWrapper>
-    </form>
+      {/* ── Floating Action Bar ───────────────────────────────────────── */}
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        isSaving={loading}
+        onSave={() => formik.submitForm()}
+        onReset={() => {
+          formik.resetForm();
+          setSaved(false);
+        }}
+        title="New Scratch Tier"
+        description="Publish this reward tier to the active scratch game."
+        buttonText="Create Scratch Tier"
+        saved={saved}
+      />
+    </EcosystemWrapper>
   );
 }

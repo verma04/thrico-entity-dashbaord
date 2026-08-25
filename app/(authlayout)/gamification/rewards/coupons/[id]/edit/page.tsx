@@ -3,9 +3,8 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useParams, useRouter } from "next/navigation";
-import { Ticket, Sparkles } from "lucide-react";
+import { Ticket, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useGetRewardById, useUpdateReward } from "@/graphql/actions/rewards";
@@ -13,9 +12,12 @@ import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel"
 import { RewardFormSections } from "@/components/rewards/coupons/form/reward-form-sections";
 import { RewardPreviewSidebar } from "@/components/rewards/coupons/form/reward-preview-sidebar";
 import { RewardInfoSidebar } from "@/components/rewards/coupons/form/reward-info-sidebar";
-import { RewardFormHeader } from "@/components/rewards/coupons/form/reward-form-header";
 import { couponSchema } from "@/components/rewards/coupons/types";
 import { PolarisFormLayout } from "@/components/gamification/shared/polaris-form-ui";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 export default function EditRewardPage() {
   const { toast } = useToast();
@@ -41,7 +43,11 @@ export default function EditRewardPage() {
     const mEligibility =
       elig?.memberEligibility ||
       r?.memberEligibility ||
-      (uIds.length > 0 ? "SPECIFIC_CUSTOMERS" : tIds.length > 0 ? "TIERS" : "ALL");
+      (uIds.length > 0
+        ? "SPECIFIC_CUSTOMERS"
+        : tIds.length > 0
+          ? "TIERS"
+          : "ALL");
 
     return {
       title: r?.title || "",
@@ -121,16 +127,9 @@ export default function EditRewardPage() {
             ? [values.membershipTierId]
             : values.eligibleTierIds || [];
 
-        const validMechanisms = ["SPIN_WHEEL", "SCRATCH_CARD", "MATCH_AND_WIN"];
-        const filteredMechanisms = Array.isArray(values.rewardMechanism)
-          ? values.rewardMechanism.filter((m: string) =>
-              validMechanisms.includes(m),
-            )
-          : [];
-
         await updateReward({
           variables: {
-            updateRewardId: rewardId,
+            id: rewardId,
             input: {
               title: values.title,
               description: values.description,
@@ -141,9 +140,6 @@ export default function EditRewardPage() {
               image: values.image,
               url: values.url,
               couponCode: values.couponCode,
-              ...(filteredMechanisms.length > 0 && {
-                rewardMechanism: filteredMechanisms,
-              }),
               eligibility: {
                 memberEligibility: values.memberEligibility || "ALL",
                 membershipTierId: tierIds,
@@ -183,20 +179,17 @@ export default function EditRewardPage() {
                     ? values.selectedRuleId || null
                     : null,
               },
-              status: values.status,
               isActive: values.isActive,
+              status: values.status,
               expiryDate: values.expiryDate || null,
             },
           },
         });
         toast({
-          title: "Reward updated",
-          description: `${values.title} has been saved.`,
+          title: "Reward Updated",
+          description: `${values.title} configuration has been saved.`,
         });
         setSaved(true);
-        setTimeout(() => {
-          router.push("/gamification/rewards/coupons");
-        }, 1500);
       } catch (err: any) {
         toast({
           title: "Update failed",
@@ -207,100 +200,82 @@ export default function EditRewardPage() {
     },
   });
 
-  React.useEffect(() => {
-    if (reward) {
-      formik.resetForm({ values: getInitialValues(reward) });
-    }
-  }, [reward]);
-
-  if (fetchLoading) {
-    return (
-      <div className="min-h-screen bg-[#fafafa] dark:bg-black/10">
-        <RewardFormHeader
-          title="Loading Reward..."
-          backUrl="/gamification/rewards/coupons"
-        />
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 space-y-6">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-4"
-                >
-                  <Skeleton className="h-5 w-48" />
-                  <Skeleton className="h-4 w-72" />
-                  <Skeleton className="h-11 w-full rounded-lg" />
-                </div>
-              ))}
-            </div>
-            <div className="lg:col-span-4">
-              <Skeleton className="aspect-[3/4] w-full rounded-2xl" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!reward) {
-    return (
-      <div className="min-h-screen bg-[#fafafa] dark:bg-black/10 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="h-16 w-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto border border-zinc-200 dark:border-zinc-700">
-            <Ticket className="h-7 w-7 text-zinc-400" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-              Reward not found
-            </h2>
-            <p className="text-xs text-zinc-500 max-w-xs">
-              This reward may have been deleted or the link is invalid.
-            </p>
-          </div>
-          <Link href="/gamification/rewards/coupons">
-            <Button
-              variant="outline"
-              className="rounded-lg px-5 text-xs font-semibold"
-            >
-              Back to Reward Coupons
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black/10 pb-20">
-      <RewardFormHeader
-        title="Edit Reward"
-        subtitle={`Editing · ${reward.title}`}
-        backUrl="/gamification/rewards/coupons"
-        icon={Sparkles}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={reward ? `Edit · ${reward.title}` : "Reward Coupon"}
+        badgeText="Reward Studio"
+        description="Update coupon terms, points pricing, member gating, and fulfillment rules."
+        icon={Ticket}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Rewards", href: "/gamification/rewards" },
+          { label: "Reward Coupons", href: "/gamification/rewards/coupons" },
+          { label: reward?.title || "Edit" },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Link href="/gamification/rewards/coupons">
+              <Button
+                variant="outline"
+                className="text-[13px] font-medium h-[36px] gap-1.5 border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-100 text-[#303030] dark:text-zinc-100 cursor-pointer shadow-xs rounded-[6px]"
+              >
+                <ArrowLeft className="h-4 w-4 text-[#616161]" />
+                Back to Reward Coupons
+              </Button>
+            </Link>
+          </div>
+        }
       />
 
-      <main className="px-6 py-8">
-        <PolarisFormLayout
-          sidebar={
-            <div className="space-y-6">
-              <RewardPreviewSidebar formik={formik} />
-              <RewardInfoSidebar
-                reward={reward}
-                inventoryRequired={formik.values.inventoryRequired}
-              />
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        {fetchLoading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : !reward ? (
+          <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[12px] bg-white dark:bg-zinc-900 space-y-4">
+            <div className="h-14 w-14 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20 shadow-xs">
+              <Ticket className="h-7 w-7" />
             </div>
-          }
-        >
-          <form onSubmit={formik.handleSubmit} className="space-y-6">
-            <RewardFormSections
-              key={reward?.id || "reward-form"}
-              formik={formik}
-              rewardId={rewardId}
-            />
-          </form>
-        </PolarisFormLayout>
-      </main>
+            <div className="space-y-1 max-w-sm">
+              <h3 className="text-base font-bold text-[#303030] dark:text-zinc-100">
+                Reward Coupon Not Found
+              </h3>
+              <p className="text-[13px] text-[#616161] dark:text-zinc-400">
+                This reward may have been deleted or the link is invalid.
+              </p>
+            </div>
+            <Link href="/gamification/rewards/coupons">
+              <Button
+                variant="outline"
+                className="gap-2 text-[13px] font-medium h-[36px] border-[#aeb4b9] rounded-[6px]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Reward Coupons
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <PolarisFormLayout
+            sidebar={
+              <div className="space-y-4">
+                <RewardPreviewSidebar formik={formik} showStrategy />
+                <RewardInfoSidebar
+                  reward={reward}
+                  inventoryRequired={formik.values.inventoryRequired}
+                />
+              </div>
+            }
+          >
+            <form onSubmit={formik.handleSubmit} className="space-y-4">
+              <RewardFormSections
+                key={reward?.id || "reward-form"}
+                formik={formik}
+                rewardId={rewardId}
+              />
+            </form>
+          </PolarisFormLayout>
+        )}
+      </EcosystemContainer>
 
       <FloatingSavePanel
         hasChanged={formik.dirty}
@@ -309,9 +284,9 @@ export default function EditRewardPage() {
         onSave={() => formik.submitForm()}
         onReset={() => formik.resetForm()}
         title="Unsaved Changes"
-        description="You have pending changes to this reward."
+        description="You have pending changes to this reward coupon."
         buttonText="Save Changes"
       />
-    </div>
+    </EcosystemWrapper>
   );
 }

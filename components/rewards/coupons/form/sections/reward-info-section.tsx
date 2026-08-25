@@ -3,11 +3,9 @@
 import React from "react";
 import { Link as LinkIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { PolarisFormCard } from "@/components/gamification/shared/polaris-form-ui";
 
 interface RewardInfoSectionProps {
@@ -23,56 +21,56 @@ export function RewardInfoSection({ formik, err }: RewardInfoSectionProps) {
       description="Name, member-facing description, and visual identity for this reward offer."
       badge="Reward Info"
     >
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
         {/* Left Column: Title, Description, Link */}
         <div className="md:col-span-7 space-y-4">
-          <div className="space-y-2">
-            <Label
+          <div className="space-y-1.5">
+            <label
               htmlFor="title"
-              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
             >
-              Reward Title *
-            </Label>
+              Reward Title <span className="text-[#d72c0d] ml-0.5">*</span>
+            </label>
             <Input
               id="title"
               placeholder="e.g. ₹500 Amazon Gift Card, 20% Off Store Discount"
-              className="h-11 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-sm font-semibold shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+              className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
               {...formik.getFieldProps("title")}
             />
             {err("title")}
           </div>
 
-          <div className="space-y-2">
-            <Label
+          <div className="space-y-1.5">
+            <label
               htmlFor="description"
-              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
             >
-              Short Description *
-            </Label>
+              Short Description <span className="text-[#d72c0d] ml-0.5">*</span>
+            </label>
             <Textarea
               id="description"
               rows={3}
               placeholder="Describe what members will receive and highlight exclusive benefits..."
-              className="bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 shadow-none text-xs leading-relaxed resize-none"
+              className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] resize-none"
               {...formik.getFieldProps("description")}
             />
             {err("description")}
           </div>
 
-          <div className="space-y-2">
-            <Label
+          <div className="space-y-1.5">
+            <label
               htmlFor="url"
-              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
             >
               Reward URL (Optional)
-            </Label>
+            </label>
             <div className="relative">
-              <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161]" />
               <Input
                 id="url"
                 type="url"
                 placeholder="https://yourstore.com/redeem"
-                className="pl-10 h-11 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 shadow-none text-xs font-medium"
+                className="pl-9 h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 {...formik.getFieldProps("url")}
               />
             </div>
@@ -82,10 +80,10 @@ export function RewardInfoSection({ formik, err }: RewardInfoSectionProps) {
 
         {/* Right Column: Banner & Active Switch */}
         <div className="md:col-span-5 space-y-4">
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+          <div className="space-y-1.5">
+            <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
               Cover Banner
-            </Label>
+            </label>
             <div className="p-1 overflow-hidden">
               <ImageUploadWithCrop
                 currentImage={formik.values.image}
@@ -98,48 +96,25 @@ export function RewardInfoSection({ formik, err }: RewardInfoSectionProps) {
             </div>
           </div>
 
-          <div className="bg-zinc-50/50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4 flex items-center justify-between">
+          {/* Active Toggle Card */}
+          <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label
-                htmlFor="isActive"
-                className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block cursor-pointer"
-              >
-                Active in Catalog
-              </Label>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                Allow members to view and claim.
-              </p>
+              <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block">
+                Reward Active & Redeemable
+              </span>
+              <span className="text-[11.5px] text-[#616161] dark:text-zinc-400 block">
+                Controls catalog visibility in member wallet.
+              </span>
             </div>
             <Switch
-              id="isActive"
               checked={formik.values.isActive}
-              onCheckedChange={(checked) => {
-                formik.setFieldValue("isActive", checked);
-                formik.setFieldValue(
-                  "status",
-                  checked ? "ACTIVE" : "INACTIVE"
-                );
+              onCheckedChange={(c) => {
+                formik.setFieldValue("isActive", c);
+                formik.setFieldValue("status", c ? "ACTIVE" : "DRAFT");
               }}
             />
           </div>
         </div>
-      </div>
-
-      {/* Claim Instructions */}
-      <div className="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-        <Label
-          htmlFor="howToClaim"
-          className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block"
-        >
-          How to Claim Instructions
-        </Label>
-        <RichTextEditor
-          value={formik.values.howToClaim || ""}
-          onChange={(val) => formik.setFieldValue("howToClaim", val)}
-          placeholder="Step-by-step instructions on how members can claim or redeem this reward..."
-          minHeight="130px"
-        />
-        {err("howToClaim")}
       </div>
     </PolarisFormCard>
   );

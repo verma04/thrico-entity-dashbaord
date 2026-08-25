@@ -82,7 +82,7 @@ export function GiftCardHowItWorksDrawer({
                   <h3 className="text-base font-bold text-foreground tracking-tight">
                     How Thrico Digital Gift Cards Work
                   </h3>
-                  <Badge className="bg-violet-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
+                  <Badge className="bg-primary text-primary-foreground font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
                     Step Guide
                   </Badge>
                 </div>
@@ -99,7 +99,7 @@ export function GiftCardHowItWorksDrawer({
                     onClose();
                     onCreateClick();
                   }}
-                  className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   Configure Gift Card
@@ -209,7 +209,7 @@ export function GiftCardHowItWorksDrawer({
                 <div className="flex justify-end pt-2">
                   <Button
                     onClick={() => setActiveTab("difference")}
-                    className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Difference from Shopify
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -231,9 +231,9 @@ export function GiftCardHowItWorksDrawer({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Shopify Pillar 2 Card */}
-                  <div className="p-4 rounded-xl border border-indigo-200/70 dark:border-indigo-900/60 bg-card space-y-3">
+                  <div className="p-4 rounded-xl border border-border/70 bg-card space-y-3">
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                      <div className="h-7 w-7 rounded-lg bg-muted text-foreground flex items-center justify-center">
                         <ShoppingBag className="h-4 w-4" />
                       </div>
                       <div>
@@ -250,9 +250,9 @@ export function GiftCardHowItWorksDrawer({
                   </div>
 
                   {/* Digital Gift Card Pillar 3 Card */}
-                  <div className="p-4 rounded-xl border border-violet-200/70 dark:border-violet-900/60 bg-card space-y-3">
+                  <div className="p-4 rounded-xl border border-border/70 bg-card space-y-3">
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-lg bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                      <div className="h-7 w-7 rounded-lg bg-muted text-foreground flex items-center justify-center">
                         <Gift className="h-4 w-4" />
                       </div>
                       <div>
@@ -279,7 +279,7 @@ export function GiftCardHowItWorksDrawer({
                   </Button>
                   <Button
                     onClick={() => setActiveTab("fault")}
-                    className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Fault Tolerance & Idempotency
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -311,7 +311,7 @@ export function GiftCardHowItWorksDrawer({
                   </Button>
                   <Button
                     onClick={() => setActiveTab("member")}
-                    className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Member Experience
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -360,7 +360,7 @@ export function GiftCardHowItWorksDrawer({
                           description: "Gift card code and PIN unlocked.",
                         });
                       }}
-                      className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs h-9 shadow-xs cursor-pointer"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-9 shadow-2xs cursor-pointer"
                     >
                       Claim Reward
                     </Button>
@@ -374,7 +374,7 @@ export function GiftCardHowItWorksDrawer({
                           <span>{sampleCard.code}</span>
                           <button
                             onClick={() => copyCode(sampleCard.code)}
-                            className="text-violet-600 flex items-center gap-1 text-[11px] font-sans font-semibold cursor-pointer"
+                            className="text-primary flex items-center gap-1 text-[11px] font-sans font-semibold cursor-pointer"
                           >
                             {copiedCode === sampleCard.code ? (
                               <>
@@ -420,7 +420,7 @@ export function GiftCardHowItWorksDrawer({
                         onClose();
                         onCreateClick();
                       }}
-                      className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer shadow-xs"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer shadow-2xs"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                       Configure First Gift Card Offer

@@ -223,11 +223,11 @@ export const PillarTwoShopify: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-200">
       {/* ── 1. Connection & Overview Banner ────────────────────────────────── */}
-      <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent p-4 sm:p-5">
+      <div className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5 max-w-xl">
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge className="bg-indigo-600 text-white font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
+              <Badge className="bg-primary text-primary-foreground font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
                 Pillar 2 • E-Commerce (Shopify)
               </Badge>
               {connectionLoading ? (
@@ -257,14 +257,14 @@ export const PillarTwoShopify: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-2">
             <Link href="/integrations/shopify">
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer">
                 <Link2 className="h-3.5 w-3.5" />
                 {isConnected ? "Manage Shopify Integration" : "Connect Shopify Store"}
               </Button>
             </Link>
 
             <Link href="/integrations/shopify/coupons">
-              <Button variant="outline" className="text-xs font-medium h-8 gap-1">
+              <Button variant="outline" className="text-xs font-medium h-8 gap-1 shadow-2xs">
                 Synced Coupons
                 <ExternalLink className="h-3 w-3" />
               </Button>
@@ -402,7 +402,7 @@ export const PillarTwoShopify: React.FC = () => {
           <div className="flex items-center gap-2">
             <Button
               onClick={handleSimulateWin}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
             >
               <Gamepad2 className="h-3.5 w-3.5" />
               Simulate Member Win (Spin Wheel)

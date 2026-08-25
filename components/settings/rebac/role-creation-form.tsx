@@ -4,16 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { CHECK_ENTITY_SUBSCRIPTIONS } from "@/graphql/quries";
 import { useGetAvailableModules, AdminAccess } from "@/graphql/actions";
-import {
-  ShieldCheck,
-  ShieldAlert,
-  ChevronRight,
-  Sparkles,
-  Loader2,
-  Lock,
-} from "lucide-react";
+import { ShieldCheck, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -76,7 +68,11 @@ export function RoleCreationForm({
   const rawModules = modulesData?.getAvailableModules;
   let groupedModules: Record<string, string[]> = {};
 
-  if (rawModules && typeof rawModules === "object" && !Array.isArray(rawModules)) {
+  if (
+    rawModules &&
+    typeof rawModules === "object" &&
+    !Array.isArray(rawModules)
+  ) {
     groupedModules = rawModules;
   } else if (Array.isArray(rawModules)) {
     groupedModules = { Modules: rawModules };
@@ -316,9 +312,13 @@ export function RoleCreationForm({
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <PolarisFormLayout
           sidebar={
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Live Role Preview */}
-              <PolarisSidebarCard title="Role Preview" badge="Live Policy" icon={Sparkles}>
+              <PolarisSidebarCard
+                title="Role Preview"
+                badge="Live Policy"
+                icon={Sparkles}
+              >
                 <RolePreview
                   formData={formData}
                   adminAccess={adminAccess}
@@ -328,7 +328,7 @@ export function RoleCreationForm({
                 />
 
                 {/* Structured Configuration Breakdown */}
-                <div className="space-y-1.5 pt-2">
+                <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                   <PolarisSummaryRow
                     label="Role Title"
                     value={
@@ -355,12 +355,14 @@ export function RoleCreationForm({
 
               {/* RBAC Strategy Tip */}
               <PolarisTipCard title="RBAC Policy Tip">
-                Combine granular Read/Create/Edit/Delete permissions to tailor roles precisely to staff functions (e.g. Content Author vs Moderator).
+                Combine granular Read/Create/Edit/Delete permissions to tailor
+                roles precisely to staff functions (e.g. Content Author vs
+                Moderator).
               </PolarisTipCard>
             </div>
           }
         >
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Step 1: Role Identity & Full Admin Access */}
             <PolarisFormCard
               step={1}
@@ -368,31 +370,39 @@ export function RoleCreationForm({
               description="Establish role designation, description, and high-level privilege level."
               badge="Required"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="name" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                    Role Designation / Name <span className="text-rose-500">*</span>
-                  </Label>
+                  <label
+                    htmlFor="name"
+                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                  >
+                    Role Designation / Name{" "}
+                    <span className="text-[#d72c0d] ml-0.5">*</span>
+                  </label>
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) =>
-                      handleInputChange("name", e.target.value)
-                    }
+                    onChange={(e) => handleInputChange("name", e.target.value)}
                     placeholder="e.g., Senior Community Moderator"
-                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   />
                   {!formData.name.trim() && isDirty && (
-                    <p className="text-[11px] text-rose-500 font-medium">
+                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                       Role name is required
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                    Scope Description <span className="text-zinc-400 font-normal">(Optional)</span>
-                  </Label>
+                  <label
+                    htmlFor="description"
+                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                  >
+                    Scope Description{" "}
+                    <span className="text-[#616161] font-normal">
+                      (Optional)
+                    </span>
+                  </label>
                   <Input
                     id="description"
                     value={formData.description}
@@ -400,30 +410,31 @@ export function RoleCreationForm({
                       handleInputChange("description", e.target.value)
                     }
                     placeholder="Explain permissions and responsibilities..."
-                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   />
                 </div>
               </div>
 
               {/* Full Admin Access Switch Card */}
-              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40">
+              <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
                   <div className="space-y-0.5">
-                    <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-zinc-900 dark:text-zinc-100" />
+                    <label className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 flex items-center gap-1.5 cursor-pointer">
+                      <ShieldCheck className="w-4 h-4 text-[#303030] dark:text-zinc-100" />
                       Grant Full Superadmin Privileges
-                    </Label>
-                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
-                      Instantly grant unrestricted access to every platform module and system configuration.
+                    </label>
+                    <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+                      Instantly grant unrestricted access to every platform
+                      module and system configuration.
                     </p>
                   </div>
-                  <label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
+                  <label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-zinc-800 border border-[#aeb4b9] dark:border-zinc-700 px-3 py-1.5 rounded-[6px] hover:bg-[#f6f6f7] transition-colors">
                     <Checkbox
                       checked={isFullAdmin}
                       onCheckedChange={(c) => handleFullAdminChange(!!c)}
-                      className="h-4 w-4 rounded"
+                      className="h-4 w-4 rounded-[4px]"
                     />
-                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
                       Grant All
                     </span>
                   </label>
@@ -439,8 +450,8 @@ export function RoleCreationForm({
               badge="CRUD Matrix"
             >
               {/* Global Permission Type Quick Select */}
-              <div className="flex items-center justify-between flex-wrap gap-2 p-3 rounded-xl bg-zinc-50/60 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800">
-                <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">
+              <div className="flex items-center justify-between flex-wrap gap-2 p-3 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-900/60 border border-[#d2d5d9] dark:border-zinc-800">
+                <span className="text-[11.5px] font-semibold text-[#616161] uppercase tracking-wider">
                   Bulk Quick-Toggle:
                 </span>
                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -458,17 +469,17 @@ export function RoleCreationForm({
                           togglePermissionTypeForAllModules(type, !allOfType)
                         }
                         className={cn(
-                          "text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md border transition-all cursor-pointer",
+                          "text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-[4px] border transition-all cursor-pointer",
                           allOfType
-                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300",
+                            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                            : "bg-white dark:bg-zinc-800 text-[#616161] border-[#d2d5d9] dark:border-zinc-700 hover:border-[#aeb4b9]",
                         )}
                       >
                         {type}
                       </button>
                     );
                   })}
-                  <label className="flex items-center gap-1.5 cursor-pointer bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-2.5 py-1 rounded-md ml-1">
+                  <label className="flex items-center gap-1.5 cursor-pointer bg-white dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 px-2.5 py-1 rounded-[4px] ml-1">
                     <Checkbox
                       checked={
                         availableModules.length > 0 &&
@@ -481,7 +492,7 @@ export function RoleCreationForm({
                       onCheckedChange={(checked) =>
                         toggleAllPermissions(!!checked)
                       }
-                      className="h-3.5 w-3.5 rounded"
+                      className="h-3.5 w-3.5 rounded-[3px]"
                     />
                     <span className="text-[10px] font-bold uppercase">All</span>
                   </label>
@@ -492,25 +503,23 @@ export function RoleCreationForm({
               {modulesLoading || subsLoading ? (
                 <div className="space-y-2.5 pt-2">
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-14 w-full rounded-xl" />
+                    <Skeleton key={i} className="h-14 w-full rounded-[8px]" />
                   ))}
                 </div>
               ) : (
-                <Accordion type="multiple" className="space-y-3 pt-2">
+                <Accordion type="multiple" className="space-y-2.5 pt-2">
                   {categories.map((category) => {
                     const modulesInCategory = groupedModules[category];
 
-                    const allCategoryChecked = modulesInCategory.every(
-                      (mod) =>
-                        permissionTypes.every(
-                          (type) => !!permissions[mod]?.[type],
-                        ),
+                    const allCategoryChecked = modulesInCategory.every((mod) =>
+                      permissionTypes.every(
+                        (type) => !!permissions[mod]?.[type],
+                      ),
                     );
-                    const anyCategoryChecked = modulesInCategory.some(
-                      (mod) =>
-                        permissionTypes.some(
-                          (type) => !!permissions[mod]?.[type],
-                        ),
+                    const anyCategoryChecked = modulesInCategory.some((mod) =>
+                      permissionTypes.some(
+                        (type) => !!permissions[mod]?.[type],
+                      ),
                     );
 
                     const toggleCategoryPermissions = (checked: boolean) => {
@@ -533,7 +542,7 @@ export function RoleCreationForm({
                       <AccordionItem
                         value={category}
                         key={category}
-                        className="border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 rounded-xl overflow-hidden px-2"
+                        className="border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900/60 rounded-[8px] overflow-hidden px-2"
                       >
                         <div className="flex items-center gap-3">
                           <Checkbox
@@ -542,18 +551,20 @@ export function RoleCreationForm({
                               toggleCategoryPermissions(!!c)
                             }
                             className={cn(
-                              "ml-3 h-4 w-4 rounded",
-                              anyCategoryChecked && !allCategoryChecked && "bg-zinc-900/40",
+                              "ml-3 h-4 w-4 rounded-[4px]",
+                              anyCategoryChecked &&
+                                !allCategoryChecked &&
+                                "bg-[#303030]/40",
                             )}
                           />
-                          <AccordionTrigger className="hover:no-underline py-3.5 flex-1">
+                          <AccordionTrigger className="hover:no-underline py-3 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                              <span className="font-semibold text-[13px] text-[#303030] dark:text-zinc-100">
                                 {category}
                               </span>
                               <Badge
                                 variant="secondary"
-                                className="text-[10px] h-4 px-1.5 font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                                className="text-[10px] h-4 px-1.5 font-bold bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 rounded-[4px]"
                               >
                                 {modulesInCategory.length}
                               </Badge>
@@ -573,10 +584,10 @@ export function RoleCreationForm({
                               <div
                                 key={moduleName}
                                 className={cn(
-                                  "group flex flex-col md:flex-row md:items-center gap-3 px-3.5 py-2.5 rounded-lg border transition-all",
+                                  "group flex flex-col md:flex-row md:items-center gap-3 px-3.5 py-2.5 rounded-[6px] border transition-all",
                                   anyChecked
-                                    ? "bg-zinc-50/70 dark:bg-zinc-800/40 border-zinc-300 dark:border-zinc-700"
-                                    : "bg-white dark:bg-zinc-900 border-zinc-200/70 dark:border-zinc-800",
+                                    ? "bg-[#f6f6f7]/70 dark:bg-zinc-800/40 border-[#aeb4b9] dark:border-zinc-700"
+                                    : "bg-white dark:bg-zinc-900 border-[#d2d5d9] dark:border-zinc-800",
                                 )}
                               >
                                 <div className="flex items-center gap-2.5 md:w-1/3">
@@ -588,15 +599,15 @@ export function RoleCreationForm({
                                         !!checked,
                                       )
                                     }
-                                    className="h-4 w-4 rounded shrink-0"
+                                    className="h-4 w-4 rounded-[4px] shrink-0"
                                   />
-                                  <div className="h-7 w-7 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 border border-zinc-200 dark:border-zinc-700">
+                                  <div className="h-7 w-7 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 flex items-center justify-center shrink-0 border border-[#d2d5d9] dark:border-zinc-700">
                                     <ModuleIcon
                                       name={moduleName}
-                                      className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400"
+                                      className="w-3.5 h-3.5 text-[#616161] dark:text-zinc-400"
                                     />
                                   </div>
-                                  <span className="text-xs font-semibold capitalize text-zinc-900 dark:text-zinc-100 truncate">
+                                  <span className="text-[12.5px] font-medium capitalize text-[#303030] dark:text-zinc-100 truncate">
                                     {moduleName.replace(/_/g, " ")}
                                   </span>
                                 </div>
@@ -613,10 +624,10 @@ export function RoleCreationForm({
                                           togglePermission(moduleName, type)
                                         }
                                         className={cn(
-                                          "flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-all cursor-pointer",
+                                          "flex items-center gap-1 px-2.5 py-1 rounded-[4px] text-[11px] font-semibold border transition-all cursor-pointer",
                                           isChecked
-                                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                                            : "bg-zinc-100/70 dark:bg-zinc-800/70 text-zinc-500 dark:text-zinc-400 border-transparent hover:border-zinc-300",
+                                            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                                            : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] hover:border-[#aeb4b9]",
                                         )}
                                       >
                                         <div
@@ -624,7 +635,7 @@ export function RoleCreationForm({
                                             "h-1.5 w-1.5 rounded-full",
                                             isChecked
                                               ? "bg-white dark:bg-zinc-900"
-                                              : "bg-zinc-300 dark:bg-zinc-600",
+                                              : "bg-[#8c9196] dark:bg-zinc-600",
                                           )}
                                         />
                                         {type}
@@ -651,17 +662,17 @@ export function RoleCreationForm({
               badge="Admin Scopes"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
-                  <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <div className="flex items-center justify-between pb-2 border-b border-[#e1e3e5] dark:border-zinc-800">
+                  <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-300">
                     Administrative Scope Permissions
                   </span>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-[12px] font-semibold text-[#303030] dark:text-zinc-300">
                     <Checkbox
                       checked={allAdminSelected}
                       onCheckedChange={(checked) =>
                         toggleAllAdminAccess(!!checked)
                       }
-                      className="h-3.5 w-3.5 rounded"
+                      className="h-3.5 w-3.5 rounded-[3px]"
                     />
                     <span>Select All Scopes</span>
                   </label>
@@ -676,18 +687,18 @@ export function RoleCreationForm({
                         type="button"
                         onClick={() => toggleAdminAccess(key)}
                         className={cn(
-                          "flex items-center gap-2.5 p-3 rounded-xl border text-left transition-all cursor-pointer",
+                          "flex items-center gap-2.5 p-3 rounded-[8px] border text-left transition-all cursor-pointer",
                           isSelected
-                            ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
-                            : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                            ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                            : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                         )}
                       >
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={() => toggleAdminAccess(key)}
-                          className="h-4 w-4 rounded shrink-0 pointer-events-none"
+                          className="h-4 w-4 rounded-[4px] shrink-0 pointer-events-none"
                         />
-                        <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                        <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
                           {adminAccessLabels[key] ?? key}
                         </span>
                       </button>

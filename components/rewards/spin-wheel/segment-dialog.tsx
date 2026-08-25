@@ -1,7 +1,8 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -34,8 +35,6 @@ import { cn } from "@/lib/utils";
 import { RewardType, WheelSegment } from "./types";
 import { PolarisPresetChips } from "@/components/gamification/shared/polaris-form-ui";
 import {
-  GIFT_CARD_BRANDS,
-  GIFT_CARD_DENOMINATIONS,
   TRY_AGAIN_PRESETS,
   ECOMMERCE_PERCENT_PRESETS,
   ECOMMERCE_FIXED_PRESETS,
@@ -113,7 +112,9 @@ export function SegmentDialog({
       const discVal = editingSegment.ecommerceDiscountValue || 20;
       updatedValue = discVal;
       updatedLabel =
-        discType === "PERCENTAGE" ? `${discVal}% Off Store` : `₹${discVal} Off Store`;
+        discType === "PERCENTAGE"
+          ? `${discVal}% Off Store`
+          : `₹${discVal} Off Store`;
       if (!editingSegment.color || editingSegment.color === "#9ca3af") {
         updatedColor = "#059669";
       }
@@ -134,27 +135,27 @@ export function SegmentDialog({
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border-zinc-200 dark:border-zinc-800 p-6">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-[12px] border-[#d2d5d9] dark:border-zinc-800 p-5 bg-white dark:bg-zinc-900 shadow-lg">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
-            <div className="h-7 w-7 rounded-lg bg-[#008060]/10 text-[#008060] flex items-center justify-center">
-              <Sparkles className="h-4 w-4" />
+            <div className="h-7 w-7 rounded-[6px] bg-[#303030] text-white flex items-center justify-center">
+              <Sparkles className="h-3.5 w-3.5" />
             </div>
-            <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+            <DialogTitle className="text-[15px] font-bold text-[#303030] dark:text-zinc-100">
               {editingSegment?.id ? "Edit Wheel Segment" : "Add Wheel Segment"}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-xs text-zinc-500">
+          <DialogDescription className="text-[12.5px] text-[#616161] dark:text-zinc-400">
             Configure the prize category, payout value, and winning probability.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 py-2">
+        <div className="space-y-4 py-2">
           {/* 1. Reward Type Selection - Visual Card Grid */}
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+          <div className="space-y-1.5">
+            <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
               Reward Type
-            </Label>
+            </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {GAME_REWARD_TYPE_OPTIONS.map((opt) => {
                 const isSelected = activeType === opt.value;
@@ -165,29 +166,32 @@ export function SegmentDialog({
                     type="button"
                     onClick={() => handleTypeChange(opt.value)}
                     className={cn(
-                      "flex flex-col text-left p-2.5 rounded-xl border text-xs transition-all relative",
+                      "flex flex-col text-left p-3 rounded-[8px] border text-xs transition-all relative cursor-pointer",
                       isSelected
-                        ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.03] dark:bg-zinc-100/[0.06] ring-1 ring-zinc-900 dark:ring-zinc-100 shadow-xs"
-                        : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700",
+                        ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                        : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                     )}
                   >
-                    <div className="flex items-center justify-between w-full mb-1">
+                    <div className="flex items-center justify-between w-full mb-1.5">
                       <div
-                        className="h-6 w-6 rounded-lg flex items-center justify-center shrink-0"
+                        className="h-6 w-6 rounded-[6px] flex items-center justify-center shrink-0"
                         style={{ backgroundColor: `${opt.accentColor}18` }}
                       >
-                        <Icon className="h-3.5 w-3.5" style={{ color: opt.accentColor }} />
+                        <Icon
+                          className="h-3.5 w-3.5"
+                          style={{ color: opt.accentColor }}
+                        />
                       </div>
                       {isSelected && (
-                        <span className="h-4 w-4 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center text-[10px]">
+                        <span className="h-4 w-4 rounded-full bg-[#303030] text-white flex items-center justify-center text-[10px]">
                           <Check className="h-2.5 w-2.5 stroke-[3]" />
                         </span>
                       )}
                     </div>
-                    <span className="font-bold text-zinc-900 dark:text-zinc-100 text-[11px] truncate">
+                    <span className="font-semibold text-[#303030] dark:text-zinc-100 text-[12px] truncate">
                       {opt.shortLabel}
                     </span>
-                    <span className="text-[10px] text-zinc-400 dark:text-zinc-500 line-clamp-1 mt-0.5">
+                    <span className="text-[11px] text-[#616161] dark:text-zinc-400 line-clamp-1 mt-0.5">
                       {opt.description}
                     </span>
                   </button>
@@ -200,15 +204,17 @@ export function SegmentDialog({
 
           {/* 2A. Points / Currency Panel */}
           {activeType === "COINS" && (
-            <div className="p-4 rounded-xl bg-amber-50/40 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-900/40 space-y-3">
+            <div className="p-3.5 rounded-[8px] bg-amber-50/40 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-900/40 space-y-3">
               <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
                 <Coins className="h-4 w-4" />
-                <span className="text-xs font-bold">Points Payout Configuration</span>
+                <span className="text-[13px] font-semibold">
+                  Points Payout Configuration
+                </span>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-200">
                   Amount of {currencyName}
-                </Label>
+                </label>
                 <Input
                   type="number"
                   min={1}
@@ -225,7 +231,7 @@ export function SegmentDialog({
                         : null,
                     );
                   }}
-                  className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-sm font-bold shadow-none"
+                  className="h-[40px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold"
                 />
                 <PolarisPresetChips
                   presets={POINT_VALUE_PRESETS}
@@ -249,24 +255,36 @@ export function SegmentDialog({
 
           {/* 2B. Try Again / No Win Panel */}
           {activeType === "NO_REWARDS" && (
-            <div className="p-4 rounded-xl bg-zinc-100/70 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 space-y-3">
-              <div className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
+            <div className="p-3.5 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-3">
+              <div className="flex items-center gap-2 text-[#616161]">
                 <RotateCcw className="h-4 w-4" />
-                <span className="text-xs font-bold">Try Again (Loss / Non-Win)</span>
+                <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                  Try Again (Loss / Non-Win)
+                </span>
               </div>
-              <p className="text-[11px] text-zinc-500">
-                No prize is awarded for this segment. Use encouraging labels to keep members motivated.
+              <p className="text-[12px] text-[#616161]">
+                No prize is awarded for this segment. Use encouraging labels to
+                keep members motivated.
               </p>
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {TRY_AGAIN_PRESETS.map((preset) => (
                   <Button
                     key={preset}
                     type="button"
-                    variant={editingSegment.label === preset ? "default" : "outline"}
+                    variant={
+                      editingSegment.label === preset ? "default" : "outline"
+                    }
                     size="sm"
-                    className="h-7 text-[11px] rounded-lg"
+                    className={cn(
+                      "h-8 text-[12px] rounded-[6px] cursor-pointer",
+                      editingSegment.label === preset
+                        ? "bg-[#303030] text-white hover:bg-[#303030]"
+                        : "border-[#aeb4b9] bg-white dark:bg-zinc-900",
+                    )}
                     onClick={() =>
-                      setEditingSegment((p) => (p ? { ...p, label: preset } : null))
+                      setEditingSegment((p) =>
+                        p ? { ...p, label: preset } : null,
+                      )
                     }
                   >
                     {preset}
@@ -278,17 +296,19 @@ export function SegmentDialog({
 
           {/* 2C. Internal Voucher / Coupon Panel */}
           {activeType === "INTERNAL_VOUCHER" && (
-            <div className="p-4 rounded-xl bg-blue-50/40 dark:bg-blue-950/20 border border-blue-200/70 dark:border-blue-900/40 space-y-3">
+            <div className="p-3.5 rounded-[8px] bg-blue-50/40 dark:bg-blue-950/20 border border-blue-200/70 dark:border-blue-900/40 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
                   <Ticket className="h-4 w-4" />
-                  <span className="text-xs font-bold">Select Reward Voucher</span>
+                  <span className="text-[13px] font-semibold">
+                    Select Reward Voucher
+                  </span>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 text-[11px] gap-1 text-blue-600 dark:text-blue-400 hover:bg-blue-100/50 px-2 rounded-md"
+                  className="h-7 text-[12px] gap-1 text-blue-600 dark:text-blue-400 hover:bg-blue-100/50 px-2 rounded-[6px] cursor-pointer"
                   onClick={() =>
                     getVouchers({
                       variables: {
@@ -300,7 +320,7 @@ export function SegmentDialog({
                   disabled={vouchersLoading}
                 >
                   <RefreshCw
-                    className={cn("h-3 w-3", vouchersLoading && "animate-spin")}
+                    className={cn("h-3.5 w-3.5", vouchersLoading && "animate-spin")}
                   />
                   Refresh
                 </Button>
@@ -318,13 +338,14 @@ export function SegmentDialog({
                           ...p,
                           rewardId: v,
                           label: selectedReward ? selectedReward.title : p.label,
-                          rewardValue: selectedReward?.discountValue || p.rewardValue,
+                          rewardValue:
+                            selectedReward?.discountValue || p.rewardValue,
                         }
                       : null,
                   );
                 }}
               >
-                <SelectTrigger className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none">
+                <SelectTrigger className="h-[40px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 text-[13px] rounded-[8px]">
                   {editingSegment.rewardId ? (
                     (() => {
                       const selectedReward = uniqueVoucherRewards.find(
@@ -341,10 +362,10 @@ export function SegmentDialog({
                               />
                             ) : (
                               <div className="h-5 w-5 rounded bg-zinc-100 flex items-center justify-center shrink-0">
-                                <Ticket className="h-3 w-3 text-zinc-500" />
+                                <Ticket className="h-3.5 w-3.5 text-zinc-500" />
                               </div>
                             )}
-                            <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate max-w-[200px]">
+                            <span className="text-[13px] font-medium text-[#303030] dark:text-zinc-100 truncate max-w-[200px]">
                               {selectedReward.title}
                             </span>
                           </div>
@@ -367,7 +388,7 @@ export function SegmentDialog({
                 <SelectContent>
                   {uniqueVoucherRewards.length === 0 ? (
                     <div className="flex flex-col items-center justify-center p-4 space-y-2">
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-[12px] text-[#616161]">
                         No vouchers configured for Spin Wheel
                       </span>
                       <Button
@@ -396,10 +417,10 @@ export function SegmentDialog({
                             />
                           ) : (
                             <div className="h-5 w-5 rounded bg-zinc-100 flex items-center justify-center shrink-0">
-                              <Ticket className="h-3 w-3 text-zinc-500" />
+                              <Ticket className="h-3.5 w-3.5 text-zinc-500" />
                             </div>
                           )}
-                          <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                          <span className="text-[13px] font-medium text-[#303030] dark:text-zinc-100 truncate">
                             {reward.title}
                           </span>
                         </div>
@@ -413,18 +434,20 @@ export function SegmentDialog({
 
           {/* 2D. Digital Gift Card Panel */}
           {activeType === "GIFT_CARD" && (
-            <div className="p-4 rounded-xl bg-purple-50/40 dark:bg-purple-950/20 border border-purple-200/70 dark:border-purple-900/40 space-y-4">
+            <div className="p-3.5 rounded-[8px] bg-purple-50/40 dark:bg-purple-950/20 border border-purple-200/70 dark:border-purple-900/40 space-y-3">
               <div className="flex items-center gap-2 text-purple-800 dark:text-purple-300">
                 <Gift className="h-4 w-4" />
-                <span className="text-xs font-bold">Brand Gift Card Configuration</span>
+                <span className="text-[13px] font-semibold">
+                  Brand Gift Card Configuration
+                </span>
               </div>
 
               {/* Direct Brand & Value Inputs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-200">
                     Brand / Provider Name
-                  </Label>
+                  </label>
                   <Input
                     value={editingSegment.giftCardBrand || ""}
                     onChange={(e) => {
@@ -440,18 +463,18 @@ export function SegmentDialog({
                               giftCardBrand: b,
                               label: `₹${denom} ${b}`,
                             }
-                          : null
+                          : null,
                       );
                     }}
                     placeholder="e.g. Amazon Pay, Swiggy, Flipkart"
-                    className="h-9 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none"
+                    className="h-[40px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 text-[13px]"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-200">
                     Gift Card Denomination (₹)
-                  </Label>
+                  </label>
                   <Input
                     type="number"
                     min={1}
@@ -471,11 +494,11 @@ export function SegmentDialog({
                               rewardValue: val,
                               label: `₹${val} ${brand}`,
                             }
-                          : null
+                          : null,
                       );
                     }}
                     placeholder="e.g. 100, 500, 1000"
-                    className="h-9 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-bold shadow-none"
+                    className="h-[40px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 text-[13px] font-bold"
                   />
                 </div>
               </div>
@@ -484,10 +507,12 @@ export function SegmentDialog({
 
           {/* 2E. Ecommerce / Shopify Store Discount Panel */}
           {activeType === "ECOMMERCE" && (
-            <div className="p-4 rounded-xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/40 space-y-4">
+            <div className="p-3.5 rounded-[8px] bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/40 space-y-3">
               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
                 <ShoppingBag className="h-4 w-4" />
-                <span className="text-xs font-bold">Shopify / Store Discount Prize</span>
+                <span className="text-[13px] font-semibold">
+                  Shopify / Store Discount Prize
+                </span>
               </div>
 
               {/* Discount Type Toggle */}
@@ -508,11 +533,11 @@ export function SegmentDialog({
                     );
                   }}
                   className={cn(
-                    "flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all",
+                    "flex items-center justify-center gap-2 p-2.5 rounded-[8px] border text-xs font-semibold transition-all cursor-pointer",
                     (editingSegment.ecommerceDiscountType || "PERCENTAGE") ===
                       "PERCENTAGE"
-                      ? "border-emerald-600 bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100 shadow-xs"
-                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 hover:border-zinc-300",
+                      ? "border-[#303030] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 shadow-xs ring-1 ring-[#303030]"
+                      : "border-[#d2d5d9] bg-white dark:bg-zinc-900 text-[#616161] hover:border-[#aeb4b9]",
                   )}
                 >
                   <Percent className="h-3.5 w-3.5" /> Percentage Discount (%)
@@ -533,10 +558,10 @@ export function SegmentDialog({
                     );
                   }}
                   className={cn(
-                    "flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all",
+                    "flex items-center justify-center gap-2 p-2.5 rounded-[8px] border text-xs font-semibold transition-all cursor-pointer",
                     editingSegment.ecommerceDiscountType === "FIXED_AMOUNT"
-                      ? "border-emerald-600 bg-emerald-100/60 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100 shadow-xs"
-                      : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 hover:border-zinc-300",
+                      ? "border-[#303030] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 shadow-xs ring-1 ring-[#303030]"
+                      : "border-[#d2d5d9] bg-white dark:bg-zinc-900 text-[#616161] hover:border-[#aeb4b9]",
                   )}
                 >
                   <span>₹ Fixed Amount Off</span>
@@ -545,13 +570,13 @@ export function SegmentDialog({
 
               {/* Discount Value */}
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13px] font-medium text-[#303030] dark:text-zinc-200">
                   Discount Value{" "}
                   {(editingSegment.ecommerceDiscountType || "PERCENTAGE") ===
                   "PERCENTAGE"
                     ? "(%)"
                     : "(₹)"}
-                </Label>
+                </label>
                 <Input
                   type="number"
                   min={1}
@@ -563,20 +588,22 @@ export function SegmentDialog({
                   onChange={(e) => {
                     const val = parseInt(e.target.value) || 0;
                     const isPct =
-                      (editingSegment.ecommerceDiscountType || "PERCENTAGE") ===
-                      "PERCENTAGE";
+                      (editingSegment.ecommerceDiscountType ||
+                        "PERCENTAGE") === "PERCENTAGE";
                     setEditingSegment((p) =>
                       p
                         ? {
                             ...p,
                             ecommerceDiscountValue: val,
                             rewardValue: val,
-                            label: isPct ? `${val}% Off Store` : `₹${val} Off Store`,
+                            label: isPct
+                              ? `${val}% Off Store`
+                              : `₹${val} Off Store`,
                           }
                         : null,
                     );
                   }}
-                  className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-sm font-bold shadow-none"
+                  className="h-[40px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold"
                 />
                 <PolarisPresetChips
                   presets={
@@ -592,15 +619,17 @@ export function SegmentDialog({
                   )}
                   onSelect={(val) => {
                     const isPct =
-                      (editingSegment.ecommerceDiscountType || "PERCENTAGE") ===
-                      "PERCENTAGE";
+                      (editingSegment.ecommerceDiscountType ||
+                        "PERCENTAGE") === "PERCENTAGE";
                     setEditingSegment((p) =>
                       p
                         ? {
                             ...p,
                             ecommerceDiscountValue: val,
                             rewardValue: val,
-                            label: isPct ? `${val}% Off Store` : `₹${val} Off Store`,
+                            label: isPct
+                              ? `${val}% Off Store`
+                              : `₹${val} Off Store`,
                           }
                         : null,
                     );
@@ -617,11 +646,11 @@ export function SegmentDialog({
           )}
 
           {/* 3. Universal Fields: Display Label & Probability & Color */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Slice Display Label *
-              </Label>
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                Slice Display Label <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Input
                 placeholder="e.g. 50 Points, 20% Off"
                 value={editingSegment.label || ""}
@@ -630,16 +659,16 @@ export function SegmentDialog({
                     p ? { ...p, label: e.target.value } : null,
                   )
                 }
-                className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none"
+                className="h-[40px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold"
               />
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
                   Probability Weight
-                </Label>
-                <span className="text-[10px] text-zinc-400">Odds Ratio</span>
+                </label>
+                <span className="text-[11px] text-[#616161]">Odds Ratio</span>
               </div>
               <Input
                 type="number"
@@ -652,33 +681,35 @@ export function SegmentDialog({
                       : null,
                   )
                 }
-                className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none"
+                className="h-[40px] bg-white dark:bg-zinc-800 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-mono"
               />
             </div>
           </div>
 
           {/* 4. Segment Slice Color Palette Swatches */}
-          <div className="space-y-2">
-            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+          <div className="space-y-2 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
               Wheel Slice Color
-            </Label>
+            </label>
             <div className="flex flex-wrap items-center gap-2">
-              {SEGMENT_COLORS.map((color) => {
-                const isSelected = editingSegment.color === color;
+              {SEGMENT_COLORS.map((c) => {
+                const isSelected =
+                  editingSegment.color?.toLowerCase() === c.hex.toLowerCase();
                 return (
                   <button
-                    key={color}
+                    key={c.hex}
                     type="button"
                     onClick={() =>
-                      setEditingSegment((p) => (p ? { ...p, color } : null))
+                      setEditingSegment((p) => (p ? { ...p, color: c.hex } : null))
                     }
+                    title={c.name}
                     className={cn(
-                      "h-7 w-7 rounded-full transition-transform flex items-center justify-center shadow-xs",
+                      "h-8 w-8 rounded-full transition-all flex items-center justify-center shadow-xs cursor-pointer",
                       isSelected
-                        ? "scale-110 ring-2 ring-zinc-900 dark:ring-white ring-offset-2"
-                        : "hover:scale-105",
+                        ? "scale-110 ring-2 ring-[#303030] ring-offset-2"
+                        : "hover:scale-105 opacity-85 hover:opacity-100",
                     )}
-                    style={{ backgroundColor: color }}
+                    style={{ backgroundColor: c.hex }}
                   >
                     {isSelected && (
                       <Check className="h-3.5 w-3.5 text-white stroke-[3]" />
@@ -695,9 +726,9 @@ export function SegmentDialog({
                       p ? { ...p, color: e.target.value } : null,
                     )
                   }
-                  className="h-7 w-7 rounded-lg border border-zinc-200 dark:border-zinc-700 cursor-pointer p-0.5 bg-white dark:bg-zinc-800"
+                  className="h-8 w-8 rounded-[6px] border border-[#aeb4b9] cursor-pointer p-0.5 bg-transparent"
                 />
-                <span className="text-[11px] font-mono text-zinc-400">
+                <span className="text-[12px] font-mono text-[#616161] uppercase">
                   {editingSegment.color}
                 </span>
               </div>
@@ -705,19 +736,21 @@ export function SegmentDialog({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+        <DialogFooter className="gap-2 sm:gap-0 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsDialogOpen(false)}
-            className="rounded-lg text-xs font-semibold"
+            className="rounded-[6px] text-[13px] font-medium h-[36px] border-[#aeb4b9]"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSaveSegment}
-            disabled={creatingSegment || updatingSegment || !editingSegment.label}
-            className="rounded-lg text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 gap-2"
+            disabled={
+              creatingSegment || updatingSegment || !editingSegment.label
+            }
+            className="rounded-[6px] text-[13px] font-semibold bg-[#303030] hover:bg-black text-white dark:bg-zinc-100 dark:text-zinc-900 gap-2 h-[36px]"
           >
             {(creatingSegment || updatingSegment) && (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

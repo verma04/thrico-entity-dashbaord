@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React from "react";
 import { useRouter } from "next/navigation";
 import { SurveyCreationForm } from "@/components/surveys/add/survey-creation-form";
@@ -13,6 +12,7 @@ import { useAddSurvey } from "@/graphql/surveys/survey-mutations";
 import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { ClipboardList } from "lucide-react";
 
 const AddSurveyPage = () => {
@@ -27,20 +27,19 @@ const AddSurveyPage = () => {
         title: "Success",
         description: `${singularName} created successfully!`,
       });
-      router.push(`/surveys/${data.addSurvey.id}`); // or the actual surveys list route
+      router.push(`/surveys/${data.addSurvey.id}`);
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
+        description:
+          error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
   });
 
   const onFinish = (values: any) => {
-    // Map Formik values to the expected AddSurveyInput structure
-    // (Note: description and status are not in the backend AddSurveyInput)
     const input = {
       title: values.title,
       startDate: values.startDate
@@ -62,28 +61,26 @@ const AddSurveyPage = () => {
     <EcosystemWrapper>
       <EcosystemHeader
         title={`Create ${singularName}`}
-        badgeText="New"
+        badgeText="Insights Studio"
         description={`Add a new ${singularName.toLowerCase()} to gather community insights.`}
         icon={ClipboardList}
         breadcrumbs={[
           { label: moduleName, href: "/surveys/all" },
-          { label: "Create" }
+          { label: `Create ${singularName}` },
         ]}
       />
-      <div className="flex-1 overflow-auto bg-background/50 p-6">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <SurveyCreationForm
           loading={loading}
           onFinish={onFinish}
           onCancel={onCancel}
         />
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 };
 
-
-
 export default withSubscriptionCheck(
   withModulePermission(AddSurveyPage, "SURVEYS", "canCreate"),
-  "surveys"
+  "surveys",
 );

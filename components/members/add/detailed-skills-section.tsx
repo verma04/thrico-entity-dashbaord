@@ -4,17 +4,7 @@ import React, { useState } from "react";
 import { FieldArray, useFormikContext } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, X, Star } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   Popover,
@@ -29,8 +19,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PolarisInput, PolarisTextarea } from "@/components/ui/platform/polaris-primitives";
 
 export const skillValidationSchema = Yup.object().shape({
   skillId: Yup.string().nullable(),
@@ -100,19 +91,19 @@ export function DetailedSkillsSection({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-2">
-        <Label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200">
           Detailed Competencies
-        </Label>
-        <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">
+        </label>
+        <span className="text-[12px] text-[#616161] dark:text-zinc-400">
           Add specific skills with proficiency
-        </p>
+        </span>
       </div>
 
       <FieldArray
         name="skills"
         render={(arrayHelpers) => (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {values.skills && values.skills.length > 0 ? (
               values.skills.map((skill: any, index: number) => {
                 const skillErrors = (errors.skills as any)?.[index] || {};
@@ -121,48 +112,38 @@ export function DetailedSkillsSection({
                 return (
                   <div
                     key={index}
-                    className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 relative space-y-4"
+                    className="p-4 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/40 relative space-y-4"
                   >
-                    <div className="absolute top-3.5 right-3.5">
-                      <Button
+                    <div className="absolute top-3 right-3">
+                      <button
                         type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 h-7 w-7 rounded-lg transition-colors"
+                        className="h-7 w-7 rounded-[6px] flex items-center justify-center text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                         onClick={() => arrayHelpers.remove(index)}
+                        title="Remove skill"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      </button>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                      <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                          Skill Name <span className="text-rose-500">*</span>
-                        </Label>
-                        <Input
-                          name={`skills.${index}.name`}
-                          placeholder="e.g. React.js"
-                          className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                          value={skill.name}
-                          onChange={(e) =>
-                            setFieldValue(
-                              `skills.${index}.name`,
-                              e.target.value,
-                            )
-                          }
-                        />
-                        {skillErrors.name && skillTouched.name && (
-                          <p className="text-[11px] text-rose-500 font-medium">
-                            {skillErrors.name}
-                          </p>
-                        )}
-                      </div>
+                      <PolarisInput
+                        name={`skills.${index}.name`}
+                        label="Skill Name"
+                        required
+                        placeholder="e.g. React.js"
+                        value={skill.name}
+                        onChange={(e) =>
+                          setFieldValue(`skills.${index}.name`, e.target.value)
+                        }
+                        error={skillTouched.name && skillErrors.name ? String(skillErrors.name) : null}
+                      />
 
-                      <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                          Category <span className="text-rose-500">*</span>
-                        </Label>
+                      <div className="w-full space-y-1.5">
+                        <div className="flex items-center justify-between gap-2 mb-[6px]">
+                          <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                            Category <span className="text-[#d72c0d] ml-0.5">*</span>
+                          </label>
+                        </div>
                         <Popover
                           open={openComboboxes[index]}
                           onOpenChange={(open) =>
@@ -173,33 +154,33 @@ export function DetailedSkillsSection({
                           }
                         >
                           <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={openComboboxes[index]}
+                            <button
+                              type="button"
                               className={cn(
-                                "w-full justify-between h-10 text-xs font-semibold bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800",
-                                !skill.category && "text-zinc-400 font-normal",
+                                "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
+                                !skill.category && "text-[#8c9196] dark:text-zinc-500"
                               )}
                             >
-                              {skill.category
-                                ? (entitySkills.length > 0
-                                    ? entitySkills.find(
-                                        (c: any) => c.title === skill.category,
-                                      )?.title
-                                    : skillCategories.find(
-                                        (c) => c.value === skill.category,
-                                      )?.label) || skill.category
-                                : "Select category"}
-                              <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
-                            </Button>
+                              <span className="truncate">
+                                {skill.category
+                                  ? (entitySkills.length > 0
+                                      ? entitySkills.find(
+                                          (c: any) => c.title === skill.category,
+                                        )?.title
+                                      : skillCategories.find(
+                                          (c) => c.value === skill.category,
+                                        )?.label) || skill.category
+                                  : "Select category"}
+                              </span>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
+                            </button>
                           </PopoverTrigger>
                           <PopoverContent
                             className="w-[var(--radix-popover-trigger-width)] p-0"
                             align="start"
                           >
                             <Command className="border-none">
-                              <CommandInput placeholder="Search category..." className="h-10 text-xs" />
+                              <CommandInput placeholder="Search category..." className="h-10 text-[13px]" />
                               <CommandList className="max-h-[200px]">
                                 <CommandEmpty>No category found.</CommandEmpty>
                                 <CommandGroup>
@@ -226,11 +207,11 @@ export function DetailedSkillsSection({
                                               [index]: false,
                                             });
                                           }}
-                                          className="flex items-center justify-between text-xs font-semibold cursor-pointer"
+                                          className="flex items-center justify-between text-[13px] font-medium cursor-pointer"
                                         >
                                           <span>{c.title}</span>
                                           {skill.category === c.title && (
-                                            <Check className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100" />
+                                            <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
                                           )}
                                         </CommandItem>
                                       ))
@@ -252,11 +233,11 @@ export function DetailedSkillsSection({
                                               [index]: false,
                                             });
                                           }}
-                                          className="flex items-center justify-between text-xs font-semibold cursor-pointer"
+                                          className="flex items-center justify-between text-[13px] font-medium cursor-pointer"
                                         >
                                           <span>{c.label}</span>
                                           {skill.category === c.value && (
-                                            <Check className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100" />
+                                            <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
                                           )}
                                         </CommandItem>
                                       ))}
@@ -266,119 +247,112 @@ export function DetailedSkillsSection({
                           </PopoverContent>
                         </Popover>
                         {skillErrors.category && skillTouched.category && (
-                          <p className="text-[11px] text-rose-500 font-medium">
-                            {skillErrors.category}
+                          <p className="text-[12.5px] text-[#d72c0d] dark:text-rose-400 mt-1 flex items-center gap-1 font-normal leading-[18px]">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            <span>{skillErrors.category}</span>
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                          Level <span className="text-rose-500">*</span>
-                        </Label>
-                        <Select
-                          value={skill.level}
-                          onValueChange={(val) =>
-                            setFieldValue(`skills.${index}.level`, val)
-                          }
-                        >
-                          <SelectTrigger className="h-10 text-xs font-semibold bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-                            <SelectValue placeholder="Select level" />
-                          </SelectTrigger>
-                          <SelectContent>
+                      {/* Level */}
+                      <div className="w-full space-y-1.5">
+                        <div className="flex items-center justify-between gap-2 mb-[6px]">
+                          <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                            Level <span className="text-[#d72c0d] ml-0.5">*</span>
+                          </label>
+                        </div>
+                        <div className="relative">
+                          <select
+                            value={skill.level || ""}
+                            onChange={(e) =>
+                              setFieldValue(`skills.${index}.level`, e.target.value)
+                            }
+                            className="w-full h-[40px] pl-3 pr-9 text-[14px] text-[#303030] dark:text-zinc-100 bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] appearance-none cursor-pointer transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500"
+                          >
+                            <option value="" disabled>Select level</option>
                             {skillLevels.map((l) => (
-                              <SelectItem key={l.value} value={l.value} className="text-xs font-medium">
+                              <option key={l.value} value={l.value}>
                                 {l.label}
-                              </SelectItem>
+                              </option>
                             ))}
-                          </SelectContent>
-                        </Select>
+                          </select>
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#616161] dark:text-zinc-400">
+                            <ChevronsUpDown className="h-4 w-4" />
+                          </div>
+                        </div>
                         {skillErrors.level && skillTouched.level && (
-                          <p className="text-[11px] text-rose-500 font-medium">
-                            {skillErrors.level}
+                          <p className="text-[12.5px] text-[#d72c0d] dark:text-rose-400 mt-1 flex items-center gap-1 font-normal leading-[18px]">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            <span>{skillErrors.level}</span>
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                          Years of Experience
-                        </Label>
-                        <Input
-                          type="number"
-                          name={`skills.${index}.yearsOfExperience`}
-                          placeholder="e.g. 3"
-                          className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                          value={skill.yearsOfExperience}
-                          onChange={(e) =>
-                            setFieldValue(
-                              `skills.${index}.yearsOfExperience`,
-                              Number(e.target.value),
-                            )
-                          }
-                          min={0}
-                        />
-                      </div>
+                      <PolarisInput
+                        type="number"
+                        name={`skills.${index}.yearsOfExperience`}
+                        label="Years of Experience"
+                        placeholder="e.g. 3"
+                        value={skill.yearsOfExperience}
+                        onChange={(e) =>
+                          setFieldValue(
+                            `skills.${index}.yearsOfExperience`,
+                            Number(e.target.value),
+                          )
+                        }
+                        min={0}
+                      />
                     </div>
 
                     <div className="space-y-1.5 pt-1">
-                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Tags & Keywords <span className="text-rose-500">*</span>
-                      </Label>
+                      <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                        Tags & Keywords <span className="text-[#d72c0d] ml-0.5">*</span>
+                      </label>
                       <div className="flex flex-wrap gap-1.5 mb-1.5">
                         {skill.tags?.map((tag: string) => (
                           <Badge
                             key={tag}
                             variant="secondary"
-                            className="bg-zinc-200/80 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold px-2 py-0.5 flex items-center gap-1"
+                            className="bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 text-[11px] font-medium px-2 py-0.5 flex items-center gap-1 rounded-[6px]"
                           >
                             {tag}
                             <X
-                              className="h-2.5 w-2.5 cursor-pointer hover:text-rose-500"
+                              className="h-2.5 w-2.5 cursor-pointer hover:text-[#d72c0d]"
                               onClick={() => removeTag(index, tag)}
                             />
                           </Badge>
                         ))}
                       </div>
-                      <Input
+                      <PolarisInput
                         placeholder="Type a tag and press Enter or comma..."
-                        className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-medium"
                         value={tagInput[index] || ""}
                         onChange={(e) =>
                           setTagInput({ ...tagInput, [index]: e.target.value })
                         }
                         onKeyDown={(e) => handleAddTag(index, e)}
+                        error={skillTouched.tags && skillErrors.tags ? String(skillErrors.tags) : null}
                       />
-                      {skillErrors.tags && skillTouched.tags && (
-                        <p className="text-[11px] text-rose-500 font-medium">
-                          {skillErrors.tags}
-                        </p>
-                      )}
                     </div>
 
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Description
-                      </Label>
-                      <Textarea
-                        placeholder="Describe how this skill is applied..."
-                        className="min-h-[72px] bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
-                        value={skill.description}
-                        onChange={(e) =>
-                          setFieldValue(
-                            `skills.${index}.description`,
-                            e.target.value,
-                          )
-                        }
-                      />
-                    </div>
+                    <PolarisTextarea
+                      label="Description"
+                      placeholder="Describe how this skill is applied..."
+                      value={skill.description || ""}
+                      onChange={(e) =>
+                        setFieldValue(
+                          `skills.${index}.description`,
+                          e.target.value,
+                        )
+                      }
+                      className="min-h-[72px]"
+                    />
                   </div>
                 );
               })
             ) : (
-              <div className="text-center p-8 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/30 dark:bg-zinc-900/20">
-                <Star className="h-7 w-7 text-zinc-400 mx-auto mb-2 opacity-60" />
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+              <div className="text-center p-8 border border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[8px] bg-[#f6f6f7]/40 dark:bg-zinc-900/20">
+                <Star className="h-6 w-6 text-[#8c9196] mx-auto mb-2 opacity-60" />
+                <p className="text-[13px] text-[#616161] dark:text-zinc-400 font-medium">
                   No detailed skills added yet.
                 </p>
               </div>
@@ -387,7 +361,7 @@ export function DetailedSkillsSection({
             <Button
               type="button"
               variant="outline"
-              className="w-full border-dashed border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all rounded-xl h-11 text-xs font-semibold"
+              className="w-full border-dashed border border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-300 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 hover:border-[#8c9196] dark:hover:border-zinc-600 transition-all rounded-[8px] h-[40px] text-[13.5px] font-medium"
               onClick={() =>
                 arrayHelpers.push({
                   skillId: null,

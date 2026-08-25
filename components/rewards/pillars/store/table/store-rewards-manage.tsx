@@ -323,7 +323,7 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
           {onCreateClick && (
             <Button
               onClick={onCreateClick}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               Create Store Reward
@@ -346,7 +346,7 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
               className={cn(
                 "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 cursor-pointer border",
                 isActive
-                  ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
                   : "bg-card hover:bg-muted text-muted-foreground hover:text-foreground border-border/70"
               )}
             >
@@ -356,7 +356,7 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
                 className={cn(
                   "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
                   isActive
-                    ? "bg-white/20 text-white"
+                    ? "bg-primary-foreground/20 text-primary-foreground"
                     : "bg-muted text-muted-foreground"
                 )}
               >

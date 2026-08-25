@@ -9,6 +9,7 @@ import {
   ShoppingBag,
   Sparkles,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   PolarisSidebarCard,
   PolarisTipCard,
@@ -33,7 +34,8 @@ export function ScratchTierPreviewSidebar({
       return {
         label: "Digital Gift Card",
         tag: values.giftCardBrand || "Brand Card",
-        color: "bg-purple-100 dark:bg-purple-950/80 text-purple-800 dark:text-purple-300",
+        color:
+          "bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300",
         icon: Gift,
       };
     }
@@ -44,7 +46,8 @@ export function ScratchTierPreviewSidebar({
           values.ecommerceDiscountType === "PERCENTAGE"
             ? `${values.ecommerceDiscountValue || 20}% OFF`
             : `₹${values.ecommerceDiscountValue || 100} OFF`,
-        color: "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300",
+        color:
+          "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300",
         icon: ShoppingBag,
       };
     }
@@ -52,7 +55,8 @@ export function ScratchTierPreviewSidebar({
       return {
         label: "Internal Voucher",
         tag: "Promo Code",
-        color: "bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300",
+        color:
+          "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300",
         icon: Ticket,
       };
     }
@@ -67,7 +71,8 @@ export function ScratchTierPreviewSidebar({
     return {
       label: "Loyalty Points",
       tag: `+${values.rewardValue || 50} ${currencyName}`,
-      color: "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300",
+      color:
+        "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300",
       icon: Coins,
     };
   };
@@ -76,11 +81,11 @@ export function ScratchTierPreviewSidebar({
   const PillarIcon = pillarBadge.icon;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* ── Live Member Scratch Card Preview ─────────────────────────────── */}
       <PolarisSidebarCard title="Scratch Tier Preview" badge="Member View">
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden flex flex-col">
+        <div className="space-y-3">
+          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs overflow-hidden flex flex-col">
             {/* Top Accent / Card Color Bar */}
             <div
               className="h-2 w-full transition-all duration-300"
@@ -88,101 +93,66 @@ export function ScratchTierPreviewSidebar({
             />
 
             {/* Simulated Scratch Surface Card */}
-            <div className="p-5 flex flex-col items-center text-center relative bg-gradient-to-b from-zinc-50/50 to-zinc-100/30 dark:from-zinc-900/50 dark:to-zinc-950/50">
-              {/* Top Floating Status */}
-              <div className="w-full flex items-center justify-between mb-4">
-                <span
-                  className={cn(
-                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-                    pillarBadge.color
-                  )}
-                >
+            <div className="p-4 flex flex-col items-center text-center relative bg-[#f6f6f7]/60 dark:bg-zinc-800/40">
+              {/* Top Status */}
+              <div className="w-full flex items-center justify-between mb-3">
+                <span className="px-2 py-0.5 rounded-[4px] text-[10px] font-bold uppercase tracking-wider bg-[#303030] text-white">
                   {pillarBadge.label}
                 </span>
-
-                <span
-                  className={cn(
-                    "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase",
-                    values.isActive
-                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                      : "bg-rose-500/10 text-rose-700 dark:text-rose-300"
-                  )}
-                >
-                  {values.isActive ? "Active" : "Disabled"}
+                <span className="text-[11px] font-medium text-[#616161]">
+                  {values.isActive ? "Active" : "Inactive"}
                 </span>
               </div>
 
-              {/* Icon Circle */}
-              <div className="h-14 w-14 rounded-2xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                <PillarIcon className="h-7 w-7 text-primary" />
+              {/* Central Scratch Simulation */}
+              <div className="relative my-2">
+                <div
+                  className="w-16 h-16 rounded-[8px] flex items-center justify-center text-white shadow-sm transition-transform duration-300"
+                  style={{ backgroundColor: values.cardColor || "#4F46E5" }}
+                >
+                  <PillarIcon className="h-8 w-8 text-white drop-shadow-xs" />
+                </div>
               </div>
 
-              {/* Title & Payout details */}
-              <h4 className="text-sm font-bold text-foreground line-clamp-1 max-w-[220px]">
-                {values.label || "Scratch Card Prize"}
+              {/* Tier Details */}
+              <h4 className="text-[15px] font-bold text-[#303030] dark:text-zinc-100 mt-2 tracking-tight">
+                {values.label || values.title || "Untitled Scratch Tier"}
               </h4>
-              <p className="text-xs font-semibold text-primary mt-0.5 font-mono">
+              <p className="text-[12px] font-medium text-[#616161] dark:text-zinc-400 mt-0.5">
                 {pillarBadge.tag}
               </p>
+            </div>
 
-              {/* Prize Details Footer */}
-              <div className="mt-4 pt-3 border-t border-border/50 w-full flex items-center justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Prize Fulfillment</span>
-                </span>
-                <span className="font-semibold text-foreground">
-                  {pillarBadge.label}
-                </span>
-              </div>
+            {/* Summary Specification Rows */}
+            <div className="p-3 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1">
+              <PolarisSummaryRow
+                label="Fulfillment Pillar"
+                value={pillarBadge.label}
+              />
+              <PolarisSummaryRow
+                label="Audience"
+                value={
+                  values.memberEligibility === "TIERS"
+                    ? "Selected Tiers"
+                    : values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                      ? "Selected Members"
+                      : "All Members"
+                }
+              />
+              <PolarisSummaryRow
+                label="Status"
+                value={values.isActive ? "Active in Game" : "Disabled"}
+                isLast
+              />
             </div>
           </div>
         </div>
       </PolarisSidebarCard>
 
-      {/* ── Summary Metrics Card ────────────────────────────────────────── */}
-      <PolarisSidebarCard title="Tier Summary" badge="Gating & Limits">
-        <div className="space-y-1">
-          <PolarisSummaryRow
-            label="Mechanism Type"
-            value={pillarBadge.label}
-          />
-          <PolarisSummaryRow
-            label="Member Eligibility"
-            value={
-              values.memberEligibility === "ALL"
-                ? "All Customers"
-                : values.memberEligibility === "VERIFIED"
-                ? "Verified Customers"
-                : values.memberEligibility === "TIERS"
-                ? `${(values.membershipTierId || values.eligibleTierIds || []).length} Tier(s)`
-                : values.memberEligibility === "SPECIFIC_CUSTOMERS"
-                ? `${(values.eligibleUserIds || []).length} Customer(s)`
-                : "All Customers"
-            }
-          />
-          {values.minAccountAge > 0 && (
-            <PolarisSummaryRow
-              label="Min Account Age"
-              value={`${values.minAccountAge} Days`}
-            />
-          )}
-          {values.minActivity > 0 && (
-            <PolarisSummaryRow
-              label="Min Activity"
-              value={`${values.minActivity} PTS`}
-            />
-          )}
-          <PolarisSummaryRow
-            label="Game Status"
-            value={values.isActive ? "Active in Game" : "Draft (Disabled)"}
-          />
-        </div>
-      </PolarisSidebarCard>
-
-      {/* ── Strategic Advice Card ──────────────────────────────────────── */}
-      <PolarisTipCard title="Reward Optimization Tip">
-        Pair high-value digital gift cards and store discounts with member gating criteria to reward your most active community members.
+      {/* Strategic Guidance */}
+      <PolarisTipCard title="Scratch Economy Optimization">
+        Scratch cards achieve highest engagement when configured with a balanced mix
+        of instant bonus points, store vouchers, and occasional high-value brand gift cards.
       </PolarisTipCard>
     </div>
   );

@@ -173,7 +173,7 @@ export function ManualPoolDrawer({
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-emerald-600 text-white text-[9px] uppercase font-bold px-1.5 py-0">
+                  <Badge className="bg-primary text-primary-foreground text-[9px] uppercase font-bold px-1.5 py-0">
                     Voucher Pool
                   </Badge>
                   <span className="text-xs font-semibold text-muted-foreground">
@@ -240,7 +240,7 @@ export function ManualPoolDrawer({
                     className={cn(
                       "text-[10px] font-bold px-2 py-1 rounded transition-colors whitespace-nowrap cursor-pointer",
                       statusFilter === st
-                        ? "bg-emerald-600 text-white"
+                        ? "bg-primary text-primary-foreground shadow-xs"
                         : "bg-muted/60 text-muted-foreground hover:bg-muted"
                     )}
                   >

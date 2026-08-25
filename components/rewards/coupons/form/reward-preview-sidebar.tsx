@@ -7,6 +7,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   PolarisSidebarCard,
   PolarisTipCard,
@@ -44,34 +45,40 @@ export function RewardPreviewSidebar({
       return {
         label: "Digital Gift Card",
         tag: formik.values.giftCardBrand || "Brand Card",
-        color: "bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300",
+        color:
+          "bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300",
       };
     }
     if (pillar === "ECOMMERCE") {
       return {
         label: "Shopify Store",
         tag: "On-Demand Win",
-        color: "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300",
+        color:
+          "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300",
       };
     }
     return {
       label: "Internal Voucher",
-      tag: formik.values.couponType === "ONE_TO_ONE" ? "1 Code / User" : "Shared Code",
-      color: "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300",
+      tag:
+        formik.values.couponType === "ONE_TO_ONE"
+          ? "1 Code / User"
+          : "Shared Code",
+      color:
+        "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300",
     };
   };
 
   const pillarBadge = getPillarBadge();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Live Member Discovery Preview */}
       <PolarisSidebarCard title="Reward Preview" badge="Member View">
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Card Mockup */}
-          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden flex flex-col">
+          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs overflow-hidden flex flex-col">
             {/* Banner Image */}
-            <div className="h-44 w-full bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden">
+            <div className="h-40 w-full bg-[#f6f6f7] dark:bg-zinc-800 relative overflow-hidden">
               {bannerUrl ? (
                 <img
                   src={bannerUrl}
@@ -87,142 +94,92 @@ export function RewardPreviewSidebar({
                   ) : (
                     <Ticket className="h-8 w-8 text-emerald-400" />
                   )}
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-2">
+                  <p className="text-[10px] text-[#616161] font-bold uppercase tracking-wider mt-2">
                     No Banner Uploaded
                   </p>
                 </div>
               )}
 
               {/* Point Cost Pill */}
-              <div className="absolute bottom-3 left-3">
-                <div className="bg-zinc-900/90 dark:bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm">
+              <div className="absolute bottom-2.5 left-2.5">
+                <div className="bg-[#303030]/90 dark:bg-black/90 backdrop-blur-md px-2.5 py-1 rounded-[4px] flex items-center gap-1.5 border border-white/20 shadow-sm">
                   <Zap className="h-3.5 w-3.5 text-white fill-white" />
-                  <span className="text-xs font-bold text-white leading-none">
-                    {formik.values.tcCost || 1} Points
+                  <span className="text-[12px] font-bold text-white leading-none">
+                    {formik.values.tcCost || 1} PTS
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Card Body */}
-            <div className="p-4 space-y-3">
-              <div className="flex items-center justify-between text-xs pt-1">
-                <div className="flex items-center gap-1.5 font-bold text-zinc-900 dark:text-zinc-100">
-                  <Zap className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100 fill-zinc-900 dark:fill-zinc-100" />
-                  <span>{formik.values.tcCost || 0}</span>
-                  <span className="text-[10px] text-zinc-400 font-medium">
-                    Points
+            {/* Reward Card Body */}
+            <div className="p-3.5 space-y-2.5 flex-1 flex flex-col justify-between">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] text-[#303030] dark:text-zinc-100 uppercase tracking-wider">
+                    {pillarBadge.label}
+                  </span>
+                  <span className="text-[10px] text-[#616161] font-semibold">
+                    • {pillarBadge.tag}
                   </span>
                 </div>
 
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100 font-mono">
-                  {pillar === "DIGITAL_GIFT_CARD"
-                    ? `₹${formik.values.giftCardValue || 500} Card`
-                    : pillar === "ECOMMERCE"
-                      ? formik.values.storeDiscountType === "PERCENTAGE"
-                        ? `${formik.values.discountValue || 15}% Off`
-                        : `₹${formik.values.discountValue || 100} Off`
-                      : "Special Offer"}
-                </span>
+                <h4 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100 line-clamp-1">
+                  {formik.values.title || "Untitled Reward Offer"}
+                </h4>
+
+                <p className="text-[12px] text-[#616161] dark:text-zinc-400 line-clamp-2 leading-[16px]">
+                  {formik.values.description ||
+                    "Enter a description to preview what members see before redeeming."}
+                </p>
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold ${pillarBadge.color}`}>
-                  <span>{pillarBadge.label}</span>
-                </div>
-                <span className="text-[9px] font-bold text-zinc-500 bg-muted px-1.5 py-0.5 rounded">
-                  {pillarBadge.tag}
-                </span>
-              </div>
-
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
-                {formik.values.title || "Your Reward Title"}
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                {formik.values.description ||
-                  "Enter a description to preview how this reward will appear to members."}
-              </p>
-
-              {/* Quick Summary Breakdown */}
-              <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                <PolarisSummaryRow
-                  label="Reward Pillar"
-                  value={
-                    pillar === "DIGITAL_GIFT_CARD"
-                      ? "Digital Gift Card"
-                      : pillar === "ECOMMERCE"
-                        ? "Shopify Store"
-                        : "Internal Voucher"
-                  }
-                />
-                <PolarisSummaryRow
-                  label="Validity Period"
-                  value={`${formik.values.validityDays || 30} Days`}
-                />
-                <PolarisSummaryRow
-                  label="Available Supply"
-                  value={
-                    formik.values.totalUsageLimit
-                      ? `${formik.values.totalUsageLimit} Units`
-                      : "Unlimited"
-                  }
-                />
-                <PolarisSummaryRow
-                  label="Eligibility"
-                  value={
-                    formik.values.memberEligibility === "VERIFIED"
-                      ? "Verified Only"
-                      : formik.values.memberEligibility === "TIERS"
-                        ? (formik.values.membershipTierId?.length || formik.values.eligibleTierIds?.length) > 0
-                          ? `${formik.values.membershipTierId?.length || formik.values.eligibleTierIds?.length} Tier(s)`
-                          : "Specific Tiers"
-                        : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
-                          ? formik.values.eligibleUserIds?.length > 0
-                            ? `${formik.values.eligibleUserIds.length} Customer(s)`
-                            : "Specific Customers"
-                          : "All Customers"
-                  }
-                  isLast
-                />
-              </div>
-
-              <div className="pt-2">
-                <Button
-                  disabled
-                  className="w-full h-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 font-bold text-xs gap-2 shadow-xs cursor-default opacity-95"
-                >
-                  Claim Reward
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
+              {/* Action Button */}
+              <Button
+                size="sm"
+                disabled
+                className="w-full bg-[#303030] text-white text-[12px] font-semibold h-[34px] rounded-[6px] gap-1 cursor-default opacity-90 shadow-none"
+              >
+                <span>Redeem for {formik.values.tcCost || 1} PTS</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
             </div>
+          </div>
+
+          {/* Quick Specifications */}
+          <div className="space-y-1 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <PolarisSummaryRow
+              label="Fulfillment Pillar"
+              value={pillarBadge.label}
+            />
+            <PolarisSummaryRow
+              label="Cost"
+              value={`${formik.values.tcCost || 1} PTS`}
+            />
+            <PolarisSummaryRow
+              label="Validity"
+              value={`${formik.values.validityDays || 30} Days`}
+            />
+            <PolarisSummaryRow
+              label="Audience"
+              value={
+                formik.values.memberEligibility === "TIERS"
+                  ? "Select Tiers"
+                  : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                    ? "Specific Members"
+                    : "All Members"
+              }
+              isLast
+            />
           </div>
         </div>
       </PolarisSidebarCard>
 
-      {/* Strategic Tip Card */}
+      {/* Strategic Tip */}
       {showStrategy && (
-        <PolarisTipCard title="Reward Optimization Tip">
-          <ul className="space-y-2 text-[11px] text-zinc-600 dark:text-zinc-400">
-            <li className="flex items-start gap-1.5">
-              <span className="text-zinc-900 dark:text-zinc-100 font-bold">•</span>
-              <span>
-                Rewards attached to interactive games (Spin Wheel, Scratch Card) see 2.4x higher engagement.
-              </span>
-            </li>
-            <li className="flex items-start gap-1.5">
-              <span className="text-zinc-900 dark:text-zinc-100 font-bold">•</span>
-              <span>
-                Setting a minimum account age or activity points threshold prevents throwaway account farming.
-              </span>
-            </li>
-            <li className="flex items-start gap-1.5">
-              <span className="text-zinc-900 dark:text-zinc-100 font-bold">•</span>
-              <span>
-                Digital gift cards and Shopify discounts are generated on-demand only when a member wins.
-              </span>
-            </li>
-          </ul>
+        <PolarisTipCard title="Reward Optimization">
+          Rewards priced between 50 and 200 points achieve the highest redemption
+          velocity. Always ensure coupon codes or digital card pools are funded
+          before high-volume campaign announcements.
         </PolarisTipCard>
       )}
     </div>

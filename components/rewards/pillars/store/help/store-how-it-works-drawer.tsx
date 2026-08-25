@@ -72,7 +72,7 @@ export function StoreHowItWorksDrawer({
                   <h3 className="text-base font-bold text-foreground tracking-tight">
                     How E-Commerce Store Rewards Work
                   </h3>
-                  <Badge className="bg-indigo-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
+                  <Badge className="bg-primary text-primary-foreground font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
                     Step Guide
                   </Badge>
                 </div>
@@ -89,7 +89,7 @@ export function StoreHowItWorksDrawer({
                     onClose();
                     onCreateClick();
                   }}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   Create Store Reward
@@ -184,7 +184,7 @@ export function StoreHowItWorksDrawer({
                 <div className="flex justify-end pt-2">
                   <Button
                     onClick={() => setActiveTab("rules")}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Supported Discount Types
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -243,7 +243,7 @@ export function StoreHowItWorksDrawer({
                       >
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <div className="h-7 w-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                            <div className="h-7 w-7 rounded-lg bg-muted text-foreground flex items-center justify-center">
                               <Icon className="h-3.5 w-3.5" />
                             </div>
                             <h5 className="text-xs font-bold text-foreground">
@@ -261,7 +261,7 @@ export function StoreHowItWorksDrawer({
                           </span>
                           <button
                             onClick={() => copyCode(rule.sampleCode)}
-                            className="text-xs text-indigo-600 font-semibold flex items-center gap-1 cursor-pointer"
+                            className="text-xs text-primary font-semibold flex items-center gap-1 cursor-pointer"
                           >
                             {copiedCode === rule.sampleCode ? (
                               <>
@@ -291,7 +291,7 @@ export function StoreHowItWorksDrawer({
                   </Button>
                   <Button
                     onClick={() => setActiveTab("benefits")}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Strategic Advantages
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -323,7 +323,7 @@ export function StoreHowItWorksDrawer({
                   </Button>
                   <Button
                     onClick={() => setActiveTab("gamification")}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Gamification Hooks
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -345,7 +345,7 @@ export function StoreHowItWorksDrawer({
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="p-3.5 rounded-xl border border-border/70 bg-card space-y-1.5">
-                    <div className="h-7 w-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <div className="h-7 w-7 rounded-lg bg-muted text-foreground flex items-center justify-center">
                       <Gamepad2 className="h-4 w-4" />
                     </div>
                     <h5 className="text-xs font-bold text-foreground">
@@ -357,7 +357,7 @@ export function StoreHowItWorksDrawer({
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-border/70 bg-card space-y-1.5">
-                    <div className="h-7 w-7 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                    <div className="h-7 w-7 rounded-lg bg-muted text-foreground flex items-center justify-center">
                       <Sparkles className="h-4 w-4" />
                     </div>
                     <h5 className="text-xs font-bold text-foreground">
@@ -369,7 +369,7 @@ export function StoreHowItWorksDrawer({
                   </div>
 
                   <div className="p-3.5 rounded-xl border border-border/70 bg-card space-y-1.5">
-                    <div className="h-7 w-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                    <div className="h-7 w-7 rounded-lg bg-muted text-foreground flex items-center justify-center">
                       <ShieldCheck className="h-4 w-4" />
                     </div>
                     <h5 className="text-xs font-bold text-foreground">
@@ -396,7 +396,7 @@ export function StoreHowItWorksDrawer({
                         onClose();
                         onCreateClick();
                       }}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer shadow-xs"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer shadow-2xs"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                       Create Store Reward Rule

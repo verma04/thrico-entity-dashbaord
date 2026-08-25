@@ -40,7 +40,7 @@ export const StoreRewardGrid: React.FC<StoreRewardGridProps> = ({
         {onCreateClick && (
           <Button
             onClick={onCreateClick}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
             Create Store Reward

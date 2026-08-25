@@ -3,9 +3,7 @@
 import React from "react";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -16,11 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  Store,
   MapPin,
-  DollarSign,
-  Tag,
-  Package,
   Image as ImageIcon,
   Sparkles,
   CheckCircle2,
@@ -144,12 +138,16 @@ export function ListingCreationForm({
     <FormikProvider value={formik}>
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Live Marketplace Preview Card */}
-            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Preview" icon={Sparkles}>
-              <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
+            <PolarisSidebarCard
+              title={`${singularName} Preview`}
+              badge="Live Preview"
+              icon={Sparkles}
+            >
+              <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
                 {/* Image Container */}
-                <div className="aspect-[3/2] w-full bg-zinc-200 dark:bg-zinc-800 relative flex items-center justify-center overflow-hidden">
+                <div className="aspect-[3/2] w-full bg-[#e1e3e5] dark:bg-zinc-800 relative flex items-center justify-center overflow-hidden">
                   {getPrimaryImageUrl() ? (
                     <img
                       src={getPrimaryImageUrl()!}
@@ -158,15 +156,17 @@ export function ListingCreationForm({
                     />
                   ) : (
                     <div className="text-center p-4">
-                      <ImageIcon className="h-8 w-8 text-zinc-400 mx-auto mb-1 opacity-60" />
-                      <p className="text-[11px] text-zinc-400 font-medium">No photo uploaded</p>
+                      <ImageIcon className="h-8 w-8 text-[#8c9196] mx-auto mb-1 opacity-60" />
+                      <p className="text-[11px] text-[#616161] font-medium">
+                        No photo uploaded
+                      </p>
                     </div>
                   )}
                   {formik.values.category && (
                     <div className="absolute top-2.5 right-2.5">
                       <Badge
                         variant="secondary"
-                        className="bg-black/60 text-white backdrop-blur-md border-none text-[10px] font-bold px-2 py-0.5"
+                        className="bg-black/75 text-white backdrop-blur-xs border-none text-[10px] font-semibold px-2 py-0.5 rounded-[4px]"
                       >
                         {formik.values.category}
                       </Badge>
@@ -175,36 +175,39 @@ export function ListingCreationForm({
                 </div>
 
                 {/* Details */}
-                <div className="p-4 space-y-3">
+                <div className="p-3.5 space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+                      <h4 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 truncate">
                         {formik.values.title || `${singularName} Item Title`}
                       </h4>
                       {formik.values.location && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5 truncate">
+                        <p className="text-[12px] text-[#616161] dark:text-zinc-400 flex items-center gap-1 mt-0.5 truncate">
                           <MapPin className="h-3 w-3 shrink-0" />
                           {formik.values.location}
                         </p>
                       )}
                     </div>
-                    <span className="text-base font-extrabold text-zinc-900 dark:text-zinc-100 shrink-0">
-                      ₹{formik.values.price ? Number(formik.values.price).toLocaleString() : "0"}
+                    <span className="text-[15px] font-bold text-[#303030] dark:text-zinc-100 shrink-0">
+                      ₹
+                      {formik.values.price
+                        ? Number(formik.values.price).toLocaleString()
+                        : "0"}
                     </span>
                   </div>
 
                   {/* Metadata Chips */}
-                  <div className="flex flex-wrap gap-1.5 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                  <div className="flex flex-wrap gap-1.5 pt-1 border-t border-[#e1e3e5] dark:border-zinc-800">
                     <Badge
                       variant="outline"
-                      className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-none text-[10px] font-bold"
+                      className="bg-[#303030] dark:bg-zinc-100 text-white dark:text-zinc-900 border-none text-[10px] font-bold rounded-[4px]"
                     >
                       {getConditionLabel()}
                     </Badge>
                     {formik.values.media.length > 1 && (
                       <Badge
                         variant="outline"
-                        className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold"
+                        className="bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-300 border-[#d2d5d9] text-[10px] font-semibold rounded-[4px]"
                       >
                         +{formik.values.media.length - 1} photos
                       </Badge>
@@ -212,14 +215,15 @@ export function ListingCreationForm({
                   </div>
 
                   {/* Description Snippet */}
-                  <div className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
-                    {formik.values.description || "Detailed item description and specifics will appear here..."}
+                  <div className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[16px] line-clamp-2">
+                    {formik.values.description ||
+                      "Detailed item description and specifics will appear here..."}
                   </div>
                 </div>
               </div>
 
               {/* Structured Configuration Breakdown */}
-              <div className="space-y-1.5 pt-2">
+              <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
                   label="Item Title"
                   value={
@@ -243,7 +247,7 @@ export function ListingCreationForm({
                 <PolarisSummaryRow
                   label="Location"
                   value={
-                    <span className="truncate max-w-[150px] inline-block">
+                    <span className="truncate max-w-[150px] inline-block font-semibold">
                       {formik.values.location || "Not set"}
                     </span>
                   }
@@ -254,12 +258,14 @@ export function ListingCreationForm({
 
             {/* Marketplace Tip */}
             <PolarisTipCard title={`${singularName} Listing Tip`}>
-              Listings featuring at least 3 bright, high-resolution photos and detailed condition explanations sell 2.8× faster in community marketplaces.
+              Listings featuring at least 3 bright, high-resolution photos and
+              detailed condition explanations sell 2.8× faster in community
+              marketplaces.
             </PolarisTipCard>
           </div>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           {/* Step 1: Photos & Product Overview */}
           <PolarisFormCard
             step={1}
@@ -269,9 +275,10 @@ export function ListingCreationForm({
           >
             {/* Multi-Photo Upload */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Item Gallery (Up to 4 photos) <span className="text-rose-500">*</span>
-              </Label>
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Item Gallery (Up to 4 photos){" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <ImageUpload
                 fileList={formik.values.media}
                 onFilesChange={(files) =>
@@ -279,17 +286,21 @@ export function ListingCreationForm({
                 }
               />
               {formik.touched.media && formik.errors.media && (
-                <p className="text-[11px] text-rose-500 font-medium">
+                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                   {formik.errors.media as string}
                 </p>
               )}
             </div>
 
             {/* Title */}
-            <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-              <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                {singularName} Title <span className="text-rose-500">*</span>
-              </Label>
+            <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <label
+                htmlFor="title"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+              >
+                {singularName} Title{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Input
                 id="title"
                 name="title"
@@ -297,10 +308,10 @@ export function ListingCreationForm({
                 value={formik.values.title}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
               />
               {formik.touched.title && formik.errors.title && (
-                <p className="text-[11px] text-rose-500 font-medium">
+                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                   {formik.errors.title as string}
                 </p>
               )}
@@ -308,9 +319,13 @@ export function ListingCreationForm({
 
             {/* Description */}
             <div className="space-y-1.5">
-              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Item Description <span className="text-rose-500">*</span>
-              </Label>
+              <label
+                htmlFor="description"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+              >
+                Item Description{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Textarea
                 id="description"
                 name="description"
@@ -318,15 +333,17 @@ export function ListingCreationForm({
                 value={formik.values.description}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="min-h-[110px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                className="min-h-[110px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
               />
               <div className="flex items-center justify-between">
                 {formik.touched.description && formik.errors.description ? (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.description as string}
                   </p>
-                ) : <span />}
-                <p className="text-[10px] text-zinc-400 font-medium">
+                ) : (
+                  <span />
+                )}
+                <p className="text-[11.5px] text-[#616161] font-medium">
                   {formik.values.description.length} characters (min 10)
                 </p>
               </div>
@@ -340,13 +357,17 @@ export function ListingCreationForm({
             description="Establish the listing price, marketplace taxonomy category, and pickup city."
             badge="Pricing"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label htmlFor="price" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Listing Price (₹) <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="price"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Listing Price (₹){" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] font-semibold text-[#616161]">
                     ₹
                   </span>
                   <Input
@@ -354,30 +375,36 @@ export function ListingCreationForm({
                     name="price"
                     type="number"
                     placeholder="0"
-                    className="h-10 pl-8 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] pl-8 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                     value={formik.values.price}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   />
                 </div>
                 {formik.touched.price && formik.errors.price && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.price as string}
                   </p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="category" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Taxonomy Category <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="category"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Taxonomy Category{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Select
-                  onValueChange={(value) => formik.setFieldValue("category", value)}
+                  onValueChange={(value) =>
+                    formik.setFieldValue("category", value)
+                  }
                   value={formik.values.category}
                 >
                   <SelectTrigger
                     id="category"
-                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   >
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -390,7 +417,7 @@ export function ListingCreationForm({
                   </SelectContent>
                 </Select>
                 {formik.touched.category && formik.errors.category && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.category as string}
                   </p>
                 )}
@@ -398,18 +425,22 @@ export function ListingCreationForm({
             </div>
 
             {/* Location Input */}
-            <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-              <Label htmlFor="location" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Item Location / Pickup Region <span className="text-rose-500">*</span>
-              </Label>
+            <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <label
+                htmlFor="location"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+              >
+                Item Location / Pickup Region{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161] z-10" />
                 <GooglePlacesInput
                   id="location"
                   name="location"
                   onBlur={formik.handleBlur}
                   placeholder="Search city, neighborhood or region..."
-                  className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   initialValue={
                     formik.values.location
                       ? {
@@ -426,7 +457,7 @@ export function ListingCreationForm({
                 />
               </div>
               {formik.touched.location && formik.errors.location && (
-                <p className="text-[11px] text-rose-500 font-medium">
+                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                   {formik.errors.location as string}
                 </p>
               )}
@@ -441,9 +472,10 @@ export function ListingCreationForm({
             badge="Assurance"
           >
             <div className="space-y-2">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Condition Rating <span className="text-rose-500">*</span>
-              </Label>
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Condition Rating{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {CONDITIONS.map((cond) => {
                   const Icon = cond.icon;
@@ -452,29 +484,31 @@ export function ListingCreationForm({
                     <button
                       key={cond.value}
                       type="button"
-                      onClick={() => formik.setFieldValue("condition", cond.value)}
+                      onClick={() =>
+                        formik.setFieldValue("condition", cond.value)
+                      }
                       className={cn(
-                        "relative flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                        "relative flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
                         isSelected
-                          ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
-                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                          ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
                       <div
                         className={cn(
-                          "h-8 w-8 rounded-lg flex items-center justify-center border transition-colors shrink-0 mt-0.5",
+                          "h-8 w-8 rounded-[6px] flex items-center justify-center border transition-colors shrink-0 mt-0.5",
                           isSelected
-                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                            : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
                         )}
                       >
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">
+                        <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block">
                           {cond.label}
                         </span>
-                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
                           {cond.desc}
                         </p>
                       </div>
@@ -483,7 +517,7 @@ export function ListingCreationForm({
                 })}
               </div>
               {formik.touched.condition && formik.errors.condition && (
-                <p className="text-[11px] text-rose-500 font-medium">
+                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                   {formik.errors.condition as string}
                 </p>
               )}

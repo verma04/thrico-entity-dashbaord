@@ -61,7 +61,7 @@ export function LeaderboardManager() {
           value === null ||
           value === "" ||
           value === "0" ||
-          value === "grid" ||
+          value === "list" ||
           value === "rank-asc"
         ) {
           params.delete(key);
@@ -80,7 +80,7 @@ export function LeaderboardManager() {
   const offset = (page - 1) * limit;
 
   const sortBy = searchParams.get("sort") || "rank-asc";
-  const view = (searchParams.get("view") as "grid" | "list") || "grid";
+  const view = (searchParams.get("view") as "grid" | "list") || "list";
 
   // Search input state with debounce
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
@@ -120,7 +120,7 @@ export function LeaderboardManager() {
     updateParams({ sort: v === "rank-asc" ? null : v, page: null });
 
   const setView = (v: "grid" | "list") =>
-    updateParams({ view: v === "grid" ? null : v });
+    updateParams({ view: v === "list" ? null : v });
 
   const setPage = (p: number) =>
     updateParams({ page: p <= 1 ? null : String(p) });

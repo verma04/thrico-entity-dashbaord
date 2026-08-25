@@ -1,6 +1,7 @@
 export * from "./types";
 export * from "./shopify-discount-form";
 export * from "./sticky-save-bar";
+export * from "./floating-save-button";
 
 // Primitives
 export * from "./primitives/polaris-card";

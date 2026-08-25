@@ -79,7 +79,7 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
           value === "ALL" ||
           value === "all" ||
           value === "0" ||
-          value === "grid" ||
+          value === "list" ||
           value === "newest"
         ) {
           params.delete(key);
@@ -105,7 +105,7 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
   const selectedModule = searchParams.get("module") || "ALL";
   const eligibility = searchParams.get("eligibility") || "ALL";
   const sortBy = searchParams.get("sort") || "newest";
-  const view = (searchParams.get("view") as "grid" | "list") || "grid";
+  const view = (searchParams.get("view") as "grid" | "list") || "list";
 
   // Search input state with debounce
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
@@ -157,7 +157,7 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
     updateParams({ sort: v === "newest" ? null : v, page: null });
 
   const setView = (v: "grid" | "list") =>
-    updateParams({ view: v === "grid" ? null : v });
+    updateParams({ view: v === "list" ? null : v });
 
   const setPage = (p: number) =>
     updateParams({ page: p <= 1 ? null : String(p) });

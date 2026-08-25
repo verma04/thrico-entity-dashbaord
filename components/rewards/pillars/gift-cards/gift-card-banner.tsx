@@ -20,25 +20,25 @@ export const GiftCardBanner: React.FC<GiftCardBannerProps> = ({
   onHowItWorksClick,
 }) => {
   return (
-    <div className="rounded-xl border border-violet-200/80 dark:border-violet-900/60 bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent p-4 sm:p-5">
+    <div className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5 max-w-xl">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge className="bg-violet-600 text-white font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
+            <Badge className="bg-primary text-primary-foreground font-bold px-2 py-0.2 text-[9px] uppercase tracking-wider">
               Pillar 3 • Digital Gift Cards
             </Badge>
 
             {/* Wallet Balance Pill */}
             <div
               onClick={onTopUpClick}
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-100 dark:bg-violet-950/80 text-violet-900 dark:text-violet-200 border border-violet-300 dark:border-violet-800 cursor-pointer hover:bg-violet-200/80 dark:hover:bg-violet-900/90 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground border border-border cursor-pointer hover:bg-muted/80 transition-colors shadow-2xs"
             >
-              <Wallet className="h-3 w-3 text-violet-600 dark:text-violet-400" />
+              <Wallet className="h-3 w-3 text-muted-foreground" />
               <span>Reward Wallet:</span>
               <span className="font-mono text-emerald-700 dark:text-emerald-300">
                 ₹{walletBalance.toLocaleString("en-IN")}
               </span>
-              <span className="text-[9px] font-semibold text-violet-600 dark:text-violet-400 underline ml-0.5">
+              <span className="text-[9px] font-semibold text-primary underline ml-0.5">
                 + Top Up
               </span>
             </div>
@@ -57,9 +57,9 @@ export const GiftCardBanner: React.FC<GiftCardBannerProps> = ({
             <Button
               variant="outline"
               onClick={onHowItWorksClick}
-              className="text-xs font-semibold h-8 gap-1.5 border-violet-300 dark:border-violet-800 bg-background/80 hover:bg-violet-50 dark:hover:bg-violet-950/40 text-violet-800 dark:text-violet-300 cursor-pointer"
+              className="text-xs font-medium h-8 gap-1.5 cursor-pointer shadow-2xs"
             >
-              <HelpCircle className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
               How Gift Cards Work
             </Button>
           )}
@@ -67,16 +67,16 @@ export const GiftCardBanner: React.FC<GiftCardBannerProps> = ({
           <Button
             variant="outline"
             onClick={onTopUpClick}
-            className="text-xs font-semibold h-8 gap-1.5 border-violet-300 dark:border-violet-800 text-violet-800 dark:text-violet-300 cursor-pointer"
+            className="text-xs font-medium h-8 gap-1.5 cursor-pointer shadow-2xs"
           >
-            <Wallet className="h-3.5 w-3.5 text-violet-600" />
+            <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
             Top-Up Wallet
           </Button>
 
           {onCreateClick && (
             <Button
               onClick={onCreateClick}
-              className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               Configure Gift Card

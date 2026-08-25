@@ -1,10 +1,9 @@
 "use client";
 
+import React from "react";
 import { useFormikContext } from "formik";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { ProductFormValues } from "../product-form";
@@ -25,11 +24,15 @@ export function BasicInfoSection() {
   return (
     <div className="space-y-4">
       {/* Name & SKU */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-            {singularName} Title <span className="text-rose-500">*</span>
-          </Label>
+          <label
+            htmlFor="title"
+            className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+          >
+            {singularName} Title{" "}
+            <span className="text-[#d72c0d] ml-0.5">*</span>
+          </label>
           <Input
             id="title"
             name="title"
@@ -37,17 +40,23 @@ export function BasicInfoSection() {
             value={values.title}
             onChange={handleChange}
             onBlur={handleBlur}
-            className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+            className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
           />
           {(touched.title || submitCount > 0) && errors.title && (
-            <p className="text-[11px] text-rose-500 font-medium">{errors.title as string}</p>
+            <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+              {errors.title as string}
+            </p>
           )}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="sku" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-            SKU Identifier <span className="text-zinc-400 font-normal">(Stock Unit)</span>
-          </Label>
+          <label
+            htmlFor="sku"
+            className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+          >
+            SKU Identifier{" "}
+            <span className="text-[#616161] font-normal">(Stock Unit)</span>
+          </label>
           <div className="flex gap-2">
             <Input
               id="sku"
@@ -56,14 +65,14 @@ export function BasicInfoSection() {
               value={values.sku || ""}
               onChange={handleChange}
               onBlur={handleBlur}
-              className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold font-mono uppercase"
+              className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] font-mono uppercase"
             />
             <Button
               type="button"
               variant="outline"
               size="icon"
               title="Generate SKU from Title"
-              className="h-10 w-10 border-zinc-200 dark:border-zinc-800 shrink-0"
+              className="h-[40px] w-[40px] border-[#aeb4b9] dark:border-zinc-700 shrink-0 rounded-[8px] cursor-pointer"
               onClick={() => {
                 if (values.title) {
                   const generated = values.title
@@ -75,48 +84,33 @@ export function BasicInfoSection() {
                 }
               }}
             >
-              <RefreshCw className="h-4 w-4 text-zinc-500" />
+              <RefreshCw className="h-4 w-4 text-[#616161]" />
             </Button>
           </div>
         </div>
       </div>
 
       {/* Description Field */}
-      <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-        <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+      <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+        <label
+          htmlFor="description"
+          className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+        >
           Product Description
-        </Label>
+        </label>
         <Textarea
           id="description"
           name="description"
           placeholder={`Describe product specifications, materials, fit, care instructions, and warranty...`}
           rows={4}
-          className="min-h-[110px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+          className="min-h-[110px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
           value={values.description}
           onChange={handleChange}
           onBlur={handleBlur}
         />
-        <p className="text-[10px] text-zinc-400 font-medium text-right">
+        <p className="text-[11.5px] text-[#616161] font-medium text-right">
           {values.description?.length || 0} characters
         </p>
-      </div>
-
-      {/* Stock Status */}
-      <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40">
-        <div className="space-y-0.5">
-          <Label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-            Out of Stock Toggle
-          </Label>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
-            Temporarily disable checkout and mark this item as unavailable.
-          </p>
-        </div>
-        <Switch
-          checked={values.isOutOfStock}
-          onCheckedChange={(checked) =>
-            setFieldValue("isOutOfStock", checked)
-          }
-        />
       </div>
     </div>
   );

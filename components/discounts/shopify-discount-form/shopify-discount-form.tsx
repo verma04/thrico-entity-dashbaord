@@ -24,7 +24,7 @@ import { ActiveDatesCard } from "./cards/active-dates-card";
 import { DiscountSummaryCard } from "./cards/discount-summary-card";
 import { SalesChannelCard } from "./cards/sales-channel-card";
 import { TagsCard } from "./cards/tags-card";
-import { StickySaveBar } from "./sticky-save-bar";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 export interface ShopifyDiscountFormProps {
   initialValues?: Partial<ShopifyDiscountFormValues>;
@@ -45,6 +45,7 @@ export function ShopifyDiscountForm({
 }: ShopifyDiscountFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const mergedInitialValues: ShopifyDiscountFormValues = {
     ...initialShopifyDiscountValues,
@@ -69,6 +70,7 @@ export function ShopifyDiscountForm({
               ? values.code.toUpperCase()
               : values.title;
 
+          setSaved(true);
           toast.success("Discount created successfully", {
             description: `"${discountIdentifier}" is now active in your Shopify store.`,
           });
@@ -360,17 +362,21 @@ export function ShopifyDiscountForm({
         </form>
       </div>
 
-      {/* ── Sticky Unsaved Changes Action Bar ────────────────────────────── */}
-      <StickySaveBar
+      {/* ── Floating Save Panel ─────────────────────────────────────────── */}
+      <FloatingSavePanel
         hasChanged={formik.dirty}
-        isSubmitting={isSubmitting}
+        saved={saved}
+        isSaving={isSubmitting}
         onSave={() => handleSaveAttempt()}
-        onDiscard={handleDiscard}
-        saveLabel="Save discount"
-        discardLabel="Discard"
+        onReset={handleDiscard}
+        title="Unsaved discount"
+        description="You have pending changes to this discount configuration."
+        buttonText="Save discount"
+        discardButtonText="Discard"
       />
     </div>
   );
 }
 
 export default ShopifyDiscountForm;
+

@@ -1,28 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Video,
-  Play,
   Image as ImageIcon,
   FileVideo,
   CloudUpload,
   Sparkles,
-  Share2,
   Trash2,
-  AlertCircle,
-  Radio,
-  CheckCircle2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -121,10 +114,14 @@ export function MomentCreationForm({
     <FormikProvider value={formik}>
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Live 9:16 Vertical Story Preview */}
-            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Story" icon={Sparkles}>
-              <div className="aspect-[9/16] relative bg-zinc-950 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 overflow-hidden group shadow-sm flex flex-col justify-between">
+            <PolarisSidebarCard
+              title={`${singularName} Preview`}
+              badge="Live Story"
+              icon={Sparkles}
+            >
+              <div className="aspect-[9/16] relative bg-zinc-950 rounded-[10px] border border-[#d2d5d9] dark:border-zinc-800 overflow-hidden group shadow-xs flex flex-col justify-between">
                 {videoPreviewUrl ? (
                   <video
                     src={videoPreviewUrl}
@@ -156,12 +153,12 @@ export function MomentCreationForm({
                     <div className="h-7 w-7 rounded-full bg-zinc-800 border border-white/20 flex items-center justify-center text-white text-[10px] font-bold">
                       {singularName.charAt(0)}
                     </div>
-                    <span className="text-xs font-semibold text-white truncate max-w-[120px]">
+                    <span className="text-[12px] font-semibold text-white truncate max-w-[120px]">
                       {singularName}
                     </span>
                   </div>
                   {formik.values.isAiContent && (
-                    <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-bold flex items-center gap-1 border border-white/10">
+                    <span className="px-2 py-0.5 rounded-[4px] bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold flex items-center gap-1 border border-white/10">
                       <Sparkles className="h-2.5 w-2.5" />
                       AI
                     </span>
@@ -169,22 +166,31 @@ export function MomentCreationForm({
                 </div>
 
                 {/* Bottom Caption Overlay */}
-                <div className="relative z-10 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent space-y-2">
-                  <p className="text-xs font-medium text-white/95 line-clamp-3 leading-relaxed">
-                    {formik.values.caption || "Narrative hook and caption preview..."}
+                <div className="relative z-10 p-3.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent space-y-2">
+                  <p className="text-[12px] font-medium text-white/95 line-clamp-3 leading-[16px]">
+                    {formik.values.caption ||
+                      "Narrative hook and caption preview..."}
                   </p>
                   <div className="flex items-center justify-between text-[10px] text-white/60 pt-1 border-t border-white/10">
-                    <span>{formik.values.shareInFeed ? "Visible in Feed" : "Direct Link"}</span>
+                    <span>
+                      {formik.values.shareInFeed
+                        ? "Visible in Feed"
+                        : "Direct Link"}
+                    </span>
                     <span>9:16 Vertical</span>
                   </div>
                 </div>
               </div>
 
               {/* Structured Configuration Breakdown */}
-              <div className="space-y-1.5 pt-2">
+              <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
                   label="Video Asset"
-                  value={videoFile ? videoFile.name : "Not selected"}
+                  value={
+                    <span className="truncate max-w-[140px] inline-block font-semibold">
+                      {videoFile ? videoFile.name : "Not selected"}
+                    </span>
+                  }
                 />
                 {videoFile && (
                   <PolarisSummaryRow
@@ -210,12 +216,13 @@ export function MomentCreationForm({
 
             {/* Content Retention Tip */}
             <PolarisTipCard title={`${singularName} Creation Tip`}>
-              Vertical short-form stories with compelling opening frames retain viewer attention 4.2× longer within the first 3 seconds.
+              Vertical short-form stories with compelling opening frames retain
+              viewer attention 4.2× longer within the first 3 seconds.
             </PolarisTipCard>
           </div>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           {step === 1 ? (
             /* Step 1: Video Package & Cover Asset */
             <PolarisFormCard
@@ -226,9 +233,10 @@ export function MomentCreationForm({
             >
               {/* Video Upload Box */}
               <div className="space-y-2">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Video File (9:16 Vertical) <span className="text-rose-500">*</span>
-                </Label>
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                  Video File (9:16 Vertical){" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 {!videoFile ? (
                   <div className="relative group">
                     <input
@@ -237,32 +245,34 @@ export function MomentCreationForm({
                       onChange={handleVideoSelect}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                     />
-                    <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl py-10 flex flex-col items-center justify-center gap-2.5 bg-zinc-50/50 dark:bg-zinc-900/50 group-hover:bg-zinc-100/50 dark:group-hover:bg-zinc-800/50 transition-all cursor-pointer">
-                      <div className="h-10 w-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400">
+                    <div className="border-2 border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[8px] py-10 flex flex-col items-center justify-center gap-2 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 group-hover:bg-[#f6f6f7] dark:group-hover:bg-zinc-800/50 transition-all cursor-pointer">
+                      <div className="h-10 w-10 rounded-[8px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] flex items-center justify-center text-[#616161] dark:text-zinc-400">
                         <CloudUpload className="h-5 w-5" />
                       </div>
                       <div className="text-center">
-                        <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                        <p className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200">
                           Click to upload video or drag and drop
                         </p>
-                        <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
-                          MP4, MOV or WebM (up to 100MB · vertical 9:16 recommended)
+                        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5">
+                          MP4, MOV or WebM (up to 100MB · vertical 9:16
+                          recommended)
                         </p>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
                     <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
+                      <div className="h-9 w-9 rounded-[6px] bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
                         <FileVideo className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[280px]">
+                        <p className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 truncate max-w-[280px]">
                           {videoFile.name}
                         </p>
-                        <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
-                          {(videoFile.size / (1024 * 1024)).toFixed(2)} MB · Ready for staging
+                        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 font-medium">
+                          {(videoFile.size / (1024 * 1024)).toFixed(2)} MB ·
+                          Ready for staging
                         </p>
                       </div>
                     </div>
@@ -270,7 +280,7 @@ export function MomentCreationForm({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                      className="h-8 w-8 text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer rounded-[6px]"
                       onClick={() => {
                         setVideoFile(null);
                         setVideoPreviewUrl(null);
@@ -283,12 +293,12 @@ export function MomentCreationForm({
               </div>
 
               {/* Cover Asset Selection */}
-              <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              <div className="space-y-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                   Custom Static Cover Frame (Optional)
-                </Label>
-                <div className="flex items-start gap-4 p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-900/30">
-                  <div className="w-20 aspect-[9/16] rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center overflow-hidden relative group shrink-0">
+                </label>
+                <div className="flex items-start gap-4 p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/30">
+                  <div className="w-20 aspect-[9/16] rounded-[6px] bg-[#e1e3e5] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 flex items-center justify-center overflow-hidden relative group shrink-0">
                     {thumbnailUrl ? (
                       <Image
                         src={thumbnailUrl}
@@ -297,7 +307,7 @@ export function MomentCreationForm({
                         className="object-cover"
                       />
                     ) : (
-                      <ImageIcon className="h-5 w-5 text-zinc-400" />
+                      <ImageIcon className="h-5 w-5 text-[#8c9196]" />
                     )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <ImageUploadWithCrop
@@ -314,12 +324,14 @@ export function MomentCreationForm({
                       </ImageUploadWithCrop>
                     </div>
                   </div>
-                  <div className="flex-1 space-y-1 pt-1">
-                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                  <div className="flex-1 space-y-0.5 pt-1">
+                    <p className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200">
                       Feed Snapshot Frame
                     </p>
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                      Custom static covers appear in community feeds and notifications. If omitted, the video initial keyframe will be extracted automatically.
+                    <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                      Custom static covers appear in community feeds and
+                      notifications. If omitted, the video initial keyframe will
+                      be extracted automatically.
                     </p>
                   </div>
                 </div>
@@ -335,9 +347,13 @@ export function MomentCreationForm({
             >
               {/* Caption Textarea */}
               <div className="space-y-1.5">
-                <Label htmlFor="caption" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Story Caption & Context <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="caption"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Story Caption & Context{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Textarea
                   id="caption"
                   name="caption"
@@ -346,34 +362,37 @@ export function MomentCreationForm({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   autoFocus
-                  className="min-h-[120px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                  className="min-h-[120px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
                 />
                 <div className="flex items-center justify-between">
                   {formik.touched.caption && formik.errors.caption ? (
-                    <p className="text-[11px] text-rose-500 font-medium">
+                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                       {formik.errors.caption as string}
                     </p>
-                  ) : <span />}
-                  <p className="text-[10px] text-zinc-400 font-medium">
+                  ) : (
+                    <span />
+                  )}
+                  <p className="text-[11.5px] text-[#616161] font-medium">
                     {formik.values.caption.length} / 500 characters
                   </p>
                 </div>
               </div>
 
               {/* Toggles */}
-              <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              <div className="space-y-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                   Distribution Settings
-                </Label>
+                </label>
 
                 {/* Feed Toggle */}
-                <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
                       Share in Community Feed
                     </span>
-                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
-                      Broadcast to the global feed for all community members to discover.
+                    <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                      Broadcast to the global feed for all community members to
+                      discover.
                     </p>
                   </div>
                   <Switch
@@ -386,14 +405,15 @@ export function MomentCreationForm({
                 </div>
 
                 {/* AI Toggle */}
-                <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-zinc-500" />
+                    <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-[#616161]" />
                       AI-Generated Content Label
                     </span>
-                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
-                      Mark content synthesized or heavily generated by AI algorithms.
+                    <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                      Mark content synthesized or heavily generated by AI
+                      algorithms.
                     </p>
                   </div>
                   <Switch
@@ -423,16 +443,26 @@ export function MomentCreationForm({
               if (onCancel) onCancel();
               else window.history.back();
             }}
-            title={step === 1 ? `Broadcast ${singularName}` : `Finalize ${singularName}`}
-            description={step === 1 ? "Video package ready to transmit." : "Configure captions before publishing."}
-            buttonText={step === 1 ? "Upload & Continue" : `Publish ${singularName}`}
+            title={
+              step === 1
+                ? `Broadcast ${singularName}`
+                : `Finalize ${singularName}`
+            }
+            description={
+              step === 1
+                ? "Video package ready to transmit."
+                : "Configure captions before publishing."
+            }
+            buttonText={
+              step === 1 ? "Upload & Continue" : `Publish ${singularName}`
+            }
           />
         </form>
       </PolarisFormLayout>
 
       {/* Monochromatic Upload / Processing Modal */}
       {loading && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/60 backdrop-blur-xs animate-in fade-in duration-300">
           <div className="w-full max-w-sm px-8 flex flex-col items-center text-center">
             <div className="relative mb-6 h-16 w-16">
               <div className="absolute inset-0 h-16 w-16 border-2 border-white/20 rounded-2xl" />

@@ -12,11 +12,25 @@ import {
   ShieldCheck,
   Crown,
   Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Select,
   SelectContent,
@@ -67,6 +81,7 @@ const pointRuleSchema = Yup.object().shape({
 });
 
 interface PointRuleFormProps {
+  showHeader?: boolean;
   initialValues?: any;
   onSubmit: (values: any) => Promise<void>;
   loading: boolean;
@@ -81,6 +96,7 @@ interface PointRuleFormProps {
 const POINT_PRESETS = [5, 10, 25, 50, 100, 250, 500];
 
 export function PointRuleForm({
+  showHeader = true,
   initialValues,
   onSubmit,
   loading,
@@ -107,6 +123,8 @@ export function PointRuleForm({
   const [sourceType, setSourceType] = useState<"MODULE" | "INTEGRATION">(
     initialSourceType,
   );
+  const [isModulePopoverOpen, setIsModulePopoverOpen] = useState(false);
+  const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
 
   useEffect(() => {
     if (initialValues?.module) {
@@ -369,21 +387,21 @@ export function PointRuleForm({
             badge="Live Simulator"
           >
             {/* Simulated Customer Notification Toast */}
-            <div className="p-4 rounded-xl bg-zinc-900 text-white dark:bg-zinc-950 border border-zinc-800 shadow-md relative overflow-hidden">
+            <div className="p-3.5 rounded-[8px] bg-[#303030] text-white dark:bg-zinc-950 border border-[#202020] dark:border-zinc-800 shadow-sm relative overflow-hidden">
               <div className="flex items-start gap-3">
-                <div className="h-8 w-8 rounded-full bg-white/10 text-white flex items-center justify-center font-bold text-xs shrink-0 border border-white/20 shadow-xs">
-                  <Zap className="h-4 w-4 fill-white" />
+                <div className="h-7 w-7 rounded-full bg-white/10 text-white flex items-center justify-center font-bold text-xs shrink-0 border border-white/20 shadow-xs">
+                  <Zap className="h-3.5 w-3.5 fill-white" />
                 </div>
-                <div className="space-y-1 min-w-0">
+                <div className="space-y-0.5 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-zinc-100">
+                    <span className="text-[12px] font-bold text-white">
                       +{formik.values.points || 0} Points Awarded!
                     </span>
                   </div>
-                  <p className="text-xs font-semibold text-zinc-100 line-clamp-2">
+                  <p className="text-[12px] font-medium text-zinc-200 line-clamp-2 leading-[16px]">
                     You just earned points for {readableActionName}.
                   </p>
-                  <p className="text-[10px] text-zinc-400">
+                  <p className="text-[11px] text-zinc-400">
                     Channel:{" "}
                     {selectedSourceItem?.name ||
                       (sourceType === "MODULE"
@@ -516,148 +534,199 @@ export function PointRuleForm({
           />
 
           {/* Target Source and Triggering Action Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+            {/* Searchable Target Module Combobox */}
             <div className="space-y-1.5">
-              <Label
+              <label
                 htmlFor="module"
-                className="text-xs font-medium text-zinc-700 dark:text-zinc-300"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
               >
                 {sourceType === "MODULE"
                   ? "Target Module"
                   : "Target App / Store"}
-              </Label>
-              <Select
-                onValueChange={(val) => {
-                  formik.setFieldValue("module", val);
-                  formik.setFieldValue("action", "");
-                }}
-                value={
-                  currentSourceList.find(
-                    (item) =>
-                      item.id?.toLowerCase() ===
-                        formik.values.module?.toLowerCase() ||
-                      item.uuid?.toLowerCase() ===
-                        formik.values.module?.toLowerCase() ||
-                      (item as any).slug?.toLowerCase() ===
-                        formik.values.module?.toLowerCase(),
-                  )?.id || formik.values.module
-                }
-                disabled={isEdit}
-              >
-                <SelectTrigger
-                  id="module"
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+              </label>
+              <Popover open={isModulePopoverOpen} onOpenChange={setIsModulePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    id="module"
+                    disabled={isEdit}
+                    className={cn(
+                      "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
+                      !formik.values.module && "text-[#8c9196] dark:text-zinc-500",
+                      isEdit && "opacity-60 cursor-not-allowed",
+                    )}
+                  >
+                    <span className="truncate">
+                      {selectedSourceItem?.name ||
+                        (sourceType === "MODULE"
+                          ? "Select platform module..."
+                          : "Select connected app...")}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-800"
+                  align="start"
                 >
-                  <SelectValue
-                    placeholder={
-                      sourceType === "MODULE"
-                        ? "Select platform module"
-                        : "Select connected app"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentSourceList.map((item, idx) => (
-                    <SelectItem
-                      key={`src-${item.id}-${idx}`}
-                      value={item.id}
-                      className="text-xs"
-                    >
-                      {item.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Command className="border-none">
+                    <CommandInput
+                      placeholder={
+                        sourceType === "MODULE"
+                          ? "Search platform modules..."
+                          : "Search connected apps..."
+                      }
+                      className="h-10 text-[13px]"
+                    />
+                    <CommandList className="max-h-[240px]">
+                      <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
+                        No {sourceType === "MODULE" ? "modules" : "apps"} found.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {currentSourceList.map((item, idx) => {
+                          const isSelected =
+                            item.id?.toLowerCase() ===
+                              formik.values.module?.toLowerCase() ||
+                            item.uuid?.toLowerCase() ===
+                              formik.values.module?.toLowerCase() ||
+                            (item as any).slug?.toLowerCase() ===
+                              formik.values.module?.toLowerCase();
+                          return (
+                            <CommandItem
+                              key={`src-${item.id}-${idx}`}
+                              value={item.name || item.id}
+                              onSelect={() => {
+                                formik.setFieldValue("module", item.id);
+                                formik.setFieldValue("action", "");
+                                setIsModulePopoverOpen(false);
+                              }}
+                              className="flex items-center justify-between text-[13px] font-medium cursor-pointer py-2 px-3"
+                            >
+                              <span>{item.name}</span>
+                              {isSelected && (
+                                <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                              )}
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {formik.touched.module && formik.errors.module && (
-                <p className="text-[11px] text-rose-500 font-medium">
+                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                   {formik.errors.module as string}
                 </p>
               )}
             </div>
 
+            {/* Searchable Trigger Event Combobox */}
             <div className="space-y-1.5">
-              <Label
+              <label
                 htmlFor="action"
-                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
               >
-                Trigger Event <span className="text-rose-500">*</span>
-              </Label>
-              <Select
-                onValueChange={(val) => {
-                  formik.setFieldValue("action", val);
-                  const trig = filteredTriggers.find(
-                    (t) =>
-                      t.value === val ||
-                      (t.name || t.id) === val ||
-                      t.id === val ||
-                      t.name === val,
-                  );
-                  if (trig && !formik.values.description) {
-                    formik.setFieldValue(
-                      "description",
-                      trig.description || trig.name || "",
-                    );
-                  }
-                }}
-                value={
-                  filteredTriggers.find(
-                    (t) =>
-                      t.value === formik.values.action ||
-                      t.id === formik.values.action ||
-                      t.name === formik.values.action ||
-                      (t.name || t.id) === formik.values.action,
-                  )?.value || formik.values.action
-                }
-                disabled={!formik.values.module || isEdit}
-              >
-                <SelectTrigger
-                  id="action"
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                Trigger Event <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
+              <Popover open={isActionPopoverOpen} onOpenChange={setIsActionPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    id="action"
+                    disabled={!formik.values.module || isEdit}
+                    className={cn(
+                      "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center justify-between transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
+                      !formik.values.action && "text-[#8c9196] dark:text-zinc-500",
+                      (!formik.values.module || isEdit) && "opacity-60 cursor-not-allowed",
+                    )}
+                  >
+                    <span className="truncate">
+                      {selectedTriggerItem
+                        ? (selectedTriggerItem.name
+                            ? selectedTriggerItem.name.replace(/_/g, " ")
+                            : selectedTriggerItem.description ||
+                              selectedTriggerItem.value ||
+                              formik.values.action)
+                        : (formik.values.module
+                            ? "Choose trigger action..."
+                            : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`)}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-800"
+                  align="start"
                 >
-                  <SelectValue
-                    placeholder={
-                      formik.values.module
-                        ? "Choose trigger action"
-                        : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredTriggers.length === 0 ? (
-                    <div className="p-3 text-xs text-zinc-500 text-center">
-                      No trigger events found for this source
-                    </div>
-                  ) : (
-                    filteredTriggers.map((t, idx) => {
-                      const itemVal = t.value || t.name || t.id;
-                      return (
-                        <SelectItem
-                          key={`trig-${itemVal}-${idx}`}
-                          value={itemVal}
-                          className="text-xs"
-                        >
-                          <div className="flex flex-col py-0.5 text-left">
-                            <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                              {t.name
-                                ? t.name.replace(/_/g, " ")
-                                : t.description || itemVal}
-                            </span>
-                            {t.description &&
-                              t.name &&
-                              t.description !== t.name && (
-                                <span className="text-[10px] text-zinc-400 dark:text-zinc-500 line-clamp-1">
-                                  {t.description}
-                                </span>
-                              )}
-                          </div>
-                        </SelectItem>
-                      );
-                    })
-                  )}
-                </SelectContent>
-              </Select>
+                  <Command className="border-none">
+                    <CommandInput
+                      placeholder="Search trigger event..."
+                      className="h-10 text-[13px]"
+                    />
+                    <CommandList className="max-h-[240px]">
+                      {filteredTriggers.length === 0 ? (
+                        <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
+                          No trigger events found for this source
+                        </CommandEmpty>
+                      ) : (
+                        <>
+                          <CommandEmpty className="p-3 text-[12.5px] text-[#616161] text-center">
+                            No matching trigger event found.
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {filteredTriggers.map((t, idx) => {
+                              const itemVal = t.value || t.name || t.id;
+                              const isSelected =
+                                formik.values.action === itemVal ||
+                                formik.values.action === t.id ||
+                                formik.values.action === t.name;
+                              return (
+                                <CommandItem
+                                  key={`trig-${itemVal}-${idx}`}
+                                  value={`${t.name || ""} ${t.description || ""} ${itemVal}`}
+                                  onSelect={() => {
+                                    formik.setFieldValue("action", itemVal);
+                                    if (!formik.values.description) {
+                                      formik.setFieldValue(
+                                        "description",
+                                        t.description || t.name || "",
+                                      );
+                                    }
+                                    setIsActionPopoverOpen(false);
+                                  }}
+                                  className="flex items-center justify-between text-[13px] font-medium cursor-pointer py-2 px-3"
+                                >
+                                  <div className="flex flex-col py-0.5 text-left min-w-0 pr-2">
+                                    <span className="font-medium text-[#303030] dark:text-zinc-100 truncate">
+                                      {t.name
+                                        ? t.name.replace(/_/g, " ")
+                                        : t.description || itemVal}
+                                    </span>
+                                    {t.description &&
+                                      t.name &&
+                                      t.description !== t.name && (
+                                        <span className="text-[11px] text-[#616161] dark:text-zinc-400 line-clamp-1">
+                                          {t.description}
+                                        </span>
+                                      )}
+                                  </div>
+                                  {isSelected && (
+                                    <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100 shrink-0" />
+                                  )}
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {formik.touched.action && formik.errors.action && (
-                <p className="text-[11px] text-rose-500 font-medium">
+                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                   {formik.errors.action as string}
                 </p>
               )}
@@ -665,14 +734,14 @@ export function PointRuleForm({
           </div>
 
           {/* Cadence & Description */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
             <div className="space-y-1.5">
-              <Label
+              <label
                 htmlFor="trigger"
-                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
               >
                 Reward Cadence
-              </Label>
+              </label>
               <Select
                 onValueChange={(val) => formik.setFieldValue("trigger", val)}
                 value={formik.values.trigger}
@@ -680,27 +749,27 @@ export function PointRuleForm({
               >
                 <SelectTrigger
                   id="trigger"
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold shadow-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500"
                 >
                   <SelectValue placeholder="Select trigger cadence" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="FIRST_TIME" className="text-xs">
+                  <SelectItem value="FIRST_TIME" className="text-[13px]">
                     <div className="flex flex-col text-left py-0.5">
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      <span className="font-semibold text-[#303030] dark:text-zinc-100">
                         First-time Action (One-off milestone)
                       </span>
-                      <span className="text-[10px] text-zinc-500">
+                      <span className="text-[11px] text-[#616161] dark:text-zinc-400">
                         Rewarded only once per user account lifetime
                       </span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="RECURRING" className="text-xs">
+                  <SelectItem value="RECURRING" className="text-[13px]">
                     <div className="flex flex-col text-left py-0.5">
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      <span className="font-semibold text-[#303030] dark:text-zinc-100">
                         Recurring (Every instance)
                       </span>
-                      <span className="text-[10px] text-zinc-500">
+                      <span className="text-[11px] text-[#616161] dark:text-zinc-400">
                         Rewarded each time, bounded by velocity limits
                       </span>
                     </div>
@@ -710,17 +779,17 @@ export function PointRuleForm({
             </div>
 
             <div className="space-y-1.5">
-              <Label
+              <label
                 htmlFor="description"
-                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
               >
                 Merchant Note / Description
-              </Label>
+              </label>
               <Textarea
                 id="description"
                 placeholder="Explain under what conditions this point rule applies..."
                 {...formik.getFieldProps("description")}
-                className="min-h-[70px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium shadow-none resize-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none resize-none focus-visible:ring-1 focus-visible:ring-[#005bd3] dark:focus-visible:ring-blue-500"
               />
             </div>
           </div>
@@ -733,16 +802,16 @@ export function PointRuleForm({
           description="Define the point reward value credited to the member upon action completion."
           badge="Instant Credit"
         >
-          <div className="space-y-3">
-            <Label
+          <div className="space-y-2">
+            <label
               htmlFor="points"
-              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
             >
               Points Awarded per Event
-            </Label>
+            </label>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-900 dark:text-zinc-100">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#616161] dark:text-zinc-400">
                   <Zap className="h-4 w-4" />
                 </div>
                 <Input
@@ -750,9 +819,9 @@ export function PointRuleForm({
                   type="number"
                   min="1"
                   {...formik.getFieldProps("points")}
-                  className="h-11 pl-10 pr-16 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-base font-bold text-zinc-900 dark:text-zinc-100 shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                  className="h-[40px] pl-9 pr-14 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none focus-visible:ring-1 focus-visible:ring-[#005bd3] dark:focus-visible:ring-blue-500"
                 />
-                <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[12px] font-semibold text-[#616161] dark:text-zinc-400 uppercase tracking-wider">
                   PTS
                 </div>
               </div>
@@ -764,7 +833,7 @@ export function PointRuleForm({
               />
             </div>
             {formik.touched.points && formik.errors.points && (
-              <p className="text-[11px] text-rose-500 font-medium">
+              <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                 {formik.errors.points as string}
               </p>
             )}
@@ -843,14 +912,14 @@ export function PointRuleForm({
           description="Configure alert channels and custom notification text when members earn points from this rule."
           badge="Notification Channels"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Push Notification Panel */}
             <div
               className={cn(
-                "rounded-xl border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-4 space-y-4",
                 formik.values.allowPushNotification
-                  ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
-                  : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75",
+                  ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                  : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
               )}
             >
               <div
@@ -860,7 +929,7 @@ export function PointRuleForm({
                     !formik.values.allowPushNotification,
                   )
                 }
-                className="flex items-start gap-3.5 cursor-pointer select-none"
+                className="flex items-start gap-3 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -871,17 +940,17 @@ export function PointRuleForm({
                     }
                   />
                 </div>
-                <div className="space-y-1 flex-1">
+                <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
-                    <Label
+                    <Bell className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                    <label
                       htmlFor="allowPushNotification"
-                      className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow push notification for user
-                    </Label>
+                    </label>
                   </div>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                     Send an instant push notification to user's device when
                     points are awarded from this rule.
                   </p>
@@ -889,36 +958,36 @@ export function PointRuleForm({
               </div>
 
               {formik.values.allowPushNotification && (
-                <div className="space-y-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-700/80 animate-in fade-in-50 duration-200">
+                <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="pushNotificationTitle"
-                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                     >
                       Push Notification Title
-                    </Label>
+                    </label>
                     <Input
                       id="pushNotificationTitle"
                       placeholder="e.g. ⚡ Points Earned!"
                       {...formik.getFieldProps("pushNotificationTitle")}
-                      className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
+                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="pushNotificationBody"
-                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                     >
                       Push Notification Message
-                    </Label>
+                    </label>
                     <Textarea
                       id="pushNotificationBody"
                       placeholder="e.g. You just earned {{points}} points!"
                       {...formik.getFieldProps("pushNotificationBody")}
-                      className="min-h-[70px] text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 resize-none"
+                      className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] resize-none"
                     />
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
                     <span>Variables:</span>
                     <button
                       type="button"
@@ -928,7 +997,7 @@ export function PointRuleForm({
                           `${formik.values.pushNotificationBody} {{points}}`.trim(),
                         )
                       }
-                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
                     >
                       {"{{points}}"}
                     </button>
@@ -940,7 +1009,7 @@ export function PointRuleForm({
                           `${formik.values.pushNotificationBody} {{userName}}`.trim(),
                         )
                       }
-                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
                     >
                       {"{{userName}}"}
                     </button>
@@ -952,10 +1021,10 @@ export function PointRuleForm({
             {/* Email Notification Panel */}
             <div
               className={cn(
-                "rounded-xl border transition-all p-4 space-y-4",
+                "rounded-[8px] border transition-all p-4 space-y-4",
                 formik.values.allowEmailNotification
-                  ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
-                  : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75",
+                  ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                  : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
               )}
             >
               <div
@@ -965,7 +1034,7 @@ export function PointRuleForm({
                     !formik.values.allowEmailNotification,
                   )
                 }
-                className="flex items-start gap-3.5 cursor-pointer select-none"
+                className="flex items-start gap-3 cursor-pointer select-none"
               >
                 <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -976,17 +1045,17 @@ export function PointRuleForm({
                     }
                   />
                 </div>
-                <div className="space-y-1 flex-1">
+                <div className="space-y-0.5 flex-1">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
-                    <Label
+                    <Mail className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
+                    <label
                       htmlFor="allowEmailNotification"
-                      className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                      className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
                     >
                       Allow email notification
-                    </Label>
+                    </label>
                   </div>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                     Send an email notification when user earns points from this
                     rule.
                   </p>
@@ -994,36 +1063,36 @@ export function PointRuleForm({
               </div>
 
               {formik.values.allowEmailNotification && (
-                <div className="space-y-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-700/80 animate-in fade-in-50 duration-200">
+                <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="emailNotificationSubject"
-                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                     >
                       Email Subject
-                    </Label>
+                    </label>
                     <Input
                       id="emailNotificationSubject"
                       placeholder="e.g. You've earned {{points}} points!"
                       {...formik.getFieldProps("emailNotificationSubject")}
-                      className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
+                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label
+                    <label
                       htmlFor="emailNotificationBody"
-                      className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300"
+                      className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
                     >
                       Email Message / Content
-                    </Label>
+                    </label>
                     <Textarea
                       id="emailNotificationBody"
                       placeholder="e.g. Great job! You have earned {{points}} points on our platform."
                       {...formik.getFieldProps("emailNotificationBody")}
-                      className="min-h-[70px] text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 resize-none"
+                      className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] resize-none"
                     />
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
                     <span>Variables:</span>
                     <button
                       type="button"
@@ -1033,7 +1102,7 @@ export function PointRuleForm({
                           `${formik.values.emailNotificationBody} {{points}}`.trim(),
                         )
                       }
-                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
                     >
                       {"{{points}}"}
                     </button>
@@ -1045,7 +1114,7 @@ export function PointRuleForm({
                           `${formik.values.emailNotificationBody} {{userName}}`.trim(),
                         )
                       }
-                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      className="px-2 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[11px]"
                     >
                       {"{{userName}}"}
                     </button>

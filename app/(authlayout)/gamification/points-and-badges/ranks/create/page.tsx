@@ -8,6 +8,7 @@ import { useGetRanks } from "@/graphql/actions/gamification/gamification-quiries
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 import { RankForm } from "@/components/gamification/ranks/rank-form";
 import { useModuleStore } from "@/store/useModuleStore";
 
@@ -16,7 +17,7 @@ export default function CreateRankPage() {
     (state) => state.gamificationModuleName,
   );
   const router = useRouter();
-  const { data: ranksData } = useGetRanks();
+  const { data: ranksData, loading: ranksLoading } = useGetRanks();
   const [createRank, { loading: isCreating }] = useCreateRank();
 
   const ranks = ranksData?.getRanks || [];
@@ -69,11 +70,16 @@ export default function CreateRankPage() {
         ]}
       />
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <RankForm
-          onSubmit={handleCreate}
-          loading={isCreating}
-          nextOrder={nextOrder}
-        />
+        {ranksLoading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : (
+          <RankForm
+            showHeader={false}
+            onSubmit={handleCreate}
+            loading={isCreating}
+            nextOrder={nextOrder}
+          />
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );

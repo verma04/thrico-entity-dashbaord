@@ -44,26 +44,26 @@ export default function PillarThreeGiftCardsPage() {
             <Button
               variant="outline"
               onClick={() => setIsTopUpOpen(true)}
-              className="text-xs font-semibold h-9 gap-1.5 border-violet-300 dark:border-violet-800 bg-background/80 hover:bg-violet-50 dark:hover:bg-violet-950/40 text-violet-800 dark:text-violet-300 cursor-pointer shadow-xs"
+              className="text-xs font-semibold h-8 gap-1.5 cursor-pointer shadow-2xs"
             >
-              <Wallet className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Wallet: ₹{walletBalance.toLocaleString("en-IN")}</span>
             </Button>
 
             <Button
               variant="outline"
               onClick={() => setIsHowItWorksOpen(true)}
-              className="text-xs font-semibold h-9 gap-1.5 border-violet-300 dark:border-violet-800 bg-background/80 hover:bg-violet-50 dark:hover:bg-violet-950/40 text-violet-800 dark:text-violet-300 cursor-pointer shadow-xs"
+              className="text-xs font-semibold h-8 gap-1.5 cursor-pointer shadow-2xs"
             >
-              <HelpCircle className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
               How Gift Cards Work
             </Button>
 
             <Button
               onClick={() => setIsDrawerOpen(true)}
-              className="bg-violet-600 hover:bg-violet-700 text-white gap-2 font-semibold text-xs h-9 shadow-xs cursor-pointer"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-medium text-xs h-8 shadow-2xs cursor-pointer"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               Configure Gift Card
             </Button>
           </div>

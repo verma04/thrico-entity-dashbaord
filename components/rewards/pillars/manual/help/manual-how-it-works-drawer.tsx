@@ -85,7 +85,7 @@ export function ManualHowItWorksDrawer({
                   <h3 className="text-base font-bold text-foreground tracking-tight">
                     How Manual & Internal Vouchers Work
                   </h3>
-                  <Badge className="bg-emerald-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
+                  <Badge className="bg-primary text-primary-foreground font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
                     Step Guide
                   </Badge>
                 </div>
@@ -102,7 +102,7 @@ export function ManualHowItWorksDrawer({
                     onClose();
                     onCreateClick();
                   }}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-8 shadow-xs cursor-pointer"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   Create Internal Voucher
@@ -197,7 +197,7 @@ export function ManualHowItWorksDrawer({
                 <div className="flex justify-end pt-2">
                   <Button
                     onClick={() => setActiveTab("assets")}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Supported Asset Classes
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -232,7 +232,7 @@ export function ManualHowItWorksDrawer({
                   </Button>
                   <Button
                     onClick={() => setActiveTab("benefits")}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Strategic Advantages
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -264,7 +264,7 @@ export function ManualHowItWorksDrawer({
                   </Button>
                   <Button
                     onClick={() => setActiveTab("gamification")}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer"
                   >
                     Next: Gamification Hooks
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -301,7 +301,7 @@ export function ManualHowItWorksDrawer({
                         onClose();
                         onCreateClick();
                       }}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs font-semibold h-9 cursor-pointer shadow-xs"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-9 cursor-pointer shadow-2xs"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
                       Create Your First Internal Voucher

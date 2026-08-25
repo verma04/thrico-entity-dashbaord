@@ -145,7 +145,7 @@ export function CompanyAutocompleteSelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between bg-transparent"
+            className="w-full justify-between h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] px-3 font-normal"
           >
             {selectedValue ? (
               <div className="flex items-center gap-2">
@@ -159,10 +159,10 @@ export function CompanyAutocompleteSelect({
                   />
                   <AvatarFallback>{selectedValue.name[0]}</AvatarFallback>
                 </Avatar>
-                <span>{selectedValue.name}</span>
+                <span className="font-semibold">{selectedValue.name}</span>
               </div>
             ) : (
-              "Search for a School/Institute..."
+              <span className="text-[#8c9196]">Search for a company...</span>
             )}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>

@@ -14,7 +14,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { SubscriptionLimitBanner } from "@/components/members/manage/subscription-alerts";
-import { Skeleton } from "@/components/ui/skeleton";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 
 const AddMemberPage = () => {
   const router = useRouter();
@@ -26,7 +26,7 @@ const AddMemberPage = () => {
         title: "Success",
         description: "Member added successfully to the community!",
       });
-      router.push("/members"); // or the actual members list route
+      router.push("/members");
     },
     onError: (error: any) => {
       toast({
@@ -38,7 +38,6 @@ const AddMemberPage = () => {
   });
 
   const onFinish = (values: any) => {
-    // Map Formik values to the expected AddNewMemberInput structure
     const input = {
       firstName: values.firstName,
       lastName: values.lastName,
@@ -63,7 +62,7 @@ const AddMemberPage = () => {
   };
 
   const onCancel = () => {
-    router.back();
+    router.push("/members");
   };
 
   const { data: subData, loading: subLoading } = useCheckMemberSubscription();
@@ -71,7 +70,7 @@ const AddMemberPage = () => {
 
   if (subLoading) {
     return (
-      <EcosystemWrapper>
+      <EcosystemWrapper className="animate-in fade-in duration-500">
         <EcosystemHeader
           title="Add Member"
           breadcrumbs={[
@@ -80,75 +79,28 @@ const AddMemberPage = () => {
             { label: "Add Member" },
           ]}
           badgeText="Community"
-          description="Add a new member to your community."
+          description="Add a new member to your community directory."
           icon={UserPlus}
         />
-        <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-5xl mx-auto px-6 py-10">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <div className="lg:col-span-8 space-y-8">
-                  <div className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
-                    <div className="bg-muted/30 border-b border-border p-6 pb-4">
-                      <Skeleton className="h-6 w-1/3 mb-2" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                    <div className="p-6 pt-8 space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-11 w-full rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-11 w-full rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-11 w-full rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-11 w-full rounded-xl" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
-                    <div className="bg-muted/30 border-b border-border p-6 pb-4">
-                      <Skeleton className="h-6 w-1/3 mb-2" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                    <div className="p-6 pt-8 space-y-6">
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-11 w-full rounded-xl" />
-                      </div>
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-11 w-full rounded-xl" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-4 space-y-6">
-                  <div className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card p-6 flex flex-col items-center">
-                    <Skeleton className="h-32 w-32 rounded-full mb-4" />
-                    <Skeleton className="h-10 w-full rounded-xl" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0 mt-3">
+          <PolarisFormSkeleton
+            showHeader={false}
+            mainCards={[
+              { fieldRows: 2, fullWidthRows: 2 },
+              { fieldRows: 0, fullWidthRows: 3 },
+              { fieldRows: 0, fullWidthRows: 1 },
+            ]}
+            sidebarSummaryRows={5}
+            showSidebarInfo={true}
+            showSidebarTip={true}
+          />
         </EcosystemContainer>
       </EcosystemWrapper>
     );
   }
 
   return (
-    <EcosystemWrapper>
+    <EcosystemWrapper className="animate-in fade-in duration-500">
       <EcosystemHeader
         title="Add Member"
         breadcrumbs={[
@@ -157,14 +109,13 @@ const AddMemberPage = () => {
           { label: "Add Member" },
         ]}
         badgeText="Community"
-        description="Add a new member to your community."
+        description="Add a new member to your community directory."
         icon={UserPlus}
       />
-      <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 pt-6">
-        <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
-      </div>
-      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+      <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0 mt-3">
         <MemberCreationForm
+          showHeader={false}
           loading={loading}
           serverError={error?.message?.replace("GraphQL error: ", "")}
           onFinish={onFinish}

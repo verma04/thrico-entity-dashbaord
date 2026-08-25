@@ -14,20 +14,19 @@ import {
   Wallet,
   CheckCircle2,
   Check,
-  Info,
-  ShieldCheck,
   Zap,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
   PolarisFormLayout,
   PolarisFormCard,
-} from "@/components/gamification/shared";
+  PolarisSidebarCard,
+  PolarisTipCard,
+  PolarisSummaryRow,
+} from "@/components/gamification/shared/polaris-form-ui";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { GiftCardRuleItem } from "../types";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -36,6 +35,60 @@ import {
   useUpdateDigitalCardRule,
   useGetDigitalCardRuleById,
 } from "@/graphql/actions/rewards/gift-cards";
+
+const BRAND_PRESETS: Record<
+  string,
+  { bg: string; text: string; logoText: string; gradient: string }
+> = {
+  "Amazon Pay": {
+    bg: "bg-[#232f3e]",
+    text: "text-amber-400",
+    logoText: "amazon pay",
+    gradient: "from-[#232f3e] to-[#131921]",
+  },
+  Flipkart: {
+    bg: "bg-[#2874f0]",
+    text: "text-yellow-300",
+    logoText: "Flipkart",
+    gradient: "from-[#2874f0] to-[#1c54b2]",
+  },
+  Swiggy: {
+    bg: "bg-[#fc8019]",
+    text: "text-white",
+    logoText: "SWIGGY",
+    gradient: "from-[#fc8019] to-[#d35f04]",
+  },
+  Zomato: {
+    bg: "bg-[#cb202d]",
+    text: "text-white",
+    logoText: "zomato",
+    gradient: "from-[#cb202d] to-[#99141f]",
+  },
+  Myntra: {
+    bg: "bg-[#ff3f6c]",
+    text: "text-white",
+    logoText: "myntra",
+    gradient: "from-[#ff3f6c] to-[#d62851]",
+  },
+  Uber: {
+    bg: "bg-black",
+    text: "text-white",
+    logoText: "Uber",
+    gradient: "from-zinc-900 to-black",
+  },
+  BookMyShow: {
+    bg: "bg-[#c4242d]",
+    text: "text-white",
+    logoText: "bookmyshow",
+    gradient: "from-[#c4242d] to-[#871219]",
+  },
+  "Google Play": {
+    bg: "bg-[#01875f]",
+    text: "text-white",
+    logoText: "Google Play",
+    gradient: "from-[#01875f] to-[#015f43]",
+  },
+};
 
 const BRAND_CATALOG = [
   {
@@ -107,8 +160,12 @@ interface GiftCardFormProps {
 const validationSchema = Yup.object({
   title: Yup.string().required("Reward title is required"),
   brand: Yup.string().required("Brand is required"),
-  denomination: Yup.number().min(50, "Minimum ₹50").required("Denomination is required"),
-  validityMonths: Yup.number().min(1, "At least 1 month").required("Validity is required"),
+  denomination: Yup.number()
+    .min(50, "Minimum ₹50")
+    .required("Denomination is required"),
+  validityMonths: Yup.number()
+    .min(1, "At least 1 month")
+    .required("Validity is required"),
 });
 
 export function GiftCardForm({
@@ -119,6 +176,7 @@ export function GiftCardForm({
   walletBalance = 0,
 }: GiftCardFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [createDigitalCardRule] = useCreateDigitalCardRule();
   const [updateDigitalCardRule] = useUpdateDigitalCardRule();
 
@@ -129,18 +187,25 @@ export function GiftCardForm({
     skip: !id || Boolean(initialItem),
   });
 
-  const parsedFetchedItem: GiftCardRuleItem | null = fetchedRuleData?.getDigitalCardRuleById
+  const parsedFetchedItem: GiftCardRuleItem | null = fetchedRuleData
+    ?.getDigitalCardRuleById
     ? {
         id: fetchedRuleData.getDigitalCardRuleById.id,
         title: fetchedRuleData.getDigitalCardRuleById.title,
-        brand: fetchedRuleData.getDigitalCardRuleById.brandName || "Amazon Pay",
+        brand:
+          fetchedRuleData.getDigitalCardRuleById.brandName || "Amazon Pay",
         category: "E-Commerce",
-        denomination: fetchedRuleData.getDigitalCardRuleById.faceValue || 500,
+        denomination:
+          fetchedRuleData.getDigitalCardRuleById.faceValue || 500,
         serviceFee: 25,
-        totalCostPerWin: (fetchedRuleData.getDigitalCardRuleById.faceValue || 500) + 25,
-        validityMonths: Math.round((fetchedRuleData.getDigitalCardRuleById.validityDays || 365) / 30),
+        totalCostPerWin:
+          (fetchedRuleData.getDigitalCardRuleById.faceValue || 500) + 25,
+        validityMonths: Math.round(
+          (fetchedRuleData.getDigitalCardRuleById.validityDays || 365) / 30,
+        ),
         isActive: fetchedRuleData.getDigitalCardRuleById.isActive ?? true,
-        totalIssued: fetchedRuleData.getDigitalCardRuleById.totalAllocated || 0,
+        totalIssued:
+          fetchedRuleData.getDigitalCardRuleById.totalAllocated || 0,
         totalSpent: 0,
         gameAssignments: ["Spin the Wheel"],
       }
@@ -165,7 +230,8 @@ export function GiftCardForm({
       setIsSubmitting(true);
       try {
         const productId = `${values.brand.toLowerCase().replace(/[^a-z0-9]/g, "_")}_${values.denomination}`;
-        const totalCostPerWin = Number(values.denomination) + Number(values.serviceFee);
+        const totalCostPerWin =
+          Number(values.denomination) + Number(values.serviceFee);
 
         let savedId = currentItem?.id || id || `gc-${Date.now()}`;
 
@@ -230,15 +296,20 @@ export function GiftCardForm({
         };
 
         toast.success(
-          isEditing ? "Gift Card Offer Updated!" : "Digital Gift Card Offer Configured!",
+          isEditing
+            ? "Gift Card Offer Updated!"
+            : "Digital Gift Card Offer Configured!",
           {
             description: `Voucher blueprint saved. Provider will purchase card on-demand when members win.`,
-          }
+          },
         );
 
+        setIsSaved(true);
         if (onSuccess) onSuccess(savedItem);
       } catch (err: any) {
-        toast.error(err?.message || "Failed to save gift card offer. Please try again.");
+        toast.error(
+          err?.message || "Failed to save gift card offer. Please try again.",
+        );
       } finally {
         setIsSubmitting(false);
       }
@@ -246,7 +317,11 @@ export function GiftCardForm({
   });
 
   const selectedBrandObj =
-    BRAND_CATALOG.find((b) => b.name === formik.values.brand) || BRAND_CATALOG[0];
+    BRAND_CATALOG.find((b) => b.name === formik.values.brand) ||
+    BRAND_CATALOG[0];
+
+  const brandPreset =
+    BRAND_PRESETS[formik.values.brand] || BRAND_PRESETS["Amazon Pay"];
 
   const handleBrandSelect = (brandName: string) => {
     const brand = BRAND_CATALOG.find((b) => b.name === brandName);
@@ -268,237 +343,352 @@ export function GiftCardForm({
     formik.setFieldValue("serviceFee", fee);
     formik.setFieldValue(
       "title",
-      `₹${denom} ${formik.values.brand} Gift Card`
+      `₹${denom} ${formik.values.brand} Gift Card`,
     );
   };
 
-  const totalCost = Number(formik.values.denomination) + Number(formik.values.serviceFee);
+  const totalCost =
+    Number(formik.values.denomination) + Number(formik.values.serviceFee);
 
   return (
-    <PolarisFormLayout>
-      <form onSubmit={formik.handleSubmit} className="space-y-6">
-        {/* Prominent Architecture Notice Banner */}
-        <div className="rounded-xl border border-violet-300 dark:border-violet-800 bg-gradient-to-r from-violet-50 via-violet-50/60 to-purple-50/40 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-purple-950/20 p-4 sm:p-4.5 space-y-2.5 shadow-xs">
-          <div className="flex items-start gap-3">
-            <div className="h-8 w-8 rounded-lg bg-violet-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-              <Wallet className="h-4 w-4" />
-            </div>
-            <div className="space-y-1.5 flex-1">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <h4 className="text-xs font-bold text-violet-950 dark:text-violet-200 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>How Digital Gift Cards Are Fulfilled</span>
-                  <Badge className="bg-violet-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase">
-                    On-Demand Provider Purchase
-                  </Badge>
-                </h4>
-              </div>
-
-              <p className="text-xs text-violet-900/90 dark:text-violet-300 leading-relaxed">
-                Saving this offer <strong className="text-violet-950 dark:text-white font-bold">does NOT purchase gift cards upfront</strong>. It only sets up the blueprint. Thrico purchases the card from the digital provider API <strong className="text-violet-950 dark:text-white font-bold">only after a member actually wins</strong> in an engagement game.
-              </p>
-
-              <div className="pt-1.5 border-t border-violet-200/60 dark:border-violet-900/60 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-violet-900/80 dark:text-violet-300/90">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
-                  <span><strong>2-Phase Reservation:</strong> Funds are reserved first; if provider fails, reservation is released (₹0 lost).</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
-                  <span><strong>Idempotency Key:</strong> Deterministic references prevent double-purchasing on network retries.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 1: Brand Selection */}
-        <PolarisFormCard
-          step={1}
-          title="Select Partner Brand & Category"
-          description="Choose from top digital gift card catalogs (Amazon, Flipkart, Swiggy, Zomato)."
-          badge="Step 1"
-        >
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {BRAND_CATALOG.map((item) => {
-                const Icon = item.icon;
-                const isSelected = formik.values.brand === item.name;
-
-                return (
-                  <div
-                    key={item.name}
-                    onClick={() => handleBrandSelect(item.name)}
-                    className={cn(
-                      "p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-2",
-                      isSelected
-                        ? "border-violet-600 bg-violet-50/60 dark:bg-violet-950/40 shadow-xs ring-1 ring-violet-500/30"
-                        : "border-border/70 bg-card hover:bg-muted/40"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="h-7 w-7 rounded-lg bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      {isSelected && (
-                        <Check className="h-3.5 w-3.5 text-violet-600" />
-                      )}
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-foreground block leading-tight">
-                        {item.name}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block">
-                        {item.category}
-                      </span>
-                    </div>
+    <div className="w-full">
+      <PolarisFormLayout
+        sidebar={
+          <>
+            {/* Live Visual Card Preview */}
+            <PolarisSidebarCard title="Gift Card Live Preview" icon={Sparkles}>
+              <div className="rounded-[10px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3.5 space-y-3 shadow-xs">
+                {/* Simulated Digital Card Artwork */}
+                <div
+                  className={cn(
+                    "relative h-32 w-full rounded-[8px] bg-gradient-to-br p-3.5 flex flex-col justify-between text-white shadow-sm overflow-hidden",
+                    brandPreset.gradient,
+                  )}
+                >
+                  {/* Subtle Background Pattern */}
+                  <div className="absolute right-[-10px] bottom-[-10px] opacity-15 pointer-events-none">
+                    <Gift className="h-28 w-28 text-white" />
                   </div>
-                );
-              })}
-            </div>
 
-            <div className="space-y-1.5 pt-2">
-              <Label className="text-xs font-bold text-foreground">
-                Reward Offer Title *
-              </Label>
-              <Input
-                name="title"
-                value={formik.values.title}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className="text-xs font-semibold"
-              />
+                  <div className="flex items-center justify-between z-10">
+                    <span className="font-bold tracking-tight text-[15px]">
+                      {brandPreset.logoText}
+                    </span>
+                    <Badge className="bg-white/20 hover:bg-white/20 text-white font-mono text-[10px] px-2 py-0 border-white/30 backdrop-blur-xs">
+                      E-GIFT CARD
+                    </Badge>
+                  </div>
+
+                  <div className="z-10 flex items-end justify-between">
+                    <div>
+                      <span className="text-[10px] text-white/75 uppercase tracking-wider block font-medium">
+                        Denomination
+                      </span>
+                      <span className="font-mono text-[20px] font-extrabold leading-none">
+                        ₹{formik.values.denomination}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-white/80 font-mono">
+                      VALID: {formik.values.validityMonths}M
+                    </span>
+                  </div>
+                </div>
+
+                {/* Offer Details */}
+                <div className="space-y-1 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#616161]">
+                      {formik.values.category}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] font-medium border-[#d2d5d9] text-[#303030] dark:text-zinc-200"
+                    >
+                      On-Demand Payout
+                    </Badge>
+                  </div>
+                  <h5 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
+                    {formik.values.title || "Untitled Gift Card"}
+                  </h5>
+                </div>
+
+                {/* Ledger Summary */}
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1">
+                  <PolarisSummaryRow
+                    label="Face Value"
+                    value={`₹${formik.values.denomination}`}
+                  />
+                  <PolarisSummaryRow
+                    label="Service Fee (5%)"
+                    value={`+₹${formik.values.serviceFee}`}
+                  />
+                  <PolarisSummaryRow
+                    label="Net Cost per Win"
+                    value={
+                      <span className="font-bold text-[#303030] dark:text-zinc-100">
+                        ₹{totalCost}
+                      </span>
+                    }
+                  />
+                  <PolarisSummaryRow
+                    label="Validity"
+                    value={`${formik.values.validityMonths} Months`}
+                    isLast
+                  />
+                </div>
+              </div>
+            </PolarisSidebarCard>
+
+            {/* Strategic Guidance */}
+            <PolarisTipCard title="Zero Upfront Capital">
+              Gift cards are funded on-demand from your entity reward balance
+              only when a member actually achieves a winning outcome.
+            </PolarisTipCard>
+          </>
+        }
+      >
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
+          {/* Architecture Notice Banner */}
+          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 p-4 space-y-2">
+            <div className="flex items-start gap-3">
+              <div className="h-8 w-8 rounded-[6px] bg-[#303030] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                <Wallet className="h-4 w-4" />
+              </div>
+              <div className="space-y-1 flex-1">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h4 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>How Digital Gift Cards Are Fulfilled</span>
+                    <Badge className="bg-[#303030] text-white font-semibold text-[9px] px-1.5 py-0 uppercase rounded-[4px]">
+                      On-Demand Provider Purchase
+                    </Badge>
+                  </h4>
+                </div>
+
+                <p className="text-[12.5px] text-[#616161] dark:text-zinc-400 leading-[18px]">
+                  Saving this offer{" "}
+                  <strong className="text-[#303030] dark:text-zinc-200 font-semibold">
+                    does NOT purchase gift cards upfront
+                  </strong>
+                  . It sets up the blueprint, and Thrico purchases the card from
+                  the digital provider API{" "}
+                  <strong className="text-[#303030] dark:text-zinc-200 font-semibold">
+                    only after a member actually wins
+                  </strong>{" "}
+                  in an engagement game.
+                </p>
+
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[12px] text-[#616161] dark:text-zinc-400">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>
+                      <strong>2-Phase Reservation:</strong> Funds are reserved
+                      first; if provider fails, reservation is released (₹0 lost).
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>
+                      <strong>Idempotency Key:</strong> Deterministic references
+                      prevent double-purchasing on network retries.
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </PolarisFormCard>
 
-        {/* Card 2: Denomination & Pricing Breakdown */}
-        <PolarisFormCard
-          step={2}
-          title="Denomination & Cost Breakdown"
-          description="Select card value. Service fee and net wallet deduction are calculated automatically."
-          badge="Step 2"
-        >
-          <div className="space-y-4">
-            {/* Denomination Buttons */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-foreground">
-                Available Denominations
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {selectedBrandObj.denominations.map((denom) => {
-                  const isSelected = formik.values.denomination === denom;
+          {/* Card 1: Brand Selection */}
+          <PolarisFormCard
+            step={1}
+            title="Select Partner Brand & Category"
+            description="Choose from top digital gift card catalogs (Amazon, Flipkart, Swiggy, Zomato)."
+            badge="Step 1"
+          >
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {BRAND_CATALOG.map((item) => {
+                  const Icon = item.icon;
+                  const isSelected = formik.values.brand === item.name;
+
                   return (
                     <button
-                      key={denom}
                       type="button"
-                      onClick={() => handleDenominationSelect(denom)}
+                      key={item.name}
+                      onClick={() => handleBrandSelect(item.name)}
                       className={cn(
-                        "px-3.5 py-2 rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer",
+                        "p-3 rounded-[8px] border transition-all cursor-pointer flex flex-col justify-between gap-2 text-left",
                         isSelected
-                          ? "border-violet-600 bg-violet-600 text-white shadow-2xs"
-                          : "border-border/70 bg-card hover:bg-muted text-foreground"
+                          ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 shadow-xs ring-1 ring-[#303030] dark:ring-zinc-100"
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
-                      ₹{denom}
+                      <div className="flex items-center justify-between w-full">
+                        <div className="h-7 w-7 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center">
+                          <Icon className="h-3.5 w-3.5" />
+                        </div>
+                        {isSelected && (
+                          <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block leading-tight">
+                          {item.name}
+                        </span>
+                        <span className="text-[11px] text-[#616161] dark:text-zinc-400 block mt-0.5">
+                          {item.category}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}
               </div>
-            </div>
 
-            {/* Financial Ledger Receipt Box */}
-            <div className="p-3.5 rounded-xl border border-violet-200/80 dark:border-violet-900/60 bg-violet-50/40 dark:bg-violet-950/20 space-y-2">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Gift Card Face Value:</span>
-                <span className="font-mono font-bold text-foreground">
-                  ₹{formik.values.denomination}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Digital Provider & Service Fee (5%):</span>
-                <span className="font-mono font-bold text-foreground">
-                  + ₹{formik.values.serviceFee}
-                </span>
-              </div>
-              <div className="pt-2 border-t border-violet-200/60 dark:border-violet-900/60 flex items-center justify-between text-xs">
-                <span className="font-bold text-foreground">
-                  Total Deducted per Winning Member:
-                </span>
-                <span className="font-mono text-sm font-bold text-violet-700 dark:text-violet-300">
-                  ₹{totalCost}
-                </span>
+              <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <label
+                  htmlFor="title"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
+                >
+                  Reward Offer Title <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={formik.values.title}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-[40px] text-[14px] font-semibold bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
+                />
+                {formik.touched.title && formik.errors.title && (
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+                    {formik.errors.title}
+                  </p>
+                )}
               </div>
             </div>
+          </PolarisFormCard>
 
-            {/* Validity in Months */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-foreground">
-                Validity (Months) *
-              </Label>
-              <Input
-                type="number"
-                name="validityMonths"
-                value={formik.values.validityMonths}
-                onChange={formik.handleChange}
-                className="text-xs font-mono w-32"
-              />
-            </div>
-          </div>
-        </PolarisFormCard>
-
-        {/* Card 3: Game Distribution */}
-        <PolarisFormCard
-          step={3}
-          title="Minigame Assignment & Status"
-          description="Assign this gift card to engagement games (Spin the Wheel, Scratch Card, Match Win)."
-          badge="Step 3"
-        >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg border border-border/70 bg-muted/20">
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-foreground block">
-                  Active in Minigames
-                </span>
-                <span className="text-[10px] text-muted-foreground block">
-                  Enables this reward to appear as a winning slice or scratch unlock.
-                </span>
+          {/* Card 2: Denomination & Pricing Breakdown */}
+          <PolarisFormCard
+            step={2}
+            title="Denomination & Cost Breakdown"
+            description="Select card value. Service fee and net wallet deduction are calculated automatically."
+            badge="Step 2"
+          >
+            <div className="space-y-4">
+              {/* Denomination Buttons */}
+              <div className="space-y-1.5">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                  Available Denominations
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedBrandObj.denominations.map((denom) => {
+                    const isSelected = formik.values.denomination === denom;
+                    return (
+                      <button
+                        key={denom}
+                        type="button"
+                        onClick={() => handleDenominationSelect(denom)}
+                        className={cn(
+                          "h-[36px] px-3.5 rounded-[6px] border text-[13px] font-mono font-semibold transition-all cursor-pointer",
+                          isSelected
+                            ? "border-[#303030] bg-[#303030] text-white shadow-2xs dark:bg-zinc-100 dark:text-zinc-900"
+                            : "border-[#aeb4b9] bg-white dark:bg-zinc-900 hover:border-[#8c9196] text-[#303030] dark:text-zinc-100",
+                        )}
+                      >
+                        ₹{denom}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <Switch
-                checked={formik.values.isActive}
-                onCheckedChange={(c) => formik.setFieldValue("isActive", c)}
-              />
+
+              {/* Financial Ledger Receipt Box */}
+              <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/40 space-y-2">
+                <div className="flex items-center justify-between text-[12.5px] text-[#616161] dark:text-zinc-400">
+                  <span>Gift Card Face Value:</span>
+                  <span className="font-mono font-semibold text-[#303030] dark:text-zinc-100">
+                    ₹{formik.values.denomination}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[12.5px] text-[#616161] dark:text-zinc-400">
+                  <span>Digital Provider & Service Fee (5%):</span>
+                  <span className="font-mono font-semibold text-[#303030] dark:text-zinc-100">
+                    + ₹{formik.values.serviceFee}
+                  </span>
+                </div>
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-between text-[13px]">
+                  <span className="font-semibold text-[#303030] dark:text-zinc-100">
+                    Total Deducted per Winning Member:
+                  </span>
+                  <span className="font-mono text-[14px] font-bold text-[#303030] dark:text-zinc-100">
+                    ₹{totalCost}
+                  </span>
+                </div>
+              </div>
+
+              {/* Validity in Months */}
+              <div className="space-y-1.5">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                  Validity (Months) <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
+                <Input
+                  type="number"
+                  name="validityMonths"
+                  value={formik.values.validityMonths}
+                  onChange={formik.handleChange}
+                  className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] w-32"
+                />
+              </div>
             </div>
-          </div>
-        </PolarisFormCard>
+          </PolarisFormCard>
 
-        {/* Form Actions Footer */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-border/60">
-          <div className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-            <Info className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400 shrink-0" />
-            <span>₹0 spent now. ₹{totalCost} is deducted from prepaid wallet only when a player wins.</span>
-          </div>
+          {/* Card 3: Game Distribution */}
+          <PolarisFormCard
+            step={3}
+            title="Minigame Assignment & Status"
+            description="Assign this gift card to engagement games (Spin the Wheel, Scratch Card, Match Win)."
+            badge="Step 3"
+          >
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40">
+                <div className="space-y-0.5">
+                  <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
+                    Active in Minigames
+                  </span>
+                  <span className="text-[12px] text-[#616161] dark:text-zinc-400 block">
+                    Enables this reward to appear as a winning slice or scratch unlock.
+                  </span>
+                </div>
+                <Switch
+                  checked={formik.values.isActive}
+                  onCheckedChange={(c) => formik.setFieldValue("isActive", c)}
+                />
+              </div>
+            </div>
+          </PolarisFormCard>
+        </form>
+      </PolarisFormLayout>
 
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onCancel}
-              className="text-xs font-semibold"
-            >
-              Cancel
-            </Button>
-
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-violet-600 hover:bg-violet-700 text-white gap-2 font-semibold text-xs h-9 shadow-xs cursor-pointer"
-            >
-              <Sparkles className="h-4 w-4" />
-              {isSubmitting ? "Saving Offer..." : "Save Gift Card Offer"}
-            </Button>
-          </div>
-        </div>
-      </form>
-    </PolarisFormLayout>
+      {/* Floating Save Panel */}
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={isSaved}
+        isSaving={isSubmitting}
+        onSave={() => formik.submitForm()}
+        onReset={() => {
+          formik.resetForm();
+          setIsSaved(false);
+        }}
+        title={isEditing ? "Unsaved Gift Card Rule" : "Unsaved Gift Card Offer"}
+        description={
+          isEditing
+            ? `You have pending changes to "${formik.values.title}".`
+            : "You have pending changes to this gift card offer."
+        }
+        buttonText={
+          isEditing ? "Update Gift Card Offer" : "Save Gift Card Offer"
+        }
+      />
+    </div>
   );
 }

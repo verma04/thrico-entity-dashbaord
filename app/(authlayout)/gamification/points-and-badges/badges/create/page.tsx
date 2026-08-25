@@ -8,6 +8,7 @@ import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 
 import { useModuleStore } from "@/store/useModuleStore";
 import { BadgeForm } from "@/components/gamification/badges/badge-form";
@@ -17,7 +18,8 @@ export default function CreateBadgePage() {
     (state) => state.gamificationModuleName,
   );
   const router = useRouter();
-  const { data: moduleData } = useGetEntityGamificationModules();
+  const { data: moduleData, loading: modulesLoading } =
+    useGetEntityGamificationModules();
   const [createBadge, { loading: isCreating }] = useCreateBadge();
 
   const handleCreate = async (values: any) => {
@@ -41,10 +43,18 @@ export default function CreateBadgePage() {
       eligibleUserIds: values.eligibleUserIds || [],
       allowPushNotification: values.allowPushNotification,
       allowEmailNotification: values.allowEmailNotification,
-      pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,
-      pushNotificationBody: values.allowPushNotification ? values.pushNotificationBody : undefined,
-      emailNotificationSubject: values.allowEmailNotification ? values.emailNotificationSubject : undefined,
-      emailNotificationBody: values.allowEmailNotification ? values.emailNotificationBody : undefined,
+      pushNotificationTitle: values.allowPushNotification
+        ? values.pushNotificationTitle
+        : undefined,
+      pushNotificationBody: values.allowPushNotification
+        ? values.pushNotificationBody
+        : undefined,
+      emailNotificationSubject: values.allowEmailNotification
+        ? values.emailNotificationSubject
+        : undefined,
+      emailNotificationBody: values.allowEmailNotification
+        ? values.emailNotificationBody
+        : undefined,
     };
 
     if (values.type === "ACTION") {
@@ -87,15 +97,20 @@ export default function CreateBadgePage() {
         ]}
       />
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <BadgeForm
-          onSubmit={handleCreate}
-          loading={isCreating}
-          modules={modules}
-          integrations={integrations}
-          triggers={triggers}
-          moduleTriggers={moduleTriggers}
-          integrationTriggers={integrationTriggers}
-        />
+        {modulesLoading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : (
+          <BadgeForm
+            showHeader={false}
+            onSubmit={handleCreate}
+            loading={isCreating}
+            modules={modules}
+            integrations={integrations}
+            triggers={triggers}
+            moduleTriggers={moduleTriggers}
+            integrationTriggers={integrationTriggers}
+          />
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );

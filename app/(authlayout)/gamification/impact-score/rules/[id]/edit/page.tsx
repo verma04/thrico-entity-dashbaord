@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Trophy, Loader2 } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import {
   useGetImpactRuleById,
@@ -12,7 +12,9 @@ import { useMutation, gql } from "@apollo/client";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 import { ImpactRuleForm } from "@/components/impact/rule-form";
+import { Button } from "@/components/ui/button";
 
 const UPDATE_IMPACT_RULE = gql`
   mutation UpdateImpactRule($id: ID!, $input: CreateImpactRuleInput!) {
@@ -34,8 +36,10 @@ export default function EditImpactRulePage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { data: moduleData } = useGetEntityGamificationModules();
-  const { data: templatesData } = useGetImpactTemplates();
+  const { data: moduleData, loading: modulesLoading } =
+    useGetEntityGamificationModules();
+  const { data: templatesData, loading: templatesLoading } =
+    useGetImpactTemplates();
   const { data: ruleData, loading: ruleLoading } = useGetImpactRuleById(id);
 
   const [updateRule, { loading: isUpdating }] = useMutation(
@@ -46,10 +50,13 @@ export default function EditImpactRulePage() {
   );
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
-  const integrations = moduleData?.getEntityGamificationModules?.integrations || [];
+  const integrations =
+    moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
-  const moduleTriggers = moduleData?.getEntityGamificationModules?.moduleTriggers || [];
-  const integrationTriggers = moduleData?.getEntityGamificationModules?.integrationTriggers || [];
+  const moduleTriggers =
+    moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers =
+    moduleData?.getEntityGamificationModules?.integrationTriggers || [];
   const templates = templatesData?.impactTemplates || [];
 
   const rule = ruleData?.getImpactRuleById;
@@ -70,23 +77,7 @@ export default function EditImpactRulePage() {
     });
   };
 
-  if (ruleLoading) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-900 dark:text-zinc-100" />
-      </div>
-    );
-  }
-
-  if (!rule) {
-    return (
-      <div className="p-8 text-center text-sm text-zinc-500">
-        Rule not found.
-      </div>
-    );
-  }
-
-  const templateId = rule.templateId || templates[0]?.id || "";
+  const isLoading = ruleLoading || modulesLoading || templatesLoading;
 
   return (
     <EcosystemWrapper>
@@ -103,27 +94,32 @@ export default function EditImpactRulePage() {
         ]}
       />
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <ImpactRuleForm
-          initialValues={{
-            templateId,
-            module: rule.module,
-            action: rule.action,
-            category: rule.category,
-            points: rule.points,
-            dailyLimit: rule.dailyLimit,
-            formula: rule.formula || "",
-            description: "",
-          }}
-          isEdit
-          onSubmit={handleUpdate}
-          loading={isUpdating}
-          modules={modules}
-          integrations={integrations}
-          triggers={triggers}
-          moduleTriggers={moduleTriggers}
-          integrationTriggers={integrationTriggers}
-          templates={templates}
-        />
+        {isLoading ? (
+          <PolarisFormSkeleton showHeader={false} />
+        ) : !rule ? (
+          <div className="min-h-[400px] w-full flex flex-col items-center justify-center space-y-4">
+            <h2 className="text-xl font-bold">Rule Not Found</h2>
+            <Button
+              onClick={() => router.push("/gamification/impact-score/rules")}
+            >
+              Back to Rules
+            </Button>
+          </div>
+        ) : (
+          <ImpactRuleForm
+            showHeader={false}
+            initialValues={rule}
+            onSubmit={handleUpdate}
+            loading={isUpdating}
+            isEdit={true}
+            modules={modules}
+            integrations={integrations}
+            triggers={triggers}
+            moduleTriggers={moduleTriggers}
+            integrationTriggers={integrationTriggers}
+            templates={templates}
+          />
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );

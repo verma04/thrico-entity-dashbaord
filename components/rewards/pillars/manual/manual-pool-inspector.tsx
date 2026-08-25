@@ -77,7 +77,7 @@ export const ManualPoolInspector: React.FC<ManualPoolInspectorProps> = ({
                 className={cn(
                   "text-[9px] font-semibold px-1.5 py-0.5 rounded transition-all",
                   statusFilter === st
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:bg-muted"
                 )}
               >

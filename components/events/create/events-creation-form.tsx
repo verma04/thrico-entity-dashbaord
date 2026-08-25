@@ -6,18 +6,14 @@ import * as Yup from "yup";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
   Camera,
-  Calendar as CalendarIcon,
   MapPin,
   Laptop,
   RefreshCw,
-  Clock,
   Sparkles,
-  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import GooglePlacesInput from "@/components/layout/google-place-input";
@@ -143,9 +139,13 @@ export function EventsCreationForm({
     <FormikProvider value={formik}>
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Live Event Preview Card */}
-            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Preview" icon={Sparkles}>
+            <PolarisSidebarCard
+              title={`${singularName} Preview`}
+              badge="Live Preview"
+              icon={Sparkles}
+            >
               <EventPreview
                 eventData={{
                   ...formik.values,
@@ -157,21 +157,21 @@ export function EventsCreationForm({
               />
 
               {/* Structured Configuration Breakdown */}
-              <div className="space-y-1.5 pt-2">
+              <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
                   label="Event Format"
                   value={
                     formik.values.type === "in_person"
                       ? "In Person Venue"
                       : formik.values.type === "virtual"
-                      ? "Virtual Livestream"
-                      : "Hybrid Meetup"
+                        ? "Virtual Livestream"
+                        : "Hybrid Meetup"
                   }
                 />
                 <PolarisSummaryRow
                   label="Location"
                   value={
-                    <span className="truncate max-w-[150px] inline-block">
+                    <span className="truncate max-w-[150px] inline-block font-semibold">
                       {formatLocationName(formik.values.location)}
                     </span>
                   }
@@ -194,12 +194,13 @@ export function EventsCreationForm({
 
             {/* Event Success Tip */}
             <PolarisTipCard title={`${singularName} Scheduling Tip`}>
-              Clear registration deadlines and high-resolution cover banners increase member RSVP conversion rates by over 40%.
+              Clear registration deadlines and high-resolution cover banners
+              increase member RSVP conversion rates by over 40%.
             </PolarisTipCard>
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Step 1: Core Event Identity & Venue */}
           <PolarisFormCard
             step={1}
@@ -209,12 +210,14 @@ export function EventsCreationForm({
           >
             {/* Cover Image Upload */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Event Banner <span className="text-rose-500">*</span>
-              </Label>
-              <div className="relative group aspect-[3/2] sm:aspect-[21/9] w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Event Banner <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
+              <div className="relative group aspect-[3/2] sm:aspect-[21/9] w-full rounded-[8px] overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7] dark:bg-zinc-900 flex items-center justify-center">
                 <Image
-                  src={imageUrl || `https://cdn.thrico.network/default_event.png`}
+                  src={
+                    imageUrl || `https://cdn.thrico.network/default_event.png`
+                  }
                   alt={`${singularName} cover`}
                   width={1536}
                   height={1024}
@@ -225,7 +228,7 @@ export function EventsCreationForm({
                     type="button"
                     variant="secondary"
                     size="sm"
-                    className="h-9 px-4 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-md border-none text-xs font-semibold shadow-md gap-2 cursor-pointer"
+                    className="h-9 px-4 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-xs border-none text-[13px] font-semibold shadow-md gap-2 cursor-pointer rounded-[6px]"
                     onClick={() =>
                       document.getElementById("cover-upload")?.click()
                     }
@@ -242,17 +245,22 @@ export function EventsCreationForm({
                   onChange={handleImageUpload}
                 />
               </div>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                Recommended aspect ratio: 3:2 or 21:9 banner (1536 × 1024px). Max 5MB.
+              <p className="text-[12px] text-[#616161] dark:text-zinc-400">
+                Recommended aspect ratio: 3:2 or 21:9 banner (1536 × 1024px). Max
+                5MB.
               </p>
             </div>
 
             {/* Title & Location */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               <div className="space-y-1.5">
-                <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  {singularName} Title <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="title"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  {singularName} Title{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Input
                   id="title"
                   name="title"
@@ -260,27 +268,31 @@ export function EventsCreationForm({
                   value={formik.values.title}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
                 {formik.touched.title && formik.errors.title && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.title as string}
                   </p>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="location" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Venue / Location <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="location"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Venue / Location{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161] z-10" />
                   <GooglePlacesInput
                     id="location"
                     name="location"
                     onBlur={formik.handleBlur}
                     placeholder="Search venue or address..."
-                    className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                     initialValue={
                       formik.values.location
                         ? {
@@ -300,7 +312,7 @@ export function EventsCreationForm({
                   />
                 </div>
                 {formik.touched.location && formik.errors.location && (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.location as string}
                   </p>
                 )}
@@ -309,9 +321,13 @@ export function EventsCreationForm({
 
             {/* Description Field */}
             <div className="space-y-1.5">
-              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                {singularName} Description <span className="text-rose-500">*</span>
-              </Label>
+              <label
+                htmlFor="description"
+                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+              >
+                {singularName} Description{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Textarea
                 id="description"
                 name="description"
@@ -319,15 +335,17 @@ export function EventsCreationForm({
                 value={formik.values.description}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className="min-h-[110px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                className="min-h-[110px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
               />
               <div className="flex items-center justify-between">
                 {formik.touched.description && formik.errors.description ? (
-                  <p className="text-[11px] text-rose-500 font-medium">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {formik.errors.description as string}
                   </p>
-                ) : <span />}
-                <p className="text-[10px] text-zinc-400 font-medium">
+                ) : (
+                  <span />
+                )}
+                <p className="text-[11.5px] text-[#616161] font-medium">
                   {formik.values.description.length} characters (min 30)
                 </p>
               </div>
@@ -343,9 +361,9 @@ export function EventsCreationForm({
           >
             {/* Meeting Format Selectable Tiles */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Event Format <span className="text-rose-500">*</span>
-              </Label>
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Event Format <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   {
@@ -375,26 +393,26 @@ export function EventsCreationForm({
                       type="button"
                       onClick={() => handleInputChange("type", type.value)}
                       className={cn(
-                        "relative flex flex-col items-start p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                        "relative flex flex-col items-start p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
                         isSelected
-                          ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
-                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                          ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
                       <div
                         className={cn(
-                          "h-8 w-8 rounded-lg flex items-center justify-center mb-2.5 border transition-colors",
+                          "h-8 w-8 rounded-[6px] flex items-center justify-center mb-2 border transition-colors",
                           isSelected
-                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                            : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
                         )}
                       >
                         <Icon className="h-4 w-4" />
                       </div>
-                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
                         {type.label}
                       </span>
-                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                      <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
                         {type.desc}
                       </p>
                     </button>
@@ -404,11 +422,14 @@ export function EventsCreationForm({
             </div>
 
             {/* Date & Time Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               <div className="space-y-1.5">
-                <Label htmlFor="startDate" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Start Date <span className="text-rose-500">*</span>
-                </Label>
+                <label
+                  htmlFor="startDate"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
+                  Start Date <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
                 <Input
                   id="startDate"
                   name="startDate"
@@ -416,14 +437,17 @@ export function EventsCreationForm({
                   value={formik.values.startDate}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="endDate" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label
+                  htmlFor="endDate"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
                   End Date
-                </Label>
+                </label>
                 <Input
                   id="endDate"
                   name="endDate"
@@ -431,14 +455,17 @@ export function EventsCreationForm({
                   value={formik.values.endDate}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="startTime" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label
+                  htmlFor="startTime"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
                   Start Time
-                </Label>
+                </label>
                 <Input
                   id="startTime"
                   name="startTime"
@@ -446,17 +473,20 @@ export function EventsCreationForm({
                   value={formik.values.startTime}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
               </div>
             </div>
 
             {/* Registration Deadline & Active Toggle */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               <div className="space-y-1.5">
-                <Label htmlFor="lastDateOfRegistration" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label
+                  htmlFor="lastDateOfRegistration"
+                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                >
                   RSVP Registration Deadline
-                </Label>
+                </label>
                 <Input
                   id="lastDateOfRegistration"
                   name="lastDateOfRegistration"
@@ -464,17 +494,19 @@ export function EventsCreationForm({
                   value={formik.values.lastDateOfRegistration}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                   Publishing Status
-                </Label>
-                <div className="h-10 px-3 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 flex items-center justify-between">
-                  <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                    {formik.values.isActive ? "Published (Live Event)" : "Draft (Hidden)"}
+                </label>
+                <div className="h-[40px] px-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between">
+                  <span className="text-[13px] font-medium text-[#303030] dark:text-zinc-300">
+                    {formik.values.isActive
+                      ? "Published (Live Event)"
+                      : "Draft (Hidden)"}
                   </span>
                   <Switch
                     id="isActive"
