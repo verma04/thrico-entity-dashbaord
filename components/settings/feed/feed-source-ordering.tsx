@@ -11,7 +11,6 @@ import {
   GripVertical,
   LucideIcon,
   Sparkles,
-  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -110,17 +109,17 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-[1040px]">
+    <div className="w-full">
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Live Sequence Ranking */}
             <PolarisSidebarCard
               title="Current Sequence"
               badge="Live Order"
               icon={Sparkles}
             >
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {sources.map((source, idx) => (
                   <PolarisSummaryRow
                     key={source.id}
@@ -139,7 +138,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
           </div>
         }
       >
-        <div className="space-y-6">
+        <div className="space-y-3.5">
           <PolarisFormCard
             step={1}
             title="Module Prioritization Hierarchy"
@@ -153,7 +152,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className="space-y-2.5"
+                    className="space-y-2"
                   >
                     {sources.map((source, index) => (
                       <Draggable
@@ -166,37 +165,37 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             className={cn(
-                              "group relative flex items-center gap-3.5 p-3 rounded-xl border transition-all duration-200",
+                              "group relative flex items-center gap-2.5 p-2.5 rounded-[6px] border transition-all duration-200",
                               snapshot.isDragging
-                                ? "bg-white dark:bg-zinc-900 border-zinc-900 dark:border-zinc-100 shadow-xl z-50 scale-[1.02]"
-                                : "bg-white dark:bg-zinc-900/60 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700",
+                                ? "bg-white dark:bg-zinc-900 border-[#303030] dark:border-zinc-100 shadow-md z-50 scale-[1.01]"
+                                : "bg-[#f6f6f7]/50 dark:bg-zinc-900/50 border-[#d2d5d9] dark:border-zinc-800 hover:border-[#aeb4b9] hover:bg-[#f6f6f7]",
                             )}
                           >
                             {/* Drag Handle */}
                             <div
                               {...provided.dragHandleProps}
-                              className="p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-grab active:cursor-grabbing"
+                              className="p-1 rounded-[4px] text-[#616161] hover:text-[#303030] dark:hover:text-zinc-200 cursor-grab active:cursor-grabbing"
                             >
-                              <GripVertical size={16} />
+                              <GripVertical size={14} />
                             </div>
 
                             {/* Rank Indicator */}
-                            <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold text-zinc-600 dark:text-zinc-400 tabular-nums">
+                            <div className="flex items-center justify-center w-5 h-5 rounded-[4px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 text-[10px] font-bold text-[#303030] dark:text-zinc-300 tabular-nums">
                               {index + 1}
                             </div>
 
                             {/* Icon & Label */}
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300 shrink-0">
-                                <source.icon size={15} strokeWidth={2} />
+                            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                              <div className="w-7 h-7 rounded-[4px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 flex items-center justify-center text-[#303030] dark:text-zinc-300 shrink-0">
+                                <source.icon size={14} strokeWidth={2} />
                               </div>
                               <div className="min-w-0">
-                                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-none">
+                                <h4 className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 leading-tight">
                                   {source.label
                                     .replace("Show ", "")
                                     .replace(" in Feed", "")}
                                 </h4>
-                                <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400 truncate max-w-[340px]">
+                                <p className="text-[11px] text-[#616161] dark:text-zinc-400 truncate max-w-[340px] mt-0.5">
                                   {source.description}
                                 </p>
                               </div>
@@ -205,11 +204,11 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
                             {/* Status / Tags */}
                             <div className="flex items-center gap-2 shrink-0 pr-1">
                               {!source.enabled ? (
-                                <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                                <span className="text-[9.5px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-[3px] border border-amber-500/20">
                                   Disabled in Config
                                 </span>
                               ) : (
-                                <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
+                                <span className="text-[9.5px] font-semibold text-[#616161] dark:text-zinc-400 bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 px-1.5 py-0.5 rounded-[3px]">
                                   Active
                                 </span>
                               )}
