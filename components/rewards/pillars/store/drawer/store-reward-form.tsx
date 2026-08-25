@@ -13,8 +13,6 @@ import {
   CheckCircle2,
   Check,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -30,6 +28,9 @@ import {
   PolarisSidebarCard,
   PolarisTipCard,
   PolarisSummaryRow,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
@@ -307,24 +308,24 @@ export function StoreRewardForm({
           </>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-3.5">
           {/* Architecture Notice Banner */}
-          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 p-4 space-y-2">
-            <div className="flex items-start gap-3">
-              <div className="h-8 w-8 rounded-[6px] bg-[#303030] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-                <Zap className="h-4 w-4" />
+          <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 p-3 space-y-1.5">
+            <div className="flex items-start gap-2.5">
+              <div className="h-7 w-7 rounded-[4px] bg-[#303030] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                <Zap className="h-3.5 w-3.5" />
               </div>
               <div className="space-y-1 flex-1">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <h4 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
                     <span>How This Rule Generates Coupons</span>
-                    <Badge className="bg-[#303030] text-white font-semibold text-[9px] px-1.5 py-0 uppercase rounded-[4px]">
+                    <Badge className="bg-[#303030] text-white font-semibold text-[8.5px] px-1.5 py-0 uppercase rounded-[3px]">
                       On-Demand On-Win Only
                     </Badge>
                   </h4>
                 </div>
 
-                <p className="text-[12.5px] text-[#616161] dark:text-zinc-400 leading-[18px]">
+                <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                   Saving this rule{" "}
                   <strong className="text-[#303030] dark:text-zinc-200 font-semibold">
                     does NOT generate thousands of codes in advance
@@ -334,16 +335,16 @@ export function StoreRewardForm({
                   members win.
                 </p>
 
-                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[12px] text-[#616161] dark:text-zinc-400">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <div className="pt-1.5 border-t border-[#e1e3e5] dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>
                       <strong>When created:</strong> Only upon member win or
                       claim.
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>
                       <strong>Unique per user:</strong> Single-use code (e.g.{" "}
                       <code>SHOP-8K4P7X</code>).
@@ -361,58 +362,34 @@ export function StoreRewardForm({
             description="Name, member-facing description, artwork, and store provider."
             badge="Step 1"
           >
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="title"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Reward Offer Title <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="title"
-                  name="title"
-                  value={formik.values.title}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  placeholder="e.g. 100 Flat Order Discount"
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.title && formik.errors.title && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.title}
-                  </p>
-                )}
-              </div>
+            <div className="space-y-3.5">
+              <PolarisInput
+                id="title"
+                name="title"
+                label="Reward Offer Title"
+                required
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="e.g. 100 Flat Order Discount"
+                error={formik.touched.title && formik.errors.title ? formik.errors.title : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="description"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Description & Terms <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formik.values.description}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  placeholder="e.g. Applicable on all products with minimum order value of ₹499."
-                  className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] resize-none"
-                />
-                {formik.touched.description && formik.errors.description && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.description}
-                  </p>
-                )}
-              </div>
+              <PolarisTextarea
+                id="description"
+                name="description"
+                label="Description & Terms"
+                required
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="e.g. Applicable on all products with minimum order value of ₹499."
+                error={formik.touched.description && formik.errors.description ? formik.errors.description : undefined}
+              />
 
               {/* Cover Image Upload */}
               <div className="space-y-1.5 pt-1">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                  Cover Artwork / Badge Image (Optional)
-                </label>
+                <PolarisLabel>Cover Artwork / Badge Image (Optional)</PolarisLabel>
                 <ImageUploadWithCrop
                   currentImage={formik.values.image}
                   onImageUpdate={(cdnUrl: string) =>
@@ -423,18 +400,16 @@ export function StoreRewardForm({
               </div>
 
               {/* Store Provider and Domain */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                <div className="space-y-1.5">
-                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                    E-Commerce Store Provider
-                  </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <div className="space-y-1">
+                  <PolarisLabel>E-Commerce Store Provider</PolarisLabel>
                   <Select
                     value={formik.values.storeProvider}
                     onValueChange={(v) =>
                       formik.setFieldValue("storeProvider", v as StoreProvider)
                     }
                   >
-                    <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]">
+                    <SelectTrigger className="h-[34px] text-[12.5px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[6px]">
                       <SelectValue placeholder="Select provider" />
                     </SelectTrigger>
                     <SelectContent>
@@ -448,19 +423,15 @@ export function StoreRewardForm({
                   </Select>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                    Connected Store Domain (Optional)
-                  </label>
-                  <Input
-                    name="connectedDomain"
-                    value={formik.values.connectedDomain}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder="e.g. brand-store.myshopify.com"
-                    className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                  />
-                </div>
+                <PolarisInput
+                  id="connectedDomain"
+                  name="connectedDomain"
+                  label="Connected Store Domain (Optional)"
+                  value={formik.values.connectedDomain}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  placeholder="e.g. brand-store.myshopify.com"
+                />
               </div>
             </div>
           </PolarisFormCard>
@@ -472,9 +443,9 @@ export function StoreRewardForm({
             description="Select discount mechanics and parameters for on-demand synthesis."
             badge="Step 2"
           >
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {/* Discount Type Selector */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
                   {
                     type: StoreDiscountType.FIXED_AMOUNT,
@@ -506,23 +477,23 @@ export function StoreRewardForm({
                         formik.setFieldValue("discountType", item.type)
                       }
                       className={cn(
-                        "p-3.5 rounded-[8px] border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left",
+                        "p-2.5 rounded-[6px] border transition-all cursor-pointer flex flex-col justify-between gap-1 text-left",
                         isSelected
                           ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 shadow-xs ring-1 ring-[#303030] dark:ring-zinc-100"
                           : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
                       <div className="flex items-center justify-between w-full">
-                        <Icon className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
+                        <Icon className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
                         {isSelected && (
-                          <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                          <Check className="h-3 w-3 text-[#303030] dark:text-zinc-100" />
                         )}
                       </div>
                       <div>
-                        <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block">
+                        <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100 block">
                           {item.label}
                         </span>
-                        <span className="text-[11.5px] text-[#616161] dark:text-zinc-400 block mt-0.5">
+                        <span className="text-[11px] text-[#616161] dark:text-zinc-400 block mt-0.5">
                           {item.desc}
                         </span>
                       </div>
@@ -532,87 +503,64 @@ export function StoreRewardForm({
               </div>
 
               {/* Values Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
                 {formik.values.discountType !==
                   StoreDiscountType.FREE_SHIPPING && (
-                  <div className="space-y-1.5">
-                    <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                      {formik.values.discountType ===
-                      StoreDiscountType.PERCENTAGE
-                        ? "Discount %"
-                        : `Discount Amount (${currencySymbol})`}{" "}
-                      <span className="text-[#d72c0d] ml-0.5">*</span>
-                    </label>
-                    <Input
-                      type="number"
-                      name="discountValue"
-                      value={formik.values.discountValue}
-                      onChange={formik.handleChange}
-                      className="h-[40px] text-[14px] font-mono font-bold bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                    />
-                    {formik.touched.discountValue &&
-                      formik.errors.discountValue && (
-                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                          {formik.errors.discountValue as string}
-                        </p>
-                      )}
-                  </div>
+                  <PolarisInput
+                    id="discountValue"
+                    type="number"
+                    name="discountValue"
+                    label={formik.values.discountType === StoreDiscountType.PERCENTAGE ? "Discount %" : `Discount Amount (${currencySymbol})`}
+                    required
+                    value={formik.values.discountValue}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.discountValue && formik.errors.discountValue ? (formik.errors.discountValue as string) : undefined}
+                  />
                 )}
 
                 {formik.values.discountType ===
                   StoreDiscountType.PERCENTAGE && (
-                  <div className="space-y-1.5">
-                    <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                      Max Discount Cap ({currencySymbol})
-                    </label>
-                    <Input
-                      type="number"
-                      name="maxDiscountCap"
-                      value={formik.values.maxDiscountCap || ""}
-                      onChange={formik.handleChange}
-                      placeholder="0 (No limit)"
-                      className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                    />
-                  </div>
+                  <PolarisInput
+                    id="maxDiscountCap"
+                    type="number"
+                    name="maxDiscountCap"
+                    label={`Max Discount Cap (${currencySymbol})`}
+                    value={formik.values.maxDiscountCap || ""}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    placeholder="0 (No limit)"
+                  />
                 )}
 
-                <div className="space-y-1.5">
-                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                    Min. Cart Subtotal ({currencySymbol})
-                  </label>
-                  <Input
-                    type="number"
-                    name="minCartSubtotal"
-                    value={formik.values.minCartSubtotal || ""}
-                    onChange={formik.handleChange}
-                    placeholder="0 (No minimum)"
-                    className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                  />
-                </div>
+                <PolarisInput
+                  id="minCartSubtotal"
+                  type="number"
+                  name="minCartSubtotal"
+                  label={`Min. Cart Subtotal (${currencySymbol})`}
+                  value={formik.values.minCartSubtotal || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  placeholder="0 (No minimum)"
+                />
 
-                <div className="space-y-1.5">
-                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                    Code Prefix <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
-                  <Input
-                    name="codePrefix"
-                    value={formik.values.codePrefix}
-                    onChange={(e) => {
-                      setHasUserEditedPrefix(true);
-                      formik.setFieldValue(
-                        "codePrefix",
-                        e.target.value.toUpperCase(),
-                      );
-                    }}
-                    placeholder={defaultEntityPrefix}
-                    className="h-[40px] text-[14px] font-mono font-bold uppercase bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                  />
-                  {formik.touched.codePrefix && formik.errors.codePrefix && (
-                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                      {formik.errors.codePrefix}
-                    </p>
-                  )}
-                </div>
+                <PolarisInput
+                  id="codePrefix"
+                  name="codePrefix"
+                  label="Code Prefix"
+                  required
+                  value={formik.values.codePrefix}
+                  onChange={(e) => {
+                    setHasUserEditedPrefix(true);
+                    formik.setFieldValue(
+                      "codePrefix",
+                      e.target.value.toUpperCase(),
+                    );
+                  }}
+                  onBlur={formik.handleBlur}
+                  placeholder={defaultEntityPrefix}
+                  error={formik.touched.codePrefix && formik.errors.codePrefix ? formik.errors.codePrefix : undefined}
+                />
               </div>
             </div>
           </PolarisFormCard>
@@ -624,30 +572,27 @@ export function StoreRewardForm({
             description="Prevent discount abuse with single-use per winning customer locking."
             badge="Step 3"
           >
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                    Validity Period (Days) <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
-                  <Input
-                    type="number"
-                    name="validityDays"
-                    value={formik.values.validityDays}
-                    onChange={formik.handleChange}
-                    className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[8px]"
-                  />
-                  <span className="text-[12px] text-[#616161] dark:text-zinc-400">
-                    Calculates exact expiration date when code is synthesized.
-                  </span>
-                </div>
+            <div className="space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <PolarisInput
+                  id="validityDays"
+                  type="number"
+                  min={1}
+                  name="validityDays"
+                  label="Validity Period (Days)"
+                  required
+                  value={formik.values.validityDays}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  helperText="Calculates exact expiration date when code is synthesized."
+                />
 
-                <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40">
+                <div className="flex items-center justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40">
                   <div className="space-y-0.5">
-                    <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
+                    <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
                       Single-Use per Customer Lock
                     </span>
-                    <span className="text-[12px] text-[#616161] dark:text-zinc-400 block">
+                    <span className="text-[11.5px] text-[#616161] dark:text-zinc-400 block">
                       Restricts redemption to winning member email on checkout.
                     </span>
                   </div>
