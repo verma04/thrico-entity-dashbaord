@@ -169,6 +169,14 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
     onSubmit: async (values) => {
       try {
         if (!isEditing) {
+          const expiryDate = values.validityDays
+            ? (() => {
+                const d = new Date();
+                d.setDate(d.getDate() + Number(values.validityDays));
+                return d.toISOString();
+              })()
+            : undefined;
+
           const res = await createBatch({
             variables: {
               input: {
@@ -185,11 +193,15 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   values.couponType === ManualCouponType.ONE_TO_ONE
                     ? Number(values.count)
                     : undefined,
+                couponCode:
+                  values.couponType === ManualCouponType.ONE_TO_MANY
+                    ? values.couponCode
+                    : undefined,
                 totalUsageLimit:
                   values.couponType === ManualCouponType.ONE_TO_MANY
                     ? Number(values.totalUsageLimit) || undefined
                     : undefined,
-                status: values.status,
+                expiryDate,
               },
             },
           });

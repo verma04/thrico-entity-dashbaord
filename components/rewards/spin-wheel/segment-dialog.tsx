@@ -692,24 +692,24 @@ export function SegmentDialog({
               Wheel Slice Color
             </label>
             <div className="flex flex-wrap items-center gap-2">
-              {SEGMENT_COLORS.map((c) => {
+              {SEGMENT_COLORS.map((hex) => {
                 const isSelected =
-                  editingSegment.color?.toLowerCase() === c.hex.toLowerCase();
+                  editingSegment.color?.toLowerCase() === hex.toLowerCase();
                 return (
                   <button
-                    key={c.hex}
+                    key={hex}
                     type="button"
                     onClick={() =>
-                      setEditingSegment((p) => (p ? { ...p, color: c.hex } : null))
+                      setEditingSegment((p) => (p ? { ...p, color: hex } : null))
                     }
-                    title={c.name}
+                    title={hex}
                     className={cn(
                       "h-8 w-8 rounded-full transition-all flex items-center justify-center shadow-xs cursor-pointer",
                       isSelected
                         ? "scale-110 ring-2 ring-[#303030] ring-offset-2"
                         : "hover:scale-105 opacity-85 hover:opacity-100",
                     )}
-                    style={{ backgroundColor: c.hex }}
+                    style={{ backgroundColor: hex }}
                   >
                     {isSelected && (
                       <Check className="h-3.5 w-3.5 text-white stroke-[3]" />

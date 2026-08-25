@@ -114,23 +114,23 @@ export function SpinSegmentFormSections({
             <PolarisLabel>Wheel Slice Theme Color</PolarisLabel>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              {SEGMENT_COLORS.map((c) => {
+              {SEGMENT_COLORS.map((hex) => {
                 const isSelected =
-                  values.color?.toLowerCase() === c.hex.toLowerCase();
+                  values.color?.toLowerCase() === hex.toLowerCase();
 
                 return (
                   <button
-                    key={c.hex}
+                    key={hex}
                     type="button"
-                    onClick={() => setFieldValue("color", c.hex)}
-                    title={c.name}
+                    onClick={() => setFieldValue("color", hex)}
+                    title={hex}
                     className={cn(
                       "h-6 w-6 rounded-full transition-all cursor-pointer relative flex items-center justify-center shadow-2xs",
                       isSelected
                         ? "ring-2 ring-[#303030] ring-offset-1.5 scale-110"
                         : "hover:scale-105 opacity-85 hover:opacity-100",
                     )}
-                    style={{ backgroundColor: c.hex }}
+                    style={{ backgroundColor: hex }}
                   >
                     {isSelected && (
                       <span className="h-1.5 w-1.5 rounded-full bg-white shadow-xs" />
