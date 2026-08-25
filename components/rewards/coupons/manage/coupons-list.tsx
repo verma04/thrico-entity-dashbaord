@@ -54,14 +54,27 @@ export const getRewardTableColumns = (
   },
   {
     key: "mechanism",
-    header: "Mechanism",
+    header: "Reward Type",
     cell: (reward) => {
-      const mechType =
+      const provider = (reward.metadata?.provider || reward.provider || "").toUpperCase();
+      const rewardType = (reward.rewardType || reward.rewardPillar || reward.pillar || "").toUpperCase();
+      const rawMech =
         reward.mechanism?.type ||
         (Array.isArray(reward.rewardMechanism)
           ? reward.rewardMechanism[0]
-          : reward.rewardMechanism) ||
-        "INTERNAL_VOUCHER";
+          : reward.rewardMechanism);
+
+      let mechType = rawMech;
+      if (!mechType || mechType === "INTERNAL" || mechType === "INTERNAL_VOUCHER" || mechType === "MANUAL_COUPON") {
+        if (rewardType === "STORE" || rewardType === "SHOPIFY" || provider === "SHOPIFY" || provider === "STORE") {
+          mechType = "STORE_DISCOUNT";
+        } else if (rewardType === "GIFT_CARD" || rewardType === "DIGITAL_GIFT_CARD" || provider === "THRICO" || provider === "XOXODAY" || provider === "GIFT_CARD") {
+          mechType = "DIGITAL_GIFT_CARD";
+        } else {
+          mechType = "COUPON";
+        }
+      }
+
       const primaryMech = getMechanismBadge(mechType);
       const MechIcon = primaryMech.icon;
       return (

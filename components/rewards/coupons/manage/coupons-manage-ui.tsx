@@ -11,6 +11,8 @@ import {
   Sparkles,
   RotateCw,
   Gamepad2,
+  ShoppingBag,
+  Gift,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,8 +47,10 @@ export const STATUS_TABS = [
 export type RewardStatusValue = (typeof STATUS_TABS)[number]["value"];
 
 export const MECHANISM_OPTIONS = [
-  { value: "ALL", label: "All Mechanisms", icon: Ticket },
+  { value: "ALL", label: "All Types & Mechanisms", icon: Ticket },
   { value: "COUPON", label: "Standard Coupon", icon: Ticket },
+  { value: "STORE_DISCOUNT", label: "Store Discount", icon: ShoppingBag },
+  { value: "DIGITAL_GIFT_CARD", label: "Digital Gift Card", icon: Gift },
   { value: "SCRATCH_CARD", label: "Scratch Card", icon: Sparkles },
   { value: "SPIN_WHEEL", label: "Spin Wheel", icon: RotateCw },
   { value: "MATCH_AND_WIN", label: "Match & Win", icon: Gamepad2 },

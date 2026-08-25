@@ -24,13 +24,24 @@ interface CouponCardCompactProps {
 export function CouponCardCompact({
   reward,
 }: CouponCardCompactProps) {
+  const provider = (reward.metadata?.provider || reward.provider || "").toUpperCase();
+  const rewardType = (reward.rewardType || reward.rewardPillar || reward.pillar || "").toUpperCase();
   const mechanisms = Array.isArray(reward.rewardMechanism)
     ? reward.rewardMechanism
     : [reward.rewardMechanism || "COUPON"];
 
-  const primaryMech = getMechanismBadge(
-    reward.mechanism?.type || mechanisms[0] || "COUPON"
-  );
+  let mechType = reward.mechanism?.type || mechanisms[0] || "COUPON";
+  if (!mechType || mechType === "INTERNAL" || mechType === "INTERNAL_VOUCHER" || mechType === "MANUAL_COUPON") {
+    if (rewardType === "STORE" || rewardType === "SHOPIFY" || provider === "SHOPIFY" || provider === "STORE") {
+      mechType = "STORE_DISCOUNT";
+    } else if (rewardType === "GIFT_CARD" || rewardType === "DIGITAL_GIFT_CARD" || provider === "THRICO" || provider === "XOXODAY" || provider === "GIFT_CARD") {
+      mechType = "DIGITAL_GIFT_CARD";
+    } else {
+      mechType = "COUPON";
+    }
+  }
+
+  const primaryMech = getMechanismBadge(mechType);
   const MechIcon = primaryMech.icon;
 
   const coverUrl = reward.image

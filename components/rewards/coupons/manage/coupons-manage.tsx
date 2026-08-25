@@ -187,12 +187,52 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
       list = list.filter((r) => !r.isActive);
     }
 
-    // Mechanism filter
+    // Mechanism / Pillar filter
     if (mechanism !== "ALL") {
       list = list.filter((r) => {
         const mechs = Array.isArray(r.rewardMechanism)
           ? r.rewardMechanism
           : [r.rewardMechanism || "COUPON"];
+        const pillar = (r.rewardPillar || r.pillar || r.mechanism?.type || r.rewardType || "").toUpperCase();
+        const provider = (r.metadata?.provider || r.provider || "").toUpperCase();
+
+        if (mechanism === "COUPON") {
+          return (
+            mechs.includes("COUPON") ||
+            mechs.includes("INTERNAL_VOUCHER") ||
+            mechs.includes("INTERNAL") ||
+            mechs.includes("MANUAL_COUPON") ||
+            pillar === "INTERNAL" ||
+            pillar === "COUPON" ||
+            pillar === "PILLAR_1"
+          );
+        }
+        if (mechanism === "STORE_DISCOUNT") {
+          return (
+            mechs.includes("STORE_DISCOUNT") ||
+            mechs.includes("ECOMMERCE") ||
+            mechs.includes("SHOPIFY_DISCOUNT") ||
+            pillar === "STORE_DISCOUNT" ||
+            pillar === "SHOPIFY" ||
+            pillar === "PILLAR_2" ||
+            pillar === "STORE" ||
+            provider === "SHOPIFY" ||
+            provider === "STORE"
+          );
+        }
+        if (mechanism === "DIGITAL_GIFT_CARD") {
+          return (
+            mechs.includes("DIGITAL_GIFT_CARD") ||
+            mechs.includes("GIFT_CARD") ||
+            pillar === "GIFT_CARD" ||
+            pillar === "DIGITAL_GIFT_CARD" ||
+            pillar === "PILLAR_3" ||
+            provider === "THRICO" ||
+            provider === "XOXODAY" ||
+            provider === "GIFT_CARD"
+          );
+        }
+
         return mechs.includes(mechanism);
       });
     }

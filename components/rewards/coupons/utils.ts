@@ -17,7 +17,7 @@ export function getMechanismBadge(mechanism: string) {
       variant: "purple" as const,
     };
 
-  if (mechanism === "STORE_DISCOUNT" || mechanism === "ECOMMERCE" || mechanism === "SHOPIFY_DISCOUNT")
+  if (mechanism === "STORE_DISCOUNT" || mechanism === "ECOMMERCE" || mechanism === "SHOPIFY_DISCOUNT" || mechanism === "STORE" || mechanism === "SHOPIFY")
     return {
       label: "Store Discount",
       icon: ShoppingBag,
@@ -26,9 +26,9 @@ export function getMechanismBadge(mechanism: string) {
       variant: "indigo" as const,
     };
 
-  if (mechanism === "INTERNAL_VOUCHER" || mechanism === "INTERNAL" || mechanism === "MANUAL_COUPON")
+  if (mechanism === "INTERNAL_VOUCHER" || mechanism === "INTERNAL" || mechanism === "MANUAL_COUPON" || mechanism === "COUPON")
     return {
-      label: "Internal Voucher",
+      label: "Standard Coupon",
       icon: Ticket,
       color: "bg-emerald-600 text-white",
       chip: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
@@ -37,7 +37,7 @@ export function getMechanismBadge(mechanism: string) {
 
   if (mechanism === "SCRATCH_CARD")
     return {
-      label: "Scratch",
+      label: "Scratch Card",
       icon: Sparkles,
       color: "bg-amber-500 text-white",
       chip: "bg-amber-50 text-amber-700 border-amber-100",
@@ -63,10 +63,10 @@ export function getMechanismBadge(mechanism: string) {
     };
 
   return {
-    label: "Coupon",
+    label: "Standard Coupon",
     icon: Ticket,
-    color: "bg-indigo-500 text-white",
-    chip: "bg-indigo-50 text-indigo-700 border-indigo-100",
-    variant: "indigo" as const,
+    color: "bg-emerald-600 text-white",
+    chip: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    variant: "emerald" as const,
   };
 }
