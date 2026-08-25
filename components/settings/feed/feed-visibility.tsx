@@ -32,6 +32,57 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+export interface FeedField {
+  key: string;
+  label: string;
+  description: string;
+  icon: any;
+  type?: string;
+}
+
+export const FEED_FIELDS: FeedField[] = [
+  {
+    key: "allowEntityMomentsInFeed",
+    label: "Show Video Moments in Feed",
+    description:
+      "Surface short-form vertical video clips and milestone moments in feed cards.",
+    icon: Film,
+    type: "switch",
+  },
+  {
+    key: "allowEntityFeedInFeed",
+    label: "Show Admin Feed Announcements",
+    description:
+      "Surface entity announcements, pinned notifications, and administrative updates.",
+    icon: ShieldAlert,
+    type: "switch",
+  },
+  {
+    key: "allowEntityCommunityInFeed",
+    label: "Show Communities in Feed",
+    description:
+      "Surface community group activities and member announcements in the main feed stream.",
+    icon: Users2,
+    type: "switch",
+  },
+  {
+    key: "allowEntityDiscussionForumInFeed",
+    label: "Show Forum Posts in Feed",
+    description:
+      "Allow structured discussion forum topics and questions to appear in the stream.",
+    icon: MessageSquare,
+    type: "switch",
+  },
+  {
+    key: "allowEntityPollsInFeed",
+    label: "Show Polls & Votes in Feed",
+    description:
+      "Allow interactive community voting polls and opinion cards directly in member feeds.",
+    icon: BarChart2,
+    type: "switch",
+  },
+];
+
 interface FeedVisibilitySettings {
   allowEntityCommunityInFeed: boolean;
   allowEntityDiscussionForumInFeed: boolean;
