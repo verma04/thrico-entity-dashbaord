@@ -239,35 +239,48 @@ export function PolarisOriginPicker({
 /* ─── PolarisPresetChips ─── */
 export interface PolarisPresetChipsProps {
   presets: number[];
-  currentValue: number;
-  onSelect: (value: number) => void;
+  currentValue?: number;
+  value?: number;
+  onSelect?: (value: number) => void;
+  onChange?: (value: number) => void;
   prefix?: string;
+  suffix?: string;
+  unit?: string;
   className?: string;
 }
 
 export function PolarisPresetChips({
   presets,
   currentValue,
+  value,
   onSelect,
+  onChange,
   prefix = "+",
+  suffix,
+  unit,
   className,
 }: PolarisPresetChipsProps) {
+  const activeValue = currentValue !== undefined ? currentValue : value;
+  const handleSelect = onSelect || onChange || (() => {});
+  const displaySuffix = suffix ?? unit ?? "";
+
   return (
     <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
       {presets.map((preset) => (
         <button
           key={preset}
           type="button"
-          onClick={() => onSelect(preset)}
+          onClick={() => handleSelect(preset)}
           className={cn(
             "h-7 px-2.5 rounded-[6px] text-[12px] font-medium border transition-all cursor-pointer",
-            Number(currentValue) === preset
+            Number(activeValue) === preset
               ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 font-bold shadow-xs"
               : "bg-[#f6f6f7] dark:bg-zinc-800 border-[#d2d5d9] dark:border-zinc-700 text-[#303030] dark:text-zinc-300 hover:bg-[#e4e5e7] dark:hover:bg-zinc-700",
           )}
         >
           {prefix}
           {preset}
+          {displaySuffix}
         </button>
       ))}
     </div>

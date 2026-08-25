@@ -93,3 +93,38 @@ export function getActiveSidebarTab(pathName?: string | null): ActiveSidebarTab 
   // 13. Modules (all other dynamic entity modules)
   return "modules";
 }
+
+/**
+ * Determines whether the current route is a creation/edit form or visual studio route
+ * so that the child sidebar drawer automatically collapses to give optimal workspace.
+ */
+export function isFormRoute(pathName?: string | null): boolean {
+  if (!pathName) return false;
+  const path = pathName.split("?")[0].replace(/\/+$/, "") || "/";
+
+  // 1. Suffix or path segment matches for create/edit/add
+  if (
+    path.endsWith("/create") ||
+    path.includes("/create/") ||
+    path.endsWith("/edit") ||
+    path.includes("/edit/") ||
+    path.endsWith("/add-mentor") ||
+    path.endsWith("/add") ||
+    path.includes("/add/") ||
+    path.endsWith("/new") ||
+    path.includes("/new/")
+  ) {
+    return true;
+  }
+
+  // 2. Specific studio / configuration form pages
+  const specificFormRoutes = [
+    "/settings/branding",
+    "/settings/appearance",
+    "/gamification/currency/economics",
+  ];
+
+  return specificFormRoutes.some(
+    (route) => path === route || path.startsWith(`${route}/`),
+  );
+}

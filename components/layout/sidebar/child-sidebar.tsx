@@ -40,7 +40,7 @@ import { TopNavbar } from "./top-navbar";
 import { ParentSidebar } from "./parent-sidebar";
 import LogoutModal from "./logout";
 import { SwitchingLoader } from "./switching-loader";
-import { getActiveSidebarTab } from "./sidebar-utils";
+import { getActiveSidebarTab, isFormRoute } from "./sidebar-utils";
 
 export function ChildSidebarContainer({
   children,
@@ -53,10 +53,19 @@ export function ChildSidebarContainer({
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const { state, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   const activeTab = getActiveSidebarTab(pathName);
+
+  // Automatically collapse child-sidebar drawer on form routes; keep open on all other pages
+  useEffect(() => {
+    if (isFormRoute(pathName)) {
+      setOpen(false);
+    } else {
+      setOpen(true);
+    }
+  }, [pathName, setOpen]);
 
   // Default-open the Classifications group when on the members tab
   useEffect(() => {
@@ -305,11 +314,12 @@ export function ChildSidebarContainer({
         otherAccountsData={otherAccountsData}
         isSwitching={isSwitching}
         handleSwitch={handleSwitch}
+        showSidebarToggle={activeTab !== "mobile-app" && activeTab !== "home"}
       />
       <div className="flex flex-1 relative w-full bg-white dark:bg-neutral-950 group/sidebar-wrapper">
         <ParentSidebar />
-        {/* ── SIDEBAR ── */}
-        {activeTab !== "mobile-app" && (
+        {/* ── SIDEBAR (Hidden on Home route & Mobile App) ── */}
+        {activeTab !== "mobile-app" && activeTab !== "home" && (
           <Sidebar
             collapsible="icon"
             className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! mb-2 z-30 shadow-sm rounded-l-2xl!"
@@ -351,16 +361,6 @@ export function ChildSidebarContainer({
                     )}
                   </div>
                 </div>
-              )}
-
-              {activeTab === "home" && (
-                <CollapsibleSection
-                  sectionKey="home"
-                  label="Home"
-                  items={filteredHome}
-                  renderItems={renderItems}
-                  className="mb-1"
-                />
               )}
 
               {activeTab === "ai" && (

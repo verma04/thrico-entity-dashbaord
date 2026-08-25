@@ -45,6 +45,7 @@ interface TopNavbarProps {
   otherAccountsData: any; // Ideally typed with your GraphQL generated types
   isSwitching: boolean;
   handleSwitch: (entityId: string, name: string) => void;
+  showSidebarToggle?: boolean;
 }
 
 export function TopNavbar({
@@ -57,26 +58,31 @@ export function TopNavbar({
   otherAccountsData,
   isSwitching,
   handleSwitch,
+  showSidebarToggle = true,
 }: TopNavbarProps) {
   return (
     <header className="flex h-14 items-center justify-between gap-3  bg-white dark:bg-background px-4 sticky top-0 z-40">
       {/* Left: sidebar toggle + Workspace */}
       <div className="flex items-center gap-2 min-w-0 shrink-0">
         <WorkspaceSwitcher />
-        <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-800" />
-        <button
-          onClick={toggleSidebar}
-          className="h-7 w-7 rounded-md text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-150 flex items-center justify-center shrink-0"
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <PanelLeft
-            size={15}
-            className={cn(
-              "transition-transform duration-200",
-              isCollapsed && "rotate-180",
-            )}
-          />
-        </button>
+        {showSidebarToggle && (
+          <>
+            <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-800" />
+            <button
+              onClick={toggleSidebar}
+              className="h-7 w-7 rounded-md text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-150 flex items-center justify-center shrink-0 cursor-pointer"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <PanelLeft
+                size={15}
+                className={cn(
+                  "transition-transform duration-200",
+                  isCollapsed && "rotate-180",
+                )}
+              />
+            </button>
+          </>
+        )}
       </div>
 
       {/* Center: Search + AI Chats */}
