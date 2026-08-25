@@ -177,7 +177,8 @@ function MenuTabs({
               item={item}
               isActive={
                 activeTab === item.key ||
-                (!!item.key && (fullKey === item.key || fullKey.startsWith(item.key + "/")))
+                (!!item.key &&
+                  (fullKey === item.key || fullKey.startsWith(item.key + "/")))
               }
               href={href}
               fullWidth={fullWidth}
@@ -208,7 +209,7 @@ function MenuTabs({
   };
 
   return (
-    <nav className="sticky top-0 z-30 bg-white dark:bg-background border-b border-border">
+    <nav className="sticky top-0 z-30 bg-white dark:bg-background mx-1 border-b border-border">
       <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
         {enableReorder ? (
           <DragDropContext onDragEnd={handleDragEnd}>
