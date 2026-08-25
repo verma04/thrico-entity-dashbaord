@@ -72,7 +72,12 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
         icon: <Award className="h-4 w-4" />,
         locked: !canRead,
       },
-
+      {
+        key: "automation",
+        label: "Automations",
+        icon: <Zap className="h-4 w-4" />,
+        locked: !canRead,
+      },
       {
         key: "graph",
         label: "Network Graph",

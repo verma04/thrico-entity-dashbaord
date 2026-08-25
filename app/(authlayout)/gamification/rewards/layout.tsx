@@ -13,6 +13,7 @@ import {
   RectangleHorizontal,
   RefreshCw,
   Layers,
+  BookOpen,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
@@ -62,6 +63,12 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
       label: "Fraud Control",
       icon: <ShieldAlert className="h-4 w-4" />,
       section: "Reports",
+    },
+    {
+      key: "how-it-works",
+      label: "How It Works",
+      icon: <BookOpen className="h-4 w-4" />,
+      section: "Guide",
     },
   ];
 

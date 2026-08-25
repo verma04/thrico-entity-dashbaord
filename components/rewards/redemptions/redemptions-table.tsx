@@ -248,11 +248,11 @@ export function RedemptionsTable({
           return (
             <div className="text-xs font-mono">
               <span className="font-bold text-foreground">
-                ₹{row.totalCost || row.faceValue}
+                {row.totalCost || row.faceValue}
               </span>
               {row.serviceFee ? (
                 <span className="text-[10px] text-muted-foreground block">
-                  (₹{row.faceValue} + ₹{row.serviceFee} fee)
+                  ({row.faceValue} + {row.serviceFee} fee)
                 </span>
               ) : null}
             </div>
@@ -475,12 +475,12 @@ export function RedemptionsTable({
                     </span>
                     <span className="font-mono text-sm font-bold text-foreground block">
                       {selectedRedemption.totalCost !== undefined || selectedRedemption.faceValue !== undefined
-                        ? `₹${selectedRedemption.totalCost ?? selectedRedemption.faceValue}`
-                        : "₹0"}
+                        ? `${currencySymbol}${selectedRedemption.totalCost ?? selectedRedemption.faceValue}`
+                        : `${currencySymbol}0`}
                     </span>
                     {selectedRedemption.serviceFee ? (
                       <span className="text-[10px] text-muted-foreground font-mono block">
-                        ₹{selectedRedemption.faceValue} + ₹{selectedRedemption.serviceFee} fee
+                        {currencySymbol}{selectedRedemption.faceValue} + {currencySymbol}{selectedRedemption.serviceFee} fee
                       </span>
                     ) : null}
                   </div>
