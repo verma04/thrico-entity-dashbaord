@@ -20,7 +20,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
@@ -36,6 +35,9 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 
 const pollSchema = Yup.object().shape({
@@ -167,39 +169,39 @@ export default function NewPoll({
                     badge="Live Ballot"
                     icon={Sparkles}
                   >
-                    <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs">
+                    <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3 space-y-2.5 shadow-2xs">
                       <div>
-                        <h4 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 truncate">
+                        <h4 className="font-semibold text-[13px] text-[#303030] dark:text-zinc-100 truncate">
                           {formik.values.title || `Untitled ${singularName}`}
                         </h4>
-                        <p className="text-[12px] text-[#616161] dark:text-zinc-400 mt-1 leading-[16px]">
+                        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[15px]">
                           {formik.values.question ||
                             "Poll question and prompt will appear here..."}
                         </p>
                       </div>
 
                       {/* Ballot Options Preview */}
-                      <div className="space-y-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                      <div className="space-y-1.5 pt-1.5 border-t border-[#e1e3e5] dark:border-zinc-800">
                         {formik.values.options.map((opt, i) => (
                           <div
                             key={i}
-                            className="flex items-center gap-2.5 p-2 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800"
+                            className="flex items-center gap-2 p-1.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800"
                           >
-                            <div className="h-5 w-5 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-700 border border-[#d2d5d9] dark:border-zinc-600 flex items-center justify-center shrink-0">
-                              <span className="text-[10px] font-bold text-[#303030] dark:text-zinc-200">
+                            <div className="h-4.5 w-4.5 rounded-[3px] bg-[#f6f6f7] dark:bg-zinc-700 border border-[#d2d5d9] dark:border-zinc-600 flex items-center justify-center shrink-0">
+                              <span className="text-[9.5px] font-bold text-[#303030] dark:text-zinc-200">
                                 {String.fromCharCode(65 + i)}
                               </span>
                             </div>
-                            <span className="text-[12.5px] font-medium text-[#303030] dark:text-zinc-200 truncate flex-1">
+                            <span className="text-[11.5px] font-medium text-[#303030] dark:text-zinc-200 truncate flex-1">
                               {opt.option || `Choice ${i + 1}`}
                             </span>
-                            <div className="h-3.5 w-3.5 rounded-full border border-[#aeb4b9] dark:border-zinc-600 shrink-0" />
+                            <div className="h-3 w-3 rounded-full border border-[#aeb4b9] dark:border-zinc-600 shrink-0" />
                           </div>
                         ))}
                       </div>
 
                       {/* Visibility Chip */}
-                      <div className="pt-1 flex items-center justify-between text-[11.5px] text-[#616161]">
+                      <div className="pt-1 flex items-center justify-between text-[11px] text-[#616161]">
                         <span>Visibility:</span>
                         <span className="font-semibold text-[#303030] dark:text-zinc-200">
                           {getVisibilityLabel()}
@@ -238,7 +240,7 @@ export default function NewPoll({
                 </div>
               }
             >
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3.5">
                 {/* Step 1: Core Poll Identity & Prompt */}
                 <PolarisFormCard
                   step={1}
@@ -246,62 +248,34 @@ export default function NewPoll({
                   description="Specify the subject headline and the main inquiry for your community."
                   badge="Required"
                 >
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="poll-title"
-                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                    >
-                      {singularName} Title{" "}
-                      <span className="text-[#d72c0d] ml-0.5">*</span>
-                    </label>
-                    <Input
-                      id="poll-title"
-                      name="title"
-                      placeholder={`e.g., Weekly Product Feedback Poll`}
-                      maxLength={100}
-                      value={formik.values.title}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                    />
-                    {formik.touched.title && formik.errors.title && (
-                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                        {formik.errors.title}
-                      </p>
-                    )}
-                  </div>
+                  <PolarisInput
+                    id="poll-title"
+                    name="title"
+                    label={`${singularName} Title`}
+                    required
+                    placeholder="e.g., Weekly Product Feedback Poll"
+                    maxLength={100}
+                    value={formik.values.title}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.title && formik.errors.title ? String(formik.errors.title) : undefined}
+                  />
 
-                  <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                    <label
-                      htmlFor="poll-question"
-                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                    >
-                      Inquiry Question{" "}
-                      <span className="text-[#d72c0d] ml-0.5">*</span>
-                    </label>
-                    <Textarea
+                  <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                    <PolarisTextarea
                       id="poll-question"
                       name="question"
+                      label="Inquiry Question"
+                      required
                       rows={3}
-                      placeholder={`State the exact question or decision members should vote on...`}
+                      placeholder="State the exact question or decision members should vote on..."
                       maxLength={200}
                       value={formik.values.question}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      className="min-h-[100px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
+                      helperText={`${formik.values.question.length} / 200 characters`}
+                      error={formik.touched.question && formik.errors.question ? String(formik.errors.question) : undefined}
                     />
-                    <div className="flex items-center justify-between">
-                      {formik.touched.question && formik.errors.question ? (
-                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                          {formik.errors.question}
-                        </p>
-                      ) : (
-                        <span />
-                      )}
-                      <p className="text-[11.5px] text-[#616161] font-medium">
-                        {formik.values.question.length} / 200 characters
-                      </p>
-                    </div>
                   </div>
                 </PolarisFormCard>
 
@@ -315,14 +289,14 @@ export default function NewPoll({
                   <FieldArray
                     name="options"
                     render={(arrayHelpers) => (
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         {formik.values.options.map((option, index) => (
                           <div
                             key={index}
-                            className="group flex items-center gap-2 p-2 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/50 transition-colors"
+                            className="group flex items-center gap-1.5 p-1.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/50 transition-colors"
                           >
-                            <div className="h-7 w-7 rounded-[6px] bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
-                              <span className="text-xs font-bold">
+                            <div className="h-6 w-6 rounded-[4px] bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
+                              <span className="text-[11px] font-bold">
                                 {String.fromCharCode(65 + index)}
                               </span>
                             </div>
@@ -333,41 +307,41 @@ export default function NewPoll({
                               value={option.option}
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
-                              className="h-[36px] flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-[13.5px] text-[#303030] dark:text-zinc-100 font-medium"
+                              className="h-[30px] flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-[12.5px] text-[#303030] dark:text-zinc-100 font-medium px-1.5"
                             />
 
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-[6px] text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 cursor-pointer"
+                                className="h-6 w-6 rounded-[4px] text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 cursor-pointer"
                                 onClick={() => moveOption(index, index - 1)}
                                 disabled={index === 0}
                               >
-                                <ArrowUp className="h-3.5 w-3.5" />
+                                <ArrowUp className="h-3 w-3" />
                               </Button>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-[6px] text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 cursor-pointer"
+                                className="h-6 w-6 rounded-[4px] text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 cursor-pointer"
                                 onClick={() => moveOption(index, index + 1)}
                                 disabled={
                                   index === formik.values.options.length - 1
                                 }
                               >
-                                <ArrowDown className="h-3.5 w-3.5" />
+                                <ArrowDown className="h-3 w-3" />
                               </Button>
                               {formik.values.options.length > 2 && (
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 rounded-[6px] text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer"
+                                  className="h-6 w-6 rounded-[4px] text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer"
                                   onClick={() => arrayHelpers.remove(index)}
                                 >
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <Trash2 className="h-3 w-3" />
                                 </Button>
                               )}
                             </div>
@@ -379,10 +353,10 @@ export default function NewPoll({
                           variant="outline"
                           size="sm"
                           onClick={() => arrayHelpers.push({ option: "" })}
-                          className="w-full h-[38px] border-dashed border-[#aeb4b9] dark:border-zinc-700 text-[13px] font-semibold text-[#303030] dark:text-zinc-300 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 rounded-[8px]"
+                          className="w-full h-[34px] border-dashed border-[#aeb4b9] dark:border-zinc-700 text-[12px] font-semibold text-[#303030] dark:text-zinc-300 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 rounded-[6px] cursor-pointer"
                           disabled={formik.values.options.length >= 10}
                         >
-                          <Plus className="h-3.5 w-3.5 mr-1.5" />
+                          <Plus className="h-3 w-3 mr-1" />
                           Add Choice ({formik.values.options.length}/10)
                         </Button>
                       </div>
@@ -397,7 +371,7 @@ export default function NewPoll({
                   description="Determine when voters and peers are permitted to view real-time tally percentages."
                   badge="Governance"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     {visibilityOptions.map((opt) => {
                       const Icon = opt.icon;
                       const isSelected = resultVisibility === opt.value;
@@ -407,26 +381,26 @@ export default function NewPoll({
                           type="button"
                           onClick={() => setResultVisibility(opt.value)}
                           className={cn(
-                            "relative flex flex-col items-start p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+                            "relative flex flex-col items-start p-3 rounded-[6px] border text-left transition-all cursor-pointer",
                             isSelected
-                              ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                              ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-2xs"
                               : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                           )}
                         >
                           <div
                             className={cn(
-                              "h-8 w-8 rounded-[6px] flex items-center justify-center mb-2 border transition-colors",
+                              "h-7 w-7 rounded-[4px] flex items-center justify-center mb-1.5 border transition-colors",
                               isSelected
                                 ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
                                 : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
                             )}
                           >
-                            <Icon className="h-4 w-4" />
+                            <Icon className="h-3.5 w-3.5" />
                           </div>
-                          <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                          <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
                             {opt.label}
                           </span>
-                          <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+                          <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[15px]">
                             {opt.desc}
                           </p>
                         </button>
@@ -461,38 +435,36 @@ export default function NewPoll({
   // Standalone / Modal / Sheet mode
   const renderForm = () => (
     <FormikProvider value={formik}>
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-4 p-5">
-        <div className="space-y-1.5">
-          <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-            {singularName} Title
-          </label>
-          <Input
-            name="title"
-            placeholder="Poll title..."
-            value={formik.values.title}
-            onChange={formik.handleChange}
-            className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-            Question
-          </label>
-          <Textarea
-            name="question"
-            placeholder="Ask question..."
-            rows={2}
-            value={formik.values.question}
-            onChange={formik.handleChange}
-            className="min-h-[90px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none"
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-3 p-4">
+        <PolarisInput
+          id="sheet-poll-title"
+          name="title"
+          label={`${singularName} Title`}
+          required
+          placeholder="Poll title..."
+          value={formik.values.title}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.title && formik.errors.title ? String(formik.errors.title) : undefined}
+        />
+        <PolarisTextarea
+          id="sheet-poll-question"
+          name="question"
+          label="Question"
+          required
+          placeholder="Ask question..."
+          rows={2}
+          value={formik.values.question}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.question && formik.errors.question ? String(formik.errors.question) : undefined}
+        />
         <div className="pt-2 flex items-center justify-end gap-2">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-[36px] text-[13px] border-[#aeb4b9] rounded-[6px]"
+            className="h-[30px] text-[12px] border-[#aeb4b9] rounded-[4px] cursor-pointer"
             onClick={() => {
               if (standalone) setOpen(false);
               else if (onCancel) onCancel();
@@ -503,7 +475,7 @@ export default function NewPoll({
           <Button
             type="submit"
             size="sm"
-            className="h-[36px] text-[13px] rounded-[6px]"
+            className="h-[30px] text-[12px] rounded-[4px] cursor-pointer bg-[#303030] text-white hover:bg-[#202020]"
             disabled={!formik.isValid || !formik.dirty || loading}
           >
             {loading ? "Creating..." : `Create ${singularName}`}
@@ -519,15 +491,15 @@ export default function NewPoll({
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} size="sm" className="shadow-xs rounded-[6px] h-[36px]">
-        <Plus className="h-4 w-4 mr-2" />
+      <Button onClick={() => setOpen(true)} size="sm" className="shadow-2xs rounded-[6px] h-[34px] text-[12.5px]">
+        <Plus className="h-3.5 w-3.5 mr-1.5" />
         Create {singularName}
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="w-full sm:max-w-[500px] p-0 border-l border-[#d2d5d9] dark:border-zinc-800">
-          <SheetHeader className="p-4 border-b border-[#d2d5d9] dark:border-zinc-800">
-            <SheetTitle className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100">
+        <SheetContent className="w-full sm:max-w-[460px] p-0 border-l border-[#d2d5d9] dark:border-zinc-800">
+          <SheetHeader className="p-3.5 border-b border-[#d2d5d9] dark:border-zinc-800">
+            <SheetTitle className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
               Create {singularName}
             </SheetTitle>
           </SheetHeader>
