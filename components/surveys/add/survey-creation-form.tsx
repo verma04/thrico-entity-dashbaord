@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Calendar as CalendarIcon, Sparkles, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -22,6 +21,8 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 
 export function SurveyCreationForm({
@@ -76,24 +77,24 @@ export function SurveyCreationForm({
               badge="Draft Mode"
               icon={Sparkles}
             >
-              <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-[6px] bg-[#303030] dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center shrink-0">
-                    <FileText className="h-5 w-5" />
+              <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3 space-y-2.5 shadow-2xs">
+                <div className="flex items-start gap-2.5">
+                  <div className="h-8 w-8 rounded-[4px] bg-[#303030] dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center shrink-0">
+                    <FileText className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-semibold text-[14px] text-[#303030] dark:text-zinc-100 truncate">
+                    <h4 className="font-semibold text-[13px] text-[#303030] dark:text-zinc-100 truncate">
                       {formik.values.title || `New ${singularName} Draft`}
                     </h4>
-                    <p className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5">
+                    <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5">
                       Ready for question builder
                     </p>
                   </div>
                 </div>
 
                 {/* Timeline Snapshot */}
-                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1">
-                  <div className="flex items-center justify-between text-[11.5px] text-[#616161]">
+                <div className="pt-1.5 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
                     <span>Timeline:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
                       {formik.values.startDate
@@ -147,7 +148,7 @@ export function SurveyCreationForm({
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           {/* Step 1: Survey Title & Information */}
           <PolarisFormCard
             step={1}
@@ -155,29 +156,17 @@ export function SurveyCreationForm({
             description="Specify the title and identifying context for this survey campaign."
             badge="Required"
           >
-            <div className="space-y-1.5">
-              <label
-                htmlFor="title"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-              >
-                {singularName} Title{" "}
-                <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="e.g., Q3 Community Feedback & Engagement Survey"
-                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                value={formik.values.title}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-              {formik.touched.title && formik.errors.title && (
-                <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                  {formik.errors.title as string}
-                </p>
-              )}
-            </div>
+            <PolarisInput
+              id="title"
+              name="title"
+              label={`${singularName} Title`}
+              required
+              placeholder="e.g., Q3 Community Feedback & Engagement Survey"
+              value={formik.values.title}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.title && formik.errors.title ? String(formik.errors.title) : undefined}
+            />
           </PolarisFormCard>
 
           {/* Step 2: Scheduling & Duration */}
@@ -189,10 +178,8 @@ export function SurveyCreationForm({
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Start Date */}
-              <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                  Start Date
-                </label>
+              <div className="space-y-1">
+                <PolarisLabel>Start Date</PolarisLabel>
                 <Popover
                   open={isStartDateOpen}
                   onOpenChange={setIsStartDateOpen}
@@ -201,11 +188,11 @@ export function SurveyCreationForm({
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full h-[40px] justify-start text-left font-normal rounded-[8px] border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[14px] text-[#303030] dark:text-zinc-100 px-3 cursor-pointer",
+                        "w-full h-[34px] justify-start text-left font-normal rounded-[6px] border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[12.5px] text-[#303030] dark:text-zinc-100 px-2.5 cursor-pointer",
                         !formik.values.startDate && "text-[#8c9196]",
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-[#616161]" />
+                      <CalendarIcon className="mr-2 h-3.5 w-3.5 text-[#616161]" />
                       {formik.values.startDate ? (
                         format(formik.values.startDate, "PPP")
                       ) : (
@@ -214,7 +201,7 @@ export function SurveyCreationForm({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-auto p-0 rounded-[8px] shadow-lg border-[#d2d5d9] dark:border-zinc-800"
+                    className="w-auto p-0 rounded-[6px] shadow-lg border-[#d2d5d9] dark:border-zinc-800"
                     align="start"
                   >
                     <Calendar
@@ -231,20 +218,18 @@ export function SurveyCreationForm({
               </div>
 
               {/* End Date */}
-              <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                  End Date
-                </label>
+              <div className="space-y-1">
+                <PolarisLabel>End Date</PolarisLabel>
                 <Popover open={isEndDateOpen} onOpenChange={setIsEndDateOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full h-[40px] justify-start text-left font-normal rounded-[8px] border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[14px] text-[#303030] dark:text-zinc-100 px-3 cursor-pointer",
+                        "w-full h-[34px] justify-start text-left font-normal rounded-[6px] border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[12.5px] text-[#303030] dark:text-zinc-100 px-2.5 cursor-pointer",
                         !formik.values.endDate && "text-[#8c9196]",
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-[#616161]" />
+                      <CalendarIcon className="mr-2 h-3.5 w-3.5 text-[#616161]" />
                       {formik.values.endDate ? (
                         format(formik.values.endDate, "PPP")
                       ) : (
@@ -253,7 +238,7 @@ export function SurveyCreationForm({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-auto p-0 rounded-[8px] shadow-lg border-[#d2d5d9] dark:border-zinc-800"
+                    className="w-auto p-0 rounded-[6px] shadow-lg border-[#d2d5d9] dark:border-zinc-800"
                     align="start"
                   >
                     <Calendar
@@ -273,7 +258,7 @@ export function SurveyCreationForm({
                   </PopoverContent>
                 </Popover>
                 {formik.touched.endDate && formik.errors.endDate && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+                  <p className="text-[12px] text-[#d72c0d] font-normal leading-[16px]">
                     {formik.errors.endDate as string}
                   </p>
                 )}
