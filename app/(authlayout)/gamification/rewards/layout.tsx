@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   ShieldAlert,
   Plus,
-  Network,
   BarChart3,
   Gamepad2,
   Dices,
@@ -63,12 +62,6 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
       label: "Fraud Control",
       icon: <ShieldAlert className="h-4 w-4" />,
       section: "Reports",
-    },
-    {
-      key: "settings",
-      label: "Partner Network",
-      icon: <Network className="h-4 w-4" />,
-      section: "Partnerships",
     },
   ];
 
