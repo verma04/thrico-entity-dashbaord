@@ -263,8 +263,21 @@ export const useGetFeedInterestMatrix = (
     ...options,
   });
 
-export const useGetPromotedNodeEvents = (options?: any) =>
-  useQuery<GetPromotedNodeEventsData>(GET_PROMOTED_NODE_EVENTS, options);
+export const useGetPromotedNodeEvents = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetPromotedNodeEventsData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+) =>
+  useQuery<
+    GetPromotedNodeEventsData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_PROMOTED_NODE_EVENTS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 
 export interface PostAnalytics {
   engagement: {

@@ -20,6 +20,7 @@ import {
   useGetFeedInterestMatrix,
   useGetPromotedNodeEvents,
   useAllFeed,
+  TimeRange,
 } from "@/graphql/actions/feed";
 import { cn } from "@/lib/utils";
 
@@ -30,8 +31,15 @@ import { FeedPromotedEvents } from "./feed-promoted-events";
 import { FeedChannels } from "./feed-channels";
 import { FeedRecentPosts } from "./feed-recent-posts";
 
+const timeRangeMap: Record<string, TimeRange> = {
+  "24h": TimeRange.LAST_24_HOURS,
+  "7d": TimeRange.LAST_7_DAYS,
+  "30d": TimeRange.LAST_30_DAYS,
+  "90d": TimeRange.LAST_90_DAYS,
+};
+
 export default function FeedDashboard() {
-  const { dateRange, handleDateChange } = useUrlDateRange(7);
+  const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Dedicated chart time filter
@@ -48,35 +56,35 @@ export default function FeedDashboard() {
     };
   }, [dateRange]);
 
+  const activeTimeRange = timeRangeMap[timeRange] || TimeRange.LAST_7_DAYS;
+
   const {
     data: kpiData,
     loading: loadingKpi,
     refetch: refetchKpi,
-  } = useGetFeedIntelligenceKPI(
-    chartFilterValue.dateRange ? undefined : formattedDateRange
-  );
+  } = useGetFeedIntelligenceKPI(activeTimeRange, formattedDateRange);
+
+  const chartTimeRangeParam =
+    (chartFilterValue.timeRange as TimeRange) || activeTimeRange;
+  const chartDateRangeParam = chartFilterValue.dateRange || formattedDateRange;
 
   const {
     data: yieldData,
     loading: loadingYield,
     refetch: refetchYield,
-  } = useGetFeedYieldVelocity(
-    chartFilterValue.dateRange || formattedDateRange
-  );
+  } = useGetFeedYieldVelocity(chartTimeRangeParam, chartDateRangeParam);
 
   const {
     data: interestData,
     loading: loadingInterest,
     refetch: refetchInterest,
-  } = useGetFeedInterestMatrix(
-    chartFilterValue.dateRange ? undefined : formattedDateRange
-  );
+  } = useGetFeedInterestMatrix(chartTimeRangeParam, chartDateRangeParam);
 
   const {
     data: eventsData,
     loading: loadingEvents,
     refetch: refetchEvents,
-  } = useGetPromotedNodeEvents(4);
+  } = useGetPromotedNodeEvents(activeTimeRange, formattedDateRange);
 
   const {
     data: feedData,

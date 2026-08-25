@@ -8,11 +8,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface PromotedEventItem {
-  id: string;
+  id?: string;
   title: string;
-  startDate: string;
+  startDate?: string;
+  date?: string;
+  time?: string;
   location?: string;
   type?: string;
+  description?: string;
   attendeesCount?: number;
 }
 
@@ -56,19 +59,29 @@ export function FeedPromotedEvents({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {events.slice(0, 4).map((evt) => {
-                const dateObj = new Date(evt.startDate);
-                const month = !isNaN(dateObj.getTime())
+              {events.slice(0, 4).map((evt, idx) => {
+                const dateStr = evt.startDate || evt.date;
+                const dateObj = dateStr ? new Date(dateStr) : null;
+                const isValidDate = dateObj && !isNaN(dateObj.getTime());
+                const month = isValidDate
                   ? dateObj.toLocaleDateString("en-US", { month: "short" })
-                  : "DEC";
-                const day = !isNaN(dateObj.getTime())
+                  : "EVENT";
+                const day = isValidDate
                   ? dateObj.toLocaleDateString("en-US", { day: "2-digit" })
-                  : "01";
+                  : "--";
+                const displayTime =
+                  evt.time ||
+                  (isValidDate
+                    ? dateObj.toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "TBA");
 
                 return (
                   <Link
-                    key={evt.id}
-                    href={`/events/${evt.id}`}
+                    key={evt.id || `${evt.title}-${idx}`}
+                    href={evt.id ? `/events/${evt.id}` : `/events/all`}
                     className="flex items-start gap-3 p-3 rounded-xl border border-border/60 bg-card hover:border-primary/40 hover:shadow-xs transition-all group"
                   >
                     <div className="flex flex-col items-center justify-center h-12 w-12 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 shrink-0">
@@ -96,10 +109,7 @@ export function FeedPromotedEvents({
                       <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Clock size={11} />
-                          {dateObj.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {displayTime}
                         </span>
                         {evt.location && (
                           <span className="flex items-center gap-1 truncate max-w-[120px]">

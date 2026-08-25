@@ -738,8 +738,11 @@ export const GET_FEED_INTEREST_MATRIX = gql`
 `;
 
 export const GET_PROMOTED_NODE_EVENTS = gql`
-  query GetPromotedNodeEvents {
-    getPromotedNodeEvents {
+  query GetPromotedNodeEvents(
+    $timeRange: TimeRange
+    $dateRange: DateRangeInput
+  ) {
+    getPromotedNodeEvents(timeRange: $timeRange, dateRange: $dateRange) {
       title
       date
       time
