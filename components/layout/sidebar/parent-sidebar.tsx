@@ -21,66 +21,11 @@ import {
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 import { useHasAnyIntegration } from "@/graphql/actions";
-
-// Helper to determine the active tab for the parent sidebar
-function getActiveTab(pathName: string) {
-  if (pathName.startsWith("/settings/integrations") || pathName.startsWith("/integrations")) return "integrations";
-  if (pathName.startsWith("/ai-agent")) return "ai";
-  if (pathName.startsWith("/gamification")) return "gamification";
-  if (pathName.startsWith("/members")) return "members";
-
-  if (
-    pathName.startsWith("/moderation") ||
-    pathName.startsWith("/feed") ||
-    pathName.startsWith("/reports") ||
-    pathName.startsWith("/trust-center")
-  )
-    return "content";
-
-  const moduleRoutes = [
-    "/communities",
-    "/events",
-    "/forums",
-    "/moments",
-    "/jobs",
-    "/news",
-    "/opportunities",
-    "/polls",
-    "/shop",
-    "/sponsors",
-    "/surveys",
-    "/stories",
-    "/learnings",
-    "/mentorship",
-    "/offers",
-    "/media-gallery",
-    "/feed",
-    "/celebrations",
-    "/faq",
-    "/chat",
-    "/contacts",
-    "/feedback",
-    "/listing",
-    "/moderation",
-    "/reports",
-    "/support",
-    "/trust-center",
-    "/wall-of-fame",
-  ];
-  if (moduleRoutes.some((route) => pathName.startsWith(route)))
-    return "modules";
-
-  if (pathName.startsWith("/app-layout")) return "website";
-  if (pathName.startsWith("/settings")) return "settings";
-  if (pathName.startsWith("/email")) return "email";
-  if (pathName.startsWith("/mobile-app")) return "mobile-app";
-  if (pathName.startsWith("/ai-agent")) return "ai";
-  return "home";
-}
+import { getActiveSidebarTab } from "./sidebar-utils";
 
 export function ParentSidebar() {
   const pathName = usePathname();
-  const activeTab = getActiveTab(pathName);
+  const activeTab = getActiveSidebarTab(pathName);
   const { data: integrationsData } = useHasAnyIntegration();
   const showIntegrations = !!integrationsData?.hasAnyIntegration;
 
@@ -166,12 +111,13 @@ export function ParentSidebar() {
           icon={<Users2 size={18} />}
           label="Team"
           href="/settings/users/all"
-          active={pathName === "/settings/users/all"}
+          active={activeTab === "team"}
         />
         <NavRailItem
           icon={<ArrowUpCircle size={18} className="text-purple-400" />}
           label="Upgrade"
           href="/settings/subscription"
+          active={activeTab === "upgrade"}
         />
       </div>
     </div>

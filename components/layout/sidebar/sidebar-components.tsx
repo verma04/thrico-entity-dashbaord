@@ -67,7 +67,7 @@ export function NavRailItem({
     <>
       <div className="relative flex items-center justify-center">
         {active && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-tr from-[#ff5733] via-[#0967ff ] to-[#0967ff] rounded-full blur-[6px] opacity-90 mix-blend-screen" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-tr from-[#ff5733] via-[#0967ff] to-[#0967ff] rounded-full blur-[6px] opacity-90 mix-blend-screen pointer-events-none" />
         )}
         <div
           className={cn(
@@ -91,7 +91,7 @@ export function NavRailItem({
 
   const className = cn(
     "flex flex-col items-center justify-center w-[50px] py-1 rounded-xl transition-all duration-200 group/navitem relative",
-    !active && "hover:text-white hover:bg-white/5",
+    active ? "bg-white/10 text-white shadow-2xs" : "hover:text-white hover:bg-white/5 text-neutral-400",
   );
 
   if (href) {

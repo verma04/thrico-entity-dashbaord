@@ -40,54 +40,7 @@ import { TopNavbar } from "./top-navbar";
 import { ParentSidebar } from "./parent-sidebar";
 import LogoutModal from "./logout";
 import { SwitchingLoader } from "./switching-loader";
-
-type ActiveTab =
-  | "home"
-  | "ai"
-  | "members"
-  | "content"
-  | "gamification"
-  | "modules"
-  | "settings"
-  | "email"
-  | "mobile-app"
-  | "website"
-  | "integrations";
-
-function getActiveTab(pathName: string): ActiveTab {
-  if (
-    pathName.startsWith("/settings/integrations") ||
-    pathName.startsWith("/integrations")
-  )
-    return "integrations";
-  if (pathName.startsWith("/app-layout")) return "website";
-  if (pathName.startsWith("/settings")) return "settings";
-  if (pathName.startsWith("/email")) return "email";
-  if (pathName.startsWith("/mobile-app")) return "mobile-app";
-
-  if (pathName.startsWith("/members")) return "members";
-
-  if (pathName.startsWith("/ai-agent")) return "ai";
-
-  if (
-    pathName.startsWith("/moderation") ||
-    pathName.startsWith("/feed") ||
-    pathName.startsWith("/reports") ||
-    pathName.startsWith("/trust-center")
-  )
-    return "content";
-
-  if (pathName.startsWith("/gamification")) return "gamification";
-
-  if (
-    pathName === "/" ||
-    pathName.startsWith("/dashboard") ||
-    pathName.startsWith("/chat")
-  )
-    return "home";
-
-  return "modules"; // Fallback
-}
+import { getActiveSidebarTab } from "./sidebar-utils";
 
 export function ChildSidebarContainer({
   children,
@@ -103,7 +56,7 @@ export function ChildSidebarContainer({
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  const activeTab = getActiveTab(pathName);
+  const activeTab = getActiveSidebarTab(pathName);
 
   // Default-open the Classifications group when on the members tab
   useEffect(() => {
