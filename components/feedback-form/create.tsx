@@ -27,27 +27,24 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Top Bar for Tabs */}
-      <div className="bg-white border-b px-4 h-16 flex items-center justify-between shrink-0 z-10 sticky top-0 relative shadow-sm">
-        <div className="flex items-center gap-4 w-1/3">
+      <div className="bg-white dark:bg-zinc-900 border-b border-[#e1e3e5] dark:border-zinc-800 px-4 h-14 flex items-center justify-between shrink-0 z-10 sticky top-0 shadow-2xs">
+        <div className="flex items-center gap-3 w-1/3">
           {/* Left: Back & Title */}
           <Button
             variant="ghost"
             size="icon"
-            className="shrink-0"
+            className="h-8 w-8 rounded-[4px] shrink-0 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 cursor-pointer"
             onClick={onClose}
           >
-            <ChevronLeft className="h-5 w-5 text-gray-500" />
+            <ChevronLeft className="h-4 w-4 text-[#616161]" />
           </Button>
           <div className="flex flex-col flex-1">
             <input
               value={formTitle}
               onChange={(e) => setFormTitle(e.target.value)}
-              className="font-semibold text-sm text-gray-900 leading-none border-none hover:bg-gray-100 p-1 rounded focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all outline-none w-full max-w-[200px]"
+              className="font-semibold text-[13px] text-[#303030] dark:text-zinc-100 leading-none border-none hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 px-1.5 py-1 rounded-[4px] focus:bg-white dark:focus:bg-zinc-900 focus:ring-1 focus:ring-[#005bd3] transition-all outline-none w-full max-w-[220px]"
               placeholder="Untitled Form"
             />
-            {/* <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium mt-1 px-1">
-              Draft
-            </span> */}
           </div>
         </div>
 
@@ -58,12 +55,12 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
             onValueChange={setActiveTab}
             className="w-auto"
           >
-            <TabsList className="bg-transparent p-0 gap-6">
+            <TabsList className="bg-transparent p-0 gap-5">
               {["edit", "preview", "settings"].map((tab) => (
                 <TabsTrigger
                   key={tab}
                   value={tab}
-                  className="bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-black text-gray-500 border-b-2 border-transparent data-[state=active]:border-black rounded-none px-2 py-2 transition-all font-medium capitalize"
+                  className="bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-[#303030] dark:data-[state=active]:text-zinc-100 text-[#616161] border-b-2 border-transparent data-[state=active]:border-[#303030] dark:data-[state=active]:border-zinc-100 rounded-none px-1.5 py-1 text-[12.5px] transition-all font-semibold capitalize"
                 >
                   {tab === "edit"
                     ? "Edit"
@@ -76,22 +73,23 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
           </Tabs>
         </div>
 
-        <div className="flex items-center justify-end gap-3 w-1/3">
+        <div className="flex items-center justify-end gap-2.5 w-1/3">
           {/* Right: Actions */}
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-500 hidden md:flex"
+            className="text-[#616161] text-[12px] h-[30px] hidden md:flex rounded-[4px] cursor-pointer"
+            onClick={() => setActiveTab("preview")}
           >
-            <Eye className="h-4 w-4 mr-2" />
+            <Eye className="h-3.5 w-3.5 mr-1.5" />
             Preview
           </Button>
           <Button
             size="sm"
-            className="rounded-xl px-6 font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
+            className="h-[34px] rounded-[6px] px-4 font-semibold text-[12.5px] bg-[#303030] hover:bg-[#202020] text-white cursor-pointer shadow-2xs"
             onClick={onPublish}
           >
-            Publish
+            Publish Form
           </Button>
           <AutosaveIndicator isSaving={false} />
         </div>
@@ -110,7 +108,7 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
             <PropertiesPanel />
           </div>
         ) : activeTab === "preview" ? (
-          <div className="h-full overflow-y-auto p-8">
+          <div className="h-full overflow-y-auto p-6">
             <Preview
               formTitle={formTitle}
               formDescription={formDescription}
@@ -119,7 +117,7 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
             />
           </div>
         ) : (
-          <div className="h-full overflow-y-auto p-8 max-w-4xl mx-auto">
+          <div className="h-full overflow-y-auto p-6 max-w-4xl mx-auto">
             <Settings
               formSettings={formSettings}
               updateFormSetting={updateFormSetting}
