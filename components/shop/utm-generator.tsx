@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
+import { PolarisInput, PolarisLabel } from "@/components/gamification/shared/polaris-form-ui";
 
 interface UTMGeneratorProps {
   entityName: string;
@@ -59,51 +57,40 @@ export function UTMGenerator({
   };
 
   return (
-    <Card className="bg-muted/30">
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <LinkIcon className="w-4 h-4" />
-            <span>3rd Party Link Generator</span>
-          </div>
+    <div className="space-y-3">
+      <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[#616161]">
+        <LinkIcon className="w-3.5 h-3.5" />
+        <span>3rd Party Link Generator</span>
+      </div>
 
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="externalLink">External Product Link</Label>
-            <Input
-              id="externalLink"
-              placeholder="https://example.com/product"
-              value={baseUrl}
-              onChange={(e) => onUrlChange(e.target.value)} // We pass raw input back to parent forms usually, but here we want to modify it?
-              // Actually usually we want to store the RAW link or the UTM link?
-              // Requirement says "user upload link... and generate utm".
-              // Let's assume we store the FINAL link with UTMs.
-            />
-            <p className="text-xs text-muted-foreground">
-              Paste the vendor's product link here. We'll automatically add
-              tracking tags.
-            </p>
-          </div>
+      <PolarisInput
+        id="externalLink"
+        name="externalLink"
+        label="External Product Link"
+        placeholder="https://example.com/product"
+        value={baseUrl}
+        onChange={(e) => onUrlChange(e.target.value)}
+        helperText="Paste the vendor's product link here. We'll automatically add tracking tags."
+      />
 
-          {generatedUrl && (
-            <div className="rounded-md bg-muted p-3 flex items-center justify-between gap-2 break-all">
-              <code className="text-xs text-primary">{generatedUrl}</code>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 shrink-0"
-                onClick={copyToClipboard}
-                type="button"
-              >
-                {copied ? (
-                  <Check className="w-4 h-4 text-green-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-          )}
+      {generatedUrl && (
+        <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-800/40 p-2.5 flex items-center justify-between gap-2 break-all">
+          <code className="text-[11.5px] text-[#303030] dark:text-zinc-200 font-mono">{generatedUrl}</code>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7 shrink-0 cursor-pointer rounded-[4px] hover:bg-[#e1e3e5]"
+            onClick={copyToClipboard}
+            type="button"
+          >
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+            ) : (
+              <Copy className="w-3.5 h-3.5 text-[#616161]" />
+            )}
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

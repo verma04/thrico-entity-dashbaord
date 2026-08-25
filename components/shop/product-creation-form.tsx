@@ -3,24 +3,13 @@
 import { useState, useEffect } from "react";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  ShoppingBag,
-  Sparkles,
-  Store,
-  Tag,
-  DollarSign,
-  Package,
-  Layers,
-  Globe,
-} from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { ProductPreview } from "./product-preview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useShopStore } from "@/store/useShopStore";
 import { ProductFormValues } from "./product-form";
-import { CATEGORY_CONFIG } from "./category-config";
 import { useModuleStore } from "@/store/useModuleStore";
 
 import { BasicInfoSection } from "./form-sections/basic-info";
@@ -169,9 +158,13 @@ export function ProductCreationForm({
     <FormikProvider value={formik}>
       <PolarisFormLayout
         sidebar={
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Live Product Preview */}
-            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Storefront" icon={Sparkles}>
+            <PolarisSidebarCard
+              title={`${singularName} Preview`}
+              badge="Live Storefront"
+              icon={Sparkles}
+            >
               <ProductPreview
                 formData={{
                   ...formik.values,
@@ -181,7 +174,7 @@ export function ProductCreationForm({
               />
 
               {/* Structured Configuration Breakdown */}
-              <div className="space-y-1.5 pt-2">
+              <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
                   label="Product Title"
                   value={
@@ -218,18 +211,19 @@ export function ProductCreationForm({
 
             {/* Storefront Conversion Tip */}
             <PolarisTipCard title={`${singularName} Commerce Tip`}>
-              Clear multi-angle imagery, concise SKU labeling, and categorized pricing increase checkout conversion rates by up to 35%.
+              Clear multi-angle imagery, concise SKU labeling, and categorized
+              pricing increase checkout conversion rates by up to 35%.
             </PolarisTipCard>
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           {mode === "create" ? (
             <>
               <PolarisFormCard
                 step={1}
                 title={`Core ${singularName} Identity`}
-                description={`Provide a title, SKU identifier, detailed description, and availability status.`}
+                description="Provide a title, SKU identifier, detailed description, and availability status."
                 badge="Required"
               >
                 <BasicInfoSection />
@@ -266,31 +260,31 @@ export function ProductCreationForm({
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="w-full space-y-6"
+              className="w-full space-y-3.5"
             >
-              <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-1">
-                <TabsList className="bg-transparent h-auto p-0 gap-6">
+              <div className="flex items-center justify-between border-b border-[#e1e3e5] dark:border-zinc-800 pb-1">
+                <TabsList className="bg-transparent h-auto p-0 gap-4">
                   <TabsTrigger
                     value="general"
-                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-1.5 text-[12px] font-semibold transition-all text-[#616161] data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
                   >
                     General Info
                   </TabsTrigger>
                   <TabsTrigger
                     value="media"
-                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-1.5 text-[12px] font-semibold transition-all text-[#616161] data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
                   >
                     Media Gallery
                   </TabsTrigger>
                   <TabsTrigger
                     value="options"
-                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-1.5 text-[12px] font-semibold transition-all text-[#616161] data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
                   >
                     Options & Attributes
                   </TabsTrigger>
                   <TabsTrigger
                     value="inventory"
-                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-1.5 text-[12px] font-semibold transition-all text-[#616161] data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
                   >
                     SKU Variants
                   </TabsTrigger>
@@ -299,7 +293,7 @@ export function ProductCreationForm({
 
               <TabsContent
                 value="general"
-                className="space-y-6 mt-0 border-none p-0 outline-none"
+                className="space-y-3.5 mt-0 border-none p-0 outline-none"
               >
                 <PolarisFormCard
                   step={1}
@@ -307,8 +301,12 @@ export function ProductCreationForm({
                   description="Manage basic information, pricing, and external checkout links."
                 >
                   <BasicInfoSection />
-                  <PricingSection categories={categories} />
-                  <ExternalLinkSection entityName={entityName} />
+                  <div className="pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
+                    <PricingSection categories={categories} />
+                  </div>
+                  <div className="pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
+                    <ExternalLinkSection entityName={entityName} />
+                  </div>
                 </PolarisFormCard>
               </TabsContent>
 
