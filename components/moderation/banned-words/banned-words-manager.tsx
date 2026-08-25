@@ -1,7 +1,8 @@
+"use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +22,6 @@ import {
   Plus,
   Trash2,
   Edit2,
-  Search,
-  AlertTriangle,
   Ban,
   RotateCcw,
   ShieldAlert,
@@ -32,7 +31,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import type {
+  ExportCsvScope,
+  ExportCsvFormat,
+} from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 
 import {
@@ -149,7 +151,7 @@ export function BannedWordsManager() {
         <AdminTableItem
           icon={Ban}
           title={row.word}
-          titleClassName="font-mono text-[12px] font-semibold"
+          titleClassName="font-mono text-[13px] font-semibold text-[#303030] dark:text-zinc-100"
         />
       ),
     },
@@ -173,9 +175,7 @@ export function BannedWordsManager() {
       key: "category",
       header: "Classification",
       cell: (row) => (
-        <AdminTableTag variant="purple">
-          {row.category}
-        </AdminTableTag>
+        <AdminTableTag variant="purple">{row.category}</AdminTableTag>
       ),
     },
     {
@@ -202,19 +202,19 @@ export function BannedWordsManager() {
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
+            className="h-7 w-7 p-0 text-[#616161] hover:text-[#303030] hover:bg-[#f6f6f7] rounded-[6px]"
             onClick={() => handleOpenDialog(row)}
           >
-            <Edit2 className="h-3 w-3" />
+            <Edit2 className="h-3.5 w-3.5" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md"
+            className="h-7 w-7 p-0 text-[#616161] hover:text-[#d72c0d] hover:bg-[#fff4f4] rounded-[6px]"
             onClick={() => handleDelete(row.id)}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),
@@ -248,8 +248,8 @@ export function BannedWordsManager() {
         <EcosystemActionBar.Separator />
 
         <EcosystemActionBar.Group>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
-            <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" />
+          <div className="flex items-center gap-1.5 text-[12.5px] text-[#616161] font-semibold">
+            <ShieldAlert className="h-3.5 w-3.5 text-[#616161]" />
             {totalCount} Active Filters
           </div>
         </EcosystemActionBar.Group>
@@ -261,9 +261,11 @@ export function BannedWordsManager() {
               variant="outline"
               size="sm"
               onClick={() => refetch()}
-              className="h-8 gap-1.5 text-xs font-semibold border-border"
+              className="h-8 gap-1.5 text-[12px] font-semibold border-[#d2d5d9] bg-white hover:bg-[#f6f6f7] text-[#303030] rounded-[6px]"
             >
-              <RotateCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+              <RotateCcw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
               Refresh
             </Button>
           </EcosystemActionBar.Item>
@@ -273,7 +275,7 @@ export function BannedWordsManager() {
               variant="outline"
               size="sm"
               onClick={() => setShowExportModal(true)}
-              className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+              className="h-8 gap-1.5 text-[12px] font-semibold bg-white border-[#d2d5d9] text-[#303030] hover:bg-[#f6f6f7] px-2.5 rounded-[6px]"
             >
               <Upload className="h-3.5 w-3.5" />
               Export
@@ -284,7 +286,7 @@ export function BannedWordsManager() {
               type="button"
               size="sm"
               onClick={() => handleOpenDialog()}
-              className="h-8 gap-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
+              className="h-8 gap-1.5 text-[12px] font-semibold bg-[#303030] text-white hover:bg-[#202020] rounded-[6px] shadow-xs cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Banned Keyword
@@ -293,7 +295,7 @@ export function BannedWordsManager() {
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 border border-border shadow-sm rounded-xl bg-card mt-4 overflow-hidden">
+      <EcosystemContainer className="p-0 border border-[#d2d5d9] dark:border-zinc-800 shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-[12px] bg-white dark:bg-zinc-900 mt-3 overflow-hidden">
         <AdminTable
           columns={columns}
           data={filteredWords}
@@ -306,7 +308,7 @@ export function BannedWordsManager() {
         />
 
         {totalPages > 1 && (
-          <div className="p-3 border-t border-border flex justify-end">
+          <div className="p-3 border-t border-[#e1e3e5] dark:border-zinc-800 flex justify-end">
             <Pagination
               page={page}
               totalPages={totalPages}
@@ -319,79 +321,86 @@ export function BannedWordsManager() {
 
       {/* Polaris Modal for Add/Edit Banned Word */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md flex flex-col p-0 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden">
-          <DialogHeader className="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
-                <Ban className="h-4 w-4" />
+        <DialogContent className="max-w-md flex flex-col p-0 rounded-[12px] border border-[#d2d5d9] dark:border-zinc-800 shadow-xl overflow-hidden bg-white dark:bg-zinc-900">
+          <DialogHeader className="px-5 py-4 border-b border-[#e1e3e5] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-[6px] bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
+                <Ban className="h-3.5 w-3.5" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+                <DialogTitle className="text-[15px] font-semibold text-[#303030] dark:text-zinc-100 leading-tight">
                   {editingWord ? "Edit Keyword Rule" : "Add Banned Keyword"}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                <DialogDescription className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5">
                   Define exact string or pattern to suppress automatically.
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
-          <div className="p-6 space-y-4 bg-white dark:bg-zinc-950">
+          <div className="p-5 space-y-3.5">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Word or Regex Pattern <span className="text-rose-500">*</span>
-              </Label>
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Word or Regex Pattern{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Input
                 placeholder="e.g., spamkeyword, offensivephrase"
                 value={formData.word}
                 onChange={(e) =>
                   setFormData({ ...formData, word: e.target.value })
                 }
-                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold font-mono"
+                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 font-mono rounded-[8px]"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                   Severity Level
-                </Label>
+                </label>
                 <Select
                   value={formData.severity}
                   onValueChange={(v) =>
                     setFormData({ ...formData, severity: v as Severity })
                   }
                 >
-                  <SelectTrigger className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold">
+                  <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border border-zinc-200 dark:border-zinc-800">
-                    <SelectItem value="LOW" className="text-xs font-semibold">Low (Flag)</SelectItem>
-                    <SelectItem value="MEDIUM" className="text-xs font-semibold">Medium (Filter)</SelectItem>
-                    <SelectItem value="HIGH" className="text-xs font-semibold">High (Block)</SelectItem>
+                  <SelectContent className="rounded-[8px] border border-[#d2d5d9]">
+                    <SelectItem value="LOW" className="text-[13px]">
+                      Low (Flag)
+                    </SelectItem>
+                    <SelectItem value="MEDIUM" className="text-[13px]">
+                      Medium (Filter)
+                    </SelectItem>
+                    <SelectItem value="HIGH" className="text-[13px]">
+                      High (Block)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                   Classification
-                </Label>
+                </label>
                 <Select
                   value={formData.category}
                   onValueChange={(v) =>
                     setFormData({ ...formData, category: v })
                   }
                 >
-                  <SelectTrigger className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold">
+                  <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl border border-zinc-200 dark:border-zinc-800">
+                  <SelectContent className="rounded-[8px] border border-[#d2d5d9]">
                     {CATEGORIES.map((cat) => (
                       <SelectItem
                         key={cat}
                         value={cat}
-                        className="capitalize text-xs font-semibold"
+                        className="capitalize text-[13px]"
                       >
                         {cat}
                       </SelectItem>
@@ -402,12 +411,12 @@ export function BannedWordsManager() {
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex items-center justify-end gap-2">
+          <DialogFooter className="px-5 py-3 border-t border-[#e1e3e5] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900 flex items-center justify-end gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
-              className="h-9 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
+              className="h-8 px-3 text-[12px] font-semibold border-[#d2d5d9] bg-white text-[#303030] rounded-[6px]"
             >
               Cancel
             </Button>
@@ -415,7 +424,7 @@ export function BannedWordsManager() {
               type="button"
               onClick={handleSave}
               disabled={adding || updating || !formData.word.trim()}
-              className="h-9 px-4 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center gap-1.5 shadow-xs"
+              className="h-8 px-3.5 text-[12px] font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 rounded-[6px] flex items-center gap-1.5 shadow-xs"
             >
               {adding || updating ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -438,17 +447,31 @@ export function BannedWordsManager() {
         onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
           const rows = filteredWords;
           if (rows.length === 0) {
-            toast.error("Nothing to export", { description: "No banned keywords found." });
+            toast.error("Nothing to export", {
+              description: "No banned keywords found.",
+            });
             return;
           }
           const csv = buildCsv(rows, [
             { header: "Keyword / Phrase", getValue: (w) => w.word || "" },
             { header: "Severity", getValue: (w) => w.severity || "" },
             { header: "Category", getValue: (w) => w.category || "other" },
-            { header: "Created At", getValue: (w) => w.createdAt ? new Date(parseInt(w.createdAt)).toISOString().slice(0, 10) : "" },
+            {
+              header: "Created At",
+              getValue: (w) =>
+                w.createdAt
+                  ? new Date(parseInt(w.createdAt)).toISOString().slice(0, 10)
+                  : "",
+            },
           ]);
-          downloadCsv(csv, `banned-words-${new Date().toISOString().slice(0, 10)}`, format);
-          toast.success("Export ready", { description: `${rows.length} keyword${rows.length !== 1 ? "s" : ""} exported.` });
+          downloadCsv(
+            csv,
+            `banned-words-${new Date().toISOString().slice(0, 10)}`,
+            format,
+          );
+          toast.success("Export ready", {
+            description: `${rows.length} keyword${rows.length !== 1 ? "s" : ""} exported.`,
+          });
         }}
       />
     </EcosystemWrapper>

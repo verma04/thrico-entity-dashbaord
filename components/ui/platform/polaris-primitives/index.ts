@@ -11,6 +11,9 @@
 export { PolarisCard } from "./polaris-card";
 export type { PolarisCardProps } from "./polaris-card";
 
+export { PolarisLabel } from "./polaris-label";
+export type { PolarisLabelProps } from "./polaris-label";
+
 export { PolarisInput } from "./polaris-input";
 export type { PolarisInputProps } from "./polaris-input";
 

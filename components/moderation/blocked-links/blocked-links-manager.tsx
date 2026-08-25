@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -23,18 +22,19 @@ import {
   Plus,
   Trash2,
   Edit2,
-  Search,
   Link as LinkIcon,
   RotateCcw,
   ShieldCheck,
-  ShieldAlert,
   Loader2,
   Save,
   Globe,
   Upload,
 } from "lucide-react";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import type {
+  ExportCsvScope,
+  ExportCsvFormat,
+} from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import {
   useGetBlockedLinks,
@@ -53,7 +53,6 @@ import {
   AdminTableColumn,
   AdminTableItem,
   AdminTableTag,
-  AdminTableText,
   Pagination,
 } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
@@ -151,7 +150,9 @@ export function BlockedLinksManager() {
           isBlocked: !link.isBlocked,
         },
       });
-      toast.success(link.isBlocked ? "Route allowed / whitelisted" : "Route restricted");
+      toast.success(
+        link.isBlocked ? "Route allowed / whitelisted" : "Route restricted",
+      );
       refetch();
     } catch (err) {
       toast.error("Failed to update route status");
@@ -166,7 +167,7 @@ export function BlockedLinksManager() {
         <AdminTableItem
           icon={Globe}
           title={row.url}
-          titleClassName="font-mono text-[12px] font-semibold"
+          titleClassName="font-mono text-[13px] font-semibold text-[#303030] dark:text-zinc-100"
           subtitle={row.reason || undefined}
         />
       ),
@@ -175,7 +176,10 @@ export function BlockedLinksManager() {
       key: "type",
       header: "Routing Type",
       cell: (row) => {
-        const typeVariants: Record<string, "indigo" | "emerald" | "purple" | "default"> = {
+        const typeVariants: Record<
+          string,
+          "indigo" | "emerald" | "purple" | "default"
+        > = {
           DOMAIN: "indigo",
           URL: "emerald",
           PATTERN: "purple",
@@ -200,7 +204,7 @@ export function BlockedLinksManager() {
       key: "reason",
       header: "Internal Context",
       cell: (row) => (
-        <span className="text-[12px] text-muted-foreground font-medium">
+        <span className="text-[12.5px] text-[#616161] font-medium">
           {row.reason || "—"}
         </span>
       ),
@@ -216,7 +220,7 @@ export function BlockedLinksManager() {
             type="button"
             variant="outline"
             size="sm"
-            className="h-6 px-2 text-[10px] font-semibold rounded-md border-border text-foreground hover:bg-muted"
+            className="h-7 px-2 text-[11px] font-semibold rounded-[4px] border-[#d2d5d9] text-[#303030] hover:bg-[#f6f6f7]"
             onClick={() => handleToggleStatus(row)}
           >
             {row.isBlocked ? "Allow" : "Block"}
@@ -225,19 +229,19 @@ export function BlockedLinksManager() {
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
+            className="h-7 w-7 p-0 text-[#616161] hover:text-[#303030] hover:bg-[#f6f6f7] rounded-[6px]"
             onClick={() => handleOpenDialog(row)}
           >
-            <Edit2 className="h-3 w-3" />
+            <Edit2 className="h-3.5 w-3.5" />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md"
+            className="h-7 w-7 p-0 text-[#616161] hover:text-[#d72c0d] hover:bg-[#fff4f4] rounded-[6px]"
             onClick={() => handleDelete(row.id)}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),
@@ -271,8 +275,8 @@ export function BlockedLinksManager() {
         <EcosystemActionBar.Separator />
 
         <EcosystemActionBar.Group>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
-            <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
+          <div className="flex items-center gap-1.5 text-[12.5px] text-[#616161] font-semibold">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#616161]" />
             {totalCount} Managed Route Rules
           </div>
         </EcosystemActionBar.Group>
@@ -284,9 +288,11 @@ export function BlockedLinksManager() {
               variant="outline"
               size="sm"
               onClick={() => refetch()}
-              className="h-8 gap-1.5 text-xs font-semibold border-border"
+              className="h-8 gap-1.5 text-[12px] font-semibold border-[#d2d5d9] bg-white hover:bg-[#f6f6f7] text-[#303030] rounded-[6px]"
             >
-              <RotateCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+              <RotateCcw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
               Refresh
             </Button>
           </EcosystemActionBar.Item>
@@ -296,7 +302,7 @@ export function BlockedLinksManager() {
               variant="outline"
               size="sm"
               onClick={() => setShowExportModal(true)}
-              className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+              className="h-8 gap-1.5 text-[12px] font-semibold bg-white border-[#d2d5d9] text-[#303030] hover:bg-[#f6f6f7] px-2.5 rounded-[6px]"
             >
               <Upload className="h-3.5 w-3.5" />
               Export
@@ -307,7 +313,7 @@ export function BlockedLinksManager() {
               type="button"
               size="sm"
               onClick={() => handleOpenDialog()}
-              className="h-8 gap-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
+              className="h-8 gap-1.5 text-[12px] font-semibold bg-[#303030] text-white hover:bg-[#202020] rounded-[6px] shadow-xs cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               Add URL Policy
@@ -316,7 +322,7 @@ export function BlockedLinksManager() {
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 border border-border shadow-sm rounded-xl bg-card mt-4 overflow-hidden">
+      <EcosystemContainer className="p-0 border border-[#d2d5d9] dark:border-zinc-800 shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-[12px] bg-white dark:bg-zinc-900 mt-3 overflow-hidden">
         <AdminTable
           columns={columns}
           data={filteredLinks}
@@ -329,7 +335,7 @@ export function BlockedLinksManager() {
         />
 
         {totalPages > 1 && (
-          <div className="p-3 border-t border-border flex justify-end">
+          <div className="p-3 border-t border-[#e1e3e5] dark:border-zinc-800 flex justify-end">
             <Pagination
               page={page}
               totalPages={totalPages}
@@ -342,77 +348,87 @@ export function BlockedLinksManager() {
 
       {/* Edit/Create Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-2xl border-zinc-200 dark:border-zinc-800">
-          <DialogHeader>
-            <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-              {editingLink ? "Edit URL Route Rule" : "Add URL Rule Policy"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-zinc-500">
+        <DialogContent className="sm:max-w-[425px] p-5 rounded-[12px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+          <DialogHeader className="space-y-1">
+            <div className="flex items-center gap-2 mb-0.5">
+              <div className="w-7 h-7 rounded-[6px] bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
+                <LinkIcon className="h-3.5 w-3.5" />
+              </div>
+              <DialogTitle className="text-[15px] font-semibold text-[#303030] dark:text-zinc-100">
+                {editingLink ? "Edit URL Route Rule" : "Add URL Rule Policy"}
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-[12px] text-[#616161]">
               Define domain matching pattern, routing type, and optional audit
               rationale.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-3">
+
+          <div className="space-y-3.5 py-1">
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                Target URL / Domain
-              </Label>
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                Target URL / Domain{" "}
+                <span className="text-[#d72c0d] ml-0.5">*</span>
+              </label>
               <Input
                 placeholder="e.g. spam-domain.com or https://example.com/bad"
                 value={formData.url}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, url: e.target.value }))
                 }
-                className="h-9 text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 font-mono"
+                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 font-mono rounded-[8px]"
               />
             </div>
+
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                 Pattern Match Type
-              </Label>
+              </label>
               <Select
                 value={formData.type}
                 onValueChange={(val: LinkType) =>
                   setFormData((prev) => ({ ...prev, type: val }))
                 }
               >
-                <SelectTrigger className="h-9 text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800">
+                <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800">
-                  <SelectItem value="DOMAIN" className="text-xs">
+                <SelectContent className="rounded-[8px] border border-[#d2d5d9]">
+                  <SelectItem value="DOMAIN" className="text-[13px]">
                     Domain (Entire Host)
                   </SelectItem>
-                  <SelectItem value="URL" className="text-xs">
+                  <SelectItem value="URL" className="text-[13px]">
                     Exact URL
                   </SelectItem>
-                  <SelectItem value="PATTERN" className="text-xs">
+                  <SelectItem value="PATTERN" className="text-[13px]">
                     Regex Pattern
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                 Reason / Enforcement Note
-              </Label>
+              </label>
               <Input
                 placeholder="e.g. Phishing source reported by watchdog"
                 value={formData.reason}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, reason: e.target.value }))
                 }
-                className="h-9 text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800"
+                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
               />
             </div>
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="gap-2 sm:gap-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsDialogOpen(false)}
-              className="h-8 text-xs font-semibold"
+              className="h-8 px-3 text-[12px] font-semibold rounded-[6px] border-[#d2d5d9] bg-white text-[#303030]"
             >
               Cancel
             </Button>
@@ -421,7 +437,7 @@ export function BlockedLinksManager() {
               size="sm"
               onClick={handleSave}
               disabled={adding || updating || !formData.url.trim()}
-              className="h-8 gap-1.5 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800"
+              className="h-8 px-3.5 gap-1.5 text-[12px] font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 rounded-[6px]"
             >
               {adding || updating ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -444,18 +460,35 @@ export function BlockedLinksManager() {
         onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
           const rows = filteredLinks;
           if (rows.length === 0) {
-            toast.error("Nothing to export", { description: "No blocked links found." });
+            toast.error("Nothing to export", {
+              description: "No blocked links found.",
+            });
             return;
           }
           const csv = buildCsv(rows, [
             { header: "URL / Domain", getValue: (l) => l.url || "" },
             { header: "Type", getValue: (l) => l.type || "" },
-            { header: "Status", getValue: (l) => l.isBlocked ? "Blocked" : "Allowed" },
+            {
+              header: "Status",
+              getValue: (l) => (l.isBlocked ? "Blocked" : "Allowed"),
+            },
             { header: "Reason", getValue: (l) => l.reason || "" },
-            { header: "Created At", getValue: (l) => l.createdAt ? new Date(parseInt(l.createdAt)).toISOString().slice(0, 10) : "" },
+            {
+              header: "Created At",
+              getValue: (l) =>
+                l.createdAt
+                  ? new Date(parseInt(l.createdAt)).toISOString().slice(0, 10)
+                  : "",
+            },
           ]);
-          downloadCsv(csv, `blocked-links-${new Date().toISOString().slice(0, 10)}`, format);
-          toast.success("Export ready", { description: `${rows.length} link policy rule${rows.length !== 1 ? "s" : ""} exported.` });
+          downloadCsv(
+            csv,
+            `blocked-links-${new Date().toISOString().slice(0, 10)}`,
+            format,
+          );
+          toast.success("Export ready", {
+            description: `${rows.length} link policy rule${rows.length !== 1 ? "s" : ""} exported.`,
+          });
         }}
       />
     </EcosystemWrapper>

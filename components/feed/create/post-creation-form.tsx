@@ -4,7 +4,6 @@ import React, { useState, useCallback } from "react";
 import { useFormik, FormikProvider, FieldArray } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare,
   Image as ImageIcon,
@@ -27,7 +26,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -52,6 +50,7 @@ import {
   PolarisTipCard,
   PolarisInfoBanner,
 } from "@/components/gamification/shared/polaris-form-ui";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useGetEntity } from "@/graphql/actions";
 import UserAvatar from "@/components/layout/user-avatar";
 import { cn } from "@/lib/utils";
@@ -92,7 +91,7 @@ const postSchema = Yup.object().shape({
           .of(
             Yup.object().shape({
               text: Yup.string().required("Option text is required"),
-            })
+            }),
           )
           .min(2, "Poll must have at least 2 options")
           .max(6, "Maximum 6 options allowed"),
@@ -110,7 +109,9 @@ export function PostCreationForm({
   const router = useRouter();
   const { data: entityData } = useGetEntity();
   const [mediaList, setMediaList] = useState<MediaPreviewItem[]>([]);
-  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">(
+    "desktop",
+  );
   const [showFullPreviewModal, setShowFullPreviewModal] = useState(false);
 
   const entity = entityData?.getEntity;
@@ -139,41 +140,48 @@ export function PostCreationForm({
 
   const { values, errors, touched, setFieldValue, isSubmitting } = formik;
 
-  // Extract dominant color from an image URL using canvas sampling
-  const extractDominantColor = useCallback((imageUrl: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) { resolve("rgba(120,120,120,0.15)"); return; }
-          canvas.width = 8;
-          canvas.height = 8;
-          ctx.drawImage(img, 0, 0, 8, 8);
-          const data = ctx.getImageData(0, 0, 8, 8).data;
-          let r = 0, g = 0, b = 0, count = 0;
-          for (let i = 0; i < data.length; i += 4) {
-            r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
-            count++;
+  const extractDominantColor = useCallback(
+    (imageUrl: string): Promise<string> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              resolve("rgba(120,120,120,0.15)");
+              return;
+            }
+            canvas.width = 8;
+            canvas.height = 8;
+            ctx.drawImage(img, 0, 0, 8, 8);
+            const data = ctx.getImageData(0, 0, 8, 8).data;
+            let r = 0,
+              g = 0,
+              b = 0,
+              count = 0;
+            for (let i = 0; i < data.length; i += 4) {
+              r += data[i];
+              g += data[i + 1];
+              b += data[i + 2];
+              count++;
+            }
+            r = Math.round(r / count);
+            g = Math.round(g / count);
+            b = Math.round(b / count);
+            resolve(`rgba(${r},${g},${b},0.18)`);
+          } catch {
+            resolve("rgba(120,120,120,0.15)");
           }
-          r = Math.round(r / count);
-          g = Math.round(g / count);
-          b = Math.round(b / count);
-          resolve(`rgba(${r},${g},${b},0.18)`);
-        } catch {
-          resolve("rgba(120,120,120,0.15)");
-        }
-      };
-      img.onerror = () => resolve("rgba(120,120,120,0.15)");
-      img.src = imageUrl;
-    });
-  }, []);
+        };
+        img.onerror = () => resolve("rgba(120,120,120,0.15)");
+        img.src = imageUrl;
+      });
+    },
+    [],
+  );
 
-  // Handle file uploads for media
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
@@ -189,7 +197,7 @@ export function PostCreationForm({
           size: file.size,
           bgColor,
         };
-      })
+      }),
     );
     setMediaList((prev) => [...prev, ...newItems]);
   };
@@ -201,34 +209,35 @@ export function PostCreationForm({
   const charCount = values.description.length;
   const isDirty = formik.dirty || mediaList.length > 0;
 
-  // Renders the feed card preview UI used in both sidebar and full preview modal
   const renderFeedCardPreview = (isModal = false) => (
     <div
       className={cn(
-        "rounded-2xl border border-border/80 bg-card p-5 space-y-4 shadow-sm transition-all",
-        previewDevice === "mobile" && !isModal && "max-w-[320px] mx-auto text-xs"
+        "rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs transition-all",
+        previewDevice === "mobile" &&
+          !isModal &&
+          "max-w-[300px] mx-auto text-xs",
       )}
     >
       {/* Author Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <UserAvatar
-          size={isModal ? 44 : 38}
+          size={isModal ? 40 : 36}
           src={entity?.logo}
-          className="rounded-xl border border-border bg-white shrink-0"
+          className="rounded-[6px] border border-[#d2d5d9] bg-white shrink-0"
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="font-bold text-foreground truncate text-sm">
+            <span className="font-semibold text-[#303030] dark:text-zinc-100 truncate text-[13px]">
               {entity?.name || "Your Organization"}
             </span>
             <Badge
               variant="secondary"
-              className="text-[10px] h-4 px-1.5 font-semibold bg-primary/10 text-primary border-transparent"
+              className="text-[10px] h-4 px-1.5 font-bold bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border border-[#d2d5d9] rounded-[4px]"
             >
               Admin
             </Badge>
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5">
             <span>Just now</span>
             <span>•</span>
             <span className="flex items-center gap-1">
@@ -245,7 +254,7 @@ export function PostCreationForm({
         {values.isPinned && (
           <Badge
             variant="outline"
-            className="text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 gap-1 px-2 py-0.5"
+            className="text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 gap-1 px-1.5 py-0.2 rounded-[4px]"
           >
             <Pin className="h-3 w-3 fill-amber-500" />
             Pinned
@@ -254,11 +263,11 @@ export function PostCreationForm({
       </div>
 
       {/* Description Content */}
-      <div className="text-foreground/90 whitespace-pre-line leading-relaxed text-sm">
+      <div className="text-[#303030] dark:text-zinc-200 whitespace-pre-line leading-[18px] text-[13px]">
         {values.description ? (
           values.description
         ) : (
-          <span className="text-muted-foreground italic text-xs">
+          <span className="text-[#8c9196] italic text-[12px]">
             Start typing your post content to preview live here...
           </span>
         )}
@@ -268,19 +277,21 @@ export function PostCreationForm({
       {mediaList.length > 0 && (
         <div
           className={cn(
-            "rounded-xl overflow-hidden border border-border/80 grid gap-1.5",
+            "rounded-[6px] overflow-hidden border border-[#d2d5d9] grid gap-1",
             mediaList.length === 1
               ? "grid-cols-1"
               : mediaList.length === 2
-              ? "grid-cols-2"
-              : "grid-cols-2 sm:grid-cols-3"
+                ? "grid-cols-2"
+                : "grid-cols-2 sm:grid-cols-3",
           )}
         >
           {mediaList.slice(0, 4).map((m, idx) => (
             <div
               key={m.id}
-              className="relative aspect-video overflow-hidden rounded-lg"
-              style={{ backgroundColor: m.bgColor || "rgba(120,120,120,0.15)" }}
+              className="relative aspect-video overflow-hidden rounded-[4px]"
+              style={{
+                backgroundColor: m.bgColor || "rgba(120,120,120,0.15)",
+              }}
             >
               <img
                 src={m.url}
@@ -288,7 +299,7 @@ export function PostCreationForm({
                 className="w-full h-full object-contain"
               />
               {idx === 3 && mediaList.length > 4 && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-sm">
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-[12px]">
                   +{mediaList.length - 4}
                 </div>
               )}
@@ -299,30 +310,30 @@ export function PostCreationForm({
 
       {/* Poll Options Preview */}
       {values.postType === "poll" && (
-        <div className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-3">
-          <div className="flex items-center gap-2">
-            <BarChart2 className="h-4 w-4 text-emerald-500" />
-            <h4 className="text-sm font-bold text-foreground">
+        <div className="p-3 rounded-[6px] border border-[#d2d5d9] bg-white dark:bg-zinc-800 space-y-2">
+          <div className="flex items-center gap-1.5">
+            <BarChart2 className="h-3.5 w-3.5 text-emerald-600" />
+            <h4 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
               {values.poll.question || "Poll Question"}
             </h4>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {values.poll.options.map((opt, i) => (
               <div
                 key={i}
-                className="group relative flex items-center justify-between p-2.5 rounded-lg border border-border/80 bg-card hover:border-primary/50 text-xs font-semibold text-foreground transition-all cursor-pointer"
+                className="flex items-center justify-between p-2 rounded-[4px] border border-[#d2d5d9] bg-[#f6f6f7]/60 text-[12px] font-semibold text-[#303030] dark:text-zinc-200"
               >
-                <div className="flex items-center gap-2">
-                  <span className="h-4 w-4 rounded-full border border-border bg-muted flex items-center justify-center text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-4 w-4 rounded-full border border-[#d2d5d9] bg-white flex items-center justify-center text-[9px] text-[#616161]">
                     {String.fromCharCode(65 + i)}
                   </span>
                   <span>{opt.text || `Option ${i + 1}`}</span>
                 </div>
-                <span className="text-[10px] text-muted-foreground font-mono">0%</span>
+                <span className="text-[10px] text-[#8c9196] font-mono">0%</span>
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
+          <div className="flex items-center justify-between text-[11px] text-[#616161] pt-1">
             <span>0 votes</span>
             <span>Duration: {values.poll.durationDays} days</span>
           </div>
@@ -330,22 +341,25 @@ export function PostCreationForm({
       )}
 
       {/* Engagement Actions Preview */}
-      <div className="flex items-center justify-between pt-3 border-t border-border/50 text-muted-foreground">
-        <div className="flex items-center gap-4">
-          <button type="button" className="flex items-center gap-1.5 text-xs font-medium hover:text-foreground">
-            <Heart className="h-4 w-4" />
+      <div className="flex items-center justify-between pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 text-[#616161]">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 text-[11px]">
+            <Heart className="h-3.5 w-3.5" />
             <span>0</span>
-          </button>
-          <button type="button" className="flex items-center gap-1.5 text-xs font-medium hover:text-foreground">
-            <MessageSquare className="h-4 w-4" />
+          </div>
+          <div className="flex items-center gap-1 text-[11px]">
+            <MessageSquare className="h-3.5 w-3.5" />
             <span>0</span>
-          </button>
-          <button type="button" className="flex items-center gap-1.5 text-xs font-medium hover:text-foreground">
-            <Share2 className="h-4 w-4" />
+          </div>
+          <div className="flex items-center gap-1 text-[11px]">
+            <Share2 className="h-3.5 w-3.5" />
             <span>0</span>
-          </button>
+          </div>
         </div>
-        <Badge variant="outline" className="text-[10px] font-medium uppercase tracking-wider">
+        <Badge
+          variant="outline"
+          className="text-[9px] font-bold uppercase tracking-wider rounded-[2px]"
+        >
           Feed
         </Badge>
       </div>
@@ -357,25 +371,25 @@ export function PostCreationForm({
       <form onSubmit={formik.handleSubmit}>
         <PolarisFormLayout
           sidebar={
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Live Card Preview with Device Switcher */}
               <PolarisSidebarCard
-                title="Live Preview"
-                badge="Real-time"
-                badgeVariant="outline"
+                title="Feed Preview"
+                badge="Live Stream"
+                icon={Sparkles}
               >
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {/* Device and Fullscreen Toggle Controls */}
-                  <div className="flex items-center justify-between pb-2 border-b border-border/40">
-                    <div className="flex items-center gap-1 p-0.5 bg-muted rounded-lg border border-border/60">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-[#e1e3e5] dark:border-zinc-800">
+                    <div className="flex items-center gap-0.5 p-0.5 bg-white dark:bg-zinc-800 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700">
                       <button
                         type="button"
                         onClick={() => setPreviewDevice("desktop")}
                         className={cn(
-                          "p-1 rounded-md text-xs font-semibold transition-all",
+                          "p-1 rounded-[4px] text-[11px] font-semibold transition-all cursor-pointer",
                           previewDevice === "desktop"
-                            ? "bg-card text-foreground shadow-2xs"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                            : "text-[#616161] hover:text-[#303030]",
                         )}
                         title="Desktop view"
                       >
@@ -385,10 +399,10 @@ export function PostCreationForm({
                         type="button"
                         onClick={() => setPreviewDevice("mobile")}
                         className={cn(
-                          "p-1 rounded-md text-xs font-semibold transition-all",
+                          "p-1 rounded-[4px] text-[11px] font-semibold transition-all cursor-pointer",
                           previewDevice === "mobile"
-                            ? "bg-card text-foreground shadow-2xs"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                            : "text-[#616161] hover:text-[#303030]",
                         )}
                         title="Mobile view"
                       >
@@ -401,7 +415,7 @@ export function PostCreationForm({
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowFullPreviewModal(true)}
-                      className="h-7 px-2 text-[11px] font-semibold gap-1 text-muted-foreground hover:text-foreground"
+                      className="h-7 px-2 text-[11.5px] font-semibold gap-1 text-[#616161] hover:text-[#303030]"
                     >
                       <Maximize2 className="h-3 w-3" />
                       Fullscreen
@@ -411,19 +425,17 @@ export function PostCreationForm({
                   {/* The Rendered Preview Card */}
                   {renderFeedCardPreview(false)}
                 </div>
-              </PolarisSidebarCard>
 
-              {/* Post Summary Details */}
-              <PolarisSidebarCard title="Publishing Summary">
-                <div className="space-y-1 divide-y divide-border/40">
+                {/* Structured Configuration Breakdown */}
+                <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                   <PolarisSummaryRow
                     label="Post Format"
                     value={
                       values.postType === "poll"
                         ? "Interactive Poll"
                         : values.postType === "celebration"
-                        ? "Celebration"
-                        : "Standard Post"
+                          ? "Celebration"
+                          : "Standard Post"
                     }
                   />
                   <PolarisSummaryRow
@@ -437,53 +449,22 @@ export function PostCreationForm({
                   <PolarisSummaryRow
                     label="Pinned to Top"
                     value={values.isPinned ? "Yes" : "No"}
-                    highlight={values.isPinned}
+                    isLast
                   />
                 </div>
               </PolarisSidebarCard>
 
               {/* Best Practices Tip Card */}
-              <PolarisTipCard
-                title="Engagement Tips"
-                tips={[
-                  "Posts with images or media achieve 2.5x more community reactions.",
-                  "Use polls to gather fast feedback on upcoming events or topics.",
-                  "Pinned posts remain prominently visible at the top of the feed stream.",
-                ]}
-              />
+              <PolarisTipCard title="Engagement Tips">
+                Posts with visual media achieve 2.5x more community reactions.
+                Pinned announcements remain prominently highlighted at the top
+                of the stream.
+              </PolarisTipCard>
             </div>
           }
         >
-          {/* ── LEFT COLUMN: MAIN FORM (8 Cols) ────────────────────────── */}
-          <div className="space-y-6">
-            {/* Top Quick Actions Bar */}
-            <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                  <MessageSquare className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-foreground">New Post Draft</h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    Publishing to <span className="font-semibold text-foreground">Community Feed</span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowFullPreviewModal(true)}
-                  className="h-8 px-3 rounded-lg text-xs font-semibold gap-1.5 border-border shadow-2xs text-foreground bg-card hover:bg-muted"
-                >
-                  <Eye className="h-3.5 w-3.5 text-primary" />
-                  Preview Post
-                </Button>
-              </div>
-            </div>
-
+          {/* ── LEFT COLUMN: MAIN FORM ────────────────────────── */}
+          <div className="space-y-4">
             {/* Author / Entity Identity Banner */}
             <PolarisInfoBanner
               variant="default"
@@ -501,53 +482,53 @@ export function PostCreationForm({
                 values.postType === "poll"
                   ? "Interactive Poll"
                   : values.postType === "celebration"
-                  ? "Milestone / Celebration"
-                  : "Standard Post"
+                    ? "Milestone / Celebration"
+                    : "Standard Post"
               }
             >
               {/* Post Type Selector Tabs */}
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-foreground">
+              <div className="space-y-1.5">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                   Post Format
-                </Label>
-                <div className="grid grid-cols-3 gap-2 p-1 bg-muted/50 rounded-xl border border-border">
+                </label>
+                <div className="grid grid-cols-3 gap-2 p-1 bg-[#f6f6f7] dark:bg-zinc-800 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-700">
                   <button
                     type="button"
                     onClick={() => setFieldValue("postType", "general")}
                     className={cn(
-                      "flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all",
+                      "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-[6px] text-[12.5px] font-semibold transition-all cursor-pointer",
                       values.postType === "general"
-                        ? "bg-card text-foreground shadow-xs border border-border/80"
-                        : "text-muted-foreground hover:text-foreground hover:bg-card/50"
+                        ? "bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-100 shadow-xs border border-[#d2d5d9] dark:border-zinc-700"
+                        : "text-[#616161] hover:text-[#303030]",
                     )}
                   >
-                    <ImageIcon className="h-3.5 w-3.5 text-indigo-500" />
+                    <ImageIcon className="h-3.5 w-3.5 text-indigo-600" />
                     <span>Text & Media</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFieldValue("postType", "poll")}
                     className={cn(
-                      "flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all",
+                      "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-[6px] text-[12.5px] font-semibold transition-all cursor-pointer",
                       values.postType === "poll"
-                        ? "bg-card text-foreground shadow-xs border border-border/80"
-                        : "text-muted-foreground hover:text-foreground hover:bg-card/50"
+                        ? "bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-100 shadow-xs border border-[#d2d5d9] dark:border-zinc-700"
+                        : "text-[#616161] hover:text-[#303030]",
                     )}
                   >
-                    <BarChart2 className="h-3.5 w-3.5 text-emerald-500" />
+                    <BarChart2 className="h-3.5 w-3.5 text-emerald-600" />
                     <span>Poll & Vote</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFieldValue("postType", "celebration")}
                     className={cn(
-                      "flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all",
+                      "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-[6px] text-[12.5px] font-semibold transition-all cursor-pointer",
                       values.postType === "celebration"
-                        ? "bg-card text-foreground shadow-xs border border-border/80"
-                        : "text-muted-foreground hover:text-foreground hover:bg-card/50"
+                        ? "bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-100 shadow-xs border border-[#d2d5d9] dark:border-zinc-700"
+                        : "text-[#616161] hover:text-[#303030]",
                     )}
                   >
-                    <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                    <Sparkles className="h-3.5 w-3.5 text-amber-600" />
                     <span>Celebration</span>
                   </button>
                 </div>
@@ -556,18 +537,19 @@ export function PostCreationForm({
               {/* Textarea Description */}
               <div className="space-y-1.5 pt-2">
                 <div className="flex items-center justify-between">
-                  <Label
+                  <label
                     htmlFor="description"
-                    className="text-xs font-semibold text-foreground"
+                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                   >
-                    Message Body <span className="text-destructive">*</span>
-                  </Label>
+                    Message Body{" "}
+                    <span className="text-[#d72c0d] ml-0.5">*</span>
+                  </label>
                   <span
                     className={cn(
-                      "text-[11px] font-mono",
+                      "text-[11.5px] font-mono",
                       charCount > 1800
-                        ? "text-amber-500 font-bold"
-                        : "text-muted-foreground"
+                        ? "text-amber-600 font-bold"
+                        : "text-[#616161]",
                     )}
                   >
                     {charCount} / 2000
@@ -576,43 +558,43 @@ export function PostCreationForm({
                 <Textarea
                   id="description"
                   name="description"
-                  rows={6}
+                  rows={5}
                   placeholder={
                     values.postType === "poll"
                       ? "Add background context or instructions for your poll..."
                       : values.postType === "celebration"
-                      ? "Share a special milestone, welcome a member, or celebrate an achievement..."
-                      : "Share an update, news, article summary, or announcement with your community. Mention @members or add #hashtags..."
+                        ? "Share a special milestone, welcome a member, or celebrate an achievement..."
+                        : "Share an update, news, article summary, or announcement with your community. Mention @members or add #hashtags..."
                   }
                   value={values.description}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   className={cn(
-                    "text-sm resize-y rounded-xl border-border bg-card leading-relaxed focus-visible:ring-primary/20",
-                    touched.description && errors.description && "border-destructive"
+                    "text-[14px] min-h-[110px] resize-y rounded-[8px] border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 leading-[20px] text-[#303030] dark:text-zinc-100",
+                    touched.description &&
+                      errors.description &&
+                      "border-[#d72c0d]",
                   )}
                 />
                 {touched.description && errors.description && (
-                  <p className="text-[11px] font-medium text-destructive mt-1">
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                     {errors.description}
                   </p>
                 )}
-                <p className="text-[11px] text-muted-foreground">
-                  Markdown links and external URLs will automatically display rich card previews.
-                </p>
               </div>
 
               {/* Pin to top switch */}
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-border/80 bg-muted/20 mt-3">
+              <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 mt-2">
                 <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <Pin className="h-3.5 w-3.5 text-amber-500" />
-                    <Label className="text-xs font-semibold text-foreground cursor-pointer">
+                  <div className="flex items-center gap-1.5">
+                    <Pin className="h-3.5 w-3.5 text-amber-600" />
+                    <label className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200 cursor-pointer">
                       Pin Announcement to Top
-                    </Label>
+                    </label>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
-                    Highlight this announcement at the top of the feed stream.
+                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+                    Highlight this announcement prominently at the top of the
+                    community feed stream.
                   </p>
                 </div>
                 <Switch
@@ -633,12 +615,13 @@ export function PostCreationForm({
               >
                 {/* Poll Question */}
                 <div className="space-y-1.5">
-                  <Label
+                  <label
                     htmlFor="poll.question"
-                    className="text-xs font-semibold text-foreground"
+                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
                   >
-                    Poll Question <span className="text-destructive">*</span>
-                  </Label>
+                    Poll Question{" "}
+                    <span className="text-[#d72c0d] ml-0.5">*</span>
+                  </label>
                   <Input
                     id="poll.question"
                     name="poll.question"
@@ -646,26 +629,29 @@ export function PostCreationForm({
                     value={values.poll.question}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className="rounded-xl border-border h-10 text-sm"
+                    className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   />
                   {touched.poll?.question && errors.poll?.question && (
-                    <p className="text-[11px] font-medium text-destructive">
+                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
                       {errors.poll.question}
                     </p>
                   )}
                 </div>
 
                 {/* Poll Options List */}
-                <div className="space-y-3 pt-2">
-                  <Label className="text-xs font-semibold text-foreground">
+                <div className="space-y-2 pt-2">
+                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                     Poll Options (Min. 2, Max. 6)
-                  </Label>
+                  </label>
                   <FieldArray name="poll.options">
                     {({ push, remove }) => (
-                      <div className="space-y-2.5">
+                      <div className="space-y-2">
                         {values.poll.options.map((opt, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <span className="h-6 w-6 rounded-md bg-muted flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">
+                          <div
+                            key={index}
+                            className="flex items-center gap-2"
+                          >
+                            <span className="h-7 w-7 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] flex items-center justify-center text-[11px] font-bold text-[#616161] shrink-0">
                               {index + 1}
                             </span>
                             <Input
@@ -674,7 +660,7 @@ export function PostCreationForm({
                               value={opt.text}
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
-                              className="rounded-xl border-border h-9 text-xs flex-1"
+                              className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] flex-1"
                             />
                             {values.poll.options.length > 2 && (
                               <Button
@@ -682,9 +668,9 @@ export function PostCreationForm({
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => remove(index)}
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                                className="h-8 w-8 text-[#616161] hover:text-[#d72c0d] shrink-0"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             )}
                           </div>
@@ -696,7 +682,7 @@ export function PostCreationForm({
                             variant="outline"
                             size="sm"
                             onClick={() => push({ text: "" })}
-                            className="rounded-xl h-8 px-3 text-xs font-semibold gap-1.5 border-dashed border-border/80"
+                            className="h-8 px-3 rounded-[6px] text-[12px] font-semibold gap-1.5 border-dashed border-[#aeb4b9] text-[#303030] bg-white hover:bg-[#f6f6f7]"
                           >
                             <Plus className="h-3.5 w-3.5" />
                             Add Option
@@ -708,26 +694,26 @@ export function PostCreationForm({
                 </div>
 
                 {/* Poll Duration */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/40">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-foreground">
+                    <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                       Poll Duration
-                    </Label>
+                    </label>
                     <Select
                       value={String(values.poll.durationDays)}
                       onValueChange={(val) =>
                         setFieldValue("poll.durationDays", Number(val))
                       }
                     >
-                      <SelectTrigger className="h-9 rounded-xl border-border text-xs">
+                      <SelectTrigger className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]">
                         <SelectValue placeholder="Select duration" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border">
-                        <SelectItem value="1" className="text-xs">1 Day</SelectItem>
-                        <SelectItem value="3" className="text-xs">3 Days</SelectItem>
-                        <SelectItem value="7" className="text-xs">1 Week (Default)</SelectItem>
-                        <SelectItem value="14" className="text-xs">2 Weeks</SelectItem>
-                        <SelectItem value="30" className="text-xs">1 Month</SelectItem>
+                      <SelectContent>
+                        <SelectItem value="1">1 Day</SelectItem>
+                        <SelectItem value="3">3 Days</SelectItem>
+                        <SelectItem value="7">1 Week (Default)</SelectItem>
+                        <SelectItem value="14">2 Weeks</SelectItem>
+                        <SelectItem value="30">1 Month</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -742,18 +728,18 @@ export function PostCreationForm({
                 badge="Optional Media"
               >
                 {/* Media Dropzone */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <label
                     htmlFor="media-file-upload"
-                    className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border/80 rounded-2xl bg-muted/10 hover:bg-muted/30 cursor-pointer transition-colors group"
+                    className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-[#d2d5d9] hover:border-[#aeb4b9] rounded-[8px] bg-[#f6f6f7]/50 hover:bg-[#f6f6f7] cursor-pointer transition-colors group"
                   >
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-105 transition-transform shadow-xs">
-                      <UploadCloud className="h-6 w-6" />
+                    <div className="h-10 w-10 rounded-[6px] bg-white border border-[#d2d5d9] text-[#303030] flex items-center justify-center mb-2 shadow-xs">
+                      <UploadCloud className="h-5 w-5" />
                     </div>
-                    <p className="text-xs font-semibold text-foreground">
+                    <p className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
                       Click or drag photos to upload
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-[11px] text-[#616161] mt-0.5">
                       PNG, JPG, WEBP, GIF up to 10MB each
                     </p>
                   </label>
@@ -768,26 +754,29 @@ export function PostCreationForm({
 
                   {/* Uploaded Media Previews */}
                   {mediaList.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
                       {mediaList.map((item) => (
                         <div
                           key={item.id}
-                          className="group/img relative rounded-xl overflow-hidden border border-border aspect-square shadow-2xs"
-                          style={{ backgroundColor: item.bgColor || "rgba(120,120,120,0.15)" }}
+                          className="group/img relative rounded-[6px] overflow-hidden border border-[#d2d5d9] aspect-square shadow-xs"
+                          style={{
+                            backgroundColor:
+                              item.bgColor || "rgba(120,120,120,0.15)",
+                          }}
                         >
                           <img
                             src={item.url}
                             alt={item.name}
-                            className="w-full h-full object-contain group-hover/img:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain"
                           />
                           <button
                             type="button"
                             onClick={() => removeMedia(item.id)}
-                            className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-transform hover:scale-110 shadow-xs"
+                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-transform hover:scale-110 shadow-xs cursor-pointer"
                           >
-                            <X className="h-3.5 w-3.5" />
+                            <X className="h-3 w-3" />
                           </button>
-                          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 text-[10px] text-white truncate">
+                          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-1 text-[10px] text-white truncate">
                             {item.name}
                           </div>
                         </div>
@@ -797,83 +786,42 @@ export function PostCreationForm({
                 </div>
               </PolarisFormCard>
             )}
-
           </div>
         </PolarisFormLayout>
 
         {/* ── Sticky Bottom Action Bar with Preview ──────────────────── */}
-        <AnimatePresence>
-          {(isDirty || isSubmitting) && (
-            <motion.div
-              key="feed-floating-bar"
-              initial={{ opacity: 0, y: 30, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 30, scale: 0.98 }}
-              transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] w-[92%] sm:w-[65%] md:w-[50%] lg:w-[40%] min-w-[340px] max-w-[580px] pointer-events-auto"
-            >
-              <div className="w-full bg-[#212121]/95 dark:bg-[#1c1c1c]/95 backdrop-blur-md border border-[#383838] dark:border-[#333] rounded-xl px-4 py-2.5 flex items-center justify-between shadow-2xl shadow-black/50">
-                <div className="flex items-center gap-2 min-w-0 pr-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-                  <span className="text-[13px] font-medium text-neutral-100 truncate tracking-tight">
-                    Unpublished post draft
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      formik.resetForm();
-                      setMediaList([]);
-                    }}
-                    disabled={loading || isSubmitting}
-                    className="h-8 px-3 rounded-lg text-[12.5px] font-medium text-neutral-300 bg-[#2f2f2f] hover:bg-[#3a3a3a] active:bg-[#444444] border border-[#424242] transition-all duration-150 disabled:opacity-40 cursor-pointer"
-                  >
-                    Discard
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setShowFullPreviewModal(true)}
-                    className="h-8 px-3 rounded-lg text-[12.5px] font-medium text-neutral-200 bg-[#2f2f2f] hover:bg-[#3a3a3a] active:bg-[#444444] border border-[#424242] transition-all duration-150 cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Eye className="h-3.5 w-3.5 text-primary" />
-                    <span>Preview</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => formik.submitForm()}
-                    disabled={loading || isSubmitting}
-                    className="h-8 px-3.5 rounded-lg text-[12.5px] font-semibold text-white bg-primary hover:bg-primary/90 border border-primary/40 transition-all duration-150 disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-xs"
-                  >
-                    {(loading || isSubmitting) && (
-                      <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    )}
-                    <span>Publish Post</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <FloatingSavePanel
+          hasChanged={isDirty}
+          saved={false}
+          isSaving={loading || isSubmitting}
+          onSave={() => formik.submitForm()}
+          onReset={() => {
+            formik.resetForm();
+            setMediaList([]);
+            onCancel();
+          }}
+          title="Unpublished post draft"
+          description="Ready to broadcast this announcement to your community?"
+          buttonText="Publish Post"
+        />
 
         {/* ── Fullscreen Preview Modal ──────────────────────────────── */}
-        <Dialog open={showFullPreviewModal} onOpenChange={setShowFullPreviewModal}>
-          <DialogContent className="max-w-xl p-6 rounded-3xl border-border bg-card">
-            <DialogHeader className="pb-3 border-b border-border/50">
-              <DialogTitle className="text-base font-bold flex items-center gap-2">
-                <Eye className="h-4 w-4 text-primary" />
+        <Dialog
+          open={showFullPreviewModal}
+          onOpenChange={setShowFullPreviewModal}
+        >
+          <DialogContent className="max-w-xl p-5 rounded-[12px] border border-[#d2d5d9] bg-white dark:bg-zinc-900 shadow-xl">
+            <DialogHeader className="pb-2 border-b border-[#e1e3e5] dark:border-zinc-800">
+              <DialogTitle className="text-[15px] font-semibold flex items-center gap-2 text-[#303030] dark:text-zinc-100">
+                <Eye className="h-4 w-4" />
                 <span>Full Feed Post Preview</span>
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                How members will experience this post on the community feed stream.
+              <DialogDescription className="text-[12px] text-[#616161]">
+                How members will experience this post on the community feed
+                stream.
               </DialogDescription>
             </DialogHeader>
-            <div className="py-2">
-              {renderFeedCardPreview(true)}
-            </div>
+            <div className="py-2">{renderFeedCardPreview(true)}</div>
           </DialogContent>
         </Dialog>
       </form>

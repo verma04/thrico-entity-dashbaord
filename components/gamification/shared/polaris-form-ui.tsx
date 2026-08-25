@@ -82,6 +82,8 @@ interface PolarisInfoBannerProps {
   title?: string;
   description: string;
   icon?: LucideIcon;
+  variant?: "default" | "warning" | "success" | "info";
+  tips?: string[];
   className?: string;
 }
 
@@ -89,6 +91,8 @@ export function PolarisInfoBanner({
   title,
   description,
   icon: Icon = Info,
+  variant = "default",
+  tips,
   className,
 }: PolarisInfoBannerProps) {
   return (
@@ -105,7 +109,16 @@ export function PolarisInfoBanner({
             {title}
           </p>
         )}
-        <p className="text-[12.5px] text-[#616161] dark:text-zinc-400">{description}</p>
+        <p className="text-[12.5px] text-[#616161] dark:text-zinc-400">
+          {description}
+        </p>
+        {tips && tips.length > 0 && (
+          <ul className="list-disc pl-4 space-y-1 mt-1 text-[12px] text-[#616161] dark:text-zinc-400">
+            {tips.map((t, idx) => (
+              <li key={idx}>{t}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -138,182 +151,134 @@ export function PolarisOriginPicker({
   if (integrationsCount === 0) return null;
 
   return (
-    <div className="space-y-1.5">
-      <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-        Origin Channel
-      </label>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Platform Module Option */}
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onSelect("MODULE")}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onSelect("MODULE")}
+        className={cn(
+          "flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+          sourceType === "MODULE"
+            ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+            : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
+          disabled && "opacity-50 cursor-not-allowed",
+        )}
+      >
+        <div
           className={cn(
-            "relative flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+            "p-2 rounded-[6px] shrink-0 border",
             sourceType === "MODULE"
-              ? "border-[#005bd3] dark:border-blue-500 ring-1 ring-[#005bd3] dark:ring-blue-500 bg-blue-50/20 dark:bg-blue-950/20"
-              : "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-[#8c9196] dark:hover:border-zinc-600",
-            disabled && "opacity-60 cursor-not-allowed",
+              ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+              : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
           )}
         >
-          <div
-            className={cn(
-              "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 border transition-colors",
-              sourceType === "MODULE"
-                ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
-            )}
-          >
-            <Layers className="h-4 w-4" />
+          <Layers className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+              {moduleLabel}
+            </span>
+            <Badge
+              variant="outline"
+              className="text-[10px] h-4 px-1.5 font-bold bg-white dark:bg-zinc-900 text-[#616161] border-[#d2d5d9] rounded-[4px]"
+            >
+              {modulesCount}
+            </Badge>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                {moduleLabel}
-              </span>
-              <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400">
-                {modulesCount} Active
-              </span>
-            </div>
-            <p className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
-              {moduleDescription}
-            </p>
-          </div>
-        </button>
+          <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+            {moduleDescription}
+          </p>
+        </div>
+      </button>
 
-        {/* Third-party Integration Option */}
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onSelect("INTEGRATION")}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => onSelect("INTEGRATION")}
+        className={cn(
+          "flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+          sourceType === "INTEGRATION"
+            ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+            : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
+          disabled && "opacity-50 cursor-not-allowed",
+        )}
+      >
+        <div
           className={cn(
-            "relative flex items-start gap-3 p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+            "p-2 rounded-[6px] shrink-0 border",
             sourceType === "INTEGRATION"
-              ? "border-[#005bd3] dark:border-blue-500 ring-1 ring-[#005bd3] dark:ring-blue-500 bg-blue-50/20 dark:bg-blue-950/20"
-              : "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-[#8c9196] dark:hover:border-zinc-600",
-            disabled && "opacity-60 cursor-not-allowed",
+              ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+              : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
           )}
         >
-          <div
-            className={cn(
-              "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 border transition-colors",
-              sourceType === "INTEGRATION"
-                ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
-            )}
+          <Boxes className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+              {integrationLabel}
+            </span>
+            <Badge
+              variant="outline"
+              className="text-[10px] h-4 px-1.5 font-bold bg-white dark:bg-zinc-900 text-[#616161] border-[#d2d5d9] rounded-[4px]"
+            >
+              {integrationsCount}
+            </Badge>
+          </div>
+          <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+            {integrationDescription}
+          </p>
+        </div>
+      </button>
+    </div>
+  );
+}
+
+/* ─── PolarisSidebarCard ─── */
+interface PolarisSidebarCardProps {
+  title: string;
+  badge?: string;
+  badgeVariant?: "default" | "outline" | "emerald";
+  icon?: LucideIcon;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function PolarisSidebarCard({
+  title,
+  badge,
+  badgeVariant = "outline",
+  icon: Icon,
+  children,
+  className,
+}: PolarisSidebarCardProps) {
+  return (
+    <div
+      className={cn(
+        "rounded-[12px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-4 space-y-3",
+        className,
+      )}
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-[#e1e3e5] dark:border-zinc-800 pb-2.5">
+        <div className="flex items-center gap-2">
+          {Icon && (
+            <Icon className="h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
+          )}
+          <h4 className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 leading-[18px]">
+            {title}
+          </h4>
+        </div>
+        {badge && (
+          <Badge
+            variant="outline"
+            className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[10.5px] font-semibold px-2 py-0.5 rounded-[4px]"
           >
-            <ShoppingBag className="h-4 w-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                {integrationLabel}
-              </span>
-              <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400">
-                {integrationsCount} Apps
-              </span>
-            </div>
-            <p className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
-              {integrationDescription}
-            </p>
-          </div>
-        </button>
+            {badge}
+          </Badge>
+        )}
       </div>
-    </div>
-  );
-}
-
-/* ─── PolarisPresetChips ─── */
-interface PolarisPresetChipsProps {
-  presets: number[];
-  currentValue: number;
-  onSelect: (value: number) => void;
-  prefix?: string;
-  suffix?: string;
-}
-
-export function PolarisPresetChips({
-  presets,
-  currentValue,
-  onSelect,
-  prefix = "+",
-  suffix = "",
-}: PolarisPresetChipsProps) {
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {presets.map((preset) => (
-        <button
-          key={preset}
-          type="button"
-          onClick={() => onSelect(preset)}
-          className={cn(
-            "h-[32px] px-3 rounded-[6px] text-[13px] font-medium border transition-all cursor-pointer",
-            Number(currentValue) === preset
-              ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 shadow-xs font-semibold"
-              : "bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-300 hover:border-[#8c9196] dark:hover:border-zinc-600",
-          )}
-        >
-          {prefix}
-          {preset}
-          {suffix}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/* ─── PolarisCapInput ─── */
-interface PolarisCapInputProps {
-  id: string;
-  label: string;
-  periodSuffix: string;
-  value: any;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
-  onClear: () => void;
-}
-
-export function PolarisCapInput({
-  id,
-  label,
-  periodSuffix,
-  value,
-  onChange,
-  onBlur,
-  onClear,
-}: PolarisCapInputProps) {
-  return (
-    <div className="p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 space-y-1.5">
-      <div className="flex items-center justify-between">
-        <label
-          htmlFor={id}
-          className="text-[13px] font-medium text-[#303030] dark:text-zinc-200"
-        >
-          {label}
-        </label>
-        <button
-          type="button"
-          onClick={onClear}
-          className="text-[11px] font-medium text-[#005bd3] dark:text-blue-400 hover:underline cursor-pointer"
-        >
-          Unlimited
-        </button>
-      </div>
-      <div className="relative">
-        <input
-          id={id}
-          type="number"
-          placeholder="No limit"
-          name={id}
-          value={value ?? ""}
-          onChange={onChange}
-          onBlur={onBlur}
-          className="w-full h-[40px] pl-3 pr-16 text-[14px] text-[#303030] dark:text-zinc-100 bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] transition-all outline-none placeholder:text-[#8c9196] focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500"
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[#616161] dark:text-zinc-400 font-medium pointer-events-none">
-          {periodSuffix}
-        </span>
-      </div>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 }
@@ -323,70 +288,36 @@ interface PolarisSummaryRowProps {
   label: string;
   value: React.ReactNode;
   isLast?: boolean;
+  highlight?: boolean;
+  className?: string;
 }
 
 export function PolarisSummaryRow({
   label,
   value,
-  isLast,
+  isLast = false,
+  highlight = false,
+  className,
 }: PolarisSummaryRowProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-between py-1 text-[12.5px]",
-        !isLast && "border-b border-[#e1e3e5] dark:border-zinc-800 pb-1.5",
-      )}
-    >
-      <span className="text-[#616161] dark:text-zinc-400 font-medium">{label}</span>
-      <span className="font-medium text-[#303030] dark:text-zinc-200">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-/* ─── PolarisSidebarCard ─── */
-interface PolarisSidebarCardProps {
-  title: string;
-  badge?: string;
-  icon?: LucideIcon;
-  children: React.ReactNode;
-  className?: string;
-}
-
-export function PolarisSidebarCard({
-  title,
-  badge,
-  icon: Icon,
-  children,
-  className,
-}: PolarisSidebarCardProps) {
-  return (
-    <div
-      className={cn(
-        "rounded-[12px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] p-4 transition-all duration-150",
+        "flex items-center justify-between py-1.5 text-[12.5px]",
+        !isLast && "border-b border-[#f1f2f3] dark:border-zinc-800/80",
         className,
       )}
     >
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {Icon && (
-            <Icon className="h-4 w-4 text-[#616161] dark:text-zinc-400 shrink-0" />
-          )}
-          <h3 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100 leading-[20px]">
-            {title}
-          </h3>
-        </div>
-        {badge && (
-          <Badge
-            variant="outline"
-            className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[11px] font-medium px-2 py-0.5 rounded-[6px]"
-          >
-            {badge}
-          </Badge>
+      <span className="text-[#616161] dark:text-zinc-400 font-medium">
+        {label}
+      </span>
+      <span
+        className={cn(
+          "font-semibold text-[#303030] dark:text-zinc-100 text-right truncate max-w-[170px]",
+          highlight && "text-emerald-700 dark:text-emerald-400",
         )}
-      </div>
-      <div className="space-y-4">{children}</div>
+      >
+        {value}
+      </span>
     </div>
   );
 }
@@ -395,13 +326,15 @@ export function PolarisSidebarCard({
 interface PolarisTipCardProps {
   title?: string;
   icon?: LucideIcon;
-  children: React.ReactNode;
+  tips?: string[];
+  children?: React.ReactNode;
   className?: string;
 }
 
 export function PolarisTipCard({
-  title = "Merchant Economy Tip",
+  title = "Configuration Tip",
   icon: Icon = Info,
+  tips,
   children,
   className,
 }: PolarisTipCardProps) {
@@ -418,9 +351,18 @@ export function PolarisTipCard({
           <h4 className="text-[13px] font-semibold text-amber-800 dark:text-amber-300 leading-[18px]">
             {title}
           </h4>
-          <p className="text-[12.5px] text-amber-700 dark:text-amber-400 mt-1 leading-[18px]">
-            {children}
-          </p>
+          {children && (
+            <div className="text-[12.5px] text-amber-700 dark:text-amber-400 mt-1 leading-[18px]">
+              {children}
+            </div>
+          )}
+          {tips && tips.length > 0 && (
+            <ul className="list-disc pl-4 space-y-1 mt-1 text-[12px] text-amber-700 dark:text-amber-400">
+              {tips.map((t, idx) => (
+                <li key={idx}>{t}</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
@@ -466,7 +408,9 @@ export function getSourceIcon(name?: string, type?: string) {
     lower.includes("store") ||
     lower.includes("order")
   ) {
-    return <ShoppingBag className="h-4 w-4 text-[#303030] dark:text-zinc-100" />;
+    return (
+      <ShoppingBag className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
+    );
   }
   if (lower.includes("feed") || lower.includes("post")) {
     return (
@@ -490,3 +434,21 @@ export function getSourceIcon(name?: string, type?: string) {
 }
 
 export { PolarisEligibilityCard, toArray } from "./polaris-eligibility-card";
+
+/* ─── Primitives Re-Exports ─── */
+export {
+  PolarisCard,
+  PolarisLabel,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisSelect,
+  PolarisFormSkeleton,
+} from "@/components/ui/platform/polaris-primitives";
+export type {
+  PolarisCardProps,
+  PolarisLabelProps,
+  PolarisInputProps,
+  PolarisTextareaProps,
+  PolarisSelectProps,
+  PolarisFormSkeletonProps,
+} from "@/components/ui/platform/polaris-primitives";

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Image as ImageIcon, Star } from "lucide-react";
@@ -102,55 +102,57 @@ export function AlbumFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md p-6 border-border">
+      <DialogContent className="sm:max-w-md p-5 border border-[#d2d5d9] dark:border-zinc-800 rounded-[12px] bg-white dark:bg-zinc-900 shadow-lg">
         <DialogHeader className="space-y-1">
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <ImageIcon className="h-4 w-4" />
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="h-7 w-7 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center border border-[#d2d5d9] dark:border-zinc-700">
+              <ImageIcon className="h-3.5 w-3.5" />
             </div>
-            <DialogTitle className="text-base font-bold text-foreground">
+            <DialogTitle className="text-[15px] font-semibold text-[#303030] dark:text-zinc-100">
               {editingAlbum ? "Edit Album Details" : "Create Media Album"}
             </DialogTitle>
           </div>
-          <DialogDescription className="text-xs text-muted-foreground">
+          <DialogDescription className="text-[12px] text-[#616161] dark:text-zinc-400">
             {editingAlbum
-              ? "Update the album metadata, cover photography, and featured status."
+              ? "Update album metadata, cover photography, and featured highlight status."
               : "Organize photos, event highlights, and community media into an album."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-3.5 py-1">
           {/* Cover Image Upload Box */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-foreground">
-              Album Cover Image (Optional)
-            </Label>
+            <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+              Album Cover Image{" "}
+              <span className="text-[#616161] font-normal">(Optional)</span>
+            </label>
             <div
-              className="relative h-36 rounded-xl border-2 border-dashed border-border hover:border-primary/40 bg-muted/20 cursor-pointer overflow-hidden transition-all group flex items-center justify-center"
+              className="relative h-32 rounded-[8px] border-2 border-dashed border-[#d2d5d9] hover:border-[#aeb4b9] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 cursor-pointer overflow-hidden transition-all group flex items-center justify-center"
               onClick={() => coverInputRef.current?.click()}
             >
               {coverPreview ? (
                 <>
-                  <img
+                  <Image
                     src={coverPreview}
                     alt="Cover preview"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs">
-                    <span className="px-3 py-1 rounded-full bg-white text-zinc-900 text-xs font-bold shadow-md">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="px-2.5 py-1 rounded-[4px] bg-white text-[#303030] text-[11.5px] font-bold shadow-xs">
                       Change Cover
                     </span>
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-1.5 text-muted-foreground">
-                  <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
-                    <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                <div className="flex flex-col items-center justify-center h-full gap-1 text-[#616161]">
+                  <div className="h-7 w-7 rounded-[4px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] flex items-center justify-center">
+                    <ImageIcon className="w-3.5 h-3.5 text-[#616161]" />
                   </div>
-                  <span className="text-xs font-semibold text-foreground">
+                  <span className="text-[12px] font-medium text-[#303030] dark:text-zinc-200">
                     Click to select cover image
                   </span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[10.5px] text-[#8c9196]">
                     PNG, JPG, WEBP (16:9 or 4:3 recommended)
                   </span>
                 </div>
@@ -167,57 +169,57 @@ export function AlbumFormDialog({
 
           {/* Title */}
           <div className="space-y-1.5">
-            <Label
+            <label
               htmlFor="album-title"
-              className="text-xs font-semibold text-foreground"
+              className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
             >
-              Album Title <span className="text-rose-500">*</span>
-            </Label>
+              Album Title <span className="text-[#d72c0d] ml-0.5">*</span>
+            </label>
             <Input
               id="album-title"
               placeholder="e.g., Annual Summit 2026 Highlights"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="h-9 bg-card border-border text-xs font-medium"
+              className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-1.5">
-            <Label
+            <label
               htmlFor="album-description"
-              className="text-xs font-semibold text-foreground"
+              className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
             >
               Description & Context
-            </Label>
+            </label>
             <Textarea
               id="album-description"
               placeholder="Describe event context, photographer credits, or album themes..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="min-h-[80px] bg-card border-border text-xs font-medium resize-none shadow-none"
+              rows={2}
+              className="min-h-[70px] p-3 text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] resize-none"
             />
           </div>
 
           {/* Featured Toggle Card */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+          <div className="flex items-center justify-between p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
             <div className="space-y-0.5">
-              <Label
+              <label
                 htmlFor="album-featured"
-                className="text-xs font-semibold text-foreground flex items-center gap-1.5"
+                className="text-[13px] font-semibold text-[#303030] dark:text-zinc-200 flex items-center gap-1.5 cursor-pointer"
               >
                 <Star
                   className={cn(
                     "h-3.5 w-3.5",
                     isFeatured
                       ? "text-amber-500 fill-amber-500"
-                      : "text-muted-foreground",
+                      : "text-[#8c9196]",
                   )}
                 />
                 Featured Album
-              </Label>
-              <p className="text-[10px] text-muted-foreground">
+              </label>
+              <p className="text-[11px] text-[#616161] dark:text-zinc-400">
                 Highlight this album prominently in the gallery collection.
               </p>
             </div>
@@ -229,13 +231,13 @@ export function AlbumFormDialog({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-border">
+        <DialogFooter className="gap-2 sm:gap-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
             disabled={saving}
-            className="h-8 text-xs font-medium"
+            className="h-8 px-3 text-[12px] font-semibold rounded-[6px] border-[#d2d5d9] text-[#303030] bg-white hover:bg-[#f6f6f7]"
           >
             Cancel
           </Button>
@@ -243,7 +245,7 @@ export function AlbumFormDialog({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="h-8 text-xs font-medium"
+            className="h-8 px-3.5 text-[12px] font-semibold rounded-[6px] bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900"
           >
             {saving
               ? "Saving…"
