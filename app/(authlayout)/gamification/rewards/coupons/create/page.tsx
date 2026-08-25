@@ -40,7 +40,7 @@ export default function CreateCouponPage() {
       mechanism: "INTERNAL",
       rewardPillar: "INTERNAL",
       selectedRuleId: "",
-      rewardMechanism: ["COUPON"],
+      rewardMechanism: [],
       storeDiscountType: "FIXED_AMOUNT",
       storeCodePrefix: "THRICO-",
       storeMinCart: 0,
@@ -56,6 +56,7 @@ export default function CreateCouponPage() {
       membershipTierId: [],
       eligibleTierIds: [],
       eligibleUserIds: [],
+      showToAllMembers: true,
       isActive: true,
       status: "ACTIVE",
       expiryDate: (() => {
@@ -81,10 +82,11 @@ export default function CreateCouponPage() {
               description: values.description,
               howToClaim: values.howToClaim,
               tcCost: values.tcCost,
-              validityDays: Number(values.validityDays || 30),
+              expiryDays: Number(values.validityDays || 30),
               inventoryRequired: values.inventoryRequired,
               image: values.image,
               url: values.url,
+              couponCode: values.couponCode,
               eligibility: {
                 memberEligibility: values.memberEligibility || "ALL",
                 membershipTierId: tierIds,
@@ -96,6 +98,7 @@ export default function CreateCouponPage() {
                 minActivityRequired: values.minActivityRequired,
                 blockWarnedUsers: values.blockWarnedUsers,
                 cooldownPeriod: values.cooldownPeriod,
+                showToAllMembers: values.showToAllMembers ?? true,
               },
               mechanism: {
                 type:

@@ -6,11 +6,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Coins, Plus, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  PillarOneManual,
-  InternalRewardDrawer,
-  ManualHowItWorksDrawer,
-} from "@/components/rewards/pillars/manual";
+import { PillarOneManual } from "@/components/rewards/pillars/manual";
 
 export default function PillarOneManualPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -52,21 +48,13 @@ export default function PillarOneManualPage() {
       />
 
       <EcosystemContainer className="p-4 sm:p-5 space-y-4">
-        <PillarOneManual />
+        <PillarOneManual
+          isExternalDrawerOpen={isDrawerOpen}
+          setIsExternalDrawerOpen={setIsDrawerOpen}
+          isExternalHowItWorksOpen={isHowItWorksOpen}
+          setIsExternalHowItWorksOpen={setIsHowItWorksOpen}
+        />
       </EcosystemContainer>
-
-      {/* Internal Reward Creation Drawer */}
-      <InternalRewardDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-      />
-
-      {/* Step-by-Step "How Manual Works" Help Drawer */}
-      <ManualHowItWorksDrawer
-        isOpen={isHowItWorksOpen}
-        onClose={() => setIsHowItWorksOpen(false)}
-        onCreateClick={() => setIsDrawerOpen(true)}
-      />
     </EcosystemWrapper>
   );
 }

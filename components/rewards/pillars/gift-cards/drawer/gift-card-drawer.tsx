@@ -12,6 +12,7 @@ interface GiftCardDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   initialItem?: GiftCardRuleItem | null;
+  id?: string;
   onSuccess?: (item: GiftCardRuleItem) => void;
   walletBalance?: number;
 }
@@ -20,9 +21,12 @@ export function GiftCardDrawer({
   isOpen,
   onClose,
   initialItem,
+  id,
   onSuccess,
   walletBalance = 0,
 }: GiftCardDrawerProps) {
+  const isEditing = Boolean(initialItem?.id || id);
+
   const handleSuccess = (savedItem: GiftCardRuleItem) => {
     if (onSuccess) onSuccess(savedItem);
     onClose();
@@ -46,14 +50,16 @@ export function GiftCardDrawer({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-bold text-foreground tracking-tight">
-                    Configure Digital Gift Card
+                    {isEditing ? "Edit Digital Gift Card Offer" : "Configure Digital Gift Card"}
                   </h3>
                   <Badge className="bg-violet-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
                     Pillar 3
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Select brand vouchers from catalog. Cards are purchased on-demand from provider API upon member win.
+                  {isEditing
+                    ? "Update denomination, brand pricing, and rules for this gift card offer."
+                    : "Select brand vouchers from catalog. Cards are purchased on-demand from provider API upon member win."}
                 </p>
               </div>
             </div>
@@ -73,6 +79,7 @@ export function GiftCardDrawer({
         <div className="flex-1 min-h-0 overflow-y-auto">
           <GiftCardForm
             initialItem={initialItem}
+            id={id}
             onSuccess={handleSuccess}
             onCancel={onClose}
             walletBalance={walletBalance}

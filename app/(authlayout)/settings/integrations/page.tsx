@@ -6,7 +6,6 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import {
   ShopifyIntegrationCard,
-  WooCommerceIntegrationCard,
   HRIntegrationCard,
   CRMIntegrationCard,
   SlackIntegrationCard,
@@ -29,7 +28,6 @@ import {
   useGetCRMProviders,
   useGetCRMConnections,
   useGetShopifyConnection,
-  useGetWooCommerceConnection,
 } from "@/graphql/actions";
 import {
   Search,
@@ -75,9 +73,6 @@ export default function IntegrationsPage() {
   const { data: shopifyData } = useGetShopifyConnection();
   const isShopifyConnected = !!shopifyData?.shopifyConnection?.id;
 
-  const { data: wooData } = useGetWooCommerceConnection();
-  const isWooConnected = !!wooData?.wooCommerceConnection?.id;
-
   const { data: hrProvidersData } = useGetHRProviders();
   const { data: hrConnectionsData } = useGetHRConnections();
   const hrProviders = hrProvidersData?.getHRProviders || [];
@@ -104,16 +99,6 @@ export default function IntegrationsPage() {
           "Sync products, customers, and checkout orders from your online store directly with Thrico in real-time.",
         isConnected: isShopifyConnected,
         component: <ShopifyIntegrationCard />,
-      },
-      {
-        id: "woocommerce",
-        name: "WooCommerce",
-        category: "ecommerce",
-        categoryLabel: "E-Commerce",
-        description:
-          "Sync WordPress WooCommerce store catalog, member purchases, and orders via REST API keys.",
-        isConnected: isWooConnected,
-        component: <WooCommerceIntegrationCard />,
       },
       ...(crmProviders
         .map((meta: any) => {
@@ -199,7 +184,7 @@ export default function IntegrationsPage() {
         category: "communication",
         categoryLabel: "Communication",
         description:
-          "Send real-time alerts, member activity updates, and system notifications directly to workspace channels.",
+          "Broadcast announcements, notify community channels, and sync discussions directly with your Slack workspace.",
         isConnected: false,
         component: <SlackIntegrationCard />,
       },
@@ -209,7 +194,7 @@ export default function IntegrationsPage() {
         category: "communication",
         categoryLabel: "Communication",
         description:
-          "Connect Zoom to automatically create and manage meeting rooms for webinars, coaching calls, and virtual sessions.",
+          "Create and manage virtual meeting rooms, auto-sync event registrations, and track attendee engagement seamlessly.",
         isConnected: false,
         component: <ZoomIntegrationCard />,
       },
@@ -219,7 +204,7 @@ export default function IntegrationsPage() {
         category: "communication",
         categoryLabel: "Communication",
         description:
-          "Auto-generate secure Google Meet video links for events, coaching sessions, and community calls.",
+          "Schedule secure Google Meet sessions for community calls, webinars, and 1-on-1 member mentoring.",
         isConnected: false,
         component: <GoogleMeetIntegrationCard />,
       },
@@ -229,7 +214,7 @@ export default function IntegrationsPage() {
         category: "communication",
         categoryLabel: "Communication",
         description:
-          "Deliver high-deliverability transactional emails, event reminders, and member onboarding emails.",
+          "Deliver transactional emails, newsletter digests, and marketing automation with high deliverability via Twilio SendGrid.",
         isConnected: false,
         component: <SendGridIntegrationCard />,
       },
@@ -246,7 +231,6 @@ export default function IntegrationsPage() {
     ];
   }, [
     isShopifyConnected,
-    isWooConnected,
     hrProviders,
     hrConnections,
     crmProviders,

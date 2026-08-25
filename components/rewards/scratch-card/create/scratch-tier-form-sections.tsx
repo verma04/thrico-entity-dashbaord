@@ -57,8 +57,11 @@ export function ScratchTierFormSections({
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Tier Display Label *</Label>
             <UiInput
-              value={values.label}
-              onChange={(e) => setFieldValue("label", e.target.value)}
+              value={values.label || values.title || ""}
+              onChange={(e) => {
+                setFieldValue("label", e.target.value);
+                setFieldValue("title", e.target.value);
+              }}
               placeholder="e.g. 50 Points Scratch Card"
               className="h-10 text-sm"
             />
@@ -100,6 +103,7 @@ export function ScratchTierFormSections({
 
       {/* ── Step 3: Member Eligibility & Guardrails (Merged) ───────────── */}
       <PolarisEligibilityCard
+        key={`eligibility-${values.memberEligibility || "ALL"}`}
         step={3}
         title="Member Eligibility & Guardrails"
         description="Specify which members can win this prize tier and configure anti-abuse fraud restrictions."
@@ -115,6 +119,17 @@ export function ScratchTierFormSections({
         onUserIdsChange={(users) => {
           setFieldValue("eligibleUserIds", users);
         }}
+        showToAllMembers={values.showToAllMembers ?? true}
+        onShowToAllMembersChange={(val) =>
+          setFieldValue("showToAllMembers", val)
+        }
+        errorMessage={
+          values.memberEligibility === "TIERS"
+            ? (err("membershipTierId") || err("eligibleTierIds"))
+            : values.memberEligibility === "SPECIFIC_CUSTOMERS"
+              ? err("eligibleUserIds")
+              : null
+        }
       >
         {/* Embedded Anti-Abuse Guardrails */}
         <div className="pt-3 border-t border-border/70 space-y-3">

@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import {
   useCreateDigitalCardRule,
   useUpdateDigitalCardRule,
+  useGetDigitalCardRuleById,
 } from "@/graphql/actions/rewards/gift-cards";
 
 const BRAND_CATALOG = [
@@ -97,6 +98,7 @@ const BRAND_CATALOG = [
 
 interface GiftCardFormProps {
   initialItem?: GiftCardRuleItem | null;
+  id?: string;
   onSuccess?: (item: GiftCardRuleItem) => void;
   onCancel?: () => void;
   walletBalance?: number;
@@ -111,6 +113,7 @@ const validationSchema = Yup.object({
 
 export function GiftCardForm({
   initialItem,
+  id,
   onSuccess,
   onCancel,
   walletBalance = 0,
@@ -119,18 +122,42 @@ export function GiftCardForm({
   const [createDigitalCardRule] = useCreateDigitalCardRule();
   const [updateDigitalCardRule] = useUpdateDigitalCardRule();
 
-  const isEditing = Boolean(initialItem?.id);
+  const ruleId = initialItem?.id || id;
+  const isEditing = Boolean(ruleId);
+
+  const { data: fetchedRuleData } = useGetDigitalCardRuleById(id || "", {
+    skip: !id || Boolean(initialItem),
+  });
+
+  const parsedFetchedItem: GiftCardRuleItem | null = fetchedRuleData?.getDigitalCardRuleById
+    ? {
+        id: fetchedRuleData.getDigitalCardRuleById.id,
+        title: fetchedRuleData.getDigitalCardRuleById.title,
+        brand: fetchedRuleData.getDigitalCardRuleById.brandName || "Amazon Pay",
+        category: "E-Commerce",
+        denomination: fetchedRuleData.getDigitalCardRuleById.faceValue || 500,
+        serviceFee: 25,
+        totalCostPerWin: (fetchedRuleData.getDigitalCardRuleById.faceValue || 500) + 25,
+        validityMonths: Math.round((fetchedRuleData.getDigitalCardRuleById.validityDays || 365) / 30),
+        isActive: fetchedRuleData.getDigitalCardRuleById.isActive ?? true,
+        totalIssued: fetchedRuleData.getDigitalCardRuleById.totalAllocated || 0,
+        totalSpent: 0,
+        gameAssignments: ["Spin the Wheel"],
+      }
+    : null;
+
+  const currentItem = initialItem || parsedFetchedItem;
 
   const formik = useFormik({
     initialValues: {
-      title: initialItem?.title || "₹500 Amazon Gift Card",
-      brand: initialItem?.brand || "Amazon Pay",
-      category: initialItem?.category || "E-Commerce",
-      denomination: initialItem?.denomination || 500,
-      serviceFee: initialItem?.serviceFee || 25,
-      validityMonths: initialItem?.validityMonths || 12,
-      isActive: initialItem?.isActive ?? true,
-      gameAssignments: initialItem?.gameAssignments || ["Spin the Wheel"],
+      title: currentItem?.title || "₹500 Amazon Gift Card",
+      brand: currentItem?.brand || "Amazon Pay",
+      category: currentItem?.category || "E-Commerce",
+      denomination: currentItem?.denomination || 500,
+      serviceFee: currentItem?.serviceFee || 25,
+      validityMonths: currentItem?.validityMonths || 12,
+      isActive: currentItem?.isActive ?? true,
+      gameAssignments: currentItem?.gameAssignments || ["Spin the Wheel"],
     },
     enableReinitialize: true,
     validationSchema,
@@ -140,12 +167,12 @@ export function GiftCardForm({
         const productId = `${values.brand.toLowerCase().replace(/[^a-z0-9]/g, "_")}_${values.denomination}`;
         const totalCostPerWin = Number(values.denomination) + Number(values.serviceFee);
 
-        let savedId = initialItem?.id || `gc-${Date.now()}`;
+        let savedId = currentItem?.id || id || `gc-${Date.now()}`;
 
-        if (isEditing && initialItem && !initialItem.id.startsWith("gc-")) {
+        if (isEditing && savedId && !savedId.startsWith("gc-")) {
           await updateDigitalCardRule({
             variables: {
-              id: initialItem.id,
+              id: (currentItem?.id || id)!,
               input: {
                 title: values.title,
                 description: `${values.brand} Digital Gift Card Voucher`,

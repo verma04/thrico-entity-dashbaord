@@ -1,73 +1,75 @@
 "use client";
 
 import React from "react";
-import {
-  Coins,
-  DollarSign,
-  TrendingUp,
-  Percent,
-} from "lucide-react";
+import { Coins, DollarSign, TrendingUp, Percent } from "lucide-react";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import type { StatValue } from "@/graphql/actions/member-kpi-dashboard";
 
-const kpis = [
+const monetisationKPIs = [
   {
     title: "Coins Payouts",
-    key: "totalCurrencyPayouts" as const,
+    key: "totalCurrencyPayouts",
     icon: Coins,
+    color: "bg-amber-500",
     tooltip: "SUM(payout_amount WHERE status = 'completed')",
-    colorScheme: "orange" as const,
     href: "/gamification/currency",
   },
   {
     title: "Avg Revenue / Member",
-    key: "revenuePerMember" as const,
+    key: "revenuePerMember",
     icon: DollarSign,
+    color: "bg-emerald-500",
     tooltip: "Total Community Revenue ÷ Active Members",
-    colorScheme: "lime" as const,
   },
   {
     title: "Member Lifetime Value",
-    key: "memberLifetimeValue" as const,
+    key: "memberLifetimeValue",
     icon: TrendingUp,
+    color: "bg-indigo-500",
     tooltip: "Average total revenue generated per member over their lifecycle",
-    colorScheme: "indigo" as const,
   },
   {
     title: "Revenue Conversion",
-    key: "revenueConversionRate" as const,
+    key: "revenueConversionRate",
     icon: Percent,
+    color: "bg-violet-500",
     suffix: "%",
     tooltip: "Members who made a transaction ÷ Active Members",
-    colorScheme: "purple" as const,
   },
 ];
 
 interface KPIMonetisationProps {
   loading: boolean;
-  data: Record<string, StatValue | undefined>;
+  getMetric: (key: string) => StatValue;
 }
 
-export function KPIMonetisation({ loading, data }: KPIMonetisationProps) {
+export function KPIMonetisation({ loading, getMetric }: KPIMonetisationProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {kpis.map((kpi) => {
-        const metric = data[kpi.key];
-        return (
-          <EcosystemKPI
-            key={kpi.key}
-            title={kpi.title}
-            value={loading ? "..." : (metric?.value ?? "0")}
-            trend={metric?.change ?? 0}
-            trendData={metric?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-            icon={kpi.icon}
-            colorScheme={kpi.colorScheme}
-            suffix={(kpi as any).suffix}
-            tooltip={kpi.tooltip}
-            href={(kpi as any).href}
-          />
-        );
-      })}
-    </div>
+    <section
+      id="kpi-section-monetisation"
+      className="space-y-3 mt-20 scroll-mt-24"
+    >
+      <DashboardSectionHeading title="MONETISATION" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {monetisationKPIs.map((v) => {
+          const item = getMetric(v.key);
+          return (
+            <EcosystemKPI
+              key={v.key}
+              title={v.title}
+              value={loading ? "..." : (item?.value ?? "0")}
+              trend={item?.change ?? 0}
+              trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+              icon={v.icon}
+              color={v.color}
+              suffix={(v as any).suffix}
+              tooltip={v.tooltip}
+              href={(v as any).href}
+            />
+          );
+        })}
+      </div>
+    </section>
   );
 }

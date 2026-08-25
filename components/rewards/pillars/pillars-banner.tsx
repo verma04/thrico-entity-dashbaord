@@ -23,8 +23,8 @@ interface PillarsBannerProps {
 }
 
 export const PillarsBanner: React.FC<PillarsBannerProps> = ({
-  totalRedemptions = 128,
-  activeCoupons = 12,
+  totalRedemptions = 0,
+  activeCoupons = 0,
   loading = false,
 }) => {
   return (

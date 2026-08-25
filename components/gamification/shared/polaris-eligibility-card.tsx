@@ -8,6 +8,7 @@ import { useSearchUserByName } from "@/graphql/actions/mentorship/mentorship-act
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -43,6 +44,9 @@ interface PolarisEligibilityCardProps {
   onTierIdsChange: (tierIds: string[]) => void;
   userIds: string[] | string | undefined | null;
   onUserIdsChange: (userIds: string[]) => void;
+  showToAllMembers?: boolean;
+  onShowToAllMembersChange?: (val: boolean) => void;
+  errorMessage?: string | null | React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -57,6 +61,9 @@ export function PolarisEligibilityCard({
   onTierIdsChange,
   userIds,
   onUserIdsChange,
+  showToAllMembers = true,
+  onShowToAllMembersChange,
+  errorMessage,
   children,
 }: PolarisEligibilityCardProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -132,6 +139,41 @@ export function PolarisEligibilityCard({
     },
     [selectedUserIds, onUserIdsChange],
   );
+
+  React.useEffect(() => {
+    if (searchResultsUsers.length > 0) {
+      setSelectedCustomersMap((prev) => {
+        const next = { ...prev };
+        searchResultsUsers.forEach((m: any) => {
+          const uid = m.user?.id || m.id;
+          const name =
+            `${m.user?.firstName || ""} ${m.user?.lastName || ""}`.trim() ||
+            m.user?.email ||
+            m.name ||
+            uid;
+          if (uid) {
+            next[uid] = {
+              id: uid,
+              name,
+              email: m.user?.email,
+              avatar: m.user?.avatar,
+            };
+          }
+        });
+        return next;
+      });
+    }
+  }, [searchResultsUsers]);
+
+  React.useEffect(() => {
+    if (
+      eligibility === "SPECIFIC_CUSTOMERS" &&
+      selectedUserIds.length > 0 &&
+      searchResultsUsers.length === 0
+    ) {
+      searchUserByName({ variables: { name: "" } });
+    }
+  }, [eligibility, selectedUserIds.length, searchResultsUsers.length, searchUserByName]);
 
   return (
     <>
@@ -254,20 +296,25 @@ export function PolarisEligibilityCard({
                 <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                   {selectedUserIds.map((userId: string) => {
                     const saved = selectedCustomersMap[userId];
-                    const name = saved?.name || userId;
+                    const displayName =
+                      saved?.name ||
+                      (userId.length > 20
+                        ? `Customer (${userId.slice(0, 8)}...)`
+                        : userId);
                     const avatar = saved?.avatar;
                     return (
                       <span
                         key={userId}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                        title={userId}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 max-w-full"
                       >
-                        <Avatar className="h-3.5 w-3.5">
+                        <Avatar className="h-3.5 w-3.5 shrink-0">
                           <AvatarImage src={avatar} />
                           <AvatarFallback className="text-[8px]">
-                            {name.charAt(0).toUpperCase()}
+                            {displayName.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{name}</span>
+                        <span className="truncate">{displayName}</span>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -275,7 +322,7 @@ export function PolarisEligibilityCard({
                             const next = selectedUserIds.filter((id) => id !== userId);
                             onUserIdsChange(next);
                           }}
-                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5"
+                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5 shrink-0"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -365,6 +412,46 @@ export function PolarisEligibilityCard({
                   )}
                 </div>
               )}
+
+              {/* Validation error display */}
+              {errorMessage ? (
+                typeof errorMessage === "string" ? (
+                  <p className="text-[11px] text-destructive font-medium mt-1 animate-in fade-in-50">
+                    {errorMessage}
+                  </p>
+                ) : (
+                  errorMessage
+                )
+              ) : null}
+            </div>
+          )}
+
+          {/* Show To All Members Discovery Checkbox */}
+          {onShowToAllMembersChange && (
+            <div className="pt-3 border-t border-border/70 space-y-2">
+              <div className="flex items-start space-x-3 p-3 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors">
+                <Checkbox
+                  id="showToAllMembersCheckbox"
+                  checked={showToAllMembers}
+                  onCheckedChange={(checked) =>
+                    onShowToAllMembersChange?.(Boolean(checked))
+                  }
+                  className="mt-0.5"
+                />
+                <div className="space-y-0.5">
+                  <Label
+                    htmlFor="showToAllMembersCheckbox"
+                    className="text-xs font-semibold text-foreground cursor-pointer"
+                  >
+                    Show to all members in discovery & game lists
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    {showToAllMembers
+                      ? "Visible to all members, but only members meeting the eligibility criteria can win or claim."
+                      : "Hidden from non-eligible members. Only matching members can view and access this tier."}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

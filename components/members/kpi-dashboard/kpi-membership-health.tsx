@@ -1,75 +1,76 @@
 "use client";
 
 import React from "react";
-import {
-  Users,
-  UserCheck,
-  Activity,
-  ShieldBan,
-  AlertTriangle,
-} from "lucide-react";
+import { Users, Activity, Target, ShieldBan } from "lucide-react";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import type { StatValue } from "@/graphql/actions/member-kpi-dashboard";
 
-const kpis = [
+const membershipHealthKPIs = [
   {
     title: "Total Members",
-    key: "totalMembers" as const,
+    key: "totalMembers",
     icon: Users,
+    color: "bg-cyan-500",
     tooltip: "COUNT(members WHERE status != 'deleted')",
-    colorScheme: "indigo" as const,
   },
   {
-    title: "Active Members (30d)",
-    key: "activeUsers" as const,
-    icon: UserCheck,
-    tooltip: "COUNT(DISTINCT member_id WHERE last_action ≥ today − 30d)",
-    colorScheme: "lime" as const,
+    title: "Active Members",
+    key: "activeUsers",
+    icon: Activity,
+    color: "bg-emerald-500",
+    tooltip: "Unique members active within the selected date range",
     href: "/members/all?filter=active",
   },
   {
     title: "Active Member Rate",
-    key: "engagementRate" as const,
-    icon: Activity,
+    key: "engagementRate",
+    icon: Target,
+    color: "bg-amber-400",
     suffix: "%",
     tooltip: "(Active Members ÷ Total Members) × 100",
-    colorScheme: "sky" as const,
   },
   {
     title: "Blocked Members",
-    key: "blockMembers" as const,
+    key: "blockMembers",
     icon: ShieldBan,
+    color: "bg-rose-500",
     tooltip: "Members currently blocked across the platform",
-    colorScheme: "rose" as const,
     href: "/members/all?filter=blocked",
   },
 ];
 
 interface KPIMembershipHealthProps {
   loading: boolean;
-  data: Record<string, StatValue | undefined>;
+  getMetric: (key: string) => StatValue;
 }
 
-export function KPIMembershipHealth({ loading, data }: KPIMembershipHealthProps) {
+export function KPIMembershipHealth({
+  loading,
+  getMetric,
+}: KPIMembershipHealthProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {kpis.map((kpi) => {
-        const metric = data[kpi.key];
-        return (
-          <EcosystemKPI
-            key={kpi.key}
-            title={kpi.title}
-            value={loading ? "..." : (metric?.value ?? "0")}
-            trend={metric?.change ?? 0}
-            trendData={metric?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-            icon={kpi.icon}
-            colorScheme={kpi.colorScheme}
-            suffix={(kpi as any).suffix}
-            tooltip={kpi.tooltip}
-            href={(kpi as any).href}
-          />
-        );
-      })}
-    </div>
+    <section id="kpi-section-membership" className="space-y-3 scroll-mt-24">
+      <DashboardSectionHeading title="MEMBERSHIP HEALTH" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {membershipHealthKPIs.map((v) => {
+          const item = getMetric(v.key);
+          return (
+            <EcosystemKPI
+              key={v.key}
+              title={v.title}
+              value={loading ? "..." : (item?.value ?? "0")}
+              trend={item?.change ?? 0}
+              trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+              icon={v.icon}
+              color={v.color}
+              suffix={(v as any).suffix}
+              tooltip={v.tooltip}
+              href={(v as any).href}
+            />
+          );
+        })}
+      </div>
+    </section>
   );
 }

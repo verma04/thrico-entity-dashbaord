@@ -12,6 +12,7 @@ import {
   Zap,
   Package,
   Calendar,
+  Edit,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ interface ManualRewardCardProps {
   currencyName?: string;
   onSimulateWin?: (reward: ManualRewardItem) => void;
   onManagePool?: (reward: ManualRewardItem) => void;
+  onEdit?: (reward: ManualRewardItem) => void;
 }
 
 export function ManualRewardCard({
@@ -58,6 +60,7 @@ export function ManualRewardCard({
   currencyName,
   onSimulateWin,
   onManagePool,
+  onEdit,
 }: ManualRewardCardProps) {
   const [copied, setCopied] = React.useState(false);
 
@@ -166,16 +169,25 @@ export function ManualRewardCard({
               {onSimulateWin && (
                 <DropdownMenuItem
                   onClick={() => onSimulateWin(reward)}
-                  className="text-xs gap-2 text-emerald-600 dark:text-emerald-400 font-medium"
+                  className="text-xs gap-2 text-emerald-600 dark:text-emerald-400 font-medium cursor-pointer"
                 >
                   <Zap className="h-3.5 w-3.5" />
                   Simulate Voucher Claim
                 </DropdownMenuItem>
               )}
+              {onEdit && (
+                <DropdownMenuItem
+                  onClick={() => onEdit(reward)}
+                  className="text-xs gap-2 cursor-pointer"
+                >
+                  <Edit className="h-3.5 w-3.5" />
+                  Edit Campaign Config
+                </DropdownMenuItem>
+              )}
               {onManagePool && (
                 <DropdownMenuItem
                   onClick={() => onManagePool(reward)}
-                  className="text-xs gap-2"
+                  className="text-xs gap-2 cursor-pointer"
                 >
                   <Package className="h-3.5 w-3.5" />
                   Inspect Voucher Pool

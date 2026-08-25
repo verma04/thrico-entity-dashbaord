@@ -12,99 +12,107 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import type { StatValue } from "@/graphql/actions/member-kpi-dashboard";
 
-const kpis = [
+const growthRetentionKPIs = [
   {
     title: "New Members (30d)",
-    key: "newMembers" as const,
+    key: "newMembers",
     icon: UserPlus,
+    color: "bg-cyan-500",
     tooltip: "COUNT(members WHERE created_at ≥ today − 30d)",
-    colorScheme: "sky" as const,
   },
   {
     title: "Member Growth Rate",
-    key: "memberGrowthRate" as const,
+    key: "memberGrowthRate",
     icon: TrendingUp,
+    color: "bg-indigo-500",
     suffix: "%",
     tooltip: "((Members_end − Members_start) ÷ Members_start) × 100",
-    colorScheme: "indigo" as const,
   },
   {
     title: "Activation Rate",
-    key: "memberActivationRate" as const,
+    key: "memberActivationRate",
     icon: Target,
+    color: "bg-emerald-500",
     suffix: "%",
-    tooltip: "(New members reaching activation milestone within 7d ÷ Total new members) × 100",
-    colorScheme: "lime" as const,
+    tooltip:
+      "(New members reaching activation milestone within 7d ÷ Total new members) × 100",
   },
   {
     title: "Churn Rate",
-    key: "churnRate" as const,
+    key: "churnRate",
     icon: TrendingDown,
+    color: "bg-rose-500",
     suffix: "%",
     tooltip: "(Members lost ÷ Members at period start) × 100",
-    colorScheme: "rose" as const,
   },
   {
     title: "Retention Rate (90d)",
-    key: "retentionRate" as const,
+    key: "retentionRate",
     icon: Heart,
+    color: "bg-indigo-500",
     suffix: "%",
     tooltip: "(90d cohort still active ÷ Original cohort size) × 100",
-    colorScheme: "purple" as const,
   },
   {
     title: "Referrals Joined",
-    key: "referralsJoined" as const,
+    key: "referralsJoined",
     icon: Users,
+    color: "bg-amber-500",
     tooltip: "COUNT(members WHERE signup_source = 'referral')",
-    colorScheme: "orange" as const,
     href: "/members/referrals",
   },
   {
     title: "Onboarding Rate",
-    key: "onboardingCompletionRate" as const,
+    key: "onboardingCompletionRate",
     icon: CheckCircle,
+    color: "bg-blue-500",
     suffix: "%",
     tooltip: "Percentage of new members who completed onboarding",
-    colorScheme: "sky" as const,
   },
   {
-    title: "Re-engagement Rate",
-    key: "reEngagementRecoveryRate" as const,
+    title: "Re-engagement",
+    key: "reEngagementRecoveryRate",
     icon: RefreshCw,
+    color: "bg-violet-500",
     suffix: "%",
     tooltip: "Dormant members who became active again",
-    colorScheme: "indigo" as const,
   },
 ];
 
 interface KPIGrowthRetentionProps {
   loading: boolean;
-  data: Record<string, StatValue | undefined>;
+  getMetric: (key: string) => StatValue;
 }
 
-export function KPIGrowthRetention({ loading, data }: KPIGrowthRetentionProps) {
+export function KPIGrowthRetention({
+  loading,
+  getMetric,
+}: KPIGrowthRetentionProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {kpis.map((kpi) => {
-        const metric = data[kpi.key];
-        return (
-          <EcosystemKPI
-            key={kpi.key}
-            title={kpi.title}
-            value={loading ? "..." : (metric?.value ?? "0")}
-            trend={metric?.change ?? 0}
-            trendData={metric?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-            icon={kpi.icon}
-            colorScheme={kpi.colorScheme}
-            suffix={(kpi as any).suffix}
-            tooltip={kpi.tooltip}
-            href={(kpi as any).href}
-          />
-        );
-      })}
-    </div>
+    <section id="kpi-section-growth" className="space-y-3 mt-20 scroll-mt-24">
+      <DashboardSectionHeading title="GROWTH & RETENTION" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {growthRetentionKPIs.map((v) => {
+          const item = getMetric(v.key);
+          return (
+            <EcosystemKPI
+              key={v.key}
+              title={v.title}
+              value={loading ? "..." : (item?.value ?? "0")}
+              trend={item?.change ?? 0}
+              trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+              icon={v.icon}
+              color={v.color}
+              suffix={(v as any).suffix}
+              tooltip={v.tooltip}
+              href={(v as any).href}
+            />
+          );
+        })}
+      </div>
+    </section>
   );
 }

@@ -16,13 +16,15 @@ interface PillarsCardsGridProps {
   manualCount?: number;
   storeCount?: number;
   giftCardsCount?: number;
+  walletBalance?: number;
   loading?: boolean;
 }
 
 export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
-  manualCount = 12,
-  storeCount = 84,
-  giftCardsCount = 32,
+  manualCount = 0,
+  storeCount = 0,
+  giftCardsCount = 0,
+  walletBalance = 0,
   loading = false,
 }) => {
   const cards = [
@@ -62,7 +64,7 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
       href: "/gamification/rewards/pillars/store",
       badge: "Merchant Funded",
       stats: [
-        { label: "Codes Created", value: storeCount.toString() },
+        { label: "Rules / Codes", value: storeCount.toString() },
         { label: "Conversion Lift", value: "+38%" },
         { label: "Speed", value: "<150ms" },
       ],
@@ -87,8 +89,8 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
       href: "/gamification/rewards/pillars/gift-cards",
       badge: "Prepaid Wallet",
       stats: [
-        { label: "Active Brands", value: "200+" },
-        { label: "Budget Pool", value: "₹50,000" },
+        { label: "Active Rules", value: giftCardsCount.toString() },
+        { label: "Prepaid Wallet", value: `₹${walletBalance.toLocaleString("en-IN")}` },
         { label: "Inventory Risk", value: "0% (API)" },
       ],
       highlights: [

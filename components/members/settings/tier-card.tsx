@@ -53,16 +53,16 @@ export function TierCard({
   }, [tier.benefits]);
 
   return (
-    <div className="border border-border/60 bg-card rounded-2xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col group relative overflow-hidden">
-      {/* Top accent color bar */}
+    <div className="border border-border/50 bg-card rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col group relative overflow-hidden">
+      {/* Color bar */}
       <div
-        className="absolute top-0 left-0 h-1.5 w-full opacity-80 group-hover:opacity-100 transition-opacity"
+        className="absolute top-0 left-0 h-1 w-full opacity-80 group-hover:opacity-100 transition-opacity"
         style={{ backgroundColor: color }}
       />
 
-      {/* Card Header */}
-      <div className="flex items-start justify-between border-b border-border/50 pb-3.5 mb-3.5 mt-1">
-        <div className="flex gap-3 min-w-0">
+      {/* Header */}
+      <div className="flex items-start justify-between border-b border-border/50 pb-3 mb-3 mt-1">
+        <div className="flex gap-2.5 min-w-0">
           {tier.badgeIcon ? (
             <img
               src={
@@ -71,25 +71,21 @@ export function TierCard({
                   : `https://cdn.thrico.network/${tier.badgeIcon}`
               }
               alt={tier.name}
-              className="w-10 h-10 rounded-xl object-cover border border-zinc-200 dark:border-zinc-700 shrink-0 shadow-2xs"
+              className="w-8 h-8 rounded-lg object-cover border border-border/60 shrink-0"
             />
           ) : (
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105"
-              style={{
-                backgroundColor: `${color}18`,
-                borderColor: `${color}30`,
-                color: color,
-              }}
+              className="p-2 rounded-lg flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${color}15`, color: color }}
             >
-              <Award className="h-5 w-5" style={{ color }} />
+              <Award className="h-4 w-4" style={{ color }} />
             </div>
           )}
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <h3
-                className="text-sm font-bold text-foreground truncate group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-colors"
+                className="text-sm font-semibold text-foreground truncate group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors"
                 title={tier.name}
               >
                 {tier.name}
@@ -97,18 +93,18 @@ export function TierCard({
               {tier.isDefault && (
                 <Badge
                   variant="outline"
-                  className="text-[10px] py-0 px-1.5 h-4 font-semibold text-emerald-600 bg-emerald-500/10 border-emerald-500/20"
+                  className="text-[9px] py-0 px-1 h-3.5 font-semibold text-emerald-600 bg-emerald-500/10 border-emerald-500/20"
                 >
                   Default
                 </Badge>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5 font-medium">
-              <Users className="h-3 w-3 text-muted-foreground/80" />
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-0.5">
+              <Users className="h-3 w-3" />
               <span>
                 {loading ? (
-                  <Skeleton className="h-3 w-14 inline-block" />
+                  <Skeleton className="h-3 w-12 inline-block" />
                 ) : (
                   `${totalCount} ${totalCount === 1 ? "Member" : "Members"}`
                 )}
@@ -117,96 +113,98 @@ export function TierCard({
           </div>
         </div>
 
-        {/* Action buttons (always visible / hover highlighted) */}
-        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
-          {onEdit && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-              title="Edit Tier"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              title="Delete Tier"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
+        {/* Hover Actions */}
+        {(onEdit || onDelete) && (
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                title="Edit Tier"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                title="Delete Tier"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Card Body */}
-      <div className="flex-1 flex flex-col justify-between space-y-3.5">
-        {/* Description */}
-        {tier.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-            {tier.description}
-          </p>
-        )}
+      {/* Body */}
+      <div className="flex-1 flex flex-col justify-between space-y-3">
+        {/* Description / Perks if available */}
+        {(tier.description || benefitsList.length > 0) && (
+          <div className="space-y-2">
+            {tier.description && (
+              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                {tier.description}
+              </p>
+            )}
 
-        {/* Benefits / Privileges preview */}
-        {benefitsList.length > 0 && (
-          <div className="space-y-1.5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Privileges & Perks
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {benefitsList.slice(0, 3).map((benefit, idx) => (
-                <Badge
-                  key={idx}
-                  variant="secondary"
-                  className="text-[10px] bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 font-medium px-2 py-0.5 border border-zinc-200/50 dark:border-zinc-700/50 truncate max-w-[200px]"
-                >
-                  <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-500 shrink-0" />
-                  {benefit}
-                </Badge>
-              ))}
-              {benefitsList.length > 3 && (
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-medium px-1.5 py-0.5"
-                >
-                  +{benefitsList.length - 3} more
-                </Badge>
-              )}
-            </div>
+            {benefitsList.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {benefitsList.slice(0, 2).map((benefit, idx) => (
+                  <Badge
+                    key={idx}
+                    variant="secondary"
+                    className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-medium px-1.5 py-0.5 truncate max-w-[180px]"
+                  >
+                    <Sparkles className="h-2.5 w-2.5 mr-1 text-amber-500 shrink-0" />
+                    {benefit}
+                  </Badge>
+                ))}
+                {benefitsList.length > 2 && (
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-medium px-1.5 py-0.5"
+                  >
+                    +{benefitsList.length - 2} more
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Members Avatar Stack */}
-        <div className="pt-2 border-t border-border/40">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Assigned Members
-            </span>
-            {totalCount > 0 && (
+        {/* Members section matching ClassificationCard */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Members
+            </p>
+            {totalCount > 0 && onViewMembers && (
               <button
                 type="button"
-                onClick={onViewMembers}
-                className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-0.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewMembers();
+                }}
+                className="text-[11px] font-semibold text-primary hover:underline"
               >
                 View all ({totalCount})
-                <ChevronRight className="h-3 w-3" />
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 min-h-[32px]">
+          <div className="flex flex-wrap gap-1.5">
             {loading ? (
               <div className="flex gap-1.5">
                 <Skeleton className="h-7 w-7 rounded-full" />
@@ -214,16 +212,16 @@ export function TierCard({
                 <Skeleton className="h-7 w-7 rounded-full" />
               </div>
             ) : memberRows.length === 0 ? (
-              <p className="text-xs text-muted-foreground/70 italic py-1">
-                No members assigned to this tier yet.
+              <p className="text-xs text-muted-foreground/70 italic">
+                No members yet.
               </p>
             ) : (
-              <div className="flex flex-wrap items-center gap-1.5">
-                {memberRows.slice(0, 7).map((row: any) => {
+              <>
+                {memberRows.slice(0, 8).map((row: any) => {
                   const u = row.user || {};
                   const name =
                     [u.firstName, u.lastName].filter(Boolean).join(" ") ||
-                    "Member";
+                    "User";
                   const avatarUrl = u.avatar
                     ? `https://cdn.thrico.network/${u.avatar}`
                     : "";
@@ -240,82 +238,75 @@ export function TierCard({
                       }}
                     >
                       <Avatar
-                        className="h-7 w-7 border-2 border-background shadow-xs hover:z-10 hover:scale-110 transition-transform cursor-pointer"
+                        className="h-7 w-7 border-2 border-background shadow-sm hover:z-10 hover:scale-110 transition-transform cursor-pointer"
                         title={`${name} ${u.headline ? `- ${u.headline}` : ""}`}
                       >
                         <AvatarImage src={avatarUrl} alt={name} />
                         <AvatarFallback
-                          className="text-[10px] font-bold"
+                          className="text-[10px] font-medium"
                           style={{
-                            backgroundColor: `${color}20`,
+                            backgroundColor: `${color}15`,
                             color: color,
                           }}
                         >
-                          {u.firstName?.charAt(0) || "M"}
+                          {u.firstName?.charAt(0) || "U"}
                         </AvatarFallback>
                       </Avatar>
                     </UserProfileHoverCard>
                   );
                 })}
-                {totalCount > 7 && (
+                {totalCount > 8 && (
                   <button
                     type="button"
-                    onClick={onViewMembers}
-                    className="h-7 px-2 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-background flex items-center justify-center text-[10px] font-bold text-zinc-600 dark:text-zinc-400 shadow-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewMembers?.();
+                    }}
+                    className="h-7 w-7 rounded-full bg-slate-100 dark:bg-zinc-800 border-2 border-background flex items-center justify-center text-[10px] font-medium text-slate-600 dark:text-zinc-400 shadow-sm hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
                   >
-                    +{totalCount - 7}
+                    +{totalCount - 8}
                   </button>
                 )}
-              </div>
+              </>
             )}
           </div>
-        </div>
-
-        {/* Card Footer Button */}
-        <div className="pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onViewMembers}
-            className="w-full h-8 text-xs font-semibold border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 justify-between group/btn"
-          >
-            <span className="flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5 text-muted-foreground" />
-              Manage Tier Members
-            </span>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover/btn:translate-x-0.5 transition-transform" />
-          </Button>
         </div>
       </div>
     </div>
   );
 }
 
-export function TierSkeletonGrid() {
+export function TierSkeletonGrid({
+  count = 8,
+  className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4",
+}: {
+  count?: number;
+  className?: string;
+}) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
-      {Array.from({ length: 4 }).map((_, i) => (
+    <div className={className}>
+      {[...Array(count)].map((_, i) => (
         <div
           key={i}
-          className="border border-border/60 bg-card rounded-2xl p-5 shadow-xs flex flex-col space-y-4"
+          className="border border-border/50 bg-card rounded-xl p-4 shadow-sm space-y-3"
         >
-          <div className="flex items-start gap-3">
-            <Skeleton className="w-10 h-10 rounded-xl" />
+          <div className="flex items-center gap-2.5 border-b border-border/50 pb-3">
+            <Skeleton className="h-8 w-8 rounded-lg" />
             <div className="space-y-1.5 flex-1">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/3" />
+              <Skeleton className="h-3.5 w-3/4" />
+              <Skeleton className="h-2.5 w-1/4" />
             </div>
           </div>
-          <Skeleton className="h-8 w-full" />
-          <div className="flex gap-1.5">
-            <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-6 w-20 rounded-full" />
-          </div>
-          <div className="flex gap-1 pt-2">
-            <Skeleton className="h-7 w-7 rounded-full" />
-            <Skeleton className="h-7 w-7 rounded-full" />
-            <Skeleton className="h-7 w-7 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-2.5 w-1/2" />
+            <div className="flex gap-1.5">
+              {[...Array(4)].map((_, j) => (
+                <Skeleton
+                  key={j}
+                  className="h-7 w-7 rounded-full border-2 border-background"
+                />
+              ))}
+            </div>
           </div>
         </div>
       ))}

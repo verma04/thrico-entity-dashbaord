@@ -25,9 +25,9 @@ interface PillarsDistributionChartProps {
 }
 
 export function PillarsDistributionChart({
-  manualCount = 54,
-  storeCount = 48,
-  giftCardsCount = 26,
+  manualCount = 0,
+  storeCount = 0,
+  giftCardsCount = 0,
   loading = false,
 }: PillarsDistributionChartProps) {
   const chartData = React.useMemo(() => {
@@ -65,6 +65,22 @@ export function PillarsDistributionChart({
 
   const totalRewards = manualCount + storeCount + giftCardsCount;
 
+  // Placeholder slice when total is 0 so the chart ring renders elegantly
+  const renderData =
+    totalRewards > 0
+      ? chartData
+      : [
+          {
+            name: "No Assets Configured",
+            shortName: "No Assets",
+            value: 1,
+            percentage: 0,
+            color: "hsl(var(--muted))",
+            icon: Coins,
+            funding: "Pending Setup",
+          },
+        ];
+
   return (
     <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-xs relative h-full flex flex-col overflow-hidden">
       <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-border/40 mb-2 px-3 sm:px-5 pt-3 sm:pt-4">
@@ -80,7 +96,7 @@ export function PillarsDistributionChart({
 
         <div className="flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-primary/10 text-primary border border-primary/20">
           <ShieldCheck className="h-2.5 w-2.5" />
-          Balanced
+          {totalRewards > 0 ? "Balanced" : "Ready"}
         </div>
       </CardHeader>
 
@@ -101,16 +117,16 @@ export function PillarsDistributionChart({
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={chartData}
+                data={renderData}
                 cx="50%"
                 cy="50%"
                 innerRadius={46}
                 outerRadius={64}
-                paddingAngle={3}
+                paddingAngle={totalRewards > 0 ? 3 : 0}
                 dataKey="value"
                 stroke="none"
               >
-                {chartData.map((entry, index) => (
+                {renderData.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.color}
@@ -118,20 +134,22 @@ export function PillarsDistributionChart({
                   />
                 ))}
               </Pie>
-              <RechartsTooltip
-                formatter={(value: number, name: string, props: any) => [
-                  `${value} claims (${props.payload.percentage.toFixed(0)}%)`,
-                  name,
-                ]}
-                contentStyle={{
-                  backgroundColor: "hsl(var(--background))",
-                  borderRadius: "8px",
-                  border: "1px solid hsl(var(--border))",
-                  fontSize: "11px",
-                  padding: "6px 10px",
-                }}
-                itemStyle={{ color: "hsl(var(--foreground))", fontWeight: "600" }}
-              />
+              {totalRewards > 0 && (
+                <RechartsTooltip
+                  formatter={(value: number, name: string, props: any) => [
+                    `${value} asset${value !== 1 ? "s" : ""} (${props.payload.percentage.toFixed(0)}%)`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--background))",
+                    borderRadius: "8px",
+                    border: "1px solid hsl(var(--border))",
+                    fontSize: "11px",
+                    padding: "6px 10px",
+                  }}
+                  itemStyle={{ color: "hsl(var(--foreground))", fontWeight: "600" }}
+                />
+              )}
             </PieChart>
           </ResponsiveContainer>
 

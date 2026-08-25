@@ -6,11 +6,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { ShoppingBag, Plus, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  PillarTwoStore,
-  StoreRewardDrawer,
-  StoreHowItWorksDrawer,
-} from "@/components/rewards/pillars/store";
+import { PillarTwoStore } from "@/components/rewards/pillars/store";
 
 export default function PillarTwoStorePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -52,21 +48,13 @@ export default function PillarTwoStorePage() {
       />
 
       <EcosystemContainer className="p-4 sm:p-5 space-y-4">
-        <PillarTwoStore />
+        <PillarTwoStore
+          isExternalDrawerOpen={isDrawerOpen}
+          setIsExternalDrawerOpen={setIsDrawerOpen}
+          isExternalHowItWorksOpen={isHowItWorksOpen}
+          setIsExternalHowItWorksOpen={setIsHowItWorksOpen}
+        />
       </EcosystemContainer>
-
-      {/* Store Reward Creation Drawer */}
-      <StoreRewardDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-      />
-
-      {/* Step-by-Step "How Store Rewards Work" Help Drawer */}
-      <StoreHowItWorksDrawer
-        isOpen={isHowItWorksOpen}
-        onClose={() => setIsHowItWorksOpen(false)}
-        onCreateClick={() => setIsDrawerOpen(true)}
-      />
     </EcosystemWrapper>
   );
 }

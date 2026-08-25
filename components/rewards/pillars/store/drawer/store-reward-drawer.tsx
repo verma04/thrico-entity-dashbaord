@@ -11,16 +11,22 @@ import { StoreRewardItem } from "../types";
 interface StoreRewardDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  initialItem?: StoreRewardItem | null;
+  id?: string;
   onSuccess?: (createdItem: StoreRewardItem) => void;
 }
 
 export function StoreRewardDrawer({
   isOpen,
   onClose,
+  initialItem,
+  id,
   onSuccess,
 }: StoreRewardDrawerProps) {
-  const handleSuccess = (createdItem: StoreRewardItem) => {
-    if (onSuccess) onSuccess(createdItem);
+  const isEditing = Boolean(initialItem?.id || id);
+
+  const handleSuccess = (item?: StoreRewardItem) => {
+    if (onSuccess && item) onSuccess(item);
     onClose();
   };
 
@@ -42,14 +48,16 @@ export function StoreRewardDrawer({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-bold text-foreground tracking-tight">
-                    Create Store Discount Rule
+                    {isEditing ? "Edit Store Discount Rule" : "Create Store Discount Rule"}
                   </h3>
                   <Badge className="bg-indigo-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
                     Pillar 2 • Shopify
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Define discount conditions & rules in Thrico. Unique single-use coupons are synthesized in Shopify only when a member wins or redeems.
+                  {isEditing
+                    ? "Update discount conditions & rules for this e-commerce reward blueprint."
+                    : "Define discount conditions & rules in Thrico. Unique single-use coupons are synthesized in Shopify only when a member wins or redeems."}
                 </p>
               </div>
             </div>
@@ -58,7 +66,7 @@ export function StoreRewardDrawer({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -67,7 +75,12 @@ export function StoreRewardDrawer({
 
         {/* Scrollable Form Content Area */}
         <div className="flex-1 min-h-0 overflow-y-auto">
-          <StoreRewardForm onSuccess={handleSuccess} onCancel={onClose} />
+          <StoreRewardForm
+            initialItem={initialItem}
+            id={id}
+            onSuccess={handleSuccess}
+            onCancel={onClose}
+          />
         </div>
       </SheetContent>
     </Sheet>

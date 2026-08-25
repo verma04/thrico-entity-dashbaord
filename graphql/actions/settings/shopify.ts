@@ -9,6 +9,14 @@ export const GET_SHOPIFY_CONNECTION = gql`
       status
       installedAt
       lastSyncAt
+      isActive
+      hasAllPermissions
+      requiresReconnect
+      hasReconnect
+      grantedScopes
+      requiredScopes
+      missingScopes
+      scopes
     }
   }
 `;
@@ -210,8 +218,30 @@ export const GET_ALL_SHOPIFY_COUPONS = gql`
   }
 `;
 
+// Interfaces for Shopify Connection
+export interface ShopifyConnection {
+  id: string;
+  shopDomain: string;
+  status: string;
+  installedAt?: string | null;
+  lastSyncAt?: string | null;
+  isActive: boolean;
+  hasAllPermissions: boolean;
+  requiresReconnect: boolean;
+  hasReconnect: boolean;
+  grantedScopes: string[];
+  requiredScopes: string[];
+  missingScopes: string[];
+  scopes: string[];
+}
+
+export interface GetShopifyConnectionResponse {
+  shopifyConnection: ShopifyConnection | null;
+}
+
 // Hooks
-export const useGetShopifyConnection = () => useQuery(GET_SHOPIFY_CONNECTION);
+export const useGetShopifyConnection = (options?: any) =>
+  useQuery<GetShopifyConnectionResponse>(GET_SHOPIFY_CONNECTION, options);
 export const useGetShopifySyncStatus = (options?: any) => useQuery(GET_SHOPIFY_SYNC_STATUS, options);
 
 export const useConnectShopify = () => useMutation(CONNECT_SHOPIFY);

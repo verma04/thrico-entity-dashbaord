@@ -142,6 +142,7 @@ export function ContentArea({
   offset = 0,
   onSimulateWin,
   onManagePool,
+  onEdit,
   onCreateClick,
 }: {
   view: "grid" | "list";
@@ -152,6 +153,7 @@ export function ContentArea({
   offset?: number;
   onSimulateWin?: (reward: ManualRewardItem) => void;
   onManagePool?: (reward: ManualRewardItem) => void;
+  onEdit?: (reward: ManualRewardItem) => void;
   onCreateClick?: () => void;
 }) {
   return (
@@ -228,6 +230,7 @@ export function ContentArea({
               currencyName={currencyName}
               onSimulateWin={onSimulateWin}
               onManagePool={onManagePool}
+              onEdit={onEdit}
               onCreateClick={onCreateClick}
             />
           ) : (
@@ -239,6 +242,7 @@ export function ContentArea({
               offset={offset}
               onSimulateWin={onSimulateWin}
               onManagePool={onManagePool}
+              onEdit={onEdit}
               onCreateClick={onCreateClick}
             />
           )}

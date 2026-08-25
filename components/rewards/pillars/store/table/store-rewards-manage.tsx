@@ -56,10 +56,12 @@ import { cn } from "@/lib/utils";
 
 interface StoreRewardsManageProps {
   onCreateClick?: () => void;
+  onEditClick?: (reward: StoreRewardItem) => void;
 }
 
 export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
   onCreateClick,
+  onEditClick,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -178,9 +180,9 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
       await deleteRule({ variables: { id } });
       toast.success("Store discount rule deleted successfully.");
       refetch();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error("Failed to delete store discount rule", {
-        description: err.message || "An unexpected error occurred.",
+        description: err instanceof Error ? err.message : "An unexpected error occurred.",
       });
     }
   };
@@ -375,21 +377,23 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
       {/* ── Content Area: Grid or List View ────────────────────────── */}
       <ContentArea loading={loading} viewMode={view}>
         {view === "grid" ? (
-          <StoreRewardGrid
-            rewards={filteredRewards}
-            onCreateClick={onCreateClick}
-            onSimulateWin={handleSimulateWin}
-            onDelete={handleDelete}
-          />
-        ) : (
-          <StoreRewardList
-            rewards={filteredRewards}
-            visibleColumns={visibleColumns}
-            onSimulateWin={handleSimulateWin}
-            onDelete={handleDelete}
-          />
-        )}
-      </ContentArea>
+           <StoreRewardGrid
+             rewards={filteredRewards}
+             onCreateClick={onCreateClick}
+             onSimulateWin={handleSimulateWin}
+             onEdit={onEditClick}
+             onDelete={handleDelete}
+           />
+         ) : (
+           <StoreRewardList
+             rewards={filteredRewards}
+             visibleColumns={visibleColumns}
+             onSimulateWin={handleSimulateWin}
+             onEdit={onEditClick}
+             onDelete={handleDelete}
+           />
+         )}
+       </ContentArea>
 
       {/* ── Bottom Pagination Bar ──────────────────────────────────── */}
       {totalPages > 1 && (

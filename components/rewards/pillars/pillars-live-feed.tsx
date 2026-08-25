@@ -20,77 +20,114 @@ import { cn } from "@/lib/utils";
 
 interface PillarsLiveFeedProps {
   loading?: boolean;
+  redemptions?: any[];
 }
 
-export function PillarsLiveFeed({ loading = false }: PillarsLiveFeedProps) {
+function getRelativeTimeString(dateInput?: string | Date | null) {
+  if (!dateInput) return "Just now";
+  try {
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return "Recently";
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  } catch {
+    return "Recently";
+  }
+}
+
+export function PillarsLiveFeed({ loading = false, redemptions = [] }: PillarsLiveFeedProps) {
   const [selectedPillarFlow, setSelectedPillarFlow] = useState<"manual" | "store" | "giftcards">("manual");
 
-  const recentActivities = [
-    {
-      id: "act-1",
-      user: {
-        firstName: "Aarav",
-        lastName: "Sharma",
-        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60",
-      },
-      pillar: "giftcards" as const,
-      pillarLabel: "Gift Card",
-      rewardName: "₹500 Amazon Voucher",
-      valueUnlocked: "₹500",
-      time: "2m ago",
-      status: "Delivered",
-      color: "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20",
-      icon: Gift,
-    },
-    {
-      id: "act-2",
-      user: {
-        firstName: "Priya",
-        lastName: "Patel",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=60",
-      },
-      pillar: "store" as const,
-      pillarLabel: "Store",
-      rewardName: "25% Off Cart",
-      valueUnlocked: "₹380",
-      time: "12m ago",
-      status: "Synthesized",
-      color: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-      icon: ShoppingBag,
-    },
-    {
-      id: "act-3",
-      user: {
-        firstName: "Rohan",
-        lastName: "Verma",
-        avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=60",
-      },
-      pillar: "manual" as const,
-      pillarLabel: "Manual",
-      rewardName: "VIP Pass #441",
-      valueUnlocked: "Zero Fee",
-      time: "28m ago",
-      status: "Claimed",
-      color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-      icon: Coins,
-    },
-    {
-      id: "act-4",
-      user: {
-        firstName: "Sneha",
-        lastName: "Nair",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60",
-      },
-      pillar: "giftcards" as const,
-      pillarLabel: "Gift Card",
-      rewardName: "₹250 Swiggy Money",
-      valueUnlocked: "₹250",
-      time: "45m ago",
-      status: "Delivered",
-      color: "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20",
-      icon: Gift,
-    },
-  ];
+  const activities = React.useMemo(() => {
+    if (!redemptions || redemptions.length === 0) {
+      return [];
+    }
+
+    return redemptions.slice(0, 6).map((r: any) => {
+      const reward = r.reward || {};
+      const metadata = r.metadata || {};
+      const provider = (reward.provider || metadata.provider || "").toUpperCase();
+      const rewardType = (reward.rewardType || "").toUpperCase();
+      const mechType = reward.mechanism?.type || "";
+
+      let pillar: "manual" | "store" | "giftcards" = "manual";
+      let pillarLabel = "Manual";
+      let color = "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+      let icon = Coins;
+
+      if (
+        mechType === "STORE_DISCOUNT" ||
+        reward.storeDiscountRuleId ||
+        rewardType === "STORE" ||
+        rewardType === "SHOPIFY_DISCOUNT" ||
+        provider === "SHOPIFY" ||
+        provider === "STORE"
+      ) {
+        pillar = "store";
+        pillarLabel = "Store";
+        color = "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20";
+        icon = ShoppingBag;
+      } else if (
+        mechType === "DIGITAL_GIFT_CARD" ||
+        reward.digitalCardRuleId ||
+        rewardType === "GIFT_CARD" ||
+        rewardType === "THRICO_GIFT_CARD" ||
+        provider === "GIFT_CARD" ||
+        provider === "THRICO" ||
+        provider === "XOXODAY"
+      ) {
+        pillar = "giftcards";
+        pillarLabel = "Gift Card";
+        color = "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20";
+        icon = Gift;
+      }
+
+      const user = r.user || {};
+      const firstName = user.firstName || "Member";
+      const lastName = user.lastName || "";
+      const avatar = user.avatar || "";
+
+      let valueUnlocked = "Claimed";
+      if (r.totalCost && Number(r.totalCost) > 0) {
+        valueUnlocked = `₹${Number(r.totalCost).toLocaleString("en-IN")}`;
+      } else if (r.faceValue && Number(r.faceValue) > 0) {
+        valueUnlocked = `₹${Number(r.faceValue).toLocaleString("en-IN")}`;
+      } else if (r.tcUsed && Number(r.tcUsed) > 0) {
+        valueUnlocked = `${Number(r.tcUsed).toLocaleString()} TC`;
+      } else if (r.ecUsed && Number(r.ecUsed) > 0) {
+        valueUnlocked = `${Number(r.ecUsed).toLocaleString()} EC`;
+      } else if (pillar === "manual") {
+        valueUnlocked = "Zero Cost";
+      }
+
+      const status = r.status === "COMPLETED" || r.status === "DELIVERED"
+        ? "Delivered"
+        : r.status === "CLAIMED"
+        ? "Claimed"
+        : r.status || "Completed";
+
+      return {
+        id: r.id,
+        user: { firstName, lastName, avatar },
+        pillar,
+        pillarLabel,
+        rewardName: reward.title || "Reward Coupon",
+        valueUnlocked,
+        time: getRelativeTimeString(r.claimedAt || r.createdAt),
+        status,
+        color,
+        icon,
+      };
+    });
+  }, [redemptions]);
 
   const flows = {
     manual: {
@@ -186,68 +223,91 @@ export function PillarsLiveFeed({ loading = false }: PillarsLiveFeedProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-[11px] text-primary font-bold h-6 px-2 rounded hover:bg-muted"
+                className="text-[11px] text-primary font-bold h-6 px-2 rounded hover:bg-muted cursor-pointer"
               >
                 View all <ArrowRight className="h-2.5 w-2.5 ml-0.5" />
               </Button>
             </Link>
           </CardHeader>
 
-          <CardContent className="flex-1 p-0 divide-y divide-border/50">
-            {recentActivities.map((act) => {
-              const Icon = act.icon;
-              return (
-                <div
-                  key={act.id}
-                  className="flex items-center justify-between gap-2.5 px-3 sm:px-5 py-2 hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Avatar className="h-7 w-7 border border-border/70 shrink-0">
-                      <AvatarImage src={act.user.avatar} alt={act.user.firstName} />
-                      <AvatarFallback className="text-[9px] font-bold">
-                        {act.user.firstName[0]}
-                      </AvatarFallback>
-                    </Avatar>
+          <CardContent className="flex-1 p-0 divide-y divide-border/50 flex flex-col justify-center">
+            {loading ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-2">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <span className="text-[10px] text-muted-foreground font-semibold">
+                  Syncing live redemptions...
+                </span>
+              </div>
+            ) : activities.length > 0 ? (
+              activities.map((act) => {
+                const Icon = act.icon;
+                return (
+                  <div
+                    key={act.id}
+                    className="flex items-center justify-between gap-2.5 px-3 sm:px-5 py-2 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Avatar className="h-7 w-7 border border-border/70 shrink-0">
+                        <AvatarImage src={act.user.avatar} alt={act.user.firstName} />
+                        <AvatarFallback className="text-[9px] font-bold">
+                          {act.user.firstName[0]}
+                        </AvatarFallback>
+                      </Avatar>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1">
-                        <span className="text-[11px] font-bold text-foreground truncate">
-                          {act.user.firstName} {act.user.lastName}
-                        </span>
-                        <span className="text-[9px] text-muted-foreground/60">•</span>
-                        <span className="text-[9px] text-muted-foreground shrink-0">
-                          {act.time}
-                        </span>
-                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[11px] font-bold text-foreground truncate">
+                            {act.user.firstName} {act.user.lastName}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground/60">•</span>
+                          <span className="text-[9px] text-muted-foreground shrink-0">
+                            {act.time}
+                          </span>
+                        </div>
 
-                      <div className="flex items-center gap-1 mt-0.2">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-0.5 text-[8px] font-bold px-1 py-0.1 rounded border",
-                            act.color
-                          )}
-                        >
-                          <Icon className="h-2 w-2" />
-                          {act.pillarLabel}
-                        </span>
-                        <span className="text-[10px] font-medium text-foreground/80 truncate">
-                          {act.rewardName}
-                        </span>
+                        <div className="flex items-center gap-1 mt-0.2">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-0.5 text-[8px] font-bold px-1 py-0.1 rounded border",
+                              act.color
+                            )}
+                          >
+                            <Icon className="h-2 w-2" />
+                            {act.pillarLabel}
+                          </span>
+                          <span className="text-[10px] font-medium text-foreground/80 truncate">
+                            {act.rewardName}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-[11px] font-extrabold text-foreground tabular-nums block">
-                      {act.valueUnlocked}
-                    </span>
-                    <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold block">
-                      {act.status}
-                    </span>
+                    <div className="text-right shrink-0">
+                      <span className="text-[11px] font-extrabold text-foreground tabular-nums block">
+                        {act.valueUnlocked}
+                      </span>
+                      <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold block">
+                        {act.status}
+                      </span>
+                    </div>
                   </div>
+                );
+              })
+            ) : (
+              <div className="py-10 px-4 text-center space-y-2">
+                <div className="h-9 w-9 rounded-full bg-muted/60 text-muted-foreground mx-auto flex items-center justify-center">
+                  <History className="h-4 w-4" />
                 </div>
-              );
-            })}
+                <div className="space-y-0.5">
+                  <h5 className="text-xs font-bold text-foreground">
+                    No Live Redemptions Yet
+                  </h5>
+                  <p className="text-[10px] text-muted-foreground max-w-xs mx-auto leading-relaxed">
+                    When members win prizes in Spin Wheel, Scratch Card, or redeem rewards, real-time claim records will stream here.
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

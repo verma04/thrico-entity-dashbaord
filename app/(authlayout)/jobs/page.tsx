@@ -1,10 +1,19 @@
 "use client";
 
-import JobsAnalytics from "@/components/jobs/dashboard/analytics";
+import { Suspense } from "react";
+import JobsDashboard from "@/components/jobs/dashboard";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 
+/**
+ * Jobs & Recruitment Dashboard Page
+ * Route: /jobs
+ */
 function JobsPage() {
-  return <JobsAnalytics />;
+  return (
+    <Suspense fallback={null}>
+      <JobsDashboard />
+    </Suspense>
+  );
 }
 
 export default withModulePermission(JobsPage, "JOBS", "canRead");

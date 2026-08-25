@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LucideIcon, ChevronRight } from "lucide-react";
+import { LucideIcon, ChevronRight, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -13,7 +13,7 @@ export interface BreadcrumbType {
 interface EcosystemHeaderProps {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   badgeText?: string;
   breadcrumb?: string;
   breadcrumbs?: BreadcrumbType[];
@@ -28,7 +28,7 @@ interface EcosystemHeaderProps {
 export function EcosystemHeader({
   title,
   description,
-  icon: Icon,
+  icon: Icon = Sparkles,
   badgeText = "Ecosystem Hub",
   breadcrumb: _breadcrumb,
   breadcrumbs,
@@ -60,7 +60,7 @@ export function EcosystemHeader({
                 iconClassName,
               )}
             >
-              <Icon className="h-4 w-4" strokeWidth={2} />
+              {Icon ? <Icon className="h-4 w-4" strokeWidth={2} /> : <Sparkles className="h-4 w-4" strokeWidth={2} />}
             </div>
             {showLiveIndicator && (
               <span

@@ -1,21 +1,20 @@
 "use client";
 
 import React from "react";
-import { Tooltip, Cell, PieChart, Pie } from "recharts";
-import { ResponsiveContainer } from "@/components/ui/responsive-container";
+import { Tooltip, Cell, PieChart, Pie, ResponsiveContainer } from "recharts";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
+import { Card, CardContent } from "@/components/ui/card";
+import { Sparkles } from "lucide-react";
 import type { StatusDistributionPoint } from "@/graphql/actions/communities";
 
-const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
-
-const ChartSkeleton = () => (
-  <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-dashed border-border">
-    <div className="flex flex-col items-center gap-4 text-center px-6">
-      <div className="h-6 w-6 border-2 border-border border-t-primary rounded-full animate-spin" />
-      <p className="text-xs font-medium text-muted-foreground">Getting info...</p>
-    </div>
-  </div>
-);
+const STATUS_COLORS = [
+  "#6366f1", // Indigo
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#8b5cf6", // Purple
+  "#ec4899", // Pink
+  "#06b6d4", // Cyan
+];
 
 interface CommunityStatusDistributionProps {
   loading: boolean;
@@ -30,91 +29,119 @@ export function CommunityStatusDistribution({
 }: CommunityStatusDistributionProps) {
   const totalStatusCount = statusDistribution.reduce(
     (acc: number, item: StatusDistributionPoint) => acc + item.value,
-    0,
+    0
   );
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-3 flex flex-col h-full">
       <DashboardSectionHeading
-        title={`${singularName} Status`}
-        titleClassName="normal-case tracking-normal text-sm text-foreground"
+        title={`${singularName || "Community"} Status`}
+        icon={<Sparkles className="h-3.5 w-3.5 text-muted-foreground" />}
       />
-      <div className="flex flex-col gap-6">
-        <div className="relative h-64 w-full flex items-center justify-center">
+      <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-sm relative flex-1 flex flex-col rounded-xl">
+        <CardContent className="p-5 flex-1 flex flex-col justify-between">
           {loading ? (
-            <ChartSkeleton />
+            <div className="h-[260px] w-full flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  Analyzing Status...
+                </p>
+              </div>
+            </div>
+          ) : statusDistribution.length === 0 ? (
+            <div className="h-[260px] w-full flex flex-col items-center justify-center text-center text-muted-foreground">
+              <Sparkles className="h-8 w-8 mb-2 opacity-30" />
+              <span className="text-xs">No status data recorded yet</span>
+            </div>
           ) : (
             <>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={statusDistribution}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={95}
-                    paddingAngle={4}
-                    dataKey="value"
-                    stroke="none"
-                    animationDuration={1000}
-                  >
-                    {statusDistribution.map((_, i: number) => (
-                      <Cell
-                        key={i}
-                        fill={STATUS_COLORS[i % STATUS_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #e4e4e7",
-                      borderRadius: "12px",
-                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.05)",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center translate-y-1">
-                  <span className="text-2xl font-bold text-foreground block leading-none">
+              <div className="h-[170px] w-full relative flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusDistribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={75}
+                      paddingAngle={5}
+                      dataKey="value"
+                      stroke="none"
+                      animationDuration={1200}
+                    >
+                      {statusDistribution.map((_, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={STATUS_COLORS[index % STATUS_COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--background))",
+                        borderRadius: "8px",
+                        border: "1px solid hsl(var(--border))",
+                        fontSize: "12px",
+                      }}
+                      itemStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-xl font-bold tracking-tight text-foreground leading-none">
                     {totalStatusCount}
                   </span>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                    TOTAL
-                  </p>
+                  <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
+                    Total
+                  </span>
                 </div>
+              </div>
+
+              <div className="space-y-2 pt-3 border-t border-border/40">
+                {statusDistribution.map((item: StatusDistributionPoint, i: number) => {
+                  const itemColor = STATUS_COLORS[i % STATUS_COLORS.length];
+                  const percentage =
+                    totalStatusCount > 0
+                      ? Math.round((item.value / totalStatusCount) * 100)
+                      : 0;
+
+                  return (
+                    <div key={`${item.name}-${i}`} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="h-2 w-2 rounded-full shrink-0"
+                            style={{ backgroundColor: itemColor }}
+                          />
+                          <span className="font-medium text-foreground/80 capitalize">
+                            {item.name.toLowerCase()}
+                          </span>
+                        </div>
+                        <span className="font-semibold text-foreground tabular-nums">
+                          {item.value}{" "}
+                          <span className="text-[10px] text-muted-foreground font-normal">
+                            ({percentage}%)
+                          </span>
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted/60 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: itemColor,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </>
           )}
-        </div>
-
-        <div className="w-full space-y-2">
-          {statusDistribution.map((item: StatusDistributionPoint, i: number) => (
-            <div
-              key={`${item.name}-${i}`}
-              className="flex items-center justify-between p-3 rounded-[20px] bg-muted/30 border border-transparent"
-            >
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="h-2 w-2 rounded-full"
-                  style={{
-                    backgroundColor: STATUS_COLORS[i % STATUS_COLORS.length],
-                  }}
-                />
-                <span className="text-xs font-semibold text-muted-foreground capitalize">
-                  {item.name.toLowerCase()}
-                </span>
-              </div>
-              <span className="text-xs font-bold text-foreground tabular-nums">
-                {item.value}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

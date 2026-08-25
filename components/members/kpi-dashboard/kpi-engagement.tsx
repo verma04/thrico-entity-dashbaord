@@ -12,96 +12,103 @@ import {
   Layers,
 } from "lucide-react";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import type { StatValue } from "@/graphql/actions/member-kpi-dashboard";
 
-const kpis = [
+const engagementKPIs = [
   {
     title: "Total Posts",
-    key: "totalPosts" as const,
+    key: "totalPosts",
     icon: FileText,
+    color: "bg-indigo-500",
     tooltip: "Total feed entries, stories, and discussions",
-    colorScheme: "indigo" as const,
   },
   {
     title: "Post Frequency",
-    key: "contributionFrequency" as const,
+    key: "contributionFrequency",
     icon: Zap,
+    color: "bg-cyan-500",
     suffix: "/wk",
     tooltip: "(Total Posts / Active Members / Days) × 7",
-    colorScheme: "sky" as const,
   },
   {
     title: "Reply Rate",
-    key: "interactionReciprocity" as const,
+    key: "interactionReciprocity",
     icon: Reply,
+    color: "bg-violet-500",
     suffix: "%",
     tooltip: "Comment-to-Post ratio: (Total Comments ÷ Total Posts) × 100",
-    colorScheme: "purple" as const,
   },
   {
     title: "Content Reach",
-    key: "contentReach" as const,
+    key: "contentReach",
     icon: Eye,
+    color: "bg-emerald-500",
     tooltip: "Total impressions / views on community content",
-    colorScheme: "lime" as const,
   },
   {
     title: "Virality Rate",
-    key: "contentViralityRate" as const,
+    key: "contentViralityRate",
     icon: Flame,
+    color: "bg-orange-500",
     suffix: "%",
     tooltip: "Content that reached beyond the immediate audience",
-    colorScheme: "orange" as const,
   },
   {
-    title: "Content/Member",
-    key: "contentToMemberRatio" as const,
+    title: "Content / Member",
+    key: "contentToMemberRatio",
     icon: BarChart3,
+    color: "bg-rose-500",
     tooltip: "Posts per active member",
-    colorScheme: "rose" as const,
   },
   {
     title: "Event Participation",
-    key: "eventParticipationRate" as const,
+    key: "eventParticipationRate",
     icon: Calendar,
+    color: "bg-blue-500",
     suffix: "%",
     tooltip: "Event attendance rate",
-    colorScheme: "sky" as const,
   },
   {
     title: "Feature Adoption",
-    key: "featureAdoptionRate" as const,
+    key: "featureAdoptionRate",
     icon: Layers,
+    color: "bg-purple-500",
     suffix: "%",
     tooltip: "Usage of platform features",
-    colorScheme: "indigo" as const,
   },
 ];
 
 interface KPIEngagementProps {
   loading: boolean;
-  data: Record<string, StatValue | undefined>;
+  getMetric: (key: string) => StatValue;
 }
 
-export function KPIEngagement({ loading, data }: KPIEngagementProps) {
+export function KPIEngagement({ loading, getMetric }: KPIEngagementProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {kpis.map((kpi) => {
-        const metric = data[kpi.key];
-        return (
-          <EcosystemKPI
-            key={kpi.key}
-            title={kpi.title}
-            value={loading ? "..." : (metric?.value ?? "0")}
-            trend={metric?.change ?? 0}
-            trendData={metric?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-            icon={kpi.icon}
-            colorScheme={kpi.colorScheme}
-            suffix={(kpi as any).suffix}
-            tooltip={kpi.tooltip}
-          />
-        );
-      })}
-    </div>
+    <section
+      id="kpi-section-engagement"
+      className="space-y-3 mt-20 scroll-mt-24"
+    >
+      <DashboardSectionHeading title="ENGAGEMENT" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {engagementKPIs.map((v) => {
+          const item = getMetric(v.key);
+          return (
+            <EcosystemKPI
+              key={v.key}
+              title={v.title}
+              value={loading ? "..." : (item?.value ?? "0")}
+              trend={item?.change ?? 0}
+              trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+              icon={v.icon}
+              color={v.color}
+              suffix={(v as any).suffix}
+              tooltip={v.tooltip}
+            />
+          );
+        })}
+      </div>
+    </section>
   );
 }

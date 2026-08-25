@@ -32,12 +32,16 @@ import { cn } from "@/lib/utils";
 import { useGetEntity } from "@/graphql/actions";
 import {
   useCreateManualVoucherBatch,
+  useGetManualVoucherBatchById,
   ManualCouponType,
   CreateManualVoucherBatchInput,
 } from "@/graphql/actions/rewards/manual";
+import { ManualRewardItem } from "../table/manual-reward-card";
 import { toast } from "sonner";
 
 interface InternalRewardFormProps {
+  initialItem?: ManualRewardItem | null;
+  id?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -75,6 +79,8 @@ const internalRewardSchema = Yup.object().shape({
 });
 
 export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
+  initialItem,
+  id,
   onSuccess,
   onCancel,
 }) => {
@@ -86,6 +92,37 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
     [],
   );
 
+  const ruleId = initialItem?.id || id;
+  const isEditing = Boolean(ruleId);
+
+  const { data: fetchedBatchData } = useGetManualVoucherBatchById(id || "", {
+    skip: !id || Boolean(initialItem),
+  });
+
+  const parsedFetchedItem: ManualRewardItem | null = fetchedBatchData?.getManualVoucherBatchById
+    ? {
+        id: fetchedBatchData.getManualVoucherBatchById.id,
+        title: fetchedBatchData.getManualVoucherBatchById.name,
+        description: fetchedBatchData.getManualVoucherBatchById.description,
+        image: fetchedBatchData.getManualVoucherBatchById.image || "",
+        url: fetchedBatchData.getManualVoucherBatchById.url || "",
+        couponType: fetchedBatchData.getManualVoucherBatchById.couponType || ManualCouponType.ONE_TO_ONE,
+        couponCode: fetchedBatchData.getManualVoucherBatchById.couponType === ManualCouponType.ONE_TO_MANY ? fetchedBatchData.getManualVoucherBatchById.name : "",
+        codePrefix: "VCH",
+        faceValue: fetchedBatchData.getManualVoucherBatchById.faceValue || 0,
+        currency: fetchedBatchData.getManualVoucherBatchById.currency || "TC",
+        totalInventory: fetchedBatchData.getManualVoucherBatchById.totalCount || 0,
+        allocatedCount: fetchedBatchData.getManualVoucherBatchById.allocatedCount || 0,
+        redeemedCount: fetchedBatchData.getManualVoucherBatchById.redeemedCount || 0,
+        remainingCount: fetchedBatchData.getManualVoucherBatchById.remainingCount || 0,
+        isActive: fetchedBatchData.getManualVoucherBatchById.status === "ACTIVE",
+        validityDays: 30,
+        createdAt: fetchedBatchData.getManualVoucherBatchById.createdAt || new Date().toISOString(),
+      }
+    : null;
+
+  const currentItem = initialItem || parsedFetchedItem;
+
   const { data: entityData } = useGetEntity();
   const rawEntityName = entityData?.getEntity?.name || "VCH";
   const defaultEntityPrefix =
@@ -93,25 +130,26 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
 
   const formik = useFormik({
     initialValues: {
-      title: "",
-      description: "",
-      image: "",
-      couponType: ManualCouponType.ONE_TO_ONE,
-      prefix: defaultEntityPrefix,
-      count: 25,
-      couponCode: "",
+      title: currentItem?.title || "",
+      description: currentItem?.description || "",
+      image: currentItem?.image || "",
+      couponType: currentItem?.couponType || ManualCouponType.ONE_TO_ONE,
+      prefix: currentItem?.codePrefix || defaultEntityPrefix,
+      count: currentItem?.totalInventory || 25,
+      couponCode: currentItem?.couponCode || "",
       inventoryRequired: true,
-      totalUsageLimit: 25,
-      validityDays: 30,
-      url: "",
-      isActive: true,
-      status: "ACTIVE",
+      totalUsageLimit: currentItem?.totalInventory || 25,
+      validityDays: currentItem?.validityDays || 30,
+      url: currentItem?.url || "",
+      isActive: currentItem?.isActive ?? true,
+      status: currentItem?.isActive !== false ? "ACTIVE" : "DRAFT",
       expiryDate: (() => {
         const d = new Date();
-        d.setDate(d.getDate() + 30);
+        d.setDate(d.getDate() + (currentItem?.validityDays || 30));
         return d.toISOString().slice(0, 16);
       })(),
     },
+    enableReinitialize: true,
     validationSchema: internalRewardSchema,
     onSubmit: async (values) => {
       try {

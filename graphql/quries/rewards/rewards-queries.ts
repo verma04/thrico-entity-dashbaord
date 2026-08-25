@@ -35,6 +35,7 @@ export const GET_REWARDS = gql`
         minActivityRequired
         blockWarnedUsers
         cooldownPeriod
+        showToAllMembers
       }
 
       mechanism {
@@ -89,6 +90,16 @@ export const GET_REWARD_BY_ID = gql`
       url
       howToClaim
       couponCode
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
+      totalUsageLimit
+      perUserLimit
+      minAccountAge
+      minActivityRequired
+      blockWarnedUsers
+      cooldownPeriod
 
       eligibility {
         memberEligibility
@@ -101,6 +112,7 @@ export const GET_REWARD_BY_ID = gql`
         minActivityRequired
         blockWarnedUsers
         cooldownPeriod
+        showToAllMembers
       }
 
       mechanism {
@@ -280,6 +292,7 @@ export const CREATE_REWARD = gql`
         minActivityRequired
         blockWarnedUsers
         cooldownPeriod
+        showToAllMembers
       }
 
       mechanism {
@@ -334,6 +347,16 @@ export const UPDATE_REWARD = gql`
       url
       howToClaim
       couponCode
+      memberEligibility
+      membershipTierId
+      eligibleTierIds
+      eligibleUserIds
+      totalUsageLimit
+      perUserLimit
+      minAccountAge
+      minActivityRequired
+      blockWarnedUsers
+      cooldownPeriod
 
       eligibility {
         memberEligibility
@@ -346,6 +369,7 @@ export const UPDATE_REWARD = gql`
         minActivityRequired
         blockWarnedUsers
         cooldownPeriod
+        showToAllMembers
       }
 
       mechanism {
@@ -625,13 +649,60 @@ export const GET_SCRATCH_CONFIG = gql`
     getScratchCardConfig {
       id
       entityId
-      costPerScratch
-      maxScratchesPerDay
       isActive
-      campaignStartDate
-      campaignEndDate
       createdAt
       updatedAt
+      prizes {
+        id
+        configId
+        label
+        type
+        value
+        coinsAmount
+        tryAgainMessage
+        isActive
+        minAccountAge
+        minActivity
+        eligibilityDescription
+        storeDiscountRuleId
+        manualBatchId
+        digitalCardRuleId
+        eligibilityRuleId
+        storeDiscountRule {
+          id
+          title
+          discountValue
+        }
+        manualBatch {
+          id
+          name
+          totalCount
+        }
+        digitalCardRule {
+          id
+          title
+          faceValue
+          totalCost
+        }
+        mechanism {
+          type
+          ruleId
+          manualBatchId
+          storeDiscountRuleId
+          digitalCardRuleId
+        }
+        eligibility {
+          memberEligibility
+          membershipTierId
+          eligibleTierIds
+          eligibleUserIds
+          minAccountAge
+          minActivityRequired
+          showToAllMembers
+        }
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -644,8 +715,48 @@ export const GET_SCRATCH_PRIZES = gql`
       label
       type
       value
-      probability
+      coinsAmount
+      tryAgainMessage
       isActive
+      minAccountAge
+      minActivity
+      eligibilityDescription
+      storeDiscountRuleId
+      manualBatchId
+      digitalCardRuleId
+      eligibilityRuleId
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
+      }
+      storeDiscountRule {
+        id
+        title
+        discountValue
+      }
+      manualBatch {
+        id
+        name
+        totalCount
+      }
+      digitalCardRule {
+        id
+        title
+        faceValue
+        totalCost
+      }
+      eligibility {
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        minAccountAge
+        minActivityRequired
+        showToAllMembers
+      }
       createdAt
       updatedAt
     }
@@ -656,15 +767,23 @@ export const GET_SCRATCH_PLAYS = gql`
   query GetScratchCardPlays($pagination: PaginationInput) {
     getScratchCardPlays(pagination: $pagination) {
       id
+      userId
       prizeType
       prizeValue
       coinsSpent
       playedAt
+      user {
+        id
+        firstName
+        lastName
+        email
+        avatar
+      }
       prize {
         id
         label
-        value
         type
+        value
       }
     }
   }
@@ -674,11 +793,8 @@ export const UPSERT_SCRATCH_CONFIG = gql`
   mutation UpsertScratchCardConfig($input: UpsertScratchCardConfigInput!) {
     upsertScratchCardConfig(input: $input) {
       id
-      costPerScratch
-      maxScratchesPerDay
+      entityId
       isActive
-      campaignStartDate
-      campaignEndDate
     }
   }
 `;
@@ -687,10 +803,10 @@ export const CREATE_SCRATCH_PRIZE = gql`
   mutation CreateScratchCardPrize($input: CreateScratchCardPrizeInput!) {
     createScratchCardPrize(input: $input) {
       id
+      configId
       label
       type
       value
-      probability
       isActive
     }
   }
@@ -703,10 +819,10 @@ export const UPDATE_SCRATCH_PRIZE = gql`
   ) {
     updateScratchCardPrize(id: $id, input: $input) {
       id
+      configId
       label
       type
       value
-      probability
       isActive
     }
   }

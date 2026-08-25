@@ -249,6 +249,7 @@ export function ScratchCardManager({ status: initialStatus }: ScratchCardManager
         storeDiscountRuleId: p.storeDiscountRuleId,
         manualBatchId: p.manualBatchId,
         digitalCardRuleId: p.digitalCardRuleId,
+        eligibilityRuleId: p.eligibilityRuleId,
         storeDiscountRule: p.storeDiscountRule,
         manualBatch: p.manualBatch,
         digitalCardRule: p.digitalCardRule,

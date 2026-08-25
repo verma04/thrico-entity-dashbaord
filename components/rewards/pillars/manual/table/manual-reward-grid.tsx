@@ -13,6 +13,7 @@ interface ManualRewardGridProps {
   currencyName: string;
   onSimulateWin?: (reward: ManualRewardItem) => void;
   onManagePool?: (reward: ManualRewardItem) => void;
+  onEdit?: (reward: ManualRewardItem) => void;
   onCreateClick?: () => void;
 }
 
@@ -22,6 +23,7 @@ export function ManualRewardGrid({
   currencyName,
   onSimulateWin,
   onManagePool,
+  onEdit,
   onCreateClick,
 }: ManualRewardGridProps) {
   if (loading) {
@@ -93,6 +95,7 @@ export function ManualRewardGrid({
               currencyName={currencyName}
               onSimulateWin={onSimulateWin}
               onManagePool={onManagePool}
+              onEdit={onEdit}
             />
           </motion.div>
         ))}

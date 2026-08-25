@@ -8,20 +8,28 @@ import { Button } from "@/components/ui/button";
 import { InternalRewardForm } from "./internal-reward-form";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 
+import { ManualRewardItem } from "../table/manual-reward-card";
+
 interface InternalRewardDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  initialItem?: ManualRewardItem | null;
+  id?: string;
   onSuccess?: () => void;
 }
 
 export function InternalRewardDrawer({
   isOpen,
   onClose,
+  initialItem,
+  id,
   onSuccess,
 }: InternalRewardDrawerProps) {
   const { data: currencyData } = useGetEntityCurrencyConfig();
   const currencyName =
     currencyData?.getEntityCurrencyConfig?.currencyName || "Thrico Coins";
+
+  const isEditing = Boolean(initialItem?.id || id);
 
   const handleSuccess = () => {
     if (onSuccess) onSuccess();
@@ -46,7 +54,7 @@ export function InternalRewardDrawer({
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-bold text-foreground tracking-tight">
-                    Create Internal Voucher
+                    {isEditing ? "Edit Internal Voucher Campaign" : "Create Internal Voucher"}
                   </h3>
                   <Badge className="bg-emerald-600 text-white font-bold text-[9px] px-1.5 py-0 uppercase tracking-wider">
                     Pillar 1
@@ -56,7 +64,9 @@ export function InternalRewardDrawer({
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Issue proprietary vouchers and codes with 1:1 serial pools or 1:N shared campaigns.
+                  {isEditing
+                    ? "Update campaign details and settings for this proprietary voucher."
+                    : "Issue proprietary vouchers and codes with 1:1 serial pools or 1:N shared campaigns."}
                 </p>
               </div>
             </div>
@@ -65,7 +75,7 @@ export function InternalRewardDrawer({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -74,7 +84,12 @@ export function InternalRewardDrawer({
 
         {/* Scrollable Form Content Area */}
         <div className="flex-1 min-h-0 overflow-y-auto">
-          <InternalRewardForm onSuccess={handleSuccess} onCancel={onClose} />
+          <InternalRewardForm
+            initialItem={initialItem}
+            id={id}
+            onSuccess={handleSuccess}
+            onCancel={onClose}
+          />
         </div>
       </SheetContent>
     </Sheet>

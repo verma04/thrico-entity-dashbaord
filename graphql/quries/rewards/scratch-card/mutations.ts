@@ -53,6 +53,7 @@ export const UPSERT_SCRATCH_CONFIG = gql`
           eligibleUserIds
           minAccountAge
           minActivityRequired
+          showToAllMembers
         }
         createdAt
         updatedAt
@@ -108,6 +109,7 @@ export const CREATE_SCRATCH_PRIZE = gql`
         eligibleUserIds
         minAccountAge
         minActivityRequired
+        showToAllMembers
       }
       createdAt
       updatedAt
@@ -165,6 +167,7 @@ export const UPDATE_SCRATCH_PRIZE = gql`
         eligibleUserIds
         minAccountAge
         minActivityRequired
+        showToAllMembers
       }
       createdAt
       updatedAt

@@ -4,17 +4,16 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Sparkles, TrendingUp, TrendingDown } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
+import type { StatValue } from "@/graphql/actions/member-kpi-dashboard";
 
 interface KPINorthStarProps {
   loading: boolean;
-  value: string | number;
-  change?: number;
-  trend?: number[];
+  metric?: StatValue;
 }
 
-export function KPINorthStar({ loading, value, change, trend }: KPINorthStarProps) {
-  const isPositive = (change ?? 0) >= 0;
-  const chartData = (trend ?? [0, 0, 0, 0, 0, 0, 0]).map((val, i) => ({
+export function KPINorthStar({ loading, metric }: KPINorthStarProps) {
+  const isPositive = (metric?.change ?? 0) >= 0;
+  const chartData = (metric?.trend ?? [0, 0, 0, 0, 0, 0, 0]).map((val, i) => ({
     value: val,
     id: i,
   }));
@@ -50,45 +49,68 @@ export function KPINorthStar({ loading, value, change, trend }: KPINorthStarProp
               {loading ? (
                 <span className="inline-block h-10 w-28 rounded-lg bg-muted animate-pulse" />
               ) : (
-                value
+                (metric?.value ?? 0)
               )}
             </span>
-            {!loading && change !== undefined && change !== 0 && (
-              <div
-                className={cn(
-                  "flex items-center gap-1 text-sm font-bold mb-1",
-                  isPositive
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-rose-600 dark:text-rose-400"
-                )}
-              >
-                {isPositive ? (
-                  <TrendingUp className="h-4 w-4" />
-                ) : (
-                  <TrendingDown className="h-4 w-4" />
-                )}
-                {isPositive ? "+" : ""}
-                {typeof change === "number" ? change.toFixed(1) : change}%
-                <span className="text-[10px] font-medium text-muted-foreground ml-1">
-                  vs last period
-                </span>
-              </div>
-            )}
+            {!loading &&
+              metric?.change !== undefined &&
+              metric.change !== 0 && (
+                <div
+                  className={cn(
+                    "flex items-center gap-1 text-sm font-bold mb-1",
+                    isPositive
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-rose-600 dark:text-rose-400",
+                  )}
+                >
+                  {isPositive ? (
+                    <TrendingUp className="h-4 w-4" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" />
+                  )}
+                  {isPositive ? "+" : ""}
+                  {typeof metric.change === "number"
+                    ? metric.change.toFixed(1)
+                    : metric.change}
+                  %
+                  <span className="text-[10px] font-medium text-muted-foreground ml-1">
+                    vs last period
+                  </span>
+                </div>
+              )}
           </div>
 
           <p className="text-[11px] text-muted-foreground/60 max-w-md leading-relaxed">
-            Members who performed a meaningful action (post, comment, reaction, or
-            session &gt; 2 min) in the last 30 days.
+            Members who performed a meaningful action (post, comment,
+            reaction, or session &gt; 2 min) in the last 30 days.
           </p>
         </div>
 
         {/* Right: Sparkline */}
         <div className="h-[80px] w-full md:w-[280px] shrink-0">
-          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-            <AreaChart data={chartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={1}
+            minHeight={1}
+          >
+            <AreaChart
+              data={chartData}
+              margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
+            >
               <defs>
-                <linearGradient id="northStarGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
+                <linearGradient
+                  id="northStarGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="5%"
+                    stopColor="#6366f1"
+                    stopOpacity={0.25}
+                  />
                   <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                 </linearGradient>
               </defs>

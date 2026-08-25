@@ -45,7 +45,10 @@ import {
   StoreProvider,
   StoreRewardItem,
   useCreateStoreDiscountRule,
+  useUpdateStoreDiscountRule,
+  useGetStoreDiscountRuleById,
   CreateStoreDiscountRuleInput,
+  UpdateStoreDiscountRuleInput,
 } from "@/graphql/actions/rewards/store";
 import { useGetEntity } from "@/graphql/actions";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
@@ -53,6 +56,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface StoreRewardFormProps {
+  initialItem?: StoreRewardItem | null;
+  id?: string;
   onSuccess?: (createdItem?: StoreRewardItem) => void;
   onCancel?: () => void;
 }
@@ -69,10 +74,26 @@ const validationSchema = Yup.object({
 });
 
 export function StoreRewardForm({
+  initialItem,
+  id,
   onSuccess,
   onCancel,
 }: StoreRewardFormProps) {
-  const [createRule, { loading: isSubmitting }] = useCreateStoreDiscountRule();
+  const [createRule, { loading: isCreating }] = useCreateStoreDiscountRule();
+  const [updateRule, { loading: isUpdating }] = useUpdateStoreDiscountRule();
+
+  const ruleId = initialItem?.id || id;
+  const isEditing = Boolean(ruleId);
+
+  const { data: fetchedRuleData, loading: isFetching } = useGetStoreDiscountRuleById(
+    id || "",
+    { skip: !id || Boolean(initialItem) }
+  );
+
+  const existingRule: StoreRewardItem | null =
+    initialItem || fetchedRuleData?.getStoreDiscountRuleById || null;
+
+  const isSubmitting = isCreating || isUpdating;
   const [isSaved, setIsSaved] = useState(false);
   const { data: entityData } = useGetEntity();
   const { data: currencyData } = useGetEntityCurrencyConfig();
@@ -87,71 +108,109 @@ export function StoreRewardForm({
 
   const formik = useFormik({
     initialValues: {
-      title: "",
-      description: "",
-      image: "",
-      discountType: StoreDiscountType.FIXED_AMOUNT,
-      discountValue: 100,
-      minCartSubtotal: 499,
-      maxDiscountCap: 0,
-      codePrefix: defaultEntityPrefix,
-      storeProvider: StoreProvider.SHOPIFY,
-      connectedDomain: "",
-      singleUsePerCustomer: true,
-      validityDays: 30,
-      isActive: true,
+      title: existingRule?.title || "",
+      description: existingRule?.description || "",
+      image: existingRule?.image || "",
+      discountType: existingRule?.discountType || StoreDiscountType.FIXED_AMOUNT,
+      discountValue: existingRule?.discountValue ?? 100,
+      minCartSubtotal: existingRule?.minCartSubtotal ?? 499,
+      maxDiscountCap: existingRule?.maxDiscountCap ?? 0,
+      codePrefix: existingRule?.codePrefix || defaultEntityPrefix,
+      storeProvider: existingRule?.storeProvider || StoreProvider.SHOPIFY,
+      connectedDomain: existingRule?.connectedDomain || "",
+      singleUsePerCustomer: existingRule?.singleUsePerCustomer ?? true,
+      validityDays: existingRule?.validityDays ?? 30,
+      isActive: existingRule?.isActive ?? true,
     },
+    enableReinitialize: true,
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const input: CreateStoreDiscountRuleInput = {
-          title: values.title.trim(),
-          description: values.description?.trim() || null,
-          image: values.image || null,
-          discountType: values.discountType,
-          discountValue: Number(values.discountValue),
-          currency: currencyCode,
-          minCartSubtotal: values.minCartSubtotal ? Number(values.minCartSubtotal) : null,
-          maxDiscountCap: values.maxDiscountCap ? Number(values.maxDiscountCap) : null,
-          codePrefix: values.codePrefix.trim().toUpperCase(),
-          storeProvider: values.storeProvider,
-          connectedDomain: values.connectedDomain?.trim() || null,
-          singleUsePerCustomer: values.singleUsePerCustomer,
-          validityDays: Number(values.validityDays),
-          isActive: values.isActive,
-        };
+        if (isEditing && ruleId) {
+          const updateInput: UpdateStoreDiscountRuleInput = {
+            title: values.title.trim(),
+            description: values.description?.trim() || null,
+            image: values.image || null,
+            discountType: values.discountType,
+            discountValue: Number(values.discountValue),
+            currency: currencyCode,
+            minCartSubtotal: values.minCartSubtotal ? Number(values.minCartSubtotal) : null,
+            maxDiscountCap: values.maxDiscountCap ? Number(values.maxDiscountCap) : null,
+            codePrefix: values.codePrefix.trim().toUpperCase(),
+            storeProvider: values.storeProvider,
+            connectedDomain: values.connectedDomain?.trim() || null,
+            singleUsePerCustomer: values.singleUsePerCustomer,
+            validityDays: Number(values.validityDays),
+            isActive: values.isActive,
+          };
 
-        const res = await createRule({
-          variables: {
-            input,
-          },
-        });
+          const res = await updateRule({
+            variables: {
+              id: ruleId,
+              input: updateInput,
+            },
+          });
 
-        const createdItem = res?.data?.createStoreDiscountRule;
-        setIsSaved(true);
+          const updatedItem = res?.data?.updateStoreDiscountRule;
+          setIsSaved(true);
 
-        toast.success("Store Reward Rule Created!", {
-          description: `PriceRule blueprint saved. Codes will synthesize on-demand when members win.`,
-        });
+          toast.success("Store Reward Rule Updated!", {
+            description: `Changes to "${values.title}" saved successfully.`,
+          });
 
-        if (onSuccess) {
-          setTimeout(() => onSuccess(createdItem), 600);
+          if (onSuccess) {
+            setTimeout(() => onSuccess(updatedItem), 400);
+          }
+        } else {
+          const createInput: CreateStoreDiscountRuleInput = {
+            title: values.title.trim(),
+            description: values.description?.trim() || null,
+            image: values.image || null,
+            discountType: values.discountType,
+            discountValue: Number(values.discountValue),
+            currency: currencyCode,
+            minCartSubtotal: values.minCartSubtotal ? Number(values.minCartSubtotal) : null,
+            maxDiscountCap: values.maxDiscountCap ? Number(values.maxDiscountCap) : null,
+            codePrefix: values.codePrefix.trim().toUpperCase(),
+            storeProvider: values.storeProvider,
+            connectedDomain: values.connectedDomain?.trim() || null,
+            singleUsePerCustomer: values.singleUsePerCustomer,
+            validityDays: Number(values.validityDays),
+            isActive: values.isActive,
+          };
+
+          const res = await createRule({
+            variables: {
+              input: createInput,
+            },
+          });
+
+          const createdItem = res?.data?.createStoreDiscountRule;
+          setIsSaved(true);
+
+          toast.success("Store Reward Rule Created!", {
+            description: `PriceRule blueprint saved. Codes will synthesize on-demand when members win.`,
+          });
+
+          if (onSuccess) {
+            setTimeout(() => onSuccess(createdItem), 400);
+          }
         }
-      } catch (err: any) {
-        toast.error("Failed to create store reward rule", {
-          description: err.message || "An unexpected error occurred.",
+      } catch (err: unknown) {
+        toast.error(isEditing ? "Failed to update store reward rule" : "Failed to create store reward rule", {
+          description: err instanceof Error ? err.message : "An unexpected error occurred.",
         });
       }
     },
   });
 
   React.useEffect(() => {
-    if (entityData?.getEntity?.name && !hasUserEditedPrefix) {
+    if (entityData?.getEntity?.name && !hasUserEditedPrefix && !isEditing) {
       const prefix =
         (entityData.getEntity.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 8) || "SHOP") + "-";
       formik.setFieldValue("codePrefix", prefix);
     }
-  }, [entityData?.getEntity?.name, hasUserEditedPrefix]);
+  }, [entityData?.getEntity?.name, hasUserEditedPrefix, isEditing]);
 
   const getDiscountPreviewLabel = () => {
     switch (formik.values.discountType) {
@@ -557,9 +616,13 @@ export function StoreRewardForm({
         isSaving={isSubmitting}
         onSave={() => formik.submitForm()}
         onReset={() => formik.resetForm()}
-        title="Unsaved Store Reward"
-        description="You have pending changes to this store discount blueprint."
-        buttonText="Save Store Reward Blueprint"
+        title={isEditing ? "Unsaved Rule Changes" : "Unsaved Store Reward"}
+        description={
+          isEditing
+            ? `You have pending changes to "${formik.values.title || "Store Discount Rule"}".`
+            : "You have pending changes to this store discount blueprint."
+        }
+        buttonText={isEditing ? "Update Store Reward Blueprint" : "Save Store Reward Blueprint"}
       />
     </div>
   );

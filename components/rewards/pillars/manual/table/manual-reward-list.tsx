@@ -11,6 +11,7 @@ import {
   Check,
   MoreVertical,
   Zap,
+  Edit,
 } from "lucide-react";
 import {
   AdminTable,
@@ -35,7 +36,8 @@ import { ManualCouponType } from "@/graphql/actions/rewards/manual";
 export const getManualRewardTableColumns = (
   currencyName?: string,
   onSimulateWin?: (reward: ManualRewardItem) => void,
-  onManagePool?: (reward: ManualRewardItem) => void
+  onManagePool?: (reward: ManualRewardItem) => void,
+  onEdit?: (reward: ManualRewardItem) => void
 ): AdminTableColumn<ManualRewardItem>[] => [
   {
     key: "serial",
@@ -202,16 +204,25 @@ export const getManualRewardTableColumns = (
           {onSimulateWin && (
             <DropdownMenuItem
               onClick={() => onSimulateWin(reward)}
-              className="text-xs gap-2 text-emerald-600 font-medium"
+              className="text-xs gap-2 text-emerald-600 font-medium cursor-pointer"
             >
               <Zap className="h-3.5 w-3.5" />
               Simulate Voucher Claim
             </DropdownMenuItem>
           )}
+          {onEdit && (
+            <DropdownMenuItem
+              onClick={() => onEdit(reward)}
+              className="text-xs gap-2 cursor-pointer"
+            >
+              <Edit className="h-3.5 w-3.5" />
+              Edit Campaign Config
+            </DropdownMenuItem>
+          )}
           {onManagePool && (
             <DropdownMenuItem
               onClick={() => onManagePool(reward)}
-              className="text-xs gap-2"
+              className="text-xs gap-2 cursor-pointer"
             >
               <Package className="h-3.5 w-3.5" />
               Inspect Voucher Pool
@@ -231,6 +242,7 @@ interface ManualRewardListProps {
   offset?: number;
   onSimulateWin?: (reward: ManualRewardItem) => void;
   onManagePool?: (reward: ManualRewardItem) => void;
+  onEdit?: (reward: ManualRewardItem) => void;
   onCreateClick?: () => void;
 }
 
@@ -242,12 +254,13 @@ export function ManualRewardList({
   offset = 0,
   onSimulateWin,
   onManagePool,
+  onEdit,
   onCreateClick,
 }: ManualRewardListProps) {
   const allColumns = React.useMemo(
     () =>
-      getManualRewardTableColumns(currencyName, onSimulateWin, onManagePool),
-    [currencyName, onSimulateWin, onManagePool]
+      getManualRewardTableColumns(currencyName, onSimulateWin, onManagePool, onEdit),
+    [currencyName, onSimulateWin, onManagePool, onEdit]
   );
 
   const columns = React.useMemo(() => {

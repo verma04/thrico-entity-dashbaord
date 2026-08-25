@@ -29,72 +29,88 @@ export default function EditRewardPage() {
 
   const reward = data?.getRewardById;
 
-  const formik = useFormik({
-    initialValues: {
-      title: reward?.title || "",
-      description: reward?.description || "",
-      tcCost: reward?.tcCost || 1,
-      discountType: reward?.discountType || "Flat",
-      discountValue: reward?.discountValue || "",
-      validityDays: reward?.validityDays || 30,
-      totalUsageLimit: reward?.totalUsageLimit || 0,
-      perUserLimit: reward?.perUserLimit || 1,
-      minAccountAge: reward?.minAccountAge || 0,
-      minActivityRequired: reward?.minActivityRequired || 0,
-      blockWarnedUsers: reward?.blockWarnedUsers || false,
-      cooldownPeriod: reward?.cooldownPeriod || 0,
-      inventoryRequired: reward?.inventoryRequired || false,
-      image: reward?.image || "",
-      rewardPillar:
-        reward?.rewardType === "STORE"
+  const getInitialValues = (r: any) => {
+    const elig = r?.eligibility;
+    const uIds = elig?.eligibleUserIds || r?.eligibleUserIds || [];
+    const tIds =
+      elig?.membershipTierId ||
+      elig?.eligibleTierIds ||
+      r?.membershipTierId ||
+      r?.eligibleTierIds ||
+      [];
+    const mEligibility =
+      elig?.memberEligibility ||
+      r?.memberEligibility ||
+      (uIds.length > 0 ? "SPECIFIC_CUSTOMERS" : tIds.length > 0 ? "TIERS" : "ALL");
+
+    return {
+      title: r?.title || "",
+      description: r?.description || "",
+      tcCost: r?.tcCost || 1,
+      discountType: r?.discountType || "Flat",
+      discountValue: r?.discountValue || "",
+      validityDays: Number(r?.validityDays || 30),
+      totalUsageLimit: elig?.totalUsageLimit ?? r?.totalUsageLimit ?? 0,
+      perUserLimit: elig?.perUserLimit ?? r?.perUserLimit ?? 1,
+      minAccountAge: elig?.minAccountAge ?? r?.minAccountAge ?? 0,
+      minActivityRequired:
+        elig?.minActivityRequired ?? r?.minActivityRequired ?? 0,
+      blockWarnedUsers:
+        elig?.blockWarnedUsers ?? r?.blockWarnedUsers ?? false,
+      cooldownPeriod: elig?.cooldownPeriod ?? r?.cooldownPeriod ?? 0,
+      showToAllMembers: elig?.showToAllMembers ?? r?.showToAllMembers ?? true,
+      inventoryRequired: r?.inventoryRequired ?? false,
+      image: r?.image || "",
+      mechanism:
+        r?.mechanism?.type === "STORE_DISCOUNT"
           ? "ECOMMERCE"
-          : reward?.rewardType === "GIFT_CARD"
+          : r?.mechanism?.type === "DIGITAL_GIFT_CARD"
             ? "DIGITAL_GIFT_CARD"
             : "INTERNAL",
-      rewardMechanism: reward?.rewardMechanism || ["COUPON"],
+      rewardPillar:
+        r?.mechanism?.type === "STORE_DISCOUNT"
+          ? "ECOMMERCE"
+          : r?.mechanism?.type === "DIGITAL_GIFT_CARD"
+            ? "DIGITAL_GIFT_CARD"
+            : "INTERNAL",
+      selectedRuleId:
+        r?.mechanism?.ruleId ||
+        r?.mechanism?.manualBatchId ||
+        r?.mechanism?.storeDiscountRuleId ||
+        r?.mechanism?.digitalCardRuleId ||
+        r?.manualBatch?.id ||
+        r?.storeDiscountRule?.id ||
+        r?.digitalCardRule?.id ||
+        "",
+      rewardMechanism: r?.rewardMechanism || [],
       storeDiscountType: "FIXED_AMOUNT",
       storeCodePrefix: "THRICO-",
       storeMinCart: 0,
-      giftCardBrand: reward?.brand || "Amazon Pay",
-      giftCardValue: Number(reward?.discountValue) || 500,
-      giftCardFee: (Number(reward?.discountValue) || 500) * 0.05,
-      status: reward?.status || "ACTIVE",
-      isActive: reward?.isActive ?? true,
-      url: reward?.url || "",
-      howToClaim: reward?.howToClaim || "",
-      couponCode: reward?.couponCode || "",
-      couponType: reward?.couponType || "ONE_TO_ONE",
-      memberEligibility:
-        reward?.memberEligibility ||
-        (reward?.eligibleUserIds?.length
-          ? "SPECIFIC_CUSTOMERS"
-          : (Array.isArray(reward?.membershipTierId)
-                ? reward.membershipTierId.length
-                : reward?.membershipTierId) ||
-              reward?.eligibleTierIds?.length
-            ? "TIERS"
-            : "ALL"),
-      membershipTierId: Array.isArray(reward?.membershipTierId)
-        ? reward.membershipTierId
-        : reward?.membershipTierId
-          ? [reward.membershipTierId]
-          : reward?.eligibleTierIds || [],
-      eligibleTierIds: Array.isArray(reward?.membershipTierId)
-        ? reward.membershipTierId
-        : reward?.membershipTierId
-          ? [reward.membershipTierId]
-          : reward?.eligibleTierIds || [],
-      eligibleUserIds: reward?.eligibleUserIds || [],
-      expiryDate: reward?.expiryDate
+      giftCardBrand: r?.digitalCardRule?.title || "Amazon Pay",
+      giftCardValue: Number(r?.digitalCardRule?.faceValue) || 500,
+      giftCardFee: (Number(r?.digitalCardRule?.faceValue) || 500) * 0.05,
+      status: r?.status || "ACTIVE",
+      isActive: r?.isActive ?? true,
+      url: r?.url || "",
+      howToClaim: r?.howToClaim || "",
+      couponCode: r?.couponCode || "",
+      couponType: "ONE_TO_ONE",
+      memberEligibility: mEligibility,
+      membershipTierId: tIds,
+      eligibleTierIds: tIds,
+      eligibleUserIds: uIds,
+      expiryDate: r?.expiryDate
         ? new Date(
-            Number(reward.expiryDate)
-              ? Number(reward.expiryDate)
-              : reward.expiryDate,
+            Number(r.expiryDate) ? Number(r.expiryDate) : r.expiryDate,
           )
             .toISOString()
             .slice(0, 16)
         : "",
-    },
+    };
+  };
+
+  const formik = useFormik({
+    initialValues: getInitialValues(reward),
     validationSchema: couponSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
@@ -105,6 +121,13 @@ export default function EditRewardPage() {
             ? [values.membershipTierId]
             : values.eligibleTierIds || [];
 
+        const validMechanisms = ["SPIN_WHEEL", "SCRATCH_CARD", "MATCH_AND_WIN"];
+        const filteredMechanisms = Array.isArray(values.rewardMechanism)
+          ? values.rewardMechanism.filter((m: string) =>
+              validMechanisms.includes(m),
+            )
+          : [];
+
         await updateReward({
           variables: {
             updateRewardId: rewardId,
@@ -113,26 +136,55 @@ export default function EditRewardPage() {
               description: values.description,
               howToClaim: values.howToClaim,
               tcCost: values.tcCost,
+              expiryDays: Number(values.validityDays || 30),
               inventoryRequired: values.inventoryRequired,
-              perUserLimit: values.perUserLimit,
-              totalUsageLimit: values.totalUsageLimit,
-              minAccountAge: values.minAccountAge,
-              minActivityRequired: values.minActivityRequired,
-              blockWarnedUsers: values.blockWarnedUsers,
-              cooldownPeriod: values.cooldownPeriod,
               image: values.image,
-              rewardMechanism: Array.isArray(values.rewardMechanism)
-                ? values.rewardMechanism
-                : [values.rewardMechanism || "COUPON"],
+              url: values.url,
+              couponCode: values.couponCode,
+              ...(filteredMechanisms.length > 0 && {
+                rewardMechanism: filteredMechanisms,
+              }),
+              eligibility: {
+                memberEligibility: values.memberEligibility || "ALL",
+                membershipTierId: tierIds,
+                eligibleTierIds: tierIds,
+                eligibleUserIds: values.eligibleUserIds || [],
+                totalUsageLimit: values.totalUsageLimit,
+                perUserLimit: values.perUserLimit,
+                minAccountAge: values.minAccountAge,
+                minActivityRequired: values.minActivityRequired,
+                blockWarnedUsers: values.blockWarnedUsers,
+                cooldownPeriod: values.cooldownPeriod,
+                showToAllMembers: values.showToAllMembers ?? true,
+              },
+              mechanism: {
+                type:
+                  values.rewardPillar === "ECOMMERCE" ||
+                  values.mechanism === "ECOMMERCE"
+                    ? "STORE_DISCOUNT"
+                    : values.rewardPillar === "DIGITAL_GIFT_CARD" ||
+                        values.mechanism === "DIGITAL_GIFT_CARD"
+                      ? "DIGITAL_GIFT_CARD"
+                      : "INTERNAL_VOUCHER",
+                ruleId: values.selectedRuleId || null,
+                manualBatchId:
+                  values.rewardPillar === "INTERNAL" ||
+                  values.mechanism === "INTERNAL"
+                    ? values.selectedRuleId || null
+                    : null,
+                storeDiscountRuleId:
+                  values.rewardPillar === "ECOMMERCE" ||
+                  values.mechanism === "ECOMMERCE"
+                    ? values.selectedRuleId || null
+                    : null,
+                digitalCardRuleId:
+                  values.rewardPillar === "DIGITAL_GIFT_CARD" ||
+                  values.mechanism === "DIGITAL_GIFT_CARD"
+                    ? values.selectedRuleId || null
+                    : null,
+              },
               status: values.status,
               isActive: values.isActive,
-              url: values.url,
-              couponType: values.couponType,
-              couponCode: values.couponCode,
-              memberEligibility: values.memberEligibility || "ALL",
-              membershipTierId: tierIds,
-              eligibleTierIds: tierIds,
-              eligibleUserIds: values.eligibleUserIds || [],
               expiryDate: values.expiryDate || null,
             },
           },
@@ -154,6 +206,12 @@ export default function EditRewardPage() {
       }
     },
   });
+
+  React.useEffect(() => {
+    if (reward) {
+      formik.resetForm({ values: getInitialValues(reward) });
+    }
+  }, [reward]);
 
   if (fetchLoading) {
     return (
@@ -201,7 +259,10 @@ export default function EditRewardPage() {
             </p>
           </div>
           <Link href="/gamification/rewards/coupons">
-            <Button variant="outline" className="rounded-lg px-5 text-xs font-semibold">
+            <Button
+              variant="outline"
+              className="rounded-lg px-5 text-xs font-semibold"
+            >
               Back to Reward Coupons
             </Button>
           </Link>
@@ -232,7 +293,11 @@ export default function EditRewardPage() {
           }
         >
           <form onSubmit={formik.handleSubmit} className="space-y-6">
-            <RewardFormSections formik={formik} rewardId={rewardId} />
+            <RewardFormSections
+              key={reward?.id || "reward-form"}
+              formik={formik}
+              rewardId={rewardId}
+            />
           </form>
         </PolarisFormLayout>
       </main>

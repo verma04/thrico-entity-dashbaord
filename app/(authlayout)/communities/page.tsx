@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import CommunitiesAnalytics from "@/components/communities/dashboard/analytics";
+import CommunitiesDashboard from "@/components/communities/dashboard";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 /**
@@ -14,7 +14,7 @@ import { withModulePermission } from "@/components/hoc/with-module-permission";
 const CommunitiesDashboardPage = () => {
   return (
     <Suspense fallback={null}>
-      <CommunitiesAnalytics />
+      <CommunitiesDashboard />
     </Suspense>
   );
 };

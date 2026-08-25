@@ -18,6 +18,31 @@ import { ScratchTierPreviewSidebar } from "@/components/rewards/scratch-card/cre
 const scratchTierSchema = Yup.object().shape({
   label: Yup.string().required("Tier label is required"),
   rewardType: Yup.string().required("Reward type is required"),
+  memberEligibility: Yup.string().default("ALL"),
+  membershipTierId: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema
+        .min(1, "Please select at least one membership tier")
+        .required("Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleTierIds: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema
+        .min(1, "Please select at least one membership tier")
+        .required("Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleUserIds: Yup.array().when("memberEligibility", {
+    is: "SPECIFIC_CUSTOMERS",
+    then: (schema) =>
+      schema
+        .min(1, "Please select at least one customer")
+        .required("Please select at least one customer"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 export default function CreateScratchCardTierPage() {
@@ -51,6 +76,7 @@ export default function CreateScratchCardTierPage() {
       eligibleUserIds: [] as string[],
       eligibleSegmentIds: [] as string[],
       eligibleRoles: [] as string[],
+      showToAllMembers: true,
 
       // Anti-Abuse & Guardrails
       minAccountAge: 0,
@@ -119,6 +145,7 @@ export default function CreateScratchCardTierPage() {
           perUserLimit: Number(values.perUserLimit || 0),
           cooldownPeriod: Number(values.cooldownPeriod || 0),
           blockWarnedUsers: Boolean(values.blockWarnedUsers || false),
+          showToAllMembers: Boolean(values.showToAllMembers ?? true),
         };
 
         const baseInput: any = {

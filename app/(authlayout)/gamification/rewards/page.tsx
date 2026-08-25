@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Gift,
-  Coins,
-  History,
   RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -18,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   RewardsBanner,
-  RewardsOverviewKpis,
   RedemptionActivityChart,
   RecentRedemptions,
   InventoryGlance,
@@ -34,7 +30,7 @@ export default function RewardsOverviewPage() {
   const { data, loading, refetch } = useGetRewards();
 
   const vouchers = data?.getRewards || [];
-  const activeRewardsCount = vouchers.length || 24;
+
 
   return (
     <EcosystemWrapper anonymized-1="rewards-overview-analytics">
@@ -74,19 +70,7 @@ export default function RewardsOverviewPage() {
         {/* 1. Compact Module Quick-Nav Hub */}
         <RewardsNavigation />
 
-        {/* 2. Compact Core KPIs */}
-        <section className="space-y-2">
-          <DashboardSectionHeading
-            title="REWARDS CORE VITALS &amp; FINANCIAL VALUE"
-            titleClassName="normal-case tracking-normal text-[10px] text-foreground font-bold"
-          />
-          <RewardsOverviewKpis
-            activeRewardsCount={activeRewardsCount}
-            loading={loading}
-          />
-        </section>
-
-        {/* 3. Compact Main Analytics Row */}
+        {/* 2. Compact Main Analytics Row */}
         <section className="space-y-2">
           <DashboardSectionHeading
             title="REDEMPTION VELOCITY &amp; LIVE ACTIVITY STREAM"

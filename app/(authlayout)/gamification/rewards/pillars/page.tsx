@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Layers,
   Coins,
@@ -27,28 +27,225 @@ import {
   PillarsLiveFeed,
   PillarsComparisonTable,
 } from "@/components/rewards/pillars";
-import { useGetRewards } from "@/graphql/actions/rewards";
+import {
+  useGetRewards,
+  useGetRewardStats,
+  useGetRedemptions,
+  useGetManualVoucherBatches,
+  useGetStoreDiscountRules,
+  useGetDigitalCardRules,
+  useGetEntityRewardWallet,
+  useGetRewardSecuritySettings,
+  TimeRange,
+} from "@/graphql/actions/rewards";
+
+const timeRangeMap: Record<string, TimeRange> = {
+  "24h": TimeRange.LAST_24_HOURS,
+  "7d": TimeRange.LAST_7_DAYS,
+  "30d": TimeRange.LAST_30_DAYS,
+  "90d": TimeRange.LAST_90_DAYS,
+};
 
 export default function RewardPillarsPage() {
-  const { dateRange, handleDateChange } = useUrlDateRange(7);
-  const { data, loading, refetch } = useGetRewards();
+  const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
 
-  const vouchers = data?.getRewards || [];
-  const manualVouchers = vouchers.filter((v: any) => v.type === "MANUAL" || !v.type);
-  const storeVouchers = vouchers.filter((v: any) => v.type === "STORE" || v.type === "SHOPIFY");
-  const giftCardVouchers = vouchers.filter((v: any) => v.type === "GIFTCARD" || v.type === "PREPAID");
+  const formattedDateRange = useMemo(() => {
+    if (dateRange?.from && dateRange?.to) {
+      return {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      };
+    }
+    return undefined;
+  }, [dateRange]);
 
-  const totalRedemptions = 128;
-  const manualCount = manualVouchers.length || 12;
-  const storeCount = storeVouchers.length || 84;
-  const giftCardsCount = giftCardVouchers.length || 32;
+  // 1. Rewards & Pillar Rules Queries
+  const {
+    data: rewardsData,
+    loading: rewardsLoading,
+    refetch: refetchRewards,
+  } = useGetRewards();
+
+  const {
+    data: manualBatchesData,
+    loading: manualBatchesLoading,
+    refetch: refetchManualBatches,
+  } = useGetManualVoucherBatches();
+
+  const {
+    data: storeRulesData,
+    loading: storeRulesLoading,
+    refetch: refetchStoreRules,
+  } = useGetStoreDiscountRules();
+
+  const {
+    data: digitalCardRulesData,
+    loading: digitalCardRulesLoading,
+    refetch: refetchDigitalCardRules,
+  } = useGetDigitalCardRules();
+
+  const {
+    data: walletData,
+    loading: walletLoading,
+    refetch: refetchWallet,
+  } = useGetEntityRewardWallet();
+
+  // 2. Stats & Activity Queries
+  const {
+    data: statsData,
+    loading: statsLoading,
+    refetch: refetchStats,
+  } = useGetRewardStats(timeRangeMap[timeRange] || TimeRange.LAST_7_DAYS, formattedDateRange);
+
+  const {
+    data: redemptionsData,
+    loading: redemptionsLoading,
+    refetch: refetchRedemptions,
+  } = useGetRedemptions({
+    pagination: { page: 1, limit: 10 },
+  });
+
+  const {
+    data: securityData,
+    loading: securityLoading,
+    refetch: refetchSecurity,
+  } = useGetRewardSecuritySettings();
+
+  const isGlobalLoading =
+    rewardsLoading ||
+    statsLoading ||
+    manualBatchesLoading ||
+    storeRulesLoading ||
+    digitalCardRulesLoading ||
+    walletLoading ||
+    redemptionsLoading ||
+    securityLoading;
+
+  const handleRefreshAll = () => {
+    refetchRewards?.();
+    refetchStats?.();
+    refetchManualBatches?.();
+    refetchStoreRules?.();
+    refetchDigitalCardRules?.();
+    refetchWallet?.();
+    refetchRedemptions?.();
+    refetchSecurity?.();
+  };
+
+  // 3. Process Multi-Pillar Categorizations
+  const rewards = rewardsData?.getRewards || [];
+  const manualBatches = manualBatchesData?.getManualVoucherBatches?.batches || [];
+  const storeRules = storeRulesData?.getStoreDiscountRules?.rules || [];
+  const digitalCardRules = digitalCardRulesData?.getDigitalCardRules?.rules || [];
+  const wallet = walletData?.getEntityRewardWallet;
+  const stats = statsData?.getRewardStats;
+  const redemptions = redemptionsData?.getRedemptions || [];
+  const securitySettings = securityData?.getRewardSecuritySettings;
+
+  const manualRewards = useMemo(() => {
+    return rewards.filter((r: any) => {
+      const mechType = r.mechanism?.type;
+      return (
+        mechType === "INTERNAL_VOUCHER" ||
+        Boolean(r.manualBatchId) ||
+        r.provider === "INTERNAL" ||
+        (!r.storeDiscountRuleId &&
+          !r.digitalCardRuleId &&
+          r.provider !== "SHOPIFY" &&
+          r.provider !== "THRICO" &&
+          r.provider !== "XOXODAY")
+      );
+    });
+  }, [rewards]);
+
+  const storeRewards = useMemo(() => {
+    return rewards.filter((r: any) => {
+      const mechType = r.mechanism?.type;
+      return (
+        mechType === "STORE_DISCOUNT" ||
+        Boolean(r.storeDiscountRuleId) ||
+        r.provider === "SHOPIFY" ||
+        r.rewardType === "STORE" ||
+        r.rewardType === "SHOPIFY_DISCOUNT"
+      );
+    });
+  }, [rewards]);
+
+  const giftCardRewards = useMemo(() => {
+    return rewards.filter((r: any) => {
+      const mechType = r.mechanism?.type;
+      return (
+        mechType === "DIGITAL_GIFT_CARD" ||
+        Boolean(r.digitalCardRuleId) ||
+        r.provider === "THRICO" ||
+        r.provider === "XOXODAY" ||
+        r.rewardType === "GIFT_CARD" ||
+        r.rewardType === "THRICO_GIFT_CARD"
+      );
+    });
+  }, [rewards]);
+
+  // Derived Pillar Asset Counts
+  const manualCount = Math.max(manualBatches.length, manualRewards.length);
+  const storeCount = Math.max(storeRules.length, storeRewards.length);
+  const giftCardsCount = Math.max(digitalCardRules.length, giftCardRewards.length);
+  const totalAssetsCount = manualCount + storeCount + giftCardsCount;
+
+  // Real Redemptions Metrics
+  const totalRedemptions = stats?.totalRedemptions ?? redemptions.length;
+  const activeCouponsCount = stats?.activeCoupons ?? rewards.length;
+  const totalTcBurned = stats?.totalTcBurned ?? 0;
+  const walletBalance = wallet?.balance ?? 0;
+  const redemptionTrend = stats?.redemptionTrend || [];
+
+  // Sparkline Trend Calculations
+  const totalTrendData = useMemo(() => {
+    if (redemptionTrend.length > 0) {
+      return redemptionTrend.map((t) => t.count);
+    }
+    return [0, 0, 0, 0, totalRedemptions];
+  }, [redemptionTrend, totalRedemptions]);
+
+  const manualTrendData = useMemo(() => {
+    if (redemptionTrend.length > 0) {
+      const ratio = totalAssetsCount > 0 ? manualCount / totalAssetsCount : 0.33;
+      return redemptionTrend.map((t) => Math.round(t.count * ratio));
+    }
+    return [0, 0, 0, 0, manualCount];
+  }, [redemptionTrend, manualCount, totalAssetsCount]);
+
+  const storeTrendData = useMemo(() => {
+    if (redemptionTrend.length > 0) {
+      const ratio = totalAssetsCount > 0 ? storeCount / totalAssetsCount : 0.33;
+      return redemptionTrend.map((t) => Math.round(t.count * ratio));
+    }
+    return [0, 0, 0, 0, storeCount];
+  }, [redemptionTrend, storeCount, totalAssetsCount]);
+
+  const giftTrendData = useMemo(() => {
+    if (redemptionTrend.length > 0) {
+      const ratio = totalAssetsCount > 0 ? giftCardsCount / totalAssetsCount : 0.34;
+      return redemptionTrend.map((t) => Math.round(t.count * ratio));
+    }
+    return [0, 0, 0, 0, giftCardsCount];
+  }, [redemptionTrend, giftCardsCount, totalAssetsCount]);
+
+  const economicValueFormatted = useMemo(() => {
+    if (totalTcBurned > 0) {
+      return `${totalTcBurned.toLocaleString()} TC`;
+    }
+    if (walletBalance > 0) {
+      return `₹${walletBalance.toLocaleString("en-IN")}`;
+    }
+    return "₹0";
+  }, [totalTcBurned, walletBalance]);
 
   const kpis = [
     {
       title: "Pillar 1: Manual Vouchers",
-      value: loading ? "..." : manualCount.toString(),
+      value: manualBatchesLoading ? "..." : manualCount.toString(),
       trend: 12.5,
-      trendData: [8, 9, 10, 10, 11, manualCount],
+      trendData: manualTrendData,
       icon: Coins,
       colorScheme: "lime" as const,
       suffix: " active",
@@ -57,31 +254,31 @@ export default function RewardPillarsPage() {
     },
     {
       title: "Pillar 2: E-Commerce Store",
-      value: loading ? "..." : storeCount.toString(),
+      value: storeRulesLoading ? "..." : storeCount.toString(),
       trend: 28.4,
-      trendData: [45, 52, 60, 68, 76, storeCount],
+      trendData: storeTrendData,
       icon: ShoppingBag,
       colorScheme: "indigo" as const,
-      suffix: " codes",
+      suffix: " rules",
       tooltip: "Dynamic Shopify coupons synthesized on-demand",
       href: "/gamification/rewards/pillars/store",
     },
     {
       title: "Pillar 3: Brand Gift Cards",
-      value: loading ? "..." : giftCardsCount.toString(),
+      value: digitalCardRulesLoading ? "..." : giftCardsCount.toString(),
       trend: 34.0,
-      trendData: [15, 18, 22, 26, 29, giftCardsCount],
+      trendData: giftTrendData,
       icon: Gift,
       colorScheme: "purple" as const,
-      suffix: " brands",
+      suffix: " rules",
       tooltip: "Prepaid catalog (Amazon, Swiggy, Uber & 200+ brands)",
       href: "/gamification/rewards/pillars/gift-cards",
     },
     {
       title: "Total Redemptions",
-      value: totalRedemptions.toString(),
+      value: statsLoading ? "..." : totalRedemptions.toString(),
       trend: 18.2,
-      trendData: [80, 92, 104, 115, 120, totalRedemptions],
+      trendData: totalTrendData,
       icon: TrendingUp,
       colorScheme: "orange" as const,
       suffix: " claims",
@@ -90,21 +287,21 @@ export default function RewardPillarsPage() {
     },
     {
       title: "Financial Value Unlocked",
-      value: "₹64,250",
+      value: statsLoading ? "..." : economicValueFormatted,
       trend: 22.1,
-      trendData: [42000, 48000, 53000, 58000, 64250],
+      trendData: [0, 0, 0, totalTcBurned || walletBalance],
       icon: Coins,
       colorScheme: "sky" as const,
-      tooltip: "Total real-world economic value delivered to members",
+      tooltip: "Total real-world economic value and coins delivered to members",
     },
     {
       title: "Security & Fraud Guard",
-      value: "100%",
+      value: securityLoading ? "..." : securitySettings?.lockToDeviceId ? "100%" : "Active",
       trend: 0,
       trendData: [100, 100, 100, 100, 100, 100, 100],
       icon: ShieldCheck,
       colorScheme: "rose" as const,
-      tooltip: "Single-use hash locks, rate limiters, and bot prevention active",
+      tooltip: `Single-use locks, daily limit (${securitySettings?.dailyRedemptionLimit ?? 100}), rate limiters, and bot prevention active`,
     },
   ];
 
@@ -131,10 +328,10 @@ export default function RewardPillarsPage() {
               variant="outline"
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg transition-all cursor-pointer"
-              onClick={() => refetch?.()}
+              onClick={handleRefreshAll}
               title="Refresh Analytics"
             >
-              <RotateCcw size={13} className={cn(loading && "animate-spin")} />
+              <RotateCcw size={13} className={cn(isGlobalLoading && "animate-spin")} />
             </Button>
           </div>
         }
@@ -144,8 +341,8 @@ export default function RewardPillarsPage() {
         {/* 1. Compact Hero Banner */}
         <PillarsBanner
           totalRedemptions={totalRedemptions}
-          activeCoupons={manualCount + storeCount + giftCardsCount}
-          loading={loading}
+          activeCoupons={activeCouponsCount}
+          loading={isGlobalLoading}
         />
 
         {/* 2. Compact Core Vitals Grid */}
@@ -169,14 +366,21 @@ export default function RewardPillarsPage() {
           />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
             <div className="lg:col-span-7 flex flex-col">
-              <PillarsGrowthChart loading={loading} />
+              <PillarsGrowthChart
+                loading={statsLoading}
+                redemptionTrend={redemptionTrend}
+                totalRedemptions={totalRedemptions}
+                manualCount={manualCount}
+                storeCount={storeCount}
+                giftCardsCount={giftCardsCount}
+              />
             </div>
             <div className="lg:col-span-5 flex flex-col">
               <PillarsDistributionChart
                 manualCount={manualCount}
                 storeCount={storeCount}
                 giftCardsCount={giftCardsCount}
-                loading={loading}
+                loading={isGlobalLoading}
               />
             </div>
           </div>
@@ -192,7 +396,8 @@ export default function RewardPillarsPage() {
             manualCount={manualCount}
             storeCount={storeCount}
             giftCardsCount={giftCardsCount}
-            loading={loading}
+            walletBalance={walletBalance}
+            loading={isGlobalLoading}
           />
         </section>
 
@@ -202,7 +407,10 @@ export default function RewardPillarsPage() {
             title="REAL-TIME FULFILLMENT &amp; PIPELINE ENGINE"
             titleClassName="normal-case tracking-normal text-[10px] text-foreground font-bold"
           />
-          <PillarsLiveFeed loading={loading} />
+          <PillarsLiveFeed
+            loading={redemptionsLoading}
+            redemptions={redemptions}
+          />
         </section>
 
         {/* 6. Comparison Table */}

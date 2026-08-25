@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   PolarisFormLayout,
   PolarisFormCard,
@@ -92,7 +92,6 @@ export function PointRuleForm({
   integrationTriggers = [],
 }: PointRuleFormProps) {
   const router = useRouter();
-  const { toast } = useToast();
   const [saved, setSaved] = useState(false);
 
   const initialSourceType = React.useMemo(() => {
@@ -193,14 +192,22 @@ export function PointRuleForm({
           source: sourceType,
         });
         setSaved(true);
+        toast.success(
+          isEdit
+            ? "Point rule updated successfully!"
+            : "Point rule created successfully!",
+        );
         setTimeout(() => {
           router.push("/gamification/points-and-badges/points");
         }, 1200);
       } catch (error: any) {
-        toast({
-          title: "Save Failed",
-          description: error.message || "Failed to preserve configuration.",
-          variant: "destructive",
+        const errorMsg =
+          error?.graphQLErrors?.[0]?.message ||
+          error?.networkError?.result?.errors?.[0]?.message ||
+          error?.message ||
+          "Failed to preserve configuration.";
+        toast.error("Save Failed", {
+          description: errorMsg,
         });
       }
     },

@@ -140,6 +140,17 @@ export const ShopifyIntegrationCard = () => {
   };
 
   const renderSyncBadge = () => {
+    if (isConnected && connection?.requiresReconnect) {
+      return (
+        <Badge
+          variant="destructive"
+          className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[9.5px] px-1.5 py-0"
+        >
+          Needs Reconnect
+        </Badge>
+      );
+    }
+
     switch (syncStatus) {
       case "SYNCED_TODAY":
         return (

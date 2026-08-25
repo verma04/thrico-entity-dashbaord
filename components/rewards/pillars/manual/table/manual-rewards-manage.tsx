@@ -58,10 +58,12 @@ import { cn } from "@/lib/utils";
 
 interface ManualRewardsManageProps {
   onCreateClick?: () => void;
+  onEditClick?: (reward: ManualRewardItem) => void;
 }
 
 export function ManualRewardsManage({
   onCreateClick,
+  onEditClick,
 }: ManualRewardsManageProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -143,6 +145,7 @@ export function ManualRewardsManage({
 
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [editingReward, setEditingReward] = useState<ManualRewardItem | null>(null);
   const [selectedRewardForPool, setSelectedRewardForPool] =
     useState<ManualRewardItem | null>(null);
 
@@ -251,9 +254,19 @@ export function ManualRewardsManage({
   };
 
   const handleOpenCreate = () => {
+    setEditingReward(null);
     if (onCreateClick) {
       onCreateClick();
     } else {
+      setIsDrawerOpen(true);
+    }
+  };
+
+  const handleOpenEdit = (reward: ManualRewardItem) => {
+    if (onEditClick) {
+      onEditClick(reward);
+    } else {
+      setEditingReward(reward);
       setIsDrawerOpen(true);
     }
   };
@@ -553,6 +566,7 @@ export function ManualRewardsManage({
             offset={offset}
             onSimulateWin={handleSimulateWin}
             onManagePool={handleManagePool}
+            onEdit={handleOpenEdit}
             onCreateClick={handleOpenCreate}
           />
 
@@ -591,10 +605,15 @@ export function ManualRewardsManage({
       {/* ── Internal Voucher Creation Drawer ────────────────────────── */}
       <InternalRewardDrawer
         isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
+        initialItem={editingReward}
+        onClose={() => {
+          setIsDrawerOpen(false);
+          setEditingReward(null);
+        }}
         onSuccess={() => {
           refetchBatches();
           setIsDrawerOpen(false);
+          setEditingReward(null);
         }}
       />
     </div>

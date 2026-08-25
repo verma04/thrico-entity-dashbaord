@@ -39,6 +39,26 @@ interface StoreRewardCardProps {
   onDelete?: (rewardId: string) => void;
 }
 
+function DiscountIcon({
+  discountType,
+  className,
+}: {
+  discountType: StoreDiscountType;
+  className?: string;
+}) {
+  switch (discountType) {
+    case StoreDiscountType.PERCENTAGE:
+      return <Percent className={className} />;
+    case StoreDiscountType.FREE_SHIPPING:
+      return <Truck className={className} />;
+    case StoreDiscountType.BUY_X_GET_Y:
+      return <Sparkles className={className} />;
+    case StoreDiscountType.FIXED_AMOUNT:
+    default:
+      return <Tag className={className} />;
+  }
+}
+
 export const StoreRewardCard: React.FC<StoreRewardCardProps> = ({
   reward,
   onSimulateWin,
@@ -46,22 +66,6 @@ export const StoreRewardCard: React.FC<StoreRewardCardProps> = ({
   onDelete,
 }) => {
   const [copied, setCopied] = useState(false);
-
-  const getDiscountIcon = () => {
-    switch (reward.discountType) {
-      case StoreDiscountType.PERCENTAGE:
-        return Percent;
-      case StoreDiscountType.FREE_SHIPPING:
-        return Truck;
-      case StoreDiscountType.BUY_X_GET_Y:
-        return Sparkles;
-      case StoreDiscountType.FIXED_AMOUNT:
-      default:
-        return Tag;
-    }
-  };
-
-  const Icon = getDiscountIcon();
 
   const getDiscountLabel = () => {
     switch (reward.discountType) {
@@ -101,7 +105,7 @@ export const StoreRewardCard: React.FC<StoreRewardCardProps> = ({
           {/* Discount Pill Badge */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-900/60">
-              <Icon className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+              <DiscountIcon discountType={reward.discountType} className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
               {getDiscountLabel()}
             </span>
             {reward.isActive ? (

@@ -23,9 +23,11 @@ export const GET_SCRATCH_CONFIG = gql`
         storeDiscountRuleId
         manualBatchId
         digitalCardRuleId
+        eligibilityRuleId
         storeDiscountRule {
           id
           title
+          discountType
           discountValue
         }
         manualBatch {
@@ -35,9 +37,14 @@ export const GET_SCRATCH_CONFIG = gql`
         }
         digitalCardRule {
           id
+          brandName
           title
           faceValue
           totalCost
+        }
+        eligibilityRule {
+          id
+          title
         }
         mechanism {
           type
@@ -53,6 +60,7 @@ export const GET_SCRATCH_CONFIG = gql`
           eligibleUserIds
           minAccountAge
           minActivityRequired
+          showToAllMembers
         }
         createdAt
         updatedAt
@@ -78,16 +86,11 @@ export const GET_SCRATCH_PRIZES = gql`
       storeDiscountRuleId
       manualBatchId
       digitalCardRuleId
-      mechanism {
-        type
-        ruleId
-        manualBatchId
-        storeDiscountRuleId
-        digitalCardRuleId
-      }
+      eligibilityRuleId
       storeDiscountRule {
         id
         title
+        discountType
         discountValue
       }
       manualBatch {
@@ -97,9 +100,21 @@ export const GET_SCRATCH_PRIZES = gql`
       }
       digitalCardRule {
         id
+        brandName
         title
         faceValue
         totalCost
+      }
+      eligibilityRule {
+        id
+        title
+      }
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
       }
       eligibility {
         memberEligibility
@@ -108,6 +123,7 @@ export const GET_SCRATCH_PRIZES = gql`
         eligibleUserIds
         minAccountAge
         minActivityRequired
+        showToAllMembers
       }
       createdAt
       updatedAt
@@ -158,16 +174,11 @@ export const GET_SCRATCH_PRIZE_BY_ID = gql`
       storeDiscountRuleId
       manualBatchId
       digitalCardRuleId
-      mechanism {
-        type
-        ruleId
-        manualBatchId
-        storeDiscountRuleId
-        digitalCardRuleId
-      }
+      eligibilityRuleId
       storeDiscountRule {
         id
         title
+        discountType
         discountValue
       }
       manualBatch {
@@ -177,9 +188,21 @@ export const GET_SCRATCH_PRIZE_BY_ID = gql`
       }
       digitalCardRule {
         id
+        brandName
         title
         faceValue
         totalCost
+      }
+      eligibilityRule {
+        id
+        title
+      }
+      mechanism {
+        type
+        ruleId
+        manualBatchId
+        storeDiscountRuleId
+        digitalCardRuleId
       }
       eligibility {
         memberEligibility
@@ -194,6 +217,7 @@ export const GET_SCRATCH_PRIZE_BY_ID = gql`
         perUserLimit
         cooldownPeriod
         blockWarnedUsers
+        showToAllMembers
       }
       createdAt
       updatedAt

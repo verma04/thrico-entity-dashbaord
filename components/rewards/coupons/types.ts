@@ -17,6 +17,31 @@ export const couponSchema = Yup.object().shape({
   howToClaim: Yup.string().nullable(),
   isActive: Yup.boolean(),
   expiryDate: Yup.string().nullable(),
+  memberEligibility: Yup.string().default("ALL"),
+  membershipTierId: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema
+        .min(1, "Please select at least one membership tier")
+        .required("Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleTierIds: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema
+        .min(1, "Please select at least one membership tier")
+        .required("Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleUserIds: Yup.array().when("memberEligibility", {
+    is: "SPECIFIC_CUSTOMERS",
+    then: (schema) =>
+      schema
+        .min(1, "Please select at least one customer")
+        .required("Please select at least one customer"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 export interface Voucher {

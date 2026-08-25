@@ -32,6 +32,7 @@ export { useGetEntityCurrencyConfig, useGetCurrencyConfig } from "../currency";
 export * from "./manual";
 export * from "./store";
 export * from "./gift-cards";
+export * from "./eligibility";
 
 
 export const useGetRewards = (variables?: {
@@ -40,10 +41,12 @@ export const useGetRewards = (variables?: {
   pagination?: { page: number; limit: number };
 }) => useQuery(GET_REWARDS, { variables });
 
-export const useGetRewardById = (id: string) =>
+export const useGetRewardById = (id: string, options?: any) =>
   useQuery(GET_REWARD_BY_ID, {
     variables: { getRewardByIdId: id },
     skip: !id,
+    fetchPolicy: "network-only",
+    ...options,
   });
 
 export const useGetVouchers = (variables: {

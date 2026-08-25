@@ -13,12 +13,20 @@ import { DashboardSectionHeading } from "@/components/home/dashboard-section-hea
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import {
+  ChartTimeFilterValue,
+  getChartTimeFilter,
+} from "@/components/home/chart-time-filter";
+import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
+import { SubscriptionLimitBanner } from "@/components/members/manage/subscription-alerts";
 import { cn } from "@/lib/utils";
 
 import { CommunitiesKPIOverview } from "./communities-kpi-overview";
+import { CommunitiesGrowthChart } from "./communities-growth-chart";
+import { CommunityStatusDistribution } from "./community-status-distribution";
 import { TopCommunitiesCard } from "./top-communities-card";
 import { TopCreatorsCard } from "./top-creators-card";
-import { CommunityStatusDistribution } from "./community-status-distribution";
+import { CommunityShortcuts } from "./community-shortcuts";
 
 const timeRangeMap: Record<string, TimeRange> = {
   "24h": TimeRange.LAST_24_HOURS,
@@ -34,6 +42,12 @@ export default function CommunitiesAnalytics() {
   const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Dedicated chart time filter
+  const [chartFilterKey, setChartFilterKey] = useState("30d");
+  const [chartFilterValue, setChartFilterValue] = useState<ChartTimeFilterValue>(
+    getChartTimeFilter("30d")
+  );
+
   const formattedDateRange = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return undefined;
     return {
@@ -42,10 +56,19 @@ export default function CommunitiesAnalytics() {
     };
   }, [dateRange]);
 
+  const activeTimeRange =
+    (chartFilterValue.timeRange as TimeRange) ||
+    timeRangeMap[timeRange] ||
+    TimeRange.LAST_7_DAYS;
+
   const { data, loading: loadingStats, refetch, error } = useGetCommunitiesStats(
-    timeRangeMap[timeRange] || TimeRange.LAST_7_DAYS,
-    formattedDateRange,
+    activeTimeRange,
+    chartFilterValue.dateRange || formattedDateRange
   );
+
+  const { data: subData } = useCheckMemberSubscription();
+  const subscriptionInfo = subData?.checkMemberSubscription;
+
   const stats = data?.getCommunitiesStats;
   const loading = loadingStats || isRefreshing;
 
@@ -58,26 +81,29 @@ export default function CommunitiesAnalytics() {
     }
   };
 
+  const enrollmentTrend = useMemo(() => {
+    return stats?.enrollmentTrend || [];
+  }, [stats?.enrollmentTrend]);
+
   if (error) {
     return (
-      <EcosystemWrapper data-testid="communities-analytics">
+      <EcosystemWrapper data-testid="communities-analytics" className="m-2">
         <EcosystemHeader
-          title={`${moduleName || "Communities"} Insights`}
+          title={`${moduleName || "Communities"} Overview`}
           description={`${moduleName || "Communities"} overview and insights`}
           badgeText="Overview"
           icon={Users2}
           actions={
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <DateRangePicker
                 date={dateRange}
                 onDateChange={handleDateChange}
                 defaultValue="LAST_7_DAYS"
               />
-              <div className="h-4 w-px bg-muted mx-1" />
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg transition-all"
                 onClick={handleRefresh}
                 disabled={loading}
               >
@@ -90,21 +116,19 @@ export default function CommunitiesAnalytics() {
           }
         />
 
-        <EcosystemContainer className="">
+        <EcosystemContainer className="p-5 space-y-5">
           <div className="max-w-3xl space-y-4">
             <DashboardSectionHeading
               title="Access Restricted"
               titleClassName="normal-case tracking-normal text-sm text-foreground"
             />
-            <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
-              <div className="p-2">
-                <AccessDeniedAlert
-                  message={
-                    error.message ||
-                    `You do not have permission to view ${singularName.toLowerCase()} analytics.`
-                  }
-                />
-              </div>
+            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+              <AccessDeniedAlert
+                message={
+                  error.message ||
+                  `You do not have permission to view ${singularName.toLowerCase()} analytics.`
+                }
+              />
             </div>
           </div>
         </EcosystemContainer>
@@ -117,24 +141,22 @@ export default function CommunitiesAnalytics() {
   const statusDistribution = stats?.statusDistribution ?? [];
 
   return (
-    <EcosystemWrapper data-testid="communities-analytics">
+    <EcosystemWrapper data-testid="communities-analytics" className="m-2">
       <EcosystemHeader
-        title={`${moduleName || "Communities"} Insights`}
-        description={`${moduleName || "Communities"} overview and insights`}
-        badgeText="Overview"
+        title={`${moduleName || "Communities"} Overview`}
+        description="Real-time pulse of community group health, membership growth, and active leaders."
         icon={Users2}
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-muted mx-1" />
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
               onClick={handleRefresh}
               disabled={loading}
             >
@@ -144,17 +166,46 @@ export default function CommunitiesAnalytics() {
         }
       />
 
-      <EcosystemContainer className="p-6 lg:p-8 space-y-8">
+      <EcosystemContainer className="p-5 space-y-5">
+        {/* Subscription Limit Warning Banner */}
+        <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
+
+        {/* 1. Core Communities KPIs */}
         <CommunitiesKPIOverview loading={loading} stats={stats} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8 space-y-6">
+        {/* 2. Enrollment Growth & Status Distribution Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-8">
+            <CommunitiesGrowthChart
+              loading={loading}
+              enrollmentTrend={enrollmentTrend}
+              filterKey={chartFilterKey}
+              onFilterChange={(key, val) => {
+                setChartFilterKey(key);
+                setChartFilterValue(val);
+              }}
+              growthPercentage={stats?.enrollmentsChange ?? 0}
+              totalEnrollments={stats?.totalEnrollments}
+            />
+          </div>
+
+          <div className="lg:col-span-4">
+            <CommunityStatusDistribution
+              loading={loading}
+              singularName={singularName}
+              statusDistribution={statusDistribution}
+            />
+          </div>
+        </div>
+
+        {/* 3. Top Communities, Top Creators, and Shortcuts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-8 space-y-4">
             <TopCommunitiesCard
               loading={loading}
               moduleName={moduleName}
               topCommunities={topCommunities}
             />
-
             <TopCreatorsCard
               loading={loading}
               moduleName={moduleName}
@@ -162,11 +213,10 @@ export default function CommunitiesAnalytics() {
             />
           </div>
 
-          <div className="lg:col-span-4 space-y-6">
-            <CommunityStatusDistribution
-              loading={loading}
+          <div className="lg:col-span-4">
+            <CommunityShortcuts
+              moduleName={moduleName}
               singularName={singularName}
-              statusDistribution={statusDistribution}
             />
           </div>
         </div>

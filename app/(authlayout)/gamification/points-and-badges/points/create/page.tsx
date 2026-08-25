@@ -27,7 +27,7 @@ export default function CreatePointRulePage() {
         ? [values.membershipTierId]
         : values.eligibleTierIds || [];
 
-    await createPointRule({
+    const res = await createPointRule({
       variables: {
         input: {
           source: values.source,
@@ -52,6 +52,10 @@ export default function CreatePointRulePage() {
         },
       },
     });
+
+    if (res?.errors && res.errors.length > 0) {
+      throw new Error(res.errors[0].message);
+    }
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];

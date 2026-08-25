@@ -3,13 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  Users,
-  Eye,
-  CheckCircle2,
-  Lock,
-  Globe,
-} from "lucide-react";
+import { Users, Eye, CheckCircle2, Lock, Globe } from "lucide-react";
 import type { communityEntity } from "../ts-types";
 import { CommunityActions } from "./community-actions";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
@@ -78,7 +72,7 @@ export function CommunityCardCompact({ record }: CommunityCardCompactProps) {
 
   return (
     <div
-      onClick={() => router.push(`/communities/${record.id}`)}
+      onClick={() => router.push(`/communities/${record.id}/discussion`)}
       className="relative overflow-hidden rounded-xl border border-border/60 bg-card shadow-2xs hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
     >
       {/* Classification-card style top color bar */}
@@ -133,7 +127,10 @@ export function CommunityCardCompact({ record }: CommunityCardCompactProps) {
 
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold backdrop-blur-md bg-black/50 text-white border border-white/10 shadow-2xs">
               <span
-                className={cn("h-1.5 w-1.5 rounded-full shrink-0", statusInfo.dot)}
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full shrink-0",
+                  statusInfo.dot,
+                )}
               />
               {statusInfo.label}
             </span>
@@ -166,7 +163,10 @@ export function CommunityCardCompact({ record }: CommunityCardCompactProps) {
 
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-muted text-muted-foreground border border-border">
               <span
-                className={cn("h-1.5 w-1.5 rounded-full shrink-0", statusInfo.dot)}
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full shrink-0",
+                  statusInfo.dot,
+                )}
               />
               {statusInfo.label}
             </span>

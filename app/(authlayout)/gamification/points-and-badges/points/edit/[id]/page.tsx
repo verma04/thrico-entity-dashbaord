@@ -39,7 +39,7 @@ export default function EditPointRulePage() {
         ? [values.membershipTierId]
         : values.eligibleTierIds || [];
 
-    await updatePointRule({
+    const res = await updatePointRule({
       variables: {
         id: ruleId,
         input: {
@@ -70,6 +70,10 @@ export default function EditPointRulePage() {
         },
       },
     });
+
+    if (res?.errors && res.errors.length > 0) {
+      throw new Error(res.errors[0].message);
+    }
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];

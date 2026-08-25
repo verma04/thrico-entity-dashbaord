@@ -1,16 +1,23 @@
 "use client";
 
+import { Suspense } from "react";
+import PollsDashboard from "@/components/polls/dashboard";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-import React from "react";
-import PollsAnalytics from "@/components/polls/dashboard/analytics";
-
-function PollsAnalyticsPage() {
-  return <PollsAnalytics />;
+/**
+ * Polls & Sentiment Hub Dashboard Page
+ * Route: /polls
+ */
+function PollsDashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <PollsDashboard />
+    </Suspense>
+  );
 }
 
 export default withSubscriptionCheck(
-  withModulePermission(PollsAnalyticsPage, "POLLS", "canRead"),
+  withModulePermission(PollsDashboardPage, "POLLS", "canRead"),
   "polls"
 );

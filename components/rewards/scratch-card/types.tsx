@@ -55,9 +55,11 @@ export interface ScratchRewardTier {
   storeDiscountRuleId?: string | null;
   manualBatchId?: string | null;
   digitalCardRuleId?: string | null;
+  eligibilityRuleId?: string | null;
   storeDiscountRule?: {
     id: string;
     title: string;
+    discountType?: string;
     discountValue?: number;
   };
   manualBatch?: {
@@ -67,9 +69,14 @@ export interface ScratchRewardTier {
   };
   digitalCardRule?: {
     id: string;
+    brandName?: string;
     title: string;
     faceValue?: number;
     totalCost?: number;
+  };
+  eligibilityRule?: {
+    id: string;
+    title?: string;
   };
   mechanism?: {
     type: string;
@@ -85,6 +92,7 @@ export interface ScratchRewardTier {
     eligibleUserIds?: string[];
     minAccountAge?: number;
     minActivityRequired?: number;
+    showToAllMembers?: boolean;
   };
   reward?: {
     id: string;

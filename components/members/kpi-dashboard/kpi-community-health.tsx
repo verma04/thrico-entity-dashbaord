@@ -1,69 +1,72 @@
 "use client";
 
 import React from "react";
-import {
-  HeartPulse,
-  Smile,
-  Shield,
-  AlertTriangle,
-} from "lucide-react";
+import { HeartPulse, Smile, Shield, AlertTriangle } from "lucide-react";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import type { StatValue } from "@/graphql/actions/member-kpi-dashboard";
 
-const kpis = [
+const communityHealthKPIs = [
   {
     title: "Health Index",
-    key: "healthIndex" as const,
+    key: "healthIndex",
     icon: HeartPulse,
-    tooltip: "Weighted Avg: Engagement (40%) + Retention (40%) + Content Activity (20%)",
-    colorScheme: "lime" as const,
+    color: "bg-emerald-500",
+    tooltip:
+      "Weighted Avg: Engagement (40%) + Retention (40%) + Content Activity (20%)",
   },
   {
     title: "Member Happiness",
-    key: "communityNPS" as const,
+    key: "communityNPS",
     icon: Smile,
+    color: "bg-yellow-400",
     tooltip: "Engagement Rate × 1.2 − Churn Rate × 0.5",
-    colorScheme: "orange" as const,
   },
   {
     title: "Satisfaction Score",
-    key: "memberSatisfactionScore" as const,
+    key: "memberSatisfactionScore",
     icon: Shield,
+    color: "bg-indigo-500",
     tooltip: "Overall member satisfaction based on engagement signals",
-    colorScheme: "indigo" as const,
   },
   {
     title: "Churn Prediction",
-    key: "churnPredictionScore" as const,
+    key: "churnPredictionScore",
     icon: AlertTriangle,
+    color: "bg-rose-500",
     tooltip: "Predictive score for members likely to churn",
-    colorScheme: "rose" as const,
   },
 ];
 
 interface KPICommunityHealthProps {
   loading: boolean;
-  data: Record<string, StatValue | undefined>;
+  getMetric: (key: string) => StatValue;
 }
 
-export function KPICommunityHealth({ loading, data }: KPICommunityHealthProps) {
+export function KPICommunityHealth({
+  loading,
+  getMetric,
+}: KPICommunityHealthProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {kpis.map((kpi) => {
-        const metric = data[kpi.key];
-        return (
-          <EcosystemKPI
-            key={kpi.key}
-            title={kpi.title}
-            value={loading ? "..." : (metric?.value ?? "0")}
-            trend={metric?.change ?? 0}
-            trendData={metric?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-            icon={kpi.icon}
-            colorScheme={kpi.colorScheme}
-            tooltip={kpi.tooltip}
-          />
-        );
-      })}
-    </div>
+    <section id="kpi-section-health" className="space-y-3 mt-20 scroll-mt-24">
+      <DashboardSectionHeading title="COMMUNITY HEALTH" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {communityHealthKPIs.map((v) => {
+          const item = getMetric(v.key);
+          return (
+            <EcosystemKPI
+              key={v.key}
+              title={v.title}
+              value={loading ? "..." : (item?.value ?? "0")}
+              trend={item?.change ?? 0}
+              trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+              icon={v.icon}
+              color={v.color}
+              tooltip={v.tooltip}
+            />
+          );
+        })}
+      </div>
+    </section>
   );
 }

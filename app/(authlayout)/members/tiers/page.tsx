@@ -1,7 +1,11 @@
+"use client";
+
 import MembershipTiers from "@/components/members/settings/membership-tiers";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 const page = () => {
   return <MembershipTiers />;
 };
 
-export default page;
+export default withModulePermission(page, "NETWORK", "canRead");
+
