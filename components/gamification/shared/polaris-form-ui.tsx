@@ -561,15 +561,20 @@ export {
   PolarisSelect,
   PolarisMultiSelect,
   PolarisCombobox,
+  PolarisDatePicker,
   PolarisFormSkeleton,
+  renderPolarisLabelAction,
 } from "@/components/ui/platform/polaris-primitives";
 export type {
   PolarisCardProps,
   PolarisLabelProps,
+  PolarisLabelAction,
+  PolarisLabelActionObject,
   PolarisInputProps,
   PolarisTextareaProps,
   PolarisSelectProps,
   PolarisMultiSelectProps,
   PolarisComboboxProps,
+  PolarisDatePickerProps,
   PolarisFormSkeletonProps,
 } from "@/components/ui/platform/polaris-primitives";

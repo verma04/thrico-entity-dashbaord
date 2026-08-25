@@ -11,10 +11,15 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
+import {
+  type PolarisLabelAction,
+  renderPolarisLabelAction,
+} from "./polaris-label";
+
 export interface PolarisDatePickerProps {
   id?: string;
   label?: React.ReactNode;
-  labelAction?: React.ReactNode;
+  labelAction?: PolarisLabelAction;
   helperText?: React.ReactNode;
   error?: string | boolean | null;
   value: Date | null | undefined;
@@ -72,7 +77,7 @@ export function PolarisDatePicker({
               {required && <span className="text-[#d72c0d] ml-0.5">*</span>}
             </label>
           )}
-          {labelAction && <div className="text-[11.5px]">{labelAction}</div>}
+          {renderPolarisLabelAction(labelAction)}
         </div>
       )}
 

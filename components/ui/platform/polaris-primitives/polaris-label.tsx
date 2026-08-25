@@ -36,3 +36,46 @@ export function PolarisLabel({
     </label>
   );
 }
+
+export type PolarisLabelActionObject = {
+  text?: string;
+  content?: string;
+  onClick?: () => void;
+  onAction?: () => void;
+  className?: string;
+};
+
+export type PolarisLabelAction = React.ReactNode | PolarisLabelActionObject;
+
+export function renderPolarisLabelAction(
+  action?: PolarisLabelAction,
+): React.ReactNode {
+  if (!action) return null;
+  if (React.isValidElement(action)) {
+    return <div className="text-[11.5px]">{action}</div>;
+  }
+  if (typeof action === "string" || typeof action === "number") {
+    return <div className="text-[11.5px]">{action}</div>;
+  }
+  if (typeof action === "object" && action !== null) {
+    const act = action as PolarisLabelActionObject;
+    const label = act.text || act.content;
+    const onClick = act.onClick || act.onAction;
+    if (label) {
+      return (
+        <button
+          type="button"
+          onClick={onClick}
+          className={cn(
+            "text-[11.5px] font-semibold text-[#616161] hover:text-[#303030] dark:text-zinc-400 dark:hover:text-zinc-200 cursor-pointer transition-colors",
+            act.className,
+          )}
+        >
+          {label}
+        </button>
+      );
+    }
+  }
+  return null;
+}
+

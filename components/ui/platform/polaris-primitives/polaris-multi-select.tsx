@@ -17,10 +17,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  type PolarisLabelAction,
+  renderPolarisLabelAction,
+} from "./polaris-label";
 
 export interface PolarisMultiSelectOption {
   value: string;
   label: string;
+  description?: string;
+  icon?: React.ReactNode;
   badge?: string;
   disabled?: boolean;
 }
@@ -28,7 +34,7 @@ export interface PolarisMultiSelectOption {
 export interface PolarisMultiSelectProps {
   id?: string;
   label?: React.ReactNode;
-  labelAction?: React.ReactNode;
+  labelAction?: PolarisLabelAction;
   helperText?: React.ReactNode;
   error?: string | boolean | null;
   placeholder?: string;
@@ -95,7 +101,7 @@ export function PolarisMultiSelect({
               {required && <span className="text-[#d72c0d] ml-0.5">*</span>}
             </label>
           )}
-          {labelAction && <div className="text-[11.5px]">{labelAction}</div>}
+          {renderPolarisLabelAction(labelAction)}
         </div>
       )}
 

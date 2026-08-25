@@ -51,7 +51,26 @@ export const PolarisInput = forwardRef<HTMLInputElement, PolarisInputProps>(
                 {required && <span className="text-[#d72c0d] ml-0.5">*</span>}
               </label>
             )}
-            {labelAction && <div className="text-[13px]">{labelAction}</div>}
+            {labelAction && (
+              <div className="text-[13px]">
+                {React.isValidElement(labelAction) ||
+                typeof labelAction === "string" ||
+                typeof labelAction === "number" ? (
+                  labelAction
+                ) : typeof labelAction === "object" && labelAction !== null ? (
+                  <button
+                    type="button"
+                    onClick={
+                      (labelAction as any).onClick ||
+                      (labelAction as any).onAction
+                    }
+                    className="text-[13px] font-medium text-[#005bd3] dark:text-blue-400 hover:underline cursor-pointer"
+                  >
+                    {(labelAction as any).text || (labelAction as any).content}
+                  </button>
+                ) : null}
+              </div>
+            )}
           </div>
         )}
 

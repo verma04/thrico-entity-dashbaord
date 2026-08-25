@@ -3,11 +3,15 @@
 import React, { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
+import {
+  type PolarisLabelAction,
+  renderPolarisLabelAction,
+} from "./polaris-label";
 
 export interface PolarisInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "prefix"> {
   label?: React.ReactNode;
-  labelAction?: React.ReactNode;
+  labelAction?: PolarisLabelAction;
   helperText?: React.ReactNode;
   error?: string | boolean | null;
   prefix?: React.ReactNode;
@@ -55,7 +59,7 @@ export const PolarisInput = forwardRef<HTMLInputElement, PolarisInputProps>(
                 {required && <span className="text-[#d72c0d] ml-0.5">*</span>}
               </label>
             )}
-            {labelAction && <div className="text-[11.5px]">{labelAction}</div>}
+            {renderPolarisLabelAction(labelAction)}
           </div>
         )}
 
