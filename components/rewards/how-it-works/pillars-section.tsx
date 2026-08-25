@@ -9,10 +9,6 @@ import {
   Coins,
   ArrowRight,
   CheckCircle2,
-  Sparkles,
-  ExternalLink,
-  ShieldCheck,
-  Zap,
   Layers,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";

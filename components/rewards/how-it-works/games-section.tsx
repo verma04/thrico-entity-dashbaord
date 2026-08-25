@@ -6,18 +6,14 @@ import {
   RotateCw,
   Sparkles,
   Gamepad2,
-  Trophy,
-  Dices,
   Lock,
   Unlock,
   CheckCircle2,
   ArrowRight,
   Gift,
-  Coins,
-  ShoppingBag,
   Percent,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";

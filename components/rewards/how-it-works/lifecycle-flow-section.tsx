@@ -3,20 +3,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  User,
   Gamepad2,
   Cpu,
   Server,
   Wallet,
   ShoppingBag,
-  ArrowRight,
   CheckCircle2,
   ShieldCheck,
   Sparkles,
-  Zap,
-  CreditCard,
   Copy,
-  ExternalLink,
   Code2,
   Terminal,
   Activity,
@@ -25,10 +20,10 @@ import {
   Coins,
   Check,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 

@@ -1,28 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import {
-  HelpCircle,
   Layers,
   Gamepad2,
   ShieldCheck,
   Wallet,
   Sparkles,
-  ArrowRight,
   BookOpen,
   ShoppingBag,
   Gift,
   Ticket,
-  Coins,
   ChevronRight,
 } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useModuleStore } from "@/store/useModuleStore";
 
 import { PillarsSection } from "./pillars-section";
