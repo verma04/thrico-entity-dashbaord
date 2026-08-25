@@ -38,8 +38,6 @@ import { EntityLogo } from "./entity-logo";
 interface TopNavbarProps {
   toggleSidebar: () => void;
   isCollapsed: boolean;
-  searchQuery: string;
-  setSearchQuery: (val: string) => void;
   setSearchOpen: (val: boolean) => void;
   setLogoutOpen: (val: boolean) => void;
   otherAccountsData: any; // Ideally typed with your GraphQL generated types
@@ -51,8 +49,6 @@ interface TopNavbarProps {
 export function TopNavbar({
   toggleSidebar,
   isCollapsed,
-  searchQuery,
-  setSearchQuery,
   setSearchOpen,
   setLogoutOpen,
   otherAccountsData,
@@ -61,7 +57,7 @@ export function TopNavbar({
   showSidebarToggle = true,
 }: TopNavbarProps) {
   return (
-    <header className="flex h-14 items-center justify-between gap-3  bg-white dark:bg-background px-4 sticky top-0 z-40">
+    <header className="flex h-14 items-center justify-between gap-3 bg-white dark:bg-background px-4 sticky top-0 z-40">
       {/* Left: sidebar toggle + Workspace */}
       <div className="flex items-center gap-2 min-w-0 shrink-0">
         <WorkspaceSwitcher />
@@ -85,28 +81,21 @@ export function TopNavbar({
         )}
       </div>
 
-      {/* Center: Search + AI Chats */}
+      {/* Center: Global Search / Command Bar */}
       <div className="flex-1 flex justify-center items-center gap-2 max-w-xl mx-auto">
-        <div className="relative w-full max-w-md hidden md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 pointer-events-none" />
-          <Input
-            placeholder="Search ⌘K"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-8 w-full bg-neutral-100 dark:bg-neutral-900 border-transparent pl-9 pr-7 text-[13px] rounded-full focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-neutral-400 text-neutral-900 dark:text-neutral-100"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-        {/* <button className="hidden lg:flex items-center gap-1 text-[13px] font-medium text-neutral-500 hover:text-neutral-900 px-3 py-1 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700">
-          AI Chats <Sparkles className="w-3.5 h-3.5 text-pink-500" />
-        </button> */}
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          className="relative w-full max-w-md hidden md:flex items-center justify-between h-8 bg-neutral-100/90 hover:bg-neutral-200/70 dark:bg-neutral-900 dark:hover:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-800 rounded-full px-3 text-[12.5px] text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-all cursor-pointer shadow-2xs"
+        >
+          <div className="flex items-center gap-2">
+            <Search className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
+            <span className="text-neutral-400 font-normal">Search pages, actions...</span>
+          </div>
+          <kbd className="pointer-events-none inline-flex h-4.5 select-none items-center gap-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-1.5 font-mono text-[10px] font-medium text-neutral-500 dark:text-neutral-400 shadow-2xs">
+            <span className="text-[11px]">⌘</span>K
+          </kbd>
+        </button>
       </div>
 
       {/* Right: actions */}

@@ -19,19 +19,24 @@ import type { MenuItem } from "./types";
 export function SectionLabel({
   sectionKey,
   children,
+  isOpen: propIsOpen,
 }: {
   sectionKey: string;
   children: React.ReactNode;
+  isOpen?: boolean;
 }) {
   const collapsedSections = useSidebarSectionStore((s) => s.collapsedSections);
   const toggleSection = useSidebarSectionStore((s) => s.toggleSection);
-  const isOpen = !collapsedSections.includes(sectionKey);
+  const isOpen =
+    propIsOpen !== undefined
+      ? propIsOpen
+      : !collapsedSections.includes(sectionKey);
 
   return (
-    <div className="mb-1 mt-4 first:mt-1">
+    <div className="mb-1 mt-3 first:mt-0.5">
       <button
         onClick={() => toggleSection(sectionKey)}
-        className="group-data-[collapsible=icon]:hidden flex w-full items-center justify-between px-2.5 py-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-150 cursor-pointer select-none"
+        className="group-data-[collapsible=icon]:hidden flex w-full items-center justify-between px-2 py-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors duration-150 cursor-pointer select-none"
       >
         <span className="text-[11px] font-semibold tracking-wider text-neutral-500 dark:text-neutral-400 leading-none">
           {children}
@@ -329,21 +334,26 @@ export function CollapsibleSection({
   items,
   renderItems,
   className,
+  searchQuery,
 }: {
   sectionKey: string;
   label: string;
   items: MenuItem[];
   renderItems: (items: MenuItem[]) => React.ReactNode;
   className?: string;
+  searchQuery?: string;
 }) {
   const collapsedSections = useSidebarSectionStore((s) => s.collapsedSections);
-  const isOpen = !collapsedSections.includes(sectionKey);
+  const isSearching = Boolean(searchQuery?.trim());
+  const isOpen = isSearching || !collapsedSections.includes(sectionKey);
 
   if (items.length === 0) return null;
 
   return (
     <SidebarGroup className={cn("p-0", className)}>
-      <SectionLabel sectionKey={sectionKey}>{label}</SectionLabel>
+      <SectionLabel sectionKey={sectionKey} isOpen={isOpen}>
+        {label}
+      </SectionLabel>
       <div
         className={cn(
           "overflow-hidden transition-all duration-200 ease-in-out",
