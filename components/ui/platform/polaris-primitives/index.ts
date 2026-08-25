@@ -2,10 +2,10 @@
  * Polaris Primitives — Shared form design system primitives
  *
  * Shopify Polaris-inspired components with consistent sizing:
- * - Labels: 13.5px, font-medium, #303030
- * - Inputs: 40px height, 14px text, rounded-8px, border-#aeb4b9
- * - Helpers/Errors: 12.5px, #616161 / #d72c0d
- * - Cards: rounded-12px, border-#d2d5d9, shadow-sm
+ * - Labels: 12px, font-medium, #303030
+ * - Inputs: 34px height, 12.5px text, rounded-6px, border-#aeb4b9
+ * - Helpers/Errors: 11px, #616161 / #d72c0d
+ * - Cards: rounded-10px, border-#d2d5d9, shadow-sm
  */
 
 export { PolarisCard } from "./polaris-card";
@@ -34,6 +34,9 @@ export type {
   PolarisComboboxProps,
   PolarisComboboxOption,
 } from "./polaris-combobox";
+
+export { PolarisDatePicker } from "./polaris-date-picker";
+export type { PolarisDatePickerProps } from "./polaris-date-picker";
 
 export {
   PolarisFormSkeleton,

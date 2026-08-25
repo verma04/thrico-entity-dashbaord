@@ -39,6 +39,7 @@ import {
   PolarisSelect,
   PolarisMultiSelect,
   PolarisCombobox,
+  PolarisDatePicker,
 } from "@/components/ui/platform/polaris-primitives";
 import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
 import { useGetSkills } from "@/graphql/quries/skills/skill-queries";
@@ -380,47 +381,17 @@ export function MemberCreationForm({
                   />
 
                   {/* Date of Birth */}
-                  <div className="w-full space-y-1.5">
-                    <PolarisLabel>Date of Birth</PolarisLabel>
-                    <Popover
-                      open={isCalendarOpen}
-                      onOpenChange={setIsCalendarOpen}
-                    >
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className={cn(
-                            "w-full h-[40px] px-3 text-[14px] bg-white dark:bg-zinc-900 border border-[#aeb4b9] dark:border-zinc-700 rounded-[8px] flex items-center gap-2 transition-all duration-150 outline-none hover:border-[#8c9196] dark:hover:border-zinc-600 focus:border-[#005bd3] dark:focus:border-blue-500 focus:ring-1 focus:ring-[#005bd3] dark:focus:ring-blue-500 cursor-pointer",
-                            formik.values.dob
-                              ? "text-[#303030] dark:text-zinc-100"
-                              : "text-[#8c9196] dark:text-zinc-500",
-                          )}
-                        >
-                          <CalendarIcon className="h-4 w-4 text-[#616161] dark:text-zinc-400" />
-                          {formik.values.dob
-                            ? format(formik.values.dob, "PPP")
-                            : "Pick birth date"}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={formik.values.dob}
-                          onSelect={(date) => {
-                            handleInputChange("dob", date);
-                            setIsCalendarOpen(false);
-                          }}
-                          initialFocus
-                          captionLayout="dropdown"
-                          fromYear={1930}
-                          toYear={new Date().getFullYear()}
-                          defaultMonth={
-                            formik.values.dob || new Date(2000, 0, 1)
-                          }
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                  <PolarisDatePicker
+                    id="dob"
+                    label="Date of Birth"
+                    placeholder="Pick birth date"
+                    value={formik.values.dob}
+                    onChange={(date) => handleInputChange("dob", date)}
+                    fromYear={1930}
+                    toYear={new Date().getFullYear()}
+                    defaultMonth={formik.values.dob || new Date(2000, 0, 1)}
+                    allowClear
+                  />
                 </div>
 
                 {/* Headline */}

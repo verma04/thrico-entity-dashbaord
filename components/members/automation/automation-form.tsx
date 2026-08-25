@@ -16,12 +16,13 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { ConditionBuilder } from "@/components/members/settings/rules/condition-builder";
 import { ActionBuilder } from "@/components/members/settings/rules/action-builder";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -552,39 +553,28 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           icon={Zap}
         >
           <div className="space-y-3">
-            <div className="space-y-1.5">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                Rule Name <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
-              <Input
-                type="text"
-                placeholder="e.g. Stanford University - Gold Tier & Welcome Flow"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                required
-              />
-            </div>
+            <PolarisInput
+              id="rule-name"
+              label="Rule Name"
+              required
+              placeholder="e.g. Stanford University - Gold Tier & Welcome Flow"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              prefix={<Zap className="h-3.5 w-3.5" />}
+            />
 
-            <div className="space-y-1.5">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                Description{" "}
-                <span className="text-[#616161] font-normal">(Optional)</span>
-              </label>
-              <Textarea
-                placeholder="Describe when this rule executes and what privileges or emails it awards to matching members..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none min-h-[70px]"
-              />
-            </div>
+            <PolarisTextarea
+              id="rule-description"
+              label="Description"
+              placeholder="Describe when this rule executes and what privileges or emails it awards to matching members..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              helperText="Optional context explaining the business rationale or target cohort for this automation."
+            />
 
             {/* Trigger Selector */}
             <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                Trigger Lifecycle Event (WHEN){" "}
-                <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
+              <PolarisLabel required>Trigger Lifecycle Event (WHEN)</PolarisLabel>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {TRIGGER_OPTIONS.map((opt) => {
                   const Icon = opt.icon;
@@ -612,7 +602,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
                         >
                           <Icon className="w-3.5 h-3.5" />
                         </div>
-                        <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                        <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
                           {opt.label}
                         </span>
                       </div>
@@ -626,12 +616,12 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
             </div>
 
             {/* Active Switch */}
-            <div className="flex items-center justify-between p-3.5 rounded-[8px] bg-[#f6f6f7]/50 dark:bg-zinc-900/40 border border-[#d2d5d9] dark:border-zinc-800 mt-2">
+            <div className="flex items-center justify-between p-3 rounded-[6px] bg-[#f6f6f7]/50 dark:bg-zinc-900/40 border border-[#d2d5d9] dark:border-zinc-800 mt-2">
               <div>
-                <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block">
+                <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
                   Rule Active Status
                 </span>
-                <span className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+                <span className="text-[11px] text-[#616161] dark:text-zinc-400">
                   When active, this rule will automatically evaluate matching
                   members in real time.
                 </span>
