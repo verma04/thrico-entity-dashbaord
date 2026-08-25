@@ -5,8 +5,6 @@ import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
   Camera,
@@ -28,6 +26,9 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 
 interface EventsCreationFormProps {
@@ -200,20 +201,18 @@ export function EventsCreationForm({
           </div>
         }
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           {/* Step 1: Core Event Identity & Venue */}
           <PolarisFormCard
             step={1}
             title={`Core ${singularName} Identity & Venue`}
-            description={`Configure the event cover banner, headline title, location coordinates, and attendee summary.`}
+            description="Configure the event cover banner, headline title, location coordinates, and attendee summary."
             badge="Required"
           >
             {/* Cover Image Upload */}
-            <div className="space-y-2">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                Event Banner <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
-              <div className="relative group aspect-[3/2] sm:aspect-[21/9] w-full rounded-[8px] overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7] dark:bg-zinc-900 flex items-center justify-center">
+            <div className="space-y-1.5">
+              <PolarisLabel required>Event Banner</PolarisLabel>
+              <div className="relative group aspect-[3/2] sm:aspect-[21/9] w-full rounded-[6px] overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7] dark:bg-zinc-900 flex items-center justify-center">
                 <Image
                   src={
                     imageUrl || `https://cdn.thrico.network/default_event.png`
@@ -228,12 +227,12 @@ export function EventsCreationForm({
                     type="button"
                     variant="secondary"
                     size="sm"
-                    className="h-9 px-4 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-xs border-none text-[13px] font-semibold shadow-md gap-2 cursor-pointer rounded-[6px]"
+                    className="h-8 px-3 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-xs border-none text-[12px] font-semibold shadow-md gap-1.5 cursor-pointer rounded-[4px]"
                     onClick={() =>
                       document.getElementById("cover-upload")?.click()
                     }
                   >
-                    <Camera className="h-3.5 w-3.5" />
+                    <Camera className="h-3 w-3" />
                     Change Cover Banner
                   </Button>
                 </div>
@@ -245,7 +244,7 @@ export function EventsCreationForm({
                   onChange={handleImageUpload}
                 />
               </div>
-              <p className="text-[12px] text-[#616161] dark:text-zinc-400">
+              <p className="text-[11px] text-[#616161] dark:text-zinc-400">
                 Recommended aspect ratio: 3:2 or 21:9 banner (1536 × 1024px). Max
                 5MB.
               </p>
@@ -253,46 +252,28 @@ export function EventsCreationForm({
 
             {/* Title & Location */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="title"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  {singularName} Title{" "}
-                  <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder={`e.g. Annual Community Summit 2026`}
-                  value={formik.values.title}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.title && formik.errors.title && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.title as string}
-                  </p>
-                )}
-              </div>
+              <PolarisInput
+                id="title"
+                name="title"
+                label={`${singularName} Title`}
+                required
+                placeholder="e.g. Annual Community Summit 2026"
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.title && formik.errors.title ? String(formik.errors.title) : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="location"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  Venue / Location{" "}
-                  <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
+              <div className="space-y-1">
+                <PolarisLabel required>Venue / Location</PolarisLabel>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#616161] z-10" />
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#616161] z-10" />
                   <GooglePlacesInput
                     id="location"
                     name="location"
                     onBlur={formik.handleBlur}
                     placeholder="Search venue or address..."
-                    className="h-[40px] pl-9 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
+                    className="h-[34px] pl-8 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[12.5px] text-[#303030] dark:text-zinc-100 rounded-[6px]"
                     initialValue={
                       formik.values.location
                         ? {
@@ -312,7 +293,7 @@ export function EventsCreationForm({
                   />
                 </div>
                 {formik.touched.location && formik.errors.location && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+                  <p className="text-[12px] text-[#d72c0d] font-normal leading-[16px]">
                     {formik.errors.location as string}
                   </p>
                 )}
@@ -320,51 +301,32 @@ export function EventsCreationForm({
             </div>
 
             {/* Description Field */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="description"
-                className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-              >
-                {singularName} Description{" "}
-                <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder={`Detail what attendees can expect, keynotes, topics, and schedule highlights...`}
-                value={formik.values.description}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className="min-h-[110px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] p-3 resize-none shadow-none"
-              />
-              <div className="flex items-center justify-between">
-                {formik.touched.description && formik.errors.description ? (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.description as string}
-                  </p>
-                ) : (
-                  <span />
-                )}
-                <p className="text-[11.5px] text-[#616161] font-medium">
-                  {formik.values.description.length} characters (min 30)
-                </p>
-              </div>
-            </div>
+            <PolarisTextarea
+              id="description"
+              name="description"
+              label={`${singularName} Description`}
+              required
+              rows={3}
+              placeholder="Detail what attendees can expect, keynotes, topics, and schedule highlights..."
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              helperText={`${formik.values.description.length} characters (min 30)`}
+              error={formik.touched.description && formik.errors.description ? String(formik.errors.description) : undefined}
+            />
           </PolarisFormCard>
 
           {/* Step 2: Schedule & Registration Timeline */}
           <PolarisFormCard
             step={2}
             title="Schedule & Registration Timeline"
-            description={`Define event meeting format, dates, timezones, and RSVP cutoff deadlines.`}
+            description="Define event meeting format, dates, timezones, and RSVP cutoff deadlines."
             badge="Schedule"
           >
             {/* Meeting Format Selectable Tiles */}
-            <div className="space-y-2">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                Event Format <span className="text-[#d72c0d] ml-0.5">*</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <PolarisLabel required>Event Format</PolarisLabel>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 {[
                   {
                     value: "in_person",
@@ -393,26 +355,26 @@ export function EventsCreationForm({
                       type="button"
                       onClick={() => handleInputChange("type", type.value)}
                       className={cn(
-                        "relative flex flex-col items-start p-3.5 rounded-[8px] border text-left transition-all cursor-pointer",
+                        "relative flex flex-col items-start p-3 rounded-[6px] border text-left transition-all cursor-pointer",
                         isSelected
-                          ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
+                          ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-2xs"
                           : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
                       <div
                         className={cn(
-                          "h-8 w-8 rounded-[6px] flex items-center justify-center mb-2 border transition-colors",
+                          "h-7 w-7 rounded-[4px] flex items-center justify-center mb-1.5 border transition-colors",
                           isSelected
                             ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
                             : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
                         )}
                       >
-                        <Icon className="h-4 w-4" />
+                        <Icon className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
                         {type.label}
                       </span>
-                      <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+                      <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[15px]">
                         {type.desc}
                       </p>
                     </button>
@@ -422,88 +384,56 @@ export function EventsCreationForm({
             </div>
 
             {/* Date & Time Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="startDate"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  Start Date <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="startDate"
-                  name="startDate"
-                  type="date"
-                  value={formik.values.startDate}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisInput
+                id="startDate"
+                name="startDate"
+                type="date"
+                label="Start Date"
+                required
+                value={formik.values.startDate}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.startDate && formik.errors.startDate ? String(formik.errors.startDate) : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="endDate"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  End Date
-                </label>
-                <Input
-                  id="endDate"
-                  name="endDate"
-                  type="date"
-                  value={formik.values.endDate}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-              </div>
+              <PolarisInput
+                id="endDate"
+                name="endDate"
+                type="date"
+                label="End Date"
+                value={formik.values.endDate}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="startTime"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  Start Time
-                </label>
-                <Input
-                  id="startTime"
-                  name="startTime"
-                  type="time"
-                  value={formik.values.startTime}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-              </div>
+              <PolarisInput
+                id="startTime"
+                name="startTime"
+                type="time"
+                label="Start Time"
+                value={formik.values.startTime}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
             </div>
 
             {/* Registration Deadline & Active Toggle */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="lastDateOfRegistration"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
-                >
-                  RSVP Registration Deadline
-                </label>
-                <Input
-                  id="lastDateOfRegistration"
-                  name="lastDateOfRegistration"
-                  type="date"
-                  value={formik.values.lastDateOfRegistration}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+              <PolarisInput
+                id="lastDateOfRegistration"
+                name="lastDateOfRegistration"
+                type="date"
+                label="RSVP Registration Deadline"
+                value={formik.values.lastDateOfRegistration}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
 
-              <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                  Publishing Status
-                </label>
-                <div className="h-[40px] px-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between">
-                  <span className="text-[13px] font-medium text-[#303030] dark:text-zinc-300">
+              <div className="space-y-1">
+                <PolarisLabel>Publishing Status</PolarisLabel>
+                <div className="h-[34px] px-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between">
+                  <span className="text-[12px] font-medium text-[#303030] dark:text-zinc-300">
                     {formik.values.isActive
                       ? "Published (Live Event)"
                       : "Draft (Hidden)"}
