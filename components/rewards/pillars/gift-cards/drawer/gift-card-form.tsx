@@ -16,7 +16,6 @@ import {
   Check,
   Zap,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,6 +24,8 @@ import {
   PolarisSidebarCard,
   PolarisTipCard,
   PolarisSummaryRow,
+  PolarisInput,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { GiftCardRuleItem } from "../types";
@@ -447,24 +448,24 @@ export function GiftCardForm({
           </>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-3.5">
           {/* Architecture Notice Banner */}
-          <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 p-4 space-y-2">
-            <div className="flex items-start gap-3">
-              <div className="h-8 w-8 rounded-[6px] bg-[#303030] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-                <Wallet className="h-4 w-4" />
+          <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50 p-3 space-y-1.5">
+            <div className="flex items-start gap-2.5">
+              <div className="h-7 w-7 rounded-[4px] bg-[#303030] text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                <Wallet className="h-3.5 w-3.5" />
               </div>
               <div className="space-y-1 flex-1">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <h4 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100 uppercase tracking-wider flex items-center gap-1.5">
                     <span>How Digital Gift Cards Are Fulfilled</span>
-                    <Badge className="bg-[#303030] text-white font-semibold text-[9px] px-1.5 py-0 uppercase rounded-[4px]">
+                    <Badge className="bg-[#303030] text-white font-semibold text-[8.5px] px-1.5 py-0 uppercase rounded-[3px]">
                       On-Demand Provider Purchase
                     </Badge>
                   </h4>
                 </div>
 
-                <p className="text-[12.5px] text-[#616161] dark:text-zinc-400 leading-[18px]">
+                <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[16px]">
                   Saving this offer{" "}
                   <strong className="text-[#303030] dark:text-zinc-200 font-semibold">
                     does NOT purchase gift cards upfront
@@ -477,16 +478,16 @@ export function GiftCardForm({
                   in an engagement game.
                 </p>
 
-                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[12px] text-[#616161] dark:text-zinc-400">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <div className="pt-1.5 border-t border-[#e1e3e5] dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>
                       <strong>2-Phase Reservation:</strong> Funds are reserved
                       first; if provider fails, reservation is released (₹0 lost).
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>
                       <strong>Idempotency Key:</strong> Deterministic references
                       prevent double-purchasing on network retries.
@@ -504,8 +505,8 @@ export function GiftCardForm({
             description="Choose from top digital gift card catalogs (Amazon, Flipkart, Swiggy, Zomato)."
             badge="Step 1"
           >
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="space-y-3.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {BRAND_CATALOG.map((item) => {
                   const Icon = item.icon;
                   const isSelected = formik.values.brand === item.name;
@@ -516,25 +517,25 @@ export function GiftCardForm({
                       key={item.name}
                       onClick={() => handleBrandSelect(item.name)}
                       className={cn(
-                        "p-3 rounded-[8px] border transition-all cursor-pointer flex flex-col justify-between gap-2 text-left",
+                        "p-2.5 rounded-[6px] border transition-all cursor-pointer flex flex-col justify-between gap-1.5 text-left",
                         isSelected
                           ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 shadow-xs ring-1 ring-[#303030] dark:ring-zinc-100"
                           : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                       )}
                     >
                       <div className="flex items-center justify-between w-full">
-                        <div className="h-7 w-7 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center">
-                          <Icon className="h-3.5 w-3.5" />
+                        <div className="h-6 w-6 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center">
+                          <Icon className="h-3 w-3" />
                         </div>
                         {isSelected && (
-                          <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                          <Check className="h-3 w-3 text-[#303030] dark:text-zinc-100" />
                         )}
                       </div>
                       <div>
-                        <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 block leading-tight">
+                        <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100 block leading-tight">
                           {item.name}
                         </span>
-                        <span className="text-[11px] text-[#616161] dark:text-zinc-400 block mt-0.5">
+                        <span className="text-[10.5px] text-[#616161] dark:text-zinc-400 block mt-0.5">
                           {item.category}
                         </span>
                       </div>
@@ -543,26 +544,17 @@ export function GiftCardForm({
                 })}
               </div>
 
-              <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                <label
-                  htmlFor="title"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Reward Offer Title <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
+              <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <PolarisInput
                   id="title"
                   name="title"
+                  label="Reward Offer Title"
+                  required
                   value={formik.values.title}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] font-semibold bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
+                  error={formik.touched.title && formik.errors.title ? formik.errors.title : undefined}
                 />
-                {formik.touched.title && formik.errors.title && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.title}
-                  </p>
-                )}
               </div>
             </div>
           </PolarisFormCard>
@@ -574,13 +566,11 @@ export function GiftCardForm({
             description="Select card value. Service fee and net wallet deduction are calculated automatically."
             badge="Step 2"
           >
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {/* Denomination Buttons */}
-              <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                  Available Denominations
-                </label>
-                <div className="flex flex-wrap gap-2">
+              <div className="space-y-1">
+                <PolarisLabel>Available Denominations</PolarisLabel>
+                <div className="flex flex-wrap gap-1.5">
                   {selectedBrandObj.denominations.map((denom) => {
                     const isSelected = formik.values.denomination === denom;
                     return (
@@ -589,7 +579,7 @@ export function GiftCardForm({
                         type="button"
                         onClick={() => handleDenominationSelect(denom)}
                         className={cn(
-                          "h-[36px] px-3.5 rounded-[6px] border text-[13px] font-mono font-semibold transition-all cursor-pointer",
+                          "h-[28px] px-2.5 rounded-[4px] border text-[11.5px] font-mono font-semibold transition-all cursor-pointer",
                           isSelected
                             ? "border-[#303030] bg-[#303030] text-white shadow-2xs dark:bg-zinc-100 dark:text-zinc-900"
                             : "border-[#aeb4b9] bg-white dark:bg-zinc-900 hover:border-[#8c9196] text-[#303030] dark:text-zinc-100",
@@ -603,40 +593,41 @@ export function GiftCardForm({
               </div>
 
               {/* Financial Ledger Receipt Box */}
-              <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/40 space-y-2">
-                <div className="flex items-center justify-between text-[12.5px] text-[#616161] dark:text-zinc-400">
+              <div className="p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/40 space-y-1.5">
+                <div className="flex items-center justify-between text-[11.5px] text-[#616161] dark:text-zinc-400">
                   <span>Gift Card Face Value:</span>
                   <span className="font-mono font-semibold text-[#303030] dark:text-zinc-100">
                     ₹{formik.values.denomination}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[12.5px] text-[#616161] dark:text-zinc-400">
+                <div className="flex items-center justify-between text-[11.5px] text-[#616161] dark:text-zinc-400">
                   <span>Digital Provider & Service Fee (5%):</span>
                   <span className="font-mono font-semibold text-[#303030] dark:text-zinc-100">
                     + ₹{formik.values.serviceFee}
                   </span>
                 </div>
-                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-between text-[13px]">
+                <div className="pt-1.5 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-between text-[12px]">
                   <span className="font-semibold text-[#303030] dark:text-zinc-100">
                     Total Deducted per Winning Member:
                   </span>
-                  <span className="font-mono text-[14px] font-bold text-[#303030] dark:text-zinc-100">
+                  <span className="font-mono text-[13px] font-bold text-[#303030] dark:text-zinc-100">
                     ₹{totalCost}
                   </span>
                 </div>
               </div>
 
               {/* Validity in Months */}
-              <div className="space-y-1.5">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                  Validity (Months) <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  type="number"
+              <div className="w-28">
+                <PolarisInput
+                  id="validityMonths"
                   name="validityMonths"
+                  type="number"
+                  min={1}
+                  label="Validity (Months)"
+                  required
                   value={formik.values.validityMonths}
                   onChange={formik.handleChange}
-                  className="h-[40px] text-[14px] font-mono bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] w-32"
+                  onBlur={formik.handleBlur}
                 />
               </div>
             </div>
@@ -649,13 +640,13 @@ export function GiftCardForm({
             description="Assign this gift card to engagement games (Spin the Wheel, Scratch Card, Match Win)."
             badge="Step 3"
           >
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40">
+            <div className="space-y-3.5">
+              <div className="flex items-center justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40">
                 <div className="space-y-0.5">
-                  <span className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
+                  <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 block">
                     Active in Minigames
                   </span>
-                  <span className="text-[12px] text-[#616161] dark:text-zinc-400 block">
+                  <span className="text-[11.5px] text-[#616161] dark:text-zinc-400 block">
                     Enables this reward to appear as a winning slice or scratch unlock.
                   </span>
                 </div>
