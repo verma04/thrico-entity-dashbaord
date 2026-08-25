@@ -8,30 +8,11 @@ import {
   Zap,
   Trophy,
   Check,
-  ChevronsUpDown,
   MessageSquare,
   Flame,
   ShieldCheck,
   TrendingUp,
 } from "lucide-react";
-import {
-  PolarisInput,
-  PolarisTextarea,
-  PolarisLabel,
-} from "@/components/ui/platform/polaris-primitives";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import {
@@ -43,6 +24,10 @@ import {
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisCombobox,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { cn } from "@/lib/utils";
 
@@ -131,8 +116,6 @@ export function ImpactRuleForm({
   const [sourceType, setSourceType] = useState<"MODULE" | "INTEGRATION">(
     "MODULE",
   );
-  const [moduleOpen, setModuleOpen] = useState(false);
-  const [actionOpen, setActionOpen] = useState(false);
 
   useEffect(() => {
     if (initialValues?.module) {
@@ -407,7 +390,7 @@ export function ImpactRuleForm({
         </>
       }
     >
-      <form onSubmit={formik.handleSubmit} className="space-y-4">
+      <form onSubmit={formik.handleSubmit} className="space-y-3.5">
         {/* Step 1: Origin & Action Definition */}
         <PolarisFormCard
           step={1}
@@ -415,7 +398,7 @@ export function ImpactRuleForm({
           description="Identify the community module or integration channel that triggers this impact change."
           badge="Trigger"
         >
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {/* Origin Picker */}
             <PolarisOriginPicker
               sourceType={sourceType}
@@ -429,190 +412,48 @@ export function ImpactRuleForm({
             />
 
             {/* Source & Action Comboboxes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Searchable Module Combobox */}
-              <div className="space-y-1.5">
-                <PolarisLabel required>
-                  {sourceType === "MODULE"
-                    ? "Target Module"
-                    : "Connected Integration"}
-                </PolarisLabel>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <PolarisCombobox
+                id="module"
+                label={sourceType === "MODULE" ? "Target Module" : "Connected Integration"}
+                required
+                placeholder={sourceType === "MODULE" ? "Select target module..." : "Select connected app..."}
+                searchPlaceholder={sourceType === "MODULE" ? "Search modules..." : "Search apps..."}
+                options={currentSourceList.map((item) => ({
+                  value: item.id || item.uuid || (item as any).slug,
+                  label: item.name,
+                }))}
+                value={formik.values.module}
+                onChange={(val) => {
+                  formik.setFieldValue("module", val);
+                  formik.setFieldValue("action", "");
+                }}
+                error={formik.touched.module && formik.errors.module ? (formik.errors.module as string) : undefined}
+              />
 
-                <Popover open={moduleOpen} onOpenChange={setModuleOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      role="combobox"
-                      aria-expanded={moduleOpen}
-                      className={cn(
-                        "w-full h-[40px] px-3 flex items-center justify-between rounded-[8px] border text-[14px] bg-white dark:bg-zinc-900 transition-colors shadow-none text-left cursor-pointer",
-                        formik.touched.module && formik.errors.module
-                          ? "border-[#d72c0d] focus:ring-[#d72c0d]"
-                          : "border-[#aeb4b9] dark:border-zinc-700 hover:border-[#8c9196]",
-                        !formik.values.module && "text-[#616161]",
-                      )}
-                    >
-                      <span className="truncate">
-                        {formik.values.module
-                          ? currentSourceList.find(
-                              (m) => (m.id || m.uuid) === formik.values.module,
-                            )?.name || formik.values.module
-                          : sourceType === "MODULE"
-                            ? "Select target module..."
-                            : "Select connected app..."}
-                      </span>
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-[#616161]" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-700"
-                    align="start"
-                  >
-                    <Command className="rounded-[8px]">
-                      <CommandInput
-                        placeholder={
-                          sourceType === "MODULE"
-                            ? "Search modules..."
-                            : "Search apps..."
-                        }
-                        className="h-10 text-[13px]"
-                      />
-                      <CommandList className="max-h-[220px]">
-                        <CommandEmpty className="py-3 text-center text-[12.5px] text-[#616161]">
-                          No options found.
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {currentSourceList.map((item) => {
-                            const val = item.id || item.uuid;
-                            const isSelected = formik.values.module === val;
-                            return (
-                              <CommandItem
-                                key={val}
-                                value={`${item.name} ${val}`}
-                                onSelect={() => {
-                                  formik.setFieldValue("module", val);
-                                  formik.setFieldValue("action", "");
-                                  setModuleOpen(false);
-                                }}
-                                className="flex items-center justify-between text-[13px] py-2 cursor-pointer"
-                              >
-                                <span className="truncate font-medium">
-                                  {item.name}
-                                </span>
-                                {isSelected && (
-                                  <Check className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
-                                )}
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-
-                {formik.touched.module && formik.errors.module && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.module as string}
-                  </p>
-                )}
-              </div>
-
-              {/* Searchable Action Combobox */}
-              <div className="space-y-1.5">
-                <PolarisLabel required>Triggering Action</PolarisLabel>
-
-                <Popover open={actionOpen} onOpenChange={setActionOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      role="combobox"
-                      aria-expanded={actionOpen}
-                      disabled={!formik.values.module}
-                      className={cn(
-                        "w-full h-[40px] px-3 flex items-center justify-between rounded-[8px] border text-[14px] bg-white dark:bg-zinc-900 transition-colors shadow-none text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
-                        formik.touched.action && formik.errors.action
-                          ? "border-[#d72c0d] focus:ring-[#d72c0d]"
-                          : "border-[#aeb4b9] dark:border-zinc-700 hover:border-[#8c9196]",
-                        !formik.values.action && "text-[#616161]",
-                      )}
-                    >
-                      <span className="truncate">
-                        {formik.values.action
-                          ? filteredTriggers.find(
-                              (t) => (t.id || t.name) === formik.values.action,
-                            )?.description ||
-                            filteredTriggers.find(
-                              (t) => (t.id || t.name) === formik.values.action,
-                            )?.name ||
-                            formik.values.action
-                          : formik.values.module
-                            ? "Select trigger action..."
-                            : "Select module first"}
-                      </span>
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-[#616161]" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-[var(--radix-popover-trigger-width)] p-0 shadow-md border-[#d2d5d9] dark:border-zinc-700"
-                    align="start"
-                  >
-                    <Command className="rounded-[8px]">
-                      <CommandInput
-                        placeholder="Search trigger event..."
-                        className="h-10 text-[13px]"
-                      />
-                      <CommandList className="max-h-[220px]">
-                        <CommandEmpty className="py-3 text-center text-[12.5px] text-[#616161]">
-                          No triggers found.
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {filteredTriggers.map((t) => {
-                            const val = t.id || t.name;
-                            const isSelected = formik.values.action === val;
-                            const label = t.description || t.name || t.id;
-                            return (
-                              <CommandItem
-                                key={val}
-                                value={`${label} ${val}`}
-                                onSelect={() => {
-                                  formik.setFieldValue("action", val);
-                                  setActionOpen(false);
-                                }}
-                                className="flex items-center justify-between text-[13px] py-2 cursor-pointer"
-                              >
-                                <div className="flex items-center gap-2 truncate">
-                                  <Zap className="h-3.5 w-3.5 text-[#616161] shrink-0" />
-                                  <span className="truncate font-medium">
-                                    {label}
-                                  </span>
-                                </div>
-                                {isSelected && (
-                                  <Check className="h-4 w-4 text-[#303030] dark:text-zinc-100 shrink-0" />
-                                )}
-                              </CommandItem>
-                            );
-                          })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-
-                {formik.touched.action && formik.errors.action && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.action as string}
-                  </p>
-                )}
-              </div>
+              <PolarisCombobox
+                id="action"
+                label="Triggering Action"
+                required
+                placeholder={formik.values.module ? "Select trigger action..." : "Select module first"}
+                searchPlaceholder="Search trigger event..."
+                disabled={!formik.values.module}
+                options={filteredTriggers.map((t) => ({
+                  value: t.id || t.name,
+                  label: t.name ? t.name.replace(/_/g, " ") : (t.description || t.id),
+                  badge: t.type || undefined,
+                }))}
+                value={formik.values.action}
+                onChange={(val) => formik.setFieldValue("action", val)}
+                error={formik.touched.action && formik.errors.action ? (formik.errors.action as string) : undefined}
+              />
             </div>
 
             {/* Impact Category Selector */}
             <div className="space-y-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
               <PolarisLabel>Impact Category Classification</PolarisLabel>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
                 {CATEGORIES.map((cat) => {
-                  const Icon = cat.icon;
                   const isSelected = formik.values.category === cat.id;
                   return (
                     <button
@@ -620,7 +461,7 @@ export function ImpactRuleForm({
                       type="button"
                       onClick={() => formik.setFieldValue("category", cat.id)}
                       className={cn(
-                        "flex flex-col text-left p-3 rounded-[8px] border transition-all cursor-pointer",
+                        "flex flex-col text-left p-2.5 rounded-[6px] border transition-all cursor-pointer",
                         isSelected
                           ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
                           : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
@@ -629,17 +470,17 @@ export function ImpactRuleForm({
                       <div className="flex items-center justify-between w-full mb-1">
                         <div className="flex items-center gap-1.5">
                           <span
-                            className={cn("h-2 w-2 rounded-full", cat.dotClass)}
+                            className={cn("h-1.5 w-1.5 rounded-full", cat.dotClass)}
                           />
-                          <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                          <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
                             {cat.label}
                           </span>
                         </div>
                         {isSelected && (
-                          <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                          <Check className="h-3 w-3 text-[#303030] dark:text-zinc-100" />
                         )}
                       </div>
-                      <span className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                      <span className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[14px]">
                         {cat.desc}
                       </span>
                     </button>
@@ -670,16 +511,16 @@ export function ImpactRuleForm({
           description="Define the impact points awarded or deducted per action execution."
           badge="Scoring Matrix"
         >
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {/* Point Input */}
-            <div className="space-y-1.5 max-w-xs">
+            <div className="max-w-xs">
               <PolarisInput
                 id="points"
                 name="points"
                 type="number"
                 label="Impact Score Delta per Action"
                 required
-                prefix={<Zap className="h-4 w-4" />}
+                prefix={<Zap className="h-3.5 w-3.5" />}
                 value={formik.values.points}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -693,9 +534,9 @@ export function ImpactRuleForm({
 
             {/* Quick Presets */}
             <div className="space-y-1.5">
-              <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+              <span className="text-[11.5px] font-medium text-[#616161] dark:text-zinc-400">
                 Quick Point Presets
-              </label>
+              </span>
               <PolarisPresetChips
                 presets={POINT_PRESETS}
                 currentValue={Number(formik.values.points)}
@@ -727,7 +568,7 @@ export function ImpactRuleForm({
           description="Limit repetitive reward farming by capping the daily executions per member."
           badge="Protection"
         >
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             <div className="max-w-xs">
               <PolarisInput
                 id="dailyLimit"
@@ -738,7 +579,7 @@ export function ImpactRuleForm({
                   <button
                     type="button"
                     onClick={() => formik.setFieldValue("dailyLimit", 0)}
-                    className="text-[12px] font-semibold text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 cursor-pointer"
+                    className="text-[11.5px] font-semibold text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 cursor-pointer"
                   >
                     Unlimited (0)
                   </button>
