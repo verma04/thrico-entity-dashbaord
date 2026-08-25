@@ -14,9 +14,6 @@ import {
   FileSpreadsheet,
   Check,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
@@ -26,6 +23,9 @@ import {
   PolarisSidebarCard,
   PolarisTipCard,
   PolarisSummaryRow,
+  PolarisInput,
+  PolarisTextarea,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
@@ -338,7 +338,7 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
           </>
         }
       >
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-3.5">
           {/* Card 1: Core Reward Identification */}
           <PolarisFormCard
             step={1}
@@ -346,59 +346,34 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
             description="Basic information displayed on reward cards and redemption modals."
             badge="Required"
           >
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="title"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Reward Title <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="e.g., VIP Summer Community Pass, 500 Discount Voucher"
-                  value={formik.values.title}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
-                />
-                {formik.touched.title && formik.errors.title && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.title as string}
-                  </p>
-                )}
-              </div>
+            <div className="space-y-3.5">
+              <PolarisInput
+                id="title"
+                name="title"
+                label="Reward Title"
+                required
+                placeholder="e.g., VIP Summer Community Pass, 500 Discount Voucher"
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.title && formik.errors.title ? (formik.errors.title as string) : undefined}
+              />
 
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="description"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Reward Description <span className="text-[#d72c0d] ml-0.5">*</span>
-                </label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Explain what the member gets, terms of use, and redemption details..."
-                  rows={3}
-                  value={formik.values.description}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  className="min-h-[80px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] resize-none"
-                />
-                {formik.touched.description && formik.errors.description && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.description as string}
-                  </p>
-                )}
-              </div>
+              <PolarisTextarea
+                id="description"
+                name="description"
+                label="Reward Description"
+                required
+                placeholder="Explain what the member gets, terms of use, and redemption details..."
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.description && formik.errors.description ? (formik.errors.description as string) : undefined}
+              />
 
               {/* Cover Image Upload */}
               <div className="space-y-1.5 pt-1">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                  Cover Artwork / Badge Image
-                </label>
+                <PolarisLabel>Cover Artwork / Badge Image</PolarisLabel>
                 <ImageUploadWithCrop
                   currentImage={formik.values.image}
                   onImageUpdate={(cdnUrl: string) =>
@@ -409,31 +384,19 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
               </div>
 
               {/* Redemption / Claim URL */}
-              <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                <label
-                  htmlFor="url"
-                  className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                >
-                  Redemption / Claim URL (Optional)
-                </label>
-                <Input
+              <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <PolarisInput
                   id="url"
                   name="url"
                   type="url"
+                  label="Redemption / Claim URL (Optional)"
                   placeholder="e.g., https://yourbrand.com/redeem or app deep-link"
                   value={formik.values.url}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
+                  error={formik.touched.url && formik.errors.url ? (formik.errors.url as string) : undefined}
+                  helperText="External link where winners can directly apply or claim their voucher code."
                 />
-                {formik.touched.url && formik.errors.url && (
-                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                    {formik.errors.url as string}
-                  </p>
-                )}
-                <p className="text-[12px] text-[#616161] dark:text-zinc-400">
-                  External link where winners can directly apply or claim their voucher code.
-                </p>
               </div>
             </div>
           </PolarisFormCard>
@@ -445,9 +408,9 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
             description="Select how codes are generated, validated, and distributed to members."
             badge="Pillar 1"
           >
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {/* Architecture Selector */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div
                   onClick={() =>
                     formik.setFieldValue(
@@ -456,26 +419,26 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                     )
                   }
                   className={cn(
-                    "p-3.5 rounded-[8px] border transition-all cursor-pointer space-y-1.5",
+                    "p-3 rounded-[6px] border transition-all cursor-pointer space-y-1",
                     isOneToOne
                       ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
                       : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-[4px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
-                        <Ticket className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-5 w-5 rounded-[4px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center">
+                        <Ticket className="h-3 w-3" />
                       </div>
-                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                      <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
                         ONE_TO_ONE (Unique Pool)
                       </span>
                     </div>
                     {isOneToOne && (
-                      <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                      <Check className="h-3 w-3 text-[#303030] dark:text-zinc-100" />
                     )}
                   </div>
-                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[14px]">
                     Each winner receives an exclusive, single-use credential
                     from a pre-allocated pool.
                   </p>
@@ -489,26 +452,26 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                     )
                   }
                   className={cn(
-                    "p-3.5 rounded-[8px] border transition-all cursor-pointer space-y-1.5",
+                    "p-3 rounded-[6px] border transition-all cursor-pointer space-y-1",
                     !isOneToOne
                       ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
                       : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-[4px] bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
-                        <Users className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-5 w-5 rounded-[4px] bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center">
+                        <Users className="h-3 w-3" />
                       </div>
-                      <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                      <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
                         ONE_TO_MANY (Shared Code)
                       </span>
                     </div>
                     {!isOneToOne && (
-                      <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                      <Check className="h-3 w-3 text-[#303030] dark:text-zinc-100" />
                     )}
                   </div>
-                  <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[14px]">
                     Single promotional string usable across multiple members
                     with global usage limits.
                   </p>
@@ -516,78 +479,62 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
               </div>
 
               {/* Validity Days */}
-              <div className="space-y-1.5 pt-1">
-                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                  Validity Duration (Days)
-                </label>
-                <Input
+              <div className="max-w-xs pt-1">
+                <PolarisInput
+                  id="validityDays"
+                  name="validityDays"
                   type="number"
                   min={1}
-                  name="validityDays"
+                  label="Validity Duration (Days)"
                   value={formik.values.validityDays}
                   onChange={formik.handleChange}
-                  className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px] max-w-xs"
+                  onBlur={formik.handleBlur}
                 />
               </div>
 
               {/* Conditional Config based on type */}
               {isOneToOne ? (
-                <div className="p-3.5 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-3">
+                <div className="p-3 rounded-[6px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 flex items-center gap-1.5">
+                    <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100 flex items-center gap-1.5">
                       <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
                       Batch Auto-Generation Config
                     </span>
-                    <span className="text-[11.5px] text-[#616161]">
+                    <span className="text-[11px] text-[#616161]">
                       Will create initial voucher batch
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
-                        Code Prefix
-                      </label>
-                      <Input
-                        placeholder={defaultEntityPrefix}
-                        name="prefix"
-                        value={formik.values.prefix}
-                        onChange={(e) => {
-                          setHasUserEditedPrefix(true);
-                          formik.setFieldValue(
-                            "prefix",
-                            e.target.value.toUpperCase(),
-                          );
-                        }}
-                        onBlur={formik.handleBlur}
-                        className="h-[36px] text-[13px] font-mono font-semibold uppercase bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px]"
-                      />
-                      {formik.touched.prefix && formik.errors.prefix && (
-                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                          {formik.errors.prefix as string}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
-                        Initial Batch Quantity (2 - 100 Codes)
-                      </label>
-                      <Input
-                        type="number"
-                        min={2}
-                        max={100}
-                        name="count"
-                        value={formik.values.count}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        className="h-[36px] text-[13px] font-semibold bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px]"
-                      />
-                      {formik.touched.count && formik.errors.count && (
-                        <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                          {formik.errors.count as string}
-                        </p>
-                      )}
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <PolarisInput
+                      id="prefix"
+                      name="prefix"
+                      label="Code Prefix"
+                      placeholder={defaultEntityPrefix}
+                      value={formik.values.prefix}
+                      onChange={(e) => {
+                        setHasUserEditedPrefix(true);
+                        formik.setFieldValue(
+                          "prefix",
+                          e.target.value.toUpperCase(),
+                        );
+                      }}
+                      onBlur={formik.handleBlur}
+                      error={formik.touched.prefix && formik.errors.prefix ? (formik.errors.prefix as string) : undefined}
+                    />
+
+                    <PolarisInput
+                      id="count"
+                      name="count"
+                      type="number"
+                      min={2}
+                      max={100}
+                      label="Initial Batch Quantity (2 - 100 Codes)"
+                      value={formik.values.count}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      error={formik.touched.count && formik.errors.count ? (formik.errors.count as string) : undefined}
+                    />
                   </div>
 
                   <div className="flex items-center justify-between pt-1">
@@ -596,26 +543,26 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={handleGeneratePreviewCodes}
-                      className="h-[32px] text-[12px] font-semibold gap-1.5 rounded-[6px] border-[#aeb4b9]"
+                      className="h-[28px] text-[11.5px] font-semibold gap-1.5 rounded-[4px] border-[#aeb4b9]"
                     >
-                      <Zap className="h-3.5 w-3.5 text-amber-500" />
+                      <Zap className="h-3 w-3 text-amber-500" />
                       Preview Sample Series
                     </Button>
-                    <span className="text-[11.5px] text-[#616161] font-mono">
+                    <span className="text-[11px] text-[#616161] font-mono">
                       Format: {formik.values.prefix || "VCH"}-XXXXX
                     </span>
                   </div>
 
                   {generatedSampleCodes.length > 0 && (
-                    <div className="p-2.5 rounded-[6px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-700 space-y-1.5">
-                      <span className="text-[10.5px] font-semibold text-[#616161] uppercase tracking-wider block">
+                    <div className="p-2 rounded-[4px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-700 space-y-1">
+                      <span className="text-[10px] font-semibold text-[#616161] uppercase tracking-wider block">
                         Sample Output Series
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {generatedSampleCodes.map((code, idx) => (
                           <span
                             key={idx}
-                            className="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] text-[#303030] dark:text-zinc-100"
+                            className="font-mono text-[10.5px] font-semibold px-1.5 py-0.2 rounded-[3px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] text-[#303030] dark:text-zinc-100"
                           >
                             {code}
                           </span>
@@ -625,48 +572,35 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   )}
                 </div>
               ) : (
-                <div className="p-3.5 rounded-[8px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-3">
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="couponCode"
-                      className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none"
-                    >
-                      Promotional Code String{" "}
-                      <span className="text-[#d72c0d] ml-0.5">*</span>
-                    </label>
-                    <Input
-                      id="couponCode"
-                      name="couponCode"
-                      placeholder="e.g. WELCOME2026, SUMMER50, VIPMEMBER"
-                      value={formik.values.couponCode}
-                      onChange={(e) =>
-                        formik.setFieldValue(
-                          "couponCode",
-                          e.target.value.toUpperCase(),
-                        )
-                      }
-                      onBlur={formik.handleBlur}
-                      className="h-[40px] text-[14px] font-mono font-bold uppercase tracking-wider bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[8px]"
-                    />
-                    {formik.touched.couponCode && formik.errors.couponCode && (
-                      <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                        {formik.errors.couponCode as string}
-                      </p>
-                    )}
-                  </div>
+                <div className="p-3 rounded-[6px] bg-[#f6f6f7]/60 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700 space-y-2.5">
+                  <PolarisInput
+                    id="couponCode"
+                    name="couponCode"
+                    label="Promotional Code String"
+                    required
+                    placeholder="e.g. WELCOME2026, SUMMER50, VIPMEMBER"
+                    value={formik.values.couponCode}
+                    onChange={(e) =>
+                      formik.setFieldValue(
+                        "couponCode",
+                        e.target.value.toUpperCase(),
+                      )
+                    }
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.couponCode && formik.errors.couponCode ? (formik.errors.couponCode as string) : undefined}
+                  />
 
-                  <div className="space-y-1">
-                    <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
-                      Global Usage Limit
-                    </label>
-                    <Input
+                  <div className="max-w-xs">
+                    <PolarisInput
+                      id="totalUsageLimit"
+                      name="totalUsageLimit"
                       type="number"
                       min={0}
+                      label="Global Usage Limit"
                       placeholder="0 for unlimited"
-                      name="totalUsageLimit"
                       value={formik.values.totalUsageLimit}
                       onChange={formik.handleChange}
-                      className="h-[36px] text-[13px] font-medium bg-white dark:bg-zinc-900 border-[#aeb4b9] rounded-[6px] max-w-xs"
+                      onBlur={formik.handleBlur}
                     />
                   </div>
                 </div>
