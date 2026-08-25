@@ -19,9 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -35,6 +33,8 @@ import {
   PolarisTipCard,
   PolarisInfoBanner,
   PolarisPresetChips,
+  PolarisInput,
+  PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
 import {
   Gauge,
@@ -478,18 +478,18 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
           </>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           {/* Quick Preset Archetypes */}
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 flex items-center gap-1.5 select-none">
-                <Zap className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-[12.5px] font-medium text-[#303030] dark:text-zinc-200 flex items-center gap-1.5 select-none">
+                <Zap className="h-3 w-3 text-amber-500" />
                 Quick Preset Archetypes
-              </label>
-              <span className="text-[12px] text-[#616161]">Click to autofill values</span>
+              </span>
+              <span className="text-[11.5px] text-[#616161]">Click to autofill values</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
               {TEMPLATE_ARCHETYPES.map((archetype) => {
                 const Icon = archetype.icon;
                 return (
@@ -497,23 +497,23 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                     key={archetype.id}
                     type="button"
                     onClick={() => handleApplyArchetype(archetype.values)}
-                    className="flex flex-col text-left p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9] hover:shadow-xs transition-all cursor-pointer group"
+                    className="flex flex-col text-left p-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9] hover:shadow-xs transition-all cursor-pointer group"
                   >
-                    <div className="flex items-center justify-between w-full mb-2">
-                      <div className="h-7 w-7 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center group-hover:bg-[#303030] group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-900 transition-colors">
-                        <Icon className="h-3.5 w-3.5" />
+                    <div className="flex items-center justify-between w-full mb-1.5">
+                      <div className="h-6 w-6 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center group-hover:bg-[#303030] group-hover:text-white dark:group-hover:bg-zinc-100 dark:group-hover:text-zinc-900 transition-colors">
+                        <Icon className="h-3 w-3" />
                       </div>
                       <Badge
                         variant="outline"
-                        className="text-[10px] font-semibold border-[#d2d5d9] dark:border-zinc-700 text-[#616161] px-1.5 py-0.5 rounded-[4px]"
+                        className="text-[9.5px] font-semibold border-[#d2d5d9] dark:border-zinc-700 text-[#616161] px-1.5 py-0.2 rounded-[3px]"
                       >
                         {archetype.badge}
                       </Badge>
                     </div>
-                    <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                    <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
                       {archetype.title}
                     </span>
-                    <span className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+                    <span className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[15px]">
                       {archetype.desc}
                     </span>
                   </button>
@@ -523,7 +523,7 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3.5">
               {/* Step 1: Score Boundaries & Baseline */}
               <PolarisFormCard
                 step={1}
@@ -531,85 +531,64 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                 description="Define the numeric boundaries and initial score granted to community members."
                 badge="Core Range"
               >
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {/* Template Name */}
                   <FormField
                     control={form.control}
                     name="name"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                          Template Name <span className="text-[#d72c0d] ml-0.5">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. Standard Community Ruleset"
-                            {...field}
-                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-medium text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
-                          />
-                        </FormControl>
-                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
-                          An administrative name identifying this impact scoring model.
-                        </FormDescription>
-                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
-                      </FormItem>
+                    render={({ field, fieldState }) => (
+                      <PolarisInput
+                        id="name"
+                        label="Template Name"
+                        required
+                        placeholder="e.g. Standard Community Ruleset"
+                        {...field}
+                        error={fieldState.error?.message}
+                        helperText="An administrative name identifying this impact scoring model."
+                      />
                     )}
                   />
 
                   {/* Score Range Min / Max */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <FormField
                       control={form.control}
                       name="minScore"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1.5">
-                          <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                            Minimum Score Baseline <span className="text-[#d72c0d] ml-0.5">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
-                            />
-                          </FormControl>
-                          <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
-                            Lowest score a member can reach through decay (typically 0).
-                          </FormDescription>
-                          <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
-                        </FormItem>
+                      render={({ field, fieldState }) => (
+                        <PolarisInput
+                          id="minScore"
+                          type="number"
+                          label="Minimum Score Baseline"
+                          required
+                          {...field}
+                          error={fieldState.error?.message}
+                          helperText="Lowest score a member can reach through decay (typically 0)."
+                        />
                       )}
                     />
 
                     <FormField
                       control={form.control}
                       name="maxScore"
-                      render={({ field }) => (
-                        <FormItem className="space-y-1.5">
-                          <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                            Maximum Score Ceiling <span className="text-[#d72c0d] ml-0.5">*</span>
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              {...field}
-                              className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
-                            />
-                          </FormControl>
-                          <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
-                            Cap for top-tier community members.
-                          </FormDescription>
-                          <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
-                        </FormItem>
+                      render={({ field, fieldState }) => (
+                        <PolarisInput
+                          id="maxScore"
+                          type="number"
+                          label="Maximum Score Ceiling"
+                          required
+                          {...field}
+                          error={fieldState.error?.message}
+                          helperText="Cap for top-tier community members."
+                        />
                       )}
                     />
                   </div>
 
                   {/* Max Score Presets */}
                   <div className="space-y-1.5">
-                    <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                    <span className="text-[11.5px] font-medium text-[#616161] dark:text-zinc-400">
                       Quick Max Score Presets
-                    </label>
+                    </span>
                     <PolarisPresetChips
                       presets={MAX_SCORE_PRESETS}
                       currentValue={Number(maxScore)}
@@ -627,36 +606,31 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                   <FormField
                     control={form.control}
                     name="defaultScore"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                          Default Starting Score for New Members <span className="text-[#d72c0d] ml-0.5">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
-                          />
-                        </FormControl>
-                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
-                          Initial starting score assigned immediately upon registration or onboarding.
-                        </FormDescription>
-                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
-                      </FormItem>
+                    render={({ field, fieldState }) => (
+                      <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                        <PolarisInput
+                          id="defaultScore"
+                          type="number"
+                          label="Default Starting Score for New Members"
+                          required
+                          {...field}
+                          error={fieldState.error?.message}
+                          helperText="Initial starting score assigned immediately upon registration or onboarding."
+                        />
+                      </div>
                     )}
                   />
 
                   {/* Visual Range Indicator Bar */}
-                  <div className="p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/40 space-y-1.5">
-                    <div className="flex items-center justify-between text-[12px] font-medium text-[#616161] dark:text-zinc-300">
+                  <div className="p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/40 space-y-1.5">
+                    <div className="flex items-center justify-between text-[11.5px] font-medium text-[#616161] dark:text-zinc-300">
                       <span>Baseline: {minScore} pts</span>
                       <span className="text-[#303030] dark:text-zinc-100 font-semibold">
                         Starting: {defaultScore} pts ({Math.round(defaultScorePercentage)}%)
                       </span>
                       <span>Ceiling: {maxScore} pts</span>
                     </div>
-                    <div className="relative h-2 w-full bg-[#d2d5d9] dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="relative h-1.5 w-full bg-[#d2d5d9] dark:bg-zinc-800 rounded-full overflow-hidden">
                       <div
                         className="absolute top-0 bottom-0 left-0 bg-[#303030] dark:bg-zinc-100 rounded-full transition-all duration-300"
                         style={{ width: `${defaultScorePercentage}%` }}
@@ -673,17 +647,17 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                 description="Determine how often impact scores are re-evaluated and the inactivity grace window."
                 badge="Scheduling"
               >
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {/* Refresh Frequency Cards */}
                   <FormField
                     control={form.control}
                     name="refreshFrequency"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
+                      <FormItem className="space-y-1.5">
+                        <PolarisLabel required>
                           Recalculation Frequency
-                        </FormLabel>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        </PolarisLabel>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                           {REFRESH_OPTIONS.map((opt) => {
                             const Icon = opt.icon;
                             const isSelected = field.value === opt.value;
@@ -693,31 +667,31 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                                 type="button"
                                 onClick={() => field.onChange(opt.value)}
                                 className={cn(
-                                  "flex flex-col text-left p-3.5 rounded-[8px] border transition-all cursor-pointer",
+                                  "flex flex-col text-left p-2.5 rounded-[6px] border transition-all cursor-pointer",
                                   isSelected
                                     ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 shadow-xs ring-1 ring-[#303030] dark:ring-zinc-100"
                                     : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                                 )}
                               >
-                                <div className="flex items-center justify-between w-full mb-2">
+                                <div className="flex items-center justify-between w-full mb-1.5">
                                   <div
                                     className={cn(
-                                      "h-7 w-7 rounded-[6px] flex items-center justify-center transition-colors",
+                                      "h-6 w-6 rounded-[4px] flex items-center justify-center transition-colors",
                                       isSelected
                                         ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900"
                                         : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-300",
                                     )}
                                   >
-                                    <Icon className="h-3.5 w-3.5" />
+                                    <Icon className="h-3 w-3" />
                                   </div>
                                   {isSelected && (
-                                    <CheckCircle2 className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
                                   )}
                                 </div>
-                                <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                                <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
                                   {opt.title}
                                 </span>
-                                <span className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[16px]">
+                                <span className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[15px]">
                                   {opt.desc}
                                 </span>
                               </button>
@@ -733,31 +707,26 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                   <FormField
                     control={form.control}
                     name="activityWindowDays"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                          Inactivity Grace Period (Days) <span className="text-[#d72c0d] ml-0.5">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] shadow-none"
-                          />
-                        </FormControl>
-                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
-                          Number of consecutive days without eligible actions before score decay starts applying.
-                        </FormDescription>
-                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
-                      </FormItem>
+                    render={({ field, fieldState }) => (
+                      <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                        <PolarisInput
+                          id="activityWindowDays"
+                          type="number"
+                          label="Inactivity Grace Period (Days)"
+                          required
+                          {...field}
+                          error={fieldState.error?.message}
+                          helperText="Number of consecutive days without eligible actions before score decay starts applying."
+                        />
+                      </div>
                     )}
                   />
 
                   {/* Activity Window Presets */}
                   <div className="space-y-1.5">
-                    <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                    <span className="text-[11.5px] font-medium text-[#616161] dark:text-zinc-400">
                       Quick Grace Period Presets
-                    </label>
+                    </span>
                     <PolarisPresetChips
                       presets={WINDOW_PRESETS}
                       currentValue={Number(activityWindowDays)}
@@ -785,21 +754,21 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                 description="Configure automated deductions for members who remain inactive past their grace period."
                 badge="Retention Engine"
               >
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {/* Decay Switch */}
                   <FormField
                     control={form.control}
                     name="decayEnabled"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 p-4 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
+                      <FormItem className="flex flex-row items-center justify-between rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 p-3.5 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <TrendingDown className="h-4 w-4 text-[#303030] dark:text-zinc-100" />
-                            <FormLabel className="text-[13.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer">
+                            <TrendingDown className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
+                            <FormLabel className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer">
                               Enable Automated Score Decay
                             </FormLabel>
                           </div>
-                          <FormDescription className="text-[12px] text-[#616161] dark:text-zinc-400">
+                          <FormDescription className="text-[11.5px] text-[#616161] dark:text-zinc-400">
                             Automatically deduct penalty points every {refreshFrequency.toLowerCase()} cycle when inactive.
                           </FormDescription>
                         </div>
@@ -817,33 +786,26 @@ export function TemplateForm({ showHeader = false }: TemplateFormProps) {
                   <FormField
                     control={form.control}
                     name="decayPenalty"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1.5">
-                        <FormLabel className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none">
-                          Decay Penalty Deduction (Points per Cycle) <span className="text-[#d72c0d] ml-0.5">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            disabled={!decayEnabled}
-                            className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] font-semibold text-[#303030] dark:text-zinc-100 rounded-[8px] disabled:opacity-50"
-                          />
-                        </FormControl>
-                        <FormDescription className="text-[12px] text-[#616161] leading-[16px]">
-                          Points subtracted each {refreshFrequency.toLowerCase()} interval once past the {activityWindowDays}-day inactivity window.
-                        </FormDescription>
-                        <FormMessage className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]" />
-                      </FormItem>
+                    render={({ field, fieldState }) => (
+                      <PolarisInput
+                        id="decayPenalty"
+                        type="number"
+                        label="Decay Penalty Deduction (Points per Cycle)"
+                        required
+                        disabled={!decayEnabled}
+                        {...field}
+                        error={fieldState.error?.message}
+                        helperText={`Points subtracted each ${refreshFrequency.toLowerCase()} interval once past the ${activityWindowDays}-day inactivity window.`}
+                      />
                     )}
                   />
 
                   {/* Decay Penalty Presets */}
                   {decayEnabled && (
                     <div className="space-y-1.5">
-                      <label className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                      <span className="text-[11.5px] font-medium text-[#616161] dark:text-zinc-400">
                         Quick Deduction Presets
-                      </label>
+                      </span>
                       <PolarisPresetChips
                         presets={DECAY_PRESETS}
                         currentValue={Number(decayPenalty)}
