@@ -129,7 +129,7 @@ export default function EditRewardPage() {
 
         await updateReward({
           variables: {
-            id: rewardId,
+            updateRewardId: rewardId,
             input: {
               title: values.title,
               description: values.description,
