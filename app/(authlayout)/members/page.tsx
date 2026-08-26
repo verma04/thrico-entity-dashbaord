@@ -159,4 +159,4 @@ function MembersPage() {
   );
 }
 
-export default withModulePermission(MembersPage, "NETWORK", "canRead");
+export default withModulePermission(MembersPage, "MEMBERS_ALL", "canRead");

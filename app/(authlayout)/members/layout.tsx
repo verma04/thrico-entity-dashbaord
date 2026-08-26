@@ -24,22 +24,18 @@ import { useTabOrder } from "@/hooks/use-tab-order";
 
 function MembersLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const canRead = useModulePermission("NETWORK", "canRead");
-  const canCreate = useModulePermission("NETWORK", "canCreate");
-
-  const user = useUserStore((state) => state.user);
-
-  const hasSettingsPerm = React.useMemo(() => {
-    if (!user) return false;
-    if (user.isSuperAdmin || user.role?.isSystem) return true;
-    return !!user.permissions?.settings;
-  }, [user]);
-
-  const hasReportsPerm = React.useMemo(() => {
-    if (!user) return false;
-    if (user.isSuperAdmin || user.role?.isSystem) return true;
-    return !!user.permissions?.reports;
-  }, [user]);
+  const canReadMembers = useModulePermission("MEMBERS_ALL", "canRead");
+  const canCreateMembers = useModulePermission("MEMBERS_ALL", "canCreate");
+  const canReadReferrals = useModulePermission("MEMBERS_REFERRALS", "canRead");
+  const canReadGraph = useModulePermission("MEMBERS_GRAPH", "canRead");
+  const canReadClassifications = useModulePermission(
+    "MEMBERS_CLASSIFICATIONS",
+    "canRead",
+  );
+  const canReadReports = useModulePermission("MEMBERS_REPORTS", "canRead");
+  const canReadSettings = useModulePermission("MEMBERS_SETTINGS", "canRead");
+  const canReadAudit = useModulePermission("MEMBERS_AUDIT", "canRead");
+  const canReadAutomation = useModulePermission("AUTOMATION", "canRead");
 
   const defaultItems = React.useMemo(() => {
     return [
@@ -52,67 +48,77 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
         key: "all",
         label: "Manage Members",
         icon: <Users className="h-4 w-4" />,
-        locked: !canRead,
+        locked: !canReadMembers,
       },
       {
         key: "create",
         label: "Create New Members",
         icon: <Plus className="h-4 w-4" />,
-        locked: !canCreate,
+        locked: !canCreateMembers,
       },
       {
         key: "referrals",
         label: "Referrals",
         icon: <Users className="h-4 w-4" />,
-        locked: !canRead,
+        locked: !canReadReferrals,
       },
       {
         key: "tiers",
         label: "Membership Tiers",
         icon: <Award className="h-4 w-4" />,
-        locked: !canRead,
+        locked: !canReadMembers,
       },
       {
         key: "automation",
         label: "Automations",
         icon: <Zap className="h-4 w-4" />,
-        locked: !canRead,
+        locked: !canReadAutomation,
       },
       {
         key: "graph",
         label: "Network Graph",
         icon: <Network className="h-4 w-4" />,
-        locked: !canRead,
+        locked: !canReadGraph,
       },
       {
         key: "classification",
         label: "Classifications",
         icon: <Building2 className="h-4 w-4" />,
-        locked: !canRead,
+        locked: !canReadClassifications,
       },
       {
         key: "reports",
         label: "Reported Items",
         icon: <AlertTriangle className="h-4 w-4" />,
         section: "Admin",
-        locked: !hasReportsPerm,
+        locked: !canReadReports,
       },
       {
         key: "audit-log",
         label: "Audit Log",
         icon: <FileText className="h-4 w-4" />,
         section: "Admin",
-        locked: !canRead,
+        locked: !canReadAudit,
       },
       {
         key: "settings",
         label: "Settings",
         icon: <Wrench className="h-4 w-4" />,
         section: "Admin",
-        locked: !hasSettingsPerm,
+        locked: !canReadSettings,
       },
     ];
-  }, [canRead, canCreate, hasReportsPerm, hasSettingsPerm]);
+  }, [
+    canReadMembers,
+    canCreateMembers,
+    canReadReferrals,
+    canReadAutomation,
+    canReadGraph,
+    canReadClassifications,
+    canReadReports,
+    canReadAudit,
+    canReadSettings,
+  ]);
 
   const { getOrderedTabs, onReorder } = useTabOrder(
     "MEMBERS",

@@ -8,4 +8,4 @@ const AutomationPage = () => {
   return <AutomationManage />;
 };
 
-export default withModulePermission(AutomationPage, "NETWORK", "canRead");
+export default withModulePermission(AutomationPage, "AUTOMATION", "canRead");

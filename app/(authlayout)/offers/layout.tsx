@@ -40,4 +40,9 @@ function OffersLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(OffersLayout, "offers");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(OffersLayout, "OFFERS", "canRead"),
+  "offers",
+);

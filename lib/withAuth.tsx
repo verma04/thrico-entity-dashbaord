@@ -16,11 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Loader2, ShieldAlert } from "lucide-react";
-
-type ModulePermission = {
-  module?: string;
-  canRead?: boolean;
-};
+import { hasUserModulePermission } from "@/hooks/use-module-permission";
 
 export default function withAuth<P>(WrappedComponent: React.ComponentType<P>) {
   const WithAuth = (props: React.PropsWithChildren<P>) => {
@@ -52,32 +48,25 @@ export default function withAuth<P>(WrappedComponent: React.ComponentType<P>) {
     }, [getUser, setUser]);
 
     // ── URL Access Control ──────────────────────────────────────────────────
-    // 1. Module-level check (for paths like /listing, /moments, etc.)
     const moduleMatch = pathname?.split("/")[1]?.toUpperCase();
 
     useEffect(() => {
       if (getUser && !loading) {
+        if (getUser.isSuperAdmin || getUser.role?.isSystem) return; // Master access
+        if (!pathname || pathname === "/" || pathname === "/dashboard") return;
+
         let hasAccess = true;
 
-        if (getUser.isSuperAdmin || getUser.role?.isSystem) return; // Master access
-
-        // Check against modulePermissions for extended products
-        const modulePerm = getUser.modulePermissions?.find(
-          (mp: ModulePermission) => mp.module === moduleMatch,
-        );
-
-        // If we found a module permission, respect its canRead flag
-        if (modulePerm) {
-          hasAccess = modulePerm.canRead;
-        }
-
-        // 2. System-level checks (using the general permissions object)
         if (moduleMatch === "APP-LAYOUT" || moduleMatch === "PAGES") {
-          hasAccess = getUser.permissions?.website;
-        } else if (pathname?.includes("/settings/moderation")) {
-          hasAccess = getUser.permissions?.moderation;
-        } else if (moduleMatch === "AUDIT-LOGS") {
-          hasAccess = getUser.permissions?.auditLogs;
+          hasAccess = hasUserModulePermission(getUser, "WEBSITE", "canRead");
+        } else if (pathname?.includes("/settings/moderation") || moduleMatch === "MODERATION") {
+          hasAccess =
+            hasUserModulePermission(getUser, "MODERATION", "canRead") ||
+            hasUserModulePermission(getUser, "AI_MODERATION", "canRead");
+        } else if (moduleMatch === "AUDIT-LOGS" || moduleMatch === "AUDIT") {
+          hasAccess = hasUserModulePermission(getUser, "AUDIT_LOGS", "canRead");
+        } else if (moduleMatch) {
+          hasAccess = hasUserModulePermission(getUser, moduleMatch, "canRead");
         }
 
         if (!hasAccess) {

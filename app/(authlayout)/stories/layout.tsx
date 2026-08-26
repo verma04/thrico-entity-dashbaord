@@ -28,4 +28,10 @@ function StoriesLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default StoriesLayout;
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withModulePermission(
+  StoriesLayout,
+  "STORIES",
+  "canRead",
+);

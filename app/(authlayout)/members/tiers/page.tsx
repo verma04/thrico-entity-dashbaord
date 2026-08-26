@@ -7,5 +7,5 @@ const page = () => {
   return <MembershipTiers />;
 };
 
-export default withModulePermission(page, "NETWORK", "canRead");
+export default withModulePermission(page, "MEMBERS_ALL", "canRead");
 

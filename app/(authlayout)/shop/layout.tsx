@@ -52,4 +52,9 @@ function ShopLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(ShopLayout, "shop");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(ShopLayout, "SHOP", "canRead"),
+  "shop",
+);

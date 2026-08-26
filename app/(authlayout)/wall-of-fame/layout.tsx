@@ -34,4 +34,10 @@ function WallOfFameLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default WallOfFameLayout;
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withModulePermission(
+  WallOfFameLayout,
+  "WALL_OF_FAME",
+  "canRead",
+);

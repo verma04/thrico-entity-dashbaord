@@ -44,4 +44,9 @@ function EventsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(EventsLayout, "events");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(EventsLayout, "EVENTS", "canRead"),
+  "events",
+);

@@ -68,4 +68,9 @@ function JobsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(JobsLayout, "jobs");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(JobsLayout, "JOBS", "canRead"),
+  "jobs",
+);

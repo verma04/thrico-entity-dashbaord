@@ -33,4 +33,9 @@ function PollsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(PollsLayout, "polls");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(PollsLayout, "POLLS", "canRead"),
+  "polls",
+);

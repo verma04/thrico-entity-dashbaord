@@ -119,4 +119,6 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default RootLayout;
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withModulePermission(RootLayout, "WEBSITE", "canRead");

@@ -11,10 +11,11 @@ import {
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { useTabOrder } from "@/hooks/use-tab-order";
 import { createLayoutStore } from "@/store/create-layout-store";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 const usePillarsLayoutStore = createLayoutStore();
 
-export default function RewardPillarsLayout({
+function RewardPillarsLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -62,3 +63,9 @@ export default function RewardPillarsLayout({
     </MenuItemsLayout>
   );
 }
+
+export default withModulePermission(
+  RewardPillarsLayout,
+  "REWARDS",
+  "canRead",
+);

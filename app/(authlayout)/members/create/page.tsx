@@ -126,4 +126,4 @@ const AddMemberPage = () => {
   );
 };
 
-export default withModulePermission(AddMemberPage, "NETWORK", "canCreate");
+export default withModulePermission(AddMemberPage, "MEMBERS_ALL", "canCreate");

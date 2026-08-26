@@ -42,4 +42,9 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(MomentsLayout, "moments");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(MomentsLayout, "MOMENTS", "canRead"),
+  "moments",
+);

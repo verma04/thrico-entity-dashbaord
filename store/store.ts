@@ -44,31 +44,55 @@ const useTokenStore = create<AuthState>()(
 export { useTokenStore };
 
 export interface Permission {
-  auditLogs: boolean;
-  website: boolean;
-  settings: boolean;
-  moderation: boolean;
-  reports: boolean;
-  subscription: boolean;
-  platformFeatures: boolean;
-  appearance: boolean;
-  domain: boolean;
-  permissions: boolean;
-  adminUsers: boolean;
+  auditLogs?: boolean;
+  website?: boolean;
+  settings?: boolean;
+  moderation?: boolean;
+  reports?: boolean;
+  subscription?: boolean;
+  platformFeatures?: boolean;
+  appearance?: boolean;
+  domain?: boolean;
+  permissions?: boolean;
+  adminUsers?: boolean;
+  [key: string]: boolean | undefined;
 }
 
 export interface ModulePermission {
+  id?: string;
   module: string;
   canRead: boolean;
   canEdit: boolean;
   canCreate: boolean;
   canDelete: boolean;
+  isSystem?: boolean;
+  isAdmin?: boolean;
+}
+
+export interface GroupedPermissionItem {
+  id?: string;
+  module: string;
+  canRead: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  isSystem?: boolean;
+  isAdmin?: boolean;
+}
+
+export interface GroupedPermissionCategory {
+  category: string;
+  permissions: GroupedPermissionItem[];
 }
 
 export interface Role {
+  id?: string;
   name: string;
-  description: string;
+  description?: string;
   isSystem: boolean;
+  isAdmin?: boolean;
+  groupedModulePermissions?: GroupedPermissionCategory[] | Record<string, GroupedPermissionItem[]>;
+  modulePermissions?: ModulePermission[];
 }
 
 export interface User {
@@ -79,9 +103,13 @@ export interface User {
   status: boolean;
   isSuperAdmin: boolean;
   memberStatus: string | null;
-  permissions: Permission;
-  modulePermissions: ModulePermission[];
-  role: Role;
+  isSystem?: boolean | null;
+  permissions?: Permission;
+  modulePermissions?: ModulePermission[];
+  groupedModulePermissions?: GroupedPermissionCategory[] | Record<string, GroupedPermissionItem[]>;
+  role?: Role | null;
+  avatar?: string;
+  profilePicture?: string;
 }
 
 interface UserState {

@@ -130,6 +130,6 @@ const EditAutomationRulePage = () => {
 
 export default withModulePermission(
   EditAutomationRulePage,
-  "NETWORK",
-  "canUpdate"
+  "AUTOMATION",
+  "canEdit"
 );

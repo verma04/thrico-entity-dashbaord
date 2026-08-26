@@ -56,5 +56,10 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(SurveysLayout, "surveys");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(SurveysLayout, "SURVEYS", "canRead"),
+  "surveys",
+);
 

@@ -93,4 +93,9 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(RewardsLayout, "rewards");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(RewardsLayout, "REWARDS", "canRead"),
+  "rewards",
+);

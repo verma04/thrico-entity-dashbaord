@@ -34,4 +34,9 @@ function OpportunitiesLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(OpportunitiesLayout, "opportunities");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(OpportunitiesLayout, "OPPORTUNITIES", "canRead"),
+  "opportunities",
+);

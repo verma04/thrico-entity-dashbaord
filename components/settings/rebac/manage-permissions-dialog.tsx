@@ -32,6 +32,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ModuleIcon } from "./module-icon";
+import { extractUserModulePermissions } from "@/hooks/use-module-permission";
 
 interface ManagePermissionsDialogProps {
   open: boolean;
@@ -216,31 +217,41 @@ export default function ManagePermissionsDialog({
                           <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Resource Permissions</h4>
                         </div>
                         <div className="grid gap-2">
-                          {selectedRole.modulePermissions?.map((perm: any) => (
-                            <div 
-                              key={perm.id} 
-                              className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-muted/5 group hover:bg-muted/10 transition-colors"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="h-7 w-7 rounded-md bg-background border border-border/60 flex items-center justify-center shrink-0">
-                                  <ModuleIcon name={perm.module} className="h-3.5 w-3.5 text-muted-foreground" />
+                          {(() => {
+                            const perms = extractUserModulePermissions({
+                              ...user,
+                              role: selectedRole as any,
+                            });
+                            if (!perms.length) {
+                              return (
+                                <div className="p-6 border border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center text-center gap-2 opacity-50">
+                                  <Info className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-[11px] font-medium text-muted-foreground">No resource permissions.</span>
                                 </div>
-                                <span className="text-xs font-semibold capitalize text-foreground/80">{perm.module}</span>
+                              );
+                            }
+                            return perms.map((perm: any) => (
+                              <div 
+                                key={perm.id || perm.module} 
+                                className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-muted/5 group hover:bg-muted/10 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="h-7 w-7 rounded-md bg-background border border-border/60 flex items-center justify-center shrink-0">
+                                    <ModuleIcon name={perm.module} className="h-3.5 w-3.5 text-muted-foreground" />
+                                  </div>
+                                  <span className="text-xs font-semibold capitalize text-foreground/80">
+                                    {perm.module.replace(/_/g, " ")}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {perm.canRead && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Read</Badge>}
+                                  {perm.canCreate && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Create</Badge>}
+                                  {perm.canEdit && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Edit</Badge>}
+                                  {perm.canDelete && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Delete</Badge>}
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                {perm.canRead && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Read</Badge>}
-                                {perm.canCreate && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Create</Badge>}
-                                {perm.canEdit && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Edit</Badge>}
-                                {perm.canDelete && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Delete</Badge>}
-                              </div>
-                            </div>
-                          ))}
-                          {(!selectedRole.modulePermissions?.length) && (
-                            <div className="p-6 border border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center text-center gap-2 opacity-50">
-                              <Info className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-[11px] font-medium text-muted-foreground">No resource permissions.</span>
-                            </div>
-                          )}
+                            ));
+                          })()}
                         </div>
                       </div>
                     </div>

@@ -32,4 +32,10 @@ function SponsorsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default SponsorsLayout;
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withModulePermission(
+  SponsorsLayout,
+  "SPONSORS",
+  "canRead",
+);

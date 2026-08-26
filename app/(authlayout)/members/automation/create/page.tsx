@@ -80,6 +80,6 @@ const CreateAutomationRulePage = () => {
 
 export default withModulePermission(
   CreateAutomationRulePage,
-  "NETWORK",
+  "AUTOMATION",
   "canCreate"
 );

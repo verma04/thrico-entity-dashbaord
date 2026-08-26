@@ -69,4 +69,9 @@ function MentorshipLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(MentorshipLayout, "mentorship");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(MentorshipLayout, "MENTORSHIP", "canRead"),
+  "mentorship",
+);

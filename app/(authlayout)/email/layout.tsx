@@ -8,6 +8,8 @@ import { EmailDomainGate } from "@/components/email/domain-gate";
 import { useTabOrder } from "@/hooks/use-tab-order";
 import { createLayoutStore } from "@/store/create-layout-store";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
 const useEmailLayoutStore = createLayoutStore();
 
 function EmailLayout({ children }: { children: React.ReactNode }) {
@@ -42,13 +44,6 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
       section: "General",
       href: "/email/usage",
     },
-    // {
-    //   key: "automation",
-    //   label: "Campaigns",
-    //   icon: <GitBranch className="h-4 w-4" />,
-    //   section: "General",
-    //   href: "/email/automation",
-    // },
   ];
 
   const isTakeoverPage =
@@ -74,4 +69,4 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default EmailLayout;
+export default withModulePermission(EmailLayout, "EMAIL", "canRead");

@@ -50,4 +50,9 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(CommunitiesLayout, "communities");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(CommunitiesLayout, "COMMUNITIES", "canRead"),
+  "communities",
+);

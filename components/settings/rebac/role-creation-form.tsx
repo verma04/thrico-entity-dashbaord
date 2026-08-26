@@ -92,23 +92,27 @@ export function RoleCreationForm({
       const newPerms: Record<string, Record<string, boolean>> = {};
       
       if (initialValues.groupedModulePermissions) {
-        Object.values(initialValues.groupedModulePermissions).forEach(
-          (groupList: any) => {
-            if (Array.isArray(groupList)) {
-              groupList.forEach((p: any) => {
-                if (p && (p.module || p.name)) {
-                  const modName = p.module || p.name;
-                  newPerms[modName] = {
-                    Read: !!p.canRead,
-                    Create: !!p.canCreate,
-                    Edit: !!p.canEdit,
-                    Delete: !!p.canDelete,
-                  };
-                }
-              });
-            }
-          },
-        );
+        const groups = Array.isArray(initialValues.groupedModulePermissions)
+          ? initialValues.groupedModulePermissions.map(
+              (g: any) => g.permissions || [],
+            )
+          : Object.values(initialValues.groupedModulePermissions);
+
+        groups.forEach((groupList: any) => {
+          if (Array.isArray(groupList)) {
+            groupList.forEach((p: any) => {
+              if (p && (p.module || p.name)) {
+                const modName = p.module || p.name;
+                newPerms[modName] = {
+                  Read: !!p.canRead,
+                  Create: !!p.canCreate,
+                  Edit: !!p.canEdit,
+                  Delete: !!p.canDelete,
+                };
+              }
+            });
+          }
+        });
       }
 
       initialValues.modulePermissions?.forEach((p: any) => {

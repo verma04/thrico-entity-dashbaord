@@ -7,4 +7,4 @@ function ReferralsPage() {
   return <ReferralsUI />;
 }
 
-export default withModulePermission(ReferralsPage, "NETWORK", "canRead");
+export default withModulePermission(ReferralsPage, "MEMBERS_REFERRALS", "canRead");

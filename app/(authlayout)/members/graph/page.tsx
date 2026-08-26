@@ -20,4 +20,4 @@ function UsersGraphPage() {
   );
 }
 
-export default withModulePermission(UsersGraphPage, "NETWORK", "canRead");
+export default withModulePermission(UsersGraphPage, "MEMBERS_GRAPH", "canRead");

@@ -12,9 +12,11 @@ import { useModuleStore } from "@/store/useModuleStore";
 import { useTabOrder } from "@/hooks/use-tab-order";
 import { createLayoutStore } from "@/store/create-layout-store";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
 const useEngagementLayoutStore = createLayoutStore();
 
-export default function EngagementGamesLayout({
+function EngagementGamesLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -66,3 +68,9 @@ export default function EngagementGamesLayout({
     </MenuItemsLayout>
   );
 }
+
+export default withModulePermission(
+  EngagementGamesLayout,
+  "GAMES_CENTER",
+  "canRead",
+);

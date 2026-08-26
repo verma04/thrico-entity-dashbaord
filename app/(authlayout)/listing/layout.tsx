@@ -61,4 +61,9 @@ function ListingLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(ListingLayout, "listing");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(ListingLayout, "LISTING", "canRead"),
+  "listing",
+);

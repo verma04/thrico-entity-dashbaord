@@ -21,6 +21,6 @@ function MembersAuditLogPage() {
 
 export default withModulePermission(
   MembersAuditLogPage,
-  "NETWORK",
+  "MEMBERS_AUDIT",
   "canRead"
 );

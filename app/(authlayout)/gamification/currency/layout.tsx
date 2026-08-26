@@ -68,4 +68,9 @@ function CurrencyLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(CurrencyLayout, "currency");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(CurrencyLayout, "CURRENCY", "canRead"),
+  "currency",
+);

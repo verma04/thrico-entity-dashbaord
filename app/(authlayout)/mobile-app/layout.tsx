@@ -6,7 +6,9 @@ import { Smartphone, Apple } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { MobileAppLanding } from "@/components/mobile-app/mobile-app-landing";
 
-export default function MobileAppLayout({
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+function MobileAppLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -34,3 +36,5 @@ export default function MobileAppLayout({
   // Otherwise, show the child sidebar for Android/iOS management pages
   return <MobileAppLanding />;
 }
+
+export default withModulePermission(MobileAppLayout, "MOBILE_APP", "canRead");

@@ -227,17 +227,42 @@ export default function RolesTab() {
       key: "permissions",
       header: "Permissions",
       cell: (role: any) => {
-        const perms = role.modulePermissions || [];
-        const count = perms.reduce(
-          (acc: number, p: any) =>
-            acc +
-            [p.canCreate, p.canRead, p.canEdit, p.canDelete].filter(Boolean)
-              .length,
-          0,
-        );
+        let count = 0;
+        let moduleCount = 0;
+        if (role.groupedModulePermissions) {
+          const groups = Array.isArray(role.groupedModulePermissions)
+            ? role.groupedModulePermissions.map((g: any) => g.permissions || [])
+            : Object.values(role.groupedModulePermissions);
+
+          groups.forEach((groupList: any) => {
+            if (Array.isArray(groupList)) {
+              groupList.forEach((p: any) => {
+                const actions = [
+                  p.canCreate,
+                  p.canRead,
+                  p.canEdit,
+                  p.canDelete,
+                ].filter(Boolean).length;
+                if (actions > 0) {
+                  moduleCount++;
+                  count += actions;
+                }
+              });
+            }
+          });
+        } else if (role.modulePermissions) {
+          moduleCount = role.modulePermissions.length;
+          count = role.modulePermissions.reduce(
+            (acc: number, p: any) =>
+              acc +
+              [p.canCreate, p.canRead, p.canEdit, p.canDelete].filter(Boolean)
+                .length,
+            0,
+          );
+        }
         return (
           <span className="text-xs font-medium text-muted-foreground">
-            {perms.length} modules ({count} actions)
+            {moduleCount} modules ({count} actions)
           </span>
         );
       },
@@ -424,7 +449,28 @@ export default function RolesTab() {
             },
             {
               header: "Modules Count",
-              getValue: (r) => (r.modulePermissions || []).length,
+              getValue: (r) => {
+                let moduleCount = 0;
+                if (r.groupedModulePermissions) {
+                  Object.values(r.groupedModulePermissions).forEach(
+                    (groupList: any) => {
+                      if (Array.isArray(groupList)) {
+                        groupList.forEach((p: any) => {
+                          if (
+                            p &&
+                            (p.canRead || p.canCreate || p.canEdit || p.canDelete)
+                          ) {
+                            moduleCount++;
+                          }
+                        });
+                      }
+                    },
+                  );
+                } else if (r.modulePermissions) {
+                  moduleCount = r.modulePermissions.length;
+                }
+                return moduleCount;
+              },
             },
           ]);
           downloadCsv(

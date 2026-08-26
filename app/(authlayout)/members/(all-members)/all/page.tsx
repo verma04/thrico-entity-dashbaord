@@ -12,4 +12,4 @@ const page = () => {
   return <User status={"ALL"} subscriptionInfo={subscriptionInfo} />;
 };
 
-export default withModulePermission(page, "NETWORK", "canRead");
+export default withModulePermission(page, "MEMBERS_ALL", "canRead");

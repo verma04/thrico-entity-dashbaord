@@ -38,4 +38,9 @@ function FaqLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(FaqLayout, "faq");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(FaqLayout, "FAQ", "canRead"),
+  "faq",
+);

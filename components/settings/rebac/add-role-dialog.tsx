@@ -83,7 +83,11 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
       const newPerms: Record<string, Record<string, boolean>> = {};
 
       if (role.groupedModulePermissions) {
-        Object.values(role.groupedModulePermissions).forEach((groupList: any) => {
+        const groups = Array.isArray(role.groupedModulePermissions)
+          ? role.groupedModulePermissions.map((g: any) => g.permissions || [])
+          : Object.values(role.groupedModulePermissions);
+
+        groups.forEach((groupList: any) => {
           if (Array.isArray(groupList)) {
             groupList.forEach((p: any) => {
               if (p && (p.module || p.name)) {

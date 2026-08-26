@@ -36,7 +36,7 @@ export interface ModulePermission {
   canDelete: boolean;
 }
 
-export interface GroupedModulePermissionItem {
+export interface GroupedPermissionItem {
   id?: string;
   module: string;
   canRead: boolean;
@@ -46,6 +46,15 @@ export interface GroupedModulePermissionItem {
   isSystem?: boolean;
   isAdmin?: boolean;
 }
+
+export type GroupedModulePermissionItem = GroupedPermissionItem;
+
+export interface GroupedPermissionCategory {
+  category: string;
+  permissions: GroupedPermissionItem[];
+}
+
+export type GroupedModulePermissionCategory = GroupedPermissionCategory;
 
 export interface AvailableModuleItem {
   name: string;
@@ -60,8 +69,8 @@ export interface Role {
   isSystem: boolean;
   isAdmin: boolean;
   adminAccess?: AdminAccess;
-  modulePermissions: ModulePermission[];
-  groupedModulePermissions?: Record<string, GroupedModulePermissionItem[]>;
+  modulePermissions?: ModulePermission[];
+  groupedModulePermissions?: GroupedPermissionCategory[] | Record<string, GroupedPermissionItem[]>;
   userCount?: number;
   usersCount?: number;
 }
@@ -84,7 +93,7 @@ export interface CreateRoleInput {
   isAdmin?: boolean;
   adminAccess?: Partial<AdminAccess>;
   modulePermissions?: Omit<ModulePermission, "id">[];
-  groupedModulePermissions?: Record<string, any>;
+  groupedModulePermissions?: Record<string, any> | any;
 }
 
 export interface UpdateRoleInput {
@@ -94,7 +103,7 @@ export interface UpdateRoleInput {
   isAdmin?: boolean;
   adminAccess?: Partial<AdminAccess>;
   modulePermissions?: Omit<ModulePermission, "id">[];
-  groupedModulePermissions?: Record<string, any>;
+  groupedModulePermissions?: Record<string, any> | any;
 }
 
 export interface CreateRoleResponse {
@@ -103,7 +112,7 @@ export interface CreateRoleResponse {
     name: string;
     description: string;
     isAdmin: boolean;
-    groupedModulePermissions?: Record<string, GroupedModulePermissionItem[]>;
+    groupedModulePermissions?: GroupedPermissionCategory[] | Record<string, GroupedPermissionItem[]>;
   };
 }
 
@@ -113,7 +122,7 @@ export interface UpdateRoleResponse {
     name: string;
     description: string;
     isAdmin: boolean;
-    groupedModulePermissions?: Record<string, GroupedModulePermissionItem[]>;
+    groupedModulePermissions?: GroupedPermissionCategory[] | Record<string, GroupedPermissionItem[]>;
   };
 }
 
@@ -125,15 +134,17 @@ export interface DeleteRoleResponse {
 
 export interface AdminUser {
   id: string;
-  status: string;
+  status: boolean;
   email: string;
   firstName: string;
   lastName: string;
-  role: Role;
-  isSuperAdmin: boolean;
+  role?: Role | null;
+  roleId?: string | null;
+  memberStatus?: string;
+  isSystem?: boolean;
+  isSuperAdmin?: boolean;
+  groupedModulePermissions?: GroupedPermissionCategory[] | Record<string, GroupedPermissionItem[]>;
   avatar?: string;
-  permissions?: AdminAccess;
-  modulePermissions?: ModulePermission[];
 }
 
 export interface GetAdminUsersResponse {
@@ -147,10 +158,11 @@ export interface GetAdminUsersResponse {
 }
 
 export interface AdminRegisterInput {
-  email: string;
   firstName: string;
   lastName: string;
-  roleId: string;
+  email: string;
+  phone?: string;
+  roleId?: string | null;
   avatar?: string;
 }
 
@@ -162,7 +174,8 @@ export interface AdminUpdateInput {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  status?: string;
+  status?: boolean;
+  roleId?: string | null;
   avatar?: string;
 }
 

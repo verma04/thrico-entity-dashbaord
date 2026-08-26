@@ -5,34 +5,31 @@ export const GET_USER = gql`
     getUser {
       id
       email
-
       firstName
       lastName
       status
       memberStatus
-
-      permissions {
-        reports
-        settings
-        subscription
-        platformFeatures
-        appearance
-        auditLogs
-        domain
-        permissions
-        adminUsers
-      }
-      modulePermissions {
-        module
-        canRead
-        canEdit
-        canCreate
-        canDelete
-      }
+      isSystem
+      isSuperAdmin
       role {
+        id
         name
         description
         isSystem
+        isAdmin
+        groupedModulePermissions {
+          category
+          permissions {
+            id
+            module
+            canRead
+            canCreate
+            canEdit
+            canDelete
+            isSystem
+            isAdmin
+          }
+        }
       }
     }
   }

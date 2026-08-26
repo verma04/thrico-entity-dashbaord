@@ -19,8 +19,9 @@ import {
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 import { useClassificationStore } from "@/store/classification-store";
 import { useTabOrder } from "@/hooks/use-tab-order";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
-export default function ClassificationLayout({
+function ClassificationLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -145,3 +146,9 @@ export default function ClassificationLayout({
     </EcosystemWrapper>
   );
 }
+
+export default withModulePermission(
+  ClassificationLayout,
+  "MEMBERS_CLASSIFICATIONS",
+  "canRead",
+);

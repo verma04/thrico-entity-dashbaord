@@ -4,6 +4,8 @@ import * as React from "react";
 import { Images, Settings } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
 function MediaGalleryLayout({ children }: { children: React.ReactNode }) {
   const items = React.useMemo(() => {
     return [
@@ -27,4 +29,8 @@ function MediaGalleryLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default MediaGalleryLayout;
+export default withModulePermission(
+  MediaGalleryLayout,
+  "MEDIA_GALLERY",
+  "canRead",
+);

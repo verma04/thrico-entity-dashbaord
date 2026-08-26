@@ -164,17 +164,15 @@ export default function UsersTab() {
 
   const [updateUser, { loading: updatingStatus }] = useUpdateAdminUser({
     onCompleted: (data: any) => {
-      toast({
-        title: "Status updated",
-        description: `User is now ${data.updateAdminUser.status}.`,
+      const isAct = Boolean(data?.updateAdminUser?.status);
+      sonnerToast.success("Status updated", {
+        description: `Member is now ${isAct ? "active" : "inactive"}.`,
       });
       refetch();
     },
     onError: (err: any) => {
-      toast({
-        title: "Update failed",
+      sonnerToast.error("Update failed", {
         description: err.message,
-        variant: "destructive",
       });
     },
   });
@@ -220,7 +218,7 @@ export default function UsersTab() {
       typeof currentStatus === "string"
         ? currentStatus.toLowerCase() === "active"
         : Boolean(currentStatus);
-    const newStatus = isCurrentlyActive ? "inactive" : "active";
+    const newStatus = !isCurrentlyActive;
     updateUser({ variables: { adminId: id, input: { status: newStatus } } });
   };
 
@@ -245,7 +243,7 @@ export default function UsersTab() {
           }
           subtitle={user.email || "Team Member"}
           fallbackText={`${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`}
-          onClick={() => handleEditUser(user)}
+          onClick={user.isSuperAdmin ? undefined : () => handleEditUser(user)}
         />
       ),
     },
@@ -263,7 +261,11 @@ export default function UsersTab() {
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
           <span className="text-[12px] font-semibold text-foreground">
-            {user.role?.name || "Member"}
+            {user.isSuperAdmin
+              ? "Super Admin"
+              : typeof user.role === "object"
+                ? user.role?.name
+                : user.role || "Member"}
           </span>
         </div>
       ),
@@ -298,6 +300,12 @@ export default function UsersTab() {
       className: "text-right",
       isFixedRight: true,
       cell: (user: AdminUser) => {
+        if (user.isSystem) {
+          return null;
+        }
+
+        console.log(user);
+
         const isActive =
           typeof user.status === "string"
             ? user.status.toLowerCase() === "active"
@@ -318,10 +326,6 @@ export default function UsersTab() {
                 <DropdownMenuItem onClick={() => handleEditUser(user)}>
                   <UserCog className="h-4 w-4 mr-2" />
                   Edit Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleManagePermissions(user)}>
-                  <Lock className="h-4 w-4 mr-2" />
-                  Manage Permissions
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -649,7 +653,9 @@ export default function UsersTab() {
               </div>
               <div className="p-3 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-900/50 text-left space-y-1">
                 <p className="text-[11.5px] text-rose-800 dark:text-rose-300/90 leading-normal">
-                  An email notification will be sent confirming that their access has been revoked. They will immediately lose access to all dashboard tools and administrative features.
+                  An email notification will be sent confirming that their
+                  access has been revoked. They will immediately lose access to
+                  all dashboard tools and administrative features.
                 </p>
               </div>
             </div>

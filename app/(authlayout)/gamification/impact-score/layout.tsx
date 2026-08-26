@@ -70,4 +70,9 @@ function ImpactScoreLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(ImpactScoreLayout, "GAMIFICATION");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(ImpactScoreLayout, "IMPACT_SCORE", "canRead"),
+  "GAMIFICATION",
+);

@@ -19,15 +19,19 @@ export const GET_ROLES = gql`
         permissions
         adminUsers
       }
-      modulePermissions {
-        id
-        module
-        canRead
-        canCreate
-        canEdit
-        canDelete
+      groupedModulePermissions {
+        category
+        permissions {
+          id
+          module
+          canRead
+          canCreate
+          canEdit
+          canDelete
+          isSystem
+          isAdmin
+        }
       }
-      groupedModulePermissions
       userCount
       usersCount
     }
@@ -53,15 +57,19 @@ export const GET_ROLE_BY_ID = gql`
         permissions
         adminUsers
       }
-      modulePermissions {
-        id
-        module
-        canRead
-        canCreate
-        canEdit
-        canDelete
+      groupedModulePermissions {
+        category
+        permissions {
+          id
+          module
+          canRead
+          canCreate
+          canEdit
+          canDelete
+          isSystem
+          isAdmin
+        }
       }
-      groupedModulePermissions
       userCount
       usersCount
     }
@@ -81,7 +89,19 @@ export const CREATE_ROLE = gql`
       name
       description
       isAdmin
-      groupedModulePermissions
+      groupedModulePermissions {
+        category
+        permissions {
+          id
+          module
+          canRead
+          canCreate
+          canEdit
+          canDelete
+          isSystem
+          isAdmin
+        }
+      }
     }
   }
 `;
@@ -93,7 +113,19 @@ export const UPDATE_ROLE = gql`
       name
       description
       isAdmin
-      groupedModulePermissions
+      groupedModulePermissions {
+        category
+        permissions {
+          id
+          module
+          canRead
+          canCreate
+          canEdit
+          canDelete
+          isSystem
+          isAdmin
+        }
+      }
     }
   }
 `;
@@ -116,64 +148,41 @@ export const GET_ADMIN_USERS = gql`
         firstName
         lastName
         isSystem
+        isSuperAdmin
+        roleId
+        memberStatus
         role {
           id
           name
           description
           isSystem
-          adminAccess {
-            reports
-            settings
-            subscription
-            platformFeatures
-            appearance
-            auditLogs
-            domain
-            permissions
-            adminUsers
-            general
-            module
-            billing
-            usersAndPermissions
-            taxesAndDuties
-            languages
-            customerPrivacy
-            policies
-            contactSupport
-            integrations
+          isAdmin
+          groupedModulePermissions {
+            category
+            permissions {
+              id
+              module
+              canRead
+              canCreate
+              canEdit
+              canDelete
+              isSystem
+              isAdmin
+            }
           }
         }
-        roleId
-        memberStatus
-        isSuperAdmin
-        permissions {
-          reports
-          settings
-          subscription
-          platformFeatures
-          appearance
-          auditLogs
-          domain
-          permissions
-          adminUsers
-          general
-          module
-          billing
-          usersAndPermissions
-          taxesAndDuties
-          languages
-          customerPrivacy
-          policies
-          contactSupport
-          integrations
-        }
-        modulePermissions {
-          id
-          module
-          canRead
-          canCreate
-          canEdit
-          canDelete
+        groupedModulePermissions {
+          category
+          permissions {
+            id
+            module
+            canRead
+            canCreate
+            canEdit
+            canDelete
+            isSystem
+            isAdmin
+          }
         }
       }
       total
@@ -193,64 +202,41 @@ export const GET_ADMIN_BY_ID = gql`
       firstName
       lastName
       isSystem
+      isSuperAdmin
+      roleId
+      memberStatus
       role {
         id
         name
         description
         isSystem
-        adminAccess {
-          reports
-          settings
-          subscription
-          platformFeatures
-          appearance
-          auditLogs
-          domain
-          permissions
-          adminUsers
-          general
-          module
-          billing
-          usersAndPermissions
-          taxesAndDuties
-          languages
-          customerPrivacy
-          policies
-          contactSupport
-          integrations
+        isAdmin
+        groupedModulePermissions {
+          category
+          permissions {
+            id
+            module
+            canRead
+            canCreate
+            canEdit
+            canDelete
+            isSystem
+            isAdmin
+          }
         }
       }
-      roleId
-      memberStatus
-      isSuperAdmin
-      permissions {
-        reports
-        settings
-        subscription
-        platformFeatures
-        appearance
-        auditLogs
-        domain
-        permissions
-        adminUsers
-        general
-        module
-        billing
-        usersAndPermissions
-        taxesAndDuties
-        languages
-        customerPrivacy
-        policies
-        contactSupport
-        integrations
-      }
-      modulePermissions {
-        id
-        module
-        canRead
-        canCreate
-        canEdit
-        canDelete
+      groupedModulePermissions {
+        category
+        permissions {
+          id
+          module
+          canRead
+          canCreate
+          canEdit
+          canDelete
+          isSystem
+          isAdmin
+        }
       }
     }
   }
@@ -259,36 +245,47 @@ export const GET_ADMIN_BY_ID = gql`
 export const CREATE_ADMIN = gql`
   mutation CreateAdmin($input: AdminRegisterInput!) {
     createAdmin(input: $input) {
+      id
+      status
       email
       firstName
-      id
-      isSuperAdmin
       lastName
+      isSuperAdmin
+      isSystem
+      roleId
       role {
-        modulePermissions {
+        id
+        name
+        description
+        isSystem
+        isAdmin
+        groupedModulePermissions {
+          category
+          permissions {
+            id
+            module
+            canRead
+            canCreate
+            canEdit
+            canDelete
+            isSystem
+            isAdmin
+          }
+        }
+      }
+      groupedModulePermissions {
+        category
+        permissions {
           id
           module
           canRead
           canCreate
           canEdit
           canDelete
-        }
-        isSystem
-
-        description
-        adminAccess {
-          reports
-          settings
-          subscription
-          platformFeatures
-          appearance
-          auditLogs
-          domain
-          permissions
-          adminUsers
+          isSystem
+          isAdmin
         }
       }
-      status
     }
   }
 `;
@@ -301,11 +298,42 @@ export const UPDATE_ADMIN_USER = gql`
       email
       firstName
       lastName
+      isSuperAdmin
+      isSystem
+      roleId
       role {
         id
         name
+        description
+        isSystem
+        isAdmin
+        groupedModulePermissions {
+          category
+          permissions {
+            id
+            module
+            canRead
+            canCreate
+            canEdit
+            canDelete
+            isSystem
+            isAdmin
+          }
+        }
       }
-      isSuperAdmin
+      groupedModulePermissions {
+        category
+        permissions {
+          id
+          module
+          canRead
+          canCreate
+          canEdit
+          canDelete
+          isSystem
+          isAdmin
+        }
+      }
     }
   }
 `;

@@ -75,4 +75,9 @@ function GamificationLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(GamificationLayout, "gamification");
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+
+export default withSubscriptionCheck(
+  withModulePermission(GamificationLayout, "POINTS_BADGES", "canRead"),
+  "gamification",
+);

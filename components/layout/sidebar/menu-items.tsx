@@ -106,6 +106,7 @@ import {
   useHasAnyIntegration,
 } from "@/graphql/actions";
 import { useUserStore } from "@/store/store";
+import { hasUserModulePermission } from "@/hooks/use-module-permission";
 
 const menuLink = (href: string, text: string) => (
   <Link
@@ -1240,18 +1241,9 @@ export const useFilteredExtendedItems = () => {
 
     const hasModulePermission = (
       moduleName: string,
-      action: string = "canRead",
+      action: any = "canRead",
     ) => {
-      if (!user) return false;
-      if (user.isSuperAdmin || user.role?.isSystem) return true;
-      if (user.permissions && moduleName in user.permissions) {
-        return !!user.permissions[moduleName as keyof typeof user.permissions];
-      }
-      const modulePermission = user.modulePermissions?.find(
-        (m) => m.module.toUpperCase() === moduleName.toUpperCase(),
-      );
-      // @ts-ignore
-      return !!modulePermission?.[action];
+      return hasUserModulePermission(user, moduleName, action);
     };
 
     const enabledModuleIds = new Set(
@@ -1360,8 +1352,10 @@ export const useFilteredExtendedItems = () => {
       }
 
       // 3. Regular users need explicit module permissions
-      const hasPermission = modulePermissions.some(
-        (mp: any) => mp.module === item.key?.toUpperCase() && mp.canRead,
+      const hasPermission = hasUserModulePermission(
+        user,
+        item.key,
+        "canRead",
       );
 
       if (hasPermission) {
@@ -1451,18 +1445,9 @@ export const useFilteredManagementItems = () => {
 
   const hasModulePermission = (
     moduleName: string,
-    action: string = "canRead",
+    action: any = "canRead",
   ) => {
-    if (!user) return false;
-    if (user.isSuperAdmin || user.role?.isSystem) return true;
-    if (user.permissions && moduleName in user.permissions) {
-      return !!user.permissions[moduleName as keyof typeof user.permissions];
-    }
-    const modulePermission = user.modulePermissions?.find(
-      (m) => m.module.toUpperCase() === moduleName.toUpperCase(),
-    );
-    // @ts-ignore
-    return !!modulePermission?.[action];
+    return hasUserModulePermission(user, moduleName, action);
   };
 
   const filterSettingsGroup = (group: any[]) => {
