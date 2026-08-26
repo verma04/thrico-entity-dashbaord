@@ -22,6 +22,45 @@ export default function EditManualVoucherBatchPage() {
   const { data, loading, error } = useGetManualVoucherBatchById(id || "");
 
   const rawBatch = data?.getManualVoucherBatchById;
+  let calculatedValidityDays = 30;
+  if (rawBatch?.expiryDate) {
+    const expiry = new Date(rawBatch.expiryDate);
+    const created = rawBatch.createdAt ? new Date(rawBatch.createdAt) : new Date();
+    const diffDays = Math.round(
+      (expiry.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    calculatedValidityDays =
+      diffDays > 0
+        ? diffDays
+        : Math.max(
+            Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+            1
+          );
+  }
+
+  let parsedMeta: any = {};
+  try {
+    if (rawBatch?.metadata) {
+      parsedMeta =
+        typeof rawBatch.metadata === "string"
+          ? JSON.parse(rawBatch.metadata)
+          : rawBatch.metadata;
+    }
+  } catch {
+    parsedMeta = {};
+  }
+
+  const isOneToMany =
+    rawBatch?.couponType === "ONE_TO_MANY";
+  const couponCode =
+    parsedMeta.couponCode ||
+    (isOneToMany ? rawBatch?.name : "");
+  const codePrefix =
+    parsedMeta.prefix ||
+    (!isOneToMany && rawBatch?.name && rawBatch.name.length <= 8 && !rawBatch.name.includes(" ")
+      ? rawBatch.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()
+      : "VCH");
+
   const batch: ManualRewardItem | null = rawBatch
     ? {
         id: rawBatch.id,
@@ -30,8 +69,8 @@ export default function EditManualVoucherBatchPage() {
         image: rawBatch.image || "",
         url: rawBatch.url || "",
         couponType: rawBatch.couponType || "ONE_TO_ONE",
-        couponCode: rawBatch.couponType === "ONE_TO_MANY" ? rawBatch.name : "",
-        codePrefix: "VCH",
+        couponCode: couponCode || (isOneToMany ? rawBatch.name : ""),
+        codePrefix: codePrefix || "VCH",
         faceValue: rawBatch.faceValue || 0,
         currency: rawBatch.currency || "TC",
         totalInventory: rawBatch.totalCount || 0,
@@ -39,7 +78,8 @@ export default function EditManualVoucherBatchPage() {
         redeemedCount: rawBatch.redeemedCount || 0,
         remainingCount: rawBatch.remainingCount || 0,
         isActive: rawBatch.status === "ACTIVE",
-        validityDays: 30,
+        validityDays: rawBatch.expiryDate ? calculatedValidityDays : 30,
+        expiryDate: rawBatch.expiryDate || undefined,
         createdAt: rawBatch.createdAt || new Date().toISOString(),
       }
     : null;

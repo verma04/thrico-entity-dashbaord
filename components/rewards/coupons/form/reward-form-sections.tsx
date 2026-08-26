@@ -4,7 +4,10 @@ import React from "react";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import { Switch } from "@/components/ui/switch";
 import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
-import { PolarisInput, PolarisLabel } from "@/components/gamification/shared/polaris-form-ui";
+import {
+  PolarisInput,
+  PolarisLabel,
+} from "@/components/gamification/shared/polaris-form-ui";
 import { RewardInfoSection } from "./sections/reward-info-section";
 import { RewardEconomicsSection } from "./sections/reward-economics-section";
 import { DeliveryFulfillmentSection } from "@/components/rewards/shared/delivery-fulfillment-section";
@@ -70,9 +73,7 @@ export function RewardFormSections({
           formik.setFieldValue("memberEligibility", val)
         }
         tierIds={
-          formik.values.membershipTierId ||
-          formik.values.eligibleTierIds ||
-          []
+          formik.values.membershipTierId || formik.values.eligibleTierIds || []
         }
         onTierIdsChange={(tiers) => {
           formik.setFieldValue("membershipTierId", tiers);
@@ -122,7 +123,11 @@ export function RewardFormSections({
                 )
               }
               onBlur={formik.handleBlur}
-              error={formik.touched.minAccountAge && formik.errors.minAccountAge ? String(formik.errors.minAccountAge) : undefined}
+              error={
+                formik.touched.minAccountAge && formik.errors.minAccountAge
+                  ? String(formik.errors.minAccountAge)
+                  : undefined
+              }
             />
 
             <PolarisInput
@@ -141,7 +146,11 @@ export function RewardFormSections({
                 )
               }
               onBlur={formik.handleBlur}
-              error={formik.touched.cooldownPeriod && formik.errors.cooldownPeriod ? String(formik.errors.cooldownPeriod) : undefined}
+              error={
+                formik.touched.cooldownPeriod && formik.errors.cooldownPeriod
+                  ? String(formik.errors.cooldownPeriod)
+                  : undefined
+              }
             />
           </div>
 
@@ -165,7 +174,12 @@ export function RewardFormSections({
                 formik.setFieldValue("minActivity", val);
               }}
               onBlur={formik.handleBlur}
-              error={formik.touched.minActivityRequired && formik.errors.minActivityRequired ? String(formik.errors.minActivityRequired) : undefined}
+              error={
+                formik.touched.minActivityRequired &&
+                formik.errors.minActivityRequired
+                  ? String(formik.errors.minActivityRequired)
+                  : undefined
+              }
             />
 
             <div className="p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40 flex items-center justify-between gap-3">
@@ -174,7 +188,8 @@ export function RewardFormSections({
                   Block Warned Members
                 </PolarisLabel>
                 <p className="text-[11px] text-[#616161] dark:text-zinc-400">
-                  Disallow members with active moderation warnings from redeeming.
+                  Disallow members with active moderation warnings from
+                  redeeming.
                 </p>
               </div>
               <Switch
@@ -197,7 +212,12 @@ export function RewardFormSections({
               formik.setFieldValue("eligibilityDescription", e.target.value)
             }
             onBlur={formik.handleBlur}
-            error={formik.touched.eligibilityDescription && formik.errors.eligibilityDescription ? String(formik.errors.eligibilityDescription) : undefined}
+            error={
+              formik.touched.eligibilityDescription &&
+              formik.errors.eligibilityDescription
+                ? String(formik.errors.eligibilityDescription)
+                : undefined
+            }
           />
         </div>
       </PolarisEligibilityCard>

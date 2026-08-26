@@ -40,6 +40,7 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { Pagination } from "@/components/shared/admin-table/admin-table";
 import { useModuleStore } from "@/store/useModuleStore";
+import { MemberEligibilitySelect } from "@/components/gamification/shared/member-eligibility-select";
 
 import { useGetSurveys, Survey } from "@/graphql/surveys/survey-queries";
 import {
@@ -111,6 +112,11 @@ export function SurveysManage({
     initialStatus ||
     "ALL";
 
+  const memberEligibility =
+    searchParams.get("memberEligibility") ||
+    searchParams.get("eligibility") ||
+    "ALL";
+
   const sortBy = searchParams.get("sort") || "newest";
   const view = (searchParams.get("view") as "grid" | "list") || "grid";
 
@@ -140,10 +146,18 @@ export function SurveysManage({
     description: "",
     startDate: null as moment.Moment | null,
     endDate: null as moment.Moment | null,
+    memberEligibility: "ALL",
+    membershipTierId: [] as string[],
+    eligibleTierIds: [] as string[],
+    eligibleUserIds: [] as string[],
+    eligibleSegmentIds: [] as string[],
   });
 
   useEffect(() => {
     if (editingDetailsSurvey) {
+      const elig =
+        editingDetailsSurvey.eligibility ||
+        editingDetailsSurvey.eligibilityRule;
       setDetails({
         title: editingDetailsSurvey.title || "",
         description: editingDetailsSurvey.description || "",
@@ -153,6 +167,13 @@ export function SurveysManage({
         endDate: editingDetailsSurvey.endDate
           ? moment(editingDetailsSurvey.endDate)
           : null,
+        memberEligibility: elig?.memberEligibility || "ALL",
+        membershipTierId:
+          elig?.membershipTierId || elig?.eligibleTierIds || [],
+        eligibleTierIds:
+          elig?.eligibleTierIds || elig?.membershipTierId || [],
+        eligibleUserIds: elig?.eligibleUserIds || [],
+        eligibleSegmentIds: elig?.eligibleSegmentIds || [],
       });
     }
   }, [editingDetailsSurvey]);
@@ -178,6 +199,12 @@ export function SurveysManage({
   const setStatus = (v: string) =>
     updateParams({ status: v === "ALL" ? null : v, page: null });
 
+  const setMemberEligibility = (v: string) =>
+    updateParams({
+      memberEligibility: v === "ALL" ? null : v,
+      page: null,
+    });
+
   const setSortBy = (v: string) =>
     updateParams({ sort: v === "newest" ? null : v, page: null });
 
@@ -193,7 +220,10 @@ export function SurveysManage({
       input: {
         limit: 100,
         offset: 0,
+        search: debouncedSearch.trim() || null,
         status: status === "ALL" ? null : status,
+        memberEligibility:
+          memberEligibility === "ALL" ? null : memberEligibility,
       },
     },
     fetchPolicy: "network-only",
@@ -266,6 +296,15 @@ export function SurveysManage({
           description: details.description,
           startDate: details.startDate?.toISOString(),
           endDate: details.endDate?.toISOString(),
+          eligibility: {
+            memberEligibility: details.memberEligibility as any,
+            membershipTierId:
+              details.membershipTierId || details.eligibleTierIds || [],
+            eligibleTierIds:
+              details.eligibleTierIds || details.membershipTierId || [],
+            eligibleUserIds: details.eligibleUserIds || [],
+            eligibleSegmentIds: details.eligibleSegmentIds || [],
+          },
         },
       },
     });
@@ -293,6 +332,17 @@ export function SurveysManage({
     // Status filter
     if (status !== "ALL") {
       list = list.filter((s) => s.status === status);
+    }
+
+    // Eligibility filter
+    if (memberEligibility !== "ALL") {
+      list = list.filter((s) => {
+        const ruleElig =
+          s.eligibility?.memberEligibility ||
+          s.eligibilityRule?.memberEligibility ||
+          "ALL";
+        return ruleElig === memberEligibility;
+      });
     }
 
     // Search filter
@@ -445,6 +495,14 @@ export function SurveysManage({
                 ))}
               </SelectContent>
             </Select>
+          </EcosystemActionBar.Item>
+
+          {/* Member Eligibility Filter */}
+          <EcosystemActionBar.Item>
+            <MemberEligibilitySelect
+              value={memberEligibility}
+              onValueChange={setMemberEligibility}
+            />
           </EcosystemActionBar.Item>
 
           {/* Sort Filter */}

@@ -1,9 +1,29 @@
 import { gql, useMutation, MutationHookOptions } from "@apollo/client";
 import { GET_SURVEYS } from "./survey-queries";
+import { MemberEligibility } from "../actions/gamification/gamification-mutation";
 
 // ---------------------------------------------------------
 // TYPES
 // ---------------------------------------------------------
+
+export interface SurveyEligibilityInput {
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+}
+
+export interface SurveyEligibilityRule {
+  id: string;
+  memberEligibility: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  createdAt: string;
+  updatedAt?: string;
+}
 
 export interface Survey {
   id: string;
@@ -13,6 +33,9 @@ export interface Survey {
   status: string;
   startDate?: string;
   endDate?: string;
+  eligibilityRuleId?: string;
+  eligibility?: SurveyEligibilityRule;
+  eligibilityRule?: SurveyEligibilityRule;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -23,6 +46,8 @@ export interface AddSurveyInput {
   status?: string;
   startDate?: string;
   endDate?: string;
+  eligibilityRuleId?: string;
+  eligibility?: SurveyEligibilityInput;
   previewType?: string;
   appearance?: any;
   fields?: any[];
@@ -46,6 +71,15 @@ const ADD_SURVEY = gql`
       status
       startDate
       endDate
+      eligibilityRuleId
+      eligibility {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+      }
       createdAt
       updatedAt
     }
@@ -72,6 +106,8 @@ export interface EditSurveyInput {
   status?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  eligibilityRuleId?: string | null;
+  eligibility?: SurveyEligibilityInput | null;
 }
 
 export interface EditSurveyData {
@@ -88,6 +124,15 @@ const EDIT_SURVEY = gql`
       status
       startDate
       endDate
+      eligibilityRuleId
+      eligibility {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+      }
       createdAt
       updatedAt
     }

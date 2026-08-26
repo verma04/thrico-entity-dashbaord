@@ -24,9 +24,11 @@ import {
   PolarisInput,
   PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
+import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
 
 export function SurveyCreationForm({
   initialValues,
+  isEdit = false,
   loading,
   onFinish,
   onCancel,
@@ -39,23 +41,62 @@ export function SurveyCreationForm({
     title: Yup.string()
       .required(`${singularName} title is required`)
       .max(100, "Max 100 characters"),
+    description: Yup.string().max(500, "Max 500 characters").nullable(),
     startDate: Yup.date().nullable(),
     endDate: Yup.date()
       .nullable()
       .min(Yup.ref("startDate"), "End date cannot be before start date"),
+    memberEligibility: Yup.string().default("ALL"),
+    membershipTierId: Yup.array().when("memberEligibility", {
+      is: "TIERS",
+      then: (schema) =>
+        schema.min(1, "Please select at least one membership tier"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    eligibleTierIds: Yup.array().when("memberEligibility", {
+      is: "TIERS",
+      then: (schema) =>
+        schema.min(1, "Please select at least one membership tier"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    eligibleUserIds: Yup.array().when("memberEligibility", {
+      is: "SPECIFIC_CUSTOMERS",
+      then: (schema) => schema.min(1, "Please select at least one customer"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   });
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: initialValues || {
       title: "",
+      description: "",
       startDate: null,
       endDate: null,
+      memberEligibility: "ALL",
+      membershipTierId: [],
+      eligibleTierIds: [],
+      eligibleUserIds: [],
+      eligibleSegmentIds: [],
     },
     validationSchema: surveySchema,
     onSubmit: (values) => {
       onFinish(values);
     },
   });
+
+  const err = (field: string) => {
+    const isTouched = Boolean(formik.touched[field]);
+    const errorMsg = formik.errors[field];
+    if (isTouched && errorMsg) {
+      return (
+        <p className="text-[12px] text-[#d72c0d] font-normal mt-0.5 leading-[16px]">
+          {String(errorMsg)}
+        </p>
+      );
+    }
+    return null;
+  };
 
   const handleInputChange = (field: string, value: any) => {
     formik.setFieldValue(field, value);
@@ -134,6 +175,20 @@ export function SurveyCreationForm({
                       ? format(formik.values.endDate, "MMM d, yyyy")
                       : "Indefinite"
                   }
+                />
+                <PolarisSummaryRow
+                  label="Eligibility"
+                  value={
+                    formik.values.memberEligibility === "ALL"
+                      ? "All Members"
+                      : formik.values.memberEligibility === "VERIFIED"
+                        ? "Verified Members"
+                        : formik.values.memberEligibility === "TIERS"
+                          ? `${(formik.values.eligibleTierIds || formik.values.membershipTierId || []).length} Tier(s)`
+                          : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                            ? `${(formik.values.eligibleUserIds || []).length} Customer(s)`
+                            : "All Members"
+                  }
                   isLast
                 />
               </div>
@@ -167,6 +222,20 @@ export function SurveyCreationForm({
               onBlur={formik.handleBlur}
               error={formik.touched.title && formik.errors.title ? String(formik.errors.title) : undefined}
             />
+
+            <div className="space-y-1 mt-3">
+              <PolarisLabel>Description (Optional)</PolarisLabel>
+              <textarea
+                id="description"
+                name="description"
+                rows={3}
+                placeholder="Provide helpful context or instructions for respondents..."
+                value={formik.values.description || ""}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="w-full rounded-[6px] border border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[12.5px] text-[#303030] dark:text-zinc-100 p-2.5 outline-none focus:ring-1 focus:ring-[#005bd3] focus:border-[#005bd3] transition-all resize-none shadow-2xs"
+              />
+            </div>
           </PolarisFormCard>
 
           {/* Step 2: Scheduling & Duration */}
@@ -266,6 +335,42 @@ export function SurveyCreationForm({
             </div>
           </PolarisFormCard>
 
+          {/* Step 3: Audience & Member Eligibility */}
+          <PolarisEligibilityCard
+            key={`eligibility-${formik.values.memberEligibility || "ALL"}`}
+            step={3}
+            title="Audience & Eligibility"
+            description="Specify which customers, members, or tiers can view and participate in this survey."
+            badge="Access"
+            eligibility={formik.values.memberEligibility || "ALL"}
+            onEligibilityChange={(val) => {
+              formik.setFieldValue("memberEligibility", val);
+              if (val === "ALL" || val === "VERIFIED") {
+                formik.setFieldValue("membershipTierId", []);
+                formik.setFieldValue("eligibleTierIds", []);
+                formik.setFieldValue("eligibleUserIds", []);
+              }
+            }}
+            tierIds={
+              formik.values.membershipTierId || formik.values.eligibleTierIds || []
+            }
+            onTierIdsChange={(tiers) => {
+              formik.setFieldValue("membershipTierId", tiers);
+              formik.setFieldValue("eligibleTierIds", tiers);
+            }}
+            userIds={formik.values.eligibleUserIds || []}
+            onUserIdsChange={(users) => {
+              formik.setFieldValue("eligibleUserIds", users);
+            }}
+            errorMessage={
+              formik.values.memberEligibility === "TIERS"
+                ? err("membershipTierId") || err("eligibleTierIds")
+                : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                  ? err("eligibleUserIds")
+                  : null
+            }
+          />
+
           {/* Floating Save Action Bar */}
           <FloatingSavePanel
             hasChanged={formik.dirty}
@@ -277,9 +382,13 @@ export function SurveyCreationForm({
               if (onCancel) onCancel();
               else window.history.back();
             }}
-            title={`Create ${singularName}`}
-            description="You have unsaved changes to this survey campaign configuration."
-            buttonText={`Create ${singularName}`}
+            title={isEdit ? `Save ${singularName}` : `Create ${singularName}`}
+            description={
+              isEdit
+                ? `You have unsaved changes to this ${singularName.toLowerCase()} campaign configuration.`
+                : "You have unsaved changes to this survey campaign configuration."
+            }
+            buttonText={isEdit ? "Save Changes" : `Create ${singularName}`}
           />
         </form>
       </PolarisFormLayout>

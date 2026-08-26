@@ -162,30 +162,75 @@ export function ManualRewardsManage({
   const allRewards: ManualRewardItem[] = useMemo(() => {
     const batchItems = batchesData?.getManualVoucherBatches?.items || [];
 
-    return batchItems.map((b: any) => ({
-      id: b.id,
-      title: b.name,
-      description:
-        b.description ||
-        b.reward?.description ||
-        (b.couponType === ManualCouponType.ONE_TO_ONE
-          ? "Unique serial pool batch."
-          : "Shared promotional coupon campaign."),
-      image: b.image || b.reward?.image || "",
-      url: b.url || "",
-      couponType: b.couponType || ManualCouponType.ONE_TO_ONE,
-      couponCode: b.couponType === ManualCouponType.ONE_TO_MANY ? b.name : "",
-      codePrefix: "VCH",
-      faceValue: b.faceValue || 0,
-      currency: b.currency || "TC",
-      totalInventory: b.totalCount || 0,
-      allocatedCount: b.allocatedCount || 0,
-      redeemedCount: b.redeemedCount || 0,
-      remainingCount: b.remainingCount || 0,
-      isActive: b.status === "ACTIVE",
-      validityDays: 30,
-      createdAt: b.createdAt || new Date().toISOString(),
-    }));
+    return batchItems.map((b: any) => {
+      let calculatedValidityDays = 30;
+      if (b.expiryDate) {
+        const expiry = new Date(b.expiryDate);
+        const created = b.createdAt ? new Date(b.createdAt) : new Date();
+        const diffDays = Math.round(
+          (expiry.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        calculatedValidityDays =
+          diffDays > 0
+            ? diffDays
+            : Math.max(
+                Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+                1
+              );
+      }
+
+      let parsedMeta: any = {};
+      try {
+        if (b.metadata) {
+          parsedMeta =
+            typeof b.metadata === "string"
+              ? JSON.parse(b.metadata)
+              : b.metadata;
+        }
+      } catch {
+        parsedMeta = {};
+      }
+
+      const isOneToMany =
+        b.couponType === ManualCouponType.ONE_TO_MANY ||
+        b.couponType === "ONE_TO_MANY";
+      const couponCode =
+        parsedMeta.couponCode ||
+        b.couponCode ||
+        (isOneToMany ? b.name : "");
+      const codePrefix =
+        parsedMeta.prefix ||
+        b.prefix ||
+        (!isOneToMany && b.name && b.name.length <= 8 && !b.name.includes(" ")
+          ? b.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()
+          : "VCH");
+
+      return {
+        id: b.id,
+        title: b.name,
+        description:
+          b.description ||
+          b.reward?.description ||
+          (b.couponType === ManualCouponType.ONE_TO_ONE
+            ? "Unique serial pool batch."
+            : "Shared promotional coupon campaign."),
+        image: b.image || b.reward?.image || "",
+        url: b.url || "",
+        couponType: b.couponType || ManualCouponType.ONE_TO_ONE,
+        couponCode: couponCode || b.name,
+        codePrefix: codePrefix || "VCH",
+        faceValue: b.faceValue || 0,
+        currency: b.currency || "TC",
+        totalInventory: b.totalCount || 0,
+        allocatedCount: b.allocatedCount || 0,
+        redeemedCount: b.redeemedCount || 0,
+        remainingCount: b.remainingCount || 0,
+        isActive: b.status === "ACTIVE",
+        validityDays: b.expiryDate ? calculatedValidityDays : 30,
+        expiryDate: b.expiryDate || undefined,
+        createdAt: b.createdAt || new Date().toISOString(),
+      };
+    });
   }, [batchesData]);
 
   // Tab counts

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Upload, X, Mail } from "lucide-react";
+import { Upload, X, Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -36,18 +36,21 @@ export interface ExportCsvModalProps {
    */
   matchingCount?: number;
 
+  /** Whether the export action is currently submitting/loading */
+  loading?: boolean;
+
   /**
    * Called when the user clicks Export.
    * If scope === "all", the modal automatically shows an email toast instead
    * of calling this callback (you can override via onExportAll).
    */
-  onExport?: (scope: ExportCsvScope, format: ExportCsvFormat) => void;
+  onExport?: (scope: ExportCsvScope, format: ExportCsvFormat) => void | Promise<void>;
 
   /**
    * Optional custom handler specifically for "Export all".
    * If provided, this is called instead of showing the default email toast.
    */
-  onExportAll?: (format: ExportCsvFormat) => void;
+  onExportAll?: (format: ExportCsvFormat) => void | Promise<void>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -121,6 +124,7 @@ export function ExportCsvModal({
   totalCount = 0,
   selectedCount,
   matchingCount,
+  loading = false,
   onExport,
   onExportAll,
 }: ExportCsvModalProps) {
@@ -130,10 +134,10 @@ export function ExportCsvModal({
   const capitalised =
     entityName.charAt(0).toUpperCase() + entityName.slice(1);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (scope === "all") {
       if (onExportAll) {
-        onExportAll(format);
+        await onExportAll(format);
       } else {
         // Default behaviour: show email toast
         toast.success(`CSV will be sent to your email`, {
@@ -143,7 +147,7 @@ export function ExportCsvModal({
         });
       }
     } else {
-      onExport?.(scope, format);
+      await onExport?.(scope, format);
     }
     onOpenChange(false);
   };
@@ -265,6 +269,7 @@ export function ExportCsvModal({
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
+            disabled={loading}
             className="h-9 px-4 text-sm font-medium rounded-lg border-border"
           >
             Cancel
@@ -272,10 +277,15 @@ export function ExportCsvModal({
           <Button
             size="sm"
             onClick={handleExport}
+            disabled={loading}
             className="h-9 px-4 text-sm font-medium rounded-lg bg-foreground text-background hover:bg-foreground/90 gap-2"
           >
-            <Upload className="h-3.5 w-3.5" />
-            {exportLabel}
+            {loading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Upload className="h-3.5 w-3.5" />
+            )}
+            {loading ? "Exporting…" : exportLabel}
           </Button>
         </div>
       </DialogContent>

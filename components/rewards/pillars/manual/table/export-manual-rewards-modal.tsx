@@ -55,6 +55,11 @@ export function ExportManualRewardsModal({
         getValue: (r) => r.validityDays ?? "",
       },
       {
+        header: "Expiry Date",
+        getValue: (r) =>
+          r.expiryDate ? safeFormat(r.expiryDate, "yyyy-MM-dd", "") : "No Expiry",
+      },
+      {
         header: "Created At",
         getValue: (r) => safeFormat(r.createdAt, "yyyy-MM-dd", ""),
       },

@@ -69,7 +69,10 @@ export function PolarisEligibilityCard({
   const [searchQuery, setSearchQuery] = useState("");
   const [isBrowseOpen, setIsBrowseOpen] = useState(false);
   const [selectedCustomersMap, setSelectedCustomersMap] = useState<
-    Record<string, { id: string; name: string; email?: string; avatar?: string }>
+    Record<
+      string,
+      { id: string; name: string; email?: string; avatar?: string }
+    >
   >({});
 
   const selectedTierIds = useMemo(() => toArray(tierIds), [tierIds]);
@@ -173,7 +176,12 @@ export function PolarisEligibilityCard({
     ) {
       searchUserByName({ variables: { name: "" } });
     }
-  }, [eligibility, selectedUserIds.length, searchResultsUsers.length, searchUserByName]);
+  }, [
+    eligibility,
+    selectedUserIds.length,
+    searchResultsUsers.length,
+    searchUserByName,
+  ]);
 
   return (
     <>
@@ -204,22 +212,23 @@ export function PolarisEligibilityCard({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL" className="text-[12.5px]">
-                All customers
+                All Member
               </SelectItem>
               <SelectItem value="VERIFIED" className="text-[12.5px]">
-                Specific customer segments (Verified)
+                Specific Members segments (Verified)
               </SelectItem>
               <SelectItem value="TIERS" className="text-[12.5px]">
                 Specific tiers
               </SelectItem>
               <SelectItem value="SPECIFIC_CUSTOMERS" className="text-[12.5px]">
-                Specific customers
+                Specific Members
               </SelectItem>
             </SelectContent>
           </Select>
 
           {/* When Specific Tiers or Specific Customers is active: Search bar + Browse button */}
-          {(eligibility === "TIERS" || eligibility === "SPECIFIC_CUSTOMERS") && (
+          {(eligibility === "TIERS" ||
+            eligibility === "SPECIFIC_CUSTOMERS") && (
             <div className="space-y-2.5 pt-0.5 animate-in fade-in-50 duration-200">
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
@@ -262,7 +271,9 @@ export function PolarisEligibilityCard({
               {eligibility === "TIERS" && selectedTierIds.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                   {selectedTierIds.map((tierId: string) => {
-                    const tier = membershipTiers.find((t: any) => t.id === tierId);
+                    const tier = membershipTiers.find(
+                      (t: any) => t.id === tierId,
+                    );
                     return (
                       <span
                         key={tierId}
@@ -292,45 +303,48 @@ export function PolarisEligibilityCard({
               )}
 
               {/* Selected Customers List */}
-              {eligibility === "SPECIFIC_CUSTOMERS" && selectedUserIds.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  {selectedUserIds.map((userId: string) => {
-                    const saved = selectedCustomersMap[userId];
-                    const displayName =
-                      saved?.name ||
-                      (userId.length > 20
-                        ? `Customer (${userId.slice(0, 8)}...)`
-                        : userId);
-                    const avatar = saved?.avatar;
-                    return (
-                      <span
-                        key={userId}
-                        title={userId}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 max-w-full"
-                      >
-                        <Avatar className="h-3.5 w-3.5 shrink-0">
-                          <AvatarImage src={avatar} />
-                          <AvatarFallback className="text-[8px]">
-                            {displayName.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="truncate">{displayName}</span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const next = selectedUserIds.filter((id) => id !== userId);
-                            onUserIdsChange(next);
-                          }}
-                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5 shrink-0"
+              {eligibility === "SPECIFIC_CUSTOMERS" &&
+                selectedUserIds.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    {selectedUserIds.map((userId: string) => {
+                      const saved = selectedCustomersMap[userId];
+                      const displayName =
+                        saved?.name ||
+                        (userId.length > 20
+                          ? `Customer (${userId.slice(0, 8)}...)`
+                          : userId);
+                      const avatar = saved?.avatar;
+                      return (
+                        <span
+                          key={userId}
+                          title={userId}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 max-w-full"
                         >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
+                          <Avatar className="h-3.5 w-3.5 shrink-0">
+                            <AvatarImage src={avatar} />
+                            <AvatarFallback className="text-[8px]">
+                              {displayName.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="truncate">{displayName}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const next = selectedUserIds.filter(
+                                (id) => id !== userId,
+                              );
+                              onUserIdsChange(next);
+                            }}
+                            className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5 shrink-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
 
               {/* Inline filter preview when searching */}
               {searchQuery.trim() && (
@@ -338,7 +352,9 @@ export function PolarisEligibilityCard({
                   {eligibility === "TIERS" ? (
                     membershipTiers
                       .filter((t: any) =>
-                        t.name.toLowerCase().includes(searchQuery.toLowerCase()),
+                        t.name
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()),
                       )
                       .map((tier: any) => {
                         const isSelected = selectedTierIds.includes(tier.id);
@@ -368,7 +384,9 @@ export function PolarisEligibilityCard({
                       })
                   ) : searchResultsUsers.length === 0 ? (
                     <div className="p-3 text-center text-xs text-zinc-500">
-                      {searchingUsers ? "Searching customers..." : "No matching customers found."}
+                      {searchingUsers
+                        ? "Searching customers..."
+                        : "No matching customers found."}
                     </div>
                   ) : (
                     searchResultsUsers.map((m: any) => {

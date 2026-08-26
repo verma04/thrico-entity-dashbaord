@@ -36,6 +36,7 @@ import {
   ManualCouponType,
 } from "@/graphql/actions/rewards/manual";
 import { ManualRewardItem } from "../table/manual-reward-card";
+import { safeFormat } from "@/lib/date-utils";
 import { toast } from "sonner";
 
 interface InternalRewardFormProps {
@@ -73,7 +74,8 @@ const internalRewardSchema = Yup.object().shape({
       schema.required("Coupon code string is required for shared campaigns"),
     otherwise: (schema) => schema.nullable(),
   }),
-  validityDays: Yup.number().min(1, "Validity days must be at least 1"),
+  validityDays: Yup.number().min(1, "Validity days must be at least 1").nullable(),
+  expiryDate: Yup.string().nullable(),
   url: Yup.string()
     .url("Must be a valid URL format (e.g. https://example.com)")
     .nullable(),
@@ -103,6 +105,47 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
   const parsedFetchedItem = React.useMemo<ManualRewardItem | null>(() => {
     const raw = fetchedBatchData?.getManualVoucherBatchById;
     if (!raw) return null;
+
+    let calculatedValidityDays = 30;
+    if (raw.expiryDate) {
+      const expiry = new Date(raw.expiryDate);
+      const created = raw.createdAt ? new Date(raw.createdAt) : new Date();
+      const diffDays = Math.round(
+        (expiry.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      calculatedValidityDays =
+        diffDays > 0
+          ? diffDays
+          : Math.max(
+              Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+              1
+            );
+    }
+
+    let parsedMeta: any = {};
+    try {
+      if (raw.metadata) {
+        parsedMeta =
+          typeof raw.metadata === "string"
+            ? JSON.parse(raw.metadata)
+            : raw.metadata;
+      }
+    } catch {
+      parsedMeta = {};
+    }
+
+    const isOneToMany =
+      raw.couponType === ManualCouponType.ONE_TO_MANY ||
+      raw.couponType === "ONE_TO_MANY";
+    const couponCode =
+      parsedMeta.couponCode ||
+      (isOneToMany ? raw.name : "");
+    const codePrefix =
+      parsedMeta.prefix ||
+      (!isOneToMany && raw.name && raw.name.length <= 8 && !raw.name.includes(" ")
+        ? raw.name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()
+        : "VCH");
+
     return {
       id: raw.id,
       title: raw.name,
@@ -110,9 +153,8 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
       image: raw.image || "",
       url: raw.url || "",
       couponType: raw.couponType || ManualCouponType.ONE_TO_ONE,
-      couponCode:
-        raw.couponType === ManualCouponType.ONE_TO_MANY ? raw.name : "",
-      codePrefix: "VCH",
+      couponCode: couponCode || (isOneToMany ? raw.name : ""),
+      codePrefix: codePrefix || "VCH",
       faceValue: raw.faceValue || 0,
       currency: raw.currency || "TC",
       totalInventory: raw.totalCount || 0,
@@ -120,7 +162,8 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
       redeemedCount: raw.redeemedCount || 0,
       remainingCount: raw.remainingCount || 0,
       isActive: raw.status === "ACTIVE",
-      validityDays: 30,
+      validityDays: raw.expiryDate ? calculatedValidityDays : (raw.validityDays || 30),
+      expiryDate: raw.expiryDate || "",
       createdAt: raw.createdAt || "",
     };
   }, [fetchedBatchData]);
@@ -136,8 +179,42 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
     );
   }, [entityData]);
 
-  const initialValues = React.useMemo(
-    () => ({
+  const initialValues = React.useMemo(() => {
+    let calculatedValidityDays = currentItem?.validityDays || 30;
+    let initialExpiryDate = "";
+
+    if (currentItem?.expiryDate) {
+      const date = new Date(currentItem.expiryDate);
+      if (!isNaN(date.getTime())) {
+        const offset = date.getTimezoneOffset() * 60000;
+        initialExpiryDate = new Date(date.getTime() - offset)
+          .toISOString()
+          .slice(0, 16);
+
+        const created = currentItem.createdAt
+          ? new Date(currentItem.createdAt)
+          : new Date();
+        const diffDays = Math.round(
+          (date.getTime() - created.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        calculatedValidityDays =
+          diffDays > 0
+            ? diffDays
+            : Math.max(
+                Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+                1
+              );
+      }
+    } else if (calculatedValidityDays) {
+      const date = new Date();
+      date.setDate(date.getDate() + Number(calculatedValidityDays));
+      const offset = date.getTimezoneOffset() * 60000;
+      initialExpiryDate = new Date(date.getTime() - offset)
+        .toISOString()
+        .slice(0, 16);
+    }
+
+    return {
       title: currentItem?.title || "",
       description: currentItem?.description || "",
       image: currentItem?.image || "",
@@ -147,13 +224,13 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
       couponCode: currentItem?.couponCode || "",
       inventoryRequired: true,
       totalUsageLimit: currentItem?.totalInventory || 25,
-      validityDays: currentItem?.validityDays || 30,
+      validityDays: calculatedValidityDays,
+      expiryDate: initialExpiryDate,
       url: currentItem?.url || "",
       isActive: currentItem?.isActive ?? true,
       status: currentItem?.isActive !== false ? "ACTIVE" : "DRAFT",
-    }),
-    [currentItem, defaultEntityPrefix],
-  );
+    };
+  }, [currentItem, defaultEntityPrefix]);
 
   const formik = useFormik({
     initialValues,
@@ -162,13 +239,17 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
     onSubmit: async (values) => {
       try {
         if (!isEditing) {
-          const expiryDate = values.validityDays
-            ? (() => {
-                const d = new Date();
-                d.setDate(d.getDate() + Number(values.validityDays));
-                return d.toISOString();
-              })()
-            : undefined;
+          let resolvedExpiryDate: string | undefined = undefined;
+          if (values.expiryDate) {
+            const parsedDate = new Date(values.expiryDate);
+            if (!isNaN(parsedDate.getTime())) {
+              resolvedExpiryDate = parsedDate.toISOString();
+            }
+          } else if (values.validityDays) {
+            const d = new Date();
+            d.setDate(d.getDate() + Number(values.validityDays));
+            resolvedExpiryDate = d.toISOString();
+          }
 
           const res = await createBatch({
             variables: {
@@ -194,7 +275,7 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   values.couponType === ManualCouponType.ONE_TO_MANY
                     ? Number(values.totalUsageLimit) || undefined
                     : undefined,
-                expiryDate,
+                expiryDate: resolvedExpiryDate,
               },
             },
           });
@@ -327,7 +408,13 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                   />
                   <PolarisSummaryRow
                     label="Validity"
-                    value={`${formik.values.validityDays} Days`}
+                    value={
+                      formik.values.expiryDate
+                        ? `${formik.values.validityDays || 0}d (Exp: ${safeFormat(formik.values.expiryDate, "dd MMM yyyy")})`
+                        : formik.values.validityDays
+                          ? `${formik.values.validityDays} Days`
+                          : "No Expiry"
+                    }
                     isLast
                   />
                 </div>
@@ -483,17 +570,67 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
                 </div>
               </div>
 
-              {/* Validity Days */}
-              <div className="max-w-xs pt-1">
+              {/* Expiration & Validity Duration */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
                 <PolarisInput
                   id="validityDays"
                   name="validityDays"
                   type="number"
                   min={1}
                   label="Validity Duration (Days)"
-                  value={formik.values.validityDays}
-                  onChange={formik.handleChange}
+                  placeholder="e.g. 30"
+                  value={formik.values.validityDays ?? ""}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                    const days = parseInt(e.target.value, 10);
+                    if (!isNaN(days) && days > 0) {
+                      const date = new Date();
+                      date.setDate(date.getDate() + days);
+                      const offset = date.getTimezoneOffset() * 60000;
+                      const localISOTime = new Date(date.getTime() - offset)
+                        .toISOString()
+                        .slice(0, 16);
+                      formik.setFieldValue("expiryDate", localISOTime);
+                    } else if (e.target.value === "") {
+                      formik.setFieldValue("expiryDate", "");
+                    }
+                  }}
                   onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.validityDays && formik.errors.validityDays
+                      ? (formik.errors.validityDays as string)
+                      : undefined
+                  }
+                  helperText="Duration in days before generated vouchers expire."
+                />
+
+                <PolarisInput
+                  id="expiryDate"
+                  name="expiryDate"
+                  type="datetime-local"
+                  label="Expiration Date & Time"
+                  value={formik.values.expiryDate || ""}
+                  onChange={(e) => {
+                    formik.handleChange(e);
+                    if (e.target.value) {
+                      const selectedDate = new Date(e.target.value);
+                      const now = new Date();
+                      const diffTime = selectedDate.getTime() - now.getTime();
+                      const diffDays = Math.ceil(
+                        diffTime / (1000 * 60 * 60 * 24)
+                      );
+                      if (diffDays > 0) {
+                        formik.setFieldValue("validityDays", diffDays);
+                      }
+                    }
+                  }}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.expiryDate && formik.errors.expiryDate
+                      ? (formik.errors.expiryDate as string)
+                      : undefined
+                  }
+                  helperText="Direct expiration cutoff timestamp (synced with validity days)."
                 />
               </div>
 

@@ -25,6 +25,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { safeFormat } from "@/lib/date-utils";
 import { ManualCouponType } from "@/graphql/actions/rewards/manual";
 
 export interface ManualRewardItem {
@@ -256,7 +257,11 @@ export function ManualRewardCard({
         <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground">
           <span className="flex items-center gap-1 font-medium">
             <Calendar className="h-3 w-3" />
-            {reward.validityDays ? `${reward.validityDays}d validity` : "No expiry"}
+            {reward.expiryDate
+              ? `Exp: ${safeFormat(reward.expiryDate, "dd MMM yyyy")}`
+              : reward.validityDays
+              ? `${reward.validityDays}d validity`
+              : "No expiry"}
           </span>
           <span className="font-medium text-emerald-600 dark:text-emerald-400">
             Zero vendor fee

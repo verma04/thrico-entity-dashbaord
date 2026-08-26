@@ -148,8 +148,12 @@ export const getManualRewardTableColumns = (
     key: "validity",
     header: "Validity",
     cell: (reward) => (
-      <span className="text-xs text-muted-foreground">
-        {reward.validityDays ? `${reward.validityDays} Days` : "No Expiry"}
+      <span className="text-xs text-muted-foreground whitespace-nowrap">
+        {reward.expiryDate
+          ? safeFormat(reward.expiryDate, "dd MMM yyyy")
+          : reward.validityDays
+          ? `${reward.validityDays} Days`
+          : "No Expiry"}
       </span>
     ),
   },
