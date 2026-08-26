@@ -26,6 +26,8 @@ import {
   MoreHorizontal,
   Copy,
   Power,
+  Sparkles,
+  Repeat,
 } from "lucide-react";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { PointRule, useTogglePointRule } from "@/graphql/actions";
@@ -90,8 +92,36 @@ export function RulesTable({
               "h-3.5 w-3.5 text-foreground",
             )}
             title={moduleInfo?.name || rule.module}
-            subtitle={`Level ${rule.trigger === "FIRST_TIME" ? "One-Off" : "Recurring"}`}
+            subtitle={
+              rule.trigger === "FIRST_TIME" ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                  <Sparkles className="h-2.5 w-2.5" /> One-Time Milestone
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400">
+                  <Repeat className="h-2.5 w-2.5" /> Recurring Rule
+                </span>
+              )
+            }
           />
+        );
+      },
+    },
+    {
+      key: "cadence",
+      header: "Cadence",
+      cell: (rule: PointRule) => {
+        const isFirstTime = rule.trigger === "FIRST_TIME";
+        return isFirstTime ? (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-tight bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 whitespace-nowrap shadow-2xs">
+            <Sparkles className="h-2.5 w-2.5 text-amber-500 fill-amber-500/20" />
+            One-Time
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-tight bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 whitespace-nowrap shadow-2xs">
+            <Repeat className="h-2.5 w-2.5 text-sky-500" />
+            Recurring
+          </span>
         );
       },
     },
@@ -112,12 +142,23 @@ export function RulesTable({
     {
       key: "action",
       header: "Trigger Event",
+      className: "min-w-[180px] max-w-[300px]",
       cell: (rule: PointRule) => (
-        <div className="flex items-center gap-1.5 text-[12px] font-medium text-foreground capitalize">
-          <Zap className="h-3 w-3 text-muted-foreground/60 shrink-0" />
-          <span className="truncate max-w-[180px]">
-            {rule.action.replace(/_/g, " ").toLowerCase()}
-          </span>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground capitalize">
+            <Zap className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            <span className="truncate">
+              {rule.action.replace(/_/g, " ").toLowerCase()}
+            </span>
+          </div>
+          {rule.description ? (
+            <p
+              className="text-[11px] text-muted-foreground line-clamp-1 pl-5"
+              title={rule.description}
+            >
+              {rule.description}
+            </p>
+          ) : null}
         </div>
       ),
     },
@@ -144,44 +185,71 @@ export function RulesTable({
     {
       key: "dailyCap",
       header: "Daily",
-      cell: (rule: PointRule) => (
-        <div className="flex flex-col">
-          <span className="text-[12px] font-semibold text-foreground">
-            {rule.dailyCap ? `${rule.dailyCap}x` : "∞"}
-          </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
-            Limit
-          </span>
-        </div>
-      ),
+      cell: (rule: PointRule) => {
+        if (rule.trigger === "FIRST_TIME") {
+          return (
+            <span className="text-[12px] text-muted-foreground font-medium">
+              —
+            </span>
+          );
+        }
+        return (
+          <div className="flex flex-col">
+            <span className="text-[12px] font-semibold text-foreground">
+              {rule.dailyCap ? `${rule.dailyCap}x` : "∞"}
+            </span>
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
+              Limit
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "weeklyCap",
       header: "Weekly",
-      cell: (rule: PointRule) => (
-        <div className="flex flex-col">
-          <span className="text-[12px] font-semibold text-foreground">
-            {rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}
-          </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
-            Limit
-          </span>
-        </div>
-      ),
+      cell: (rule: PointRule) => {
+        if (rule.trigger === "FIRST_TIME") {
+          return (
+            <span className="text-[12px] text-muted-foreground font-medium">
+              —
+            </span>
+          );
+        }
+        return (
+          <div className="flex flex-col">
+            <span className="text-[12px] font-semibold text-foreground">
+              {rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}
+            </span>
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
+              Limit
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "monthlyCap",
       header: "Monthly",
-      cell: (rule: PointRule) => (
-        <div className="flex flex-col">
-          <span className="text-[12px] font-semibold text-foreground">
-            {rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}
-          </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
-            Limit
-          </span>
-        </div>
-      ),
+      cell: (rule: PointRule) => {
+        if (rule.trigger === "FIRST_TIME") {
+          return (
+            <span className="text-[12px] text-muted-foreground font-medium">
+              —
+            </span>
+          );
+        }
+        return (
+          <div className="flex flex-col">
+            <span className="text-[12px] font-semibold text-foreground">
+              {rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}
+            </span>
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
+              Limit
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "notifications",

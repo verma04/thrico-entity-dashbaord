@@ -128,6 +128,7 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
     serial: true,
     module: true,
+    cadence: true,
     source: true,
     action: true,
     points: true,
@@ -360,7 +361,13 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
         handleToggleActive,
         toggling,
       ),
-    [subscriptionSources, toggling],
+    [
+      subscriptionSources,
+      handleEdit,
+      setNotificationModalRule,
+      handleToggleActive,
+      toggling,
+    ],
   );
 
   return (

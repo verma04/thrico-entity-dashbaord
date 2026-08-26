@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Zap, Coins, Bell, Mail, Settings } from "lucide-react";
+import { Zap, Coins, Bell, Mail, Settings, Sparkles, Repeat } from "lucide-react";
 import { PointRule } from "@/graphql/actions";
 import { PointRuleActions } from "./point-rule-actions";
 import { Switch } from "@/components/ui/switch";
@@ -77,9 +77,17 @@ export function PointRuleCardCompact({
             {isIntegration ? "Integration" : "Module"}
           </span>
 
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-muted-foreground border border-border">
-            {isRecurring ? "Recurring" : "One-Off"}
-          </span>
+          {isRecurring ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-tight bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30 shadow-2xs">
+              <Repeat className="h-2.5 w-2.5 text-sky-500" />
+              Recurring
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-tight bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 shadow-2xs">
+              <Sparkles className="h-2.5 w-2.5 text-amber-500 fill-amber-500/20" />
+              One-Time
+            </span>
+          )}
 
           {rule.memberEligibility && (
             <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted text-muted-foreground border border-border">
@@ -125,28 +133,35 @@ export function PointRuleCardCompact({
 
           {/* Caps and Notification Badges */}
           <div className="flex items-center justify-between pt-1 text-[10px] text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <span>
-                Daily:{" "}
-                <strong className="text-foreground">
-                  {rule.dailyCap ? `${rule.dailyCap}x` : "∞"}
-                </strong>
-              </span>
-              <span>•</span>
-              <span>
-                Weekly:{" "}
-                <strong className="text-foreground">
-                  {rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}
-                </strong>
-              </span>
-              <span>•</span>
-              <span>
-                Monthly:{" "}
-                <strong className="text-foreground">
-                  {rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}
-                </strong>
-              </span>
-            </div>
+            {isRecurring ? (
+              <div className="flex items-center gap-2 text-[10px]">
+                <span className="inline-flex items-center gap-0.5">
+                  <span className="text-muted-foreground">Daily:</span>
+                  <strong className="text-foreground font-semibold">
+                    {rule.dailyCap ? `${rule.dailyCap}x` : "∞"}
+                  </strong>
+                </span>
+                <span>•</span>
+                <span className="inline-flex items-center gap-0.5">
+                  <span className="text-muted-foreground">Weekly:</span>
+                  <strong className="text-foreground font-semibold">
+                    {rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}
+                  </strong>
+                </span>
+                <span>•</span>
+                <span className="inline-flex items-center gap-0.5">
+                  <span className="text-muted-foreground">Monthly:</span>
+                  <strong className="text-foreground font-semibold">
+                    {rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}
+                  </strong>
+                </span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/20">
+                <Sparkles className="h-2.5 w-2.5 text-amber-500 fill-amber-500/20 shrink-0" />
+                One-time milestone (No caps)
+              </div>
+            )}
 
             <div className="flex items-center gap-1">
               <div

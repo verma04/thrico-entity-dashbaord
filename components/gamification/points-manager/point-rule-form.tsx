@@ -12,6 +12,8 @@ import {
   ShieldCheck,
   Crown,
   Check,
+  Sparkles,
+  Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
@@ -161,9 +163,9 @@ export function PointRuleForm({
           action: "",
           trigger: "FIRST_TIME",
           points: 10,
-          dailyCap: 10,
-          weeklyCap: 70,
-          monthlyCap: 210,
+          dailyCap: null,
+          weeklyCap: null,
+          monthlyCap: null,
           memberEligibility: "ALL",
           membershipTierId: [],
           eligibleTierIds: [],
@@ -184,9 +186,25 @@ export function PointRuleForm({
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
+        const isFirstTime = values.trigger === "FIRST_TIME";
         await onSubmit({
           ...values,
           source: sourceType,
+          dailyCap: isFirstTime
+            ? null
+            : values.dailyCap
+              ? Number(values.dailyCap)
+              : null,
+          weeklyCap: isFirstTime
+            ? null
+            : values.weeklyCap
+              ? Number(values.weeklyCap)
+              : null,
+          monthlyCap: isFirstTime
+            ? null
+            : values.monthlyCap
+              ? Number(values.monthlyCap)
+              : null,
         });
         setSaved(true);
         toast.success(
@@ -209,6 +227,8 @@ export function PointRuleForm({
       }
     },
   });
+
+  const isRecurring = formik.values.trigger === "RECURRING";
 
   const allSources = React.useMemo(() => {
     const modsMap = new Map<string, any>();
@@ -400,9 +420,15 @@ export function PointRuleForm({
               <PolarisSummaryRow
                 label="Target Trigger"
                 value={
-                  formik.values.trigger === "FIRST_TIME"
-                    ? "First Time Only"
-                    : "Recurring"
+                  formik.values.trigger === "FIRST_TIME" ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                      <Sparkles className="h-2.5 w-2.5 text-amber-500" /> One-Time Bonus
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30">
+                      <Repeat className="h-2.5 w-2.5 text-sky-500" /> Recurring Rule
+                    </span>
+                  )
                 }
               />
               <PolarisSummaryRow
@@ -421,30 +447,34 @@ export function PointRuleForm({
                         : "All Customers"
                 }
               />
-              <PolarisSummaryRow
-                label="Daily Payout Cap"
-                value={
-                  formik.values.dailyCap
-                    ? `${formik.values.dailyCap} times / user`
-                    : "Unlimited"
-                }
-              />
-              <PolarisSummaryRow
-                label="Weekly Payout Cap"
-                value={
-                  formik.values.weeklyCap
-                    ? `${formik.values.weeklyCap} times / user`
-                    : "Unlimited"
-                }
-              />
-              <PolarisSummaryRow
-                label="Monthly Payout Cap"
-                value={
-                  formik.values.monthlyCap
-                    ? `${formik.values.monthlyCap} times / user`
-                    : "Unlimited"
-                }
-              />
+              {isRecurring && (
+                <>
+                  <PolarisSummaryRow
+                    label="Daily Payout Cap"
+                    value={
+                      formik.values.dailyCap
+                        ? `${formik.values.dailyCap} times / user`
+                        : "Unlimited"
+                    }
+                  />
+                  <PolarisSummaryRow
+                    label="Weekly Payout Cap"
+                    value={
+                      formik.values.weeklyCap
+                        ? `${formik.values.weeklyCap} times / user`
+                        : "Unlimited"
+                    }
+                  />
+                  <PolarisSummaryRow
+                    label="Monthly Payout Cap"
+                    value={
+                      formik.values.monthlyCap
+                        ? `${formik.values.monthlyCap} times / user`
+                        : "Unlimited"
+                    }
+                  />
+                </>
+              )}
               <PolarisSummaryRow
                 label="Push Alert"
                 value={
@@ -563,18 +593,125 @@ export function PointRuleForm({
           </div>
 
           {/* Cadence & Description */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-            <PolarisSelect
-              id="trigger"
-              label="Reward Cadence"
-              value={formik.values.trigger}
-              disabled={isEdit}
-              onChange={(val) => formik.setFieldValue("trigger", val)}
-              options={[
-                { value: "FIRST_TIME", label: "First-time Action (One-off milestone)" },
-                { value: "RECURRING", label: "Recurring (Every instance)" },
-              ]}
-            />
+          <div className="space-y-3.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <PolarisLabel required>Reward Cadence</PolarisLabel>
+                <span className="text-[11px] text-muted-foreground">
+                  Choose how often members can be credited for this trigger.
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* One-off milestone */}
+                <div
+                  role="button"
+                  tabIndex={isEdit ? -1 : 0}
+                  onClick={() => {
+                    if (isEdit) return;
+                    formik.setFieldValue("trigger", "FIRST_TIME");
+                    formik.setFieldValue("dailyCap", null);
+                    formik.setFieldValue("weeklyCap", null);
+                    formik.setFieldValue("monthlyCap", null);
+                  }}
+                  className={cn(
+                    "relative flex items-start gap-3 p-3.5 rounded-[10px] border text-left transition-all duration-200 cursor-pointer select-none",
+                    formik.values.trigger === "FIRST_TIME"
+                      ? "border-amber-500/60 bg-gradient-to-b from-amber-500/[0.08] to-amber-500/[0.02] dark:from-amber-500/[0.12] dark:to-transparent ring-2 ring-amber-500/30 shadow-xs"
+                      : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-zinc-400 dark:hover:border-zinc-700",
+                    isEdit && "opacity-60 cursor-not-allowed",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "p-2 rounded-lg shrink-0 transition-colors",
+                      formik.values.trigger === "FIRST_TIME"
+                        ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="text-[13px] font-bold text-foreground">
+                        First-Time Action
+                      </span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold tracking-tight uppercase border",
+                          formik.values.trigger === "FIRST_TIME"
+                            ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40"
+                            : "bg-muted text-muted-foreground border-transparent",
+                        )}
+                      >
+                        One-Off
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                      Awarded exactly once per user account lifetime upon first completion.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Recurring */}
+                <div
+                  role="button"
+                  tabIndex={isEdit ? -1 : 0}
+                  onClick={() => {
+                    if (isEdit) return;
+                    formik.setFieldValue("trigger", "RECURRING");
+                    if (
+                      formik.values.dailyCap === null &&
+                      formik.values.weeklyCap === null &&
+                      formik.values.monthlyCap === null
+                    ) {
+                      formik.setFieldValue("dailyCap", 10);
+                      formik.setFieldValue("weeklyCap", 70);
+                      formik.setFieldValue("monthlyCap", 210);
+                    }
+                  }}
+                  className={cn(
+                    "relative flex items-start gap-3 p-3.5 rounded-[10px] border text-left transition-all duration-200 cursor-pointer select-none",
+                    formik.values.trigger === "RECURRING"
+                      ? "border-sky-500/60 bg-gradient-to-b from-sky-500/[0.08] to-sky-500/[0.02] dark:from-sky-500/[0.12] dark:to-transparent ring-2 ring-sky-500/30 shadow-xs"
+                      : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-zinc-400 dark:hover:border-zinc-700",
+                    isEdit && "opacity-60 cursor-not-allowed",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "p-2 rounded-lg shrink-0 transition-colors",
+                      formik.values.trigger === "RECURRING"
+                        ? "bg-sky-500/20 text-sky-600 dark:text-sky-400"
+                        : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    <Repeat className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="text-[13px] font-bold text-foreground">
+                        Recurring Rule
+                      </span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold tracking-tight uppercase border",
+                          formik.values.trigger === "RECURRING"
+                            ? "bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-500/40"
+                            : "bg-muted text-muted-foreground border-transparent",
+                        )}
+                      >
+                        Recurring
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                      Awarded continuously upon every event, governed by frequency caps.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <PolarisTextarea
               id="description"
@@ -621,52 +758,54 @@ export function PointRuleForm({
           </div>
         </PolarisFormCard>
 
-        {/* Card 3: Velocity & Anti-Abuse Frequency Controls */}
-        <PolarisFormCard
-          step={3}
-          title="Velocity & Fraud Protection"
-          description="Protect the community point economy with velocity limitations and anti-farming caps."
-          badge="Anti-Abuse Engine"
-        >
-          <PolarisInfoBanner
-            title="Frequency Cap Enforcement"
-            description="Caps define the maximum number of rewarded occurrences per individual user account. Leave a cap blank or set to 0 for unconstrained earning."
-          />
+        {/* Card 3: Velocity & Anti-Abuse Frequency Controls - Only rendered for Recurring rules */}
+        {isRecurring && (
+          <PolarisFormCard
+            step={3}
+            title="Velocity & Fraud Protection"
+            description="Protect the community point economy with velocity limitations and anti-farming caps."
+            badge="Anti-Abuse Engine"
+          >
+            <PolarisInfoBanner
+              title="Frequency Cap Enforcement"
+              description="Caps define the maximum number of rewarded occurrences per individual user account. Leave a cap blank or set to 0 for unconstrained earning."
+            />
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            <PolarisCapInput
-              id="dailyCap"
-              label="Daily Cap"
-              periodSuffix="/ day"
-              value={formik.values.dailyCap}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              onClear={() => formik.setFieldValue("dailyCap", null)}
-            />
-            <PolarisCapInput
-              id="weeklyCap"
-              label="Weekly Cap"
-              periodSuffix="/ week"
-              value={formik.values.weeklyCap}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              onClear={() => formik.setFieldValue("weeklyCap", null)}
-            />
-            <PolarisCapInput
-              id="monthlyCap"
-              label="Monthly Cap"
-              periodSuffix="/ month"
-              value={formik.values.monthlyCap}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              onClear={() => formik.setFieldValue("monthlyCap", null)}
-            />
-          </div>
-        </PolarisFormCard>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <PolarisCapInput
+                id="dailyCap"
+                label="Daily Cap"
+                periodSuffix="/ day"
+                value={formik.values.dailyCap}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                onClear={() => formik.setFieldValue("dailyCap", null)}
+              />
+              <PolarisCapInput
+                id="weeklyCap"
+                label="Weekly Cap"
+                periodSuffix="/ week"
+                value={formik.values.weeklyCap}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                onClear={() => formik.setFieldValue("weeklyCap", null)}
+              />
+              <PolarisCapInput
+                id="monthlyCap"
+                label="Monthly Cap"
+                periodSuffix="/ month"
+                value={formik.values.monthlyCap}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                onClear={() => formik.setFieldValue("monthlyCap", null)}
+              />
+            </div>
+          </PolarisFormCard>
+        )}
 
         {/* Card 4: Eligibility (Shopify Polaris UI) */}
         <PolarisEligibilityCard
-          step={4}
+          step={isRecurring ? 4 : 3}
           eligibility={formik.values.memberEligibility || "ALL"}
           onEligibilityChange={(val) =>
             formik.setFieldValue("memberEligibility", val)
@@ -688,7 +827,7 @@ export function PointRuleForm({
 
         {/* Card 5: Notification Settings */}
         <PolarisFormCard
-          step={5}
+          step={isRecurring ? 5 : 4}
           title="Notification Settings"
           description="Configure alert channels and custom notification text when members earn points from this rule."
           badge="Notification Channels"
