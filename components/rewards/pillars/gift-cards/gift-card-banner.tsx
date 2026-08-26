@@ -52,18 +52,7 @@ export const GiftCardBanner: React.FC<GiftCardBannerProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {onHowItWorksClick && (
-            <Button
-              variant="outline"
-              onClick={onHowItWorksClick}
-              className="text-xs font-medium h-8 gap-1.5 cursor-pointer shadow-2xs"
-            >
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-              How Gift Cards Work
-            </Button>
-          )}
-
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
             onClick={onTopUpClick}
@@ -72,16 +61,6 @@ export const GiftCardBanner: React.FC<GiftCardBannerProps> = ({
             <Wallet className="h-3.5 w-3.5 text-muted-foreground" />
             Top-Up Wallet
           </Button>
-
-          {onCreateClick && (
-            <Button
-              onClick={onCreateClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Configure Gift Card
-            </Button>
-          )}
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ import {
   UPDATE_ADMIN_USER,
   UPDATE_ADMIN_PASSWORD,
   UPDATE_ADMIN_USER_ROLE,
+  DELETE_ADMIN_USER,
 } from "../../quries/settings/roles";
 
 export interface AdminAccess {
@@ -252,3 +253,12 @@ export const useUpdateAdminUserRole = (options?: any) =>
     refetchQueries: [{ query: GET_ADMIN_USERS }],
     ...options,
   });
+
+export const useDeleteAdminUser = (options?: any) =>
+  useMutation<{ deleteAdminUser: { success: boolean } }, { adminId: string }>(
+    DELETE_ADMIN_USER,
+    {
+      refetchQueries: [{ query: GET_ADMIN_USERS }],
+      ...options,
+    },
+  );

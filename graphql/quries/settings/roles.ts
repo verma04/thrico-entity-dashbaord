@@ -334,3 +334,11 @@ export const UPDATE_ADMIN_USER_ROLE = gql`
     }
   }
 `;
+
+export const DELETE_ADMIN_USER = gql`
+  mutation DeleteAdminUser($adminId: ID!) {
+    deleteAdminUser(adminId: $adminId) {
+      success
+    }
+  }
+`;

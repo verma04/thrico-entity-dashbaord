@@ -21,9 +21,9 @@ const EditUserPage = () => {
     onCompleted: () => {
       toast({
         title: "Member updated",
-        description: "The member details have been updated.",
+        description: "The member details have been updated successfully.",
       });
-      router.push("/settings/users");
+      router.push("/settings/users/all");
     },
     onError: (err: ApolloError) => {
       toast({
@@ -34,29 +34,41 @@ const EditUserPage = () => {
     },
   });
 
-  const onFinish = (values: any) => {
-    updateAdmin({
-      variables: {
-        adminId: id,
-        input: {
-          firstName: values.firstName,
-          lastName: values.lastName,
-          // Note: email is not updatable here based on backend implementation
+  const [updateRole] = useUpdateAdminUserRole();
+
+  const onFinish = async (values: any) => {
+    try {
+      if (values.role && values.role !== data?.getAdminById?.role?.id) {
+        await updateRole({
+          variables: {
+            adminId: id,
+            roleId: values.role,
+          },
+        });
+      }
+
+      await updateAdmin({
+        variables: {
+          adminId: id,
+          input: {
+            firstName: values.firstName,
+            lastName: values.lastName,
+          },
         },
-      },
-    });
-    // Note: Role updates might need to be handled separately if the form allows it, 
-    // but the UserCreationForm for edit mode shows a message to update role from the table.
+      });
+    } catch (err: any) {
+      // Error handled by Apollo error callbacks
+    }
   };
 
   const onCancel = () => {
-    router.back();
+    router.push("/settings/users/all");
   };
 
   if (fetching) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="flex h-[calc(100vh-140px)] w-full items-center justify-center">
+        <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -65,8 +77,14 @@ const EditUserPage = () => {
 
   if (!user) {
     return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        Member not found.
+      <div className="flex h-[calc(100vh-140px)] w-full items-center justify-center flex-col gap-2 text-muted-foreground">
+        <p className="text-sm font-medium">Member not found.</p>
+        <button
+          onClick={() => router.push("/settings/users/all")}
+          className="text-xs text-primary underline hover:opacity-80"
+        >
+          Return to Members
+        </button>
       </div>
     );
   }

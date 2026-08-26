@@ -37,12 +37,24 @@ import {
   Mail,
   SlidersHorizontal,
   Plus,
+  Trash2,
+  Loader2,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import AddUserDialog from "./add-user-dialog";
 import ManagePermissionsDialog from "./manage-permissions-dialog";
 import {
   useGetAdminUsers,
   useUpdateAdminUser,
+  useDeleteAdminUser,
   AdminUser,
 } from "@/graphql/actions";
 import { cn } from "@/lib/utils";
@@ -108,6 +120,28 @@ export default function UsersTab() {
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const [deleteAdminUser, { loading: isDeletingUser }] = useDeleteAdminUser({
+    onCompleted: () => {
+      sonnerToast.success("Member removed", {
+        description: `Access has been revoked and ${
+          userToDelete?.firstName
+            ? `${userToDelete.firstName} ${userToDelete.lastName || ""}`
+            : userToDelete?.email || "the member"
+        } was removed from this workspace.`,
+      });
+      setIsDeleteModalOpen(false);
+      setUserToDelete(null);
+      refetch?.();
+    },
+    onError: (err: any) => {
+      sonnerToast.error("Failed to remove member", {
+        description: err.message,
+      });
+    },
+  });
 
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
     {
@@ -178,8 +212,7 @@ export default function UsersTab() {
   };
 
   const handleEditUser = (user: AdminUser) => {
-    setSelectedUser(user);
-    setShowAddDialog(true);
+    router.push(`/settings/users/${user.id}`);
   };
 
   const handleUpdateStatus = (id: string, currentStatus: any) => {
@@ -206,10 +239,13 @@ export default function UsersTab() {
       cell: (user: AdminUser) => (
         <AdminTableItem
           avatar={user.avatar}
-          title={`${user.firstName || ""} ${user.lastName || ""}`}
+          title={
+            `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+            user.email
+          }
           subtitle={user.email || "Team Member"}
           fallbackText={`${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`}
-          onClick={() => {}}
+          onClick={() => handleEditUser(user)}
         />
       ),
     },
@@ -308,6 +344,21 @@ export default function UsersTab() {
                     </>
                   )}
                 </DropdownMenuItem>
+                {!user.isSuperAdmin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setUserToDelete(user);
+                        setIsDeleteModalOpen(true);
+                      }}
+                      className="text-rose-600 focus:text-rose-600 cursor-pointer"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove Member
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -561,6 +612,77 @@ export default function UsersTab() {
           });
         }}
       />
+
+      <AlertDialog
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          if (!open && !isDeletingUser) {
+            setIsDeleteModalOpen(false);
+            setUserToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent className="max-w-md p-6 rounded-2xl border border-border/60 bg-background shadow-xl">
+          <AlertDialogHeader className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/60 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5">
+                <AlertDialogTitle className="text-base font-semibold text-foreground">
+                  Remove Workspace Member
+                </AlertDialogTitle>
+                <p className="text-xs text-muted-foreground">
+                  Revoke all administrative access
+                </p>
+              </div>
+            </div>
+            <div className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed pt-1 space-y-3">
+              <div>
+                Are you sure you want to remove{" "}
+                <span className="font-semibold text-foreground bg-muted px-1.5 py-0.5 rounded-md border border-border/60">
+                  {userToDelete?.firstName
+                    ? `${userToDelete.firstName} ${userToDelete.lastName || ""}`
+                    : userToDelete?.email || "this member"}
+                </span>{" "}
+                ({userToDelete?.email}) from this workspace?
+              </div>
+              <div className="p-3 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-900/50 text-left space-y-1">
+                <p className="text-[11.5px] text-rose-800 dark:text-rose-300/90 leading-normal">
+                  An email notification will be sent confirming that their access has been revoked. They will immediately lose access to all dashboard tools and administrative features.
+                </p>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-5 gap-2 sm:gap-2">
+            <AlertDialogCancel
+              disabled={isDeletingUser}
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setUserToDelete(null);
+              }}
+              className="h-9 px-4 text-xs font-medium rounded-lg"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={isDeletingUser}
+              onClick={() => {
+                if (userToDelete?.id) {
+                  deleteAdminUser({ variables: { adminId: userToDelete.id } });
+                }
+              }}
+              className="h-9 px-4 text-xs font-medium gap-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
+            >
+              {isDeletingUser && (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              )}
+              {isDeletingUser ? "Removing..." : "Remove Member"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </EcosystemWrapper>
   );
 }

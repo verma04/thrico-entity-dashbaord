@@ -416,15 +416,6 @@ export const GiftCardsManage: React.FC<GiftCardsManageProps> = ({
           <EcosystemActionBar.Status active={walletBalance > 1000}>
             Wallet: ₹{walletBalance.toLocaleString("en-IN")}
           </EcosystemActionBar.Status>
-
-          {/* Create CTA Button */}
-          <Button
-            onClick={handleCreate}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Configure Gift Card
-          </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 

@@ -58,30 +58,9 @@ export const StoreBanner: React.FC<StoreBannerProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {onHowItWorksClick && (
-            <Button
-              variant="outline"
-              onClick={onHowItWorksClick}
-              className="text-xs font-medium h-8 gap-1.5 cursor-pointer shadow-2xs"
-            >
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-              How Store Rewards Work
-            </Button>
-          )}
-
-          {onCreateClick && (
-            <Button
-              onClick={onCreateClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Create Store Reward
-            </Button>
-          )}
-
+        <div className="flex items-center gap-2 shrink-0">
           <Link href="/integrations/shopify">
-            <Button variant="outline" className="text-xs font-medium h-8 gap-1">
+            <Button variant="outline" className="text-xs font-medium h-8 gap-1 shadow-2xs">
               <Link2 className="h-3 w-3" />
               Shopify Integration
             </Button>
