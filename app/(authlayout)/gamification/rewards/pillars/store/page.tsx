@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -36,13 +37,12 @@ export default function PillarTwoStorePage() {
               How Store Rewards Work
             </Button>
 
-            <Button
-              onClick={() => setIsDrawerOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-medium text-xs h-8 shadow-2xs cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Create Store Reward
-            </Button>
+            <Link href="/gamification/rewards/pillars/store/add">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 font-medium text-xs h-8 shadow-2xs cursor-pointer">
+                <Plus className="h-3.5 w-3.5" />
+                Create Store Reward
+              </Button>
+            </Link>
           </div>
         }
       />

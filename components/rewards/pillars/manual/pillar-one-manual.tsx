@@ -48,13 +48,11 @@ export const PillarOneManual: React.FC<PillarOneManualProps> = ({
   };
 
   const handleOpenCreate = () => {
-    setEditingItem(null);
-    setIsDrawerOpen(true);
+    router.push("/gamification/rewards/pillars/manual/add");
   };
 
   const handleOpenEdit = (item: ManualRewardItem) => {
-    setEditingItem(item);
-    setIsDrawerOpen(true);
+    router.push(`/gamification/rewards/pillars/manual/${item.id}/edit`);
   };
 
   const handleCloseDrawer = () => {

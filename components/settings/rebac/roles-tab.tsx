@@ -13,7 +13,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import type {
+  ExportCsvScope,
+  ExportCsvFormat,
+} from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { toast as sonnerToast } from "sonner";
 import {
@@ -27,7 +30,20 @@ import {
   ShieldCheck,
   ShieldX,
   Upload,
+  Loader2,
+  Users,
+  AlertTriangle,
+  Crown,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import AddRoleDialog from "./add-role-dialog";
 import { useGetRoles, useDeleteRole } from "@/graphql/actions";
 import { cn } from "@/lib/utils";
@@ -88,17 +104,21 @@ export default function RolesTab() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedRole, setSelectedRole] = useState<any>(null);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<any>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const [deleteRole] = useDeleteRole({
+  const [deleteRole, { loading: deleting }] = useDeleteRole({
     onCompleted: () => {
-      toast({ title: "Role deleted" });
+      sonnerToast.success("Role deleted", {
+        description: `The role "${roleToDelete?.name || "Selected"}" has been deleted.`,
+      });
+      setIsDeleteModalOpen(false);
+      setRoleToDelete(null);
       refetch();
     },
     onError: (err: any) => {
-      toast({
-        title: "Error",
+      sonnerToast.error("Failed to delete role", {
         description: err.message,
-        variant: "destructive",
       });
     },
   });
@@ -122,22 +142,23 @@ export default function RolesTab() {
   }, [roles, debouncedSearch, typeFilter]);
 
   const handleEditRole = (role: any) => {
-    setSelectedRole(role);
-    setShowAddDialog(true);
+    router.push(`/settings/users/roles/${role.id}`);
   };
 
   const handleDeleteRole = (role: any) => {
     if (role.isSystem) {
-      toast({
-        title: "Protected role",
+      sonnerToast.error("Protected role", {
         description: "System roles cannot be deleted.",
-        variant: "destructive",
       });
       return;
     }
-    if (confirm(`Delete the role "${role.name}"? This cannot be undone.`)) {
-      deleteRole({ variables: { id: role.id } });
-    }
+    setRoleToDelete(role);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!roleToDelete?.id) return;
+    await deleteRole({ variables: { id: roleToDelete.id } });
   };
 
   const columns = [
@@ -150,14 +171,24 @@ export default function RolesTab() {
             <Fingerprint className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-foreground">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => handleEditRole(role)}
+                className="text-sm font-semibold text-foreground hover:text-primary hover:underline text-left cursor-pointer transition-colors"
+              >
                 {role.name}
-              </span>
+              </button>
               {role.isSystem && (
-                <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-md">
+                <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50 px-1.5 py-0.5 rounded-md">
                   <ShieldCheck className="w-2.5 h-2.5" />
                   System
+                </span>
+              )}
+              {role.isAdmin && (
+                <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 px-1.5 py-0.5 rounded-md">
+                  <Crown className="w-2.5 h-2.5" />
+                  Admin
                 </span>
               )}
             </div>
@@ -171,6 +202,28 @@ export default function RolesTab() {
       ),
     },
     {
+      key: "users",
+      header: "Assigned Users",
+      cell: (role: any) => {
+        const count = role.usersCount ?? role.userCount ?? 0;
+        return (
+          <div className="flex items-center gap-1.5 text-xs">
+            <Users className="w-3.5 h-3.5 text-muted-foreground" />
+            <span
+              className={cn(
+                "font-medium",
+                count > 0
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground",
+              )}
+            >
+              {count} {count === 1 ? "user" : "users"}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       key: "permissions",
       header: "Permissions",
       cell: (role: any) => {
@@ -178,7 +231,7 @@ export default function RolesTab() {
         const count = perms.reduce(
           (acc: number, p: any) =>
             acc +
-            [p.canCreate, p.canRead, p.canUpdate, p.canDelete].filter(Boolean)
+            [p.canCreate, p.canRead, p.canEdit, p.canDelete].filter(Boolean)
               .length,
           0,
         );
@@ -265,7 +318,9 @@ export default function RolesTab() {
                 className={cn("h-3.5 w-3.5", loading && "animate-spin")}
               />
             </Button>
-            <CtaButton onClick={() => router.push("/settings/users/roles/create")}>
+            <CtaButton
+              onClick={() => router.push("/settings/users/roles/create")}
+            >
               <Plus className="h-3.5 w-3.5" />
               Add Role
             </CtaButton>
@@ -343,23 +398,136 @@ export default function RolesTab() {
         entityName="roles"
         description="Export workspace roles and access levels as CSV. Includes role names, descriptions, permissions, and system status."
         totalCount={roles.length}
-        matchingCount={debouncedSearch.trim() || typeFilter !== "ALL" ? filteredRoles.length : undefined}
+        matchingCount={
+          debouncedSearch.trim() || typeFilter !== "ALL"
+            ? filteredRoles.length
+            : undefined
+        }
         onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
           const rows = filteredRoles;
           if (rows.length === 0) {
-            sonnerToast.error("Nothing to export", { description: "No roles found." });
+            sonnerToast.error("Nothing to export", {
+              description: "No roles found.",
+            });
             return;
           }
           const csv = buildCsv(rows, [
             { header: "Role Name", getValue: (r) => r.name || "" },
             { header: "Description", getValue: (r) => r.description || "" },
-            { header: "Type", getValue: (r) => r.isSystem ? "System" : "Custom" },
-            { header: "Modules Count", getValue: (r) => (r.modulePermissions || []).length },
+            {
+              header: "Type",
+              getValue: (r) => (r.isSystem ? "System" : "Custom"),
+            },
+            {
+              header: "Assigned Users",
+              getValue: (r) => r.usersCount ?? r.userCount ?? 0,
+            },
+            {
+              header: "Modules Count",
+              getValue: (r) => (r.modulePermissions || []).length,
+            },
           ]);
-          downloadCsv(csv, `roles-${new Date().toISOString().slice(0, 10)}`, format);
-          sonnerToast.success("Export ready", { description: `${rows.length} role${rows.length !== 1 ? "s" : ""} exported.` });
+          downloadCsv(
+            csv,
+            `roles-${new Date().toISOString().slice(0, 10)}`,
+            format,
+          );
+          sonnerToast.success("Export ready", {
+            description: `${rows.length} role${rows.length !== 1 ? "s" : ""} exported.`,
+          });
         }}
       />
+
+      <AlertDialog
+        open={isDeleteModalOpen}
+        onOpenChange={(open) => {
+          if (!open && !deleting) {
+            setIsDeleteModalOpen(false);
+            setRoleToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent className="max-w-md p-6 rounded-2xl border border-border/60 bg-background shadow-xl">
+          <AlertDialogHeader className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/60 flex items-center justify-center text-rose-600 dark:text-rose-400 shrink-0">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5">
+                <AlertDialogTitle className="text-base font-semibold text-foreground">
+                  Delete Role
+                </AlertDialogTitle>
+                <p className="text-xs text-muted-foreground">
+                  This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed pt-1 space-y-3">
+              <div>
+                Are you sure you want to permanently delete the role{" "}
+                <span className="font-semibold text-foreground bg-muted px-1.5 py-0.5 rounded-md border border-border/60">
+                  {roleToDelete?.name}
+                </span>
+                ?
+              </div>
+
+              {(() => {
+                const affectedCount =
+                  roleToDelete?.usersCount ?? roleToDelete?.userCount ?? 0;
+                if (affectedCount > 0) {
+                  return (
+                    <div className="p-3.5 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-left space-y-1 mt-2">
+                      <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-semibold text-xs">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <span>
+                          {affectedCount}{" "}
+                          {affectedCount === 1 ? "User" : "Users"} Currently
+                          Assigned
+                        </span>
+                      </div>
+                      <p className="text-[11.5px] text-amber-700 dark:text-amber-400/90 leading-normal pl-6">
+                        There{" "}
+                        {affectedCount === 1
+                          ? "is currently 1 user"
+                          : `are currently ${affectedCount} users`}{" "}
+                        assigned to this role. Deleting this role will
+                        immediately revoke their access permissions.
+                      </p>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50 flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                    <Users className="w-3.5 h-3.5 shrink-0" />
+                    <span>No users are currently assigned to this role.</span>
+                  </div>
+                );
+              })()}
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-5 gap-2 sm:gap-2">
+            <AlertDialogCancel
+              disabled={deleting}
+              onClick={() => {
+                setIsDeleteModalOpen(false);
+                setRoleToDelete(null);
+              }}
+              className="h-9 px-4 text-xs font-medium rounded-lg"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={handleConfirmDelete}
+              className="h-9 px-4 text-xs font-medium gap-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
+            >
+              {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {deleting ? "Deleting..." : "Delete Role"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </EcosystemWrapper>
   );
 }

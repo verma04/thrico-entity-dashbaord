@@ -51,8 +51,6 @@ function DiscountIcon({
       return <Percent className={className} />;
     case StoreDiscountType.FREE_SHIPPING:
       return <Truck className={className} />;
-    case StoreDiscountType.BUY_X_GET_Y:
-      return <Sparkles className={className} />;
     case StoreDiscountType.FIXED_AMOUNT:
     default:
       return <Tag className={className} />;
@@ -73,8 +71,6 @@ export const StoreRewardCard: React.FC<StoreRewardCardProps> = ({
         return `${reward.discountValue}% OFF`;
       case StoreDiscountType.FREE_SHIPPING:
         return "FREE SHIPPING";
-      case StoreDiscountType.BUY_X_GET_Y:
-        return "BOGO SPECIAL";
       case StoreDiscountType.FIXED_AMOUNT:
       default:
         return `₹${reward.discountValue} OFF`;

@@ -253,12 +253,12 @@ export function ChildSidebarContainer({
       ...flattenItems(aiStudioItems as MenuItem[], "AI"),
       ...flattenItems(aiSuperAgentsItems as MenuItem[], "AI"),
       ...flattenItems(aiChatItems as MenuItem[], "AI"),
-      ...flattenItems(membersIntelligence as MenuItem[], "Members"),
-      ...flattenItems(feedItems as MenuItem[], "Content"),
-      ...flattenItems(moderationItems as MenuItem[], "Content"),
-      ...flattenItems(reportedItems as MenuItem[], "Content"),
-      ...flattenItems(gamificationEngine as MenuItem[], "Gamification"),
-      ...flattenItems(modulesItems as MenuItem[], "Modules"),
+      ...flattenItems(membersIntelligence as MenuItem[], "Member Engine"),
+      ...flattenItems(feedItems as MenuItem[], "Content Engine"),
+      ...flattenItems(moderationItems as MenuItem[], "Content Engine"),
+      ...flattenItems(reportedItems as MenuItem[], "Content Engine"),
+      ...flattenItems(gamificationEngine as MenuItem[], "Gamification Engine"),
+      ...flattenItems(modulesItems as MenuItem[], "Module Engine"),
       ...flattenItems(integrationsItems as MenuItem[], "Integrations"),
       ...flattenItems(websiteItems as MenuItem[], "Website"),
       ...flattenItems(billingAndTeamItems as MenuItem[], "Settings"),
@@ -321,6 +321,8 @@ export function ChildSidebarContainer({
         return filteredEmail.length > 0;
       case "integrations":
         return filteredIntegrations.length > 0;
+      case "team":
+        return true;
       default:
         return true;
     }
@@ -374,12 +376,18 @@ export function ChildSidebarContainer({
         otherAccountsData={otherAccountsData}
         isSwitching={isSwitching}
         handleSwitch={handleSwitch}
-        showSidebarToggle={activeTab !== "mobile-app" && activeTab !== "home"}
+        showSidebarToggle={
+          activeTab !== "mobile-app" &&
+          activeTab !== "home" &&
+          activeTab !== "team"
+        }
       />
       <div className="flex flex-1 relative w-full bg-white dark:bg-neutral-950 group/sidebar-wrapper">
         <ParentSidebar />
-        {/* ── SIDEBAR (Hidden on Home route & Mobile App) ── */}
-        {activeTab !== "mobile-app" && activeTab !== "home" && (
+        {/* ── SIDEBAR (Hidden on Home route, Mobile App & Team / Users Settings) ── */}
+        {activeTab !== "mobile-app" &&
+          activeTab !== "home" &&
+          activeTab !== "team" && (
           <Sidebar
             collapsible="icon"
             className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! mb-2 z-30 shadow-sm rounded-l-2xl!"
@@ -387,12 +395,28 @@ export function ChildSidebarContainer({
           >
             <SidebarHeader className="h-10 flex items-center justify-between flex-row px-3 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
               {!isCollapsed && (
-                <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 capitalize tracking-tight w-full truncate">
+                <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 tracking-tight w-full truncate">
                   {activeTab === "gamification"
                     ? "Gamification Engine"
-                    : activeTab === "ai"
-                      ? "AI Studio"
-                      : activeTab}
+                    : activeTab === "members"
+                      ? "Member Engine"
+                      : activeTab === "content"
+                        ? "Content Engine"
+                        : activeTab === "modules"
+                          ? "Module Engine"
+                          : activeTab === "ai"
+                            ? "AI Studio"
+                            : activeTab === "integrations"
+                              ? "Integrations"
+                              : activeTab === "email"
+                                ? "Email"
+                                : activeTab === "website"
+                                  ? "Website Builder"
+                                  : activeTab === "settings"
+                                    ? "Settings"
+                                    : activeTab === "team"
+                                      ? "Team Management"
+                                      : activeTab}
                 </span>
               )}
               {isCollapsed && (
@@ -457,7 +481,7 @@ export function ChildSidebarContainer({
               {activeTab === "members" && (
                 <CollapsibleSection
                   sectionKey="members"
-                  label="Members"
+                  label="Member Engine"
                   items={filteredMembers}
                   renderItems={renderItems}
                   searchQuery={searchQuery}
@@ -523,7 +547,7 @@ export function ChildSidebarContainer({
               {activeTab === "modules" && (
                 <CollapsibleSection
                   sectionKey="modules"
-                  label="Modules"
+                  label="Module Engine"
                   items={filteredModules}
                   renderItems={renderItems}
                   searchQuery={searchQuery}
@@ -640,10 +664,10 @@ export function ChildSidebarContainer({
 
           {[
             "Home",
-            "Members",
-            "Content",
-            "Gamification",
-            "Modules",
+            "Member Engine",
+            "Content Engine",
+            "Gamification Engine",
+            "Module Engine",
             "Integrations",
             "Website",
             "Settings",

@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { CHECK_ENTITY_SUBSCRIPTIONS } from "@/graphql/quries";
-import { useGetAvailableModules, AdminAccess } from "@/graphql/actions";
-import { ShieldCheck, Sparkles } from "lucide-react";
+import { useGetAvailableModules } from "@/graphql/actions";
+import { ShieldCheck, Sparkles, Crown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -41,18 +42,6 @@ interface RoleCreationFormProps {
 
 const permissionTypes = ["Read", "Create", "Edit", "Delete"] as const;
 
-const adminAccessLabels: Record<string, string> = {
-  reports: "Reports & Analytics",
-  settings: "Workspace Settings",
-  subscription: "Billing & Plans",
-  platformFeatures: "Feature Flags",
-  appearance: "Theme & Branding",
-  auditLogs: "Security Audit Logs",
-  domain: "Custom Domains",
-  permissions: "RBAC Governance",
-  adminUsers: "Administrator Provisioning",
-};
-
 export function RoleCreationForm({
   initialValues,
   loading,
@@ -66,35 +55,28 @@ export function RoleCreationForm({
     useGetAvailableModules();
 
   const rawModules = modulesData?.getAvailableModules;
-  let groupedModules: Record<string, string[]> = {};
+  let groupedModules: Record<
+    string,
+    Array<{ name: string; isSystem?: boolean; isAdmin?: boolean } | string>
+  > = {};
 
   if (
     rawModules &&
     typeof rawModules === "object" &&
     !Array.isArray(rawModules)
   ) {
-    groupedModules = rawModules;
+    groupedModules = rawModules as any;
   } else if (Array.isArray(rawModules)) {
     groupedModules = { Modules: rawModules };
   }
 
-  const availableModules = Object.values(groupedModules).flat() as string[];
-
-  const defaultAdminAccess = {
-    reports: false,
-    settings: false,
-    subscription: false,
-    platformFeatures: false,
-    appearance: false,
-    auditLogs: false,
-    domain: false,
-    permissions: false,
-    adminUsers: false,
-  };
+  const availableModules = Object.values(groupedModules)
+    .flat()
+    .map((item: any) => (typeof item === "string" ? item : item?.name))
+    .filter(Boolean) as string[];
 
   const [formData, setFormData] = useState({ name: "", description: "" });
-  const [adminAccess, setAdminAccess] =
-    useState<Record<string, boolean>>(defaultAdminAccess);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [permissions, setPermissions] = useState<
     Record<string, Record<string, boolean>>
   >({});
@@ -106,17 +88,29 @@ export function RoleCreationForm({
         name: initialValues.name,
         description: initialValues.description || "",
       });
-      const newAdminAccess = { ...defaultAdminAccess };
-      if (initialValues.adminAccess) {
-        Object.keys(newAdminAccess).forEach((key) => {
-          const typedKey = key as keyof typeof newAdminAccess;
-          if (initialValues.adminAccess[typedKey] !== undefined) {
-            newAdminAccess[typedKey] = !!initialValues.adminAccess[typedKey];
-          }
-        });
-      }
-      setAdminAccess(newAdminAccess);
+      setIsAdmin(!!initialValues.isAdmin);
       const newPerms: Record<string, Record<string, boolean>> = {};
+      
+      if (initialValues.groupedModulePermissions) {
+        Object.values(initialValues.groupedModulePermissions).forEach(
+          (groupList: any) => {
+            if (Array.isArray(groupList)) {
+              groupList.forEach((p: any) => {
+                if (p && (p.module || p.name)) {
+                  const modName = p.module || p.name;
+                  newPerms[modName] = {
+                    Read: !!p.canRead,
+                    Create: !!p.canCreate,
+                    Edit: !!p.canEdit,
+                    Delete: !!p.canDelete,
+                  };
+                }
+              });
+            }
+          },
+        );
+      }
+
       initialValues.modulePermissions?.forEach((p: any) => {
         newPerms[p.module] = {
           Read: !!p.canRead,
@@ -151,22 +145,6 @@ export function RoleCreationForm({
         [type]: !prev[moduleId]?.[type],
       },
     }));
-    markDirty();
-  };
-
-  const toggleAdminAccess = (key: string) => {
-    setAdminAccess((prev) => ({ ...prev, [key]: !prev[key] }));
-    markDirty();
-  };
-
-  const toggleAllAdminAccess = (checked: boolean) => {
-    const newAdminAccess = {
-      ...adminAccess,
-      ...Object.fromEntries(
-        Object.keys(adminAccessLabels).map((k) => [k, checked]),
-      ),
-    };
-    setAdminAccess(newAdminAccess);
     markDirty();
   };
 
@@ -230,11 +208,35 @@ export function RoleCreationForm({
         canDelete: !!perms.Delete,
       }));
 
+    const groupedModulePermissions: Record<string, any[]> = {};
+    Object.entries(groupedModules).forEach(([category, modList]) => {
+      groupedModulePermissions[category] = modList.map((modItem: any) => {
+        const modName = typeof modItem === "string" ? modItem : modItem.name;
+        const perms = permissions[modName] || {
+          Read: false,
+          Create: false,
+          Edit: false,
+          Delete: false,
+        };
+        return {
+          module: modName,
+          canRead: !!perms.Read,
+          canCreate: !!perms.Create,
+          canEdit: !!perms.Edit,
+          canDelete: !!perms.Delete,
+          isSystem: typeof modItem === "object" ? !!modItem.isSystem : false,
+          isAdmin: typeof modItem === "object" ? !!modItem.isAdmin : false,
+        };
+      });
+    });
+
     onFinish({
       name: formData.name,
       description: formData.description,
-      adminAccess,
+      isAdmin,
+      adminAccess: {},
       modulePermissions,
+      groupedModulePermissions,
     });
   };
 
@@ -246,7 +248,6 @@ export function RoleCreationForm({
     }
   };
 
-  const allAdminSelected = Object.values(adminAccess).every((v) => v);
   const isEditing = !!initialValues;
 
   const categories = Object.keys(groupedModules)
@@ -254,7 +255,6 @@ export function RoleCreationForm({
     .sort((a, b) => a.localeCompare(b));
 
   const isFullAdmin =
-    Object.values(adminAccess).every(Boolean) &&
     availableModules.length > 0 &&
     availableModules.every((mod: string) =>
       permissionTypes.every((t) => !!permissions[mod]?.[t]),
@@ -262,15 +262,6 @@ export function RoleCreationForm({
 
   const handleFullAdminChange = (checked: boolean) => {
     if (checked) {
-      const allAdmin = Object.keys(adminAccessLabels).reduce(
-        (acc, key) => {
-          acc[key] = true;
-          return acc;
-        },
-        {} as Record<string, boolean>,
-      );
-      setAdminAccess(allAdmin);
-
       const allPerms = availableModules.reduce(
         (acc: any, mod: string) => {
           acc[mod] = { Read: true, Create: true, Edit: true, Delete: true };
@@ -280,13 +271,11 @@ export function RoleCreationForm({
       );
       setPermissions(allPerms);
     } else {
-      setAdminAccess({ ...defaultAdminAccess });
       setPermissions({});
     }
     markDirty();
   };
 
-  const activeAdminCount = Object.values(adminAccess).filter(Boolean).length;
   const activeModuleCount = Object.values(permissions).filter((p) =>
     Object.values(p).some(Boolean),
   ).length;
@@ -297,8 +286,8 @@ export function RoleCreationForm({
         title={isEditing ? "Edit Security Role" : "Create Security Role"}
         description={
           isEditing
-            ? "Update role attributes, module CRUD capabilities, and administrative scopes."
-            : "Define an authorization role with granular module permissions and administrative scopes."
+            ? "Update role attributes, and module CRUD capabilities."
+            : "Define an authorization role with granular module and administrative permissions."
         }
         breadcrumbs={[
           { label: "Settings", href: "/settings" },
@@ -321,10 +310,8 @@ export function RoleCreationForm({
               >
                 <RolePreview
                   formData={formData}
-                  adminAccess={adminAccess}
                   permissions={permissions}
-                  adminAccessLabels={adminAccessLabels}
-                  groupedModules={groupedModules}
+                  groupedModules={groupedModules as any}
                 />
 
                 {/* Structured Configuration Breakdown */}
@@ -340,10 +327,6 @@ export function RoleCreationForm({
                   <PolarisSummaryRow
                     label="Authorized Modules"
                     value={`${activeModuleCount} of ${availableModules.length}`}
-                  />
-                  <PolarisSummaryRow
-                    label="Admin Scopes"
-                    value={`${activeAdminCount} of ${Object.keys(adminAccessLabels).length}`}
                   />
                   <PolarisSummaryRow
                     label="Full Access"
@@ -413,6 +396,44 @@ export function RoleCreationForm({
                     className="h-[40px] text-[14px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   />
                 </div>
+              </div>
+
+              {/* Is Admin Toggle */}
+              <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40">
+                <div className="flex items-center gap-2.5">
+                  <div className={cn(
+                    "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 transition-colors",
+                    isAdmin
+                      ? "bg-amber-100 dark:bg-amber-900/30"
+                      : "bg-[#f6f6f7] dark:bg-zinc-800"
+                  )}>
+                    <Crown className={cn(
+                      "w-4 h-4 transition-colors",
+                      isAdmin
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-[#616161] dark:text-zinc-400"
+                    )} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <label
+                      htmlFor="isAdmin"
+                      className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer block"
+                    >
+                      Administrator Role
+                    </label>
+                    <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+                      Mark this role as an administrative role with elevated platform privileges.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  id="isAdmin"
+                  checked={isAdmin}
+                  onCheckedChange={(checked) => {
+                    setIsAdmin(checked);
+                    markDirty();
+                  }}
+                />
               </div>
 
               {/* Full Admin Access Switch Card */}
@@ -511,21 +532,24 @@ export function RoleCreationForm({
                   {categories.map((category) => {
                     const modulesInCategory = groupedModules[category];
 
-                    const allCategoryChecked = modulesInCategory.every((mod) =>
-                      permissionTypes.every(
+                    const allCategoryChecked = modulesInCategory.every((modItem: any) => {
+                      const mod = typeof modItem === "string" ? modItem : modItem.name;
+                      return permissionTypes.every(
                         (type) => !!permissions[mod]?.[type],
-                      ),
-                    );
-                    const anyCategoryChecked = modulesInCategory.some((mod) =>
-                      permissionTypes.some(
+                      );
+                    });
+                    const anyCategoryChecked = modulesInCategory.some((modItem: any) => {
+                      const mod = typeof modItem === "string" ? modItem : modItem.name;
+                      return permissionTypes.some(
                         (type) => !!permissions[mod]?.[type],
-                      ),
-                    );
+                      );
+                    });
 
                     const toggleCategoryPermissions = (checked: boolean) => {
                       setPermissions((prev) => {
                         const next = { ...prev };
-                        modulesInCategory.forEach((mod) => {
+                        modulesInCategory.forEach((modItem: any) => {
+                          const mod = typeof modItem === "string" ? modItem : modItem.name;
                           next[mod] = {
                             Read: checked,
                             Create: checked,
@@ -573,7 +597,9 @@ export function RoleCreationForm({
                         </div>
 
                         <AccordionContent className="pt-0 pb-3 px-3 space-y-2">
-                          {modulesInCategory.map((moduleName: string) => {
+                          {modulesInCategory.map((modItem: any) => {
+                            const moduleName = typeof modItem === "string" ? modItem : modItem.name;
+                            const isSystem = typeof modItem === "object" ? !!modItem.isSystem : false;
                             const allChecked = permissionTypes.every(
                               (type) => !!permissions[moduleName]?.[type],
                             );
@@ -610,6 +636,14 @@ export function RoleCreationForm({
                                   <span className="text-[12.5px] font-medium capitalize text-[#303030] dark:text-zinc-100 truncate">
                                     {moduleName.replace(/_/g, " ")}
                                   </span>
+                                  {isSystem && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-[9px] h-3.5 px-1 font-semibold bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 rounded-[3px]"
+                                    >
+                                      System
+                                    </Badge>
+                                  )}
                                 </div>
 
                                 <div className="flex flex-wrap items-center gap-1.5 md:ml-auto">
@@ -652,60 +686,6 @@ export function RoleCreationForm({
                   })}
                 </Accordion>
               )}
-            </PolarisFormCard>
-
-            {/* Step 3: Platform Settings & Administrative Scopes */}
-            <PolarisFormCard
-              step={3}
-              title="System Governance & Administrative Scopes"
-              description="Authorize access to core workspace infrastructure, billing, and platform controls."
-              badge="Admin Scopes"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-[#e1e3e5] dark:border-zinc-800">
-                  <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-300">
-                    Administrative Scope Permissions
-                  </span>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-[12px] font-semibold text-[#303030] dark:text-zinc-300">
-                    <Checkbox
-                      checked={allAdminSelected}
-                      onCheckedChange={(checked) =>
-                        toggleAllAdminAccess(!!checked)
-                      }
-                      className="h-3.5 w-3.5 rounded-[3px]"
-                    />
-                    <span>Select All Scopes</span>
-                  </label>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                  {Object.keys(adminAccessLabels).map((key) => {
-                    const isSelected = adminAccess[key];
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => toggleAdminAccess(key)}
-                        className={cn(
-                          "flex items-center gap-2.5 p-3 rounded-[8px] border text-left transition-all cursor-pointer",
-                          isSelected
-                            ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
-                            : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
-                        )}
-                      >
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => toggleAdminAccess(key)}
-                          className="h-4 w-4 rounded-[4px] shrink-0 pointer-events-none"
-                        />
-                        <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 truncate">
-                          {adminAccessLabels[key] ?? key}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
             </PolarisFormCard>
 
             {/* Floating Action Bar */}

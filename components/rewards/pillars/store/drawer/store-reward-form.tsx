@@ -37,13 +37,13 @@ import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel"
 import {
   StoreDiscountType,
   StoreProvider,
-  StoreRewardItem,
   useCreateStoreDiscountRule,
   useUpdateStoreDiscountRule,
   useGetStoreDiscountRuleById,
   CreateStoreDiscountRuleInput,
   UpdateStoreDiscountRuleInput,
 } from "@/graphql/actions/rewards/store";
+import { StoreRewardItem } from "../types";
 import { useGetEntity } from "@/graphql/actions";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import { toast } from "sonner";
@@ -130,20 +130,20 @@ export function StoreRewardForm({
         if (isEditing && ruleId) {
           const updateInput: UpdateStoreDiscountRuleInput = {
             title: values.title.trim(),
-            description: values.description?.trim() || null,
-            image: values.image || null,
+            description: values.description?.trim() || undefined,
+            image: values.image || undefined,
             discountType: values.discountType,
             discountValue: Number(values.discountValue),
             currency: currencyCode,
             minCartSubtotal: values.minCartSubtotal
               ? Number(values.minCartSubtotal)
-              : null,
+              : undefined,
             maxDiscountCap: values.maxDiscountCap
               ? Number(values.maxDiscountCap)
-              : null,
+              : undefined,
             codePrefix: values.codePrefix.trim().toUpperCase(),
             storeProvider: values.storeProvider,
-            connectedDomain: values.connectedDomain?.trim() || null,
+            connectedDomain: values.connectedDomain?.trim() || undefined,
             singleUsePerCustomer: values.singleUsePerCustomer,
             validityDays: Number(values.validityDays),
             isActive: values.isActive,
@@ -164,20 +164,20 @@ export function StoreRewardForm({
         } else {
           const createInput: CreateStoreDiscountRuleInput = {
             title: values.title.trim(),
-            description: values.description?.trim() || null,
-            image: values.image || null,
+            description: values.description?.trim() || undefined,
+            image: values.image || undefined,
             discountType: values.discountType,
             discountValue: Number(values.discountValue),
             currency: currencyCode,
             minCartSubtotal: values.minCartSubtotal
               ? Number(values.minCartSubtotal)
-              : null,
+              : undefined,
             maxDiscountCap: values.maxDiscountCap
               ? Number(values.maxDiscountCap)
-              : null,
+              : undefined,
             codePrefix: values.codePrefix.trim().toUpperCase(),
             storeProvider: values.storeProvider,
-            connectedDomain: values.connectedDomain?.trim() || null,
+            connectedDomain: values.connectedDomain?.trim() || undefined,
             singleUsePerCustomer: values.singleUsePerCustomer,
             validityDays: Number(values.validityDays),
             isActive: values.isActive,

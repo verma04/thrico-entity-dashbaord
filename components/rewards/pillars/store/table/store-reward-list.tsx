@@ -78,8 +78,6 @@ export const getStoreRewardTableColumns = (
         label = `${reward.discountValue}% OFF`;
       } else if (reward.discountType === StoreDiscountType.FREE_SHIPPING) {
         label = "Free Shipping";
-      } else if (reward.discountType === StoreDiscountType.BUY_X_GET_Y) {
-        label = "BOGO Special";
       }
 
       return (

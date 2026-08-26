@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -22,9 +23,8 @@ import {
   useGetAvailableModules,
   useCreateRole,
   useUpdateRole,
-  AdminAccess,
 } from "@/graphql/actions";
-import { Loader2, ShieldCheck, ShieldAlert, Info } from "lucide-react";
+import { Loader2, ShieldCheck, Crown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -45,20 +45,7 @@ interface AddRoleDialogProps {
 
 const permissionTypes = ["Read", "Create", "Edit", "Delete"] as const;
 
-const adminAccessLabels: Record<string, string> = {
-  website: "Website",
-  moderation: "Moderation",
-  reports: "Reports",
-  settings: "Settings",
-  subscription: "Subscription",
-  platformFeatures: "Platform Features",
-  appearance: "Appearance",
-  auditLogs: "Audit Logs",
-  domain: "Domain",
-  permissions: "Permissions",
-  adminUsers: "Admin Users",
-  users: "Users",
-};
+
 
 export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialogProps) {
   const { toast } = useToast();
@@ -85,39 +72,34 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
     },
   });
 
-  const defaultAdminAccess = {
-    website: false,
-    moderation: false,
-    reports: false,
-    settings: false,
-    subscription: false,
-    platformFeatures: false,
-    appearance: false,
-    auditLogs: false,
-    domain: false,
-    permissions: false,
-    adminUsers: false,
-    users:false,
-  };
-
   const [formData, setFormData] = useState({ name: "", description: "" });
-  const [adminAccess, setAdminAccess] = useState<Record<string, boolean>>(defaultAdminAccess);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [permissions, setPermissions] = useState<Record<string, Record<string, boolean>>>({});
 
   useEffect(() => {
     if (role && open) {
       setFormData({ name: role.name, description: role.description || "" });
-      const newAdminAccess = { ...defaultAdminAccess };
-      if (role.adminAccess) {
-        Object.keys(newAdminAccess).forEach((key) => {
-          const typedKey = key as keyof typeof newAdminAccess;
-          if (role.adminAccess[typedKey] !== undefined) {
-            newAdminAccess[typedKey] = !!role.adminAccess[typedKey];
+      setIsAdmin(!!role.isAdmin);
+      const newPerms: Record<string, Record<string, boolean>> = {};
+
+      if (role.groupedModulePermissions) {
+        Object.values(role.groupedModulePermissions).forEach((groupList: any) => {
+          if (Array.isArray(groupList)) {
+            groupList.forEach((p: any) => {
+              if (p && (p.module || p.name)) {
+                const modName = p.module || p.name;
+                newPerms[modName] = {
+                  Read: !!p.canRead,
+                  Create: !!p.canCreate,
+                  Edit: !!p.canEdit,
+                  Delete: !!p.canDelete,
+                };
+              }
+            });
           }
         });
       }
-      setAdminAccess(newAdminAccess);
-      const newPerms: Record<string, Record<string, boolean>> = {};
+
       role.modulePermissions?.forEach((p: any) => {
         newPerms[p.module] = {
           Read: !!p.canRead,
@@ -129,7 +111,7 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
       setPermissions(newPerms);
     } else if (!role && open) {
       setFormData({ name: "", description: "" });
-      setAdminAccess(defaultAdminAccess);
+      setIsAdmin(false);
       setPermissions({});
     }
   }, [role, open]);
@@ -144,13 +126,7 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
     }));
   };
 
-  const toggleAdminAccess = (key: string) => {
-    setAdminAccess((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
 
-  const toggleAllAdminAccess = (checked: boolean) => {
-    setAdminAccess(Object.fromEntries(Object.keys(adminAccess).map((k) => [k, checked])));
-  };
 
   const toggleAllModulePermissions = (moduleId: string, checked: boolean) => {
     setPermissions((prev) => ({
@@ -159,9 +135,14 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
     }));
   };
 
-  const togglePermissionTypeForAllModules = (type: string, checked: boolean) => {
+  const getAvailableModuleList = (): string[] => {
     const raw = modulesData?.getAvailableModules;
-    const availableModules = Array.isArray(raw) ? raw : (raw ? Object.values(raw).flat() : []);
+    const list = Array.isArray(raw) ? raw : (raw ? Object.values(raw).flat() : []);
+    return list.map((item: any) => typeof item === "string" ? item : item?.name).filter(Boolean) as string[];
+  };
+
+  const togglePermissionTypeForAllModules = (type: string, checked: boolean) => {
+    const availableModules = getAvailableModuleList();
     setPermissions((prev) => {
       const next = { ...prev };
       availableModules.forEach((mod: string) => {
@@ -175,8 +156,7 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
   };
 
   const toggleAllPermissions = (checked: boolean) => {
-    const raw = modulesData?.getAvailableModules;
-    const availableModules = Array.isArray(raw) ? raw : (raw ? Object.values(raw).flat() : []);
+    const availableModules = getAvailableModuleList();
     const allPerms: Record<string, Record<string, boolean>> = {};
     availableModules.forEach((mod: string) => {
       allPerms[mod] = {
@@ -213,7 +193,8 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
             id: role.id,
             name: formData.name,
             description: formData.description,
-            adminAccess: adminAccess as Partial<AdminAccess>,
+            isAdmin,
+            adminAccess: {},
             modulePermissions,
           },
         },
@@ -224,7 +205,8 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
           input: {
             name: formData.name,
             description: formData.description,
-            adminAccess: adminAccess as Partial<AdminAccess>,
+            isAdmin,
+            adminAccess: {},
             modulePermissions,
           },
         },
@@ -233,9 +215,7 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
   };
 
   const isLoading = creating || updating;
-  const raw = modulesData?.getAvailableModules;
-  const availableModules = (Array.isArray(raw) ? raw : (raw ? Object.values(raw).flat() : [])) as string[];
-  const allAdminSelected = Object.values(adminAccess).every((v) => v);
+  const availableModules = getAvailableModuleList();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -302,53 +282,40 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
 
               <Separator className="opacity-40" />
 
-              {/* SECTION 2: Admin Access */}
+              {/* SECTION: Is Admin Toggle */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Admin access scopes
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Grants elevated access to platform administration areas.
-                    </p>
+                <div className="flex items-center justify-between p-3.5 rounded-lg border border-border/50 bg-muted/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className={cn(
+                      "h-8 w-8 rounded-md flex items-center justify-center shrink-0 transition-colors",
+                      isAdmin
+                        ? "bg-amber-100 dark:bg-amber-900/30"
+                        : "bg-muted"
+                    )}>
+                      <Crown className={cn(
+                        "w-4 h-4 transition-colors",
+                        isAdmin
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-muted-foreground"
+                      )} />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="isAdminDialog"
+                        className="text-xs font-semibold text-foreground cursor-pointer block"
+                      >
+                        Administrator Role
+                      </label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Mark this role as an admin role with elevated privileges.
+                      </p>
+                    </div>
                   </div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={allAdminSelected}
-                      onCheckedChange={(checked) => toggleAllAdminAccess(!!checked)}
-                      className="h-4 w-4 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
-                    />
-                    <span className="text-xs font-medium text-muted-foreground">Select all</span>
-                  </label>
-                </div>
-
-                {Object.keys(adminAccess).some((k) => adminAccess[k]) && (
-                  <div className="flex items-center gap-2 p-3 bg-amber-50/80 border border-amber-200/60 rounded-lg">
-                    <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
-                    <p className="text-xs text-amber-700">
-                      Some admin scopes grant broad access. Assign carefully.
-                    </p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 p-4 bg-muted/30 rounded-lg border border-border/50">
-                  {Object.keys(adminAccess).map((key) => (
-                    <label
-                      key={key}
-                      className="flex items-center gap-2.5 p-2 rounded-md hover:bg-background cursor-pointer transition-colors group"
-                    >
-                      <Checkbox
-                        id={`admin-${key}`}
-                        checked={adminAccess[key]}
-                        onCheckedChange={() => toggleAdminAccess(key)}
-                        className="h-4 w-4 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground shrink-0"
-                      />
-                      <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                        {adminAccessLabels[key] ?? key}
-                      </span>
-                    </label>
-                  ))}
+                  <Switch
+                    id="isAdminDialog"
+                    checked={isAdmin}
+                    onCheckedChange={setIsAdmin}
+                  />
                 </div>
               </div>
 

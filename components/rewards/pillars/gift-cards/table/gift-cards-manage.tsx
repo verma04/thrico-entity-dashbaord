@@ -267,6 +267,22 @@ export const GiftCardsManage: React.FC<GiftCardsManageProps> = ({
 
 
 
+  const handleCreate = () => {
+    if (onCreateClick) {
+      onCreateClick();
+    } else {
+      router.push("/gamification/rewards/pillars/gift-cards/add");
+    }
+  };
+
+  const handleEdit = (reward: GiftCardRuleItem) => {
+    if (onEditClick) {
+      onEditClick(reward);
+    } else {
+      router.push(`/gamification/rewards/pillars/gift-cards/${reward.id}/edit`);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* ── Action / Filter Bar ── */}
@@ -402,15 +418,13 @@ export const GiftCardsManage: React.FC<GiftCardsManageProps> = ({
           </EcosystemActionBar.Status>
 
           {/* Create CTA Button */}
-          {onCreateClick && (
-            <Button
-              onClick={onCreateClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Configure Gift Card
-            </Button>
-          )}
+          <Button
+            onClick={handleCreate}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Configure Gift Card
+          </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
@@ -463,15 +477,15 @@ export const GiftCardsManage: React.FC<GiftCardsManageProps> = ({
         ) : view === "grid" ? (
           <GiftCardGrid
             rewards={paginatedRules}
-            onCreateClick={onCreateClick}
-            onEdit={onEditClick}
+            onCreateClick={handleCreate}
+            onEdit={handleEdit}
             onDelete={handleDelete}
           />
         ) : (
           <GiftCardList
             rewards={paginatedRules}
             visibleColumns={visibleColumns}
-            onEdit={onEditClick}
+            onEdit={handleEdit}
             onDelete={handleDelete}
           />
         )}

@@ -32,15 +32,17 @@ const CreateRolePage = () => {
         input: {
           name: values.name,
           description: values.description,
+          isAdmin: values.isAdmin,
           adminAccess: values.adminAccess as Partial<AdminAccess>,
           modulePermissions: values.modulePermissions,
+          groupedModulePermissions: values.groupedModulePermissions,
         },
       },
     });
   };
 
   const onCancel = () => {
-    router.back();
+    router.push("/settings/users/roles");
   };
 
   return (
@@ -54,4 +56,4 @@ const CreateRolePage = () => {
   );
 };
 
-export default withModulePermission(CreateRolePage, "ADMIN_USERS", "canCreate");
+export default withModulePermission(CreateRolePage, "PERMISSIONS", "canCreate");

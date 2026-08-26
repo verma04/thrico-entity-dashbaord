@@ -32,6 +32,7 @@ export interface ManualRewardItem {
   title: string;
   description?: string;
   image?: string;
+  url?: string;
   couponType: ManualCouponType | string;
   couponCode?: string;
   codePrefix?: string;

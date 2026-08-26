@@ -71,12 +71,28 @@ export function MemberCreationForm({
   className,
 }: MemberCreationFormProps) {
   const router = useRouter();
+
+  // Validate that a string is a usable image URL (absolute http/https or starts with /)
+  const isValidImageUrl = (url: string | null | undefined): url is string => {
+    if (!url || typeof url !== "string" || url.trim() === "") return false;
+    try {
+      // Accept absolute URLs
+      if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+        return true;
+      }
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const [imageUrl, setImageUrl] = useState<string | null>(
-    initialValues?.avatar || null,
+    isValidImageUrl(initialValues?.avatar) ? initialValues.avatar : null,
   );
 
   useEffect(() => {
-    if (initialValues?.avatar) {
+    if (isValidImageUrl(initialValues?.avatar)) {
       setImageUrl(initialValues.avatar);
     }
   }, [initialValues?.avatar]);

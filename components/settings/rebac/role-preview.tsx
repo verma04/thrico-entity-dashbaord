@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, ShieldAlert } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ModuleIcon } from "./module-icon";
 
@@ -10,22 +10,15 @@ interface RolePreviewProps {
     name: string;
     description: string;
   };
-  adminAccess: Record<string, boolean>;
   permissions: Record<string, Record<string, boolean>>;
-  adminAccessLabels: Record<string, string>;
   groupedModules: Record<string, string[]>;
 }
 
 export function RolePreview({
   formData,
-  adminAccess,
   permissions,
-  adminAccessLabels,
   groupedModules,
 }: RolePreviewProps) {
-  const activeAdminScopes = Object.entries(adminAccess).filter(
-    ([key, v]) => v && key in adminAccessLabels,
-  );
   const activeModules = Object.entries(permissions).filter(([_, perms]) =>
     Object.values(perms).some((v) => v),
   );
@@ -45,37 +38,6 @@ export function RolePreview({
             {formData.description || "No description provided"}
           </p>
         </div>
-      </div>
-
-      {/* Admin Access Scopes */}
-      <div className="space-y-1.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
-        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#616161]">
-          <span className="flex items-center gap-1">
-            <ShieldAlert className="h-3 w-3" />
-            Admin Scopes
-          </span>
-          <span>
-            {activeAdminScopes.length}/{Object.keys(adminAccessLabels).length}
-          </span>
-        </div>
-        {activeAdminScopes.length > 0 ? (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {activeAdminScopes.map(([key]) => (
-              <span
-                key={key}
-                className="text-[10.5px] font-medium px-2 py-0.5 rounded-[4px] bg-white text-[#303030] dark:bg-zinc-800 dark:text-zinc-200 border border-[#d2d5d9] dark:border-zinc-700"
-              >
-                {adminAccessLabels[key] ?? key}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-9 border border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[6px] bg-[#f6f6f7]/60 dark:bg-zinc-800/30">
-            <p className="text-[11.5px] text-[#8c9196] font-medium">
-              No admin scopes assigned
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Module Permissions Summary */}

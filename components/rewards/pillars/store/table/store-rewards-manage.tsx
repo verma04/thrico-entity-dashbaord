@@ -43,11 +43,11 @@ import {
   ContentArea,
 } from "./store-manage-ui";
 import {
-  StoreRewardItem,
   StoreDiscountType,
   useGetStoreDiscountRules,
   useDeleteStoreDiscountRule,
 } from "@/graphql/actions/rewards/store";
+import { StoreRewardItem } from "../types";
 import { StoreRewardGrid } from "./store-reward-grid";
 import { StoreRewardList } from "./store-reward-list";
 import { ExportStoreRewardsModal } from "./export-store-rewards-modal";
@@ -187,6 +187,22 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
     }
   };
 
+  const handleCreate = () => {
+    if (onCreateClick) {
+      onCreateClick();
+    } else {
+      router.push("/gamification/rewards/pillars/store/add");
+    }
+  };
+
+  const handleEdit = (reward: StoreRewardItem) => {
+    if (onEditClick) {
+      onEditClick(reward);
+    } else {
+      router.push(`/gamification/rewards/pillars/store/${reward.id}/edit`);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* ── Action / Filter Bar ──────────────────────────────────────── */}
@@ -320,15 +336,13 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
           </EcosystemActionBar.Status>
 
           {/* Create CTA Button */}
-          {onCreateClick && (
-            <Button
-              onClick={onCreateClick}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Create Store Reward
-            </Button>
-          )}
+          <Button
+            onClick={handleCreate}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-xs font-medium h-8 shadow-2xs cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Create Store Reward
+          </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
@@ -379,9 +393,9 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
         {view === "grid" ? (
            <StoreRewardGrid
              rewards={filteredRewards}
-             onCreateClick={onCreateClick}
+             onCreateClick={handleCreate}
              onSimulateWin={handleSimulateWin}
-             onEdit={onEditClick}
+             onEdit={handleEdit}
              onDelete={handleDelete}
            />
          ) : (
@@ -389,7 +403,7 @@ export const StoreRewardsManage: React.FC<StoreRewardsManageProps> = ({
              rewards={filteredRewards}
              visibleColumns={visibleColumns}
              onSimulateWin={handleSimulateWin}
-             onEdit={onEditClick}
+             onEdit={handleEdit}
              onDelete={handleDelete}
            />
          )}

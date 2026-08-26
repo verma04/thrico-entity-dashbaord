@@ -35,13 +35,34 @@ export interface ModulePermission {
   canDelete: boolean;
 }
 
+export interface GroupedModulePermissionItem {
+  id?: string;
+  module: string;
+  canRead: boolean;
+  canCreate: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+  isSystem?: boolean;
+  isAdmin?: boolean;
+}
+
+export interface AvailableModuleItem {
+  name: string;
+  isSystem: boolean;
+  isAdmin: boolean;
+}
+
 export interface Role {
   id: string;
   name: string;
   description: string;
   isSystem: boolean;
-  adminAccess: AdminAccess;
+  isAdmin: boolean;
+  adminAccess?: AdminAccess;
   modulePermissions: ModulePermission[];
+  groupedModulePermissions?: Record<string, GroupedModulePermissionItem[]>;
+  userCount?: number;
+  usersCount?: number;
 }
 
 export interface GetRolesResponse {
@@ -53,22 +74,26 @@ export interface GetRoleByIdResponse {
 }
 
 export interface GetAvailableModulesResponse {
-  getAvailableModules: Record<string, string[]>;
+  getAvailableModules: Record<string, Array<AvailableModuleItem | string>>;
 }
 
 export interface CreateRoleInput {
   name: string;
   description?: string;
-  adminAccess: Partial<AdminAccess>;
-  modulePermissions: Omit<ModulePermission, "id">[];
+  isAdmin?: boolean;
+  adminAccess?: Partial<AdminAccess>;
+  modulePermissions?: Omit<ModulePermission, "id">[];
+  groupedModulePermissions?: Record<string, any>;
 }
 
 export interface UpdateRoleInput {
   id: string;
   name?: string;
   description?: string;
+  isAdmin?: boolean;
   adminAccess?: Partial<AdminAccess>;
   modulePermissions?: Omit<ModulePermission, "id">[];
+  groupedModulePermissions?: Record<string, any>;
 }
 
 export interface CreateRoleResponse {
@@ -76,6 +101,8 @@ export interface CreateRoleResponse {
     id: string;
     name: string;
     description: string;
+    isAdmin: boolean;
+    groupedModulePermissions?: Record<string, GroupedModulePermissionItem[]>;
   };
 }
 
@@ -84,6 +111,8 @@ export interface UpdateRoleResponse {
     id: string;
     name: string;
     description: string;
+    isAdmin: boolean;
+    groupedModulePermissions?: Record<string, GroupedModulePermissionItem[]>;
   };
 }
 

@@ -68,7 +68,7 @@ enum Action {
   REAPPROVE = "REAPPROVE",
 }
 
-export default function UserActions({ user }: { user: UserDetail }) {
+export default function UserActions({ user, hideViewProfile }: { user: UserDetail; hideViewProfile?: boolean }) {
   const router = useRouter();
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
@@ -183,11 +183,11 @@ export default function UserActions({ user }: { user: UserDetail }) {
   }
 
   const actions: ActionItem[] = [
-    {
+    ...(!hideViewProfile ? [{
       label: "View Profile",
       icon: ExternalLink,
       onClick: () => router.push(`/members/${user.id}`),
-    },
+    }] : []),
     {
       label: "View Sessions",
       icon: Smartphone,

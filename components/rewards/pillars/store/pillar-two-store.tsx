@@ -48,13 +48,11 @@ export const PillarTwoStore: React.FC<PillarTwoStoreProps> = ({
   };
 
   const handleOpenCreate = () => {
-    setEditingItem(null);
-    setIsDrawerOpen(true);
+    router.push("/gamification/rewards/pillars/store/add");
   };
 
   const handleOpenEdit = (item: StoreRewardItem) => {
-    setEditingItem(item);
-    setIsDrawerOpen(true);
+    router.push(`/gamification/rewards/pillars/store/${item.id}/edit`);
   };
 
   const handleCloseDrawer = () => {

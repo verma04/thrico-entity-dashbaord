@@ -30,7 +30,7 @@ export function ApolloWrapper({ children }: Props) {
             toast.error("Error", {
               description:
                 extensions?.code === "INTERNAL_SERVER_ERROR"
-                  ? "Something went wrong"
+                  ? "Something went wrossssng"
                   : message,
             });
           }

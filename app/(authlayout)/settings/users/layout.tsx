@@ -14,22 +14,11 @@ function UsersLayout({ children }: { children: React.ReactNode }) {
       label: "All Members",
       icon: <Users size={18} />,
     },
-    {
-      key: "create",
-      label: "Add Member",
-      icon: <UserPlus size={18} />,
-      locked: !canCreate,
-    },
+
     {
       key: "roles",
       label: "All Roles",
       icon: <ShieldCheck size={18} />,
-    },
-    {
-      key: "roles/create",
-      label: "Create Role",
-      icon: <Plus size={18} />,
-      locked: !canCreate,
     },
   ];
 

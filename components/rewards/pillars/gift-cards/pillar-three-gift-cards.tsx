@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { GiftCardBanner } from "./gift-card-banner";
 import { GiftCardsManage } from "./table";
 import { GiftCardDrawer } from "./drawer";
@@ -27,6 +28,7 @@ export const PillarThreeGiftCards: React.FC<PillarThreeGiftCardsProps> = ({
   isExternalTopUpOpen,
   setIsExternalTopUpOpen,
 }) => {
+  const router = useRouter();
   const { data: walletData, refetch: refetchWallet } = useGetEntityRewardWallet();
   const wallet = walletData?.getEntityRewardWallet;
   const [localDelta, setLocalDelta] = useState<number>(0);
@@ -56,13 +58,11 @@ export const PillarThreeGiftCards: React.FC<PillarThreeGiftCardsProps> = ({
   };
 
   const handleOpenCreate = () => {
-    setEditingItem(null);
-    setIsDrawerOpen(true);
+    router.push("/gamification/rewards/pillars/gift-cards/add");
   };
 
   const handleOpenEdit = (item: GiftCardRuleItem) => {
-    setEditingItem(item);
-    setIsDrawerOpen(true);
+    router.push(`/gamification/rewards/pillars/gift-cards/${item.id}/edit`);
   };
 
   const handleTopUpSuccess = (amount: number) => {

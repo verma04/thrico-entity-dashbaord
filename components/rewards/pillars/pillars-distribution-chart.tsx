@@ -136,10 +136,10 @@ export function PillarsDistributionChart({
               </Pie>
               {totalRewards > 0 && (
                 <RechartsTooltip
-                  formatter={(value: number, name: string, props: any) => [
-                    `${value} asset${value !== 1 ? "s" : ""} (${props.payload.percentage.toFixed(0)}%)`,
+                  formatter={((value: any, name: any, props: any) => [
+                    `${value} asset${value !== 1 ? "s" : ""} (${props.payload?.percentage?.toFixed(0) || 0}%)`,
                     name,
-                  ]}
+                  ]) as any}
                   contentStyle={{
                     backgroundColor: "hsl(var(--background))",
                     borderRadius: "8px",

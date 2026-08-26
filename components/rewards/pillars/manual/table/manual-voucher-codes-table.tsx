@@ -283,7 +283,7 @@ export function ManualVoucherCodesTable() {
       cell: (v) => {
         const isOneToOne =
           v.couponType === ManualCouponType.ONE_TO_ONE ||
-          v.couponType === "ONE_TO_ONE";
+          (v.couponType as string) === "ONE_TO_ONE";
         return (
           <AdminTableTag variant={isOneToOne ? "emerald" : "sky"}>
             {isOneToOne ? "1:1 Serial" : "1:N Shared"}

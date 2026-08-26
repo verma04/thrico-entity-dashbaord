@@ -41,6 +41,7 @@ export default function EditGiftCardRulePage() {
         totalIssued: rawRule.totalAllocated || 0,
         totalSpent: 0,
         gameAssignments: ["Spin the Wheel"],
+        createdAt: rawRule.createdAt || new Date().toISOString(),
       }
     : null;
 

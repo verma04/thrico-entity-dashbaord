@@ -254,11 +254,10 @@ export function ManualRewardsManage({
   };
 
   const handleOpenCreate = () => {
-    setEditingReward(null);
     if (onCreateClick) {
       onCreateClick();
     } else {
-      setIsDrawerOpen(true);
+      router.push("/gamification/rewards/pillars/manual/add");
     }
   };
 
@@ -266,8 +265,7 @@ export function ManualRewardsManage({
     if (onEditClick) {
       onEditClick(reward);
     } else {
-      setEditingReward(reward);
-      setIsDrawerOpen(true);
+      router.push(`/gamification/rewards/pillars/manual/${reward.id}/edit`);
     }
   };
 

@@ -201,7 +201,7 @@ export default function RewardPillarsPage() {
   // Sparkline Trend Calculations
   const totalTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
-      return redemptionTrend.map((t) => t.count);
+      return redemptionTrend.map((t: { date: string; count: number }) => t.count);
     }
     return [0, 0, 0, 0, totalRedemptions];
   }, [redemptionTrend, totalRedemptions]);
@@ -209,7 +209,7 @@ export default function RewardPillarsPage() {
   const manualTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
       const ratio = totalAssetsCount > 0 ? manualCount / totalAssetsCount : 0.33;
-      return redemptionTrend.map((t) => Math.round(t.count * ratio));
+      return redemptionTrend.map((t: { date: string; count: number }) => Math.round(t.count * ratio));
     }
     return [0, 0, 0, 0, manualCount];
   }, [redemptionTrend, manualCount, totalAssetsCount]);
@@ -217,7 +217,7 @@ export default function RewardPillarsPage() {
   const storeTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
       const ratio = totalAssetsCount > 0 ? storeCount / totalAssetsCount : 0.33;
-      return redemptionTrend.map((t) => Math.round(t.count * ratio));
+      return redemptionTrend.map((t: { date: string; count: number }) => Math.round(t.count * ratio));
     }
     return [0, 0, 0, 0, storeCount];
   }, [redemptionTrend, storeCount, totalAssetsCount]);
@@ -225,7 +225,7 @@ export default function RewardPillarsPage() {
   const giftTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
       const ratio = totalAssetsCount > 0 ? giftCardsCount / totalAssetsCount : 0.34;
-      return redemptionTrend.map((t) => Math.round(t.count * ratio));
+      return redemptionTrend.map((t: { date: string; count: number }) => Math.round(t.count * ratio));
     }
     return [0, 0, 0, 0, giftCardsCount];
   }, [redemptionTrend, giftCardsCount, totalAssetsCount]);

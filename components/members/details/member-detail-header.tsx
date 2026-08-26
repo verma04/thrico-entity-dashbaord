@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { CtaButton } from "@/components/ui/cta-button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import UserActions from "@/components/members/manage/user-actions";
 
 interface MemberDetailHeaderProps {
   firstName: string;
@@ -23,6 +24,7 @@ interface MemberDetailHeaderProps {
   status?: string;
   isOnline?: boolean;
   isVerified?: boolean;
+  member?: any;
 }
 
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
@@ -55,6 +57,7 @@ export function MemberDetailHeader({
   status,
   isOnline,
   isVerified,
+  member,
 }: MemberDetailHeaderProps) {
   const router = useRouter();
   const statusInfo = status ? STATUS_BADGE[status] : null;
@@ -115,6 +118,7 @@ export function MemberDetailHeader({
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
+          {member && <UserActions user={member} hideViewProfile />}
           <Link href={`/members/${memberId}/edit`}>
             <CtaButton variant="outline">
               <Edit3 className="h-3.5 w-3.5" />

@@ -43,6 +43,7 @@ export default function UserDetailsLayout({
           status={member.status}
           isOnline={member.isOnline}
           isVerified={member.verification?.isVerified}
+          member={member}
         />
 
         <div className="flex-1 overflow-y-auto">

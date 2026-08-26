@@ -38,21 +38,23 @@ const EditRolePage = () => {
           id: id,
           name: values.name,
           description: values.description,
+          isAdmin: values.isAdmin,
           adminAccess: values.adminAccess as Partial<AdminAccess>,
           modulePermissions: values.modulePermissions,
+          groupedModulePermissions: values.groupedModulePermissions,
         },
       },
     });
   };
 
   const onCancel = () => {
-    router.back();
+    router.push("/settings/users/roles");
   };
 
   if (fetching) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="flex h-[calc(100vh-140px)] w-full items-center justify-center">
+        <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -61,8 +63,14 @@ const EditRolePage = () => {
 
   if (!role) {
     return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        Role not found.
+      <div className="flex h-[calc(100vh-140px)] w-full items-center justify-center flex-col gap-2 text-muted-foreground">
+        <p className="text-sm font-medium">Role not found.</p>
+        <button
+          onClick={() => router.push("/settings/users/roles")}
+          className="text-xs text-primary underline hover:opacity-80"
+        >
+          Return to Roles
+        </button>
       </div>
     );
   }
@@ -79,4 +87,4 @@ const EditRolePage = () => {
   );
 };
 
-export default withModulePermission(EditRolePage, "ADMIN_USERS", "canEdit");
+export default withModulePermission(EditRolePage, "PERMISSIONS", "canEdit");

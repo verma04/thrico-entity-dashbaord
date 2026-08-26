@@ -7,6 +7,7 @@ export const GET_ROLES = gql`
       name
       description
       isSystem
+      isAdmin
       adminAccess {
         reports
         settings
@@ -26,6 +27,9 @@ export const GET_ROLES = gql`
         canEdit
         canDelete
       }
+      groupedModulePermissions
+      userCount
+      usersCount
     }
   }
 `;
@@ -37,6 +41,7 @@ export const GET_ROLE_BY_ID = gql`
       name
       description
       isSystem
+      isAdmin
       adminAccess {
         reports
         settings
@@ -56,6 +61,9 @@ export const GET_ROLE_BY_ID = gql`
         canEdit
         canDelete
       }
+      groupedModulePermissions
+      userCount
+      usersCount
     }
   }
 `;
@@ -72,6 +80,8 @@ export const CREATE_ROLE = gql`
       id
       name
       description
+      isAdmin
+      groupedModulePermissions
     }
   }
 `;
@@ -82,6 +92,8 @@ export const UPDATE_ROLE = gql`
       id
       name
       description
+      isAdmin
+      groupedModulePermissions
     }
   }
 `;

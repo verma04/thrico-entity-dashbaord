@@ -209,6 +209,9 @@ export function GiftCardForm({
           fetchedRuleData.getDigitalCardRuleById.totalAllocated || 0,
         totalSpent: 0,
         gameAssignments: ["Spin the Wheel"],
+        createdAt:
+          fetchedRuleData.getDigitalCardRuleById.createdAt ||
+          new Date().toISOString(),
       }
     : null;
 
