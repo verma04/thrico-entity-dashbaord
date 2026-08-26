@@ -132,18 +132,27 @@ export default function RewardPillarsPage() {
     refetchSecurity?.();
   };
 
+  interface PillarRewardItem {
+    mechanism?: { type?: string };
+    manualBatchId?: string | null;
+    storeDiscountRuleId?: string | null;
+    digitalCardRuleId?: string | null;
+    provider?: string;
+    rewardType?: string;
+  }
+
   // 3. Process Multi-Pillar Categorizations
-  const rewards = rewardsData?.getRewards || [];
-  const manualBatches = manualBatchesData?.getManualVoucherBatches?.batches || [];
-  const storeRules = storeRulesData?.getStoreDiscountRules?.rules || [];
-  const digitalCardRules = digitalCardRulesData?.getDigitalCardRules?.rules || [];
+  const rewards = useMemo(() => (rewardsData?.getRewards || []) as PillarRewardItem[], [rewardsData]);
+  const manualBatches = useMemo(() => manualBatchesData?.getManualVoucherBatches?.batches || [], [manualBatchesData]);
+  const storeRules = useMemo(() => storeRulesData?.getStoreDiscountRules?.rules || [], [storeRulesData]);
+  const digitalCardRules = useMemo(() => digitalCardRulesData?.getDigitalCardRules?.rules || [], [digitalCardRulesData]);
   const wallet = walletData?.getEntityRewardWallet;
   const stats = statsData?.getRewardStats;
-  const redemptions = redemptionsData?.getRedemptions || [];
+  const redemptions = useMemo(() => redemptionsData?.getRedemptions || [], [redemptionsData]);
   const securitySettings = securityData?.getRewardSecuritySettings;
 
   const manualRewards = useMemo(() => {
-    return rewards.filter((r: any) => {
+    return rewards.filter((r: PillarRewardItem) => {
       const mechType = r.mechanism?.type;
       return (
         mechType === "INTERNAL_VOUCHER" ||
@@ -159,7 +168,7 @@ export default function RewardPillarsPage() {
   }, [rewards]);
 
   const storeRewards = useMemo(() => {
-    return rewards.filter((r: any) => {
+    return rewards.filter((r: PillarRewardItem) => {
       const mechType = r.mechanism?.type;
       return (
         mechType === "STORE_DISCOUNT" ||
@@ -172,7 +181,7 @@ export default function RewardPillarsPage() {
   }, [rewards]);
 
   const giftCardRewards = useMemo(() => {
-    return rewards.filter((r: any) => {
+    return rewards.filter((r: PillarRewardItem) => {
       const mechType = r.mechanism?.type;
       return (
         mechType === "DIGITAL_GIFT_CARD" ||
@@ -196,7 +205,7 @@ export default function RewardPillarsPage() {
   const activeCouponsCount = stats?.activeCoupons ?? rewards.length;
   const totalTcBurned = stats?.totalTcBurned ?? 0;
   const walletBalance = wallet?.balance ?? 0;
-  const redemptionTrend = stats?.redemptionTrend || [];
+  const redemptionTrend = useMemo(() => stats?.redemptionTrend || [], [stats?.redemptionTrend]);
 
   // Sparkline Trend Calculations
   const totalTrendData = useMemo(() => {
@@ -373,6 +382,7 @@ export default function RewardPillarsPage() {
                 manualCount={manualCount}
                 storeCount={storeCount}
                 giftCardsCount={giftCardsCount}
+                timeRange={timeRange === "30d" || timeRange === "90d" ? timeRange : "7d"}
               />
             </div>
             <div className="lg:col-span-5 flex flex-col">

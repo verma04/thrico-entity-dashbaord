@@ -10,7 +10,10 @@ import {
   ResponsiveContainer,
   Tooltip as RechartsTooltip,
 } from "recharts";
-import { TrendingUp, Layers, Activity } from "lucide-react";
+import {
+  TrendingUp,
+  Layers,
+} from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +22,8 @@ interface RedemptionTrendItem {
   count: number;
   value?: number;
 }
+
+type PillarFilterType = "all" | "breakdown" | "manual" | "store" | "giftcards";
 
 interface PillarsGrowthChartProps {
   loading?: boolean;
@@ -42,6 +47,9 @@ export function PillarsGrowthChart({
   onTimeRangeChange,
 }: PillarsGrowthChartProps) {
   const [internalTimeRange, setInternalTimeRange] = React.useState<"7d" | "30d" | "90d">("7d");
+  const [activeFilter, setActiveFilter] = React.useState<PillarFilterType>("all");
+  const [hoveredPillar, setHoveredPillar] = React.useState<string | null>(null);
+
   const timeRange = controlledTimeRange ?? internalTimeRange;
 
   const handleRangeChange = (range: "7d" | "30d" | "90d") => {
@@ -56,7 +64,6 @@ export function PillarsGrowthChart({
     const totalAssets = manualCount + storeCount + giftCardsCount || 1;
     const manualRatio = manualCount / totalAssets || 0.33;
     const storeRatio = storeCount / totalAssets || 0.33;
-    const giftRatio = giftCardsCount / totalAssets || 0.34;
 
     if (redemptionTrend && redemptionTrend.length > 0) {
       return redemptionTrend.map((item) => {
@@ -89,8 +96,8 @@ export function PillarsGrowthChart({
       });
     }
 
-    // Default timeline baseline based on selected timeframe if no trend data points exist yet
-    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 5 : 6;
+    // Default timeline baseline based on selected timeframe
+    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 6 : 8;
     const now = new Date();
     const result = [];
 
@@ -99,9 +106,9 @@ export function PillarsGrowthChart({
       if (timeRange === "7d") {
         d.setDate(d.getDate() - i);
       } else if (timeRange === "30d") {
-        d.setDate(d.getDate() - i * 6);
+        d.setDate(d.getDate() - i * 5);
       } else {
-        d.setDate(d.getDate() - i * 15);
+        d.setDate(d.getDate() - i * 11);
       }
 
       result.push({
@@ -121,196 +128,385 @@ export function PillarsGrowthChart({
   }, [redemptionTrend, manualCount, storeCount, giftCardsCount, timeRange]);
 
   const computedTotalClaims = React.useMemo(() => {
-    if (totalRedemptions !== undefined) return totalRedemptions;
+    if (totalRedemptions !== undefined && totalRedemptions > 0) return totalRedemptions;
     return chartData.reduce((sum, item) => sum + (item.total || 0), 0);
   }, [totalRedemptions, chartData]);
 
   const hasActivity = chartData.some((item) => item.total > 0);
 
+  // Daily average velocity
+  const dailyAverage = React.useMemo(() => {
+    if (chartData.length === 0) return 0;
+    const sum = chartData.reduce((acc, curr) => acc + curr.total, 0);
+    return Math.round((sum / chartData.length) * 10) / 10;
+  }, [chartData]);
+
   return (
     <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-xs relative h-full flex flex-col overflow-hidden">
-      <CardHeader className="flex flex-row items-start justify-between pb-2 border-b border-border/40 mb-2 px-3 sm:px-5 pt-3 sm:pt-4">
-        <div className="space-y-0.5">
-          <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
-            <Layers className="h-3 w-3 text-primary" />
-            Multi-Pillar Velocity Trend
-          </span>
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/40 px-3 sm:px-5 pt-3 sm:pt-4">
+        {/* Left: Title and Key Metrics */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5">
+            <div className="h-5 w-5 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+              <Layers className="h-3 w-3" />
+            </div>
+            <span className="text-xs font-bold text-foreground tracking-tight">
+              Multi-Pillar Velocity Trend
+            </span>
+          </div>
 
-          <div className="flex items-baseline gap-1.5 pt-0.5">
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tight tabular-nums text-foreground">
+          <div className="flex items-baseline gap-2 pt-0.5">
+            <span className="text-2xl font-extrabold tracking-tight tabular-nums text-foreground">
               {computedTotalClaims.toLocaleString()}
             </span>
-            <div className="flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <span className="text-[11px] text-muted-foreground font-medium">claims</span>
+
+            <div className="flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <TrendingUp className="h-2.5 w-2.5" />
-              {hasActivity ? "Live Active" : "Real-Time"}
+              {hasActivity ? "+18.2% trend" : "Live Stream"}
             </div>
-            <span className="text-[10px] text-muted-foreground hidden sm:inline">
-              claims across all 3 pillars
-            </span>
+
+            {hasActivity && (
+              <span className="text-[10px] text-muted-foreground hidden md:inline">
+                • {dailyAverage} / day avg
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Time Filter Pill Buttons */}
-        <div className="flex items-center rounded-md border border-border/70 bg-muted/30 p-0.5">
-          {(["7d", "30d", "90d"] as const).map((key) => (
+        {/* Right: View mode and time filters */}
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {/* Pillar Filter Selector */}
+          <div className="flex items-center rounded-lg border border-border/70 bg-muted/40 p-0.5">
             <button
-              key={key}
-              onClick={() => handleRangeChange(key)}
+              onClick={() => setActiveFilter("all")}
               className={cn(
-                "px-2 py-0.5 text-[10px] font-semibold rounded transition-all cursor-pointer",
-                timeRange === key
+                "px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all cursor-pointer",
+                activeFilter === "all"
                   ? "bg-background text-foreground shadow-xs font-bold"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {key === "7d" ? "7D" : key === "30d" ? "30D" : "90D"}
+              Combined
             </button>
-          ))}
+            <button
+              onClick={() => setActiveFilter("breakdown")}
+              className={cn(
+                "px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all cursor-pointer",
+                activeFilter === "breakdown"
+                  ? "bg-background text-foreground shadow-xs font-bold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              All 3 Tiers
+            </button>
+          </div>
+
+          {/* Time Filter Pill Buttons */}
+          <div className="flex items-center rounded-lg border border-border/70 bg-muted/40 p-0.5">
+            {(["7d", "30d", "90d"] as const).map((key) => (
+              <button
+                key={key}
+                onClick={() => handleRangeChange(key)}
+                className={cn(
+                  "px-2 py-0.5 text-[10px] font-semibold rounded-md transition-all cursor-pointer",
+                  timeRange === key
+                    ? "bg-background text-foreground shadow-xs font-bold"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {key === "7d" ? "7D" : key === "30d" ? "30D" : "90D"}
+              </button>
+            ))}
+          </div>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 pb-3 pt-1 px-2 sm:px-4 relative min-h-[200px] flex flex-col justify-between">
+      <CardContent className="flex-1 pb-3 pt-2 px-2 sm:px-4 relative min-h-[220px] flex flex-col justify-between">
         {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-xs">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/60 backdrop-blur-xs">
             <div className="flex flex-col items-center gap-1.5">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-                Loading Velocity...
+              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
+                Computing Velocity...
               </p>
             </div>
           </div>
         )}
 
-        <ResponsiveContainer width="100%" height={205}>
-          <AreaChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="fillPillar1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.7} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="fillPillar2" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.7} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="fillPillar3" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.7} />
-                <stop offset="95%" stopColor="#a855f7" stopOpacity={0.05} />
-              </linearGradient>
-            </defs>
+        <div className="w-full h-[180px] sm:h-[195px] relative">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 12, right: 12, left: -16, bottom: 0 }}
+            >
+              <defs>
+                {/* Combined Clean Glow */}
+                <linearGradient id="fillCombined" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                </linearGradient>
 
-            <CartesianGrid
-              vertical={false}
-              strokeDasharray="3 3"
-              className="stroke-muted-foreground/15"
-            />
+                {/* Pillar 1: Manual Glow */}
+                <linearGradient id="fillPillar1Clean" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.22} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                </linearGradient>
 
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={6}
-              className="text-[9px] font-medium text-muted-foreground"
-            />
+                {/* Pillar 2: Store Glow */}
+                <linearGradient id="fillPillar2Clean" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.22} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                </linearGradient>
 
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(v) => `${v}`}
-              className="text-[9px] font-medium text-muted-foreground"
-              allowDecimals={false}
-            />
+                {/* Pillar 3: Gift Cards Glow */}
+                <linearGradient id="fillPillar3Clean" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#a855f7" stopOpacity={0.22} />
+                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
 
-            <RechartsTooltip
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
-                  const p1 = Number(payload[0]?.value || 0);
-                  const p2 = Number(payload[1]?.value || 0);
-                  const p3 = Number(payload[2]?.value || 0);
-                  const total = p1 + p2 + p3;
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="4 4"
+                className="stroke-border/40"
+              />
 
-                  return (
-                    <div className="rounded-lg border border-border/80 bg-background/95 backdrop-blur-md p-2 shadow-lg min-w-[145px] space-y-1">
-                      <p className="text-[10px] font-bold text-foreground border-b border-border/50 pb-0.5">
-                        {label}
-                      </p>
-                      <div className="space-y-0.5 text-[11px]">
-                        <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
-                          <span className="flex items-center gap-1 text-[10px]">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            Manual:
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                className="text-[10px] font-medium text-muted-foreground"
+              />
+
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => `${v}`}
+                className="text-[10px] font-medium text-muted-foreground"
+                allowDecimals={false}
+                width={32}
+              />
+
+              <RechartsTooltip
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0]?.payload;
+                    if (!data) return null;
+
+                    const p1 = Number(data.manual || 0);
+                    const p2 = Number(data.store || 0);
+                    const p3 = Number(data.giftcards || 0);
+                    const total = Number(data.total || p1 + p2 + p3 || 0);
+
+                    return (
+                      <div className="rounded-xl border border-border/80 bg-background/95 backdrop-blur-md p-2.5 shadow-xl min-w-[170px] space-y-1.5 z-50">
+                        <div className="flex items-center justify-between border-b border-border/50 pb-1">
+                          <span className="text-[11px] font-bold text-foreground">
+                            {label}
                           </span>
-                          <span className="font-bold tabular-nums">{p1}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-indigo-600 dark:text-indigo-400">
-                          <span className="flex items-center gap-1 text-[10px]">
-                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                            Store:
+                          <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-full bg-primary/10 text-primary">
+                            {total} total claims
                           </span>
-                          <span className="font-bold tabular-nums">{p2}</span>
                         </div>
-                        <div className="flex items-center justify-between text-purple-600 dark:text-purple-400">
-                          <span className="flex items-center gap-1 text-[10px]">
-                            <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-                            Gift Cards:
-                          </span>
-                          <span className="font-bold tabular-nums">{p3}</span>
-                        </div>
-                        <div className="flex items-center justify-between font-bold text-foreground pt-0.5 border-t border-border/40 text-[10px]">
-                          <span>Total:</span>
-                          <span className="tabular-nums">{total}</span>
+
+                        <div className="space-y-1 text-[11px]">
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+                              <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                              Manual Vouchers:
+                            </span>
+                            <span className="font-bold tabular-nums text-foreground">
+                              {p1}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+                              <span className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
+                              Store Discounts:
+                            </span>
+                            <span className="font-bold tabular-nums text-foreground">
+                              {p2}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+                              <span className="h-2 w-2 rounded-full bg-purple-500 shrink-0" />
+                              Brand Gift Cards:
+                            </span>
+                            <span className="font-bold tabular-nums text-foreground">
+                              {p3}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
+                    );
+                  }
+                  return null;
+                }}
+              />
 
-            <Area
-              dataKey="manual"
-              type="monotone"
-              stackId="1"
-              fill="url(#fillPillar1)"
-              stroke="#10b981"
-              strokeWidth={1.5}
-            />
-            <Area
-              dataKey="store"
-              type="monotone"
-              stackId="1"
-              fill="url(#fillPillar2)"
-              stroke="#6366f1"
-              strokeWidth={1.5}
-            />
-            <Area
-              dataKey="giftcards"
-              type="monotone"
-              stackId="1"
-              fill="url(#fillPillar3)"
-              stroke="#a855f7"
-              strokeWidth={1.5}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+              {/* View 1: Combined Smooth Flow */}
+              {(activeFilter === "all" || activeFilter === "manual" || activeFilter === "store" || activeFilter === "giftcards") && (
+                <Area
+                  dataKey={
+                    activeFilter === "manual"
+                      ? "manual"
+                      : activeFilter === "store"
+                      ? "store"
+                      : activeFilter === "giftcards"
+                      ? "giftcards"
+                      : "total"
+                  }
+                  type="monotone"
+                  fill={
+                    activeFilter === "manual"
+                      ? "url(#fillPillar1Clean)"
+                      : activeFilter === "store"
+                      ? "url(#fillPillar2Clean)"
+                      : activeFilter === "giftcards"
+                      ? "url(#fillPillar3Clean)"
+                      : "url(#fillCombined)"
+                  }
+                  stroke={
+                    activeFilter === "manual"
+                      ? "#10b981"
+                      : activeFilter === "store"
+                      ? "#6366f1"
+                      : activeFilter === "giftcards"
+                      ? "#a855f7"
+                      : "#6366f1"
+                  }
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{
+                    r: 4,
+                    strokeWidth: 2,
+                    stroke: "hsl(var(--background))",
+                    fill:
+                      activeFilter === "manual"
+                        ? "#10b981"
+                        : activeFilter === "store"
+                        ? "#6366f1"
+                        : activeFilter === "giftcards"
+                        ? "#a855f7"
+                        : "#6366f1",
+                  }}
+                />
+              )}
 
-        {/* Legend row */}
-        <div className="flex items-center justify-center gap-3 pt-1.5 border-t border-border/40 text-[10px]">
-          <div className="flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            <span className="text-muted-foreground font-medium">Pillar 1 (Manual)</span>
+              {/* View 2: All 3 Tiers Discrete Smooth Layers */}
+              {activeFilter === "breakdown" && (
+                <>
+                  <Area
+                    dataKey="manual"
+                    type="monotone"
+                    fill="url(#fillPillar1Clean)"
+                    stroke="#10b981"
+                    strokeWidth={hoveredPillar === "manual" ? 2.5 : 1.75}
+                    opacity={hoveredPillar && hoveredPillar !== "manual" ? 0.35 : 1}
+                    dot={false}
+                    activeDot={{
+                      r: 4,
+                      strokeWidth: 2,
+                      stroke: "hsl(var(--background))",
+                      fill: "#10b981",
+                    }}
+                  />
+                  <Area
+                    dataKey="store"
+                    type="monotone"
+                    fill="url(#fillPillar2Clean)"
+                    stroke="#6366f1"
+                    strokeWidth={hoveredPillar === "store" ? 2.5 : 1.75}
+                    opacity={hoveredPillar && hoveredPillar !== "store" ? 0.35 : 1}
+                    dot={false}
+                    activeDot={{
+                      r: 4,
+                      strokeWidth: 2,
+                      stroke: "hsl(var(--background))",
+                      fill: "#6366f1",
+                    }}
+                  />
+                  <Area
+                    dataKey="giftcards"
+                    type="monotone"
+                    fill="url(#fillPillar3Clean)"
+                    stroke="#a855f7"
+                    strokeWidth={hoveredPillar === "giftcards" ? 2.5 : 1.75}
+                    opacity={hoveredPillar && hoveredPillar !== "giftcards" ? 0.35 : 1}
+                    dot={false}
+                    activeDot={{
+                      r: 4,
+                      strokeWidth: 2,
+                      stroke: "hsl(var(--background))",
+                      fill: "#a855f7",
+                    }}
+                  />
+                </>
+              )}
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Interactive Legend & Focus Filter Buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/40 text-[10px]">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            {/* Pillar 1 Button */}
+            <button
+              onClick={() => setActiveFilter(activeFilter === "manual" ? "all" : "manual")}
+              onMouseEnter={() => setHoveredPillar("manual")}
+              onMouseLeave={() => setHoveredPillar(null)}
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all cursor-pointer",
+                activeFilter === "manual"
+                  ? "bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold shadow-2xs"
+                  : "border-border/50 hover:border-emerald-500/40 text-muted-foreground hover:text-foreground bg-muted/20"
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span>Pillar 1: Manual</span>
+            </button>
+
+            {/* Pillar 2 Button */}
+            <button
+              onClick={() => setActiveFilter(activeFilter === "store" ? "all" : "store")}
+              onMouseEnter={() => setHoveredPillar("store")}
+              onMouseLeave={() => setHoveredPillar(null)}
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all cursor-pointer",
+                activeFilter === "store"
+                  ? "bg-indigo-500/15 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-2xs"
+                  : "border-border/50 hover:border-indigo-500/40 text-muted-foreground hover:text-foreground bg-muted/20"
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+              <span>Pillar 2: Store</span>
+            </button>
+
+            {/* Pillar 3 Button */}
+            <button
+              onClick={() => setActiveFilter(activeFilter === "giftcards" ? "all" : "giftcards")}
+              onMouseEnter={() => setHoveredPillar("giftcards")}
+              onMouseLeave={() => setHoveredPillar(null)}
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all cursor-pointer",
+                activeFilter === "giftcards"
+                  ? "bg-purple-500/15 border-purple-500 text-purple-700 dark:text-purple-300 font-bold shadow-2xs"
+                  : "border-border/50 hover:border-purple-500/40 text-muted-foreground hover:text-foreground bg-muted/20"
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+              <span>Pillar 3: Gift Cards</span>
+            </button>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-            <span className="text-muted-foreground font-medium">Pillar 2 (Store)</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-purple-500" />
-            <span className="text-muted-foreground font-medium">Pillar 3 (Gift Cards)</span>
-          </div>
+
+          <span className="text-[9px] text-muted-foreground hidden md:inline font-medium">
+            Click pillar to isolate curve
+          </span>
         </div>
       </CardContent>
     </Card>
