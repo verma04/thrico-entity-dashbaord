@@ -20,7 +20,7 @@ export function withSubscriptionCheck<P extends object>(
     const { data, loading, error } = useCheckEntitySubscription();
 
     const isEnabled = React.useMemo(() => {
-      if (loading) return null;
+      if (loading && !data) return null;
       if (!data?.checkEntitySubscription?.modules) return false;
 
       const modules = data.checkEntitySubscription.modules;
@@ -42,7 +42,7 @@ export function withSubscriptionCheck<P extends object>(
       );
     }, [data, loading]);
 
-    if (loading || isEnabled === null) {
+    if ((loading && !data) || isEnabled === null) {
       return (
         <div className="p-8 space-y-4 w-full h-full min-h-[400px]">
           <Skeleton className="h-12 w-3/4" />
@@ -56,7 +56,7 @@ export function withSubscriptionCheck<P extends object>(
       return <ModuleLocked moduleKey={moduleKey} />;
     }
 
-    if (error) {
+    if (error && !data) {
       return null;
     }
 

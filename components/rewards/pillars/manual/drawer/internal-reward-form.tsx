@@ -100,51 +100,44 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
     skip: !id || Boolean(initialItem),
   });
 
-  const parsedFetchedItem: ManualRewardItem | null = fetchedBatchData
-    ?.getManualVoucherBatchById
-    ? {
-        id: fetchedBatchData.getManualVoucherBatchById.id,
-        title: fetchedBatchData.getManualVoucherBatchById.name,
-        description: fetchedBatchData.getManualVoucherBatchById.description,
-        image: fetchedBatchData.getManualVoucherBatchById.image || "",
-        url: fetchedBatchData.getManualVoucherBatchById.url || "",
-        couponType:
-          fetchedBatchData.getManualVoucherBatchById.couponType ||
-          ManualCouponType.ONE_TO_ONE,
-        couponCode:
-          fetchedBatchData.getManualVoucherBatchById.couponType ===
-          ManualCouponType.ONE_TO_MANY
-            ? fetchedBatchData.getManualVoucherBatchById.name
-            : "",
-        codePrefix: "VCH",
-        faceValue: fetchedBatchData.getManualVoucherBatchById.faceValue || 0,
-        currency: fetchedBatchData.getManualVoucherBatchById.currency || "TC",
-        totalInventory:
-          fetchedBatchData.getManualVoucherBatchById.totalCount || 0,
-        allocatedCount:
-          fetchedBatchData.getManualVoucherBatchById.allocatedCount || 0,
-        redeemedCount:
-          fetchedBatchData.getManualVoucherBatchById.redeemedCount || 0,
-        remainingCount:
-          fetchedBatchData.getManualVoucherBatchById.remainingCount || 0,
-        isActive: fetchedBatchData.getManualVoucherBatchById.status === "ACTIVE",
-        validityDays: 30,
-        createdAt:
-          fetchedBatchData.getManualVoucherBatchById.createdAt ||
-          new Date().toISOString(),
-      }
-    : null;
+  const parsedFetchedItem = React.useMemo<ManualRewardItem | null>(() => {
+    const raw = fetchedBatchData?.getManualVoucherBatchById;
+    if (!raw) return null;
+    return {
+      id: raw.id,
+      title: raw.name,
+      description: raw.description,
+      image: raw.image || "",
+      url: raw.url || "",
+      couponType: raw.couponType || ManualCouponType.ONE_TO_ONE,
+      couponCode:
+        raw.couponType === ManualCouponType.ONE_TO_MANY ? raw.name : "",
+      codePrefix: "VCH",
+      faceValue: raw.faceValue || 0,
+      currency: raw.currency || "TC",
+      totalInventory: raw.totalCount || 0,
+      allocatedCount: raw.allocatedCount || 0,
+      redeemedCount: raw.redeemedCount || 0,
+      remainingCount: raw.remainingCount || 0,
+      isActive: raw.status === "ACTIVE",
+      validityDays: 30,
+      createdAt: raw.createdAt || "",
+    };
+  }, [fetchedBatchData]);
 
   const currentItem = initialItem || parsedFetchedItem;
 
   const { data: entityData } = useGetEntity();
-  const rawEntityName = entityData?.getEntity?.name || "VCH";
-  const defaultEntityPrefix =
-    rawEntityName.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) ||
-    "VCH";
+  const defaultEntityPrefix = React.useMemo(() => {
+    const rawEntityName = entityData?.getEntity?.name || "VCH";
+    return (
+      rawEntityName.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 6) ||
+      "VCH"
+    );
+  }, [entityData]);
 
-  const formik = useFormik({
-    initialValues: {
+  const initialValues = React.useMemo(
+    () => ({
       title: currentItem?.title || "",
       description: currentItem?.description || "",
       image: currentItem?.image || "",
@@ -158,12 +151,12 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
       url: currentItem?.url || "",
       isActive: currentItem?.isActive ?? true,
       status: currentItem?.isActive !== false ? "ACTIVE" : "DRAFT",
-      expiryDate: (() => {
-        const d = new Date();
-        d.setDate(d.getDate() + (currentItem?.validityDays || 30));
-        return d.toISOString().slice(0, 16);
-      })(),
-    },
+    }),
+    [currentItem, defaultEntityPrefix],
+  );
+
+  const formik = useFormik({
+    initialValues,
     validationSchema: internalRewardSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
