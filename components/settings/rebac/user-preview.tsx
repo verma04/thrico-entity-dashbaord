@@ -12,9 +12,18 @@ interface UserPreviewProps {
     role: string;
   };
   roles: Array<{ id: string; name: string; description?: string }>;
+  isEditing?: boolean;
+  status?: boolean | string;
+  memberStatus?: string;
 }
 
-export function UserPreview({ formData, roles }: UserPreviewProps) {
+export function UserPreview({
+  formData,
+  roles,
+  isEditing,
+  status,
+  memberStatus,
+}: UserPreviewProps) {
   const selectedRole = roles.find((r) => r.id === formData.role);
   const fullName =
     [formData.firstName, formData.lastName].filter(Boolean).join(" ") || "";
@@ -22,6 +31,10 @@ export function UserPreview({ formData, roles }: UserPreviewProps) {
     .filter(Boolean)
     .join("")
     .toUpperCase();
+
+  const displayStatus = isEditing
+    ? memberStatus || (status === false ? "Inactive" : "Active")
+    : "Pending Invite";
 
   return (
     <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3.5 space-y-3 shadow-xs">
@@ -84,9 +97,9 @@ export function UserPreview({ formData, roles }: UserPreviewProps) {
 
       {/* Status Chip */}
       <div className="pt-1 flex items-center justify-between text-[11.5px] text-[#616161]">
-        <span>Invitation Status:</span>
+        <span>{isEditing ? "Account Status:" : "Invitation Status:"}</span>
         <span className="font-semibold text-[#303030] dark:text-zinc-200">
-          Pending Invite
+          {displayStatus}
         </span>
       </div>
     </div>

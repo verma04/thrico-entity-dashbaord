@@ -406,7 +406,7 @@ export default function UsersTab() {
 
             <CtaButton onClick={() => router.push("/settings/users/create")}>
               <Plus className="h-3.5 w-3.5" />
-              Add Role
+              Add User
             </CtaButton>
           </div>
         }

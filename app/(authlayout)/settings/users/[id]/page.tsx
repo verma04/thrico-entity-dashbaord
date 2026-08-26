@@ -2,7 +2,11 @@
 
 import React from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useGetAdminById, useUpdateAdminUser, useUpdateAdminUserRole } from "@/graphql/actions";
+import {
+  useGetAdminById,
+  useUpdateAdminUser,
+  useUpdateAdminUserRole,
+} from "@/graphql/actions";
 import { UserCreationForm } from "@/components/settings/rebac/user-creation-form";
 import { useToast } from "@/hooks/use-toast";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
@@ -17,28 +21,18 @@ const EditUserPage = () => {
 
   const { data, loading: fetching } = useGetAdminById(id);
 
-  const [updateAdmin, { loading: updatingAdmin }] = useUpdateAdminUser({
-    onCompleted: () => {
-      toast({
-        title: "Member updated",
-        description: "The member details have been updated successfully.",
-      });
-      router.push("/settings/users/all");
-    },
-    onError: (err: ApolloError) => {
-      toast({
-        title: "Failed to update member",
-        description: err.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const [submitting, setSubmitting] = React.useState(false);
 
+  const [updateAdmin] = useUpdateAdminUser();
   const [updateRole] = useUpdateAdminUserRole();
 
   const onFinish = async (values: any) => {
+    setSubmitting(true);
     try {
-      if (values.role && values.role !== data?.getAdminById?.role?.id) {
+      const currentRoleId =
+        data?.getAdminById?.role?.id || (data?.getAdminById as any)?.roleId;
+
+      if (values.role && values.role !== currentRoleId) {
         await updateRole({
           variables: {
             adminId: id,
@@ -56,8 +50,20 @@ const EditUserPage = () => {
           },
         },
       });
+
+      toast({
+        title: "Member updated",
+        description: "The member details and role have been updated successfully.",
+      });
+      router.push("/settings/users/all");
     } catch (err: any) {
-      // Error handled by Apollo error callbacks
+      toast({
+        title: "Failed to update member",
+        description: err.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -93,7 +99,7 @@ const EditUserPage = () => {
     <div className="h-full overflow-hidden">
       <UserCreationForm
         initialValues={user}
-        loading={updatingAdmin}
+        loading={submitting}
         onFinish={onFinish}
         onCancel={onCancel}
       />

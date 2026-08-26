@@ -1179,7 +1179,7 @@ export const emailItems = [
   {
     key: "email-settings",
     label: "Email Settings",
-    path: "/email/settings",
+    path: "/email/usage",
     icon: <Settings size={18} />,
   },
 ];
@@ -1352,11 +1352,7 @@ export const useFilteredExtendedItems = () => {
       }
 
       // 3. Regular users need explicit module permissions
-      const hasPermission = hasUserModulePermission(
-        user,
-        item.key,
-        "canRead",
-      );
+      const hasPermission = hasUserModulePermission(user, item.key, "canRead");
 
       if (hasPermission) {
         acc.push(mappedItem);
@@ -1443,10 +1439,7 @@ export const useFilteredManagementItems = () => {
   const isSuperAdmin = user?.isSuperAdmin;
   const isSystemRole = user?.role?.isSystem;
 
-  const hasModulePermission = (
-    moduleName: string,
-    action: any = "canRead",
-  ) => {
+  const hasModulePermission = (moduleName: string, action: any = "canRead") => {
     return hasUserModulePermission(user, moduleName, action);
   };
 

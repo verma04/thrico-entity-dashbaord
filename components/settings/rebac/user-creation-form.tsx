@@ -55,7 +55,12 @@ export function UserCreationForm({
       firstName: initialValues?.firstName || "",
       lastName: initialValues?.lastName || "",
       email: initialValues?.email || "",
-      role: initialValues?.role?.id || "",
+      role:
+        (typeof initialValues?.role === "object"
+          ? initialValues?.role?.id
+          : initialValues?.role) ||
+        (initialValues as any)?.roleId ||
+        "",
       avatar: initialValues?.avatar || "",
     },
     enableReinitialize: true,
@@ -70,6 +75,9 @@ export function UserCreationForm({
 
   const selectedRoleName =
     roles.find((r: any) => r.id === formik.values.role)?.name ||
+    (typeof initialValues?.role === "object"
+      ? initialValues?.role?.name
+      : initialValues?.role) ||
     "Not selected";
 
   return (
@@ -100,7 +108,13 @@ export function UserCreationForm({
                 badge="Live Profile"
                 icon={Sparkles}
               >
-                <UserPreview formData={formik.values} roles={roles} />
+                <UserPreview
+                  formData={formik.values}
+                  roles={roles}
+                  isEditing={isEditing}
+                  status={initialValues?.status}
+                  memberStatus={initialValues?.memberStatus}
+                />
 
                 {/* Structured Configuration Breakdown */}
                 <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
@@ -128,7 +142,14 @@ export function UserCreationForm({
                   />
                   <PolarisSummaryRow
                     label="Status"
-                    value="Pending Invite"
+                    value={
+                      isEditing
+                        ? initialValues?.memberStatus ||
+                          (initialValues?.status === false
+                            ? "Inactive"
+                            : "Active")
+                        : "Pending Invite"
+                    }
                     isLast
                   />
                 </div>
@@ -226,8 +247,9 @@ export function UserCreationForm({
                   </p>
                 ) : (
                   <p className="text-[11.5px] text-[#616161]">
-                    An official invitation link with onboarding credentials will
-                    be dispatched to this inbox.
+                    {isEditing
+                      ? "Primary login and communication address for this administrator."
+                      : "An official invitation link with onboarding credentials will be dispatched to this inbox."}
                   </p>
                 )}
               </div>
@@ -240,60 +262,53 @@ export function UserCreationForm({
               description="Select the security permission level and administrative authorization for this user."
               badge="Security"
             >
-              {!isEditing ? (
-                <div className="space-y-1.5">
-                  <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
-                    Assigned Workspace Role{" "}
-                    <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
-                  <Select
-                    value={formik.values.role}
-                    onValueChange={(v) => formik.setFieldValue("role", v)}
-                  >
-                    <SelectTrigger className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]">
-                      <SelectValue placeholder="Select an administrative role..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rolesLoading ? (
-                        <div className="flex items-center justify-center py-4">
-                          <Loader2 className="h-4 w-4 animate-spin text-[#8c9196]" />
-                        </div>
-                      ) : (
-                        roles.map((role: any) => (
-                          <SelectItem key={role.id} value={role.id}>
-                            <div className="flex flex-col gap-0.5 py-0.5 text-left">
-                              <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
-                                {role.name}
+              <div className="space-y-1.5">
+                <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
+                  Assigned Workspace Role{" "}
+                  <span className="text-[#d72c0d] ml-0.5">*</span>
+                </label>
+                <Select
+                  value={formik.values.role}
+                  onValueChange={(v) => formik.setFieldValue("role", v)}
+                >
+                  <SelectTrigger className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]">
+                    <SelectValue placeholder="Select an administrative role..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rolesLoading ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-4 w-4 animate-spin text-[#8c9196]" />
+                      </div>
+                    ) : (
+                      roles.map((role: any) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          <div className="flex flex-col gap-0.5 py-0.5 text-left">
+                            <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
+                              {role.name}
+                            </span>
+                            {role.description && (
+                              <span className="text-[11px] text-[#616161] dark:text-zinc-400">
+                                {role.description}
                               </span>
-                              {role.description && (
-                                <span className="text-[11px] text-[#616161] dark:text-zinc-400">
-                                  {role.description}
-                                </span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {formik.touched.role && formik.errors.role && (
-                    <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
-                      {formik.errors.role as string}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-start gap-3 p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40">
-                  <Info className="h-4 w-4 text-[#616161] shrink-0 mt-0.5" />
-                  <p className="text-[12.5px] text-[#616161] dark:text-zinc-400 leading-[18px]">
-                    To modify this administrator's RBAC role, use the{" "}
-                    <strong className="font-semibold text-[#303030] dark:text-zinc-100">
-                      Edit role & access
-                    </strong>{" "}
-                    action on the administrators directory table.
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {formik.touched.role && formik.errors.role && (
+                  <p className="text-[12.5px] text-[#d72c0d] font-normal leading-[18px]">
+                    {formik.errors.role as string}
                   </p>
-                </div>
-              )}
+                )}
+                {isEditing && (
+                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-1">
+                    Changing the assigned role will immediately update this
+                    administrator's permissions across all modules upon saving.
+                  </p>
+                )}
+              </div>
             </PolarisFormCard>
 
             {/* Floating Action Bar */}
