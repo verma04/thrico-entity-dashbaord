@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { X, Loader2, type LucideIcon } from "lucide-react";
+import { X, Loader2, ArrowLeft, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -188,6 +188,7 @@ export interface ManageItemLayoutProps {
   className?: string;
   containerClassName?: string;
   contentContainerClassName?: string;
+  showBackButton?: boolean;
   fixed?: boolean;
 }
 
@@ -218,6 +219,7 @@ export function ManageItemLayout({
   className,
   containerClassName,
   contentContainerClassName,
+  showBackButton = true,
   fixed = true,
 }: ManageItemLayoutProps) {
   const router = useRouter();
@@ -249,7 +251,19 @@ export function ManageItemLayout({
         <div className={cn("max-w-7xl mx-auto px-6", containerClassName)}>
           {/* Top Bar */}
           <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-4 min-w-0">
+            <div className="flex items-center gap-3.5 min-w-0">
+              {showBackButton && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-xl hover:bg-muted/80 text-muted-foreground hover:text-foreground shrink-0 border border-border/40 shadow-2xs"
+                  onClick={handleClose}
+                  title="Back"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+
               {coverImage ? (
                 <div className="relative shrink-0">
                   <img
