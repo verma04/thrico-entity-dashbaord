@@ -78,6 +78,8 @@ function EditSurveyPage() {
         description: survey.description || "",
         startDate: survey.startDate ? new Date(survey.startDate) : null,
         endDate: survey.endDate ? new Date(survey.endDate) : null,
+        communityId: survey.communityId || "",
+        communityIds: survey.communityIds || elig?.communityIds || [],
         memberEligibility: elig?.memberEligibility || "ALL",
         membershipTierId:
           elig?.membershipTierId || elig?.eligibleTierIds || [],
@@ -85,6 +87,7 @@ function EditSurveyPage() {
           elig?.eligibleTierIds || elig?.membershipTierId || [],
         eligibleUserIds: elig?.eligibleUserIds || [],
         eligibleSegmentIds: elig?.eligibleSegmentIds || [],
+        eligibleCommunityIds: elig?.eligibleCommunityIds || [],
       }
     : undefined;
 
@@ -98,6 +101,9 @@ function EditSurveyPage() {
       endDate: values.endDate
         ? new Date(values.endDate).toISOString()
         : undefined,
+      communityId: values.communityId || undefined,
+      communityIds: values.communityIds?.length ? values.communityIds : undefined,
+      memberEligibility: values.memberEligibility || "ALL",
       eligibility: {
         memberEligibility: values.memberEligibility || "ALL",
         membershipTierId:
@@ -106,6 +112,8 @@ function EditSurveyPage() {
           values.eligibleTierIds || values.membershipTierId || [],
         eligibleUserIds: values.eligibleUserIds || [],
         eligibleSegmentIds: values.eligibleSegmentIds || [],
+        eligibleCommunityIds: values.eligibleCommunityIds || [],
+        communityIds: values.communityIds || [],
       },
     };
 

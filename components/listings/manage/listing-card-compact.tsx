@@ -222,6 +222,24 @@ export function ListingCardCompact({ listing }: ListingCardCompactProps) {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {(listing.memberEligibility || listing.eligibilityRule?.memberEligibility) && (
+              <span
+                className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20"
+              >
+                {(listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "ALL"
+                  ? "All Members"
+                  : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "TIERS"
+                    ? "Tiers"
+                    : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "COMMUNITY"
+                      ? "Community"
+                      : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "VERIFIED"
+                        ? "Verified"
+                        : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "OUTSIDE_PLATFORM"
+                          ? "Public"
+                          : "Specific"}
+              </span>
+            )}
+
             {listing.verification?.isVerified && (
               <span
                 className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400"

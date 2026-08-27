@@ -88,6 +88,37 @@ export type { DateRangeInput };
 
 // --- TypeScript Types ---
 
+export type EventMemberEligibility =
+  | "ALL"
+  | "VERIFIED"
+  | "TIERS"
+  | "COMMUNITY"
+  | "SPECIFIC_CUSTOMERS"
+  | "OUTSIDE_PLATFORM";
+
+export type EventEligibilityRule = {
+  id: string;
+  memberEligibility: EventMemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+  createdAt?: string;
+  updatedAt?: string | null;
+};
+
+export interface EventEligibilityInput {
+  memberEligibility?: EventMemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+}
+
 export type EventLocation = {
   name: string;
   latitude?: number;
@@ -100,6 +131,7 @@ export type EventLocation = {
 export type Event = {
   id: string;
   title: string;
+  slug?: string;
   location: EventLocation;
   description: string;
   startDate: string;
@@ -108,12 +140,19 @@ export type Event = {
   type: string;
   lastDateOfRegistration: string;
   cover?: string;
-  entity: string;
+  entityId?: string;
+  entity?: string;
   numberOfAttendees: number;
   numberOfViews: number;
   createdAt: string;
   updatedAt: string;
   status: string;
+  visibility?: string;
+  isActive?: boolean;
+  eligibilityRuleId?: string | null;
+  eligibilityRule?: EventEligibilityRule | null;
+  eligibility?: EventEligibilityRule | null;
+  memberEligibility?: EventMemberEligibility;
   verification: {
     id: string;
     isVerifiedAt: string | null;
@@ -124,15 +163,20 @@ export type Event = {
 
 export type PostEventInput = {
   title: string;
-  location: EventLocation;
+  location: EventLocation | any;
   description: string;
-  startDate: string;
-  endDate: string;
-  startTime: string;
-  type: EventType;
-  lastDateOfRegistration: string;
-  coverImage?: string;
-  entity: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  type: EventType | string;
+  lastDateOfRegistration?: string;
+  coverImage?: any;
+  entity?: string;
+  visibility?: string;
+  isActive?: boolean;
+  memberEligibility?: EventMemberEligibility;
+  eligibilityRuleId?: string;
+  eligibility?: EventEligibilityInput;
 };
 
 export type EventSpeaker = {
@@ -549,13 +593,23 @@ export interface GetEventInput {
 
 // TypeScript interface for GetAllEventsInput
 export interface GetAllEventsInput {
-  status?: EventStatus;
+  status?: EventStatus | string;
+  memberEligibility?: EventMemberEligibility;
   entityId?: string;
   limit?: number;
   offset?: number;
   search?: string;
   sortBy?: string;
   sortOrder?: "ASC" | "DESC";
+}
+
+// TypeScript interface for InputGetEvents
+export interface InputGetEvents {
+  status?: EventStatus | string;
+  userId?: string;
+  offset?: number;
+  limit?: number;
+  memberEligibility?: EventMemberEligibility;
 }
 
 // --- Apollo Client Hook ---

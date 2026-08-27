@@ -2,46 +2,78 @@ import { gql } from "@apollo/client";
 
 const list = `
   id
-    addedBy
-    postedBy {
-      id
-      firstName
-      lastName
-      avatar
-    }
-    entityId
-    title
-    price
-    condition
-    status
-    sku
-    slug
-    description
-    category
-    isApproved
-    isExpired
+  addedBy
+  communityId
+  communityIds
+  postedBy {
+    id
+    firstName
+    lastName
+    avatar
+  }
+  entityId
+  title
+  price
+  condition
+  status
+  sku
+  slug
+  description
+  category
+  isApproved
+  isExpired
+  createdAt
+  updatedAt
+  tag
+  isFeatured
+  numberOfViews
+  interests
+  categories
+  location {
+    name
+    latitude
+    longitude
+    address
+  }
+  verification {
+    id
+    isVerified
+    isVerifiedAt
+    verificationReason
+  }
+  memberEligibility
+  eligibilityRuleId
+  eligibilityRule {
+    id
+    memberEligibility
+    membershipTierId
+    eligibleTierIds
+    eligibleUserIds
+    eligibleSegmentIds
+    eligibleCommunityIds
+    communityIds
     createdAt
     updatedAt
-    tag
-    isFeatured
-    numberOfViews
-    interests
-    categories
-    location {
-      name
-      latitude
-      longitude
-      address
-    }
-    verification {
-      id
-      isVerified
-      verificationReason
-    }
-    media {
-      url
-    }
-    currency
+  }
+  eligibility {
+    id
+    memberEligibility
+    membershipTierId
+    eligibleTierIds
+    eligibleUserIds
+    eligibleSegmentIds
+    eligibleCommunityIds
+    communityIds
+    createdAt
+    updatedAt
+  }
+  media {
+    id
+    url
+    createdAt
+    updatedAt
+  }
+  currency
 `;
 // Query to get listings (with optional status filter)
 export const GET_LISTINGS = gql`
@@ -123,14 +155,13 @@ export const GET_LISTINGS_STATS = gql`
 export const GET_LISTINGS_STATS_BY_ID = gql`
   query GetListingStatsById($input: ListingStatsByIdInput!) {
     getListingStatsById(input: $input) {
-      totalListings
-      listingsDiff
-      activeListings
-      activePercent
-      verifiedListings
-      verifiedPercent
       totalViews
-      viewsPercent
+      uniqueViews
+      totalContactClicks
+      contactRate
+      thisWeekViews
+      lastWeekViews
+      weeklyViewsDiff
     }
   }
 `;

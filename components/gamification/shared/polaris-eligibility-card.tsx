@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@apollo/client";
-import { Search, X, Loader2 } from "lucide-react";
+import { Search, X, Loader2, Users, Building } from "lucide-react";
 import { GET_MEMBERSHIP_TIERS } from "@/graphql/membership-tier";
 import { useSearchUserByName } from "@/graphql/actions/mentorship/mentorship-actions";
+import { GET_COMMUNITIES } from "@/graphql/quries/group/approval";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PolarisFormCard } from "@/components/gamification/shared/polaris-form-ui";
+import { InlineAlert } from "@/components/ui/inline-alert";
 
 export function toArray(val: any): string[] {
   if (!val) return [];
@@ -40,12 +42,16 @@ interface PolarisEligibilityCardProps {
   badge?: string;
   eligibility: string;
   onEligibilityChange: (val: string) => void;
-  tierIds: string[] | string | undefined | null;
-  onTierIdsChange: (tierIds: string[]) => void;
-  userIds: string[] | string | undefined | null;
-  onUserIdsChange: (userIds: string[]) => void;
+  tierIds?: string[] | string | undefined | null;
+  onTierIdsChange?: (tierIds: string[]) => void;
+  userIds?: string[] | string | undefined | null;
+  onUserIdsChange?: (userIds: string[]) => void;
+  communityIds?: string[] | string | undefined | null;
+  onCommunityIdsChange?: (communityIds: string[]) => void;
   showToAllMembers?: boolean;
   onShowToAllMembersChange?: (val: boolean) => void;
+  allowOutsidePlatform?: boolean;
+  allowCommunity?: boolean;
   errorMessage?: string | null | React.ReactNode;
   children?: React.ReactNode;
 }
@@ -61,8 +67,12 @@ export function PolarisEligibilityCard({
   onTierIdsChange,
   userIds,
   onUserIdsChange,
+  communityIds,
+  onCommunityIdsChange,
   showToAllMembers = true,
   onShowToAllMembersChange,
+  allowOutsidePlatform = false,
+  allowCommunity = true,
   errorMessage,
   children,
 }: PolarisEligibilityCardProps) {
@@ -77,11 +87,23 @@ export function PolarisEligibilityCard({
 
   const selectedTierIds = useMemo(() => toArray(tierIds), [tierIds]);
   const selectedUserIds = useMemo(() => toArray(userIds), [userIds]);
+  const selectedCommunityIds = useMemo(() => toArray(communityIds), [communityIds]);
 
   const { data: tiersData } = useQuery(GET_MEMBERSHIP_TIERS);
   const membershipTiers = useMemo(
     () => (tiersData?.getMembershipTiers || []) as any[],
     [tiersData],
+  );
+
+  const { data: communitiesData, loading: loadingCommunities } = useQuery(
+    GET_COMMUNITIES,
+    {
+      variables: { input: {} },
+    },
+  );
+  const communities = useMemo(
+    () => (communitiesData?.getCommunities?.data || []) as any[],
+    [communitiesData],
   );
 
   const [searchUserByName, { data: searchUserData, loading: searchingUsers }] =
@@ -109,9 +131,20 @@ export function PolarisEligibilityCard({
       const next = isSelected
         ? selectedTierIds.filter((id) => id !== tierId)
         : [...selectedTierIds, tierId];
-      onTierIdsChange(next);
+      onTierIdsChange?.(next);
     },
     [selectedTierIds, onTierIdsChange],
+  );
+
+  const handleSelectCommunity = useCallback(
+    (communityId: string) => {
+      const isSelected = selectedCommunityIds.includes(communityId);
+      const next = isSelected
+        ? selectedCommunityIds.filter((id) => id !== communityId)
+        : [...selectedCommunityIds, communityId];
+      onCommunityIdsChange?.(next);
+    },
+    [selectedCommunityIds, onCommunityIdsChange],
   );
 
   const handleSelectCustomer = useCallback(
@@ -127,7 +160,7 @@ export function PolarisEligibilityCard({
         ? selectedUserIds.filter((id) => id !== uid)
         : [...selectedUserIds, uid];
 
-      onUserIdsChange(next);
+      onUserIdsChange?.(next);
       if (!isSelected) {
         setSelectedCustomersMap((prev) => ({
           ...prev,
@@ -198,9 +231,10 @@ export function PolarisEligibilityCard({
             onValueChange={(val) => {
               onEligibilityChange(val);
               setSearchQuery("");
-              if (val === "ALL" || val === "VERIFIED") {
-                onTierIdsChange([]);
-                onUserIdsChange([]);
+              if (val === "ALL" || val === "VERIFIED" || val === "OUTSIDE_PLATFORM") {
+                onTierIdsChange?.([]);
+                onUserIdsChange?.([]);
+                onCommunityIdsChange?.([]);
               }
             }}
           >
@@ -211,8 +245,13 @@ export function PolarisEligibilityCard({
               <SelectValue placeholder="Select eligibility" />
             </SelectTrigger>
             <SelectContent>
+              {allowOutsidePlatform && (
+                <SelectItem value="OUTSIDE_PLATFORM" className="text-[12.5px]">
+                  Outside Platform (Public / Non-members)
+                </SelectItem>
+              )}
               <SelectItem value="ALL" className="text-[12.5px]">
-                All Member
+                All Members
               </SelectItem>
               <SelectItem value="VERIFIED" className="text-[12.5px]">
                 Specific Members segments (Verified)
@@ -220,14 +259,39 @@ export function PolarisEligibilityCard({
               <SelectItem value="TIERS" className="text-[12.5px]">
                 Specific tiers
               </SelectItem>
+              {allowCommunity && (
+                <SelectItem value="COMMUNITY" className="text-[12.5px]">
+                  Specific Communities
+                </SelectItem>
+              )}
               <SelectItem value="SPECIFIC_CUSTOMERS" className="text-[12.5px]">
                 Specific Members
               </SelectItem>
             </SelectContent>
           </Select>
 
-          {/* When Specific Tiers or Specific Customers is active: Search bar + Browse button */}
+          {/* When Outside Platform is active: Warning notification like subscription-alerts */}
+          {eligibility === "OUTSIDE_PLATFORM" && (
+            <div className="pt-0.5 animate-in fade-in-50 duration-200">
+              <InlineAlert
+                variant="alert"
+                title="Outside Platform Warning:"
+                message={
+                  <>
+                    Selecting <strong>Outside Platform</strong> will make this event
+                    publicly accessible to everyone on the web. Visitors, guests, and
+                    non-registered users can discover, view details, and register
+                    without needing to join the community or hold a membership tier.
+                  </>
+                }
+                className="rounded-lg text-xs"
+              />
+            </div>
+          )}
+
+          {/* When Specific Tiers, Communities, or Specific Customers is active: Search bar + Browse button */}
           {(eligibility === "TIERS" ||
+            eligibility === "COMMUNITY" ||
             eligibility === "SPECIFIC_CUSTOMERS") && (
             <div className="space-y-2.5 pt-0.5 animate-in fade-in-50 duration-200">
               <div className="flex items-center gap-2">
@@ -237,13 +301,15 @@ export function PolarisEligibilityCard({
                     placeholder={
                       eligibility === "TIERS"
                         ? "Search tiers"
-                        : "Search customers by name"
+                        : eligibility === "COMMUNITY"
+                          ? "Search communities"
+                          : "Search customers by name"
                     }
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     className="h-[34px] pl-8 pr-7 text-[12.5px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[6px] shadow-none focus:ring-1 focus:ring-[#005bd3] focus:border-[#005bd3]"
                   />
-                  {searchingUsers && (
+                  {(searchingUsers || loadingCommunities) && (
                     <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#616161] animate-spin" />
                   )}
                 </div>
@@ -302,6 +368,36 @@ export function PolarisEligibilityCard({
                 </div>
               )}
 
+              {/* Selected Communities List */}
+              {eligibility === "COMMUNITY" && selectedCommunityIds.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {selectedCommunityIds.map((cId: string) => {
+                    const comm = communities.find(
+                      (c: any) => c.id === cId || c._id === cId,
+                    );
+                    return (
+                      <span
+                        key={cId}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
+                      >
+                        <Building className="h-3 w-3 text-zinc-500 shrink-0" />
+                        <span>{comm?.title || comm?.name || cId}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectCommunity(cId);
+                          }}
+                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Selected Customers List */}
               {eligibility === "SPECIFIC_CUSTOMERS" &&
                 selectedUserIds.length > 0 && (
@@ -334,7 +430,7 @@ export function PolarisEligibilityCard({
                               const next = selectedUserIds.filter(
                                 (id) => id !== userId,
                               );
-                              onUserIdsChange(next);
+                              onUserIdsChange?.(next);
                             }}
                             className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 ml-0.5 shrink-0"
                           >
@@ -373,6 +469,38 @@ export function PolarisEligibilityCard({
                               )}
                               <span className="font-medium text-zinc-900 dark:text-zinc-100">
                                 {tier.name}
+                              </span>
+                            </div>
+                            <Checkbox
+                              checked={isSelected}
+                              className="pointer-events-none"
+                            />
+                          </div>
+                        );
+                      })
+                  ) : eligibility === "COMMUNITY" ? (
+                    communities
+                      .filter((c: any) =>
+                        (c.title || c.name || "")
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()),
+                      )
+                      .map((comm: any) => {
+                        const isSelected = selectedCommunityIds.includes(
+                          comm.id || comm._id,
+                        );
+                        return (
+                          <div
+                            key={comm.id || comm._id}
+                            onClick={() =>
+                              handleSelectCommunity(comm.id || comm._id)
+                            }
+                            className="flex items-center justify-between p-2 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800/60 cursor-pointer text-xs"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Building className="h-3.5 w-3.5 text-zinc-500" />
+                              <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                                {comm.title || comm.name}
                               </span>
                             </div>
                             <Checkbox
@@ -484,7 +612,9 @@ export function PolarisEligibilityCard({
             <DialogTitle className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               {eligibility === "TIERS"
                 ? "Select Membership Tiers"
-                : "Select Specific Customers"}
+                : eligibility === "COMMUNITY"
+                  ? "Select Specific Communities"
+                  : "Select Specific Customers"}
             </DialogTitle>
           </DialogHeader>
           <div className="p-4 space-y-3">
@@ -494,13 +624,15 @@ export function PolarisEligibilityCard({
                 placeholder={
                   eligibility === "TIERS"
                     ? "Search tiers..."
-                    : "Search customers by name..."
+                    : eligibility === "COMMUNITY"
+                      ? "Search communities..."
+                      : "Search customers by name..."
                 }
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="h-9 pl-9 pr-8 text-xs"
               />
-              {searchingUsers && (
+              {(searchingUsers || loadingCommunities) && (
                 <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 animate-spin" />
               )}
             </div>
@@ -541,6 +673,50 @@ export function PolarisEligibilityCard({
                               {tier.description && (
                                 <span className="text-[10px] text-zinc-400 block truncate">
                                   {tier.description}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                )
+              ) : eligibility === "COMMUNITY" ? (
+                communities.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-zinc-500">
+                    {loadingCommunities
+                      ? "Loading communities..."
+                      : "No communities found."}
+                  </div>
+                ) : (
+                  communities
+                    .filter((c: any) =>
+                      (c.title || c.name || "")
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()),
+                    )
+                    .map((comm: any) => {
+                      const cId = comm.id || comm._id;
+                      const isSelected = selectedCommunityIds.includes(cId);
+                      return (
+                        <div
+                          key={cId}
+                          onClick={() => handleSelectCommunity(cId)}
+                          className="flex items-center gap-3 p-2.5 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800/50 cursor-pointer text-xs"
+                        >
+                          <Checkbox
+                            checked={isSelected}
+                            className="pointer-events-none"
+                          />
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <Building className="h-4 w-4 text-zinc-500 shrink-0" />
+                            <div className="min-w-0">
+                              <span className="font-medium text-zinc-900 dark:text-zinc-100 block truncate">
+                                {comm.title || comm.name}
+                              </span>
+                              {comm.tagline && (
+                                <span className="text-[10px] text-zinc-400 block truncate">
+                                  {comm.tagline}
                                 </span>
                               )}
                             </div>
@@ -601,7 +777,9 @@ export function PolarisEligibilityCard({
             <span className="text-[11px] text-zinc-500">
               {eligibility === "TIERS"
                 ? `${selectedTierIds.length} tier(s) selected`
-                : `${selectedUserIds.length} customer(s) selected`}
+                : eligibility === "COMMUNITY"
+                  ? `${selectedCommunityIds.length} community(ies) selected`
+                  : `${selectedUserIds.length} customer(s) selected`}
             </span>
             <Button
               type="button"

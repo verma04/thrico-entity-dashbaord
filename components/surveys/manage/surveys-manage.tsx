@@ -146,11 +146,14 @@ export function SurveysManage({
     description: "",
     startDate: null as moment.Moment | null,
     endDate: null as moment.Moment | null,
+    communityId: "",
+    communityIds: [] as string[],
     memberEligibility: "ALL",
     membershipTierId: [] as string[],
     eligibleTierIds: [] as string[],
     eligibleUserIds: [] as string[],
     eligibleSegmentIds: [] as string[],
+    eligibleCommunityIds: [] as string[],
   });
 
   useEffect(() => {
@@ -167,6 +170,9 @@ export function SurveysManage({
         endDate: editingDetailsSurvey.endDate
           ? moment(editingDetailsSurvey.endDate)
           : null,
+        communityId: editingDetailsSurvey.communityId || "",
+        communityIds:
+          editingDetailsSurvey.communityIds || elig?.communityIds || [],
         memberEligibility: elig?.memberEligibility || "ALL",
         membershipTierId:
           elig?.membershipTierId || elig?.eligibleTierIds || [],
@@ -174,6 +180,7 @@ export function SurveysManage({
           elig?.eligibleTierIds || elig?.membershipTierId || [],
         eligibleUserIds: elig?.eligibleUserIds || [],
         eligibleSegmentIds: elig?.eligibleSegmentIds || [],
+        eligibleCommunityIds: elig?.eligibleCommunityIds || [],
       });
     }
   }, [editingDetailsSurvey]);
@@ -296,6 +303,11 @@ export function SurveysManage({
           description: details.description,
           startDate: details.startDate?.toISOString(),
           endDate: details.endDate?.toISOString(),
+          communityId: details.communityId || undefined,
+          communityIds: details.communityIds?.length
+            ? details.communityIds
+            : undefined,
+          memberEligibility: details.memberEligibility as any,
           eligibility: {
             memberEligibility: details.memberEligibility as any,
             membershipTierId:
@@ -304,6 +316,8 @@ export function SurveysManage({
               details.eligibleTierIds || details.membershipTierId || [],
             eligibleUserIds: details.eligibleUserIds || [],
             eligibleSegmentIds: details.eligibleSegmentIds || [],
+            eligibleCommunityIds: details.eligibleCommunityIds || [],
+            communityIds: details.communityIds || [],
           },
         },
       },

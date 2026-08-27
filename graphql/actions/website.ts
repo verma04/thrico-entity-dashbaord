@@ -240,7 +240,11 @@ export const useCreatePage = (
 ) => {
   return useMutation<CreatePageResponse, CreatePageVariables>(
     CREATE_PAGE,
-    options
+    {
+      refetchQueries: [{ query: GET_WEBSITE }],
+      awaitRefetchQueries: true,
+      ...options,
+    }
   );
 };
 

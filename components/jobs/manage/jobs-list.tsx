@@ -8,6 +8,9 @@ import {
   Building2,
   Users2,
   Eye,
+  ShieldCheck,
+  Layers,
+  UserCheck,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Job } from "@/graphql/actions/jobs";
@@ -74,6 +77,53 @@ function JobTypeBadge({ type }: { type: string }) {
       )}
     >
       {type?.replace(/_/g, " ")}
+    </span>
+  );
+}
+
+function JobEligibilityBadge({ eligibility }: { eligibility?: string | null }) {
+  const norm = eligibility?.toUpperCase() || "ALL";
+  const config: Record<
+    string,
+    { label: string; icon: React.ElementType; className: string }
+  > = {
+    ALL: {
+      label: "All Members",
+      icon: Users2,
+      className: "border-border bg-muted/50 text-foreground/80",
+    },
+    VERIFIED: {
+      label: "Verified",
+      icon: ShieldCheck,
+      className:
+        "border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400",
+    },
+    TIERS: {
+      label: "Tiers",
+      icon: Layers,
+      className:
+        "border-purple-500/20 bg-purple-500/10 text-purple-700 dark:text-purple-400",
+    },
+    SPECIFIC_CUSTOMERS: {
+      label: "Specific",
+      icon: UserCheck,
+      className:
+        "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    },
+  };
+
+  const c = config[norm] || config.ALL;
+  const Icon = c.icon;
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-semibold",
+        c.className,
+      )}
+    >
+      <Icon className="h-3 w-3 shrink-0" />
+      {c.label}
     </span>
   );
 }
@@ -158,6 +208,18 @@ export const getJobTableColumns = (
         {row.workplaceType || "On-Site"}
       </span>
     ),
+  },
+  {
+    key: "eligibility",
+    header: "Audience",
+    cell: (row) => {
+      const elig =
+        row.memberEligibility ||
+        row.eligibility?.memberEligibility ||
+        row.eligibilityRule?.memberEligibility ||
+        "ALL";
+      return <JobEligibilityBadge eligibility={elig} />;
+    },
   },
   {
     key: "applicants",

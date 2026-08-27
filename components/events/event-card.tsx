@@ -35,11 +35,44 @@ function getStatusStyles(status: string) {
   }
 }
 
+const ELIGIBILITY_CONFIG: Record<
+  string,
+  { label: string; bg: string }
+> = {
+  ALL: {
+    label: "All Members",
+    bg: "bg-muted/60 text-muted-foreground border-border/50",
+  },
+  VERIFIED: {
+    label: "Verified",
+    bg: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
+  },
+  TIERS: {
+    label: "Tiers",
+    bg: "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20",
+  },
+  SPECIFIC_CUSTOMERS: {
+    label: "Invite Only",
+    bg: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+  },
+  OUTSIDE_PLATFORM: {
+    label: "Public",
+    bg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+  },
+};
+
 export default function EventCard({ event }: { event: Event }) {
   const router = useRouter();
 
   const startDate = event.startDate ? moment(event.startDate) : null;
   const isUpcoming = startDate ? startDate.isAfter(moment()) : false;
+
+  const normalizedEligibility =
+    event.memberEligibility ||
+    event.eligibility?.memberEligibility ||
+    event.eligibilityRule?.memberEligibility ||
+    "ALL";
+  const eligibilityInfo = ELIGIBILITY_CONFIG[normalizedEligibility];
 
   return (
     <Card
@@ -139,14 +172,24 @@ export default function EventCard({ event }: { event: Event }) {
             </span>
             <span>attendees</span>
           </div>
-          {isUpcoming && (
-            <Badge
-              variant="outline"
-              className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20 text-[10px]"
-            >
-              Upcoming
-            </Badge>
-          )}
+          <div className="flex items-center gap-1.5">
+            {eligibilityInfo && (
+              <Badge
+                variant="outline"
+                className={`text-[10px] font-semibold ${eligibilityInfo.bg}`}
+              >
+                {eligibilityInfo.label}
+              </Badge>
+            )}
+            {isUpcoming && (
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20 text-[10px]"
+              >
+                Upcoming
+              </Badge>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

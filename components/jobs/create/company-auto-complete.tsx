@@ -179,15 +179,28 @@ export function CompanyAutocompleteSelect({
                 {loading ? (
                   <div className="p-2 text-sm">Searching...</div>
                 ) : value ? (
-                  <div className="p-2 text-sm">
-                    <p>No company found</p>
+                  <div className="p-2 text-sm space-y-1.5">
+                    <p className="text-xs text-muted-foreground">No existing company found</p>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => {
+                        const customCompany = { id: "", name: value, logo: "" };
+                        setSelectedValue(customCompany);
+                        onChange(customCompany);
+                        setOpen(false);
+                      }}
+                      className="w-full h-7 text-xs"
+                    >
+                      Use "{value}"
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setShowDrawer(true)}
-                      className="mt-2 w-full"
+                      className="w-full h-7 text-xs"
                     >
-                      Add {value}
+                      Create Organization Page
                     </Button>
                   </div>
                 ) : (

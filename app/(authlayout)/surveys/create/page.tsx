@@ -42,12 +42,16 @@ const AddSurveyPage = () => {
   const onFinish = (values: any) => {
     const input = {
       title: values.title,
+      description: values.description || undefined,
       startDate: values.startDate
         ? new Date(values.startDate).toISOString()
         : undefined,
       endDate: values.endDate
         ? new Date(values.endDate).toISOString()
         : undefined,
+      communityId: values.communityId || undefined,
+      communityIds: values.communityIds?.length ? values.communityIds : undefined,
+      memberEligibility: values.memberEligibility || "ALL",
       eligibility: {
         memberEligibility: values.memberEligibility || "ALL",
         membershipTierId:
@@ -56,6 +60,8 @@ const AddSurveyPage = () => {
           values.eligibleTierIds || values.membershipTierId || [],
         eligibleUserIds: values.eligibleUserIds || [],
         eligibleSegmentIds: values.eligibleSegmentIds || [],
+        eligibleCommunityIds: values.eligibleCommunityIds || [],
+        communityIds: values.communityIds || [],
       },
     };
 

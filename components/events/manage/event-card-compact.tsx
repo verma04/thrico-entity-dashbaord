@@ -96,12 +96,45 @@ const STATUS_CONFIG: Record<
   },
 };
 
+const ELIGIBILITY_CONFIG: Record<
+  string,
+  { label: string; bg: string }
+> = {
+  ALL: {
+    label: "All Members",
+    bg: "bg-muted/60 text-muted-foreground border-border/50",
+  },
+  VERIFIED: {
+    label: "Verified",
+    bg: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
+  },
+  TIERS: {
+    label: "Tiers",
+    bg: "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20",
+  },
+  SPECIFIC_CUSTOMERS: {
+    label: "Invite Only",
+    bg: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+  },
+  OUTSIDE_PLATFORM: {
+    label: "Public",
+    bg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+  },
+};
+
 export function EventCardCompact({ event }: EventCardCompactProps) {
   const router = useRouter();
   const [imgError, setImgError] = useState(false);
 
   const startDate = event.startDate ? moment(event.startDate) : null;
   const isUpcoming = startDate ? startDate.isAfter(moment()) : false;
+
+  const normalizedEligibility =
+    event.memberEligibility ||
+    event.eligibility?.memberEligibility ||
+    event.eligibilityRule?.memberEligibility ||
+    "ALL";
+  const eligibilityInfo = ELIGIBILITY_CONFIG[normalizedEligibility];
 
   const normalizedType = event.type?.toUpperCase() || "OFFLINE";
   const typeInfo = TYPE_CONFIG[normalizedType] || {
@@ -250,19 +283,31 @@ export function EventCardCompact({ event }: EventCardCompactProps) {
             </div>
           )}
 
-          {/* Location / Mode */}
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
-            {normalizedType === "ONLINE" || normalizedType === "VIRTUAL" ? (
-              <Globe className="h-3 w-3 shrink-0 text-cyan-600 dark:text-cyan-400" />
-            ) : (
-              <MapPin className="h-3 w-3 shrink-0 text-muted-foreground/70" />
+          {/* Location / Mode & Eligibility */}
+          <div className="flex items-center justify-between gap-1 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 truncate">
+              {normalizedType === "ONLINE" || normalizedType === "VIRTUAL" ? (
+                <Globe className="h-3 w-3 shrink-0 text-cyan-600 dark:text-cyan-400" />
+              ) : (
+                <MapPin className="h-3 w-3 shrink-0 text-muted-foreground/70" />
+              )}
+              <span className="truncate">
+                {event.location?.name ||
+                  (normalizedType === "ONLINE" || normalizedType === "VIRTUAL"
+                    ? "Virtual Event"
+                    : "Location TBD")}
+              </span>
+            </div>
+            {eligibilityInfo && (
+              <span
+                className={cn(
+                  "text-[9.5px] font-semibold px-1.5 py-0.5 rounded border shadow-2xs shrink-0",
+                  eligibilityInfo.bg,
+                )}
+              >
+                {eligibilityInfo.label}
+              </span>
             )}
-            <span className="truncate">
-              {event.location?.name ||
-                (normalizedType === "ONLINE" || normalizedType === "VIRTUAL"
-                  ? "Virtual Event"
-                  : "Location TBD")}
-            </span>
           </div>
         </div>
 

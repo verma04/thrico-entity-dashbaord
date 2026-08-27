@@ -93,6 +93,49 @@ const getVerificationBadge = (isVerified: boolean) => {
   );
 };
 
+const getEligibilityBadge = (eligibility?: string | null) => {
+  const norm = eligibility?.toUpperCase() || "ALL";
+  const config: Record<
+    string,
+    { label: string; icon: any; className: string }
+  > = {
+    ALL: {
+      label: "All Members",
+      icon: <Users className="w-3.5 h-3.5 mr-1" />,
+      className: "border-border bg-muted/50 text-foreground",
+    },
+    VERIFIED: {
+      label: "Verified Members Only",
+      icon: <Shield className="w-3.5 h-3.5 mr-1" />,
+      className:
+        "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300",
+    },
+    TIERS: {
+      label: "Specific Tiers",
+      icon: <CheckCircle2 className="w-3.5 h-3.5 mr-1" />,
+      className:
+        "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-300",
+    },
+    SPECIFIC_CUSTOMERS: {
+      label: "Specific Members",
+      icon: <Users className="w-3.5 h-3.5 mr-1" />,
+      className:
+        "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
+    },
+  };
+
+  const cfg = config[norm] || config.ALL;
+  return (
+    <Badge
+      variant="outline"
+      className={`font-medium px-2.5 py-0.5 ${cfg.className}`}
+    >
+      {cfg.icon}
+      {cfg.label}
+    </Badge>
+  );
+};
+
 const MetricItem = ({ icon: Icon, value, label, colorClass }: any) => (
   <div className="flex flex-col p-4 bg-muted/30 border border-border/50 rounded-2xl transition-all hover:bg-muted/50">
     <div className="flex items-center gap-2 mb-2">
@@ -175,10 +218,15 @@ const Details = ({
                     <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
                       {job.title}
                     </h2>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {getStatusBadge(job.status)}
                       {getVerificationBadge(
                         job.verification?.isVerified || false,
+                      )}
+                      {getEligibilityBadge(
+                        job.memberEligibility ||
+                          job.eligibility?.memberEligibility ||
+                          job.eligibilityRule?.memberEligibility,
                       )}
                     </div>
                   </div>

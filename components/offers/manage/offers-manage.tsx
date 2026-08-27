@@ -38,6 +38,7 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { Pagination } from "@/components/shared/admin-table/admin-table";
 import { useModuleStore } from "@/store/useModuleStore";
+import { MemberEligibilitySelect } from "@/components/gamification/shared/member-eligibility-select";
 
 import {
   useGetOffers,
@@ -103,6 +104,9 @@ export function OffersManage({ status: initialStatus }: OffersManageProps) {
     initialStatus ||
     "ALL";
 
+  const memberEligibility =
+    searchParams.get("memberEligibility") || "ALL";
+
   const selectedCategory = searchParams.get("category") || "ALL";
   const sortBy = searchParams.get("sort") || "newest";
   const view = (searchParams.get("view") as "grid" | "list") || "grid";
@@ -149,6 +153,9 @@ export function OffersManage({ status: initialStatus }: OffersManageProps) {
   const setStatus = (v: string) =>
     updateParams({ status: v === "ALL" ? null : v, page: null });
 
+  const setMemberEligibility = (v: string) =>
+    updateParams({ memberEligibility: v === "ALL" ? null : v, page: null });
+
   const setSelectedCategory = (v: string) =>
     updateParams({ category: v === "ALL" ? null : v, page: null });
 
@@ -166,6 +173,8 @@ export function OffersManage({ status: initialStatus }: OffersManageProps) {
     {
       categoryId: selectedCategory === "ALL" ? undefined : selectedCategory,
       status: status === "ALL" ? undefined : status,
+      memberEligibility:
+        memberEligibility === "ALL" ? undefined : (memberEligibility as any),
     },
     {
       fetchPolicy: "network-only",
@@ -209,6 +218,17 @@ export function OffersManage({ status: initialStatus }: OffersManageProps) {
     // Status filter
     if (status !== "ALL") {
       list = list.filter((o) => o.status === status);
+    }
+
+    // Eligibility filter
+    if (memberEligibility !== "ALL") {
+      list = list.filter((o) => {
+        const elig =
+          o.memberEligibility ||
+          o.eligibility?.memberEligibility ||
+          o.eligibilityRule?.memberEligibility;
+        return elig === memberEligibility;
+      });
     }
 
     // Category filter
@@ -374,6 +394,15 @@ export function OffersManage({ status: initialStatus }: OffersManageProps) {
                 ))}
               </SelectContent>
             </Select>
+          </EcosystemActionBar.Item>
+
+          {/* Eligibility Filter */}
+          <EcosystemActionBar.Item>
+            <MemberEligibilitySelect
+              value={memberEligibility}
+              onValueChange={setMemberEligibility}
+              className="w-[145px]"
+            />
           </EcosystemActionBar.Item>
 
           {/* Sort Filter */}

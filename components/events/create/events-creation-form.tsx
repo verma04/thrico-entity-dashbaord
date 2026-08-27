@@ -30,6 +30,7 @@ import {
   PolarisTextarea,
   PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
+import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
 
 interface EventsCreationFormProps {
   initialValues?: Record<string, any>;
@@ -50,6 +51,29 @@ const eventSchema = Yup.object().shape({
     .required("Event description is required")
     .min(30, "Description must be at least 30 characters"),
   type: Yup.string().required("Event type is required"),
+  memberEligibility: Yup.string().default("ALL"),
+  membershipTierId: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema.min(1, "Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleTierIds: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema.min(1, "Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleUserIds: Yup.array().when("memberEligibility", {
+    is: "SPECIFIC_CUSTOMERS",
+    then: (schema) => schema.min(1, "Please select at least one customer"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleCommunityIds: Yup.array().when("memberEligibility", {
+    is: "COMMUNITY",
+    then: (schema) => schema.min(1, "Please select at least one community"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 export function EventsCreationForm({
@@ -83,16 +107,56 @@ export function EventsCreationForm({
       title: initialValues?.title || "",
       location: initialValues?.location || "",
       description: initialValues?.description || "",
-      startDate: initialValues?.startDate || "",
-      endDate: initialValues?.endDate || "",
-      startTime: initialValues?.startTime || "",
+      startDate: initialValues?.startDate || null,
+      endDate: initialValues?.endDate || null,
+      startTime: initialValues?.startTime || null,
       type: initialValues?.type || "in_person",
-      lastDateOfRegistration: initialValues?.lastDateOfRegistration || "",
+      lastDateOfRegistration: initialValues?.lastDateOfRegistration || null,
+      communityId: initialValues?.communityId || "",
+      communityIds: initialValues?.communityIds || [],
+      memberEligibility: initialValues?.memberEligibility || "ALL",
+      membershipTierId:
+        initialValues?.membershipTierId || initialValues?.eligibleTierIds || [],
+      eligibleTierIds:
+        initialValues?.eligibleTierIds || initialValues?.membershipTierId || [],
+      eligibleUserIds:
+        initialValues?.eligibleUserIds ||
+        initialValues?.eligibility?.eligibleUserIds ||
+        [],
+      eligibleSegmentIds:
+        initialValues?.eligibleSegmentIds ||
+        initialValues?.eligibility?.eligibleSegmentIds ||
+        [],
+      eligibleCommunityIds:
+        initialValues?.eligibleCommunityIds ||
+        initialValues?.eligibility?.eligibleCommunityIds ||
+        [],
       isActive: initialValues?.isActive ?? true,
     },
     validationSchema: eventSchema,
     onSubmit: (values) => {
-      onFinish(values);
+      const eligibilityPayload = {
+        memberEligibility: values.memberEligibility,
+        membershipTierId:
+          values.memberEligibility === "TIERS" ? values.membershipTierId : [],
+        eligibleTierIds:
+          values.memberEligibility === "TIERS" ? values.eligibleTierIds : [],
+        eligibleUserIds:
+          values.memberEligibility === "SPECIFIC_CUSTOMERS"
+            ? values.eligibleUserIds
+            : [],
+        eligibleSegmentIds: values.eligibleSegmentIds || [],
+        eligibleCommunityIds:
+          values.memberEligibility === "COMMUNITY"
+            ? values.eligibleCommunityIds
+            : [],
+        communityIds: values.communityIds || [],
+      };
+      onFinish({
+        ...values,
+        memberEligibility: values.memberEligibility,
+        eligibility: eligibilityPayload,
+      });
     },
   });
 
@@ -182,8 +246,22 @@ export function EventsCreationForm({
                   value={formik.values.startDate || "Not scheduled"}
                 />
                 <PolarisSummaryRow
-                  label="Registration"
-                  value={formik.values.lastDateOfRegistration || "Open"}
+                  label="Audience"
+                  value={
+                    formik.values.memberEligibility === "ALL"
+                      ? "All Members"
+                      : formik.values.memberEligibility === "VERIFIED"
+                        ? "Verified Only"
+                        : formik.values.memberEligibility === "TIERS"
+                          ? `Specific Tiers (${(formik.values.membershipTierId || []).length})`
+                          : formik.values.memberEligibility === "COMMUNITY"
+                            ? `Specific Communities (${(formik.values.eligibleCommunityIds || []).length})`
+                            : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                              ? `Specific Members (${(formik.values.eligibleUserIds || []).length})`
+                              : formik.values.memberEligibility === "OUTSIDE_PLATFORM"
+                                ? "Outside Platform (Public)"
+                                : "All Members"
+                  }
                 />
                 <PolarisSummaryRow
                   label="Status"
@@ -449,6 +527,65 @@ export function EventsCreationForm({
               </div>
             </div>
           </PolarisFormCard>
+
+          {/* Step 3: Audience & Member Eligibility */}
+          <PolarisEligibilityCard
+            key={`eligibility-${formik.values.memberEligibility || "ALL"}`}
+            step={3}
+            title="Audience & Eligibility"
+            description={`Define who can view and RSVP for this ${singularName.toLowerCase()} — open to the public, all community members, verified members, specific tiers, communities, or invite-only guests.`}
+            badge="Access"
+            allowOutsidePlatform={true}
+            allowCommunity={true}
+            eligibility={formik.values.memberEligibility || "ALL"}
+            onEligibilityChange={(val) => {
+              formik.setFieldValue("memberEligibility", val);
+              if (
+                val === "ALL" ||
+                val === "VERIFIED" ||
+                val === "OUTSIDE_PLATFORM"
+              ) {
+                formik.setFieldValue("membershipTierId", []);
+                formik.setFieldValue("eligibleTierIds", []);
+                formik.setFieldValue("eligibleUserIds", []);
+                formik.setFieldValue("eligibleCommunityIds", []);
+                formik.setFieldValue("communityIds", []);
+              }
+            }}
+            tierIds={
+              formik.values.membershipTierId ||
+              formik.values.eligibleTierIds ||
+              []
+            }
+            onTierIdsChange={(tiers) => {
+              formik.setFieldValue("membershipTierId", tiers);
+              formik.setFieldValue("eligibleTierIds", tiers);
+            }}
+            communityIds={
+              formik.values.eligibleCommunityIds ||
+              formik.values.communityIds ||
+              []
+            }
+            onCommunityIdsChange={(comms) => {
+              formik.setFieldValue("eligibleCommunityIds", comms);
+              formik.setFieldValue("communityIds", comms);
+            }}
+            userIds={formik.values.eligibleUserIds || []}
+            onUserIdsChange={(users) => {
+              formik.setFieldValue("eligibleUserIds", users);
+            }}
+            errorMessage={
+              formik.values.memberEligibility === "TIERS"
+                ? ((formik.touched.membershipTierId && formik.errors.membershipTierId) ||
+                    (formik.touched.eligibleTierIds && formik.errors.eligibleTierIds)) as string
+                : formik.values.memberEligibility === "COMMUNITY"
+                  ? ((formik.touched.eligibleCommunityIds && formik.errors.eligibleCommunityIds) ||
+                      (formik.touched.communityIds && formik.errors.communityIds)) as string
+                  : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                    ? (formik.touched.eligibleUserIds && (formik.errors.eligibleUserIds as string))
+                    : null
+            }
+          />
 
           {/* Floating Save Action Bar */}
           <FloatingSavePanel

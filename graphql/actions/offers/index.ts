@@ -24,6 +24,37 @@ export { TimeRange };
 export type { DateRangeInput };
 import { OfferCategory } from "./offer-quiries";
 
+export type MemberEligibility =
+  | "ALL"
+  | "VERIFIED"
+  | "TIERS"
+  | "COMMUNITY"
+  | "SPECIFIC_CUSTOMERS"
+  | "OUTSIDE_PLATFORM";
+
+export interface OfferEligibilityRule {
+  id: string;
+  memberEligibility: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+  createdAt?: string;
+  updatedAt?: string | null;
+}
+
+export interface OfferEligibilityInput {
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+}
+
 export interface Offer {
   id: string;
   title: string;
@@ -42,12 +73,21 @@ export interface Offer {
   termsAndConditions?: string;
   timeline?: string;
   website?: string;
+  addedBy?: string;
+  communityId?: string;
+  communityIds?: string[];
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string | null;
+  eligibilityRule?: OfferEligibilityRule | null;
+  eligibility?: OfferEligibilityRule | null;
   verification?: {
+    id?: string;
     isVerified: boolean;
-    verificationReason: string;
+    isVerifiedAt?: string | null;
+    verificationReason?: string | null;
   };
   createdAt: string;
-  addedBy?: string;
+  updatedAt?: string;
   creator?: {
     id: string;
     firstName: string;
@@ -60,6 +100,11 @@ export interface GetOffersInput {
   categoryId?: string;
   status?: string;
   search?: string;
+  memberEligibility?: MemberEligibility;
+  communityId?: string;
+  communityIds?: string[];
+  limit?: number;
+  offset?: number;
   pagination?: {
     limit?: number | null;
     offset?: number | null;
@@ -81,6 +126,12 @@ export interface CreateOfferInput {
   termsAndConditions?: string;
   timeline?: string;
   website?: string;
+  addedBy?: string;
+  communityId?: string;
+  communityIds?: string[];
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string;
+  eligibility?: OfferEligibilityInput;
   isActive?: boolean;
 }
 

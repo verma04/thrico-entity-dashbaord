@@ -3,9 +3,23 @@ import {
   DateRangeInput,
   TimeRange,
 } from "../actions/dashbaord/dashboard-quries";
-import { SurveyEligibilityRule } from "./survey-mutations";
+import {
+  MemberEligibility,
+  SurveyStatus,
+  SurveyEligibilityRule,
+  SurveyEligibilityInput,
+  Survey,
+} from "./survey-mutations";
+
 export { TimeRange };
-export type { DateRangeInput };
+export type {
+  DateRangeInput,
+  MemberEligibility,
+  SurveyStatus,
+  SurveyEligibilityRule,
+  SurveyEligibilityInput,
+  Survey,
+};
 
 // ---------------------------------------------------------
 // TYPES
@@ -30,27 +44,6 @@ export interface Question {
   legalText?: string;
 }
 
-export interface Survey {
-  id: string;
-  formId?: string;
-  title: string;
-  description?: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  previewType?: string;
-  appearance?: any;
-  questions?: Question[];
-  fields?: Question[];
-  sharedAsFeed?: boolean;
-  eligibilityRuleId?: string;
-  eligibilityRule?: SurveyEligibilityRule;
-  eligibility?: SurveyEligibilityRule;
-  responses?: any[];
-}
-
 export interface Pagination {
   totalCount: number;
   limit?: number;
@@ -61,8 +54,10 @@ export interface GetSurveysInput {
   limit?: number | null;
   offset?: number | null;
   search?: string | null;
-  status?: string | null;
-  memberEligibility?: string | null;
+  status?: SurveyStatus | null;
+  memberEligibility?: MemberEligibility | string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
 }
 
 export interface GetSurveysData {
@@ -93,7 +88,22 @@ export const GET_SURVEY = gql`
       createdAt
       updatedAt
       sharedAsFeed
+      addedBy
+      communityId
+      communityIds
       eligibilityRuleId
+      eligibilityRule {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
+      }
       eligibility {
         id
         memberEligibility
@@ -101,6 +111,10 @@ export const GET_SURVEY = gql`
         eligibleTierIds
         eligibleUserIds
         eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
       }
       form {
         appearance
@@ -129,73 +143,11 @@ export const GET_SURVEY = gql`
     }
   }
 `;
+
 export function useGetSurvey(
   options?: QueryHookOptions<GetSurveyData, { getSurveyId: string }>,
 ) {
   return useQuery<GetSurveyData, { getSurveyId: string }>(GET_SURVEY, options);
-}
-export interface Question {
-  id: string;
-  formId: string;
-  type: string;
-  question: string;
-  description?: string;
-  order: number;
-  required: boolean;
-  maxLength?: number;
-  min?: number;
-  max?: number;
-  scale?: number;
-  ratingType?: string;
-  options?: string[];
-  labels?: any;
-  allowMultiple?: boolean;
-  legalText?: string;
-}
-
-export interface Survey {
-  id: string;
-  formId?: string;
-  title: string;
-  description?: string;
-  status: string;
-  sharedAsFeed?: boolean;
-  startDate?: string;
-  endDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  previewType?: string;
-  appearance?: any;
-  questions?: Question[];
-  fields?: Question[];
-}
-
-export interface Pagination {
-  totalCount: number;
-  limit?: number;
-  offset?: number;
-}
-
-export interface GetSurveysInput {
-  limit?: number | null;
-  offset?: number | null;
-  search?: string | null;
-  status?: string | null;
-}
-
-export interface GetSurveysData {
-  getSurveys: {
-    pagination: Pagination;
-    surveys: Survey[];
-  };
-}
-
-// ---------------------------------------------------------
-// GET SINGLE SURVEY
-// ---------------------------------------------------------
-
-export interface GetSurveyData {
-  getSurvey: Survey;
 }
 
 // ---------------------------------------------------------
@@ -265,7 +217,22 @@ export const GET_SURVEYS = gql`
         createdAt
         updatedAt
         sharedAsFeed
+        addedBy
+        communityId
+        communityIds
         eligibilityRuleId
+        eligibilityRule {
+          id
+          memberEligibility
+          membershipTierId
+          eligibleTierIds
+          eligibleUserIds
+          eligibleSegmentIds
+          eligibleCommunityIds
+          communityIds
+          createdAt
+          updatedAt
+        }
         eligibility {
           id
           memberEligibility
@@ -273,6 +240,10 @@ export const GET_SURVEYS = gql`
           eligibleTierIds
           eligibleUserIds
           eligibleSegmentIds
+          eligibleCommunityIds
+          communityIds
+          createdAt
+          updatedAt
         }
       }
     }

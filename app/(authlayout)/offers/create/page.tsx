@@ -49,6 +49,7 @@ import {
   PolarisTextarea,
   PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
+import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
 
 const offerSchema = Yup.object().shape({
   title: Yup.string()
@@ -70,6 +71,29 @@ const offerSchema = Yup.object().shape({
   terms: Yup.string().max(1000, "Max 1000 characters"),
   isFeatured: Yup.boolean(),
   isTrending: Yup.boolean(),
+  memberEligibility: Yup.string().default("ALL"),
+  membershipTierId: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema.min(1, "Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleTierIds: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema.min(1, "Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleUserIds: Yup.array().when("memberEligibility", {
+    is: "SPECIFIC_CUSTOMERS",
+    then: (schema) => schema.min(1, "Please select at least one customer"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleCommunityIds: Yup.array().when("memberEligibility", {
+    is: "COMMUNITY",
+    then: (schema) => schema.min(1, "Please select at least one community"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 function CreateOfferPage() {
@@ -116,10 +140,32 @@ function CreateOfferPage() {
       website: "",
       isFeatured: false,
       isTrending: false,
+      communityId: "",
+      communityIds: [] as string[],
+      memberEligibility: "ALL",
+      membershipTierId: [] as string[],
+      eligibleTierIds: [] as string[],
+      eligibleUserIds: [] as string[],
+      eligibleSegmentIds: [] as string[],
+      eligibleCommunityIds: [] as string[],
     },
     validationSchema: offerSchema,
     onSubmit: async (values) => {
       try {
+        const memberEligibility = values.memberEligibility || "ALL";
+        const membershipTierId =
+          values.membershipTierId || values.eligibleTierIds || [];
+        const eligibleTierIds =
+          values.eligibleTierIds || values.membershipTierId || [];
+        const eligibleUserIds = values.eligibleUserIds || [];
+        const eligibleSegmentIds = values.eligibleSegmentIds || [];
+        const eligibleCommunityIds =
+          values.eligibleCommunityIds || values.communityIds || [];
+        const communityIds =
+          values.communityIds || values.eligibleCommunityIds || [];
+        const communityId =
+          values.communityId || (communityIds.length > 0 ? communityIds[0] : undefined);
+
         await createOfferMutation({
           variables: {
             input: {
@@ -140,6 +186,18 @@ function CreateOfferPage() {
               website: values.website ? values.website.trim() : undefined,
               status: "APPROVED",
               isActive: true,
+              communityId,
+              communityIds: communityIds.length > 0 ? communityIds : undefined,
+              memberEligibility,
+              eligibility: {
+                memberEligibility,
+                membershipTierId,
+                eligibleTierIds,
+                eligibleUserIds,
+                eligibleSegmentIds,
+                eligibleCommunityIds,
+                communityIds,
+              },
             },
           },
         });
@@ -298,6 +356,24 @@ function CreateOfferPage() {
                             : formik.values.validFrom
                               ? `From ${new Date(formik.values.validFrom).toLocaleDateString()}`
                               : "Not specified"
+                        }
+                      />
+                      <PolarisSummaryRow
+                        label="Audience"
+                        value={
+                          formik.values.memberEligibility === "ALL"
+                            ? "All Members"
+                            : formik.values.memberEligibility === "VERIFIED"
+                              ? "Verified Members"
+                              : formik.values.memberEligibility === "TIERS"
+                                ? `Specific Tiers (${(formik.values.eligibleTierIds || formik.values.membershipTierId || []).length})`
+                                : formik.values.memberEligibility === "COMMUNITY"
+                                  ? `Specific Communities (${(formik.values.eligibleCommunityIds || formik.values.communityIds || []).length})`
+                                  : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                                    ? `Specific Members (${(formik.values.eligibleUserIds || []).length})`
+                                    : formik.values.memberEligibility === "OUTSIDE_PLATFORM"
+                                      ? "Outside Platform (Public)"
+                                      : "All Members"
                         }
                         isLast
                       />
@@ -597,6 +673,65 @@ function CreateOfferPage() {
                   </div>
                 </div>
               </PolarisFormCard>
+
+              {/* ── Step 6: Audience & Eligibility ─────────────────────── */}
+              <PolarisEligibilityCard
+                key={`eligibility-${formik.values.memberEligibility || "ALL"}`}
+                step={6}
+                title="Audience & Eligibility"
+                description={`Specify which communities, members, or tiers can view and claim this ${singularName.toLowerCase()}.`}
+                badge="Access"
+                allowOutsidePlatform={true}
+                allowCommunity={true}
+                eligibility={formik.values.memberEligibility || "ALL"}
+                onEligibilityChange={(val) => {
+                  formik.setFieldValue("memberEligibility", val);
+                  if (
+                    val === "ALL" ||
+                    val === "VERIFIED" ||
+                    val === "OUTSIDE_PLATFORM"
+                  ) {
+                    formik.setFieldValue("membershipTierId", []);
+                    formik.setFieldValue("eligibleTierIds", []);
+                    formik.setFieldValue("eligibleUserIds", []);
+                    formik.setFieldValue("eligibleCommunityIds", []);
+                    formik.setFieldValue("communityIds", []);
+                  }
+                }}
+                tierIds={
+                  formik.values.membershipTierId ||
+                  formik.values.eligibleTierIds ||
+                  []
+                }
+                onTierIdsChange={(tiers) => {
+                  formik.setFieldValue("membershipTierId", tiers);
+                  formik.setFieldValue("eligibleTierIds", tiers);
+                }}
+                communityIds={
+                  formik.values.eligibleCommunityIds ||
+                  formik.values.communityIds ||
+                  []
+                }
+                onCommunityIdsChange={(comms) => {
+                  formik.setFieldValue("eligibleCommunityIds", comms);
+                  formik.setFieldValue("communityIds", comms);
+                }}
+                userIds={formik.values.eligibleUserIds || []}
+                onUserIdsChange={(users) => {
+                  formik.setFieldValue("eligibleUserIds", users);
+                }}
+                errorMessage={
+                  formik.values.memberEligibility === "TIERS"
+                    ? ((formik.touched.membershipTierId && formik.errors.membershipTierId) ||
+                        (formik.touched.eligibleTierIds && formik.errors.eligibleTierIds)) as string
+                    : formik.values.memberEligibility === "COMMUNITY"
+                      ? ((formik.touched.eligibleCommunityIds && formik.errors.eligibleCommunityIds) ||
+                          (formik.touched.communityIds && formik.errors.communityIds)) as string
+                      : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                        ? (formik.touched.eligibleUserIds && (formik.errors.eligibleUserIds as string))
+                        : null
+                }
+              />
 
               {/* Floating Action Panel */}
               <FloatingSavePanel

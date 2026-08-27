@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X, ChevronRight, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -56,16 +56,8 @@ export function ChildSidebarContainer({
   const { state, toggleSidebar, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  const activeTab = getActiveSidebarTab(pathName);
 
-  // Automatically collapse child-sidebar drawer on form routes; keep open on all other pages
-  useEffect(() => {
-    if (isFormRoute(pathName)) {
-      setOpen(false);
-    } else {
-      setOpen(true);
-    }
-  }, [pathName, setOpen]);
+  const activeTab = getActiveSidebarTab(pathName);
 
   // Default-open the Classifications group when on the members tab
   useEffect(() => {
@@ -388,264 +380,266 @@ export function ChildSidebarContainer({
         {activeTab !== "mobile-app" &&
           activeTab !== "home" &&
           activeTab !== "team" && (
-          <Sidebar
-            collapsible="icon"
-            className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! mb-2 z-30 shadow-sm rounded-l-2xl!"
-            style={{ "--sidebar-width": "210px" } as React.CSSProperties}
-          >
-            <SidebarHeader className="h-10 flex items-center justify-between flex-row px-3 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
-              {!isCollapsed && (
-                <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 tracking-tight w-full truncate">
-                  {activeTab === "gamification"
-                    ? "Gamification Engine"
-                    : activeTab === "members"
-                      ? "Member Engine"
-                      : activeTab === "content"
-                        ? "Content Engine"
-                        : activeTab === "modules"
-                          ? "Module Engine"
-                          : activeTab === "ai"
-                            ? "AI Studio"
-                            : activeTab === "integrations"
-                              ? "Integrations"
-                              : activeTab === "email"
-                                ? "Email"
-                                : activeTab === "website"
-                                  ? "Website Builder"
-                                  : activeTab === "settings"
-                                    ? "Settings"
-                                    : activeTab === "team"
-                                      ? "Team Management"
-                                      : activeTab}
-                </span>
-              )}
-              {isCollapsed && (
-                <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 capitalize text-center w-full">
-                  {activeTab[0]}
-                </span>
-              )}
-            </SidebarHeader>
+            <Sidebar
+              collapsible="icon"
+              className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! mb-2 z-30 shadow-sm rounded-l-2xl!"
+              style={{ "--sidebar-width": "210px" } as React.CSSProperties}
+            >
+              <SidebarHeader className="h-10 flex items-center justify-between flex-row px-3 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
+                {!isCollapsed && (
+                  <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 tracking-tight w-full truncate">
+                    {activeTab === "gamification"
+                      ? "Gamification Engine"
+                      : activeTab === "members"
+                        ? "Member Engine"
+                        : activeTab === "content"
+                          ? "Content Engine"
+                          : activeTab === "modules"
+                            ? "Module Engine"
+                            : activeTab === "ai"
+                              ? "AI Studio"
+                              : activeTab === "integrations"
+                                ? "Integrations"
+                                : activeTab === "email"
+                                  ? "Email"
+                                  : activeTab === "website"
+                                    ? "Website Builder"
+                                    : activeTab === "settings"
+                                      ? "Settings"
+                                      : activeTab === "team"
+                                        ? "Team Management"
+                                        : activeTab}
+                  </span>
+                )}
+                {isCollapsed && (
+                  <span className="text-base font-bold text-neutral-900 dark:text-neutral-100 capitalize text-center w-full">
+                    {activeTab[0]}
+                  </span>
+                )}
+              </SidebarHeader>
 
-            <SidebarContent className="py-1 pb-10 px-2.5 overflow-x-hidden group-data-[collapsible=icon]:px-1">
-              {!isCollapsed && (
-                <div className="mb-2 mt-0.5 group-data-[collapsible=icon]:hidden">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400 pointer-events-none" />
-                    <Input
-                      placeholder="Search..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-7.5 w-full bg-neutral-100 hover:bg-neutral-100/80 focus:bg-white dark:bg-neutral-900 dark:hover:bg-neutral-900/80 dark:focus:bg-neutral-950 border border-neutral-200/80 dark:border-neutral-800 pl-8 pr-7 text-[12px] rounded-md focus-visible:ring-1 focus-visible:ring-primary/40 placeholder:text-neutral-400 text-neutral-900 dark:text-neutral-100 transition-all shadow-none"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors p-0.5"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "ai" && (
-                <>
-                  <CollapsibleSection
-                    sectionKey="ai-studio"
-                    label="AI Studio"
-                    items={filteredAiStudio}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                  <CollapsibleSection
-                    sectionKey="ai-super-agents"
-                    label="Super Agents"
-                    items={filteredAiSuperAgents}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                  <CollapsibleSection
-                    sectionKey="ai-chat"
-                    label="Chat"
-                    items={filteredAiChat}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                </>
-              )}
-
-              {activeTab === "members" && (
-                <CollapsibleSection
-                  sectionKey="members"
-                  label="Member Engine"
-                  items={filteredMembers}
-                  renderItems={renderItems}
-                  searchQuery={searchQuery}
-                  className="mb-1"
-                />
-              )}
-
-              {activeTab === "content" && (
-                <>
-                  <CollapsibleSection
-                    sectionKey="feed"
-                    label="Feed"
-                    items={filteredFeed}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                  <CollapsibleSection
-                    sectionKey="moderation"
-                    label="Moderation"
-                    items={filteredModeration}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                  <CollapsibleSection
-                    sectionKey="reported"
-                    label="Reported Items"
-                    items={filteredReported}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                </>
-              )}
-
-              {activeTab === "gamification" && (
-                <>
-                  {filteredGamification.map((group) => {
-                    const groupItems = (group.children || []).map((child) => ({
-                      ...child,
-                      icon: child.icon || group.icon,
-                    })) as MenuItem[];
-                    return (
-                      <CollapsibleSection
-                        key={group.key}
-                        sectionKey={group.key}
-                        label={
-                          typeof group.label === "string"
-                            ? group.label
-                            : group.key
-                        }
-                        items={groupItems}
-                        renderItems={renderItems}
-                        searchQuery={searchQuery}
-                        className="mb-1"
+              <SidebarContent className="py-1 pb-10 px-2.5 overflow-x-hidden group-data-[collapsible=icon]:px-1">
+                {!isCollapsed && (
+                  <div className="mb-2 mt-0.5 group-data-[collapsible=icon]:hidden">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400 pointer-events-none" />
+                      <Input
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-7.5 w-full bg-neutral-100 hover:bg-neutral-100/80 focus:bg-white dark:bg-neutral-900 dark:hover:bg-neutral-900/80 dark:focus:bg-neutral-950 border border-neutral-200/80 dark:border-neutral-800 pl-8 pr-7 text-[12px] rounded-md focus-visible:ring-1 focus-visible:ring-primary/40 placeholder:text-neutral-400 text-neutral-900 dark:text-neutral-100 transition-all shadow-none"
                       />
-                    );
-                  })}
-                </>
-              )}
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-              {activeTab === "modules" && (
-                <CollapsibleSection
-                  sectionKey="modules"
-                  label="Module Engine"
-                  items={filteredModules}
-                  renderItems={renderItems}
-                  searchQuery={searchQuery}
-                  className="mb-1"
-                />
-              )}
+                {activeTab === "ai" && (
+                  <>
+                    <CollapsibleSection
+                      sectionKey="ai-studio"
+                      label="AI Studio"
+                      items={filteredAiStudio}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="ai-super-agents"
+                      label="Super Agents"
+                      items={filteredAiSuperAgents}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="ai-chat"
+                      label="Chat"
+                      items={filteredAiChat}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                  </>
+                )}
 
-              {activeTab === "website" && (
-                <CollapsibleSection
-                  sectionKey="website"
-                  label="Website Builder"
-                  items={filteredWebsite}
-                  renderItems={renderItems}
-                  searchQuery={searchQuery}
-                  className="mb-1"
-                />
-              )}
+                {activeTab === "members" && (
+                  <CollapsibleSection
+                    sectionKey="members"
+                    label="Member Engine"
+                    items={filteredMembers}
+                    renderItems={renderItems}
+                    searchQuery={searchQuery}
+                    className="mb-1"
+                  />
+                )}
+
+                {activeTab === "content" && (
+                  <>
+                    <CollapsibleSection
+                      sectionKey="feed"
+                      label="Feed"
+                      items={filteredFeed}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="moderation"
+                      label="Moderation"
+                      items={filteredModeration}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="reported"
+                      label="Reported Items"
+                      items={filteredReported}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                  </>
+                )}
+
+                {activeTab === "gamification" && (
+                  <>
+                    {filteredGamification.map((group) => {
+                      const groupItems = (group.children || []).map(
+                        (child) => ({
+                          ...child,
+                          icon: child.icon || group.icon,
+                        }),
+                      ) as MenuItem[];
+                      return (
+                        <CollapsibleSection
+                          key={group.key}
+                          sectionKey={group.key}
+                          label={
+                            typeof group.label === "string"
+                              ? group.label
+                              : group.key
+                          }
+                          items={groupItems}
+                          renderItems={renderItems}
+                          searchQuery={searchQuery}
+                          className="mb-1"
+                        />
+                      );
+                    })}
+                  </>
+                )}
+
+                {activeTab === "modules" && (
+                  <CollapsibleSection
+                    sectionKey="modules"
+                    label="Module Engine"
+                    items={filteredModules}
+                    renderItems={renderItems}
+                    searchQuery={searchQuery}
+                    className="mb-1"
+                  />
+                )}
+
+                {activeTab === "website" && (
+                  <CollapsibleSection
+                    sectionKey="website"
+                    label="Website Builder"
+                    items={filteredWebsite}
+                    renderItems={renderItems}
+                    searchQuery={searchQuery}
+                    className="mb-1"
+                  />
+                )}
+
+                {activeTab === "settings" && (
+                  <>
+                    <CollapsibleSection
+                      sectionKey="settings-billing"
+                      label="Billing & Team"
+                      items={filteredBillingAndTeam}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="settings-setup"
+                      label="Setup & Design"
+                      items={filteredSetupAndDesign}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="settings-support"
+                      label="Support & Legal"
+                      items={filteredSupportAndLegal}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                  </>
+                )}
+
+                {activeTab === "email" && (
+                  <CollapsibleSection
+                    sectionKey="email"
+                    label="Email"
+                    items={filteredEmail}
+                    renderItems={renderItems}
+                    searchQuery={searchQuery}
+                    className="mb-1"
+                  />
+                )}
+
+                {activeTab === "integrations" && (
+                  <CollapsibleSection
+                    sectionKey="integrations"
+                    label="Integrations"
+                    items={filteredIntegrations}
+                    renderItems={renderItems}
+                    searchQuery={searchQuery}
+                    className="mb-1"
+                  />
+                )}
+
+                {searchQuery.trim() && !hasCurrentTabResults && (
+                  <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
+                    <p className="text-[11.5px] text-muted-foreground/60">
+                      No results found
+                    </p>
+                  </div>
+                )}
+              </SidebarContent>
 
               {activeTab === "settings" && (
-                <>
-                  <CollapsibleSection
-                    sectionKey="settings-billing"
-                    label="Billing & Team"
-                    items={filteredBillingAndTeam}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                  <CollapsibleSection
-                    sectionKey="settings-setup"
-                    label="Setup & Design"
-                    items={filteredSetupAndDesign}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                  <CollapsibleSection
-                    sectionKey="settings-support"
-                    label="Support & Legal"
-                    items={filteredSupportAndLegal}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
-                </>
+                <SidebarFooter className="border-t border-border/50 bg-[#f9f9f9] dark:bg-background">
+                  <SidebarMenu>
+                    <MenuItemRow
+                      item={{
+                        key: "logout",
+                        label: "Log out",
+                        isLogout: true,
+                        icon: <LogOut size={16} />,
+                      }}
+                      pathName={pathName}
+                      openGroup={openGroup}
+                      toggleGroup={toggleGroup}
+                      setLogoutOpen={setLogoutOpen}
+                    />
+                  </SidebarMenu>
+                </SidebarFooter>
               )}
-
-              {activeTab === "email" && (
-                <CollapsibleSection
-                  sectionKey="email"
-                  label="Email"
-                  items={filteredEmail}
-                  renderItems={renderItems}
-                  searchQuery={searchQuery}
-                  className="mb-1"
-                />
-              )}
-
-              {activeTab === "integrations" && (
-                <CollapsibleSection
-                  sectionKey="integrations"
-                  label="Integrations"
-                  items={filteredIntegrations}
-                  renderItems={renderItems}
-                  searchQuery={searchQuery}
-                  className="mb-1"
-                />
-              )}
-
-              {searchQuery.trim() && !hasCurrentTabResults && (
-                <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
-                  <p className="text-[11.5px] text-muted-foreground/60">
-                    No results found
-                  </p>
-                </div>
-              )}
-            </SidebarContent>
-
-            {activeTab === "settings" && (
-              <SidebarFooter className="border-t border-border/50 bg-[#f9f9f9] dark:bg-background">
-                <SidebarMenu>
-                  <MenuItemRow
-                    item={{
-                      key: "logout",
-                      label: "Log out",
-                      isLogout: true,
-                      icon: <LogOut size={16} />,
-                    }}
-                    pathName={pathName}
-                    openGroup={openGroup}
-                    toggleGroup={toggleGroup}
-                    setLogoutOpen={setLogoutOpen}
-                  />
-                </SidebarMenu>
-              </SidebarFooter>
-            )}
-          </Sidebar>
-        )}
+            </Sidebar>
+          )}
 
         {/* ── MAIN CONTENT ── */}
         <SidebarInset className="bg-transparent overflow-hidden flex flex-col h-[calc(100vh-64px)] min-w-0 flex-1 relative">

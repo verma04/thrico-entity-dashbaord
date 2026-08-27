@@ -37,17 +37,50 @@ const CreateListingPage = () => {
   });
 
   const onFinish = (values: any) => {
+    const memberEligibility = values.memberEligibility || "ALL";
+    const membershipTierId =
+      values.membershipTierId || values.eligibleTierIds || [];
+    const eligibleTierIds =
+      values.eligibleTierIds || values.membershipTierId || [];
+    const eligibleUserIds = values.eligibleUserIds || [];
+    const eligibleSegmentIds = values.eligibleSegmentIds || [];
+    const eligibleCommunityIds =
+      values.eligibleCommunityIds || values.communityIds || [];
+    const communityIds =
+      values.communityIds || values.eligibleCommunityIds || [];
+    const communityId =
+      values.communityId || (communityIds.length > 0 ? communityIds[0] : undefined);
+
     add({
       variables: {
         input: {
-          ...values,
-          price: parseInt(values.price, 10),
-          media: values.media.map((m: any) => m.file || m.originFileObj),
+          title: values.title,
+          description: values.description,
+          category: values.category,
+          condition: values.condition,
+          sku: values.sku,
+          tag: values.tag,
+          interests: values.interests,
+          categories: values.categories,
+          price: parseInt(values.price, 10) || 0,
+          media: (values.media || []).map((m: any) => m.file || m.originFileObj),
           location: {
             name: values.location,
             address: values.location,
             latitude: 0,
             longitude: 0,
+          },
+          communityId,
+          communityIds: communityIds.length > 0 ? communityIds : undefined,
+          memberEligibility,
+          eligibility: {
+            memberEligibility,
+            membershipTierId,
+            eligibleTierIds,
+            eligibleUserIds,
+            eligibleSegmentIds,
+            eligibleCommunityIds,
+            communityIds,
           },
         },
       },

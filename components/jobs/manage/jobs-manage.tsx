@@ -47,6 +47,7 @@ import {
 } from "./jobs-manage-ui";
 import { getJobTableColumns } from "./jobs-list";
 import { ExportJobsModal } from "./export-jobs-modal";
+import { MemberEligibilitySelect } from "@/components/gamification/shared/member-eligibility-select";
 
 export interface JobsManageProps {
   status?: string;
@@ -93,6 +94,8 @@ export function JobsManage({ status: initialStatus }: JobsManageProps) {
     (initialStatus as JobStatusValue) ||
     JobStatus.ALL;
 
+  const memberEligibility =
+    searchParams.get("memberEligibility") || "ALL";
   const selectedType = searchParams.get("type") || "ALL";
   const sortBy = searchParams.get("sort") || "newest";
   const view = (searchParams.get("view") as "grid" | "list") || "grid";
@@ -118,6 +121,7 @@ export function JobsManage({ status: initialStatus }: JobsManageProps) {
     job: true,
     type: true,
     workplace: true,
+    eligibility: true,
     applicants: true,
     views: true,
     status: true,
@@ -138,6 +142,12 @@ export function JobsManage({ status: initialStatus }: JobsManageProps) {
   const setStatus = (v: JobStatusValue) =>
     updateParams({ status: v === JobStatus.ALL ? null : v, page: null });
 
+  const setMemberEligibility = (v: string) =>
+    updateParams({
+      memberEligibility: v === "ALL" ? null : v,
+      page: null,
+    });
+
   const setSelectedType = (v: string) =>
     updateParams({ type: v === "ALL" ? null : v, page: null });
 
@@ -155,6 +165,8 @@ export function JobsManage({ status: initialStatus }: JobsManageProps) {
     variables: {
       input: {
         status: status === JobStatus.ALL ? undefined : status,
+        memberEligibility:
+          memberEligibility === "ALL" ? undefined : (memberEligibility as any),
       },
     },
     fetchPolicy: "network-only",
@@ -170,6 +182,18 @@ export function JobsManage({ status: initialStatus }: JobsManageProps) {
     // Status filter
     if (status !== JobStatus.ALL) {
       list = list.filter((j) => j.status === status);
+    }
+
+    // Eligibility filter
+    if (memberEligibility !== "ALL") {
+      list = list.filter((j) => {
+        const elig =
+          j.memberEligibility ||
+          j.eligibility?.memberEligibility ||
+          j.eligibilityRule?.memberEligibility ||
+          "ALL";
+        return elig === memberEligibility;
+      });
     }
 
     // Type filter
@@ -309,6 +333,15 @@ export function JobsManage({ status: initialStatus }: JobsManageProps) {
                 ))}
               </SelectContent>
             </Select>
+          </EcosystemActionBar.Item>
+
+          {/* Member Eligibility Filter */}
+          <EcosystemActionBar.Item>
+            <MemberEligibilitySelect
+              value={memberEligibility}
+              onValueChange={setMemberEligibility}
+              triggerClassName="w-[130px]"
+            />
           </EcosystemActionBar.Item>
 
           {/* Job Type Filter */}
@@ -466,6 +499,7 @@ export function JobsManage({ status: initialStatus }: JobsManageProps) {
         matchingCount={
           debouncedSearch.trim() ||
           status !== JobStatus.ALL ||
+          memberEligibility !== "ALL" ||
           selectedType !== "ALL"
             ? filteredJobs.length
             : undefined

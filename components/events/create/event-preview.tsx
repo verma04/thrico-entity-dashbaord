@@ -10,8 +10,10 @@ import {
   Laptop,
   RefreshCw,
   Users,
+  Globe,
 } from "lucide-react";
 import moment from "moment";
+import { cn } from "@/lib/utils";
 
 interface EventPreviewProps {
   eventData: {
@@ -23,6 +25,7 @@ interface EventPreviewProps {
     startTime?: any;
     type?: string;
     lastDateOfRegistration?: any;
+    memberEligibility?: string;
   };
   coverImage?: string;
 }
@@ -37,6 +40,7 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
     startTime,
     type = "in_person",
     lastDateOfRegistration,
+    memberEligibility = "ALL",
   } = eventData;
 
   const formatDate = (date: any) => {
@@ -64,6 +68,21 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
     }
   };
 
+  const getEligibilityLabel = (eligibility?: string) => {
+    switch (eligibility) {
+      case "OUTSIDE_PLATFORM":
+        return "Public Event";
+      case "VERIFIED":
+        return "Verified Only";
+      case "TIERS":
+        return "Tier Exclusive";
+      case "SPECIFIC_CUSTOMERS":
+        return "Invite Only";
+      default:
+        return "All Members";
+    }
+  };
+
   return (
     <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
       {/* Cover Image */}
@@ -75,13 +94,32 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
           height={1024}
           className="object-cover w-full h-full transition-transform hover:scale-105 duration-300"
         />
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 flex-wrap justify-end">
           <Badge
             variant="secondary"
             className="bg-black/75 text-white backdrop-blur-xs border-none text-[10px] font-semibold px-2 py-0.5 rounded-[4px]"
           >
             {getEventTypeLabel(type)}
           </Badge>
+          {memberEligibility && (
+            <Badge
+              variant="secondary"
+              className={cn(
+                "backdrop-blur-xs border-none text-[10px] font-semibold px-2 py-0.5 rounded-[4px]",
+                memberEligibility === "OUTSIDE_PLATFORM"
+                  ? "bg-emerald-600/90 text-white"
+                  : memberEligibility === "VERIFIED"
+                    ? "bg-blue-600/90 text-white"
+                    : memberEligibility === "TIERS"
+                      ? "bg-purple-600/90 text-white"
+                      : memberEligibility === "SPECIFIC_CUSTOMERS"
+                        ? "bg-amber-600/90 text-white"
+                        : "bg-zinc-800/80 text-zinc-100",
+              )}
+            >
+              {getEligibilityLabel(memberEligibility)}
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -131,6 +169,19 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
           {description ||
             "Event description will be displayed here once entered..."}
         </div>
+
+        {/* Outside Platform Public Warning Callout */}
+        {memberEligibility === "OUTSIDE_PLATFORM" && (
+          <div className="p-2.5 rounded-[6px] bg-[#221f15] border border-[#584824] text-[#dcd1b3] text-[11px] leading-[15px] space-y-0.5 animate-in fade-in-50">
+            <div className="flex items-center gap-1.5 font-semibold text-white">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#F5A623] shrink-0" />
+              Public Event Notice
+            </div>
+            <p className="text-[10.5px] text-[#dcd1b3]/90">
+              Open to non-members outside the platform. Anyone can view and register.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

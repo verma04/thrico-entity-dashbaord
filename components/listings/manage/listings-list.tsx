@@ -126,6 +126,32 @@ export const getListingTableColumns = (
     cell: (row) => <AdminStatusBadge status={row.status} />,
   },
   {
+    key: "eligibility",
+    header: "Audience",
+    cell: (row) => {
+      const elig =
+        row.memberEligibility ||
+        row.eligibility?.memberEligibility ||
+        row.eligibilityRule?.memberEligibility ||
+        "ALL";
+      return (
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20 whitespace-nowrap">
+          {elig === "ALL"
+            ? "All Members"
+            : elig === "TIERS"
+              ? "Tiers"
+              : elig === "COMMUNITY"
+                ? "Community"
+                : elig === "VERIFIED"
+                  ? "Verified"
+                  : elig === "OUTSIDE_PLATFORM"
+                    ? "Public"
+                    : "Specific"}
+        </span>
+      );
+    },
+  },
+  {
     key: "verification",
     header: "Verified",
     cell: (row) => (

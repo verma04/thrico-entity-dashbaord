@@ -24,6 +24,8 @@ const jobs = `
         verificationReason
       }
       addedBy
+      communityId
+      communityIds
       postedBy {
         id
         firstName
@@ -39,6 +41,32 @@ const jobs = `
       numberOfApplicant
       numberOfViews
       createdAt
+      memberEligibility
+      eligibilityRuleId
+      eligibilityRule {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
+      }
+      eligibility {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
+      }
 `;
 export const ADD_JOB = gql`
   mutation AddJob($input: PostJobInput!) {

@@ -101,6 +101,28 @@ const STATUS_CONFIG: Record<
   },
 };
 
+const ELIGIBILITY_CONFIG: Record<
+  string,
+  { label: string; bg: string }
+> = {
+  ALL: {
+    label: "All Members",
+    bg: "bg-muted/60 text-muted-foreground",
+  },
+  VERIFIED: {
+    label: "Verified",
+    bg: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
+  },
+  TIERS: {
+    label: "Tiers",
+    bg: "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20",
+  },
+  SPECIFIC_CUSTOMERS: {
+    label: "Specific",
+    bg: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+  },
+};
+
 export function JobCardCompact({ job }: JobCardCompactProps) {
   const router = useRouter();
   const [logoError, setLogoError] = useState(false);
@@ -120,6 +142,14 @@ export function JobCardCompact({ job }: JobCardCompactProps) {
     text: "text-muted-foreground",
     dot: "bg-muted-foreground",
   };
+
+  const memberElig =
+    job.memberEligibility ||
+    job.eligibility?.memberEligibility ||
+    job.eligibilityRule?.memberEligibility ||
+    "ALL";
+  const eligibilityInfo =
+    ELIGIBILITY_CONFIG[memberElig.toUpperCase()] || ELIGIBILITY_CONFIG.ALL;
 
   const locationName =
     typeof job.location === "string"
@@ -227,16 +257,28 @@ export function JobCardCompact({ job }: JobCardCompactProps) {
             </span>
           </div>
 
-          {/* Salary / Experience */}
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground truncate">
-            {job.salary && (
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate">
-                {job.salary}
-              </span>
-            )}
-            {job.experienceLevel && (
-              <span className="text-[10px] text-muted-foreground/80 truncate">
-                · {job.experienceLevel}
+          {/* Salary / Experience / Eligibility */}
+          <div className="flex items-center justify-between gap-1 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 truncate">
+              {job.salary && (
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate">
+                  {job.salary}
+                </span>
+              )}
+              {job.experienceLevel && (
+                <span className="text-[10px] text-muted-foreground/80 truncate">
+                  · {job.experienceLevel}
+                </span>
+              )}
+            </div>
+            {eligibilityInfo && (
+              <span
+                className={cn(
+                  "text-[9.5px] font-semibold px-1.5 py-0.2 rounded border shadow-2xs shrink-0",
+                  eligibilityInfo.bg,
+                )}
+              >
+                {eligibilityInfo.label}
               </span>
             )}
           </div>

@@ -221,6 +221,28 @@ export function ListingDetailsDrawer({
                 </div>
               </div>
 
+              {/* Audience & Eligibility Section */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Audience & Eligibility
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20">
+                    {(listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "ALL"
+                      ? "All Members"
+                      : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "TIERS"
+                        ? "Specific Tiers"
+                        : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "COMMUNITY"
+                          ? "Specific Communities"
+                          : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "VERIFIED"
+                            ? "Verified Members Only"
+                            : (listing.memberEligibility || listing.eligibilityRule?.memberEligibility) === "OUTSIDE_PLATFORM"
+                              ? "Outside Platform (Public)"
+                              : "Specific Members"}
+                  </Badge>
+                </div>
+              </div>
+
               {/* Description Section */}
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">

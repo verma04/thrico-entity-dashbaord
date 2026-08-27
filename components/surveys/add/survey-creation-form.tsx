@@ -64,6 +64,11 @@ export function SurveyCreationForm({
       then: (schema) => schema.min(1, "Please select at least one customer"),
       otherwise: (schema) => schema.notRequired(),
     }),
+    eligibleCommunityIds: Yup.array().when("memberEligibility", {
+      is: "COMMUNITY",
+      then: (schema) => schema.min(1, "Please select at least one community"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   });
 
   const formik = useFormik({
@@ -73,11 +78,14 @@ export function SurveyCreationForm({
       description: "",
       startDate: null,
       endDate: null,
+      communityId: "",
+      communityIds: [],
       memberEligibility: "ALL",
       membershipTierId: [],
       eligibleTierIds: [],
       eligibleUserIds: [],
       eligibleSegmentIds: [],
+      eligibleCommunityIds: [],
     },
     validationSchema: surveySchema,
     onSubmit: (values) => {
@@ -185,9 +193,13 @@ export function SurveyCreationForm({
                         ? "Verified Members"
                         : formik.values.memberEligibility === "TIERS"
                           ? `${(formik.values.eligibleTierIds || formik.values.membershipTierId || []).length} Tier(s)`
-                          : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
-                            ? `${(formik.values.eligibleUserIds || []).length} Customer(s)`
-                            : "All Members"
+                          : formik.values.memberEligibility === "COMMUNITY"
+                            ? `${(formik.values.eligibleCommunityIds || formik.values.communityIds || []).length} Community(ies)`
+                            : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                              ? `${(formik.values.eligibleUserIds || []).length} Customer(s)`
+                              : formik.values.memberEligibility === "OUTSIDE_PLATFORM"
+                                ? "Outside Platform (Public)"
+                                : "All Members"
                   }
                   isLast
                 />
@@ -340,15 +352,19 @@ export function SurveyCreationForm({
             key={`eligibility-${formik.values.memberEligibility || "ALL"}`}
             step={3}
             title="Audience & Eligibility"
-            description="Specify which customers, members, or tiers can view and participate in this survey."
+            description="Specify which communities, members, or tiers can view and participate in this survey."
             badge="Access"
+            allowOutsidePlatform={true}
+            allowCommunity={true}
             eligibility={formik.values.memberEligibility || "ALL"}
             onEligibilityChange={(val) => {
               formik.setFieldValue("memberEligibility", val);
-              if (val === "ALL" || val === "VERIFIED") {
+              if (val === "ALL" || val === "VERIFIED" || val === "OUTSIDE_PLATFORM") {
                 formik.setFieldValue("membershipTierId", []);
                 formik.setFieldValue("eligibleTierIds", []);
                 formik.setFieldValue("eligibleUserIds", []);
+                formik.setFieldValue("eligibleCommunityIds", []);
+                formik.setFieldValue("communityIds", []);
               }
             }}
             tierIds={
@@ -358,6 +374,13 @@ export function SurveyCreationForm({
               formik.setFieldValue("membershipTierId", tiers);
               formik.setFieldValue("eligibleTierIds", tiers);
             }}
+            communityIds={
+              formik.values.eligibleCommunityIds || formik.values.communityIds || []
+            }
+            onCommunityIdsChange={(comms) => {
+              formik.setFieldValue("eligibleCommunityIds", comms);
+              formik.setFieldValue("communityIds", comms);
+            }}
             userIds={formik.values.eligibleUserIds || []}
             onUserIdsChange={(users) => {
               formik.setFieldValue("eligibleUserIds", users);
@@ -365,9 +388,11 @@ export function SurveyCreationForm({
             errorMessage={
               formik.values.memberEligibility === "TIERS"
                 ? err("membershipTierId") || err("eligibleTierIds")
-                : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
-                  ? err("eligibleUserIds")
-                  : null
+                : formik.values.memberEligibility === "COMMUNITY"
+                  ? err("eligibleCommunityIds") || err("communityIds")
+                  : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                    ? err("eligibleUserIds")
+                    : null
             }
           />
 

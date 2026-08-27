@@ -1,6 +1,14 @@
 import { gql, useMutation, MutationHookOptions } from "@apollo/client";
 import { GET_SURVEYS } from "./survey-queries";
-import { MemberEligibility } from "../actions/gamification/gamification-mutation";
+export type MemberEligibility =
+  | "ALL"
+  | "VERIFIED"
+  | "TIERS"
+  | "COMMUNITY"
+  | "SPECIFIC_CUSTOMERS"
+  | "OUTSIDE_PLATFORM";
+
+export type SurveyStatus = "DRAFT" | "PUBLISHED" | "CLOSED" | string;
 
 // ---------------------------------------------------------
 // TYPES
@@ -12,6 +20,8 @@ export interface SurveyEligibilityInput {
   eligibleTierIds?: string[];
   eligibleUserIds?: string[];
   eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
 }
 
 export interface SurveyEligibilityRule {
@@ -21,33 +31,49 @@ export interface SurveyEligibilityRule {
   eligibleTierIds?: string[];
   eligibleUserIds?: string[];
   eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
   createdAt: string;
-  updatedAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface Survey {
   id: string;
   formId?: string;
   title: string;
-  description?: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  eligibilityRuleId?: string;
+  description?: string | null;
+  status: SurveyStatus;
+  startDate?: string | null;
+  endDate?: string | null;
+  form?: any;
+  sharedAsFeed?: boolean;
+  addedBy?: string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
+  eligibilityRuleId?: string | null;
   eligibility?: SurveyEligibilityRule;
   eligibilityRule?: SurveyEligibilityRule;
+  responses?: any[];
   createdAt?: string;
-  updatedAt?: string;
+  updatedAt?: string | null;
+  previewType?: string;
+  appearance?: any;
+  questions?: Question[];
+  fields?: Question[];
 }
 
 export interface AddSurveyInput {
   title: string;
-  description?: string;
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-  eligibilityRuleId?: string;
+  description?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  addedBy?: string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string | null;
   eligibility?: SurveyEligibilityInput;
+  status?: string;
   previewType?: string;
   appearance?: any;
   fields?: any[];
@@ -71,7 +97,23 @@ const ADD_SURVEY = gql`
       status
       startDate
       endDate
+      sharedAsFeed
+      addedBy
+      communityId
+      communityIds
       eligibilityRuleId
+      eligibilityRule {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
+      }
       eligibility {
         id
         memberEligibility
@@ -79,6 +121,10 @@ const ADD_SURVEY = gql`
         eligibleTierIds
         eligibleUserIds
         eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
       }
       createdAt
       updatedAt
@@ -103,9 +149,13 @@ export function useAddSurvey(
 export interface EditSurveyInput {
   title?: string | null;
   description?: string | null;
-  status?: string | null;
+  status?: SurveyStatus | null;
   startDate?: string | null;
   endDate?: string | null;
+  addedBy?: string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
+  memberEligibility?: MemberEligibility | null;
   eligibilityRuleId?: string | null;
   eligibility?: SurveyEligibilityInput | null;
 }
@@ -124,7 +174,23 @@ const EDIT_SURVEY = gql`
       status
       startDate
       endDate
+      sharedAsFeed
+      addedBy
+      communityId
+      communityIds
       eligibilityRuleId
+      eligibilityRule {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
+      }
       eligibility {
         id
         memberEligibility
@@ -132,6 +198,10 @@ const EDIT_SURVEY = gql`
         eligibleTierIds
         eligibleUserIds
         eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        createdAt
+        updatedAt
       }
       createdAt
       updatedAt

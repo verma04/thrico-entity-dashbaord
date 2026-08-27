@@ -26,7 +26,7 @@ const Create = ({}) => {
   const onFinish = (values: any) => {
     const eventInput = {
       title: values.title,
-      location: values.location,
+      location: typeof values.location === "string" ? { name: values.location } : values.location,
       description: values.description,
       startDate: values.startDate || undefined,
       endDate: values.endDate || undefined,
@@ -34,6 +34,9 @@ const Create = ({}) => {
       type: values.type,
       lastDateOfRegistration: values.lastDateOfRegistration || undefined,
       coverImage: cover,
+      isActive: values.isActive,
+      memberEligibility: values.memberEligibility,
+      eligibility: values.eligibility,
     };
 
     console.log("Creating event with data:", eventInput);

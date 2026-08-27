@@ -30,11 +30,14 @@ interface SurveySheetProps {
     description: string;
     startDate: moment.Moment | null;
     endDate: moment.Moment | null;
+    communityId?: string;
+    communityIds?: string[];
     memberEligibility?: string;
     membershipTierId?: string[];
     eligibleTierIds?: string[];
     eligibleUserIds?: string[];
     eligibleSegmentIds?: string[];
+    eligibleCommunityIds?: string[];
   };
   onDetailsChange: (details: any) => void;
   onUpdate: () => void;

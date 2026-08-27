@@ -17,6 +17,53 @@ import {
   GET_LISTING_CATEGORY_DISTRIBUTION,
 } from "../../quries/listing";
 
+export type MemberEligibility =
+  | "ALL"
+  | "VERIFIED"
+  | "TIERS"
+  | "COMMUNITY"
+  | "SPECIFIC_CUSTOMERS"
+  | "OUTSIDE_PLATFORM";
+
+export type ListingConditionEnum =
+  | "NEW"
+  | "USED_LIKE_NEW"
+  | "USED_LIKE_GOOD"
+  | "USED_LIKE_FAIR";
+
+export type ListingStatus =
+  | "ALL"
+  | "APPROVED"
+  | "PENDING"
+  | "REJECTED"
+  | "DISABLED"
+  | "PAUSED";
+
+export type LogAction = "STATUS" | "UPDATE";
+
+export interface ListingEligibilityRule {
+  id: string;
+  memberEligibility: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+  createdAt?: string;
+  updatedAt?: string | null;
+}
+
+export interface ListingEligibilityInput {
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+}
+
 export type ListingCategory = {
   id: string;
   name: string;
@@ -29,24 +76,40 @@ export type MarketPlaceListing = {
   id: string;
   title: string;
   price: string;
-  status: string;
-  category: string;
+  status: ListingStatus | string;
+  category?: string;
   isApproved: boolean;
+  isExpired?: boolean;
   numberOfViews: number;
   createdAt: string;
-  condition: string;
+  condition: ListingConditionEnum | string;
   updatedAt: string;
   currency: string;
+  sku?: string;
   slug: string;
   location: LocationObject;
   description?: string;
-  media: { id: string; url: string }[];
+  tag?: string[];
+  isFeatured?: boolean;
+  interests?: string[];
+  categories?: string[];
+  media: { id?: string; url: string; createdAt?: string; updatedAt?: string }[];
   verification?: {
+    id?: string;
     isVerified: boolean;
-    verificationReason?: string;
-    isVerifiedAt?: string;
+    verificationReason?: string | null;
+    isVerifiedAt?: string | null;
+    verifiedBy?: any;
   };
   addedBy?: string;
+  communityId?: string;
+  communityIds?: string[];
+  entityId?: string;
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string | null;
+  eligibilityRule?: ListingEligibilityRule | null;
+  eligibility?: ListingEligibilityRule | null;
+  community?: any;
   postedBy?: {
     id: string;
     firstName: string;
@@ -55,13 +118,18 @@ export type MarketPlaceListing = {
   };
 };
 
+export type GetListingInput = {
+  status?: ListingStatus | string;
+  userId?: string;
+  memberEligibility?: MemberEligibility;
+  communityId?: string;
+  communityIds?: string[];
+  offset?: number;
+  limit?: number;
+};
+
 export type GetListingsVars = {
-  input: {
-    status?: string;
-    userId?: string;
-    offset?: number;
-    limit?: number;
-  };
+  input: GetListingInput;
 };
 
 export type GetListingResponse = {
@@ -71,72 +139,98 @@ export type GetListingResponse = {
   limit: number;
 };
 
+export type GetListingDetailsByIDInput = {
+  listingId: string;
+};
+
 export type GetListingDetailsVars = {
-  input: {
-    listingId: string;
-  };
+  input: GetListingDetailsByIDInput;
+};
+
+export type ListingInput = {
+  title: string;
+  price: number;
+  condition: ListingConditionEnum | string;
+  description: string;
+  category: string;
+  sku?: string;
+  interests?: string[];
+  categories?: string[];
+  location: LocationObject;
+  media?: any[];
+  tag?: string[];
+  addedBy?: string;
+  communityId?: string;
+  communityIds?: string[];
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string;
+  eligibility?: ListingEligibilityInput;
+  currency?: string;
 };
 
 export type AddListingVars = {
-  input: {
-    title: string;
-    price: string;
-    condition: string;
-    description: string;
-    category: string;
-    sku?: string;
-    interests?: string[];
-    categories?: string[];
-    location: LocationObject;
-    media?: { url: string }[];
-    currency?: string;
-  };
+  input: ListingInput;
+};
+
+export type EditListingInput = {
+  id: string;
+  title: string;
+  price: string;
+  condition: ListingConditionEnum | string;
+  description: string;
+  category: string;
+  sku?: string;
+  interests?: string[];
+  categories?: string[];
+  location: LocationObject;
+  reason?: string;
+  media?: any[];
+  addedBy?: string;
+  communityId?: string;
+  communityIds?: string[];
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string;
+  eligibility?: ListingEligibilityInput;
+  currency?: string;
 };
 
 export type EditListingVars = {
-  input: {
-    id: string;
-    title: string;
-    price: string;
-    condition: string;
-    description: string;
-    category: string;
-    sku?: string;
-    interests?: string[];
-    categories?: string[];
-    location: LocationObject;
-    reason?: string;
-    media?: { url: string }[];
-    currency?: string;
-  };
+  input: EditListingInput;
+};
+
+export type ChangeListingStatusInput = {
+  listingId: string;
+  action: string;
+  reason?: string;
 };
 
 export type ChangeListingStatusVars = {
-  input: {
-    listingId: string;
-    action: string;
-    reason?: string;
-  };
+  input: ChangeListingStatusInput;
 };
+
+export type ListingStatsByIdInput = {
+  listingId: string;
+};
+
 export type ListingStats = {
-  totalListings: number;
-  listingsDiff: number;
-  activeListings: number;
-  activePercent: number;
-  verifiedListings: number;
-  verifiedPercent: number;
-  totalViews: number;
-  viewsPercent: number;
+  totalListings?: string | number;
+  listingsDiff?: string | number;
+  activeListings?: string | number;
+  activePercent?: string | number;
+  verifiedListings?: string | number;
+  verifiedPercent?: string | number;
+  totalViews?: string | number;
+  viewsPercent?: string | number;
 };
 
 export type ListingStatsById = {
-  totalViews: number;
-  uniqueViews: number;
-  totalContactClicks: number;
-  contactRate: number;
-  thisWeekViews: number;
-  lastWeekViews: number;
-  weeklyViewsDiff: number;
+  totalViews?: string | number;
+  uniqueViews?: string | number;
+  totalContactClicks?: string | number;
+  contactRate?: string | number;
+  thisWeekViews?: string | number;
+  lastWeekViews?: string | number;
+  weeklyViewsDiff?: string | number;
 };
 
 // --- Apollo Client Hooks ---
