@@ -185,7 +185,6 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <ManageItemLayout
-      fixed={false}
       title={survey?.title || `${singularName} Details`}
       loading={loading}
       loadingText={`Loading ${singularName}...`}
