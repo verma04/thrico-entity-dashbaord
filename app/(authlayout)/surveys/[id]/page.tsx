@@ -44,7 +44,6 @@ function EditSurveyPage() {
   });
 
   const survey = data?.getSurvey;
-  const elig = survey?.eligibility || survey?.eligibilityRule;
 
   const [editSurvey, { loading: isUpdating }] = useEditSurvey({
     onCompleted: () => {
@@ -78,13 +77,6 @@ function EditSurveyPage() {
         description: survey.description || "",
         startDate: survey.startDate ? new Date(survey.startDate) : null,
         endDate: survey.endDate ? new Date(survey.endDate) : null,
-        memberEligibility: elig?.memberEligibility || "ALL",
-        membershipTierId:
-          elig?.membershipTierId || elig?.eligibleTierIds || [],
-        eligibleTierIds:
-          elig?.eligibleTierIds || elig?.membershipTierId || [],
-        eligibleUserIds: elig?.eligibleUserIds || [],
-        eligibleSegmentIds: elig?.eligibleSegmentIds || [],
       }
     : undefined;
 
@@ -98,15 +90,6 @@ function EditSurveyPage() {
       endDate: values.endDate
         ? new Date(values.endDate).toISOString()
         : undefined,
-      eligibility: {
-        memberEligibility: values.memberEligibility || "ALL",
-        membershipTierId:
-          values.membershipTierId || values.eligibleTierIds || [],
-        eligibleTierIds:
-          values.eligibleTierIds || values.membershipTierId || [],
-        eligibleUserIds: values.eligibleUserIds || [],
-        eligibleSegmentIds: values.eligibleSegmentIds || [],
-      },
     };
 
     editSurvey({ variables: { id, input } });
@@ -121,7 +104,7 @@ function EditSurveyPage() {
       <EcosystemHeader
         title={survey?.title ? `Edit · ${survey.title}` : `Edit ${singularName}`}
         badgeText="Insights Studio"
-        description={`Update ${singularName.toLowerCase()} campaign identity, active timeline, and member eligibility rules.`}
+        description={`Update ${singularName.toLowerCase()} campaign identity and active timeline.`}
         icon={ClipboardList}
         breadcrumbs={[
           { label: moduleName, href: "/surveys/all" },

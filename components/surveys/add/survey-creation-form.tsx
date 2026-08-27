@@ -24,7 +24,6 @@ import {
   PolarisInput,
   PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
-import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
 
 export function SurveyCreationForm({
   initialValues,
@@ -46,24 +45,6 @@ export function SurveyCreationForm({
     endDate: Yup.date()
       .nullable()
       .min(Yup.ref("startDate"), "End date cannot be before start date"),
-    memberEligibility: Yup.string().default("ALL"),
-    membershipTierId: Yup.array().when("memberEligibility", {
-      is: "TIERS",
-      then: (schema) =>
-        schema.min(1, "Please select at least one membership tier"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-    eligibleTierIds: Yup.array().when("memberEligibility", {
-      is: "TIERS",
-      then: (schema) =>
-        schema.min(1, "Please select at least one membership tier"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-    eligibleUserIds: Yup.array().when("memberEligibility", {
-      is: "SPECIFIC_CUSTOMERS",
-      then: (schema) => schema.min(1, "Please select at least one customer"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
   });
 
   const formik = useFormik({
@@ -73,30 +54,12 @@ export function SurveyCreationForm({
       description: "",
       startDate: null,
       endDate: null,
-      memberEligibility: "ALL",
-      membershipTierId: [],
-      eligibleTierIds: [],
-      eligibleUserIds: [],
-      eligibleSegmentIds: [],
     },
     validationSchema: surveySchema,
     onSubmit: (values) => {
       onFinish(values);
     },
   });
-
-  const err = (field: string) => {
-    const isTouched = Boolean(formik.touched[field]);
-    const errorMsg = formik.errors[field];
-    if (isTouched && errorMsg) {
-      return (
-        <p className="text-[12px] text-[#d72c0d] font-normal mt-0.5 leading-[16px]">
-          {String(errorMsg)}
-        </p>
-      );
-    }
-    return null;
-  };
 
   const handleInputChange = (field: string, value: any) => {
     formik.setFieldValue(field, value);
@@ -174,20 +137,6 @@ export function SurveyCreationForm({
                     formik.values.endDate
                       ? format(formik.values.endDate, "MMM d, yyyy")
                       : "Indefinite"
-                  }
-                />
-                <PolarisSummaryRow
-                  label="Eligibility"
-                  value={
-                    formik.values.memberEligibility === "ALL"
-                      ? "All Members"
-                      : formik.values.memberEligibility === "VERIFIED"
-                        ? "Verified Members"
-                        : formik.values.memberEligibility === "TIERS"
-                          ? `${(formik.values.eligibleTierIds || formik.values.membershipTierId || []).length} Tier(s)`
-                          : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
-                            ? `${(formik.values.eligibleUserIds || []).length} Customer(s)`
-                            : "All Members"
                   }
                   isLast
                 />
@@ -334,42 +283,6 @@ export function SurveyCreationForm({
               </div>
             </div>
           </PolarisFormCard>
-
-          {/* Step 3: Audience & Member Eligibility */}
-          <PolarisEligibilityCard
-            key={`eligibility-${formik.values.memberEligibility || "ALL"}`}
-            step={3}
-            title="Audience & Eligibility"
-            description="Specify which customers, members, or tiers can view and participate in this survey."
-            badge="Access"
-            eligibility={formik.values.memberEligibility || "ALL"}
-            onEligibilityChange={(val) => {
-              formik.setFieldValue("memberEligibility", val);
-              if (val === "ALL" || val === "VERIFIED") {
-                formik.setFieldValue("membershipTierId", []);
-                formik.setFieldValue("eligibleTierIds", []);
-                formik.setFieldValue("eligibleUserIds", []);
-              }
-            }}
-            tierIds={
-              formik.values.membershipTierId || formik.values.eligibleTierIds || []
-            }
-            onTierIdsChange={(tiers) => {
-              formik.setFieldValue("membershipTierId", tiers);
-              formik.setFieldValue("eligibleTierIds", tiers);
-            }}
-            userIds={formik.values.eligibleUserIds || []}
-            onUserIdsChange={(users) => {
-              formik.setFieldValue("eligibleUserIds", users);
-            }}
-            errorMessage={
-              formik.values.memberEligibility === "TIERS"
-                ? err("membershipTierId") || err("eligibleTierIds")
-                : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
-                  ? err("eligibleUserIds")
-                  : null
-            }
-          />
 
           {/* Floating Save Action Bar */}
           <FloatingSavePanel

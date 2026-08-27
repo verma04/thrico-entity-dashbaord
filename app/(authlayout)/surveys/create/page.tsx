@@ -48,15 +48,6 @@ const AddSurveyPage = () => {
       endDate: values.endDate
         ? new Date(values.endDate).toISOString()
         : undefined,
-      eligibility: {
-        memberEligibility: values.memberEligibility || "ALL",
-        membershipTierId:
-          values.membershipTierId || values.eligibleTierIds || [],
-        eligibleTierIds:
-          values.eligibleTierIds || values.membershipTierId || [],
-        eligibleUserIds: values.eligibleUserIds || [],
-        eligibleSegmentIds: values.eligibleSegmentIds || [],
-      },
     };
 
     addSurvey({ variables: { input } });
