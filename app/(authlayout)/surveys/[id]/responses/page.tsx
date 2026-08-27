@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React from "react";
 import { useParams } from "next/navigation";
 import { SurveyResponsesView } from "@/components/surveys/responses/survey-responses-view";
@@ -14,18 +13,13 @@ function SurveyResponsesPage() {
   const id = params?.id as string;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-background"
-    >
+    <div className="w-full h-full">
       <SurveyResponsesView surveyId={id} />
-    </motion.div>
+    </div>
   );
 }
 
 export default withSubscriptionCheck(
   withModulePermission(SurveyResponsesPage, "SURVEYS", "canRead"),
-  "surveys"
+  "surveys",
 );

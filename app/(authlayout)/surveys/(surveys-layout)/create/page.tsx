@@ -27,7 +27,7 @@ const AddSurveyPage = () => {
         title: "Success",
         description: `${singularName} created successfully!`,
       });
-      router.push(`/surveys/${data.addSurvey.id}`);
+      router.push("/surveys/all");
     },
     onError: (error: any) => {
       toast({

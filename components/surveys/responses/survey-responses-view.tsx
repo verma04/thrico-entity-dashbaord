@@ -1,27 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   useGetSurveyResponses,
   useGetSurvey,
   SurveyResponse,
-  Respondent,
 } from "@/graphql/surveys/survey-queries";
-import { DataTable } from "@/components/ui/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { useExportSurveyResponses } from "@/graphql/surveys/survey-mutations";
+import {
+  AdminTable,
+  AdminStatusBadge,
+  AdminTableColumn,
+  AdminTableItem,
+  AdminTableText,
+  AdminTableMetric,
+  AdminTableDate,
+} from "@/components/shared/admin-table/admin-table";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import {
-  ArrowLeft,
-  MessageSquare,
-  User,
-  Eye,
-  Calendar,
-  ChevronRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -31,7 +34,22 @@ import {
 } from "@/components/ui/sheet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Eye,
+  Mail,
+  Calendar,
+  MessageSquare,
+  Download,
+  Loader2,
+  Phone,
+  User,
+  HelpCircle,
+} from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface SurveyResponsesViewProps {
   surveyId: string;
@@ -40,11 +58,17 @@ interface SurveyResponsesViewProps {
 export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
   surveyId,
 }) => {
-  const router = useRouter();
   const [selectedResponse, setSelectedResponse] =
     useState<SurveyResponse | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
-  const { data: surveyData } = useGetSurvey({ variables: { getSurveyId: surveyId } });
+  const { data: surveyData } = useGetSurvey({
+    variables: { getSurveyId: surveyId },
+    skip: !surveyId,
+  });
+
   const {
     data: responsesData,
     loading,
@@ -56,183 +80,310 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
     },
   });
 
-  const responses = responsesData?.getSurveyResponses?.responses || [];
+  const rawResponses = responsesData?.getSurveyResponses?.responses || [];
   const survey = surveyData?.getSurvey;
 
-  const columns: ColumnDef<SurveyResponse>[] = [
-    {
-      accessorKey: "respondent",
-      header: "Respondent",
-      cell: ({ row }) => {
-        const respondent = row.original.respondent;
+  const [exportResponses, { loading: exporting }] = useExportSurveyResponses({
+    onCompleted: (res) => {
+      const result = res?.exportSurveyResponses;
+      if (result?.fileUrl) {
+        const link = document.createElement("a");
+        link.href = result.fileUrl;
+        link.setAttribute("download", `survey-responses-${surveyId}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        toast.success(result.message || "Survey responses exported successfully!");
+      } else {
+        toast.success(result?.message || "Export initiated. You will receive an email shortly.");
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to export survey responses");
+    },
+  });
 
-        if (!respondent?.id) {
+  const handleExport = () => {
+    exportResponses({
+      variables: {
+        surveyId,
+        format: "csv",
+      },
+    });
+  };
+
+  // Filter and sort responses
+  const filteredResponses = useMemo(() => {
+    let list = [...rawResponses];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const term = searchQuery.toLowerCase().trim();
+      list = list.filter((r) => {
+        const name = `${r.respondent?.firstName || ""} ${r.respondent?.lastName || ""} ${r.name || ""}`.toLowerCase();
+        const email = `${r.respondent?.email || ""} ${r.email || ""}`.toLowerCase();
+        const id = r.id.toLowerCase();
+        return name.includes(term) || email.includes(term) || id.includes(term);
+      });
+    }
+
+    // Type filter
+    if (typeFilter !== "ALL") {
+      list = list.filter((r) => {
+        const type = r.respondentType || (r.respondent?.id ? "USER" : r.name || r.email ? "GUEST" : "ANONYMOUS");
+        return type.toUpperCase() === typeFilter.toUpperCase();
+      });
+    }
+
+    // Sort order
+    list.sort((a, b) => {
+      const dateA = new Date(a.submittedAt).getTime();
+      const dateB = new Date(b.submittedAt).getTime();
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+
+    return list;
+  }, [rawResponses, searchQuery, typeFilter, sortOrder]);
+
+  // AdminTable columns configuration
+  const columns: AdminTableColumn<SurveyResponse>[] = [
+    {
+      key: "serial",
+      header: "S.No",
+      headerClassName: "w-12 text-center",
+      className: "text-center text-[11px] font-medium text-muted-foreground",
+      cell: (_, index) => index + 1,
+    },
+    {
+      key: "respondent",
+      header: "Respondent",
+      cell: (row) => {
+        const respondent = row.respondent;
+        const isRegistered = Boolean(respondent?.id);
+        const displayName = isRegistered
+          ? `${respondent?.firstName || ""} ${respondent?.lastName || ""}`.trim() || "Member"
+          : row.name || "Anonymous Respondent";
+
+        const subtitle = isRegistered
+          ? respondent?.about?.headline || respondent?.email || "Community Member"
+          : row.email
+            ? row.email
+            : `ID: ${row.respondentId?.slice(0, 8) || row.id?.slice(0, 8)}...`;
+
+        const fallback = isRegistered
+          ? `${respondent?.firstName?.charAt(0) || ""}${respondent?.lastName?.charAt(0) || ""}` || "M"
+          : row.name
+            ? row.name.charAt(0).toUpperCase()
+            : "A";
+
+        const itemContent = (
+          <AdminTableItem
+            avatar={respondent?.avatar}
+            shape="circle"
+            title={displayName}
+            subtitle={subtitle}
+            fallbackText={fallback}
+            onClick={() => setSelectedResponse(row)}
+          />
+        );
+
+        if (isRegistered && respondent) {
           return (
-            <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9 border border-border">
-                <AvatarFallback className="bg-primary/5 text-primary text-xs">
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-medium text-foreground">
-                  Anonymous Respondent
-                </span>
-                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">
-                  {row.original.respondentId.slice(0, 8)}...
-                </span>
-              </div>
-            </div>
+            <UserProfileHoverCard user={respondent}>
+              <div>{itemContent}</div>
+            </UserProfileHoverCard>
           );
         }
 
-        const avatarUrl = respondent?.avatar
-          ? respondent.avatar.startsWith("http")
-            ? respondent.avatar
-            : `https://cdn.thrico.network/${respondent.avatar}`
-          : "";
-
+        return itemContent;
+      },
+    },
+    {
+      key: "contact",
+      header: "Contact",
+      cell: (row) => {
+        const email = row.respondent?.email || row.email || "—";
+        const phone = row.phone;
         return (
-          <UserProfileHoverCard user={respondent}>
-            <div className="flex items-center gap-3 cursor-pointer hover:bg-accent/50 p-1.5 -ml-1.5 rounded-md transition-colors">
-              <Avatar className="h-9 w-9 border border-border">
-                <AvatarImage
-                  src={avatarUrl}
-                  alt={respondent?.firstName || ""}
-                />
-                <AvatarFallback className="bg-primary/5 text-primary text-xs">
-                  {respondent?.firstName?.[0] || <User className="h-4 w-4" />}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-medium text-foreground hover:underline">
-                  {respondent?.firstName
-                    ? `${respondent.firstName} ${respondent.lastName || ""}`
-                    : "Anonymous Respondent"}
-                </span>
-                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">
-                  {row.original.respondentId.slice(0, 8)}...
-                </span>
-              </div>
-            </div>
-          </UserProfileHoverCard>
+          <AdminTableText
+            primary={email}
+            secondary={phone}
+            icon={Mail}
+          />
         );
       },
     },
     {
-      accessorKey: "submittedAt",
+      key: "type",
+      header: "Type",
+      cell: (row) => {
+        const type = row.respondentType || (row.respondent?.id ? "USER" : row.name || row.email ? "GUEST" : "ANONYMOUS");
+        const statusMap: Record<string, { label: string; status: "active" | "pending" | "inactive" }> = {
+          USER: { label: "Member", status: "active" },
+          GUEST: { label: "Guest", status: "pending" },
+          ANONYMOUS: { label: "Anonymous", status: "inactive" },
+        };
+        const config = statusMap[type] || { label: type, status: "inactive" };
+        return <AdminStatusBadge status={config.status}>{config.label}</AdminStatusBadge>;
+      },
+    },
+    {
+      key: "answersCount",
+      header: "Answers",
+      cell: (row) => {
+        const count = Object.keys(row.answers || {}).length;
+        return (
+          <AdminTableMetric
+            value={count}
+            unit="Questions"
+            icon={HelpCircle}
+            variant="mono"
+          />
+        );
+      },
+    },
+    {
+      key: "submittedAt",
       header: "Submitted",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" />
-          <span className="text-sm">
-            {format(new Date(row.original.submittedAt), "MMM d, yyyy · p")}
-          </span>
-        </div>
+      cell: (row) => (
+        <AdminTableDate
+          date={row.submittedAt}
+          icon={true}
+        />
       ),
     },
     {
-      id: "actions",
-      cell: ({ row }) => (
-        <div className="flex justify-end pr-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2 text-primary hover:text-primary hover:bg-primary/5"
-            onClick={() => setSelectedResponse(row.original)}
-          >
-            <Eye className="h-4 w-4" />
-            View Answers
-          </Button>
-        </div>
+      key: "actions",
+      header: "",
+      isFixedRight: true,
+      headerClassName: "w-28 text-right pr-4",
+      className: "text-right pr-4",
+      cell: (row) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2.5 text-xs font-medium text-primary hover:text-primary hover:bg-primary/10 gap-1.5 cursor-pointer rounded-md transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedResponse(row);
+          }}
+        >
+          <Eye className="h-3.5 w-3.5" />
+          <span>Answers</span>
+        </Button>
       ),
     },
   ];
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4 border border-dashed border-border rounded-xl bg-card p-12">
         <div className="p-4 rounded-full bg-destructive/10">
           <MessageSquare className="h-8 w-8 text-destructive" />
         </div>
-        <p className="text-destructive font-medium">
+        <p className="text-destructive font-medium text-sm">
           Failed to load survey responses.
         </p>
-        <Button variant="outline" onClick={() => router.back()}>
-          Go Back
-        </Button>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex flex-col space-y-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-fit pl-0 gap-2 text-muted-foreground hover:text-foreground"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Surveys
-        </Button>
+    <div className="space-y-4 w-full">
+      {/* Action Bar (Identical to members/all design pattern) */}
+      <div className="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
+        <EcosystemActionBar shadow="none" className="border-b-0">
+          <EcosystemActionBar.Group align="left">
+            <EcosystemActionBar.Search
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search by respondent name, email, or ID..."
+              className="w-[280px]"
+            />
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-3 mb-1">
-              <Badge
-                variant="outline"
-                className="rounded-md font-mono text-[10px]"
+            {/* Respondent Type Filter */}
+            <EcosystemActionBar.Item>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-[140px] h-8 rounded-md border-border bg-background text-xs font-medium text-foreground shadow-2xs">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[150px]">
+                  <SelectItem value="ALL" className="text-xs font-medium py-1 px-2 cursor-pointer">
+                    All Types
+                  </SelectItem>
+                  <SelectItem value="USER" className="text-xs font-medium py-1 px-2 cursor-pointer">
+                    Registered Members
+                  </SelectItem>
+                  <SelectItem value="GUEST" className="text-xs font-medium py-1 px-2 cursor-pointer">
+                    Guest Submissions
+                  </SelectItem>
+                  <SelectItem value="ANONYMOUS" className="text-xs font-medium py-1 px-2 cursor-pointer">
+                    Anonymous
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </EcosystemActionBar.Item>
+
+            {/* Sort Order */}
+            <EcosystemActionBar.Item>
+              <Select
+                value={sortOrder}
+                onValueChange={(val: "newest" | "oldest") => setSortOrder(val)}
               >
-                RESPONSE LOG
-              </Badge>
-              {survey?.status && (
-                <Badge
-                  variant={
-                    survey.status === "PUBLISHED" ? "default" : "secondary"
-                  }
-                  className="capitalize h-5 py-0"
-                >
-                  {survey.status.toLowerCase()}
-                </Badge>
+                <SelectTrigger className="w-[125px] h-8 rounded-md border-border bg-background text-xs font-medium text-foreground shadow-2xs">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[130px]">
+                  <SelectItem value="newest" className="text-xs font-medium py-1 px-2 cursor-pointer">
+                    Newest First
+                  </SelectItem>
+                  <SelectItem value="oldest" className="text-xs font-medium py-1 px-2 cursor-pointer">
+                    Oldest First
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </EcosystemActionBar.Item>
+          </EcosystemActionBar.Group>
+
+          <EcosystemActionBar.Group align="right">
+            {/* Total Submissions Pill */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/60 text-xs font-medium text-muted-foreground">
+              <span>Total:</span>
+              <span className="font-semibold text-foreground">{rawResponses.length}</span>
+            </div>
+
+            {/* Export CSV Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 gap-1.5 border-border rounded-md text-xs font-medium cursor-pointer shadow-2xs hover:bg-accent transition-colors"
+              onClick={handleExport}
+              disabled={exporting || rawResponses.length === 0}
+            >
+              {exporting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              ) : (
+                <Download className="h-3.5 w-3.5 text-muted-foreground" />
               )}
-            </div>
-            <h1 className="text-4xl font-extrabold tracking-tight">
-              {survey?.title || "Survey Responses"}
-            </h1>
-            <p className="text-muted-foreground max-w-2xl">
-              Browsing individual submissions and respondent metadata for this
-              survey.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="bg-card px-5 py-3 rounded-2xl border border-border shadow-sm flex flex-col">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest leading-none mb-1">
-                Total Submissions
-              </span>
-              <span className="text-3xl font-black tabular-nums">
-                {responses.length}
-              </span>
-            </div>
-          </div>
-        </div>
+              <span>{exporting ? "Exporting..." : "Export CSV"}</span>
+            </Button>
+          </EcosystemActionBar.Group>
+        </EcosystemActionBar>
       </div>
 
-      <Separator className="opacity-50" />
-
-      {/* Main Table */}
-      <div className="space-y-6">
-        <DataTable
-          columns={columns}
-          data={responses}
-          isLoading={loading}
-          skeletonCount={8}
-          onRowClick={(row) => setSelectedResponse(row)}
-        />
-      </div>
+      {/* Admin Table */}
+      <AdminTable<SurveyResponse>
+        columns={columns}
+        data={filteredResponses}
+        loading={loading}
+        keyExtractor={(r) => r.id}
+        emptyIcon={MessageSquare}
+        emptyTitle="No survey responses found"
+        emptyDescription="No submissions match your search or filter criteria."
+        pageSize={15}
+        enableColumnToggle={true}
+        size="md"
+      />
 
       {/* Response Detail Drawer */}
       <Sheet
@@ -240,9 +391,9 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
         onOpenChange={(open) => !open && setSelectedResponse(null)}
       >
         <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto p-0 border-l border-border shadow-2xl">
-          <SheetHeader className="px-8 pt-8 pb-6 bg-linear-to-br from-primary/5 to-transparent border-b sticky top-0 z-10 backdrop-blur-md">
-            <div className="flex items-center gap-4 mb-4">
-              <Avatar className="h-14 w-14 ring-4 ring-background shadow-lg">
+          <SheetHeader className="px-8 pt-8 pb-6 bg-gradient-to-br from-primary/5 to-transparent border-b sticky top-0 z-10 backdrop-blur-md">
+            <div className="flex items-center gap-4 mb-3">
+              <Avatar className="h-12 w-12 ring-2 ring-background shadow-md">
                 <AvatarImage
                   src={
                     selectedResponse?.respondent?.avatar
@@ -252,48 +403,53 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
                       : ""
                   }
                 />
-                <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
-                  {selectedResponse?.respondent?.firstName?.[0] || "?"}
+                <AvatarFallback className="bg-primary/10 text-primary text-base font-bold">
+                  {selectedResponse?.respondent?.firstName?.[0] ||
+                    selectedResponse?.name?.[0] ||
+                    "?"}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-1">
-                <SheetTitle className="text-2xl font-black">
+              <div className="space-y-0.5">
+                <SheetTitle className="text-xl font-bold">
                   {selectedResponse?.respondent?.firstName
-                    ? `${selectedResponse.respondent.firstName} ${selectedResponse.respondent.lastName}`
-                    : "Anonymous Submission"}
+                    ? `${selectedResponse.respondent.firstName} ${selectedResponse.respondent.lastName || ""}`
+                    : selectedResponse?.name || "Anonymous Submission"}
                 </SheetTitle>
-                <SheetDescription className="flex items-center gap-2">
-                  <Calendar className="h-3.5 w-3.5" />
+                <SheetDescription className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
                   Submitted on{" "}
-                  {selectedResponse &&
-                    format(new Date(selectedResponse.submittedAt), "PPP p")}
+                  {selectedResponse?.submittedAt
+                    ? format(new Date(selectedResponse.submittedAt), "PPP · p")
+                    : "—"}
                 </SheetDescription>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Badge
                 variant="secondary"
-                className="bg-primary/10 text-primary hover:bg-primary/20 border-none font-mono"
+                className="bg-primary/10 text-primary hover:bg-primary/20 border-none font-mono text-[10px]"
               >
-                ID: {selectedResponse?.id.slice(0, 12)}
+                ID: {selectedResponse?.id?.slice(0, 12)}
               </Badge>
+              {selectedResponse?.email && (
+                <Badge variant="outline" className="text-[10px] font-normal">
+                  {selectedResponse.email}
+                </Badge>
+              )}
             </div>
           </SheetHeader>
 
-          <div className="p-8 space-y-8">
-            <div className="space-y-6">
-              <h3 className="text-sm font-bold uppercase tracking-[.2em] text-muted-foreground/60 flex items-center gap-3">
-                <div className="h-px flex-1 bg-border" />
+          <div className="p-6 space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-[.15em] text-muted-foreground flex items-center gap-2">
                 Question Responses
                 <div className="h-px flex-1 bg-border" />
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {selectedResponse &&
                   Object.entries(selectedResponse.answers || {}).map(
                     ([questionId, answer]: [string, any], idx) => {
-                      // This assumes you might have logic to find the question text by ID
-                      // For now, displaying it as is or attempting to map if survey data has fields
                       const questionField =
                         survey?.form?.questions?.find(
                           (f: any) => f.id === questionId,
@@ -303,18 +459,17 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
                       return (
                         <Card
                           key={idx}
-                          className="border-none bg-accent/20 shadow-none overflow-hidden group"
+                          className="border border-border/80 bg-card shadow-2xs overflow-hidden"
                         >
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary scale-y-0 group-hover:scale-y-100 transition-transform duration-300" />
-                          <CardHeader className="p-5 pb-2">
-                            <CardTitle className="text-sm font-bold text-muted-foreground flex items-center justify-between">
+                          <CardHeader className="p-4 pb-2">
+                            <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center justify-between">
                               <span>
                                 {questionField?.question ||
                                   `Question #${idx + 1}`}
                               </span>
                               <Badge
                                 variant="outline"
-                                className="text-[9px] h-4 px-1 rounded font-mono border-muted-foreground/30 capitalize"
+                                className="text-[9px] h-4 px-1.5 rounded font-mono border-border capitalize"
                               >
                                 {questionField?.type
                                   ?.toLowerCase()
@@ -322,15 +477,15 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
                               </Badge>
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="p-5 pt-0">
-                            <div className="text-base font-semibold leading-relaxed text-foreground">
+                          <CardContent className="p-4 pt-1">
+                            <div className="text-sm font-medium leading-relaxed text-foreground">
                               {Array.isArray(answer) ? (
-                                <div className="flex flex-wrap gap-2 pt-1">
+                                <div className="flex flex-wrap gap-1.5 pt-1">
                                   {answer.map((a, i) => (
                                     <Badge
                                       key={i}
                                       variant="secondary"
-                                      className="rounded-lg px-3 py-1 font-medium bg-background border-border"
+                                      className="rounded-md px-2 py-0.5 text-xs font-medium"
                                     >
                                       {a}
                                     </Badge>

@@ -683,3 +683,41 @@ export function useShareSurveyAsFeed(
     },
   );
 }
+
+// ---------------------------------------------------------
+// EXPORT SURVEY RESPONSES
+// ---------------------------------------------------------
+
+export interface ExportSurveyResponsesData {
+  exportSurveyResponses: {
+    success: boolean;
+    message: string;
+    totalCount?: number;
+    fileUrl?: string;
+  };
+}
+
+const EXPORT_SURVEY_RESPONSES = gql`
+  mutation ExportSurveyResponses($surveyId: ID!, $format: String) {
+    exportSurveyResponses(surveyId: $surveyId, format: $format) {
+      success
+      message
+      totalCount
+      fileUrl
+    }
+  }
+`;
+
+export function useExportSurveyResponses(
+  options?: MutationHookOptions<
+    ExportSurveyResponsesData,
+    { surveyId: string; format?: string }
+  >,
+) {
+  return useMutation<
+    ExportSurveyResponsesData,
+    { surveyId: string; format?: string }
+  >(EXPORT_SURVEY_RESPONSES, {
+    ...options,
+  });
+}

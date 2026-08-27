@@ -187,6 +187,8 @@ export interface ManageItemLayoutProps {
   layoutId?: string;
   className?: string;
   containerClassName?: string;
+  contentContainerClassName?: string;
+  fixed?: boolean;
 }
 
 /* ─── Full Entity Manage Layout Component ───────────────────────────────── */
@@ -215,6 +217,8 @@ export function ManageItemLayout({
   layoutId = "menu-tab-underline",
   className,
   containerClassName,
+  contentContainerClassName,
+  fixed = true,
 }: ManageItemLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -238,14 +242,10 @@ export function ManageItemLayout({
         : pathname.replace(`${basePath}/`, "").split("/")[0] || "manage"
       : "manage");
 
-  return (
-    <FixedInsetMotionContainer
-      showAccentLine
-      className={className}
-      onClose={handleClose}
-    >
+  const innerContent = (
+    <>
       {/* Sticky Header */}
-      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/60">
+      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/60">
         <div className={cn("max-w-7xl mx-auto px-6", containerClassName)}>
           {/* Top Bar */}
           <div className="flex items-center justify-between py-4">
@@ -346,7 +346,12 @@ export function ManageItemLayout({
       </div>
 
       {/* Content Area */}
-      <div className={cn("max-w-7xl mx-auto px-6 py-8", containerClassName)}>
+      <div
+        className={cn(
+          "max-w-7xl mx-auto px-6 py-8",
+          contentContainerClassName || containerClassName,
+        )}
+      >
         {breadcrumbs && breadcrumbs.length > 0 && (
           <Breadcrumb className="mb-6">
             <BreadcrumbList>
@@ -380,6 +385,24 @@ export function ManageItemLayout({
           {children}
         </div>
       </div>
+    </>
+  );
+
+  if (!fixed) {
+    return (
+      <div className={cn("w-full min-h-screen bg-background flex flex-col", className)}>
+        {innerContent}
+      </div>
+    );
+  }
+
+  return (
+    <FixedInsetMotionContainer
+      showAccentLine
+      className={className}
+      onClose={handleClose}
+    >
+      {innerContent}
     </FixedInsetMotionContainer>
   );
 }
