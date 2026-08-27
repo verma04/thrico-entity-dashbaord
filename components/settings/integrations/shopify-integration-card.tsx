@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   ShoppingBag,
   Loader2,
   Users,
   Package,
   ShoppingCart,
+  LayoutDashboard,
+  ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { IntegrationCard, IntegrationCardSkeleton } from "./integration-card";
@@ -291,6 +294,21 @@ export const ShopifyIntegrationCard = () => {
                 Orders
               </CtaButton>
             </div>
+          </div>
+
+          {/* Quick Dashboard Jump */}
+          <div className="pt-0.5">
+            <Link href="/integrations/shopify" className="block w-full">
+              <CtaButton
+                variant="outline"
+                size="sm"
+                className="w-full text-[11.5px] h-8 px-2.5 font-semibold rounded-lg border-border/60 hover:bg-muted/70 gap-1.5 justify-center transition-colors cursor-pointer"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5 text-emerald-600" />
+                Open Shopify Dashboard
+                <ArrowRight className="h-3 w-3 ml-auto opacity-50" />
+              </CtaButton>
+            </Link>
           </div>
         </div>
       </IntegrationCard>

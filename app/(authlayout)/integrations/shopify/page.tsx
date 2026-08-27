@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   ShoppingBag,
+  Store,
   Users,
   Package,
   ShoppingCart,
@@ -212,6 +213,16 @@ export default function ShopifyDashboardPage() {
           ]}
           actions={
             <div className="flex items-center gap-3">
+              <Link href="/integrations/woocommerce">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 rounded-lg text-xs font-semibold gap-1.5 border-border bg-card shadow-2xs hover:bg-muted text-muted-foreground hover:text-[#7F54B3] transition-colors"
+                >
+                  <Store className="h-3.5 w-3.5 text-[#7F54B3]" />
+                  WooCommerce
+                </Button>
+              </Link>
               <DateRangePicker
                 date={dateRange}
                 onDateChange={handleDateChange}

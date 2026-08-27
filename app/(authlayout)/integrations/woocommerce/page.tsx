@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   Store,
+  ShoppingBag,
   Users,
   Package,
   ShoppingCart,
@@ -172,7 +173,8 @@ export default function WooCommerceDashboardPage() {
   const recentOrders = ordersData?.getWooCommerceOrders?.data || [];
   const recentCustomers = customersData?.getWooCommerceCustomers?.data || [];
   const activeCoupons = couponsData?.getWooCommerceCoupons?.data || [];
-  const totalCouponsCount = couponsData?.getWooCommerceCoupons?.total ?? activeCoupons.length;
+  const totalCouponsCount =
+    couponsData?.getWooCommerceCoupons?.total ?? activeCoupons.length;
 
   const totalCustomers = stats?.totalCustomers ?? 0;
   const syncedProducts = stats?.syncedProducts ?? 0;
@@ -213,6 +215,16 @@ export default function WooCommerceDashboardPage() {
           ]}
           actions={
             <div className="flex items-center gap-3">
+              <Link href="/integrations/shopify">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 rounded-lg text-xs font-semibold gap-1.5 border-border bg-card shadow-2xs hover:bg-muted text-muted-foreground hover:text-emerald-600 transition-colors"
+                >
+                  <ShoppingBag className="h-3.5 w-3.5 text-emerald-600" />
+                  Shopify
+                </Button>
+              </Link>
               <DateRangePicker
                 date={dateRange}
                 onDateChange={handleDateChange}
@@ -240,7 +252,9 @@ export default function WooCommerceDashboardPage() {
               >
                 <RotateCcw
                   size={14}
-                  className={cn((statsLoading || isRefreshing) && "animate-spin")}
+                  className={cn(
+                    (statsLoading || isRefreshing) && "animate-spin",
+                  )}
                 />
               </Button>
             </div>
@@ -304,7 +318,8 @@ export default function WooCommerceDashboardPage() {
               </div>
 
               <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
-                Total customer records synchronized from your WordPress WooCommerce store and mapped to community accounts.
+                Total customer records synchronized from your WordPress
+                WooCommerce store and mapped to community accounts.
               </p>
             </div>
 
@@ -316,9 +331,19 @@ export default function WooCommerceDashboardPage() {
                   margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
                 >
                   <defs>
-                    <linearGradient id="wooHeroGrad" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      id="wooHeroGrad"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="5%" stopColor="#7F54B3" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#7F54B3" stopOpacity={0.0} />
+                      <stop
+                        offset="95%"
+                        stopColor="#7F54B3"
+                        stopOpacity={0.0}
+                      />
                     </linearGradient>
                   </defs>
                   <Area
@@ -402,7 +427,11 @@ export default function WooCommerceDashboardPage() {
             />
             <EcosystemKPI
               title="Reward Claim Rate"
-              value={ordersProcessed > 0 ? ((gamifiedRewards / ordersProcessed) * 100).toFixed(1) : "0"}
+              value={
+                ordersProcessed > 0
+                  ? ((gamifiedRewards / ordersProcessed) * 100).toFixed(1)
+                  : "0"
+              }
               suffix="%"
               trend={2.4}
               trendData={[40, 44, 48, 52, 58, 62, 66]}

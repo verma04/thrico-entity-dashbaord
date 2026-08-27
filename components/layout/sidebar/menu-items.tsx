@@ -1200,8 +1200,14 @@ export const integrationsItems = [
   {
     key: "int-shopify",
     label: "Shopify",
-    path: "/integrations/shopify/user",
+    path: "/integrations/shopify",
     icon: <ShoppingBag size={18} />,
+  },
+  {
+    key: "int-woocommerce",
+    label: "WooCommerce",
+    path: "/integrations/woocommerce",
+    icon: <Store size={18} />,
   },
 ];
 

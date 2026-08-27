@@ -6,6 +6,7 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import {
   ShopifyIntegrationCard,
+  WooCommerceIntegrationCard,
   HRIntegrationCard,
   CRMIntegrationCard,
   SlackIntegrationCard,
@@ -28,6 +29,7 @@ import {
   useGetCRMProviders,
   useGetCRMConnections,
   useGetShopifyConnection,
+  useGetWooCommerceConnection,
 } from "@/graphql/actions";
 import {
   Search,
@@ -73,6 +75,9 @@ export default function IntegrationsPage() {
   const { data: shopifyData } = useGetShopifyConnection();
   const isShopifyConnected = !!shopifyData?.shopifyConnection?.id;
 
+  const { data: wooCommerceData } = useGetWooCommerceConnection();
+  const isWooCommerceConnected = !!wooCommerceData?.wooCommerceConnection?.id;
+
   const { data: hrProvidersData } = useGetHRProviders();
   const { data: hrConnectionsData } = useGetHRConnections();
   const hrProviders = hrProvidersData?.getHRProviders || [];
@@ -99,6 +104,16 @@ export default function IntegrationsPage() {
           "Sync products, customers, and checkout orders from your online store directly with Thrico in real-time.",
         isConnected: isShopifyConnected,
         component: <ShopifyIntegrationCard />,
+      },
+      {
+        id: "woocommerce",
+        name: "WooCommerce",
+        category: "ecommerce",
+        categoryLabel: "E-Commerce",
+        description:
+          "Sync products, customers, and checkout orders from your WordPress WooCommerce store directly with Thrico.",
+        isConnected: isWooCommerceConnected,
+        component: <WooCommerceIntegrationCard />,
       },
       ...(crmProviders
         .map((meta: any) => {
@@ -231,6 +246,7 @@ export default function IntegrationsPage() {
     ];
   }, [
     isShopifyConnected,
+    isWooCommerceConnected,
     hrProviders,
     hrConnections,
     crmProviders,
