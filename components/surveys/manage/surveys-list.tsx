@@ -106,6 +106,28 @@ export function SurveyEligibilityBadge({ survey }: { survey: Survey }) {
   );
 }
 
+export function SurveyPreviewTypeBadge({
+  previewType,
+}: {
+  previewType?: string | null;
+}) {
+  const isMultiStep = previewType?.toUpperCase() === "MULTI_STEP";
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-semibold w-fit",
+        isMultiStep
+          ? "border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-400"
+          : "border-slate-500/20 bg-slate-500/10 text-slate-700 dark:text-slate-400",
+      )}
+    >
+      <Layers className="h-3 w-3 shrink-0" />
+      <span>{isMultiStep ? "Multi-Step" : "Scroll Long"}</span>
+    </span>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Column definitions
 // ─────────────────────────────────────────────────────────────────────────────
@@ -154,6 +176,14 @@ export const getSurveyTableColumns = (
     key: "eligibility",
     header: "Eligibility",
     cell: (row) => <SurveyEligibilityBadge survey={row} />,
+  },
+  {
+    key: "previewType",
+    header: "View Mode",
+    cell: (row) => {
+      const type = row.form?.previewType || row.previewType || "SCROLL_LONG";
+      return <SurveyPreviewTypeBadge previewType={type} />;
+    },
   },
   {
     key: "duration",

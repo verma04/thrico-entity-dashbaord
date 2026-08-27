@@ -231,6 +231,11 @@ export const GET_SURVEYS = gql`
         communityId
         communityIds
         eligibilityRuleId
+        form {
+          id
+          previewType
+          appearance
+        }
         eligibilityRule {
           id
           memberEligibility

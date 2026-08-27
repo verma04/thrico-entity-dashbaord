@@ -191,6 +191,7 @@ export function SurveysManage({
     survey: true,
     status: true,
     eligibility: true,
+    previewType: true,
     duration: true,
     created: true,
     actions: true,
