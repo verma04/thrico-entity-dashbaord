@@ -155,12 +155,6 @@ export default function NewFormPage({
               >
                 Preview
               </TabsTrigger>
-              <TabsTrigger
-                value="settings"
-                className="h-7 px-3 text-xs font-semibold rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all cursor-pointer"
-              >
-                Settings
-              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -190,7 +184,7 @@ export default function NewFormPage({
         </div>
       </div>
 
-      {/* Main Canvas / Preview / Settings Pane */}
+      {/* Main Canvas / Preview Pane */}
       <div className="flex-1 overflow-hidden relative">
         {activeTab === "edit" ? (
           <div className="flex h-full w-full">
@@ -203,20 +197,13 @@ export default function NewFormPage({
             {/* Right Sidebar - Properties */}
             <PropertiesPanel />
           </div>
-        ) : activeTab === "preview" ? (
+        ) : (
           <div className="h-full overflow-y-auto p-8 bg-muted/20">
             <Preview
               formTitle={formTitle}
               formDescription={formDescription}
               questions={questions}
               formSettings={formSettings}
-            />
-          </div>
-        ) : (
-          <div className="h-full overflow-y-auto p-8 max-w-4xl mx-auto">
-            <Settings
-              formSettings={formSettings}
-              updateFormSetting={updateFormSetting}
             />
           </div>
         )}

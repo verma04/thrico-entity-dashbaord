@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -30,14 +30,43 @@ import {
   useDeleteSurvey,
   usePublishSurvey,
   useDraftSurvey,
+  useUpdateFormSettings,
 } from "@/graphql/surveys/survey-mutations";
-import { Trash2, AlertTriangle, Globe, Archive } from "lucide-react";
+import {
+  Trash2,
+  AlertTriangle,
+  Globe,
+  Archive,
+  Palette,
+  Sliders,
+} from "lucide-react";
 import { toast } from "sonner";
 import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
+import Settings from "@/components/feedback-form/settings";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { FormSettings } from "@/store/ts-types";
 
 interface SurveySettingsProps {
   surveyId: string;
 }
+
+const DEFAULT_FORM_SETTINGS: FormSettings = {
+  primaryColor: "#667eea",
+  secondaryColor: "#764ba2",
+  backgroundColor: "#f8f9fa",
+  textColor: "#2c3e50",
+  buttonColor: "#667eea",
+  borderRadius: 8,
+  borderWidth: 2,
+  borderStyle: "solid",
+  borderColor: "#e1e8ed",
+  inputBackground: "#ffffff",
+  inputBorderColor: "#d9d9d9",
+  fontSize: 16,
+  fontWeight: "400",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+  hoverEffect: "none",
+};
 
 export function SurveySettings({ surveyId }: SurveySettingsProps) {
   const router = useRouter();
@@ -48,6 +77,104 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
   });
 
   const survey = data?.getSurvey;
+
+  // Local state for Form Appearance & Configuration
+  const [formSettings, setFormSettings] = useState<FormSettings>(
+    DEFAULT_FORM_SETTINGS,
+  );
+  const [previewType, setPreviewType] = useState<"MULTI_STEP" | "SCROLL_LONG">(
+    "SCROLL_LONG",
+  );
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [savedSettings, setSavedSettings] = useState(false);
+
+  // Snapshot tracking for dirty state
+  const initialSnapshotRef = useRef<string>("");
+  const isInitializedRef = useRef(false);
+
+  useEffect(() => {
+    if (survey && !isInitializedRef.current) {
+      const initialAppearance =
+        survey.form?.appearance || survey.appearance || DEFAULT_FORM_SETTINGS;
+      const initialPreviewType =
+        survey.form?.previewType || survey.previewType || "SCROLL_LONG";
+
+      setFormSettings(initialAppearance);
+      setPreviewType(initialPreviewType);
+
+      initialSnapshotRef.current = JSON.stringify({
+        formSettings: initialAppearance,
+        previewType: initialPreviewType,
+      });
+      isInitializedRef.current = true;
+    }
+  }, [survey]);
+
+  const currentSnapshot = JSON.stringify({
+    formSettings,
+    previewType,
+  });
+
+  const hasChanged = Boolean(
+    isInitializedRef.current &&
+      initialSnapshotRef.current &&
+      currentSnapshot !== initialSnapshotRef.current,
+  );
+
+  const [updateFormSettingsMutation] = useUpdateFormSettings({
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to save form settings");
+    },
+  });
+
+  const updateFormSetting = (
+    key: keyof FormSettings | "previewType",
+    value: any,
+  ) => {
+    if (key === "previewType") {
+      setPreviewType(value);
+    } else {
+      setFormSettings((prev) => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    const targetFormId = survey?.formId || survey?.id || surveyId;
+    setIsSavingSettings(true);
+    try {
+      await updateFormSettingsMutation({
+        variables: {
+          updateFormSettingsId: targetFormId,
+          input: {
+            previewType,
+            appearance: formSettings,
+          },
+        },
+      });
+      initialSnapshotRef.current = currentSnapshot;
+      setSavedSettings(true);
+      refetch();
+      toast.success("Form appearance & configuration saved!");
+      setTimeout(() => setSavedSettings(false), 3000);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update form settings");
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const handleResetSettings = () => {
+    if (initialSnapshotRef.current) {
+      try {
+        const initialData = JSON.parse(initialSnapshotRef.current);
+        setFormSettings(initialData.formSettings);
+        setPreviewType(initialData.previewType);
+        toast.info("Settings reverted");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   const [deleteSurvey, { loading: deleting }] = useDeleteSurvey({
     refetchQueries: [{ query: GET_SURVEYS }],
@@ -87,7 +214,7 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
   const isPublished = survey?.status === "PUBLISHED";
 
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="space-y-8 max-w-4xl pb-16">
       {/* Publication Status Card */}
       <Card className="border border-border shadow-xs">
         <CardHeader>
@@ -96,7 +223,7 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
           </CardTitle>
           <CardDescription>
             Control the visibility of this survey. Published surveys can accept
-            responses from eligible members.
+            responses from eligible participants.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-between pt-2">
@@ -112,7 +239,7 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
               </p>
               <p className="text-xs text-muted-foreground">
                 {isPublished
-                  ? "Survey is live and accessible to participants."
+                  ? "Survey is live and accessible to eligible participants."
                   : "Survey is hidden from public participant views."}
               </p>
             </div>
@@ -124,7 +251,7 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => draftSurvey({ variables: { id: surveyId } })}
+                onClick={() => draftSurvey({ variables: { draftSurveyId: surveyId } })}
                 disabled={drafting}
               >
                 <Archive className="h-4 w-4" />
@@ -134,7 +261,7 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
               <Button
                 size="sm"
                 className="gap-2"
-                onClick={() => publishSurvey({ variables: { id: surveyId } })}
+                onClick={() => publishSurvey({ variables: { publishSurveyId: surveyId } })}
                 disabled={publishing}
               >
                 <Globe className="h-4 w-4" />
@@ -144,6 +271,13 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Form Configuration & Appearance Settings */}
+      <Settings
+        formSettings={formSettings}
+        updateFormSetting={updateFormSetting}
+        previewType={previewType}
+      />
 
       {/* Danger Zone Card */}
       <Card className="border border-destructive/30 shadow-xs">
@@ -196,6 +330,18 @@ export function SurveySettings({ surveyId }: SurveySettingsProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Non-blocking Floating Save Panel for Form Settings */}
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={savedSettings}
+        isSaving={isSavingSettings}
+        title="Unsaved Form Settings"
+        saveButtonText="Save Settings"
+        discardButtonText="Discard"
+        onSave={handleSaveSettings}
+        onReset={handleResetSettings}
+      />
     </div>
   );
 }
