@@ -11,9 +11,14 @@ import {
   Users,
   UserCheck,
   Globe,
+  ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Survey } from "@/graphql/surveys/survey-queries";
+import { getThricoDomain, getCustomDomain } from "@/graphql/actions/domain";
+import { toast } from "sonner";
 import { SurveyActions } from "./survey-actions";
 import {
   AdminTable,
@@ -28,6 +33,35 @@ import { useModuleStore } from "@/store/useModuleStore";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function SurveyEligibilityBadge({ survey }: { survey: Survey }) {
+  const { data: thricoData } = getThricoDomain();
+  const { data: customData } = getCustomDomain();
+  const [copied, setCopied] = React.useState(false);
+
+  const NEXT_PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL
+    ? process.env.NEXT_PUBLIC_SITE_URL
+    : "thrico.community";
+
+  const domainHost =
+    customData?.getCustomDomain?.domain ||
+    (thricoData?.getThricoDomain?.domain
+      ? `${thricoData.getThricoDomain.domain}.${NEXT_PUBLIC_SITE_URL}`
+      : "thrico.network");
+
+  const shortCode = survey.shortCode || survey.slug;
+  const fullUrl = shortCode ? `https://${domainHost}/s/${shortCode}` : null;
+  const displayUrl = shortCode ? `${domainHost}/s/${shortCode}` : null;
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (fullUrl) {
+      navigator.clipboard.writeText(fullUrl);
+      setCopied(true);
+      toast.success("Short link copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   const norm = (
     survey.eligibility?.memberEligibility ||
     survey.eligibilityRule?.memberEligibility ||
@@ -80,7 +114,7 @@ export function SurveyEligibilityBadge({ survey }: { survey: Survey }) {
   const Icon = c.icon;
 
   return (
-    <div className="flex flex-col gap-0.5 min-w-[120px]">
+    <div className="flex flex-col gap-0.5 min-w-[130px]">
       <span
         className={cn(
           "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-semibold w-fit",
@@ -90,17 +124,32 @@ export function SurveyEligibilityBadge({ survey }: { survey: Survey }) {
         <Icon className="h-3 w-3 shrink-0" />
         <span>{c.label}</span>
       </span>
-      {norm === "OUTSIDE_PLATFORM" && (survey.shortCode || survey.slug) && (
-        <span
-          className="text-[10px] font-mono text-muted-foreground truncate max-w-[150px] pl-0.5"
-          title={
-            survey.shareUrl ||
-            survey.shortUrl ||
-            `/s/${survey.shortCode || survey.slug}`
-          }
-        >
-          /{survey.shortCode || survey.slug}
-        </span>
+      {norm === "OUTSIDE_PLATFORM" && shortCode && (
+        <div className="flex items-center gap-1 mt-0.5 group">
+          <a
+            href={fullUrl || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-[10px] font-mono text-muted-foreground hover:text-primary transition-colors truncate max-w-[170px] pl-0.5 flex items-center gap-1"
+            title={fullUrl || undefined}
+          >
+            <span className="truncate">{displayUrl}</span>
+            <ExternalLink className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+          </a>
+          <button
+            type="button"
+            onClick={handleCopy}
+            title="Copy survey link"
+            className="h-4 w-4 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors shrink-0 cursor-pointer"
+          >
+            {copied ? (
+              <Check className="h-2.5 w-2.5 text-emerald-500" />
+            ) : (
+              <Copy className="h-2.5 w-2.5" />
+            )}
+          </button>
+        </div>
       )}
     </div>
   );
