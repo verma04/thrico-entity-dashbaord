@@ -43,6 +43,11 @@ export interface Survey {
   title: string;
   description?: string | null;
   status: SurveyStatus;
+  slug?: string | null;
+  shortCode?: string | null;
+  shortUrl?: string | null;
+  shareUrl?: string | null;
+  shareLink?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   form?: any;

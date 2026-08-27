@@ -83,6 +83,11 @@ export const GET_SURVEY = gql`
       title
       description
       status
+      slug
+      shortCode
+      shortUrl
+      shareUrl
+      shareLink
       startDate
       endDate
       createdAt
@@ -212,6 +217,11 @@ export const GET_SURVEYS = gql`
         title
         description
         status
+        slug
+        shortCode
+        shortUrl
+        shareUrl
+        shareLink
         startDate
         endDate
         createdAt
