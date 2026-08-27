@@ -48,8 +48,12 @@ export function SurveyEligibilityBadge({ survey }: { survey: Survey }) {
       : "thrico.network");
 
   const shortCode = survey.shortCode || survey.slug;
-  const fullUrl = shortCode ? `https://${domainHost}/s/${shortCode}` : null;
-  const displayUrl = shortCode ? `${domainHost}/s/${shortCode}` : null;
+  const fullUrl = shortCode
+    ? `https://${domainHost}/open-survey/${shortCode}`
+    : null;
+  const displayUrl = shortCode
+    ? `${domainHost}/open-survey/${shortCode}`
+    : null;
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
