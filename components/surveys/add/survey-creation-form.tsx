@@ -413,7 +413,8 @@ export function SurveyCreationForm({
                 ? `You have unsaved changes to this ${singularName.toLowerCase()} campaign configuration.`
                 : "You have unsaved changes to this survey campaign configuration."
             }
-            buttonText={isEdit ? "Save Changes" : `Create ${singularName}`}
+            saveButtonText={isEdit ? "Save Changes" : `Create ${singularName}`}
+            discardButtonText="Discard"
           />
         </form>
       </PolarisFormLayout>
