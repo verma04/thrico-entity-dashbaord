@@ -45,11 +45,6 @@ export function SurveysList({
     description: "",
     startDate: null as moment.Moment | null,
     endDate: null as moment.Moment | null,
-    memberEligibility: "ALL",
-    membershipTierId: [] as string[],
-    eligibleTierIds: [] as string[],
-    eligibleUserIds: [] as string[],
-    eligibleSegmentIds: [] as string[],
   });
 
   const [sharingSurvey, setSharingSurvey] = useState<Survey | null>(null);
@@ -70,9 +65,6 @@ export function SurveysList({
 
   useEffect(() => {
     if (editingDetailsSurvey) {
-      const elig =
-        editingDetailsSurvey.eligibility ||
-        editingDetailsSurvey.eligibilityRule;
       setDetails({
         title: editingDetailsSurvey.title || "",
         description: editingDetailsSurvey.description || "",
@@ -82,13 +74,6 @@ export function SurveysList({
         endDate: editingDetailsSurvey.endDate
           ? moment(editingDetailsSurvey.endDate)
           : null,
-        memberEligibility: elig?.memberEligibility || "ALL",
-        membershipTierId:
-          elig?.membershipTierId || elig?.eligibleTierIds || [],
-        eligibleTierIds:
-          elig?.eligibleTierIds || elig?.membershipTierId || [],
-        eligibleUserIds: elig?.eligibleUserIds || [],
-        eligibleSegmentIds: elig?.eligibleSegmentIds || [],
       });
     }
   }, [editingDetailsSurvey]);
@@ -177,15 +162,6 @@ export function SurveysList({
           description: details.description,
           startDate: details.startDate?.toISOString(),
           endDate: details.endDate?.toISOString(),
-          eligibility: {
-            memberEligibility: details.memberEligibility as any,
-            membershipTierId:
-              details.membershipTierId || details.eligibleTierIds || [],
-            eligibleTierIds:
-              details.eligibleTierIds || details.membershipTierId || [],
-            eligibleUserIds: details.eligibleUserIds || [],
-            eligibleSegmentIds: details.eligibleSegmentIds || [],
-          },
         },
       },
     });

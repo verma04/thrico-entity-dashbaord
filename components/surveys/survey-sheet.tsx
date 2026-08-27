@@ -19,7 +19,6 @@ import { Pencil, BarChart3, MessageSquare } from "lucide-react";
 import moment from "moment";
 import { Survey } from "@/graphql/surveys/survey-queries";
 import { useRouter } from "next/navigation";
-import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
 
 interface SurveySheetProps {
   survey: Survey | null;
@@ -30,11 +29,6 @@ interface SurveySheetProps {
     description: string;
     startDate: moment.Moment | null;
     endDate: moment.Moment | null;
-    memberEligibility?: string;
-    membershipTierId?: string[];
-    eligibleTierIds?: string[];
-    eligibleUserIds?: string[];
-    eligibleSegmentIds?: string[];
   };
   onDetailsChange: (details: any) => void;
   onUpdate: () => void;
@@ -158,53 +152,6 @@ export function SurveySheet({
                 )}
               </CardContent>
             </Card>
-
-            {/* Audience & Member Eligibility */}
-            <div className="mt-4">
-              <PolarisEligibilityCard
-                key={`sheet-eligibility-${details.memberEligibility || "ALL"}`}
-                step={2}
-                title="Audience & Eligibility"
-                description="Control which members or tiers can access and submit this survey."
-                badge="Access"
-                eligibility={details.memberEligibility || "ALL"}
-                onEligibilityChange={(val) =>
-                  onDetailsChange((prev: any) => ({
-                    ...prev,
-                    memberEligibility: val,
-                    membershipTierId:
-                      val === "ALL" || val === "VERIFIED"
-                        ? []
-                        : prev.membershipTierId,
-                    eligibleTierIds:
-                      val === "ALL" || val === "VERIFIED"
-                        ? []
-                        : prev.eligibleTierIds,
-                    eligibleUserIds:
-                      val === "ALL" || val === "VERIFIED"
-                        ? []
-                        : prev.eligibleUserIds,
-                  }))
-                }
-                tierIds={
-                  details.membershipTierId || details.eligibleTierIds || []
-                }
-                onTierIdsChange={(tiers) =>
-                  onDetailsChange((prev: any) => ({
-                    ...prev,
-                    membershipTierId: tiers,
-                    eligibleTierIds: tiers,
-                  }))
-                }
-                userIds={details.eligibleUserIds || []}
-                onUserIdsChange={(users) =>
-                  onDetailsChange((prev: any) => ({
-                    ...prev,
-                    eligibleUserIds: users,
-                  }))
-                }
-              />
-            </div>
 
             <div className="mt-6 flex flex-col gap-3">
               <Button

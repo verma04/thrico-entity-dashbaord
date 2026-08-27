@@ -3,7 +3,6 @@ import {
   DateRangeInput,
   TimeRange,
 } from "../actions/dashbaord/dashboard-quries";
-import { SurveyEligibilityRule } from "./survey-mutations";
 export { TimeRange };
 export type { DateRangeInput };
 
@@ -45,9 +44,7 @@ export interface Survey {
   questions?: Question[];
   fields?: Question[];
   sharedAsFeed?: boolean;
-  eligibilityRuleId?: string;
-  eligibilityRule?: SurveyEligibilityRule;
-  eligibility?: SurveyEligibilityRule;
+  form?: any;
   responses?: any[];
 }
 
@@ -62,7 +59,6 @@ export interface GetSurveysInput {
   offset?: number | null;
   search?: string | null;
   status?: string | null;
-  memberEligibility?: string | null;
 }
 
 export interface GetSurveysData {
@@ -93,15 +89,6 @@ export const GET_SURVEY = gql`
       createdAt
       updatedAt
       sharedAsFeed
-      eligibilityRuleId
-      eligibility {
-        id
-        memberEligibility
-        membershipTierId
-        eligibleTierIds
-        eligibleUserIds
-        eligibleSegmentIds
-      }
       form {
         appearance
         previewType
@@ -265,15 +252,6 @@ export const GET_SURVEYS = gql`
         createdAt
         updatedAt
         sharedAsFeed
-        eligibilityRuleId
-        eligibility {
-          id
-          memberEligibility
-          membershipTierId
-          eligibleTierIds
-          eligibleUserIds
-          eligibleSegmentIds
-        }
       }
     }
   }
