@@ -98,11 +98,15 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
       basePath={`/surveys/${surveyId}`}
       currentTab={currentTab}
       tabs={tabItems}
-      contentContainerClassName={
-        currentTab === "questions" ? "max-w-none w-full p-0 py-0 px-0" : undefined
+      containerClassName={
+        currentTab === "responses" || currentTab === "results"
+          ? "max-w-none w-full px-6 sm:px-8 py-6"
+          : currentTab === "questions"
+            ? "max-w-none w-full px-4 py-2"
+            : "max-w-7xl mx-auto px-6 py-8"
       }
       breadcrumbs={
-        currentTab === "questions"
+        currentTab === "questions" || currentTab === "responses" || currentTab === "results"
           ? undefined
           : [
               { label: moduleName, href: "/surveys/all" },
