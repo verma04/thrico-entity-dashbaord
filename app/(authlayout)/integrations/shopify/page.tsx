@@ -195,10 +195,11 @@ export default function ShopifyDashboardPage() {
   ];
 
   return (
-    <EcosystemWrapper>
-      <EcosystemContainer className="p-6 lg:p-8 space-y-8">
+    <EcosystemWrapper className="py-6 lg:py-8">
+      <EcosystemContainer className="p-6 lg:p-8 space-y-8 lg:space-y-10 pb-16 lg:pb-24">
         {/* Header */}
         <EcosystemHeader
+          className="!m-0 !px-0"
           title="Shopify Overview"
           badgeText="E-Commerce Integration"
           description={
