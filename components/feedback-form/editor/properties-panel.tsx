@@ -48,16 +48,16 @@ export function PropertiesPanel() {
 
   if (!question) {
     return (
-      <div className="w-[300px] border-l border-[#e1e3e5] dark:border-zinc-800 h-full p-6 bg-white dark:bg-zinc-900 flex items-center justify-center text-[#8c9196] text-[12.5px]">
+      <div className="w-[260px] border-l border-border h-full p-4 bg-card/60 flex items-center justify-center text-muted-foreground text-xs shrink-0">
         Select a question to edit properties
       </div>
     );
   }
 
   return (
-    <div className="w-[300px] border-l border-[#e1e3e5] dark:border-zinc-800 h-full flex flex-col bg-white dark:bg-zinc-900 overflow-y-auto">
-      <div className="p-3.5 border-b border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-between">
-        <h3 className="font-semibold text-[11.5px] uppercase tracking-wider text-[#616161]">
+    <div className="w-[260px] border-l border-border h-full flex flex-col bg-card/60 backdrop-blur-xs overflow-y-auto shrink-0">
+      <div className="p-2.5 px-3 border-b border-border flex items-center justify-between">
+        <h3 className="font-semibold text-[10.5px] uppercase tracking-wider text-muted-foreground">
           Question Settings
         </h3>
         <AlertDialog
@@ -68,21 +68,21 @@ export function PropertiesPanel() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-[#616161] hover:text-[#d72c0d] hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-[4px] cursor-pointer"
+              className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent className="rounded-[8px]">
+          <AlertDialogContent className="rounded-lg max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-[14px]">Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription className="text-[12px]">
+              <AlertDialogTitle className="text-sm">Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription className="text-xs">
                 This action cannot be undone. This will permanently delete the
                 question &quot;{question.question || "Untitled Question"}&quot; from your form.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeletingQuestion} className="h-[34px] text-[12.5px] rounded-[6px]">
+              <AlertDialogCancel disabled={isDeletingQuestion} className="h-7 text-xs rounded-md">
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
@@ -91,11 +91,11 @@ export function PropertiesPanel() {
                   await deleteQuestion(question.id);
                   setIsDeleteDialogOpen(false);
                 }}
-                className="h-[34px] text-[12.5px] rounded-[6px] bg-[#d72c0d] hover:bg-[#b02209] text-white gap-2"
+                className="h-7 text-xs rounded-md bg-destructive hover:bg-destructive/90 text-destructive-foreground gap-1.5"
                 disabled={isDeletingQuestion}
               >
                 {isDeletingQuestion && (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-3 w-3 animate-spin" />
                 )}
                 {isDeletingQuestion ? "Deleting..." : "Delete"}
               </AlertDialogAction>
@@ -103,7 +103,7 @@ export function PropertiesPanel() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      <div className="p-4 space-y-4">
+      <div className="p-3 space-y-3">
         {/* Question Title */}
         <PolarisTextarea
           label="Question Prompt"
@@ -118,22 +118,22 @@ export function PropertiesPanel() {
 
         {/* Question Type */}
         <div className="space-y-1">
-          <PolarisLabel>Type</PolarisLabel>
+          <PolarisLabel className="text-[11px]">Type</PolarisLabel>
           <Select
             value={question.type}
             onValueChange={(val) =>
               updateQuestion(question.id, "type", val as any)
             }
           >
-            <SelectTrigger className="h-[34px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[12.5px] text-[#303030] dark:text-zinc-100 rounded-[6px]">
+            <SelectTrigger className="h-7 bg-background border-border text-xs rounded-md">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {options.map((opt) => (
-                <SelectItem key={opt.key} value={opt.key} className="text-[12.5px]">
-                  <div className="flex items-center gap-2">
+                <SelectItem key={opt.key} value={opt.key} className="text-xs">
+                  <div className="flex items-center gap-1.5">
                     {opt.icon}
-                    {opt.label}
+                    <span>{opt.label}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -142,10 +142,13 @@ export function PropertiesPanel() {
         </div>
 
         {/* Required Toggle */}
-        <div className="flex items-center justify-between p-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-800/40">
-          <PolarisLabel htmlFor="required">Required Answer</PolarisLabel>
+        <div className="flex items-center justify-between p-2 rounded-md border border-border bg-muted/30">
+          <PolarisLabel htmlFor="required" className="text-[11.5px] cursor-pointer">
+            Required Answer
+          </PolarisLabel>
           <Switch
             id="required"
+            className="scale-85"
             checked={question.required}
             onCheckedChange={(checked) =>
               updateQuestion(question.id, "required", checked)
@@ -168,11 +171,11 @@ export function PropertiesPanel() {
         {(question.type === "MULTIPLE_CHOICE" ||
           question.type === "DROPDOWN" ||
           question.type === "ISOPTION") && (
-          <div className="space-y-2 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
-            <PolarisLabel>Choice Options</PolarisLabel>
-            <div className="space-y-1.5">
+          <div className="space-y-2 pt-2 border-t border-border">
+            <PolarisLabel className="text-[11px]">Choice Options</PolarisLabel>
+            <div className="space-y-1">
               {question.options?.map((opt, idx) => (
-                <div key={idx} className="flex gap-1.5">
+                <div key={idx} className="flex gap-1">
                   <PolarisInput
                     value={opt}
                     onChange={(e) =>
@@ -184,10 +187,10 @@ export function PropertiesPanel() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full h-[32px] border-dashed border-[#aeb4b9] text-[11.5px] rounded-[6px] cursor-pointer"
+                className="w-full h-7 border-dashed border-border text-[11px] rounded-md cursor-pointer hover:bg-muted"
                 onClick={() => addOption(String(question.id))}
               >
-                <Plus className="w-3.5 h-3.5 mr-1" /> Add Option
+                <Plus className="w-3 h-3 mr-1" /> Add Option
               </Button>
             </div>
           </div>
@@ -195,8 +198,8 @@ export function PropertiesPanel() {
 
         {/* Opinion Scale Settings */}
         {question.type === "OPINION_SCALE" && (
-          <div className="space-y-3 pt-3 border-t border-[#e1e3e5] dark:border-zinc-800">
-            <PolarisLabel>Scale Settings</PolarisLabel>
+          <div className="space-y-2.5 pt-2 border-t border-border">
+            <PolarisLabel className="text-[11px]">Scale Settings</PolarisLabel>
             <PolarisInput
               type="number"
               min={2}

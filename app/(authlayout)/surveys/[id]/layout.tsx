@@ -233,7 +233,7 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
         currentTab === "responses" || currentTab === "results"
           ? "max-w-none w-full px-6 sm:px-8 py-6"
           : currentTab === "questions"
-            ? "max-w-none w-full px-4 py-2"
+            ? "max-w-none w-full p-0"
             : "max-w-7xl mx-auto px-6 sm:px-8 py-6"
       }
       breadcrumbs={

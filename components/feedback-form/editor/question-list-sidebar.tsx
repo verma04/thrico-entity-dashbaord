@@ -30,21 +30,23 @@ export function QuestionListSidebar() {
   };
 
   return (
-    <div className="w-[250px] border-r h-full flex flex-col bg-white">
-      <div className="p-4 border-b">
+    <div className="w-[215px] border-r border-border h-full flex flex-col bg-card/60 backdrop-blur-xs shrink-0">
+      <div className="p-2.5 border-b border-border">
         <Button
           variant="outline"
-          className="w-full justify-between bg-black text-white hover:bg-gray-800 hover:text-white mb-2"
+          className="w-full justify-between h-7 bg-foreground text-background hover:bg-foreground/90 hover:text-background text-xs px-2.5 rounded-md cursor-pointer shadow-2xs"
           disabled={isAddingQuestion}
           onClick={() => setOpen(true)}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {isAddingQuestion ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Plus size={16} />
+              <Plus size={13} />
             )}
-            {isAddingQuestion ? "Adding..." : "Add Question"}
+            <span className="text-[11.5px] font-medium">
+              {isAddingQuestion ? "Adding..." : "Add Question"}
+            </span>
           </div>
         </Button>
 
@@ -55,14 +57,14 @@ export function QuestionListSidebar() {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="sidebar-list">
             {(provided) => (
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="space-y-2"
+                className="space-y-1"
               >
                 {questions.map((q, index) => (
                   <Draggable
@@ -77,19 +79,19 @@ export function QuestionListSidebar() {
                         {...provided.dragHandleProps}
                         onClick={() => selectQuestion(q.id)}
                         className={cn(
-                          "p-3 rounded-md border text-sm cursor-pointer flex items-center gap-2 hover:bg-gray-50 transition-colors",
+                          "p-2 rounded-md border text-xs cursor-pointer flex items-center gap-2 transition-all",
                           selectedQuestionId === q.id
-                            ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "bg-white border-border",
+                            ? "border-primary/50 bg-primary/8 ring-1 ring-primary/30 text-foreground font-medium"
+                            : "bg-card hover:bg-accent/60 border-border/80 text-muted-foreground hover:text-foreground",
                         )}
                       >
-                        <div className="flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-xs font-medium text-gray-500">
+                        <div className="flex items-center justify-center w-5 h-5 rounded bg-muted text-[10px] font-semibold text-muted-foreground shrink-0">
                           {index + 1}
                         </div>
-                        <div className="truncate flex-1 font-medium text-gray-700">
+                        <div className="truncate flex-1 text-[11.5px] leading-tight">
                           {q.question || "Untitled"}
                         </div>
-                        <div className="text-gray-400">
+                        <div className="text-muted-foreground/70 shrink-0 scale-85">
                           {options.find((o) => o.key === q.type)?.icon}
                         </div>
                       </div>

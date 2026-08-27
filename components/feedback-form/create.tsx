@@ -104,31 +104,31 @@ export default function NewFormPage({
   };
 
   return (
-    <div className="h-[calc(100vh-130px)] bg-background flex flex-col overflow-hidden border-t border-border/60">
+    <div className="h-[calc(100vh-125px)] bg-background flex flex-col overflow-hidden border-t border-border/60">
       {/* Studio Sub-Header */}
-      <div className="bg-card/95 backdrop-blur-md border-b border-border px-4 h-12 flex items-center justify-between shrink-0 z-10 sticky top-0 shadow-2xs">
+      <div className="bg-card/95 backdrop-blur-md border-b border-border px-3.5 h-10 flex items-center justify-between shrink-0 z-10 sticky top-0 shadow-2xs">
         {/* Left: Optional Back + Question Stats */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {showBack && onClose && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-md shrink-0 hover:bg-muted cursor-pointer"
+              className="h-7 w-7 rounded-md shrink-0 hover:bg-muted cursor-pointer"
               onClick={onClose}
             >
-              <ChevronLeft className="h-4 w-4 text-muted-foreground" />
+              <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
             </Button>
           )}
 
           <div className="flex items-center gap-2">
             <Badge
               variant="outline"
-              className="h-6 px-2 text-[11px] font-medium gap-1.5 border-border bg-muted/40 text-foreground"
+              className="h-5 px-1.5 text-[10px] font-medium gap-1 border-border bg-muted/40 text-foreground"
             >
-              <Layers className="h-3 w-3 text-primary" />
+              <Layers className="h-2.5 w-2.5 text-primary" />
               <span>{questions.length} Questions</span>
             </Badge>
-            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-muted-foreground pl-1">
+            <div className="hidden sm:flex items-center gap-1.5 text-[10.5px] text-muted-foreground pl-0.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Autosave active</span>
             </div>
@@ -142,16 +142,16 @@ export default function NewFormPage({
             onValueChange={setActiveTab}
             className="w-auto"
           >
-            <TabsList className="h-8 bg-muted/60 p-0.5 rounded-lg border border-border/60">
+            <TabsList className="h-7 bg-muted/60 p-0.5 rounded-md border border-border/60">
               <TabsTrigger
                 value="edit"
-                className="h-7 px-3 text-xs font-semibold rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all cursor-pointer"
+                className="h-6 px-2.5 text-[11px] font-semibold rounded-xs data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs transition-all cursor-pointer"
               >
                 Edit
               </TabsTrigger>
               <TabsTrigger
                 value="preview"
-                className="h-7 px-3 text-xs font-semibold rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all cursor-pointer"
+                className="h-6 px-2.5 text-[11px] font-semibold rounded-xs data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-2xs transition-all cursor-pointer"
               >
                 Preview
               </TabsTrigger>
@@ -160,22 +160,22 @@ export default function NewFormPage({
         </div>
 
         {/* Right: Quick Preview Toggle */}
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1.5">
           {activeTab === "edit" ? (
             <Button
               variant="outline"
               size="sm"
-              className="h-8 px-2.5 text-xs font-medium gap-1.5 border-border shadow-2xs hover:bg-accent rounded-lg cursor-pointer"
+              className="h-7 px-2 text-[11px] font-medium gap-1.5 border-border shadow-2xs hover:bg-accent rounded-md cursor-pointer"
               onClick={() => setActiveTab("preview")}
             >
-              <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+              <Eye className="h-3 w-3 text-muted-foreground" />
               <span>Live Preview</span>
             </Button>
           ) : (
             <Button
               variant="outline"
               size="sm"
-              className="h-8 px-2.5 text-xs font-medium gap-1.5 border-border shadow-2xs hover:bg-accent rounded-lg cursor-pointer"
+              className="h-7 px-2 text-[11px] font-medium gap-1.5 border-border shadow-2xs hover:bg-accent rounded-md cursor-pointer"
               onClick={() => setActiveTab("edit")}
             >
               <span>Back to Editor</span>
