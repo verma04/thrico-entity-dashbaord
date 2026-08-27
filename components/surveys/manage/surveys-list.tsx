@@ -3,7 +3,16 @@
 import React from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ClipboardList } from "lucide-react";
+import {
+  ClipboardList,
+  Users2,
+  ShieldCheck,
+  Layers,
+  Users,
+  UserCheck,
+  Globe,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Survey } from "@/graphql/surveys/survey-queries";
 import { SurveyActions } from "./survey-actions";
 import {
@@ -13,6 +22,89 @@ import {
   AdminTableDate,
 } from "@/components/shared/admin-table/admin-table";
 import { useModuleStore } from "@/store/useModuleStore";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Eligibility Badge Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function SurveyEligibilityBadge({ survey }: { survey: Survey }) {
+  const norm = (
+    survey.eligibility?.memberEligibility ||
+    survey.eligibilityRule?.memberEligibility ||
+    (survey as any).memberEligibility ||
+    "ALL"
+  ).toUpperCase();
+
+  const config: Record<
+    string,
+    { label: string; icon: React.ElementType; className: string }
+  > = {
+    ALL: {
+      label: "All Members",
+      icon: Users2,
+      className: "border-border bg-muted/50 text-foreground/80",
+    },
+    VERIFIED: {
+      label: "Verified Only",
+      icon: ShieldCheck,
+      className:
+        "border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400",
+    },
+    TIERS: {
+      label: "Tier Restricted",
+      icon: Layers,
+      className:
+        "border-purple-500/20 bg-purple-500/10 text-purple-700 dark:text-purple-400",
+    },
+    COMMUNITY: {
+      label: "Community",
+      icon: Users,
+      className:
+        "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    },
+    SPECIFIC_CUSTOMERS: {
+      label: "Specific Users",
+      icon: UserCheck,
+      className:
+        "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    },
+    OUTSIDE_PLATFORM: {
+      label: "Outside Platform",
+      icon: Globe,
+      className:
+        "border-cyan-500/20 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400",
+    },
+  };
+
+  const c = config[norm] || config.ALL;
+  const Icon = c.icon;
+
+  return (
+    <div className="flex flex-col gap-0.5 min-w-[120px]">
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-semibold w-fit",
+          c.className,
+        )}
+      >
+        <Icon className="h-3 w-3 shrink-0" />
+        <span>{c.label}</span>
+      </span>
+      {norm === "OUTSIDE_PLATFORM" && (survey.shortCode || survey.slug) && (
+        <span
+          className="text-[10px] font-mono text-muted-foreground truncate max-w-[150px] pl-0.5"
+          title={
+            survey.shareUrl ||
+            survey.shortUrl ||
+            `/s/${survey.shortCode || survey.slug}`
+          }
+        >
+          /{survey.shortCode || survey.slug}
+        </span>
+      )}
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Column definitions
@@ -57,6 +149,11 @@ export const getSurveyTableColumns = (
     key: "status",
     header: "Status",
     cell: (row) => <AdminStatusBadge status={row.status} />,
+  },
+  {
+    key: "eligibility",
+    header: "Eligibility",
+    cell: (row) => <SurveyEligibilityBadge survey={row} />,
   },
   {
     key: "duration",

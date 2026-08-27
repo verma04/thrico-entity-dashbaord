@@ -89,7 +89,7 @@ export function SurveysManage({
           value === "ALL" ||
           value === "all" ||
           value === "0" ||
-          value === "grid" ||
+          value === "list" ||
           value === "newest"
         ) {
           params.delete(key);
@@ -118,7 +118,7 @@ export function SurveysManage({
     "ALL";
 
   const sortBy = searchParams.get("sort") || "newest";
-  const view = (searchParams.get("view") as "grid" | "list") || "grid";
+  const view = (searchParams.get("view") as "grid" | "list") || "list";
 
   // Search input state with debounce
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
@@ -190,6 +190,7 @@ export function SurveysManage({
     serial: true,
     survey: true,
     status: true,
+    eligibility: true,
     duration: true,
     created: true,
     actions: true,
