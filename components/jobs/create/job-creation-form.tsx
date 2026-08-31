@@ -43,6 +43,8 @@ import {
   PolarisTextarea,
   PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
+import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
+import { toast } from "sonner";
 
 interface ListingCreationFormProps {
   initialValues?: Record<string, any>;
@@ -54,7 +56,7 @@ interface ListingCreationFormProps {
 const jobSchema = Yup.object().shape({
   title: Yup.string().required("Job title is required"),
   company: Yup.mixed().required("Company name is required"),
-  location: Yup.object().nullable().required("Location is required"),
+  location: Yup.mixed().required("Location is required"),
   salary: Yup.string(),
   jobType: Yup.string().required("Job type is required"),
   workplaceType: Yup.string().required("Work arrangement is required"),
@@ -62,14 +64,33 @@ const jobSchema = Yup.object().shape({
   description: Yup.string()
     .required("Job description is required")
     .min(30, "Description must be at least 30 characters"),
-  requirements: Yup.array().of(
-    Yup.string().required("Requirement cannot be empty"),
-  ),
-  responsibilities: Yup.array().of(
-    Yup.string().required("Responsibility cannot be empty"),
-  ),
-  benefits: Yup.array().of(Yup.string().required("Benefit cannot be empty")),
-  skills: Yup.array().of(Yup.string().required("Skill cannot be empty")),
+  requirements: Yup.array().of(Yup.string()),
+  responsibilities: Yup.array().of(Yup.string()),
+  benefits: Yup.array().of(Yup.string()),
+  skills: Yup.array().of(Yup.string()),
+  memberEligibility: Yup.string().default("ALL"),
+  membershipTierId: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema.min(1, "Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleTierIds: Yup.array().when("memberEligibility", {
+    is: "TIERS",
+    then: (schema) =>
+      schema.min(1, "Please select at least one membership tier"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleUserIds: Yup.array().when("memberEligibility", {
+    is: "SPECIFIC_CUSTOMERS",
+    then: (schema) => schema.min(1, "Please select at least one customer"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  eligibleCommunityIds: Yup.array().when("memberEligibility", {
+    is: "COMMUNITY",
+    then: (schema) => schema.min(1, "Please select at least one community"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 export function JobCreationForm({
@@ -82,6 +103,7 @@ export function JobCreationForm({
   const singularName = useModuleStore((state) => state.jobSingularName);
 
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
       title: initialValues?.title || "",
       company: initialValues?.company || "",
@@ -95,12 +117,74 @@ export function JobCreationForm({
       responsibilities: initialValues?.responsibilities || [""],
       benefits: initialValues?.benefits || [""],
       skills: initialValues?.skills || [""],
+      communityId: initialValues?.communityId || "",
+      communityIds: initialValues?.communityIds || [],
+      memberEligibility: initialValues?.memberEligibility || "ALL",
+      membershipTierId:
+        initialValues?.membershipTierId || initialValues?.eligibleTierIds || [],
+      eligibleTierIds:
+        initialValues?.eligibleTierIds || initialValues?.membershipTierId || [],
+      eligibleUserIds: initialValues?.eligibleUserIds || [],
+      eligibleSegmentIds: initialValues?.eligibleSegmentIds || [],
+      eligibleCommunityIds: initialValues?.eligibleCommunityIds || [],
     },
     validationSchema: jobSchema,
     onSubmit: (values) => {
-      onFinish(values);
+      onFinish({
+        ...values,
+        requirements: (values.requirements || []).filter(
+          (r: string) => r && r.trim() !== "",
+        ),
+        responsibilities: (values.responsibilities || []).filter(
+          (r: string) => r && r.trim() !== "",
+        ),
+        benefits: (values.benefits || []).filter(
+          (r: string) => r && r.trim() !== "",
+        ),
+        skills: (values.skills || []).filter(
+          (r: string) => r && r.trim() !== "",
+        ),
+      });
     },
   });
+
+  const handleSubmit = async () => {
+    const errors = await formik.validateForm();
+    if (Object.keys(errors).length > 0) {
+      formik.setTouched(
+        Object.keys(errors).reduce(
+          (acc, key) => ({ ...acc, [key]: true }),
+          {},
+        ),
+      );
+      const firstKey = Object.keys(errors)[0];
+      const firstError = (errors as any)[firstKey];
+      toast.error(
+        typeof firstError === "string"
+          ? firstError
+          : `Please complete the required fields (${firstKey})`,
+      );
+      const el = document.getElementById(firstKey) || document.querySelector(`[name="${firstKey}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+    formik.handleSubmit();
+  };
+
+  const err = (field: string) => {
+    const isTouched = Boolean((formik.touched as any)[field]);
+    const errorMsg = (formik.errors as any)[field];
+    if (isTouched && errorMsg) {
+      return (
+        <p className="text-[12px] text-[#d72c0d] font-normal mt-0.5 leading-[16px]">
+          {String(errorMsg)}
+        </p>
+      );
+    }
+    return null;
+  };
 
   const handleAddListItem = (fieldName: string) => {
     const currentList = formik.values[
@@ -343,6 +427,24 @@ export function JobCreationForm({
                 <PolarisSummaryRow
                   label="Compensation"
                   value={formik.values.salary || "Undisclosed"}
+                />
+                <PolarisSummaryRow
+                  label="Audience"
+                  value={
+                    formik.values.memberEligibility === "ALL"
+                      ? "All Members"
+                      : formik.values.memberEligibility === "VERIFIED"
+                        ? "Verified Only"
+                        : formik.values.memberEligibility === "TIERS"
+                          ? `Specific Tiers (${(formik.values.membershipTierId || []).length})`
+                          : formik.values.memberEligibility === "COMMUNITY"
+                            ? `Specific Communities (${(formik.values.eligibleCommunityIds || []).length})`
+                            : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                              ? `Specific Members (${(formik.values.eligibleUserIds || []).length})`
+                              : formik.values.memberEligibility === "OUTSIDE_PLATFORM"
+                                ? "Outside Platform (Public)"
+                                : formik.values.memberEligibility
+                  }
                   isLast
                 />
               </div>
@@ -384,9 +486,7 @@ export function JobCreationForm({
               <div className="space-y-1">
                 <PolarisLabel required>Hiring Company</PolarisLabel>
                 <CompanyAutocompleteSelect
-                  onChange={(value) =>
-                    formik.setFieldValue("company", value)
-                  }
+                  onChange={(value) => formik.setFieldValue("company", value)}
                 />
                 {formik.touched.company && formik.errors.company && (
                   <p className="text-[12px] text-[#d72c0d] font-normal leading-[16px]">
@@ -419,9 +519,7 @@ export function JobCreationForm({
                             }
                           : null
                     }
-                    onChange={(loc) =>
-                      formik.setFieldValue("location", loc)
-                    }
+                    onChange={(loc) => formik.setFieldValue("location", loc)}
                   />
                 </div>
                 {formik.touched.location && formik.errors.location && (
@@ -456,7 +554,11 @@ export function JobCreationForm({
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 helperText={`${formik.values.description.length} characters (min 30)`}
-                error={formik.touched.description && formik.errors.description ? String(formik.errors.description) : undefined}
+                error={
+                  formik.touched.description && formik.errors.description
+                    ? String(formik.errors.description)
+                    : undefined
+                }
               />
             </div>
           </PolarisFormCard>
@@ -556,7 +658,9 @@ export function JobCreationForm({
               </div>
 
               <div className="space-y-1">
-                <PolarisLabel required>Seniority / Experience Level</PolarisLabel>
+                <PolarisLabel required>
+                  Seniority / Experience Level
+                </PolarisLabel>
                 <Select
                   onValueChange={(value) =>
                     formik.setFieldValue("experienceLevel", value)
@@ -635,19 +739,68 @@ export function JobCreationForm({
             </div>
           </PolarisFormCard>
 
+          {/* Step 4: Audience & Member Eligibility */}
+          <PolarisEligibilityCard
+            key={`eligibility-${formik.values.memberEligibility || "ALL"}`}
+            step={4}
+            title="Audience & Eligibility"
+            description={`Specify which communities, members, or tiers can view and apply for this ${singularName.toLowerCase()}.`}
+            badge="Access"
+            allowOutsidePlatform={true}
+            allowCommunity={true}
+            eligibility={formik.values.memberEligibility || "ALL"}
+            onEligibilityChange={(val) => {
+              formik.setFieldValue("memberEligibility", val);
+              if (val === "ALL" || val === "VERIFIED" || val === "OUTSIDE_PLATFORM") {
+                formik.setFieldValue("membershipTierId", []);
+                formik.setFieldValue("eligibleTierIds", []);
+                formik.setFieldValue("eligibleUserIds", []);
+                formik.setFieldValue("eligibleCommunityIds", []);
+                formik.setFieldValue("communityIds", []);
+              }
+            }}
+            tierIds={
+              formik.values.membershipTierId || formik.values.eligibleTierIds || []
+            }
+            onTierIdsChange={(tiers) => {
+              formik.setFieldValue("membershipTierId", tiers);
+              formik.setFieldValue("eligibleTierIds", tiers);
+            }}
+            communityIds={
+              formik.values.eligibleCommunityIds || formik.values.communityIds || []
+            }
+            onCommunityIdsChange={(comms) => {
+              formik.setFieldValue("eligibleCommunityIds", comms);
+              formik.setFieldValue("communityIds", comms);
+            }}
+            userIds={formik.values.eligibleUserIds || []}
+            onUserIdsChange={(users) => {
+              formik.setFieldValue("eligibleUserIds", users);
+            }}
+            errorMessage={
+              formik.values.memberEligibility === "TIERS"
+                ? err("membershipTierId") || err("eligibleTierIds")
+                : formik.values.memberEligibility === "COMMUNITY"
+                  ? err("eligibleCommunityIds") || err("communityIds")
+                  : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                    ? err("eligibleUserIds")
+                    : null
+            }
+          />
+
           {/* Floating Save Action Bar */}
           <FloatingSavePanel
-            hasChanged={formik.dirty}
+            hasChanged={true}
             saved={false}
             isSaving={loading}
-            onSave={() => formik.handleSubmit()}
+            onSave={handleSubmit}
             onReset={() => {
               formik.resetForm();
               if (onCancel) onCancel();
               else window.history.back();
             }}
             title={`Publish ${singularName}`}
-            description="You have pending changes to this job listing configuration."
+            description="Complete the fields to publish this job listing."
             buttonText={`Publish ${singularName}`}
           />
         </form>

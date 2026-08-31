@@ -24,6 +24,8 @@ const reorderArray = <T>(
 };
 
 interface FormState {
+  formId: string | null;
+  setFormId: (formId: string | null) => void;
   formTitle: string;
   formDescription: string;
   questions: Question[];
@@ -56,6 +58,8 @@ interface FormState {
 }
 
 export const useFormStore = create<FormState>((set, get) => ({
+  formId: null,
+  setFormId: (formId) => set({ formId }),
   formTitle: "Untitled Form",
   formDescription: "",
   previewType: "SCROLL_LONG",
@@ -173,6 +177,7 @@ export const useFormStore = create<FormState>((set, get) => ({
 
   resetForm: () =>
     set({
+      formId: null,
       formTitle: "Untitled Form",
       formDescription: "",
       previewType: "SCROLL_LONG",
@@ -215,6 +220,7 @@ export const useFormStore = create<FormState>((set, get) => ({
 
   loadForm: (data) =>
     set({
+      formId: data.formId || null,
       formTitle: data.title || "Untitled Form",
       formDescription: data.description || "",
       previewType: data.previewType || "SCROLL_LONG",

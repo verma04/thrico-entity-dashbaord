@@ -1,29 +1,92 @@
 import { gql, useMutation, MutationHookOptions } from "@apollo/client";
 import { GET_SURVEYS } from "./survey-queries";
+export type MemberEligibility =
+  | "ALL"
+  | "VERIFIED"
+  | "TIERS"
+  | "COMMUNITY"
+  | "SPECIFIC_CUSTOMERS"
+  | "OUTSIDE_PLATFORM";
+
+export type SurveyStatus = "DRAFT" | "PUBLISHED" | "CLOSED" | string;
 
 // ---------------------------------------------------------
 // TYPES
 // ---------------------------------------------------------
 
+export interface SurveyEligibilityInput {
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+  acceptAnonymousResponse?: boolean;
+}
+
+export interface SurveyEligibilityRule {
+  id: string;
+  memberEligibility: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+  acceptAnonymousResponse?: boolean;
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
 export interface Survey {
   id: string;
   formId?: string;
   title: string;
-  description?: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
+  description?: string | null;
+  status: SurveyStatus;
+  slug?: string | null;
+  shortCode?: string | null;
+  shortUrl?: string | null;
+  shareUrl?: string | null;
+  shareLink?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
   form?: any;
+  sharedAsFeed?: boolean;
+  addedBy?: string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
+  memberEligibility?: MemberEligibility;
+  acceptAnonymousResponse?: boolean;
+  eligibilityRuleId?: string | null;
+  eligibility?: SurveyEligibilityRule;
+  eligibilityRule?: SurveyEligibilityRule;
+  responses?: any[];
   createdAt?: string;
-  updatedAt?: string;
+  updatedAt?: string | null;
+  previewType?: string;
+  appearance?: any;
+  questions?: Question[];
+  fields?: Question[];
 }
 
 export interface AddSurveyInput {
   title: string;
-  description?: string;
+  description?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  addedBy?: string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
+  slug?: string | null;
+  shortCode?: string | null;
+  shortUrl?: string | null;
+  memberEligibility?: MemberEligibility;
+  acceptAnonymousResponse?: boolean;
+  eligibilityRuleId?: string | null;
+  eligibility?: SurveyEligibilityInput;
   status?: string;
-  startDate?: string;
-  endDate?: string;
   previewType?: string;
   appearance?: any;
   fields?: any[];
@@ -45,8 +108,44 @@ const ADD_SURVEY = gql`
       title
       description
       status
+      slug
+      shortCode
+      shortUrl
+      shareUrl
+      shareLink
       startDate
       endDate
+      sharedAsFeed
+      addedBy
+      communityId
+      communityIds
+      eligibilityRuleId
+      eligibilityRule {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        acceptAnonymousResponse
+        createdAt
+        updatedAt
+      }
+      eligibility {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        acceptAnonymousResponse
+        createdAt
+        updatedAt
+      }
       createdAt
       updatedAt
     }
@@ -70,9 +169,19 @@ export function useAddSurvey(
 export interface EditSurveyInput {
   title?: string | null;
   description?: string | null;
-  status?: string | null;
+  status?: SurveyStatus | null;
   startDate?: string | null;
   endDate?: string | null;
+  addedBy?: string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
+  slug?: string | null;
+  shortCode?: string | null;
+  shortUrl?: string | null;
+  memberEligibility?: MemberEligibility | null;
+  acceptAnonymousResponse?: boolean | null;
+  eligibilityRuleId?: string | null;
+  eligibility?: SurveyEligibilityInput | null;
 }
 
 export interface EditSurveyData {
@@ -87,8 +196,44 @@ const EDIT_SURVEY = gql`
       title
       description
       status
+      slug
+      shortCode
+      shortUrl
+      shareUrl
+      shareLink
       startDate
       endDate
+      sharedAsFeed
+      addedBy
+      communityId
+      communityIds
+      eligibilityRuleId
+      eligibilityRule {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        acceptAnonymousResponse
+        createdAt
+        updatedAt
+      }
+      eligibility {
+        id
+        memberEligibility
+        membershipTierId
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        eligibleCommunityIds
+        communityIds
+        acceptAnonymousResponse
+        createdAt
+        updatedAt
+      }
       createdAt
       updatedAt
     }
@@ -568,4 +713,42 @@ export function useShareSurveyAsFeed(
       ...options,
     },
   );
+}
+
+// ---------------------------------------------------------
+// EXPORT SURVEY RESPONSES
+// ---------------------------------------------------------
+
+export interface ExportSurveyResponsesData {
+  exportSurveyResponses: {
+    success: boolean;
+    message: string;
+    totalCount?: number;
+    fileUrl?: string;
+  };
+}
+
+const EXPORT_SURVEY_RESPONSES = gql`
+  mutation ExportSurveyResponses($surveyId: ID!, $format: String) {
+    exportSurveyResponses(surveyId: $surveyId, format: $format) {
+      success
+      message
+      totalCount
+      fileUrl
+    }
+  }
+`;
+
+export function useExportSurveyResponses(
+  options?: MutationHookOptions<
+    ExportSurveyResponsesData,
+    { surveyId: string; format?: string }
+  >,
+) {
+  return useMutation<
+    ExportSurveyResponsesData,
+    { surveyId: string; format?: string }
+  >(EXPORT_SURVEY_RESPONSES, {
+    ...options,
+  });
 }

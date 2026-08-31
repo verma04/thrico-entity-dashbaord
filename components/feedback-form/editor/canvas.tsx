@@ -9,9 +9,6 @@ export function Canvas() {
   const {
     questions,
     selectedQuestionId,
-    updateQuestion,
-    updateOption,
-    addOption,
     formSettings,
   } = useFormStore();
 
@@ -19,16 +16,16 @@ export function Canvas() {
 
   if (!question) {
     return (
-      <div className="flex-1 h-full bg-gray-50 flex items-center justify-center text-gray-400">
+      <div className="flex-1 h-full bg-muted/20 flex items-center justify-center text-muted-foreground text-xs">
         Select a question to edit
       </div>
     );
   }
 
   return (
-    <div className="flex-1 h-full bg-gray-50 overflow-y-auto flex items-center justify-center p-8">
+    <div className="flex-1 h-full bg-muted/15 overflow-y-auto flex items-center justify-center p-4 sm:p-6">
       {/* Visual Preview Container */}
-      <div className="w-full max-w-4xl min-h-[500px] flex items-center justify-center p-12 transition-all duration-300">
+      <div className="w-full max-w-2xl min-h-[380px] flex items-center justify-center p-4 transition-all duration-300">
         <QuestionPreview
           question={question}
           formSettings={formSettings}

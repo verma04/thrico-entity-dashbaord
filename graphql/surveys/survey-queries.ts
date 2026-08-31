@@ -3,8 +3,23 @@ import {
   DateRangeInput,
   TimeRange,
 } from "../actions/dashbaord/dashboard-quries";
+import {
+  MemberEligibility,
+  SurveyStatus,
+  SurveyEligibilityRule,
+  SurveyEligibilityInput,
+  Survey,
+} from "./survey-mutations";
+
 export { TimeRange };
-export type { DateRangeInput };
+export type {
+  DateRangeInput,
+  MemberEligibility,
+  SurveyStatus,
+  SurveyEligibilityRule,
+  SurveyEligibilityInput,
+  Survey,
+};
 
 // ---------------------------------------------------------
 // TYPES
@@ -29,25 +44,6 @@ export interface Question {
   legalText?: string;
 }
 
-export interface Survey {
-  id: string;
-  formId?: string;
-  title: string;
-  description?: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  previewType?: string;
-  appearance?: any;
-  questions?: Question[];
-  fields?: Question[];
-  sharedAsFeed?: boolean;
-  form?: any;
-  responses?: any[];
-}
-
 export interface Pagination {
   totalCount: number;
   limit?: number;
@@ -58,7 +54,10 @@ export interface GetSurveysInput {
   limit?: number | null;
   offset?: number | null;
   search?: string | null;
-  status?: string | null;
+  status?: SurveyStatus | null;
+  memberEligibility?: MemberEligibility | string | null;
+  communityId?: string | null;
+  communityIds?: string[] | null;
 }
 
 export interface GetSurveysData {
@@ -84,11 +83,20 @@ export const GET_SURVEY = gql`
       title
       description
       status
+      slug
+      shortCode
+      shortUrl
+      shareUrl
+      shareLink
       startDate
       endDate
-      createdAt
-      updatedAt
+
       sharedAsFeed
+      addedBy
+      communityId
+      communityIds
+      eligibilityRuleId
+
       form {
         appearance
         previewType
@@ -116,73 +124,11 @@ export const GET_SURVEY = gql`
     }
   }
 `;
+
 export function useGetSurvey(
   options?: QueryHookOptions<GetSurveyData, { getSurveyId: string }>,
 ) {
   return useQuery<GetSurveyData, { getSurveyId: string }>(GET_SURVEY, options);
-}
-export interface Question {
-  id: string;
-  formId: string;
-  type: string;
-  question: string;
-  description?: string;
-  order: number;
-  required: boolean;
-  maxLength?: number;
-  min?: number;
-  max?: number;
-  scale?: number;
-  ratingType?: string;
-  options?: string[];
-  labels?: any;
-  allowMultiple?: boolean;
-  legalText?: string;
-}
-
-export interface Survey {
-  id: string;
-  formId?: string;
-  title: string;
-  description?: string;
-  status: string;
-  sharedAsFeed?: boolean;
-  startDate?: string;
-  endDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  previewType?: string;
-  appearance?: any;
-  questions?: Question[];
-  fields?: Question[];
-}
-
-export interface Pagination {
-  totalCount: number;
-  limit?: number;
-  offset?: number;
-}
-
-export interface GetSurveysInput {
-  limit?: number | null;
-  offset?: number | null;
-  search?: string | null;
-  status?: string | null;
-}
-
-export interface GetSurveysData {
-  getSurveys: {
-    pagination: Pagination;
-    surveys: Survey[];
-  };
-}
-
-// ---------------------------------------------------------
-// GET SINGLE SURVEY
-// ---------------------------------------------------------
-
-export interface GetSurveyData {
-  getSurvey: Survey;
 }
 
 // ---------------------------------------------------------
@@ -247,11 +193,35 @@ export const GET_SURVEYS = gql`
         title
         description
         status
+        slug
+        shortCode
+        shortUrl
+        shareUrl
+        shareLink
         startDate
         endDate
-        createdAt
-        updatedAt
+
         sharedAsFeed
+        addedBy
+        communityId
+        communityIds
+        eligibilityRuleId
+        form {
+          id
+          previewType
+          appearance
+        }
+        eligibilityRule {
+          id
+          memberEligibility
+          membershipTierId
+          eligibleTierIds
+          eligibleUserIds
+          eligibleSegmentIds
+          eligibleCommunityIds
+          communityIds
+          acceptAnonymousResponse
+        }
       }
     }
   }
@@ -391,33 +361,46 @@ export function useGetSurveyResults(
 // GET SURVEY RESPONSES
 // ---------------------------------------------------------
 
-export interface Respondent {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  avatar?: string;
-}
-
-export interface SurveyResponse {
-  id: string;
-  formId: string;
-  surveyId: string;
-  answers: any;
-  respondentId: string;
-  submittedAt: string;
-  respondent?: Respondent;
-}
-
 export interface GetSurveyResponsesInput {
   limit?: number | null;
   offset?: number | null;
+  userId?: string | null;
+  isSubmitted?: boolean | null;
+}
+
+export interface Respondent {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatar?: string | null;
+}
+
+export interface CustomFormResponse {
+  id: string;
+  formId: string;
+  surveyId?: string | null;
+  answers: Record<string, any>;
+  respondentId?: string | null;
+  respondent?: Respondent | null;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  isAnonymous?: boolean | null;
+  respondentType?: string | null;
+  isSubmitted?: boolean | null;
+  submittedAt?: Date | string | null;
+}
+
+export type SurveyResponse = CustomFormResponse;
+
+export interface GetSurveyResponsesResponse {
+  responses: CustomFormResponse[];
+  pagination?: Pagination | null;
 }
 
 export interface GetSurveyResponsesData {
-  getSurveyResponses: {
-    pagination: Pagination;
-    responses: SurveyResponse[];
-  };
+  getSurveyResponses: GetSurveyResponsesResponse;
 }
 
 export const GET_SURVEY_RESPONSES = gql`
@@ -434,11 +417,18 @@ export const GET_SURVEY_RESPONSES = gql`
         surveyId
         answers
         respondentId
+        name
+        email
+        phone
+        isAnonymous
+        respondentType
+        isSubmitted
         submittedAt
         respondent {
-          firstName
           id
+          firstName
           lastName
+          email
           avatar
         }
       }

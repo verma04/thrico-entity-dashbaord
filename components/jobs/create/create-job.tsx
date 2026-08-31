@@ -25,9 +25,78 @@ const Create = ({}) => {
   };
 
   const onFinish = (values: any) => {
+    const memberEligibility = values.memberEligibility || "ALL";
+    const membershipTierId =
+      values.membershipTierId || values.eligibleTierIds || [];
+    const eligibleTierIds =
+      values.eligibleTierIds || values.membershipTierId || [];
+    const eligibleUserIds = values.eligibleUserIds || [];
+    const eligibleSegmentIds = values.eligibleSegmentIds || [];
+    const eligibleCommunityIds =
+      values.eligibleCommunityIds || values.communityIds || [];
+    const communityIds =
+      values.communityIds || values.eligibleCommunityIds || [];
+    const communityId =
+      values.communityId || (communityIds.length > 0 ? communityIds[0] : undefined);
+
     add({
       variables: {
-        input: values,
+        input: {
+          title: values.title,
+          description: values.description,
+          jobType: values.jobType,
+          salary: values.salary,
+          experienceLevel: values.experienceLevel,
+          workplaceType: values.workplaceType,
+          communityId,
+          communityIds: communityIds.length > 0 ? communityIds : undefined,
+          requirements: (values.requirements || []).filter(
+            (r: string) => r && r.trim() !== "",
+          ),
+          responsibilities: (values.responsibilities || []).filter(
+            (r: string) => r && r.trim() !== "",
+          ),
+          benefits: (values.benefits || []).filter(
+            (r: string) => r && r.trim() !== "",
+          ),
+          skills: (values.skills || []).filter(
+            (r: string) => r && r.trim() !== "",
+          ),
+          location: values.location
+            ? typeof values.location === "object"
+              ? {
+                  name: values.location.name || values.location.address || "",
+                  latitude: String(values.location.latitude || 0),
+                  longitude: String(values.location.longitude || 0),
+                  address: values.location.address || values.location.name || "",
+                }
+              : {
+                  name: values.location,
+                  latitude: "0",
+                  longitude: "0",
+                  address: values.location,
+                }
+            : null,
+          company:
+            typeof values.company === "string"
+              ? { name: values.company }
+              : {
+                  id: values.company.id,
+                  name: values.company.name,
+                  logo: values.company.logo,
+                },
+          applicationDeadline: new Date().toISOString(),
+          memberEligibility,
+          eligibility: {
+            memberEligibility,
+            membershipTierId,
+            eligibleTierIds,
+            eligibleUserIds,
+            eligibleSegmentIds,
+            eligibleCommunityIds,
+            communityIds,
+          },
+        },
       },
     });
   };

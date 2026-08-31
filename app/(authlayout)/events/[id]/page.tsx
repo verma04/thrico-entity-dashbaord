@@ -113,6 +113,27 @@ function EventGeneralInfo() {
                 ? moment(event.lastDateOfRegistration).format("YYYY-MM-DD")
                 : "",
               isActive: event?.isActive ?? false,
+              memberEligibility:
+                event?.memberEligibility ||
+                event?.eligibility?.memberEligibility ||
+                event?.eligibilityRule?.memberEligibility ||
+                "ALL",
+              membershipTierId:
+                event?.eligibility?.membershipTierId ||
+                event?.eligibilityRule?.membershipTierId ||
+                [],
+              eligibleTierIds:
+                event?.eligibility?.eligibleTierIds ||
+                event?.eligibilityRule?.eligibleTierIds ||
+                [],
+              eligibleUserIds:
+                event?.eligibility?.eligibleUserIds ||
+                event?.eligibilityRule?.eligibleUserIds ||
+                [],
+              eligibleSegmentIds:
+                event?.eligibility?.eligibleSegmentIds ||
+                event?.eligibilityRule?.eligibleSegmentIds ||
+                [],
             }}
             initialCoverUrl={
               event?.cover ? `https://cdn.thrico.network/${event.cover}` : null
@@ -121,7 +142,10 @@ function EventGeneralInfo() {
             onFinish={(values) => {
               const eventInput: any = {
                 title: values.title,
-                location: { name: values.location },
+                location:
+                  typeof values.location === "string"
+                    ? { name: values.location }
+                    : values.location,
                 description: values.description,
                 startDate: values.startDate
                   ? new Date(values.startDate).toISOString()
@@ -135,6 +159,8 @@ function EventGeneralInfo() {
                   ? new Date(values.lastDateOfRegistration).toISOString()
                   : undefined,
                 isActive: values.isActive,
+                memberEligibility: values.memberEligibility,
+                eligibility: values.eligibility,
               };
 
               if (cover) {

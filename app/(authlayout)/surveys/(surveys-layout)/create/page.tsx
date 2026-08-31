@@ -27,7 +27,7 @@ const AddSurveyPage = () => {
         title: "Success",
         description: `${singularName} created successfully!`,
       });
-      router.push(`/surveys/${data.addSurvey.id}`);
+      router.push("/surveys/all");
     },
     onError: (error: any) => {
       toast({
@@ -40,14 +40,36 @@ const AddSurveyPage = () => {
   });
 
   const onFinish = (values: any) => {
+    const isOutsidePlatform = values.memberEligibility === "OUTSIDE_PLATFORM";
+    const acceptAnonymous = isOutsidePlatform
+      ? Boolean(values.acceptAnonymousResponse)
+      : false;
+
     const input = {
       title: values.title,
+      description: values.description || undefined,
       startDate: values.startDate
         ? new Date(values.startDate).toISOString()
         : undefined,
       endDate: values.endDate
         ? new Date(values.endDate).toISOString()
         : undefined,
+      communityId: values.communityId || undefined,
+      communityIds: values.communityIds?.length ? values.communityIds : undefined,
+      memberEligibility: values.memberEligibility || "ALL",
+      acceptAnonymousResponse: acceptAnonymous,
+      eligibility: {
+        memberEligibility: values.memberEligibility || "ALL",
+        membershipTierId:
+          values.membershipTierId || values.eligibleTierIds || [],
+        eligibleTierIds:
+          values.eligibleTierIds || values.membershipTierId || [],
+        eligibleUserIds: values.eligibleUserIds || [],
+        eligibleSegmentIds: values.eligibleSegmentIds || [],
+        eligibleCommunityIds: values.eligibleCommunityIds || [],
+        communityIds: values.communityIds || [],
+        acceptAnonymousResponse: acceptAnonymous,
+      },
     };
 
     addSurvey({ variables: { input } });

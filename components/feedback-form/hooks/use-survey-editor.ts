@@ -9,6 +9,7 @@ import {
 } from "@/graphql/surveys/survey-mutations";
 import { debounce } from "lodash";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 export function useSurveyEditor() {
   const params = useParams();
@@ -16,7 +17,10 @@ export function useSurveyEditor() {
   const store = useFormStore();
 
   const [addQuestionMutation, { loading: isAddingQuestion }] = useAddQuestion({
-    onError: (err) => console.error("Failed to add question:", err),
+    onError: (err) => {
+      console.error("Failed to add question:", err);
+      toast.error(err.message || "Failed to add question");
+    },
   });
 
   const [editQuestionMutation] = useEditQuestion({
@@ -50,11 +54,11 @@ export function useSurveyEditor() {
 
   const debouncedSettingsUpdate = useCallback(
     debounce((surveyId: string, input: any) => {
+      const targetId = useFormStore.getState().formId || surveyId;
       updateFormSettingsMutation({
         variables: {
-          updateFormSettingsId: surveyId,
+          updateFormSettingsId: targetId,
           input,
-          
         },
       });
     }, 1000),
@@ -64,8 +68,10 @@ export function useSurveyEditor() {
   const addQuestion = useCallback(
     async (type: any) => {
       try {
-        if (!surveyId) {
-          console.error("Survey ID is missing, cannot sync addQuestion");
+        const targetFormId = useFormStore.getState().formId || surveyId;
+        if (!targetFormId) {
+          console.error("Survey/Form ID is missing, cannot sync addQuestion");
+          toast.error("Form ID is missing");
           return;
         }
 
@@ -122,7 +128,7 @@ export function useSurveyEditor() {
         }
 
         let questionInput: any = {
-          formId: surveyId,
+          formId: targetFormId,
           type,
           question: defaultQuestion,
           order: currentQuestions.length,
@@ -166,9 +172,11 @@ export function useSurveyEditor() {
         });
 
         if (data?.addQuestion) {
-          store.addQuestion(
-            data.addQuestion as unknown as import("@/store/ts-types").Question,
-          );
+          const newQ =
+            data.addQuestion as unknown as import("@/store/ts-types").Question;
+          store.addQuestion(newQ);
+          store.selectQuestion(newQ.id);
+          toast.success("Question added successfully!");
         }
       } catch (error) {
         console.error("AddQuestion Failed:", error);

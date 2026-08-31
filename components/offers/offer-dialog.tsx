@@ -38,6 +38,7 @@ import Image from "next/image";
 import { ImageCropper } from "../communities/add/image-cropper";
 import { useToast } from "@/components/ui/use-toast";
 import { useModuleStore } from "@/store/useModuleStore";
+import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
 
 interface OfferDialogProps {
   isOpen: boolean;
@@ -99,11 +100,72 @@ export function OfferDialog({
       termsAndConditions: editingOffer?.termsAndConditions || "",
       timeline: editingOffer?.timeline || "",
       website: editingOffer?.website || "",
+      communityId: editingOffer?.communityId || "",
+      communityIds: editingOffer?.communityIds || [],
+      memberEligibility:
+        editingOffer?.memberEligibility ||
+        editingOffer?.eligibility?.memberEligibility ||
+        editingOffer?.eligibilityRule?.memberEligibility ||
+        "ALL",
+      membershipTierId:
+        editingOffer?.eligibility?.membershipTierId ||
+        editingOffer?.eligibilityRule?.membershipTierId ||
+        editingOffer?.eligibility?.eligibleTierIds ||
+        editingOffer?.eligibilityRule?.eligibleTierIds ||
+        [],
+      eligibleTierIds:
+        editingOffer?.eligibility?.eligibleTierIds ||
+        editingOffer?.eligibilityRule?.eligibleTierIds ||
+        editingOffer?.eligibility?.membershipTierId ||
+        editingOffer?.eligibilityRule?.membershipTierId ||
+        [],
+      eligibleUserIds:
+        editingOffer?.eligibility?.eligibleUserIds ||
+        editingOffer?.eligibilityRule?.eligibleUserIds ||
+        [],
+      eligibleSegmentIds:
+        editingOffer?.eligibility?.eligibleSegmentIds ||
+        editingOffer?.eligibilityRule?.eligibleSegmentIds ||
+        [],
+      eligibleCommunityIds:
+        editingOffer?.eligibility?.eligibleCommunityIds ||
+        editingOffer?.eligibilityRule?.eligibleCommunityIds ||
+        editingOffer?.communityIds ||
+        [],
     },
     enableReinitialize: true,
     validationSchema,
     onSubmit: (values) => {
-      onSave({ ...values, image: coverFile as any });
+      const memberEligibility = values.memberEligibility || "ALL";
+      const membershipTierId =
+        values.membershipTierId || values.eligibleTierIds || [];
+      const eligibleTierIds =
+        values.eligibleTierIds || values.membershipTierId || [];
+      const eligibleUserIds = values.eligibleUserIds || [];
+      const eligibleSegmentIds = values.eligibleSegmentIds || [];
+      const eligibleCommunityIds =
+        values.eligibleCommunityIds || values.communityIds || [];
+      const communityIds =
+        values.communityIds || values.eligibleCommunityIds || [];
+      const communityId =
+        values.communityId || (communityIds.length > 0 ? communityIds[0] : undefined);
+
+      onSave({
+        ...values,
+        communityId,
+        communityIds: communityIds.length > 0 ? communityIds : undefined,
+        memberEligibility,
+        eligibility: {
+          memberEligibility,
+          membershipTierId,
+          eligibleTierIds,
+          eligibleUserIds,
+          eligibleSegmentIds,
+          eligibleCommunityIds,
+          communityIds,
+        },
+        image: coverFile as any,
+      });
     },
   });
 
@@ -354,6 +416,55 @@ export function OfferDialog({
                   placeholder="Terms and conditions..."
                   className="min-h-[80px] resize-none"
                   {...formik.getFieldProps("termsAndConditions")}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <PolarisEligibilityCard
+                  key={`eligibility-${formik.values.memberEligibility || "ALL"}`}
+                  step={undefined}
+                  title="Audience & Eligibility"
+                  description={`Specify which communities, members, or tiers can view and claim this ${singularName?.toLowerCase() || "offer"}.`}
+                  badge="Access"
+                  allowOutsidePlatform={true}
+                  allowCommunity={true}
+                  eligibility={formik.values.memberEligibility || "ALL"}
+                  onEligibilityChange={(val) => {
+                    formik.setFieldValue("memberEligibility", val);
+                    if (
+                      val === "ALL" ||
+                      val === "VERIFIED" ||
+                      val === "OUTSIDE_PLATFORM"
+                    ) {
+                      formik.setFieldValue("membershipTierId", []);
+                      formik.setFieldValue("eligibleTierIds", []);
+                      formik.setFieldValue("eligibleUserIds", []);
+                      formik.setFieldValue("eligibleCommunityIds", []);
+                      formik.setFieldValue("communityIds", []);
+                    }
+                  }}
+                  tierIds={
+                    formik.values.membershipTierId ||
+                    formik.values.eligibleTierIds ||
+                    []
+                  }
+                  onTierIdsChange={(tiers) => {
+                    formik.setFieldValue("membershipTierId", tiers);
+                    formik.setFieldValue("eligibleTierIds", tiers);
+                  }}
+                  communityIds={
+                    formik.values.eligibleCommunityIds ||
+                    formik.values.communityIds ||
+                    []
+                  }
+                  onCommunityIdsChange={(comms) => {
+                    formik.setFieldValue("eligibleCommunityIds", comms);
+                    formik.setFieldValue("communityIds", comms);
+                  }}
+                  userIds={formik.values.eligibleUserIds || []}
+                  onUserIdsChange={(users) => {
+                    formik.setFieldValue("eligibleUserIds", users);
+                  }}
                 />
               </div>
             </div>

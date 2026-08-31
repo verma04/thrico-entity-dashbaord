@@ -17,9 +17,14 @@ import { FormSettings, UpdateFormSettingFn } from "@/store/ts-types";
 type SettingsProps = {
   formSettings: FormSettings;
   updateFormSetting: UpdateFormSettingFn;
+  previewType?: "MULTI_STEP" | "SCROLL_LONG" | string;
 };
 
-const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
+const Settings = ({
+  formSettings,
+  updateFormSetting,
+  previewType = "SCROLL_LONG",
+}: SettingsProps) => {
   return (
     <div className="space-y-6 max-w-4xl">
       <Card>
@@ -30,7 +35,7 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
           <div className="space-y-2">
             <Label htmlFor="form-view-type">Form View Type</Label>
             <Select
-              defaultValue="MULTI_STEP"
+              value={previewType}
               onValueChange={(value) => updateFormSetting("previewType", value)}
             >
               <SelectTrigger id="form-view-type">

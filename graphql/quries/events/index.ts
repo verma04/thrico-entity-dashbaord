@@ -33,6 +33,32 @@ const events = `
     isVerifiedAt
     verificationReason
   }
+  memberEligibility
+  eligibilityRuleId
+  eligibilityRule {
+    id
+    memberEligibility
+    membershipTierId
+    eligibleTierIds
+    eligibleUserIds
+    eligibleSegmentIds
+    eligibleCommunityIds
+    communityIds
+    createdAt
+    updatedAt
+  }
+  eligibility {
+    id
+    memberEligibility
+    membershipTierId
+    eligibleTierIds
+    eligibleUserIds
+    eligibleSegmentIds
+    eligibleCommunityIds
+    communityIds
+    createdAt
+    updatedAt
+  }
 `;
 
 export const ADD_EVENT = gql`

@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { Layout, Globe } from "lucide-react";
+import { Layout, Globe, Plus, Loader2, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CtaButton } from "@/components/ui/cta-button";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useToast } from "@/hooks/use-toast";
 import { useCreatePage, useGetWebsite } from "@/graphql/actions/website";
+import { GET_WEBSITE } from "@/graphql/quries/website/index";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -25,14 +27,16 @@ import {
 
 const createPageSchema = Yup.object().shape({
   name: Yup.string()
+    .trim()
     .required("Give your new page a recognizable name")
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must be under 50 characters"),
   slug: Yup.string()
+    .trim()
     .required("URL slug is required")
     .matches(
-      /^[a-z0-9-]+$/,
-      "Slug can only contain lowercase letters, numbers, and hyphens",
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug can only contain lowercase letters, numbers, and hyphens (no leading or trailing hyphens)",
     ),
 });
 
@@ -42,10 +46,12 @@ export function CreatePageManager() {
   const { addPage } = useWebsiteBuilderStore();
   const [saved, setSaved] = useState(false);
 
-  const { data: websiteData } = useGetWebsite({});
+  const { data: websiteData, loading: websiteLoading } = useGetWebsite({});
   const websiteId = websiteData?.getWebsite?.id;
 
   const [createPageMutation, { loading: isCreating }] = useCreatePage({
+    refetchQueries: [{ query: GET_WEBSITE }],
+    awaitRefetchQueries: true,
     onCompleted: (data) => {
       toast({
         title: "Page Created",
@@ -56,7 +62,7 @@ export function CreatePageManager() {
 
       setTimeout(() => {
         router.push("/app-layout");
-      }, 1000);
+      }, 800);
     },
     onError: (error) => {
       toast({
@@ -77,21 +83,57 @@ export function CreatePageManager() {
       if (!websiteId) {
         toast({
           title: "System Error",
-          description: "Cannot identify parent website context.",
+          description: "Cannot identify parent website context. Please try again.",
           variant: "destructive",
         });
         return;
       }
 
+      const cleanSlug = values.slug
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
       createPageMutation({
         variables: {
           websiteId,
-          name: values.name,
-          slug: values.slug,
+          name: values.name.trim(),
+          slug: cleanSlug,
         },
       });
     },
   });
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const errors = await formik.validateForm();
+    if (Object.keys(errors).length > 0) {
+      formik.setTouched(
+        Object.keys(errors).reduce(
+          (acc, key) => ({ ...acc, [key]: true }),
+          {},
+        ),
+      );
+      const firstKey = Object.keys(errors)[0];
+      const firstError = (errors as any)[firstKey];
+      toast({
+        title: "Validation Error",
+        description:
+          typeof firstError === "string"
+            ? firstError
+            : "Please fill in all required fields properly.",
+        variant: "destructive",
+      });
+      const el = document.getElementById(firstKey);
+      if (el) {
+        el.focus();
+      }
+      return;
+    }
+    formik.handleSubmit();
+  };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -100,7 +142,7 @@ export function CreatePageManager() {
     const generatedSlug = val
       .toLowerCase()
       .trim()
-      .replace(/[^\w\s-]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-");
 
@@ -122,6 +164,34 @@ export function CreatePageManager() {
           { label: "Website Pages", href: "/app-layout" },
           { label: "Create Page" },
         ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => router.push("/app-layout")}
+              className="h-8 px-3 text-xs gap-1.5"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Cancel
+            </Button>
+            <CtaButton
+              type="button"
+              onClick={() => handleSubmit()}
+              disabled={isCreating || websiteLoading || !formik.values.name.trim()}
+              size="sm"
+              className="h-8 px-3 text-xs"
+            >
+              {isCreating ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Plus className="h-3.5 w-3.5" />
+              )}
+              {isCreating ? "Creating Page..." : "Create Page"}
+            </CtaButton>
+          </div>
+        }
       />
 
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
@@ -190,7 +260,7 @@ export function CreatePageManager() {
             </div>
           }
         >
-          <form onSubmit={formik.handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <PolarisInfoBanner
               title="Publishing Workflow"
               description="Create the page container first, then use the visual page builder studio to drag and drop interactive modules, banners, and layout grids."
@@ -203,7 +273,7 @@ export function CreatePageManager() {
               description="Enter the public title and URL slug path for this page."
               badge="Core Setup"
             >
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {/* Page Name */}
                 <div className="space-y-1.5">
                   <label
@@ -214,17 +284,19 @@ export function CreatePageManager() {
                   </label>
                   <Input
                     id="name"
+                    name="name"
                     placeholder="e.g. Services, About Us, Core Features"
                     value={formik.values.name}
                     onChange={handleNameChange}
                     onBlur={formik.handleBlur}
                     className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
                   />
-                  {formik.touched.name && formik.errors.name && (
-                    <p className="text-[12.5px] font-normal text-[#d72c0d] leading-[18px]">
-                      {formik.errors.name as string}
-                    </p>
-                  )}
+                  {(formik.touched.name || formik.submitCount > 0) &&
+                    formik.errors.name && (
+                      <p className="text-[12.5px] font-normal text-[#d72c0d] leading-[18px]">
+                        {formik.errors.name as string}
+                      </p>
+                    )}
                 </div>
 
                 {/* Slug Path */}
@@ -242,27 +314,53 @@ export function CreatePageManager() {
                     </div>
                     <Input
                       id="slug"
+                      name="slug"
                       placeholder="services"
                       value={formik.values.slug}
                       className="h-[40px] text-[14px] font-mono rounded-l-none rounded-r-[8px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100"
                       onChange={(e) => {
                         const val = e.target.value
                           .toLowerCase()
-                          .replace(/\s+/g, "-");
+                          .replace(/[^a-z0-9-]/g, "");
                         formik.setFieldValue("slug", val);
                       }}
                       onBlur={formik.handleBlur}
                     />
                   </div>
-                  {formik.touched.slug && formik.errors.slug && (
-                    <p className="text-[12.5px] font-normal text-[#d72c0d] leading-[18px]">
-                      {formik.errors.slug as string}
-                    </p>
-                  )}
+                  {(formik.touched.slug || formik.submitCount > 0) &&
+                    formik.errors.slug && (
+                      <p className="text-[12.5px] font-normal text-[#d72c0d] leading-[18px]">
+                        {formik.errors.slug as string}
+                      </p>
+                    )}
                   <p className="text-[11.5px] text-[#616161]">
                     Defines the URL path visitors will use to reach this page
                     (e.g. <code>thrico.community/{currentSlug}</code>).
                   </p>
+                </div>
+
+                {/* In-Card Action Footer */}
+                <div className="pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-end gap-2.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/app-layout")}
+                    className="h-9 px-3.5 text-xs"
+                  >
+                    Cancel
+                  </Button>
+                  <CtaButton
+                    type="submit"
+                    disabled={isCreating || websiteLoading || !formik.values.name.trim()}
+                    className="h-9 px-4 text-xs"
+                  >
+                    {isCreating ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
+                    {isCreating ? "Creating Page..." : "Create Page"}
+                  </CtaButton>
                 </div>
               </div>
             </PolarisFormCard>
@@ -271,12 +369,15 @@ export function CreatePageManager() {
       </EcosystemContainer>
 
       <FloatingSavePanel
-        hasChanged={formik.dirty && formik.values.name.length > 0}
+        hasChanged={formik.dirty || formik.values.name.trim().length > 0}
         saved={saved}
         isSaving={isCreating}
-        onSave={() => formik.submitForm()}
-        onReset={() => formik.resetForm()}
-        title="Unsaved Page"
+        onSave={() => handleSubmit()}
+        onReset={() => {
+          formik.resetForm();
+          router.push("/app-layout");
+        }}
+        title="New Website Page"
         description="Ready to create this website page?"
         buttonText="Create Page"
       />

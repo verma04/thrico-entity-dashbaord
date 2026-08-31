@@ -356,14 +356,16 @@ export function CollapsibleSection({
       </SectionLabel>
       <div
         className={cn(
-          "overflow-hidden transition-all duration-200 ease-in-out",
+          "grid transition-[grid-template-rows,opacity] duration-200 ease-in-out",
           isOpen
-            ? "max-h-[2000px] opacity-100"
-            : "max-h-0 opacity-0 pointer-events-none",
-          "group-data-[collapsible=icon]:max-h-[2000px] group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:pointer-events-auto",
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0 pointer-events-none",
+          "group-data-[collapsible=icon]:grid-rows-[1fr] group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:pointer-events-auto",
         )}
       >
-        <SidebarGroupContent>{renderItems(items)}</SidebarGroupContent>
+        <div className="overflow-hidden">
+          <SidebarGroupContent>{renderItems(items)}</SidebarGroupContent>
+        </div>
       </div>
     </SidebarGroup>
   );

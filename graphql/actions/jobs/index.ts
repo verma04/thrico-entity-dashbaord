@@ -27,6 +27,37 @@ export type { DateRangeInput };
 
 // --- TypeScript Types ---
 
+export type MemberEligibility =
+  | "ALL"
+  | "VERIFIED"
+  | "TIERS"
+  | "COMMUNITY"
+  | "SPECIFIC_CUSTOMERS"
+  | "OUTSIDE_PLATFORM";
+
+export type JobEligibilityRule = {
+  id: string;
+  memberEligibility: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+  createdAt?: string;
+  updatedAt?: string | null;
+};
+
+export interface JobEligibilityInput {
+  memberEligibility?: MemberEligibility;
+  membershipTierId?: string[];
+  eligibleTierIds?: string[];
+  eligibleUserIds?: string[];
+  eligibleSegmentIds?: string[];
+  eligibleCommunityIds?: string[];
+  communityIds?: string[];
+}
+
 export type JobCompany = {
   id: string;
   name: string;
@@ -57,6 +88,8 @@ export type Job = {
   isFeatured: boolean;
   entity: string;
   addedBy: string;
+  communityId?: string;
+  communityIds?: string[];
   postedBy: {
     id: string;
     firstName: string;
@@ -69,6 +102,10 @@ export type Job = {
   createdAt: string;
   updatedAt: string;
   status: string;
+  eligibilityRuleId?: string | null;
+  eligibilityRule?: JobEligibilityRule | null;
+  eligibility?: JobEligibilityRule | null;
+  memberEligibility?: MemberEligibility;
   verification: {
     id: string;
     isVerifiedAt: string | null;
@@ -92,9 +129,15 @@ export type PostJobInput = {
   skills: string[];
   isFeatured?: boolean;
   entity: string;
+  communityId?: string;
+  communityIds?: string[];
+  addedBy?: string;
   company: {
     id: string;
   };
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string;
+  eligibility?: JobEligibilityInput;
 };
 
 export type UpdateJobInput = {
@@ -112,9 +155,15 @@ export type UpdateJobInput = {
   benefits?: string[];
   skills?: string[];
   isFeatured?: boolean;
+  communityId?: string;
+  communityIds?: string[];
+  addedBy?: string;
   company?: {
     id: string;
   };
+  memberEligibility?: MemberEligibility;
+  eligibilityRuleId?: string;
+  eligibility?: JobEligibilityInput;
 };
 
 // --- Apollo Client Hook ---
@@ -122,7 +171,7 @@ export type UpdateJobInput = {
 export function useAddJob(
   options?: MutationHookOptions<{ addJob: Job }, { input: PostJobInput }>,
 ) {
-  return useMutation(ADD_JOB, {
+  return useMutation<{ addJob: Job }, { input: PostJobInput }>(ADD_JOB, {
     ...options,
     update(cache, { data }) {
       try {
@@ -190,9 +239,10 @@ export function useAddJob(
 export function useUpdateJob(
   options?: MutationHookOptions<{ updateJob: Job }, { input: UpdateJobInput }>,
 ) {
-  return useMutation(UPDATE_JOB, {
-    ...options,
-  });
+  return useMutation<{ updateJob: Job }, { input: UpdateJobInput }>(
+    UPDATE_JOB,
+    options,
+  );
 }
 
 export enum JobStatus {
@@ -210,6 +260,9 @@ export interface GetJobInput {
   userId?: string;
   offset?: number;
   limit?: number;
+  memberEligibility?: MemberEligibility;
+  communityId?: string;
+  communityIds?: string[];
 }
 
 // --- Apollo Client Hook ---

@@ -38,17 +38,41 @@ export const GET_OFFERS = gql`
       status
       claimsCount
       viewsCount
-      isActive
+      addedBy
+      communityId
+      communityIds
+      memberEligibility
       category {
         id
         name
         color
       }
+      eligibilityRule {
+        id
+        memberEligibility
+        eligibleCommunityIds
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        createdAt
+        updatedAt
+      }
+      eligibility {
+        id
+        memberEligibility
+        eligibleCommunityIds
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        createdAt
+        updatedAt
+      }
       verification {
+        id
         isVerified
+        isVerifiedAt
         verificationReason
       }
-      addedBy
       creator {
         id
         firstName
@@ -56,6 +80,7 @@ export const GET_OFFERS = gql`
         avatar
       }
       createdAt
+      updatedAt
     }
   }
 `;
@@ -164,11 +189,36 @@ export const GET_OFFER_BY_ID = gql`
       timeline
       termsAndConditions
       website
+      addedBy
+      communityId
+      communityIds
+      memberEligibility
+      eligibilityRule {
+        id
+        memberEligibility
+        eligibleCommunityIds
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        createdAt
+        updatedAt
+      }
+      eligibility {
+        id
+        memberEligibility
+        eligibleCommunityIds
+        eligibleTierIds
+        eligibleUserIds
+        eligibleSegmentIds
+        createdAt
+        updatedAt
+      }
       verification {
+        id
         isVerified
+        isVerifiedAt
         verificationReason
       }
-      addedBy
       creator {
         id
         firstName
@@ -176,6 +226,7 @@ export const GET_OFFER_BY_ID = gql`
         avatar
       }
       createdAt
+      updatedAt
     }
   }
 `;

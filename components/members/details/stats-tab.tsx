@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useGetUserStats } from "@/graphql/actions";
 import { useMemberDetails } from "./member-context";
+import { MemberCustomer360Card } from "@/components/analytics/customer-360-card";
 import {
   Layout,
   Users,
@@ -16,8 +17,11 @@ import {
   Clock,
   Network,
   ArrowUpRight,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /* ── Color Palette for stat cards ────────────────────────────────────────── */
@@ -151,9 +155,11 @@ function StatCard({
 
 export function StatsTab({ userId }: { userId: string }) {
   const router = useRouter();
-  const { member } = useMemberDetails();
+  const { member, user } = useMemberDetails();
   const { data: statsData } = useGetUserStats(userId);
   const stats = statsData?.getUserStats;
+
+  const targetUserId = userId || user?.id || member?.userId || member?.id;
 
   const basePath = `/members/${member?.id || userId}`;
 
@@ -251,11 +257,28 @@ export function StatsTab({ userId }: { userId: string }) {
         ))}
       </div>
 
-      <Card className="border-border">
-        <CardContent className="py-10 flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">
-            Activity visualization coming soon.
-          </p>
+      <Card
+        className="border-indigo-100 dark:border-indigo-950 bg-gradient-to-r from-indigo-50/50 via-background to-violet-50/40 dark:from-indigo-950/20 dark:via-background dark:to-violet-950/10 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-800 transition-all group shadow-sm"
+        onClick={() => router.push(`${basePath}/360`)}
+      >
+        <CardContent className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-sm">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground group-hover:text-indigo-600 transition-colors flex items-center gap-1.5">
+                Member 360° Intelligence & Executive Summary
+                <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform text-indigo-500" />
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                View ClickHouse behavioral event stream, RFM persona, health score, and AI recommendations
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="h-8 text-xs font-semibold gap-1.5 border-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/40">
+            Open 360° View
+          </Button>
         </CardContent>
       </Card>
     </div>

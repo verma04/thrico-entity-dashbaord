@@ -39,6 +39,7 @@ import { Pagination } from "@/components/shared/admin-table/admin-table";
 import { useModuleStore } from "@/store/useModuleStore";
 
 import { MarketPlaceListing, useListings } from "@/graphql/actions/listing";
+import { MemberEligibilitySelect } from "@/components/gamification/shared/member-eligibility-select";
 import {
   STATUS_TABS,
   CONDITION_OPTIONS,
@@ -95,6 +96,9 @@ export function ListingsManage({ status: initialStatus }: ListingsManageProps) {
     initialStatus ||
     "ALL";
 
+  const memberEligibility =
+    searchParams.get("memberEligibility") || "ALL";
+
   const selectedCondition = searchParams.get("condition") || "ALL";
   const sortBy = searchParams.get("sort") || "newest";
   const view = (searchParams.get("view") as "grid" | "list") || "grid";
@@ -122,6 +126,7 @@ export function ListingsManage({ status: initialStatus }: ListingsManageProps) {
     condition: true,
     views: true,
     status: true,
+    eligibility: true,
     verification: true,
     created: true,
     creator: true,
@@ -138,6 +143,9 @@ export function ListingsManage({ status: initialStatus }: ListingsManageProps) {
   // ── Setters ───────────────────────────────────────────────────────────────
   const setStatus = (v: string) =>
     updateParams({ status: v === "ALL" ? null : v, page: null });
+
+  const setMemberEligibility = (v: string) =>
+    updateParams({ memberEligibility: v === "ALL" ? null : v, page: null });
 
   const setSelectedCondition = (v: string) =>
     updateParams({ condition: v === "ALL" ? null : v, page: null });
@@ -156,6 +164,8 @@ export function ListingsManage({ status: initialStatus }: ListingsManageProps) {
     variables: {
       input: {
         status: status === "ALL" ? undefined : status,
+        memberEligibility:
+          memberEligibility === "ALL" ? undefined : (memberEligibility as any),
       },
     },
     fetchPolicy: "network-only",
@@ -171,6 +181,17 @@ export function ListingsManage({ status: initialStatus }: ListingsManageProps) {
     // Status filter
     if (status !== "ALL") {
       list = list.filter((l) => l.status === status);
+    }
+
+    // Eligibility filter
+    if (memberEligibility !== "ALL") {
+      list = list.filter((l) => {
+        const elig =
+          l.memberEligibility ||
+          l.eligibility?.memberEligibility ||
+          l.eligibilityRule?.memberEligibility;
+        return elig === memberEligibility;
+      });
     }
 
     // Condition filter
@@ -337,6 +358,15 @@ export function ListingsManage({ status: initialStatus }: ListingsManageProps) {
                 ))}
               </SelectContent>
             </Select>
+          </EcosystemActionBar.Item>
+
+          {/* Eligibility Filter */}
+          <EcosystemActionBar.Item>
+            <MemberEligibilitySelect
+              value={memberEligibility}
+              onValueChange={setMemberEligibility}
+              className="w-[145px]"
+            />
           </EcosystemActionBar.Item>
 
           {/* Sort Filter */}

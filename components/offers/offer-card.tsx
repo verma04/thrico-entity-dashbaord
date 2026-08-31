@@ -78,7 +78,7 @@ export function OfferCard({ offer, onEdit, refetch }: OfferCardProps) {
         </div>
 
         <CardHeader className="p-5 pb-2">
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex justify-between items-start mb-2 gap-1.5 flex-wrap">
             <Badge
               variant="outline"
               className="gap-1.5 font-semibold text-[10px] uppercase border-transparent bg-slate-100 text-slate-600"
@@ -89,6 +89,25 @@ export function OfferCard({ offer, onEdit, refetch }: OfferCardProps) {
               />
               {offer.category?.name || "Uncategorized"}
             </Badge>
+
+            {(offer.memberEligibility || offer.eligibilityRule?.memberEligibility) && (
+              <Badge
+                variant="outline"
+                className="font-semibold text-[9.5px] uppercase border-blue-200 bg-blue-50 text-blue-700"
+              >
+                {(offer.memberEligibility || offer.eligibilityRule?.memberEligibility) === "ALL"
+                  ? "All Members"
+                  : (offer.memberEligibility || offer.eligibilityRule?.memberEligibility) === "TIERS"
+                    ? "Tiers"
+                    : (offer.memberEligibility || offer.eligibilityRule?.memberEligibility) === "COMMUNITY"
+                      ? "Community"
+                      : (offer.memberEligibility || offer.eligibilityRule?.memberEligibility) === "VERIFIED"
+                        ? "Verified"
+                        : (offer.memberEligibility || offer.eligibilityRule?.memberEligibility) === "OUTSIDE_PLATFORM"
+                          ? "Public"
+                          : "Specific"}
+              </Badge>
+            )}
           </div>
 
           <div className="space-y-1.5">

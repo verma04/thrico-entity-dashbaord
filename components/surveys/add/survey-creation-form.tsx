@@ -4,7 +4,14 @@ import React, { useState } from "react";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Sparkles, FileText } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Calendar as CalendarIcon,
+  Sparkles,
+  FileText,
+  UserCheck,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -24,6 +31,25 @@ import {
   PolarisInput,
   PolarisLabel,
 } from "@/components/gamification/shared/polaris-form-ui";
+import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
+
+const EMPTY_ARRAY: string[] = [];
+
+const DEFAULT_INITIAL_VALUES = {
+  title: "",
+  description: "",
+  startDate: null,
+  endDate: null,
+  communityId: "",
+  communityIds: [],
+  memberEligibility: "ALL",
+  acceptAnonymousResponse: false,
+  membershipTierId: [],
+  eligibleTierIds: [],
+  eligibleUserIds: [],
+  eligibleSegmentIds: [],
+  eligibleCommunityIds: [],
+};
 
 export function SurveyCreationForm({
   initialValues,
@@ -45,21 +71,65 @@ export function SurveyCreationForm({
     endDate: Yup.date()
       .nullable()
       .min(Yup.ref("startDate"), "End date cannot be before start date"),
+    memberEligibility: Yup.string().default("ALL"),
+    acceptAnonymousResponse: Yup.boolean().default(false),
+    membershipTierId: Yup.array().when("memberEligibility", {
+      is: "TIERS",
+      then: (schema) =>
+        schema.min(1, "Please select at least one membership tier"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    eligibleTierIds: Yup.array().when("memberEligibility", {
+      is: "TIERS",
+      then: (schema) =>
+        schema.min(1, "Please select at least one membership tier"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    eligibleUserIds: Yup.array().when("memberEligibility", {
+      is: "SPECIFIC_CUSTOMERS",
+      then: (schema) => schema.min(1, "Please select at least one customer"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    eligibleCommunityIds: Yup.array().when("memberEligibility", {
+      is: "COMMUNITY",
+      then: (schema) => schema.min(1, "Please select at least one community"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   });
+
+  const formInitialValues = React.useMemo(
+    () => initialValues || DEFAULT_INITIAL_VALUES,
+    [initialValues],
+  );
 
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: initialValues || {
-      title: "",
-      description: "",
-      startDate: null,
-      endDate: null,
-    },
+    initialValues: formInitialValues,
     validationSchema: surveySchema,
     onSubmit: (values) => {
-      onFinish(values);
+      const isOutsidePlatform = values.memberEligibility === "OUTSIDE_PLATFORM";
+      const sanitizedValues = {
+        ...values,
+        acceptAnonymousResponse: isOutsidePlatform
+          ? Boolean(values.acceptAnonymousResponse)
+          : false,
+      };
+      onFinish(sanitizedValues);
     },
   });
+
+  const err = (field: string) => {
+    const isTouched = Boolean(formik.touched[field]);
+    const errorMsg = formik.errors[field];
+    if (isTouched && errorMsg) {
+      return (
+        <p className="text-[12px] text-[#d72c0d] font-normal mt-0.5 leading-[16px]">
+          {String(errorMsg)}
+        </p>
+      );
+    }
+    return null;
+  };
 
   const handleInputChange = (field: string, value: any) => {
     formik.setFieldValue(field, value);
@@ -138,8 +208,37 @@ export function SurveyCreationForm({
                       ? format(formik.values.endDate, "MMM d, yyyy")
                       : "Indefinite"
                   }
-                  isLast
                 />
+                <PolarisSummaryRow
+                  label="Eligibility"
+                  value={
+                    formik.values.memberEligibility === "ALL"
+                      ? "All Members"
+                      : formik.values.memberEligibility === "VERIFIED"
+                        ? "Verified Members"
+                        : formik.values.memberEligibility === "TIERS"
+                          ? `${(formik.values.eligibleTierIds || formik.values.membershipTierId || []).length} Tier(s)`
+                          : formik.values.memberEligibility === "COMMUNITY"
+                            ? `${(formik.values.eligibleCommunityIds || formik.values.communityIds || []).length} Community(ies)`
+                            : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                              ? `${(formik.values.eligibleUserIds || []).length} Customer(s)`
+                              : formik.values.memberEligibility === "OUTSIDE_PLATFORM"
+                                ? "Outside Platform (Public)"
+                                : "All Members"
+                  }
+                  isLast={formik.values.memberEligibility !== "OUTSIDE_PLATFORM"}
+                />
+                {formik.values.memberEligibility === "OUTSIDE_PLATFORM" && (
+                  <PolarisSummaryRow
+                    label="Anonymous Responses"
+                    value={
+                      formik.values.acceptAnonymousResponse
+                        ? "Allowed"
+                        : "Disabled (Guest info required)"
+                    }
+                    isLast
+                  />
+                )}
               </div>
             </PolarisSidebarCard>
 
@@ -284,6 +383,101 @@ export function SurveyCreationForm({
             </div>
           </PolarisFormCard>
 
+          {/* Step 3: Audience & Member Eligibility */}
+          <PolarisEligibilityCard
+            step={3}
+            title="Audience & Eligibility"
+            description="Specify which communities, members, or tiers can view and participate in this survey."
+            badge="Access"
+            allowOutsidePlatform={true}
+            allowCommunity={true}
+            eligibility={formik.values.memberEligibility || "ALL"}
+            onEligibilityChange={(val) => {
+              formik.setFieldValue("memberEligibility", val);
+              if (val === "ALL" || val === "VERIFIED" || val === "OUTSIDE_PLATFORM") {
+                formik.setFieldValue("membershipTierId", []);
+                formik.setFieldValue("eligibleTierIds", []);
+                formik.setFieldValue("eligibleUserIds", []);
+                formik.setFieldValue("eligibleCommunityIds", []);
+                formik.setFieldValue("communityIds", []);
+              }
+              if (val !== "OUTSIDE_PLATFORM") {
+                formik.setFieldValue("acceptAnonymousResponse", false);
+              }
+            }}
+            tierIds={
+              formik.values.membershipTierId?.length
+                ? formik.values.membershipTierId
+                : formik.values.eligibleTierIds?.length
+                  ? formik.values.eligibleTierIds
+                  : EMPTY_ARRAY
+            }
+            onTierIdsChange={(tiers) => {
+              formik.setFieldValue("membershipTierId", tiers);
+              formik.setFieldValue("eligibleTierIds", tiers);
+            }}
+            communityIds={
+              formik.values.eligibleCommunityIds?.length
+                ? formik.values.eligibleCommunityIds
+                : formik.values.communityIds?.length
+                  ? formik.values.communityIds
+                  : EMPTY_ARRAY
+            }
+            onCommunityIdsChange={(comms) => {
+              formik.setFieldValue("eligibleCommunityIds", comms);
+              formik.setFieldValue("communityIds", comms);
+            }}
+            userIds={
+              formik.values.eligibleUserIds?.length
+                ? formik.values.eligibleUserIds
+                : EMPTY_ARRAY
+            }
+            onUserIdsChange={(users) => {
+              formik.setFieldValue("eligibleUserIds", users);
+            }}
+            errorMessage={
+              formik.values.memberEligibility === "TIERS"
+                ? err("membershipTierId") || err("eligibleTierIds")
+                : formik.values.memberEligibility === "COMMUNITY"
+                  ? err("eligibleCommunityIds") || err("communityIds")
+                  : formik.values.memberEligibility === "SPECIFIC_CUSTOMERS"
+                    ? err("eligibleUserIds")
+                    : null
+            }
+          >
+            {/* When Outside Platform is selected: Anonymity option */}
+            {formik.values.memberEligibility === "OUTSIDE_PLATFORM" && (
+              <div className="pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-2 animate-in fade-in-50 duration-200">
+                <div className="flex items-start space-x-3 p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/60 dark:bg-zinc-900/50">
+                  <Checkbox
+                    id="acceptAnonymousResponse"
+                    name="acceptAnonymousResponse"
+                    checked={Boolean(formik.values.acceptAnonymousResponse)}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue(
+                        "acceptAnonymousResponse",
+                        Boolean(checked),
+                      )
+                    }
+                    className="mt-0.5"
+                  />
+                  <div className="space-y-0.5">
+                    <Label
+                      htmlFor="acceptAnonymousResponse"
+                      className="text-xs font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <UserCheck className="h-3.5 w-3.5 text-[#005bd3] dark:text-blue-400" />
+                      Accept Anonymous Responses
+                    </Label>
+                    <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-relaxed">
+                      Allow respondents outside the platform to submit feedback anonymously without being required to provide their name or email address.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </PolarisEligibilityCard>
+
           {/* Floating Save Action Bar */}
           <FloatingSavePanel
             hasChanged={formik.dirty}
@@ -301,7 +495,8 @@ export function SurveyCreationForm({
                 ? `You have unsaved changes to this ${singularName.toLowerCase()} campaign configuration.`
                 : "You have unsaved changes to this survey campaign configuration."
             }
-            buttonText={isEdit ? "Save Changes" : `Create ${singularName}`}
+            saveButtonText={isEdit ? "Save Changes" : `Create ${singularName}`}
+            discardButtonText="Discard"
           />
         </form>
       </PolarisFormLayout>

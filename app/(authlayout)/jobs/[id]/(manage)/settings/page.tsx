@@ -47,6 +47,7 @@ export default function JobSettingsPage() {
   });
 
   const job = data?.getJobById;
+  const elig = job?.eligibility || job?.eligibilityRule;
 
   if (loading) {
     return (
@@ -176,13 +177,39 @@ export default function JobSettingsPage() {
               workplaceType: job?.workplaceType || "",
               experienceLevel: job?.experienceLevel || "",
               description: job?.description || "",
+              communityId: job?.communityId || "",
+              communityIds: job?.communityIds || [],
               requirements: job?.requirements?.length ? job.requirements : [""],
               responsibilities: job?.responsibilities?.length ? job.responsibilities : [""],
               benefits: job?.benefits?.length ? job.benefits : [""],
               skills: job?.skills?.length ? job.skills : [""],
+              memberEligibility:
+                elig?.memberEligibility || job?.memberEligibility || "ALL",
+              membershipTierId:
+                elig?.membershipTierId || elig?.eligibleTierIds || [],
+              eligibleTierIds:
+                elig?.eligibleTierIds || elig?.membershipTierId || [],
+              eligibleUserIds: elig?.eligibleUserIds || [],
+              eligibleSegmentIds: elig?.eligibleSegmentIds || [],
+              eligibleCommunityIds:
+                elig?.eligibleCommunityIds || elig?.communityIds || [],
             }}
             loading={updating}
             onFinish={(values: any) => {
+              const memberEligibility = values.memberEligibility || "ALL";
+              const membershipTierId =
+                values.membershipTierId || values.eligibleTierIds || [];
+              const eligibleTierIds =
+                values.eligibleTierIds || values.membershipTierId || [];
+              const eligibleUserIds = values.eligibleUserIds || [];
+              const eligibleSegmentIds = values.eligibleSegmentIds || [];
+              const eligibleCommunityIds =
+                values.eligibleCommunityIds || values.communityIds || [];
+              const communityIds =
+                values.communityIds || values.eligibleCommunityIds || [];
+              const communityId =
+                values.communityId || (communityIds.length > 0 ? communityIds[0] : undefined);
+
               const jobInput: any = {
                 id: job?.id,
                 title: values.title,
@@ -193,10 +220,30 @@ export default function JobSettingsPage() {
                 experienceLevel: values.experienceLevel,
                 workplaceType: values.workplaceType,
                 applicationDeadline: values.applicationDeadline,
-                requirements: values.requirements.filter((r: string) => r.trim() !== ""),
-                responsibilities: values.responsibilities.filter((r: string) => r.trim() !== ""),
-                benefits: values.benefits.filter((r: string) => r.trim() !== ""),
-                skills: values.skills.filter((r: string) => r.trim() !== ""),
+                communityId,
+                communityIds: communityIds.length > 0 ? communityIds : undefined,
+                requirements: (values.requirements || []).filter(
+                  (r: string) => r && r.trim() !== "",
+                ),
+                responsibilities: (values.responsibilities || []).filter(
+                  (r: string) => r && r.trim() !== "",
+                ),
+                benefits: (values.benefits || []).filter(
+                  (r: string) => r && r.trim() !== "",
+                ),
+                skills: (values.skills || []).filter(
+                  (r: string) => r && r.trim() !== "",
+                ),
+                memberEligibility,
+                eligibility: {
+                  memberEligibility,
+                  membershipTierId,
+                  eligibleTierIds,
+                  eligibleUserIds,
+                  eligibleSegmentIds,
+                  eligibleCommunityIds,
+                  communityIds,
+                },
               };
 
               if (values.company?.id) {

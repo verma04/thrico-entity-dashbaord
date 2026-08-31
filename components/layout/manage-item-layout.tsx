@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { X, Loader2, type LucideIcon } from "lucide-react";
+import { X, Loader2, ArrowLeft, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -187,6 +187,9 @@ export interface ManageItemLayoutProps {
   layoutId?: string;
   className?: string;
   containerClassName?: string;
+  contentContainerClassName?: string;
+  showBackButton?: boolean;
+  fixed?: boolean;
 }
 
 /* ─── Full Entity Manage Layout Component ───────────────────────────────── */
@@ -215,6 +218,9 @@ export function ManageItemLayout({
   layoutId = "menu-tab-underline",
   className,
   containerClassName,
+  contentContainerClassName,
+  showBackButton = true,
+  fixed = true,
 }: ManageItemLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -238,18 +244,26 @@ export function ManageItemLayout({
         : pathname.replace(`${basePath}/`, "").split("/")[0] || "manage"
       : "manage");
 
-  return (
-    <FixedInsetMotionContainer
-      showAccentLine
-      className={className}
-      onClose={handleClose}
-    >
+  const innerContent = (
+    <>
       {/* Sticky Header */}
-      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/60">
+      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/60">
         <div className={cn("max-w-7xl mx-auto px-6", containerClassName)}>
           {/* Top Bar */}
           <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-4 min-w-0">
+            <div className="flex items-center gap-3.5 min-w-0">
+              {showBackButton && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-xl hover:bg-muted/80 text-muted-foreground hover:text-foreground shrink-0 border border-border/40 shadow-2xs"
+                  onClick={handleClose}
+                  title="Back"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+
               {coverImage ? (
                 <div className="relative shrink-0">
                   <img
@@ -346,7 +360,12 @@ export function ManageItemLayout({
       </div>
 
       {/* Content Area */}
-      <div className={cn("max-w-7xl mx-auto px-6 py-8", containerClassName)}>
+      <div
+        className={cn(
+          "max-w-7xl mx-auto px-6 py-8",
+          contentContainerClassName || containerClassName,
+        )}
+      >
         {breadcrumbs && breadcrumbs.length > 0 && (
           <Breadcrumb className="mb-6">
             <BreadcrumbList>
@@ -380,6 +399,24 @@ export function ManageItemLayout({
           {children}
         </div>
       </div>
+    </>
+  );
+
+  if (!fixed) {
+    return (
+      <div className={cn("w-full min-h-screen bg-background flex flex-col", className)}>
+        {innerContent}
+      </div>
+    );
+  }
+
+  return (
+    <FixedInsetMotionContainer
+      showAccentLine
+      className={className}
+      onClose={handleClose}
+    >
+      {innerContent}
     </FixedInsetMotionContainer>
   );
 }

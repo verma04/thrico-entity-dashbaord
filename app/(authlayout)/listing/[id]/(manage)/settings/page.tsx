@@ -207,26 +207,65 @@ export default function ListingSettingsPage() {
                 url: m.url,
                 thumbUrl: `https://cdn.thrico.network/${m.url}`,
               })),
+              communityId: listing?.communityId || "",
+              communityIds: listing?.communityIds || [],
+              memberEligibility:
+                listing?.memberEligibility ||
+                listing?.eligibility?.memberEligibility ||
+                listing?.eligibilityRule?.memberEligibility ||
+                "ALL",
+              eligibility: listing?.eligibility || listing?.eligibilityRule,
+              eligibilityRule: listing?.eligibilityRule || listing?.eligibility,
             }}
             loading={updating}
             onFinish={(values: any) => {
+              const memberEligibility = values.memberEligibility || "ALL";
+              const membershipTierId =
+                values.membershipTierId || values.eligibleTierIds || [];
+              const eligibleTierIds =
+                values.eligibleTierIds || values.membershipTierId || [];
+              const eligibleUserIds = values.eligibleUserIds || [];
+              const eligibleSegmentIds = values.eligibleSegmentIds || [];
+              const eligibleCommunityIds =
+                values.eligibleCommunityIds || values.communityIds || [];
+              const communityIds =
+                values.communityIds || values.eligibleCommunityIds || [];
+              const communityId =
+                values.communityId || (communityIds.length > 0 ? communityIds[0] : undefined);
+
               updateListing({
                 variables: {
                   input: {
                     id: listing?.id,
-                    ...values,
-                    price: parseInt(values.price, 10) || 0,
+                    title: values.title,
+                    description: values.description,
+                    category: values.category,
+                    condition: values.condition,
+                    sku: values.sku,
+                    interests: values.interests,
+                    categories: values.categories,
+                    price: String(values.price || "0"),
                     location: {
                       name: values.location,
                       address: values.location,
                       latitude: 0,
                       longitude: 0,
                     },
-                    // for edit, the backend might just expect media objects with url or upload again.
-                    // To keep it simple, we format media here properly.
                     media: values.media.map(
                       (m: any) => m.file || { url: m.url },
                     ),
+                    communityId,
+                    communityIds: communityIds.length > 0 ? communityIds : undefined,
+                    memberEligibility,
+                    eligibility: {
+                      memberEligibility,
+                      membershipTierId,
+                      eligibleTierIds,
+                      eligibleUserIds,
+                      eligibleSegmentIds,
+                      eligibleCommunityIds,
+                      communityIds,
+                    },
                   },
                 },
               });

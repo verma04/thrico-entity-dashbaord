@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, ShieldCheck, Layers, UserCheck } from "lucide-react";
+import { Users, ShieldCheck, Layers, UserCheck, Globe, Building } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const ELIGIBILITY_FILTER_OPTIONS = [
@@ -34,11 +34,25 @@ export const ELIGIBILITY_FILTER_OPTIONS = [
     description: "Members in specific tiers",
   },
   {
+    value: "COMMUNITY",
+    label: "Specific Communities",
+    shortLabel: "Communities",
+    icon: Building,
+    description: "Members of specific communities",
+  },
+  {
     value: "SPECIFIC_CUSTOMERS",
     label: "Specific Customers",
     shortLabel: "Specific",
     icon: UserCheck,
     description: "Individually selected members",
+  },
+  {
+    value: "OUTSIDE_PLATFORM",
+    label: "Outside Platform",
+    shortLabel: "Public",
+    icon: Globe,
+    description: "Open to members and non-members",
   },
 ] as const;
 
@@ -46,7 +60,9 @@ export type MemberEligibilityValue =
   | "ALL"
   | "VERIFIED"
   | "TIERS"
-  | "SPECIFIC_CUSTOMERS";
+  | "COMMUNITY"
+  | "SPECIFIC_CUSTOMERS"
+  | "OUTSIDE_PLATFORM";
 
 export interface MemberEligibilitySelectProps {
   value?: string | null;
