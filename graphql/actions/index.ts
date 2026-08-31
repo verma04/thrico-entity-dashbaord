@@ -336,6 +336,7 @@ export * from "./theme";
 export * from "./mcp";
 export * from "./impact";
 export * from "./sponsors";
+export * from "../analytics";
 
 export const useGetModuleCustomName = (id: string) =>
   useQuery(GET_MODULE_CUSTOM_NAME, {
