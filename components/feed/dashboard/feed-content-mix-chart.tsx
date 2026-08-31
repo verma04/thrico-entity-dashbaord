@@ -80,7 +80,7 @@ export function FeedContentMixChart({
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className="text-xl font-bold tracking-tight text-foreground leading-none">
-                    {totalItems}%
+                    {Math.round(totalItems)}%
                   </span>
                   <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
                     Engagement
@@ -102,14 +102,14 @@ export function FeedContentMixChart({
                         </span>
                       </div>
                       <span className="font-semibold text-foreground tabular-nums">
-                        {item.value}%
+                        {Math.round(item.value)}%
                       </span>
                     </div>
                     <div className="h-1.5 w-full bg-muted/60 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${item.value}%`,
+                          width: `${Math.min(100, Math.max(0, Math.round(item.value)))}%`,
                           backgroundColor: item.color,
                         }}
                       />

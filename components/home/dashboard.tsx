@@ -65,6 +65,7 @@ import { DashboardAcquisition } from "./dashboard-acquisition";
 import { DashboardSafetyModeration } from "./dashboard-safety-moderation";
 import { DashboardQuickStats } from "./dashboard-quick-stats";
 import { DashboardPlatformStorage } from "./dashboard-platform-storage";
+import { ConversionFunnelCard } from "@/components/analytics";
 
 const timeRangeMap: Record<string, TimeRange> = {
   "24h": TimeRange.LAST_24_HOURS,
@@ -231,6 +232,12 @@ export default function Dashboard() {
             />
           </section>
         </div>
+
+        {/* ClickHouse Conversion Funnel */}
+        <section className="space-y-3">
+          <DashboardSectionHeading title="Event & Member Conversion Funnel" />
+          <ConversionFunnelCard funnelType="EVENT_REGISTRATION" />
+        </section>
 
         {/* 4. Growing & Keeping Members */}
         <DashboardAcquisition

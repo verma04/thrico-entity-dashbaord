@@ -22,6 +22,7 @@ export interface SurveyEligibilityInput {
   eligibleSegmentIds?: string[];
   eligibleCommunityIds?: string[];
   communityIds?: string[];
+  acceptAnonymousResponse?: boolean;
 }
 
 export interface SurveyEligibilityRule {
@@ -33,6 +34,7 @@ export interface SurveyEligibilityRule {
   eligibleSegmentIds?: string[];
   eligibleCommunityIds?: string[];
   communityIds?: string[];
+  acceptAnonymousResponse?: boolean;
   createdAt: string;
   updatedAt?: string | null;
 }
@@ -55,6 +57,8 @@ export interface Survey {
   addedBy?: string | null;
   communityId?: string | null;
   communityIds?: string[] | null;
+  memberEligibility?: MemberEligibility;
+  acceptAnonymousResponse?: boolean;
   eligibilityRuleId?: string | null;
   eligibility?: SurveyEligibilityRule;
   eligibilityRule?: SurveyEligibilityRule;
@@ -75,7 +79,11 @@ export interface AddSurveyInput {
   addedBy?: string | null;
   communityId?: string | null;
   communityIds?: string[] | null;
+  slug?: string | null;
+  shortCode?: string | null;
+  shortUrl?: string | null;
   memberEligibility?: MemberEligibility;
+  acceptAnonymousResponse?: boolean;
   eligibilityRuleId?: string | null;
   eligibility?: SurveyEligibilityInput;
   status?: string;
@@ -100,6 +108,11 @@ const ADD_SURVEY = gql`
       title
       description
       status
+      slug
+      shortCode
+      shortUrl
+      shareUrl
+      shareLink
       startDate
       endDate
       sharedAsFeed
@@ -116,6 +129,7 @@ const ADD_SURVEY = gql`
         eligibleSegmentIds
         eligibleCommunityIds
         communityIds
+        acceptAnonymousResponse
         createdAt
         updatedAt
       }
@@ -128,6 +142,7 @@ const ADD_SURVEY = gql`
         eligibleSegmentIds
         eligibleCommunityIds
         communityIds
+        acceptAnonymousResponse
         createdAt
         updatedAt
       }
@@ -160,7 +175,11 @@ export interface EditSurveyInput {
   addedBy?: string | null;
   communityId?: string | null;
   communityIds?: string[] | null;
+  slug?: string | null;
+  shortCode?: string | null;
+  shortUrl?: string | null;
   memberEligibility?: MemberEligibility | null;
+  acceptAnonymousResponse?: boolean | null;
   eligibilityRuleId?: string | null;
   eligibility?: SurveyEligibilityInput | null;
 }
@@ -177,6 +196,11 @@ const EDIT_SURVEY = gql`
       title
       description
       status
+      slug
+      shortCode
+      shortUrl
+      shareUrl
+      shareLink
       startDate
       endDate
       sharedAsFeed
@@ -193,6 +217,7 @@ const EDIT_SURVEY = gql`
         eligibleSegmentIds
         eligibleCommunityIds
         communityIds
+        acceptAnonymousResponse
         createdAt
         updatedAt
       }
@@ -205,6 +230,7 @@ const EDIT_SURVEY = gql`
         eligibleSegmentIds
         eligibleCommunityIds
         communityIds
+        acceptAnonymousResponse
         createdAt
         updatedAt
       }

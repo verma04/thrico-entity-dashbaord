@@ -110,13 +110,13 @@ export function DashboardContentFeed({
                         : item?.type?.replace(/[-_]/g, " ")?.toLowerCase()}
                     </span>
                     <span className="text-[11px] font-bold text-foreground tabular-nums">
-                      {item?.percentage}%
+                      {Math.round(item?.percentage || 0)}%
                     </span>
                   </div>
                   <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${barColors[i % barColors.length]}`}
-                      style={{ width: `${item?.percentage || 0}%` }}
+                      style={{ width: `${Math.min(100, Math.max(0, Math.round(item?.percentage || 0)))}%` }}
                     />
                   </div>
                 </div>

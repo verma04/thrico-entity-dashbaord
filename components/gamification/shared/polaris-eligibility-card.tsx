@@ -213,7 +213,6 @@ export function PolarisEligibilityCard({
     eligibility,
     selectedUserIds.length,
     searchResultsUsers.length,
-    searchUserByName,
   ]);
 
   return (
@@ -278,9 +277,9 @@ export function PolarisEligibilityCard({
                 title="Outside Platform Warning:"
                 message={
                   <>
-                    Selecting <strong>Outside Platform</strong> will make this event
+                    Selecting <strong>Outside Platform</strong> will make this
                     publicly accessible to everyone on the web. Visitors, guests, and
-                    non-registered users can discover, view details, and register
+                    non-registered users can discover, view details, and participate
                     without needing to join the community or hold a membership tier.
                   </>
                 }

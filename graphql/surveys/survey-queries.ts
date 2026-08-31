@@ -90,37 +90,13 @@ export const GET_SURVEY = gql`
       shareLink
       startDate
       endDate
-      createdAt
-      updatedAt
+
       sharedAsFeed
       addedBy
       communityId
       communityIds
       eligibilityRuleId
-      eligibilityRule {
-        id
-        memberEligibility
-        membershipTierId
-        eligibleTierIds
-        eligibleUserIds
-        eligibleSegmentIds
-        eligibleCommunityIds
-        communityIds
-        createdAt
-        updatedAt
-      }
-      eligibility {
-        id
-        memberEligibility
-        membershipTierId
-        eligibleTierIds
-        eligibleUserIds
-        eligibleSegmentIds
-        eligibleCommunityIds
-        communityIds
-        createdAt
-        updatedAt
-      }
+
       form {
         appearance
         previewType
@@ -224,8 +200,7 @@ export const GET_SURVEYS = gql`
         shareLink
         startDate
         endDate
-        createdAt
-        updatedAt
+
         sharedAsFeed
         addedBy
         communityId
@@ -245,20 +220,7 @@ export const GET_SURVEYS = gql`
           eligibleSegmentIds
           eligibleCommunityIds
           communityIds
-          createdAt
-          updatedAt
-        }
-        eligibility {
-          id
-          memberEligibility
-          membershipTierId
-          eligibleTierIds
-          eligibleUserIds
-          eligibleSegmentIds
-          eligibleCommunityIds
-          communityIds
-          createdAt
-          updatedAt
+          acceptAnonymousResponse
         }
       }
     }
@@ -399,33 +361,46 @@ export function useGetSurveyResults(
 // GET SURVEY RESPONSES
 // ---------------------------------------------------------
 
-export interface Respondent {
-  id: string;
-  firstName?: string;
-  lastName?: string;
-  avatar?: string;
-}
-
-export interface SurveyResponse {
-  id: string;
-  formId: string;
-  surveyId: string;
-  answers: any;
-  respondentId: string;
-  submittedAt: string;
-  respondent?: Respondent;
-}
-
 export interface GetSurveyResponsesInput {
   limit?: number | null;
   offset?: number | null;
+  userId?: string | null;
+  isSubmitted?: boolean | null;
+}
+
+export interface Respondent {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatar?: string | null;
+}
+
+export interface CustomFormResponse {
+  id: string;
+  formId: string;
+  surveyId?: string | null;
+  answers: Record<string, any>;
+  respondentId?: string | null;
+  respondent?: Respondent | null;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  isAnonymous?: boolean | null;
+  respondentType?: string | null;
+  isSubmitted?: boolean | null;
+  submittedAt?: Date | string | null;
+}
+
+export type SurveyResponse = CustomFormResponse;
+
+export interface GetSurveyResponsesResponse {
+  responses: CustomFormResponse[];
+  pagination?: Pagination | null;
 }
 
 export interface GetSurveyResponsesData {
-  getSurveyResponses: {
-    pagination: Pagination;
-    responses: SurveyResponse[];
-  };
+  getSurveyResponses: GetSurveyResponsesResponse;
 }
 
 export const GET_SURVEY_RESPONSES = gql`
@@ -442,11 +417,18 @@ export const GET_SURVEY_RESPONSES = gql`
         surveyId
         answers
         respondentId
+        name
+        email
+        phone
+        isAnonymous
+        respondentType
+        isSubmitted
         submittedAt
         respondent {
-          firstName
           id
+          firstName
           lastName
+          email
           avatar
         }
       }

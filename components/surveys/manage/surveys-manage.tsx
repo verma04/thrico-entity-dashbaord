@@ -149,6 +149,7 @@ export function SurveysManage({
     communityId: "",
     communityIds: [] as string[],
     memberEligibility: "ALL",
+    acceptAnonymousResponse: false,
     membershipTierId: [] as string[],
     eligibleTierIds: [] as string[],
     eligibleUserIds: [] as string[],
@@ -174,6 +175,11 @@ export function SurveysManage({
         communityIds:
           editingDetailsSurvey.communityIds || elig?.communityIds || [],
         memberEligibility: elig?.memberEligibility || "ALL",
+        acceptAnonymousResponse: Boolean(
+          elig?.acceptAnonymousResponse ??
+            (editingDetailsSurvey as any)?.acceptAnonymousResponse ??
+            false,
+        ),
         membershipTierId:
           elig?.membershipTierId || elig?.eligibleTierIds || [],
         eligibleTierIds:
@@ -297,6 +303,11 @@ export function SurveysManage({
 
   const handleUpdateDetails = () => {
     if (!editingDetailsSurvey || !canUpdate) return;
+    const isOutsidePlatform = details.memberEligibility === "OUTSIDE_PLATFORM";
+    const acceptAnonymous = isOutsidePlatform
+      ? Boolean(details.acceptAnonymousResponse)
+      : false;
+
     editSurvey({
       variables: {
         id: editingDetailsSurvey.id,
@@ -310,6 +321,7 @@ export function SurveysManage({
             ? details.communityIds
             : undefined,
           memberEligibility: details.memberEligibility as any,
+          acceptAnonymousResponse: acceptAnonymous,
           eligibility: {
             memberEligibility: details.memberEligibility as any,
             membershipTierId:
@@ -320,6 +332,7 @@ export function SurveysManage({
             eligibleSegmentIds: details.eligibleSegmentIds || [],
             eligibleCommunityIds: details.eligibleCommunityIds || [],
             communityIds: details.communityIds || [],
+            acceptAnonymousResponse: acceptAnonymous,
           },
         },
       },

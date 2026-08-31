@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 import { 
   User as UserIcon, Activity, Trophy, Network, 
   BarChart3, Clock, MessageSquare, LayoutGrid, 
-  Store, Briefcase, Tag, Users, Calendar
+  Store, Briefcase, Tag, Users, Calendar, Sparkles
 } from "lucide-react";
 
 import { useMemberDetails } from "./member-context";
 
 const MEMBER_TABS = [
   { value: "", label: "Profile", icon: UserIcon },
+  { value: "360", label: "360° Intelligence", icon: Sparkles },
   { value: "stats", label: "Activity", icon: Activity },
   { value: "gamification", label: "Gamification", icon: Trophy },
   { value: "referrals", label: "Referrals", icon: Network },

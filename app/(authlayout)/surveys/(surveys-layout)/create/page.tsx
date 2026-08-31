@@ -40,6 +40,11 @@ const AddSurveyPage = () => {
   });
 
   const onFinish = (values: any) => {
+    const isOutsidePlatform = values.memberEligibility === "OUTSIDE_PLATFORM";
+    const acceptAnonymous = isOutsidePlatform
+      ? Boolean(values.acceptAnonymousResponse)
+      : false;
+
     const input = {
       title: values.title,
       description: values.description || undefined,
@@ -52,6 +57,7 @@ const AddSurveyPage = () => {
       communityId: values.communityId || undefined,
       communityIds: values.communityIds?.length ? values.communityIds : undefined,
       memberEligibility: values.memberEligibility || "ALL",
+      acceptAnonymousResponse: acceptAnonymous,
       eligibility: {
         memberEligibility: values.memberEligibility || "ALL",
         membershipTierId:
@@ -62,6 +68,7 @@ const AddSurveyPage = () => {
         eligibleSegmentIds: values.eligibleSegmentIds || [],
         eligibleCommunityIds: values.eligibleCommunityIds || [],
         communityIds: values.communityIds || [],
+        acceptAnonymousResponse: acceptAnonymous,
       },
     };
 

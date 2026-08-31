@@ -35,7 +35,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import {
   Eye,
   Mail,
@@ -46,6 +46,7 @@ import {
   Phone,
   User,
   HelpCircle,
+  RefreshCw,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -63,6 +64,7 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [isRefetching, setIsRefetching] = useState(false);
 
   const { data: surveyData } = useGetSurvey({
     variables: { getSurveyId: surveyId },
@@ -73,15 +75,29 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
     data: responsesData,
     loading,
     error,
+    refetch,
   } = useGetSurveyResponses({
     variables: {
       surveyId,
       input: { limit: 100, offset: 0 },
     },
+    fetchPolicy: "cache-and-network",
   });
 
   const rawResponses = responsesData?.getSurveyResponses?.responses || [];
   const survey = surveyData?.getSurvey;
+
+  const handleRefetch = async () => {
+    try {
+      setIsRefetching(true);
+      await refetch();
+      toast.success("Survey responses refreshed");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to refresh responses");
+    } finally {
+      setIsRefetching(false);
+    }
+  };
 
   const [exportResponses, { loading: exporting }] = useExportSurveyResponses({
     onCompleted: (res) => {
@@ -137,8 +153,8 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
 
     // Sort order
     list.sort((a, b) => {
-      const dateA = new Date(a.submittedAt).getTime();
-      const dateB = new Date(b.submittedAt).getTime();
+      const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+      const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
       return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
     });
 
@@ -218,13 +234,16 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
       header: "Type",
       cell: (row) => {
         const type = row.respondentType || (row.respondent?.id ? "USER" : row.name || row.email ? "GUEST" : "ANONYMOUS");
-        const statusMap: Record<string, { label: string; status: "active" | "pending" | "inactive" }> = {
-          USER: { label: "Member", status: "active" },
-          GUEST: { label: "Guest", status: "pending" },
-          ANONYMOUS: { label: "Anonymous", status: "inactive" },
-        };
-        const config = statusMap[type] || { label: type, status: "inactive" };
-        return <AdminStatusBadge status={config.status}>{config.label}</AdminStatusBadge>;
+        const isUser = type.toUpperCase() === "USER";
+        const isGuest = type.toUpperCase() === "GUEST";
+
+        return (
+          <AdminStatusBadge
+            label={isUser ? "Member" : isGuest ? "Guest" : "Anonymous"}
+            status={isUser ? "active" : isGuest ? "completed" : "draft"}
+            variant="pill"
+          />
+        );
       },
     },
     {
@@ -235,8 +254,7 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
         return (
           <AdminTableMetric
             value={count}
-            unit="Questions"
-            icon={HelpCircle}
+            subtext="questions"
             variant="mono"
           />
         );
@@ -259,10 +277,10 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
       headerClassName: "w-28 text-right pr-4",
       className: "text-right pr-4",
       cell: (row) => (
-        <Button
+        <CtaButton
           variant="ghost"
           size="sm"
-          className="h-7 px-2.5 text-xs font-medium text-primary hover:text-primary hover:bg-primary/10 gap-1.5 cursor-pointer rounded-md transition-colors"
+          className="text-primary hover:text-primary hover:bg-primary/10"
           onClick={(e) => {
             e.stopPropagation();
             setSelectedResponse(row);
@@ -270,7 +288,7 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
         >
           <Eye className="h-3.5 w-3.5" />
           <span>Answers</span>
-        </Button>
+        </CtaButton>
       ),
     },
   ];
@@ -284,6 +302,15 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
         <p className="text-destructive font-medium text-sm">
           Failed to load survey responses.
         </p>
+        <CtaButton
+          variant="outline"
+          size="sm"
+          onClick={handleRefetch}
+          className="gap-2"
+        >
+          <RefreshCw className={cn("h-3.5 w-3.5", isRefetching && "animate-spin text-primary")} />
+          <span>Retry</span>
+        </CtaButton>
       </div>
     );
   }
@@ -352,11 +379,27 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
               <span className="font-semibold text-foreground">{rawResponses.length}</span>
             </div>
 
-            {/* Export CSV Button */}
-            <Button
+            {/* Refresh / Refetch Button */}
+            <CtaButton
               variant="outline"
-              size="sm"
-              className="h-8 px-3 gap-1.5 border-border rounded-md text-xs font-medium cursor-pointer shadow-2xs hover:bg-accent transition-colors"
+              size="default"
+              onClick={handleRefetch}
+              disabled={loading || isRefetching}
+              title="Refresh survey responses"
+            >
+              <RefreshCw
+                className={cn(
+                  "h-3.5 w-3.5 text-muted-foreground",
+                  (loading || isRefetching) && "animate-spin text-primary",
+                )}
+              />
+              <span>Refresh</span>
+            </CtaButton>
+
+            {/* Export CSV Button */}
+            <CtaButton
+              variant="outline"
+              size="default"
               onClick={handleExport}
               disabled={exporting || rawResponses.length === 0}
             >
@@ -366,7 +409,7 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
                 <Download className="h-3.5 w-3.5 text-muted-foreground" />
               )}
               <span>{exporting ? "Exporting..." : "Export CSV"}</span>
-            </Button>
+            </CtaButton>
           </EcosystemActionBar.Group>
         </EcosystemActionBar>
       </div>

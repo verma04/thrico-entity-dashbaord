@@ -116,18 +116,30 @@ export function SurveyEligibilityBadge({ survey }: { survey: Survey }) {
 
   const c = config[norm] || config.ALL;
   const Icon = c.icon;
+  const isAnonymous = Boolean(
+    survey.eligibility?.acceptAnonymousResponse ??
+    survey.eligibilityRule?.acceptAnonymousResponse ??
+    (survey as any).acceptAnonymousResponse
+  );
 
   return (
     <div className="flex flex-col gap-0.5 min-w-[130px]">
-      <span
-        className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-semibold w-fit",
-          c.className,
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-semibold w-fit",
+            c.className,
+          )}
+        >
+          <Icon className="h-3 w-3 shrink-0" />
+          <span>{c.label}</span>
+        </span>
+        {norm === "OUTSIDE_PLATFORM" && isAnonymous && (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+            Anon OK
+          </span>
         )}
-      >
-        <Icon className="h-3 w-3 shrink-0" />
-        <span>{c.label}</span>
-      </span>
+      </div>
       {norm === "OUTSIDE_PLATFORM" && shortCode && (
         <div className="flex items-center gap-1 mt-0.5 group">
           <a

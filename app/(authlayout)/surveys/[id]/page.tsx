@@ -51,6 +51,9 @@ function EditSurveyPage() {
         communityId: survey.communityId || "",
         communityIds: survey.communityIds || elig?.communityIds || [],
         memberEligibility: elig?.memberEligibility || "ALL",
+        acceptAnonymousResponse: Boolean(
+          elig?.acceptAnonymousResponse ?? (survey as any)?.acceptAnonymousResponse ?? false,
+        ),
         membershipTierId:
           elig?.membershipTierId || elig?.eligibleTierIds || [],
         eligibleTierIds:
@@ -62,6 +65,11 @@ function EditSurveyPage() {
     : undefined;
 
   const onFinish = (values: any) => {
+    const isOutsidePlatform = values.memberEligibility === "OUTSIDE_PLATFORM";
+    const acceptAnonymous = isOutsidePlatform
+      ? Boolean(values.acceptAnonymousResponse)
+      : false;
+
     const input: EditSurveyInput = {
       title: values.title,
       description: values.description,
@@ -74,6 +82,7 @@ function EditSurveyPage() {
       communityId: values.communityId || undefined,
       communityIds: values.communityIds?.length ? values.communityIds : undefined,
       memberEligibility: values.memberEligibility || "ALL",
+      acceptAnonymousResponse: acceptAnonymous,
       eligibility: {
         memberEligibility: values.memberEligibility || "ALL",
         membershipTierId:
@@ -84,6 +93,7 @@ function EditSurveyPage() {
         eligibleSegmentIds: values.eligibleSegmentIds || [],
         eligibleCommunityIds: values.eligibleCommunityIds || [],
         communityIds: values.communityIds || [],
+        acceptAnonymousResponse: acceptAnonymous,
       },
     };
 
