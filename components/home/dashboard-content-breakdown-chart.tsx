@@ -83,7 +83,7 @@ export function DashboardContentBreakdownChart({
             </p>
           </div>
         ) : (
-          <div className="flex-1 min-h-[220px]">
+          <div className="flex-1 h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

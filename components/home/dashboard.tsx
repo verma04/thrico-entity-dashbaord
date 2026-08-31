@@ -219,12 +219,12 @@ export default function Dashboard() {
         </div>
 
         {/* 3.5. Insights Row (Growth & Content Breakdown) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <section className="space-y-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+          <section className="space-y-3 flex flex-col">
             <DashboardSectionHeading title="Community Growth" />
             <DashboardGrowthChart />
           </section>
-          <section className="space-y-3">
+          <section className="space-y-3 flex flex-col">
             <DashboardSectionHeading title="Content Insights" />
             <DashboardContentBreakdownChart
               data={kpis?.contentTypeBreakdown || []}

@@ -82,7 +82,7 @@ export function DashboardSessionRadarChart() {
   const totalSessions = totals.desktop + totals.mobile;
 
   return (
-    <Card className="border-border/60 shadow-sm relative flex flex-col h-full overflow-hidden">
+    <Card className="border-border/60 shadow-sm relative flex flex-col flex-1 h-full overflow-hidden">
       <CardHeader className="flex flex-col gap-1 pb-2 border-b border-border/40 relative z-10">
         {!loading && totalSessions > 0 && (
           <div className="grid grid-cols-2 gap-4 mt-3 pt-3 border-t border-border/40">
@@ -116,7 +116,7 @@ export function DashboardSessionRadarChart() {
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 pb-4 relative min-h-[300px]">
+      <CardContent className="flex-1 pb-4 relative min-h-[300px] flex flex-col justify-end">
         {/* Abstract Background Elements */}
 
         {loading && (
@@ -132,11 +132,11 @@ export function DashboardSessionRadarChart() {
 
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-[4/3] w-full pt-4"
+          className="mx-auto h-[280px] w-full pt-2"
         >
           <BarChart
             data={formattedData}
-            margin={{ top: 10, right: 10, bottom: 10, left: -20 }}
+            margin={{ top: 10, right: 10, bottom: 15, left: -20 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"

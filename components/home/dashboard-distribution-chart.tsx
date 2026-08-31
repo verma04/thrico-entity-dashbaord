@@ -86,7 +86,7 @@ export function DashboardDistributionChart() {
   const totalAll = totals.web + totals.ios + totals.android;
 
   return (
-    <Card className="border-border/60 bg-gradient-to-b from-background to-muted/10 shadow-sm overflow-hidden flex flex-col h-full">
+    <Card className="border-border/60 bg-gradient-to-b from-background to-muted/10 shadow-sm overflow-hidden flex flex-col flex-1 h-full">
       <CardHeader className="flex flex-col gap-4 border-b border-border/40 pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1.5 w-full">
           {!loading && totalAll > 0 && (
@@ -131,7 +131,7 @@ export function DashboardDistributionChart() {
         />
       </CardHeader>
 
-      <CardContent className="flex-1 px-0 pb-0 pt-6 relative min-h-[300px]">
+      <CardContent className="flex-1 px-0 pb-4 pt-6 relative min-h-[300px] flex flex-col">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm transition-all duration-300">
             <div className="flex flex-col items-center gap-3 bg-background/90 p-4 rounded-xl shadow-lg border border-border/50">
@@ -143,14 +143,14 @@ export function DashboardDistributionChart() {
           </div>
         )}
 
-        <div className="px-2 sm:px-6 h-full">
+        <div className="px-2 sm:px-6 h-full flex-1">
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-full min-h-[300px] w-full"
+            className="aspect-auto h-[280px] w-full"
           >
             <AreaChart
               data={chartData}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              margin={{ top: 10, right: 15, left: -20, bottom: 15 }}
             >
               <defs>
                 <linearGradient id="fillWeb" x1="0" y1="0" x2="0" y2="1">

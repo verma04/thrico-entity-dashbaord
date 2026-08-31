@@ -76,7 +76,7 @@ export function DashboardAcquisition({
   DashboardSectionHeading,
 }: DashboardAcquisitionProps) {
   return (
-    <section className="space-y-3 mt-20">
+    <section className="space-y-3">
       <DashboardSectionHeading title="COMMUNITY GROWTH MATRIX" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {acquisitionRet.map((v) => {

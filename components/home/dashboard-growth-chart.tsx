@@ -57,7 +57,7 @@ export function DashboardGrowthChart() {
   const growthRate = data?.getGrowthStats?.growthRate || 0;
 
   return (
-    <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-sm relative h-full flex flex-col">
+    <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-sm relative h-full flex flex-col flex-1">
       <CardHeader className="flex flex-row items-start justify-between pb-2 border-b border-border/40 mb-4">
         <div className="space-y-1 w-full sm:w-auto min-w-[200px]">
           {!loading && (
@@ -97,7 +97,7 @@ export function DashboardGrowthChart() {
         />
       </CardHeader>
 
-      <CardContent className="flex-1 pb-4 pt-2 px-2 sm:px-6 relative min-h-[220px]">
+      <CardContent className="flex-1 pb-4 pt-2 px-2 sm:px-6 relative h-[260px] min-h-[260px]">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
             <div className="flex flex-col items-center gap-2">
@@ -112,7 +112,7 @@ export function DashboardGrowthChart() {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            margin={{ top: 10, right: 15, left: -20, bottom: 15 }}
           >
             <defs>
               <linearGradient id="fillGrowth" x1="0" y1="0" x2="0" y2="1">
@@ -129,7 +129,7 @@ export function DashboardGrowthChart() {
               dataKey="date"
               tickLine={false}
               axisLine={false}
-              tickMargin={10}
+              tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
                 // If it's a week format (YYYY-WW), show just the week number or approximate month
