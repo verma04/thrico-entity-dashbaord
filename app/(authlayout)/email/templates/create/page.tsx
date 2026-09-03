@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import TemplateBuilder from "@/components/email/template-builder";
+import { UnlayerEmailEditor } from "@/components/email/unlayer-editor";
 import { useGetEmailTemplate } from "@/graphql/actions/email";
 
 import { STARTER_TEMPLATES } from "@/lib/email-templates";
@@ -65,7 +65,7 @@ function CreateTemplateContent() {
     return <TemplateChooser onSelect={setChosenStarter} />;
   }
 
-  return <TemplateBuilder id={id || undefined} initialData={initialData} />;
+  return <UnlayerEmailEditor id={id || undefined} initialData={initialData} />;
 }
 
 export default function CreateTemplatePage() {

@@ -218,6 +218,9 @@ dependencies:
   react-easy-crop:
     specifier: ^5.5.6
     version: 5.5.6(react-dom@19.2.0)(react@19.2.0)
+  react-email-editor:
+    specifier: ^2.1.2
+    version: 2.1.2(react@19.2.0)
   react-hook-form:
     specifier: ^7.68.0
     version: 7.68.0(react@19.2.0)
@@ -4641,6 +4644,10 @@ packages:
     resolution: {integrity: sha512-mUFwbeTqrVgDQxFveS+df2yfap6iuP20NAKAsBt5jDEoOTDew+zwLAOilHCeQJOVSvmgCX4ogqIrA0mnyr08yQ==}
     dev: false
 
+  /@unlayer/types@1.477.0:
+    resolution: {integrity: sha512-yTadBVaN7IjBEo8S9CELJvFTxS960x6KHRsPsgW+nBQwPMAaKnCL8Eg4RV/dYdQ6pd2IOUxNjKjVIjTIEMXJzQ==}
+    dev: false
+
   /@unrs/resolver-binding-android-arm-eabi@1.11.1:
     resolution: {integrity: sha512-ppLRUgHVaGRWUx0R0Ut06Mjo9gBaBkg3v/8AxusGLhsIotbBLuRk51rAzqLC8gq6NyyAojEXglNjzf6R948DNw==}
     cpu: [arm]
@@ -8282,6 +8289,16 @@ packages:
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
       tslib: 2.8.1
+    dev: false
+
+  /react-email-editor@2.1.2(react@19.2.0):
+    resolution: {integrity: sha512-zePLRUTzaVyHipRrtdWBAmjvDKaH+ShoOIjkOcK/HbGK93TYe24yIII3qwalRMd44vJVXD2Xm+3uKSQw+MV+gg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: '>=16.8'
+    dependencies:
+      '@unlayer/types': 1.477.0
+      react: 19.2.0
     dev: false
 
   /react-fast-compare@2.0.4:
