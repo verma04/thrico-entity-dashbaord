@@ -5,8 +5,6 @@ import {
   Zap,
   Coins,
   Award,
-  Bell,
-  Mail,
   Settings,
 } from "lucide-react";
 import { Badge } from "@/graphql/actions";
@@ -21,7 +19,6 @@ interface BadgeCardCompactProps {
   badge: Badge;
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (badge: Badge) => void;
-  onOpenNotifications: (badge: Badge) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
 }
@@ -30,7 +27,6 @@ export function BadgeCardCompact({
   badge,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
 }: BadgeCardCompactProps) {
@@ -44,9 +40,6 @@ export function BadgeCardCompact({
   const source = badge.source || moduleInfo?.type || "MODULE";
   const isIntegration = source === "INTEGRATION";
   const isAction = badge.type === "ACTION";
-
-  const hasPush = badge.allowPushNotification !== false;
-  const hasEmail = badge.allowEmailNotification !== false;
 
   const barColor = badge.isActive ? "#10b981" : "#f43f5e";
 
@@ -101,7 +94,6 @@ export function BadgeCardCompact({
           <BadgeActions
             badge={badge}
             onEdit={onEdit}
-            onOpenNotifications={onOpenNotifications}
             onToggleActive={onToggleActive}
           />
         </div>
@@ -144,31 +136,6 @@ export function BadgeCardCompact({
                   ? `${(badge.condition?.action || badge.action || "Action").replace(/_/g, " ")} × ${badge.condition?.count || badge.targetValue || 1}`
                   : `${(badge.condition?.pointsRequired || badge.targetValue || 0).toLocaleString()} PTS`}
               </span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <div
-                title={hasPush ? "Push Notification Enabled" : "Push Muted"}
-                className={cn(
-                  "p-1 rounded transition-colors",
-                  hasPush
-                    ? "text-foreground bg-muted"
-                    : "text-muted-foreground/40",
-                )}
-              >
-                <Bell className="h-2.5 w-2.5" />
-              </div>
-              <div
-                title={hasEmail ? "Email Notification Enabled" : "Email Muted"}
-                className={cn(
-                  "p-1 rounded transition-colors",
-                  hasEmail
-                    ? "text-foreground bg-muted"
-                    : "text-muted-foreground/40",
-                )}
-              >
-                <Mail className="h-2.5 w-2.5" />
-              </div>
             </div>
           </div>
         </div>

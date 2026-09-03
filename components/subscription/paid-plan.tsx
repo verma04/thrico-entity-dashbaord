@@ -13,9 +13,16 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 interface PaidPlanProps {
   storageStats?: any[];
   storageSummary?: any;
+  subscription?: any;
 }
 
-const PaidPlan = ({ storageStats, storageSummary }: PaidPlanProps) => {
+const PaidPlan = ({
+  storageStats,
+  storageSummary,
+  subscription,
+}: PaidPlanProps) => {
+  const isCustom = subscription?.planType?.toLowerCase() === "custom";
+
   return (
     <EcosystemWrapper>
       <EcosystemHeader
@@ -45,8 +52,8 @@ const PaidPlan = ({ storageStats, storageSummary }: PaidPlanProps) => {
           {/* Add-ons */}
           <AddonPricingSection />
 
-          {/* Upgrade plans */}
-          <Upgrade />
+          {/* Upgrade plans - hidden for custom plans */}
+          {!isCustom && <Upgrade />}
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>

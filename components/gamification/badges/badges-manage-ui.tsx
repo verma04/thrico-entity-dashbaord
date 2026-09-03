@@ -137,7 +137,6 @@ interface ContentAreaProps {
   badges: Badge[];
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (badge: Badge) => void;
-  onOpenNotifications: (badge: Badge) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
   visibleColumns?: Record<string, boolean>;
@@ -150,7 +149,6 @@ export function ContentArea({
   badges,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
   visibleColumns,
@@ -236,7 +234,6 @@ export function ContentArea({
               badges={badges}
               modules={modules}
               onEdit={onEdit}
-              onOpenNotifications={onOpenNotifications}
               onToggleActive={onToggleActive}
               toggling={toggling}
             />
@@ -245,7 +242,6 @@ export function ContentArea({
               badges={badges}
               modules={modules}
               onEdit={onEdit}
-              onOpenNotifications={onOpenNotifications}
               onToggleActive={onToggleActive}
               toggling={toggling}
               visibleColumns={visibleColumns}

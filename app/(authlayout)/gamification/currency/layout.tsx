@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   History,
   Wallet,
+  Zap,
 } from "lucide-react";
 import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
@@ -35,7 +36,11 @@ function CurrencyLayout({ children }: { children: React.ReactNode }) {
       label: "Anti-Abuse",
       icon: <ShieldAlert className="h-4 w-4" />,
     },
-
+    {
+      key: "automation",
+      label: "Automation",
+      icon: <Zap className="h-4 w-4" />,
+    },
     {
       key: "trace",
       label: "Quick Trace",

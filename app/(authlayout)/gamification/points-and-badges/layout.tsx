@@ -11,6 +11,7 @@ import {
   History,
   Flame,
   Swords,
+  Zap,
 } from "lucide-react";
 import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
@@ -46,6 +47,11 @@ function GamificationLayout({ children }: { children: React.ReactNode }) {
       key: "leaderboard",
       label: "Leaderboard",
       icon: <BarChart2 className="h-4 w-4" />,
+    },
+    {
+      key: "automation",
+      label: "Automation",
+      icon: <Zap className="h-4 w-4" />,
     },
     {
       key: "activity-log",

@@ -10,7 +10,6 @@ interface PointRulesGridProps {
   rules: PointRule[];
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (rule: PointRule) => void;
-  onOpenNotifications: (rule: PointRule) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
 }
@@ -19,7 +18,6 @@ export function PointRulesGrid({
   rules,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
 }: PointRulesGridProps) {
@@ -49,7 +47,6 @@ export function PointRulesGrid({
           rule={rule}
           modules={modules}
           onEdit={onEdit}
-          onOpenNotifications={onOpenNotifications}
           onToggleActive={onToggleActive}
           toggling={toggling}
         />

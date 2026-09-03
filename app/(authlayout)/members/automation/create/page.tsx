@@ -7,6 +7,7 @@ import {
   CREATE_MEMBER_AUTOMATION_RULE,
   GET_MEMBER_AUTOMATION_RULES,
   CreateMemberAutomationRuleInput,
+  UpdateMemberAutomationRuleInput,
 } from "@/graphql/member-automation";
 import { AutomationForm } from "@/components/members/automation/automation-form";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -31,9 +32,11 @@ const CreateAutomationRulePage = () => {
     },
   });
 
-  const handleSave = async (input: CreateMemberAutomationRuleInput) => {
+  const handleSave = async (
+    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput
+  ) => {
     await createRule({
-      variables: { input },
+      variables: { input: input as CreateMemberAutomationRuleInput },
     });
   };
 

@@ -41,10 +41,18 @@ const Page = () => {
   return (
     <>
       {subscription?.subscriptionType === "trial" && (
-        <Trail storageStats={storageStats} storageSummary={storageSummary} />
+        <Trail
+          storageStats={storageStats}
+          storageSummary={storageSummary}
+          subscription={subscription}
+        />
       )}
       {subscription?.subscriptionType === "paid" && (
-        <PaidPlan storageStats={storageStats} storageSummary={storageSummary} />
+        <PaidPlan
+          storageStats={storageStats}
+          storageSummary={storageSummary}
+          subscription={subscription}
+        />
       )}
     </>
   );

@@ -25,6 +25,7 @@ import { ConditionBuilder } from "@/components/members/settings/rules/condition-
 import { ActionBuilder } from "@/components/members/settings/rules/action-builder";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Zap,
   Sparkles,
@@ -35,7 +36,10 @@ import {
   TrendingUp,
   School,
   Building,
+  ListFilter,
+  Layers,
 } from "lucide-react";
+import { AutomationFlowBuilder } from "./flow/automation-flow-builder";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +47,7 @@ interface AutomationFormProps {
   initialValues?: MemberAutomationRule | null;
   loading?: boolean;
   onSave: (
-    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput,
+    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput
   ) => Promise<void>;
   onCancel: () => void;
   isEdit?: boolean;
@@ -161,15 +165,16 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
   onCancel,
   isEdit = false,
 }) => {
+  const [viewMode, setViewMode] = useState<"flow" | "form">("flow");
   const [name, setName] = useState(initialValues?.name || "");
   const [description, setDescription] = useState(
-    initialValues?.description || "",
+    initialValues?.description || ""
   );
   const [trigger, setTrigger] = useState<MemberRuleTrigger>(
-    initialValues?.trigger || "MEMBER_JOINED",
+    initialValues?.trigger || "MEMBER_JOINED"
   );
   const [conditionOperator, setConditionOperator] = useState<"AND" | "OR">(
-    (initialValues?.conditionOperator as "AND" | "OR") || "AND",
+    (initialValues?.conditionOperator as "AND" | "OR") || "AND"
   );
   const [conditions, setConditions] = useState<MemberRuleConditionInput[]>(
     initialValues?.conditions
@@ -178,7 +183,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           operator: c.operator,
           value: c.value,
         }))
-      : [],
+      : []
   );
   const [actions, setActions] = useState<MemberRuleActionInput[]>(
     initialValues?.actions
@@ -195,10 +200,10 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           pushBody: a.pushBody,
           push: a.push,
         }))
-      : [{ type: "ASSIGN_MEMBERSHIP_TIER" }],
+      : [{ type: "ASSIGN_MEMBERSHIP_TIER" }]
   );
   const [isActive, setIsActive] = useState(
-    initialValues ? initialValues.isActive : true,
+    initialValues ? initialValues.isActive : true
   );
   const [savedState, setSavedState] = useState(false);
 
@@ -217,7 +222,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           setActions(draft.actions || [{ type: "ASSIGN_MEMBERSHIP_TIER" }]);
           setIsActive(draft.isActive !== undefined ? draft.isActive : true);
           sessionStorage.removeItem("automation_rule_draft");
-          toast.info("Applied template recipe to form.");
+          toast.info("Applied template recipe to canvas.");
         } catch (e) {
           console.error("Failed to parse draft", e);
         }
@@ -242,7 +247,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
             field: c.field,
             operator: c.operator,
             value: c.value,
-          })) || [],
+          })) || []
         ) ||
       JSON.stringify(actions) !==
         JSON.stringify(
@@ -258,7 +263,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
             pushTitle: a.pushTitle,
             pushBody: a.pushBody,
             push: a.push,
-          })) || [],
+          })) || []
         )
     );
   }, [
@@ -278,7 +283,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
       setDescription(initialValues.description || "");
       setTrigger(initialValues.trigger || "MEMBER_JOINED");
       setConditionOperator(
-        (initialValues.conditionOperator as "AND" | "OR") || "AND",
+        (initialValues.conditionOperator as "AND" | "OR") || "AND"
       );
       setConditions(
         initialValues.conditions
@@ -287,7 +292,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
               operator: c.operator,
               value: c.value,
             }))
-          : [],
+          : []
       );
       setActions(
         initialValues.actions
@@ -304,7 +309,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
               pushBody: a.pushBody,
               push: a.push,
             }))
-          : [],
+          : []
       );
       setIsActive(initialValues.isActive);
     } else {
@@ -386,8 +391,62 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
     );
   }, [trigger]);
 
+  // If in Flow Canvas View Mode (Default), render the interactive React Flow visual canvas builder!
+  if (viewMode === "flow") {
+    return (
+      <div className="w-full">
+        <AutomationFlowBuilder
+          name={name}
+          description={description}
+          trigger={trigger}
+          conditionOperator={conditionOperator}
+          conditions={conditions}
+          actions={actions}
+          isActive={isActive}
+          onNameChange={setName}
+          onDescriptionChange={setDescription}
+          onTriggerChange={setTrigger}
+          onConditionOperatorChange={setConditionOperator}
+          onConditionsChange={setConditions}
+          onActionsChange={setActions}
+          onIsActiveChange={setIsActive}
+          onSave={handleSubmit}
+          onReset={handleReset}
+          hasChanged={hasChanged}
+          isSaving={loading}
+          isEdit={isEdit}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
+      </div>
+    );
+  }
+
+  // Classic Form Layout View Mode
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Top Mode Banner when in Form view */}
+      <div className="p-3 rounded-xl bg-card border border-border flex items-center justify-between shadow-xs">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-[10px] font-bold">
+            Step Form View
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            Linear step configuration mode. Switch to Canvas for interactive node diagram.
+          </span>
+        </div>
+
+        <Button
+          type="button"
+          size="sm"
+          onClick={() => setViewMode("flow")}
+          className="h-7 text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          <Zap className="w-3.5 h-3.5" />
+          Switch to Interactive Canvas
+        </Button>
+      </div>
+
       <PolarisFormLayout
         sidebar={
           <div className="space-y-4">
@@ -477,7 +536,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
                           "text-[10px] font-bold px-1.5 py-0.2 rounded-[4px]",
                           isActive
                             ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
-                            : "bg-zinc-100 text-zinc-600 border-zinc-300",
+                            : "bg-zinc-100 text-zinc-600 border-zinc-300"
                         )}
                       >
                         {isActive ? "Active" : "Paused"}
@@ -588,7 +647,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
                         "p-3 rounded-[8px] border text-left flex flex-col justify-between transition-all cursor-pointer",
                         isSelected
                           ? "border-[#303030] bg-[#f6f6f7] dark:border-zinc-100 dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs"
-                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
+                          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]"
                       )}
                     >
                       <div className="flex items-center gap-2 mb-1.5">
@@ -597,7 +656,7 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
                             "w-6 h-6 rounded-[4px] flex items-center justify-center shrink-0 border",
                             isSelected
                               ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
-                              : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                              : "bg-[#f6f6f7] text-[#616161] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
                           )}
                         >
                           <Icon className="w-3.5 h-3.5" />

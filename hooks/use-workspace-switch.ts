@@ -9,7 +9,11 @@ export function useWorkspaceSwitch() {
   const [mutate] = useSwitchToOtherAccount();
   const { isSwitching, targetName, setIsSwitching } = useWorkspaceStore();
 
-  const handleSwitch = async (entityId: string, name: string) => {
+  const handleSwitch = async (
+    entityId: string,
+    name: string,
+    targetPath?: string
+  ) => {
     setIsSwitching(true, name);
 
     try {
@@ -18,9 +22,26 @@ export function useWorkspaceSwitch() {
       });
 
       if (data?.switchToOtherAccount?.token) {
+        let redirectPath = targetPath;
+        if (!redirectPath && typeof window !== "undefined") {
+          const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+          if (
+            currentPath &&
+            !currentPath.startsWith("/auth") &&
+            !currentPath.startsWith("/login") &&
+            !currentPath.startsWith("/logout")
+          ) {
+            redirectPath = currentPath;
+          }
+        }
+
+        const pathParam = redirectPath
+          ? `&path=${encodeURIComponent(redirectPath)}`
+          : "";
+
         // Slack-style pause before redirection for better feel
         setTimeout(() => {
-          window.location.href = `/auth/callback?code=${data.switchToOtherAccount.token}`;
+          window.location.href = `/auth/callback?code=${data.switchToOtherAccount.token}${pathParam}`;
         }, 1500);
       } else {
         throw new Error("No token received");

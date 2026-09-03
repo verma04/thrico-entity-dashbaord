@@ -4,7 +4,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useGetUserStats } from "@/graphql/actions";
 import { useMemberDetails } from "./member-context";
-import { MemberCustomer360Card } from "@/components/analytics/customer-360-card";
 import {
   Layout,
   Users,
@@ -155,11 +154,9 @@ function StatCard({
 
 export function StatsTab({ userId }: { userId: string }) {
   const router = useRouter();
-  const { member, user } = useMemberDetails();
+  const { member } = useMemberDetails();
   const { data: statsData } = useGetUserStats(userId);
   const stats = statsData?.getUserStats;
-
-  const targetUserId = userId || user?.id || member?.userId || member?.id;
 
   const basePath = `/members/${member?.id || userId}`;
 

@@ -43,6 +43,11 @@ const Upgrade = () => {
     setActivePackage(pkg);
   };
 
+  // If the entity is on a custom plan, do not render the upgrade section
+  if (planOverview?.planType?.toLowerCase() === "custom") {
+    return null;
+  }
+
   return (
     <>
       <div className="space-y-6">

@@ -16,11 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Pencil,
-  Award,
   Zap,
   Coins,
-  Bell,
-  Mail,
   MoreHorizontal,
   Copy,
   Power,
@@ -32,7 +29,6 @@ import { renderModuleIcon } from "@/components/subscription/utils";
 import { Badge, useToggleBadge } from "@/graphql/actions";
 import { toast } from "sonner";
 import { BadgeIcon } from "./badge-icon";
-import { BadgeNotificationModal } from "./badge-notification-modal";
 
 interface BadgeListProps {
   badges: Badge[];
@@ -51,9 +47,6 @@ export function BadgeList({
   refetchBadges,
   refetchStats,
 }: BadgeListProps) {
-  const [notificationModalBadge, setNotificationModalBadge] =
-    React.useState<Badge | null>(null);
-
   const [toggleBadge, { loading: toggling }] = useToggleBadge({
     onCompleted: () => {
       refetchBadges();
@@ -165,43 +158,6 @@ export function BadgeList({
       },
     },
     {
-      key: "notifications",
-      header: "Alerts",
-      cell: (badge: Badge) => {
-        const hasPush = badge.allowPushNotification !== false;
-        const hasEmail = badge.allowEmailNotification !== false;
-
-        return (
-          <div className="flex items-center gap-1.5">
-            <div
-              title={hasPush ? "Push Notification Enabled" : "Push Notification Muted"}
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasPush
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Bell className="h-3 w-3" />
-              <span>Push</span>
-            </div>
-            <div
-              title={hasEmail ? "Email Notification Enabled" : "Email Notification Muted"}
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasEmail
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Mail className="h-3 w-3" />
-              <span>Email</span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
       key: "status",
       header: "Status",
       cell: (badge: Badge) => (
@@ -249,13 +205,6 @@ export function BadgeList({
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer text-xs py-1.5"
-                onClick={() => setNotificationModalBadge(badge)}
-              >
-                <Bell className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                <span>Edit Notifications</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer text-xs py-1.5"
                 onClick={() => handleToggleActive(badge.id)}
               >
                 <Power
@@ -284,8 +233,7 @@ export function BadgeList({
     },
   ];
 
-  return (
-    <>
+    return (
       <AdminTable
         columns={columns}
         data={badges || []}
@@ -295,16 +243,5 @@ export function BadgeList({
         emptyDescription="Badges motivate community participation. Create your first credential to reward member loyalty."
         size="sm"
       />
-
-      <BadgeNotificationModal
-        badge={notificationModalBadge}
-        open={!!notificationModalBadge}
-        onOpenChange={(open) => !open && setNotificationModalBadge(null)}
-        onSuccess={() => {
-          refetchBadges();
-          refetchStats();
-        }}
-      />
-    </>
-  );
+    );
 }

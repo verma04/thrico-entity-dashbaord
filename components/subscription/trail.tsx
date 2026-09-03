@@ -12,9 +12,10 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 interface TrailProps {
   storageStats?: any[];
   storageSummary?: any;
+  subscription?: any;
 }
 
-const Trail = ({ storageStats, storageSummary }: TrailProps) => {
+const Trail = ({ storageStats, storageSummary, subscription }: TrailProps) => {
   return (
     <EcosystemWrapper>
       <EcosystemHeader

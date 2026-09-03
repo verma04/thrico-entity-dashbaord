@@ -55,7 +55,6 @@ import {
 } from "./badges-manage-ui";
 import { getBadgeTableColumns } from "./badges-table-list";
 import { BadgeStats } from "./badge-stats";
-import { BadgeNotificationModal } from "./badge-notification-modal";
 import { ExportBadgesModal } from "./export-badges-modal";
 
 export interface BadgesManagerProps {
@@ -120,8 +119,6 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
 
   // Modal states
   const [showExportModal, setShowExportModal] = useState(false);
-  const [notificationModalBadge, setNotificationModalBadge] =
-    useState<Badge | null>(null);
 
   // Column visibility for List view
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
@@ -130,7 +127,6 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
     source: true,
     origin: true,
     criteria: true,
-    notifications: true,
     status: true,
     actions: true,
   });
@@ -337,7 +333,6 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
       getBadgeTableColumns(
         subscriptionSources,
         handleEdit,
-        setNotificationModalBadge,
         handleToggleActive,
         toggling,
       ),
@@ -632,7 +627,6 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
           badges={paginatedBadges}
           modules={subscriptionSources}
           onEdit={handleEdit}
-          onOpenNotifications={setNotificationModalBadge}
           onToggleActive={handleToggleActive}
           toggling={toggling}
           visibleColumns={visibleColumns}
@@ -652,16 +646,6 @@ export function BadgesManager({ status: initialStatus }: BadgesManagerProps) {
           </div>
         )}
       </EcosystemContainer>
-
-      {/* ── Notification Edit Modal ───────────────────────────────────────── */}
-      <BadgeNotificationModal
-        badge={notificationModalBadge}
-        open={!!notificationModalBadge}
-        onOpenChange={(open) => !open && setNotificationModalBadge(null)}
-        onSuccess={() => {
-          refetchBadges();
-        }}
-      />
 
       {/* ── Export Modal ─────────────────────────────────────────────────── */}
       <ExportBadgesModal

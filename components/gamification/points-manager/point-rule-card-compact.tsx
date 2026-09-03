@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Zap, Coins, Bell, Mail, Settings, Sparkles, Repeat } from "lucide-react";
+import { Zap, Coins, Settings, Sparkles, Repeat } from "lucide-react";
 import { PointRule } from "@/graphql/actions";
 import { PointRuleActions } from "./point-rule-actions";
 import { Switch } from "@/components/ui/switch";
@@ -18,7 +18,6 @@ interface PointRuleCardCompactProps {
     type?: "MODULE" | "INTEGRATION";
   }[];
   onEdit: (rule: PointRule) => void;
-  onOpenNotifications: (rule: PointRule) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
 }
@@ -27,7 +26,6 @@ export function PointRuleCardCompact({
   rule,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
 }: PointRuleCardCompactProps) {
@@ -41,9 +39,6 @@ export function PointRuleCardCompact({
   const source = rule.source || moduleInfo?.type || "MODULE";
   const isIntegration = source === "INTEGRATION";
   const isRecurring = rule.trigger === "RECURRING";
-
-  const hasPush = rule.allowPushNotification !== false;
-  const hasEmail = rule.allowEmailNotification !== false;
 
   const barColor = rule.isActive ? "#10b981" : "#f43f5e";
 
@@ -100,7 +95,6 @@ export function PointRuleCardCompact({
           <PointRuleActions
             rule={rule}
             onEdit={onEdit}
-            onOpenNotifications={onOpenNotifications}
             onToggleActive={onToggleActive}
           />
         </div>
@@ -131,8 +125,7 @@ export function PointRuleCardCompact({
             </p>
           )}
 
-          {/* Caps and Notification Badges */}
-          <div className="flex items-center justify-between pt-1 text-[10px] text-muted-foreground">
+          <div className="pt-1 text-[10px] text-muted-foreground">
             {isRecurring ? (
               <div className="flex items-center gap-2 text-[10px]">
                 <span className="inline-flex items-center gap-0.5">
@@ -162,31 +155,6 @@ export function PointRuleCardCompact({
                 One-time milestone (No caps)
               </div>
             )}
-
-            <div className="flex items-center gap-1">
-              <div
-                title={hasPush ? "Push Notification Enabled" : "Push Muted"}
-                className={cn(
-                  "p-1 rounded transition-colors",
-                  hasPush
-                    ? "text-foreground bg-muted"
-                    : "text-muted-foreground/40",
-                )}
-              >
-                <Bell className="h-2.5 w-2.5" />
-              </div>
-              <div
-                title={hasEmail ? "Email Notification Enabled" : "Email Muted"}
-                className={cn(
-                  "p-1 rounded transition-colors",
-                  hasEmail
-                    ? "text-foreground bg-muted"
-                    : "text-muted-foreground/40",
-                )}
-              >
-                <Mail className="h-2.5 w-2.5" />
-              </div>
-            </div>
           </div>
         </div>
 

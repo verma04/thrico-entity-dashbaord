@@ -11,7 +11,9 @@ import { ShieldCheck } from "lucide-react";
 export default function CreateBroadcastPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [createTicketMutation, { loading: ticketLoading }] = useMutation(CREATE_SUPPORT_TICKET);
+  const [createTicketMutation, { loading: ticketLoading }] = useMutation(
+    CREATE_SUPPORT_TICKET,
+  );
 
   const handleCreateTicket = async (
     subject: string,
@@ -20,7 +22,7 @@ export default function CreateBroadcastPage() {
     description: string,
     targetUserId?: string,
     targetUserIds?: string[],
-    allowReplies: boolean = true
+    allowReplies: boolean = true,
   ) => {
     try {
       const isMultiple = targetUserIds && targetUserIds.length > 0;
@@ -31,13 +33,15 @@ export default function CreateBroadcastPage() {
             subject,
             description,
             category: category.toUpperCase().replace(" ", "_"),
-            subCategory: subCategory ? subCategory.toUpperCase().replace(" ", "_") : null,
+            subCategory: subCategory
+              ? subCategory.toUpperCase().replace(" ", "_")
+              : null,
             recipientType: isMultiple ? "MULTIPLE" : "ONE",
             allowReplies,
             targetUserId: isMultiple ? undefined : targetUserId,
             targetUserIds: isMultiple ? targetUserIds : undefined,
-          }
-        }
+          },
+        },
       });
       toast({
         title: "Success",

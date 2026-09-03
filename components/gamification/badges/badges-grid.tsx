@@ -10,7 +10,6 @@ interface BadgesGridProps {
   badges: Badge[];
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (badge: Badge) => void;
-  onOpenNotifications: (badge: Badge) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
 }
@@ -19,7 +18,6 @@ export function BadgesGrid({
   badges,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
 }: BadgesGridProps) {
@@ -49,7 +47,6 @@ export function BadgesGrid({
           badge={badge}
           modules={modules}
           onEdit={onEdit}
-          onOpenNotifications={onOpenNotifications}
           onToggleActive={onToggleActive}
           toggling={toggling}
         />

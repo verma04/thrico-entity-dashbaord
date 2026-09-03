@@ -56,7 +56,6 @@ import {
 } from "./points-manage-ui";
 import { getPointRuleTableColumns } from "./point-rules-list";
 import { StatsCards } from "./stats-cards";
-import { PointRuleNotificationModal } from "./point-rule-notification-modal";
 import { ExportPointRulesModal } from "./export-point-rules-modal";
 
 export interface PointsManagerProps {
@@ -121,8 +120,6 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
 
   // Modal states
   const [showExportModal, setShowExportModal] = useState(false);
-  const [notificationModalRule, setNotificationModalRule] =
-    useState<PointRule | null>(null);
 
   // Column visibility for List view
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
@@ -135,7 +132,6 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
     dailyCap: true,
     weeklyCap: true,
     monthlyCap: true,
-    notifications: true,
     status: true,
     actions: true,
   });
@@ -357,14 +353,12 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
       getPointRuleTableColumns(
         subscriptionSources,
         handleEdit,
-        setNotificationModalRule,
         handleToggleActive,
         toggling,
       ),
     [
       subscriptionSources,
       handleEdit,
-      setNotificationModalRule,
       handleToggleActive,
       toggling,
     ],
@@ -658,7 +652,6 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
           rules={paginatedRules}
           modules={subscriptionSources}
           onEdit={handleEdit}
-          onOpenNotifications={setNotificationModalRule}
           onToggleActive={handleToggleActive}
           toggling={toggling}
           visibleColumns={visibleColumns}
@@ -678,17 +671,6 @@ export function PointsManager({ status: initialStatus }: PointsManagerProps) {
           </div>
         )}
       </EcosystemContainer>
-
-      {/* ── Notification Edit Modal ───────────────────────────────────────── */}
-      <PointRuleNotificationModal
-        rule={notificationModalRule}
-        open={!!notificationModalRule}
-        onOpenChange={(open) => !open && setNotificationModalRule(null)}
-        onSuccess={() => {
-          refetchRules();
-          refetchStats();
-        }}
-      />
 
       {/* ── Export Modal ─────────────────────────────────────────────────── */}
       <ExportPointRulesModal

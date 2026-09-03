@@ -6,8 +6,6 @@ import * as Yup from "yup";
 import { useRouter } from "next/navigation";
 import {
   Zap,
-  Bell,
-  Mail,
   Users,
   ShieldCheck,
   Crown,
@@ -38,7 +36,6 @@ import {
   PolarisEligibilityCard,
   toArray,
 } from "@/components/gamification/shared/polaris-eligibility-card";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const pointRuleSchema = Yup.object().shape({
   module: Yup.string().required("Please select a module or integration"),
@@ -55,12 +52,6 @@ const pointRuleSchema = Yup.object().shape({
   eligibleTierIds: Yup.array().of(Yup.string()).optional(),
   eligibleUserIds: Yup.array().of(Yup.string()).optional(),
   description: Yup.string().max(200, "Description too long"),
-  allowPushNotification: Yup.boolean().optional(),
-  allowEmailNotification: Yup.boolean().optional(),
-  pushNotificationTitle: Yup.string().optional(),
-  pushNotificationBody: Yup.string().optional(),
-  emailNotificationSubject: Yup.string().optional(),
-  emailNotificationBody: Yup.string().optional(),
 });
 
 interface PointRuleFormProps {
@@ -143,19 +134,6 @@ export function PointRuleForm({
               ? [initialValues.membershipTierId]
               : initialValues.eligibleTierIds || [],
           eligibleUserIds: initialValues.eligibleUserIds || [],
-          allowPushNotification:
-            initialValues.allowPushNotification !== undefined
-              ? initialValues.allowPushNotification
-              : true,
-          allowEmailNotification:
-            initialValues.allowEmailNotification !== undefined
-              ? initialValues.allowEmailNotification
-              : true,
-          pushNotificationTitle: initialValues.pushNotificationTitle ?? "",
-          pushNotificationBody: initialValues.pushNotificationBody ?? "",
-          emailNotificationSubject:
-            initialValues.emailNotificationSubject ?? "",
-          emailNotificationBody: initialValues.emailNotificationBody ?? "",
         }
       : {
           source: initialSourceType,
@@ -171,12 +149,6 @@ export function PointRuleForm({
           eligibleTierIds: [],
           eligibleUserIds: [],
           description: "",
-          allowPushNotification: true,
-          allowEmailNotification: true,
-          pushNotificationTitle: "",
-          pushNotificationBody: "",
-          emailNotificationSubject: "",
-          emailNotificationBody: "",
         };
   }, [initialValues, initialSourceType]);
 
@@ -446,6 +418,7 @@ export function PointRuleForm({
                           : "Specific Customers"
                         : "All Customers"
                 }
+                isLast={!isRecurring}
               />
               {isRecurring && (
                 <>
@@ -472,44 +445,10 @@ export function PointRuleForm({
                         ? `${formik.values.monthlyCap} times / user`
                         : "Unlimited"
                     }
+                    isLast
                   />
                 </>
               )}
-              <PolarisSummaryRow
-                label="Push Alert"
-                value={
-                  <span
-                    className={cn(
-                      "text-[11px] font-semibold",
-                      formik.values.allowPushNotification
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-zinc-400 dark:text-zinc-500",
-                    )}
-                  >
-                    {formik.values.allowPushNotification
-                      ? "Enabled"
-                      : "Disabled"}
-                  </span>
-                }
-              />
-              <PolarisSummaryRow
-                label="Email Alert"
-                value={
-                  <span
-                    className={cn(
-                      "text-[11px] font-semibold",
-                      formik.values.allowEmailNotification
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-zinc-400 dark:text-zinc-500",
-                    )}
-                  >
-                    {formik.values.allowEmailNotification
-                      ? "Enabled"
-                      : "Disabled"}
-                  </span>
-                }
-                isLast
-              />
             </div>
           </PolarisSidebarCard>
 
@@ -824,206 +763,6 @@ export function PointRuleForm({
             formik.setFieldValue("eligibleUserIds", users);
           }}
         />
-
-        {/* Card 5: Notification Settings */}
-        <PolarisFormCard
-          step={isRecurring ? 5 : 4}
-          title="Notification Settings"
-          description="Configure alert channels and custom notification text when members earn points from this rule."
-          badge="Notification Channels"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {/* Push Notification Panel */}
-            <div
-              className={cn(
-                "rounded-[8px] border transition-all p-3.5 space-y-3.5",
-                formik.values.allowPushNotification
-                  ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
-                  : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
-              )}
-            >
-              <div
-                onClick={() =>
-                  formik.setFieldValue(
-                    "allowPushNotification",
-                    !formik.values.allowPushNotification,
-                  )
-                }
-                className="flex items-start gap-2.5 cursor-pointer select-none"
-              >
-                <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    id="allowPushNotification"
-                    checked={formik.values.allowPushNotification}
-                    onCheckedChange={(checked) =>
-                      formik.setFieldValue("allowPushNotification", !!checked)
-                    }
-                  />
-                </div>
-                <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <Bell className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />
-                    <label
-                      htmlFor="allowPushNotification"
-                      className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
-                    >
-                      Allow push notification for user
-                    </label>
-                  </div>
-                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[15px]">
-                    Send an instant push notification to user's device when
-                    points are awarded from this rule.
-                  </p>
-                </div>
-              </div>
-
-              {formik.values.allowPushNotification && (
-                <div className="space-y-2.5 pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
-                  <PolarisInput
-                    id="pushNotificationTitle"
-                    name="pushNotificationTitle"
-                    label="Push Notification Title"
-                    placeholder="e.g. ⚡ Points Earned!"
-                    value={formik.values.pushNotificationTitle}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  <PolarisTextarea
-                    id="pushNotificationBody"
-                    name="pushNotificationBody"
-                    label="Push Notification Message"
-                    placeholder="e.g. You just earned {{points}} points!"
-                    value={formik.values.pushNotificationBody}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
-                    <span>Variables:</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        formik.setFieldValue(
-                          "pushNotificationBody",
-                          `${formik.values.pushNotificationBody} {{points}}`.trim(),
-                        )
-                      }
-                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
-                    >
-                      {"{{points}}"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        formik.setFieldValue(
-                          "pushNotificationBody",
-                          `${formik.values.pushNotificationBody} {{userName}}`.trim(),
-                        )
-                      }
-                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
-                    >
-                      {"{{userName}}"}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Email Notification Panel */}
-            <div
-              className={cn(
-                "rounded-[8px] border transition-all p-3.5 space-y-3.5",
-                formik.values.allowEmailNotification
-                  ? "border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900"
-                  : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/20 opacity-75",
-              )}
-            >
-              <div
-                onClick={() =>
-                  formik.setFieldValue(
-                    "allowEmailNotification",
-                    !formik.values.allowEmailNotification,
-                  )
-                }
-                className="flex items-start gap-2.5 cursor-pointer select-none"
-              >
-                <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    id="allowEmailNotification"
-                    checked={formik.values.allowEmailNotification}
-                    onCheckedChange={(checked) =>
-                      formik.setFieldValue("allowEmailNotification", !!checked)
-                    }
-                  />
-                </div>
-                <div className="space-y-0.5 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />
-                    <label
-                      htmlFor="allowEmailNotification"
-                      className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100 cursor-pointer"
-                    >
-                      Allow email notification
-                    </label>
-                  </div>
-                  <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[15px]">
-                    Send an email notification when user earns points from this
-                    rule.
-                  </p>
-                </div>
-              </div>
-
-              {formik.values.allowEmailNotification && (
-                <div className="space-y-2.5 pt-2.5 border-t border-[#e1e3e5] dark:border-zinc-800 animate-in fade-in-50 duration-200">
-                  <PolarisInput
-                    id="emailNotificationSubject"
-                    name="emailNotificationSubject"
-                    label="Email Subject"
-                    placeholder="e.g. You've earned {{points}} points!"
-                    value={formik.values.emailNotificationSubject}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  <PolarisTextarea
-                    id="emailNotificationBody"
-                    name="emailNotificationBody"
-                    label="Email Message / Content"
-                    placeholder="e.g. Great job! You have earned {{points}} points on our platform."
-                    value={formik.values.emailNotificationBody}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
-                    <span>Variables:</span>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        formik.setFieldValue(
-                          "emailNotificationBody",
-                          `${formik.values.emailNotificationBody} {{points}}`.trim(),
-                        )
-                      }
-                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
-                    >
-                      {"{{points}}"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        formik.setFieldValue(
-                          "emailNotificationBody",
-                          `${formik.values.emailNotificationBody} {{userName}}`.trim(),
-                        )
-                      }
-                      className="px-1.5 py-0.2 rounded-[4px] bg-[#e4e5e7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#d2d5d9] transition-colors font-mono text-[10.5px]"
-                    >
-                      {"{{userName}}"}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </PolarisFormCard>
       </form>
 
       {/* Floating Save Panel (Shopify Bottom Action Bar) */}

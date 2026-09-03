@@ -1,66 +1,82 @@
 "use client";
 
 import * as React from "react";
-import MenuItemsLayout from "@/components/layout/menu-items-layout";
-import { Mail, PaintBucket, Send, BarChart3, GitBranch } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { EmailDomainGate } from "@/components/email/domain-gate";
+import {
+  PaintBucket,
+  Send,
+  BarChart3,
+  LayoutDashboard,
+  Zap,
+} from "lucide-react";
+import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useModulePermission } from "@/hooks/use-module-permission";
 import { useTabOrder } from "@/hooks/use-tab-order";
 import { createLayoutStore } from "@/store/create-layout-store";
-
-import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { EmailDomainGate } from "@/components/email/domain-gate";
 
 const useEmailLayoutStore = createLayoutStore();
 
 function EmailLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const canReadEmail = useModulePermission("EMAIL", "canRead");
 
-  const items = [
-    {
-      key: "",
-      label: "Overview",
-      icon: <Mail className="h-4 w-4" />,
-      section: "General",
-      href: "/",
-    },
-    {
-      key: "templates",
-      label: "Templates",
-      icon: <PaintBucket className="h-4 w-4" />,
-      section: "General",
-      href: "/email/templates",
-    },
-    {
-      key: "send",
-      label: "Send Email",
-      icon: <Send className="h-4 w-4" />,
-      section: "General",
-      href: "/email/send",
-    },
-    {
-      key: "usage",
-      label: "Usage & Billing",
-      icon: <BarChart3 className="h-4 w-4" />,
-      section: "General",
-      href: "/email/usage",
-    },
-  ];
+  const defaultItems = React.useMemo(() => {
+    return [
+      {
+        key: "dashboard",
+        label: "Dashboard",
+        icon: <LayoutDashboard className="h-4 w-4" />,
+      },
+      {
+        key: "templates",
+        label: "Templates",
+        icon: <PaintBucket className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+      {
+        key: "send",
+        label: "Send Email",
+        icon: <Send className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+      {
+        key: "usage",
+        label: "Usage & Billing",
+        icon: <BarChart3 className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+      {
+        key: "automation",
+        label: "Automations",
+        icon: <Zap className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+    ];
+  }, [canReadEmail]);
 
   const isTakeoverPage =
     pathname.includes("/email/templates/create") ||
     pathname.includes("/email/automation/add") ||
     pathname.includes("/email/automation/edit");
 
-  const { getOrderedTabs, onReorder } = useTabOrder("EMAIL", useEmailLayoutStore, items);
-  const orderedItems = getOrderedTabs(items);
+  const { getOrderedTabs, onReorder } = useTabOrder(
+    "EMAIL",
+    useEmailLayoutStore,
+    defaultItems,
+  );
+
+  const sortedItems = getOrderedTabs(defaultItems);
 
   return (
     <MenuItemsLayout
       fixed={isTakeoverPage}
       fullHeight={isTakeoverPage}
+      active="email"
+      items={sortedItems}
       hideDefaultTabs={true}
-      active={"email"}
-      items={orderedItems}
+      showAdminTabs={false}
       enableReorder={true}
       onReorder={onReorder}
     >
@@ -69,4 +85,4 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withModulePermission(EmailLayout, "EMAIL", "canRead");
+export default withSubscriptionCheck(EmailLayout, "NETWORK");

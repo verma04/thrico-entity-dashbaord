@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ClipboardList, Settings, List, Plus, History } from "lucide-react";
+import { ClipboardList, Settings, List, Plus, History, Zap } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
@@ -40,6 +40,12 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
       label: `Create ${singularName}`,
       icon: <Plus className="h-4 w-4" />,
       locked: !canCreate,
+    },
+    {
+      key: "automation",
+      label: "Automation",
+      icon: <Zap className="h-4 w-4" />,
+      locked: !canRead,
     },
     {
       key: "audit-log",

@@ -277,6 +277,7 @@ const PlanOverview = () => {
       {/* Yearly upsell */}
       {planOverview?.status === "active" &&
         planOverview.subscriptionType === "paid" &&
+        planOverview?.planType?.toLowerCase() !== "custom" &&
         planOverview?.billingCycle === "monthly" && (
           <div className="border-t border-border/50 px-5 py-4">
             <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg bg-slate-900 dark:bg-muted text-white dark:text-foreground">

@@ -18,6 +18,7 @@ import {
   EntabCampusCareIntegrationCard,
   MyClassCampusIntegrationCard,
   MasterSoftERPIntegrationCard,
+  WhatsAppIntegrationCard,
 } from "@/components/settings/integrations";
 import {
   HR_PROVIDERS_CONFIG,
@@ -30,6 +31,7 @@ import {
   useGetCRMConnections,
   useGetShopifyConnection,
   useGetWooCommerceConnection,
+  useGetWhatsAppConnections,
 } from "@/graphql/actions";
 import {
   Search,
@@ -77,6 +79,11 @@ export default function IntegrationsPage() {
 
   const { data: wooCommerceData } = useGetWooCommerceConnection();
   const isWooCommerceConnected = !!wooCommerceData?.wooCommerceConnection?.id;
+
+  const { data: whatsAppData } = useGetWhatsAppConnections();
+  const isWhatsAppConnected =
+    !!whatsAppData?.getWhatsAppConnections?.[0]?.id &&
+    whatsAppData?.getWhatsAppConnections?.[0]?.status === "CONNECTED";
 
   const { data: hrProvidersData } = useGetHRProviders();
   const { data: hrConnectionsData } = useGetHRConnections();
@@ -234,6 +241,16 @@ export default function IntegrationsPage() {
         component: <SendGridIntegrationCard />,
       },
       {
+        id: "whatsapp",
+        name: "WhatsApp Business",
+        category: "communication",
+        categoryLabel: "Communication",
+        description:
+          "Send template messages, sync Meta-approved templates, track delivery rates, and automate WhatsApp Business notifications.",
+        isConnected: isWhatsAppConnected,
+        component: <WhatsAppIntegrationCard />,
+      },
+      {
         id: "developer-api",
         name: "MCP & Webhooks",
         category: "developer",
@@ -247,6 +264,7 @@ export default function IntegrationsPage() {
   }, [
     isShopifyConnected,
     isWooCommerceConnected,
+    isWhatsAppConnected,
     hrProviders,
     hrConnections,
     crmProviders,

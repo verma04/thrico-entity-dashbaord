@@ -21,8 +21,6 @@ import { Switch } from "@/components/ui/switch";
 import {
   Pencil,
   Zap,
-  Bell,
-  Mail,
   MoreHorizontal,
   Copy,
   Power,
@@ -32,7 +30,6 @@ import {
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { PointRule, useTogglePointRule } from "@/graphql/actions";
 import { toast } from "sonner";
-import { PointRuleNotificationModal } from "./point-rule-notification-modal";
 
 interface RulesTableProps {
   rules: PointRule[];
@@ -52,9 +49,6 @@ export function RulesTable({
   refetchRules,
   refetchStats,
 }: RulesTableProps) {
-  const [notificationModalRule, setNotificationModalRule] =
-    React.useState<PointRule | null>(null);
-
   const [togglePointRule, { loading: toggling }] = useTogglePointRule({
     onCompleted: () => {
       refetchRules();
@@ -177,7 +171,7 @@ export function RulesTable({
       key: "eligibility",
       header: "Eligibility",
       cell: (rule: PointRule) => (
-        <AdminTableTag variant="zinc">
+        <AdminTableTag variant="muted">
           {rule.memberEligibility || "ALL"}
         </AdminTableTag>
       ),
@@ -252,43 +246,6 @@ export function RulesTable({
       },
     },
     {
-      key: "notifications",
-      header: "Alerts",
-      cell: (rule: PointRule) => {
-        const hasPush = rule.allowPushNotification !== false;
-        const hasEmail = rule.allowEmailNotification !== false;
-
-        return (
-          <div className="flex items-center gap-1.5">
-            <div
-              title={hasPush ? "Push Notification Enabled" : "Push Notification Muted"}
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasPush
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Bell className="h-3 w-3" />
-              <span>Push</span>
-            </div>
-            <div
-              title={hasEmail ? "Email Notification Enabled" : "Email Notification Muted"}
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasEmail
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Mail className="h-3 w-3" />
-              <span>Email</span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
       key: "status",
       header: "Status",
       cell: (rule: PointRule) => (
@@ -336,13 +293,6 @@ export function RulesTable({
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer text-xs py-1.5"
-                onClick={() => setNotificationModalRule(rule)}
-              >
-                <Bell className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                <span>Edit Notifications</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer text-xs py-1.5"
                 onClick={() => handleToggleActive(rule.id)}
               >
                 <Power
@@ -371,8 +321,7 @@ export function RulesTable({
     },
   ];
 
-  return (
-    <>
+    return (
       <AdminTable
         columns={columns}
         data={rules || []}
@@ -382,16 +331,5 @@ export function RulesTable({
         emptyDescription="Create a reward rule to start incentivizing engagement across the ecosystem."
         size="sm"
       />
-
-      <PointRuleNotificationModal
-        rule={notificationModalRule}
-        open={!!notificationModalRule}
-        onOpenChange={(open) => !open && setNotificationModalRule(null)}
-        onSuccess={() => {
-          refetchRules();
-          refetchStats();
-        }}
-      />
-    </>
-  );
+    );
 }

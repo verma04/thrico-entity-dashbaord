@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Zap, Bell, Mail, Sparkles, Repeat } from "lucide-react";
+import { Zap, Sparkles, Repeat } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { PointRule } from "@/graphql/actions";
 import { PointRuleActions } from "./point-rule-actions";
@@ -28,7 +28,6 @@ export const getPointRuleTableColumns = (
     type?: "MODULE" | "INTEGRATION";
   }[],
   onEdit: (rule: PointRule) => void,
-  onOpenNotifications: (rule: PointRule) => void,
   onToggleActive: (id: string) => void,
   toggling?: boolean,
 ): AdminTableColumn<PointRule>[] => {
@@ -146,7 +145,7 @@ export const getPointRuleTableColumns = (
       key: "eligibility",
       header: "Eligibility",
       cell: (rule: PointRule) => (
-        <AdminTableTag variant="fuchsia">
+        <AdminTableTag variant="purple">
           {" "}
           {rule?.memberEligibility?.replace(/_/g, " ")}
         </AdminTableTag>
@@ -222,51 +221,6 @@ export const getPointRuleTableColumns = (
       },
     },
     {
-      key: "notifications",
-      header: "Alerts",
-      cell: (rule: PointRule) => {
-        const hasPush = rule.allowPushNotification !== false;
-        const hasEmail = rule.allowEmailNotification !== false;
-
-        return (
-          <div className="flex items-center gap-1.5">
-            <div
-              title={
-                hasPush
-                  ? "Push Notification Enabled"
-                  : "Push Notification Muted"
-              }
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasPush
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Bell className="h-3 w-3" />
-              <span>Push</span>
-            </div>
-            <div
-              title={
-                hasEmail
-                  ? "Email Notification Enabled"
-                  : "Email Notification Muted"
-              }
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasEmail
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Mail className="h-3 w-3" />
-              <span>Email</span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
       key: "status",
       header: "Status",
       cell: (rule: PointRule) => (
@@ -293,7 +247,6 @@ export const getPointRuleTableColumns = (
         <PointRuleActions
           rule={rule}
           onEdit={onEdit}
-          onOpenNotifications={onOpenNotifications}
           onToggleActive={onToggleActive}
         />
       ),
@@ -314,7 +267,6 @@ export interface PointRulesListProps {
     type?: "MODULE" | "INTEGRATION";
   }[];
   onEdit: (rule: PointRule) => void;
-  onOpenNotifications: (rule: PointRule) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
   visibleColumns?: Record<string, boolean>;
@@ -325,7 +277,6 @@ export function PointRulesList({
   rules,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
   visibleColumns,
@@ -336,11 +287,10 @@ export function PointRulesList({
       getPointRuleTableColumns(
         modules,
         onEdit,
-        onOpenNotifications,
         onToggleActive,
         toggling,
       ),
-    [modules, onEdit, onOpenNotifications, onToggleActive, toggling],
+    [modules, onEdit, onToggleActive, toggling],
   );
 
   const activeColumns = React.useMemo(() => {

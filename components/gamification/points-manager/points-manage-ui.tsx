@@ -138,7 +138,6 @@ interface ContentAreaProps {
   rules: PointRule[];
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (rule: PointRule) => void;
-  onOpenNotifications: (rule: PointRule) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
   visibleColumns?: Record<string, boolean>;
@@ -151,7 +150,6 @@ export function ContentArea({
   rules,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
   visibleColumns,
@@ -234,7 +232,6 @@ export function ContentArea({
               rules={rules}
               modules={modules}
               onEdit={onEdit}
-              onOpenNotifications={onOpenNotifications}
               onToggleActive={onToggleActive}
               toggling={toggling}
             />
@@ -243,7 +240,6 @@ export function ContentArea({
               rules={rules}
               modules={modules}
               onEdit={onEdit}
-              onOpenNotifications={onOpenNotifications}
               onToggleActive={onToggleActive}
               toggling={toggling}
               visibleColumns={visibleColumns}

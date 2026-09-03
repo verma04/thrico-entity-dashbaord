@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Zap, Coins, Bell, Mail } from "lucide-react";
+import { Zap, Coins } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/graphql/actions";
 import { BadgeActions } from "./badge-actions";
@@ -23,7 +23,6 @@ import {
 export const getBadgeTableColumns = (
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[],
   onEdit: (badge: Badge) => void,
-  onOpenNotifications: (badge: Badge) => void,
   onToggleActive: (id: string) => void,
   toggling?: boolean,
 ): AdminTableColumn<Badge>[] => {
@@ -135,49 +134,12 @@ export const getBadgeTableColumns = (
       key: "eligibility",
       header: "Eligibility",
       cell: (badge: Badge) => (
-        <AdminTableTag variant="fuchsia">
+        <AdminTableTag variant="purple">
           {badge.memberEligibility
             ? badge.memberEligibility.replace(/_/g, " ")
             : "ALL"}
         </AdminTableTag>
       ),
-    },
-    {
-      key: "notifications",
-      header: "Alerts",
-      cell: (badge: Badge) => {
-        const hasPush = badge.allowPushNotification !== false;
-        const hasEmail = badge.allowEmailNotification !== false;
-
-        return (
-          <div className="flex items-center gap-1.5">
-            <div
-              title={hasPush ? "Push Notification Enabled" : "Push Notification Muted"}
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasPush
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Bell className="h-3 w-3" />
-              <span>Push</span>
-            </div>
-            <div
-              title={hasEmail ? "Email Notification Enabled" : "Email Notification Muted"}
-              className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
-                hasEmail
-                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
-                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
-              )}
-            >
-              <Mail className="h-3 w-3" />
-              <span>Email</span>
-            </div>
-          </div>
-        );
-      },
     },
     {
       key: "status",
@@ -206,7 +168,6 @@ export const getBadgeTableColumns = (
         <BadgeActions
           badge={badge}
           onEdit={onEdit}
-          onOpenNotifications={onOpenNotifications}
           onToggleActive={onToggleActive}
         />
       ),
@@ -222,7 +183,6 @@ export interface BadgesTableListProps {
   badges: Badge[];
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (badge: Badge) => void;
-  onOpenNotifications: (badge: Badge) => void;
   onToggleActive: (id: string) => void;
   toggling?: boolean;
   visibleColumns?: Record<string, boolean>;
@@ -233,7 +193,6 @@ export function BadgesTableList({
   badges,
   modules,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   toggling,
   visibleColumns,
@@ -244,11 +203,10 @@ export function BadgesTableList({
       getBadgeTableColumns(
         modules,
         onEdit,
-        onOpenNotifications,
         onToggleActive,
         toggling,
       ),
-    [modules, onEdit, onOpenNotifications, onToggleActive, toggling],
+    [modules, onEdit, onToggleActive, toggling],
   );
 
   const activeColumns = React.useMemo(() => {

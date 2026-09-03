@@ -2,6 +2,7 @@ import { Figtree } from "next/font/google";
 import "./globals.css";
 import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BrandStyles } from "@/components/layout/brand-styles";
@@ -75,6 +76,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const metaAppId = process.env.NEXT_PUBLIC_META_APP_ID || "2281283925530161";
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${figtree.className} ${figtree.variable} antialiased`}>
@@ -91,6 +94,37 @@ export default function RootLayout({
             {children}
           </ApolloWrapper>
         </ThemeProvider>
+
+        {/* Official Meta Facebook JavaScript SDK Initialization */}
+        <Script
+          id="facebook-jssdk-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.fbAsyncInit = function() {
+                if (window.FB) {
+                  window.FB.init({
+                    appId      : '${metaAppId}',
+                    cookie     : true,
+                    xfbml      : true,
+                    version    : 'v20.0'
+                  });
+                  if (window.FB.AppEvents) {
+                    window.FB.AppEvents.logPageView();
+                  }
+                }
+              };
+
+              (function(d, s, id){
+                 var js, fjs = d.getElementsByTagName(s)[0];
+                 if (d.getElementById(id)) {return;}
+                 js = d.createElement(s); js.id = id;
+                 js.src = "https://connect.facebook.net/en_US/sdk.js";
+                 fjs.parentNode.insertBefore(js, fjs);
+               }(document, 'script', 'facebook-jssdk'));
+            `,
+          }}
+        />
       </body>
     </html>
   );

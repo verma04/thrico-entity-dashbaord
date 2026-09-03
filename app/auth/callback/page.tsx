@@ -18,7 +18,9 @@ const Auth = () => {
       if (searchParams.get("choose-plan") !== null) {
         router.push("/?choose-plan");
       } else {
-        router.push(path ?? "/");
+        const targetPath =
+          path && path.startsWith("/") && !path.startsWith("//") ? path : "/";
+        router.push(targetPath);
       }
     } else {
       router.push("/login");

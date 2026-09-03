@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
   MoreHorizontal,
   Pencil,
-  Bell,
   Power,
   Copy,
 } from "lucide-react";
@@ -24,7 +23,6 @@ import { cn } from "@/lib/utils";
 export interface BadgeActionsProps {
   badge: Badge;
   onEdit: (badge: Badge) => void;
-  onOpenNotifications: (badge: Badge) => void;
   onToggleActive: (id: string) => void;
   trigger?: React.ReactNode;
 }
@@ -32,7 +30,6 @@ export interface BadgeActionsProps {
 export function BadgeActions({
   badge,
   onEdit,
-  onOpenNotifications,
   onToggleActive,
   trigger,
 }: BadgeActionsProps) {
@@ -70,14 +67,6 @@ export function BadgeActions({
         >
           <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
           Edit Badge
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={() => onOpenNotifications(badge)}
-          className="text-xs font-medium cursor-pointer gap-2 py-1.5"
-        >
-          <Bell className="h-3.5 w-3.5 text-muted-foreground" />
-          Edit Notifications
         </DropdownMenuItem>
 
         <DropdownMenuItem

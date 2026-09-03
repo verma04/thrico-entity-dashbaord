@@ -10,7 +10,8 @@ export type MemberRuleActionType =
   | "EMAIL"
   | "NOTIFICATION"
   | "COMMUNITY_JOIN"
-  | "ADD_MEMBER_TAG";
+  | "ADD_MEMBER_TAG"
+  | "WHATSAPP_TEMPLATE";
 
 export interface MemberRuleCondition {
   field: string;
@@ -39,6 +40,13 @@ export interface MemberRuleAction {
   pushTitle?: string | null;
   pushBody?: string | null;
   push?: boolean | null;
+  whatsAppTemplateName?: string | null;
+  whatsAppLanguage?: string | null;
+  whatsAppVariables?: string[] | null;
+  fallbackToEmail?: boolean | null;
+  fallbackChannel?: string | null;
+  fallbackEmailSubject?: string | null;
+  fallbackEmailBody?: string | null;
 }
 
 export interface MemberRuleActionInput {
@@ -53,6 +61,13 @@ export interface MemberRuleActionInput {
   pushTitle?: string | null;
   pushBody?: string | null;
   push?: boolean | null;
+  whatsAppTemplateName?: string | null;
+  whatsAppLanguage?: string | null;
+  whatsAppVariables?: string[] | null;
+  fallbackToEmail?: boolean | null;
+  fallbackChannel?: string | null;
+  fallbackEmailSubject?: string | null;
+  fallbackEmailBody?: string | null;
 }
 
 export interface MemberAutomationRule {
