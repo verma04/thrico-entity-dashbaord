@@ -51,7 +51,7 @@ export function CampaignLinkClicks({ campaignId }: CampaignLinkClicksProps) {
           icon={MousePointerClick}
           value={link.totalClicks || 0}
           unit="Clicks"
-          variant="purple"
+          variant="indigo"
         />
       ),
     },

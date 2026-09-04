@@ -112,7 +112,7 @@ export function CampaignsTable({
           <AdminTableMetric
             icon={MousePointerClick}
             value={`${rate}%`}
-            variant="purple"
+            variant="indigo"
           />
         );
       },

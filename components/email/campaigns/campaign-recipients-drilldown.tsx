@@ -112,7 +112,7 @@ export function CampaignRecipientsDrilldown({
         <AdminTableMetric
           icon={MousePointerClick}
           value={r.clickCount || 0}
-          variant={r.clickCount > 0 ? "purple" : "default"}
+          variant={r.clickCount > 0 ? "indigo" : "default"}
         />
       ),
     },

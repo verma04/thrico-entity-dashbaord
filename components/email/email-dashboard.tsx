@@ -85,6 +85,7 @@ export default function EmailDashboard({
     numberOfEmailsPerMonth: 5000,
     usagePercent: 0,
     remaining: 5000,
+    periodEnd: new Date(Date.now() + 18 * 86400000).toISOString(),
   };
 
   const usagePercent = usage.usagePercent || (usage.emailsSent / (usage.numberOfEmailsPerMonth || 1)) * 100;
@@ -133,19 +134,23 @@ export default function EmailDashboard({
 
       {/* 2. Quota Capacity & Top-Up Velocity */}
       <EmailQuotaCapacity
+        loading={loading}
         usage={usage}
         onAddCredits={() => setShowTopupModal(true)}
         onManagePlan={() => setShowBuyPlanDialog(true)}
       />
 
       {/* 3. Campaign Performance & Engagement */}
-      <EmailCampaignEngagement />
+      <EmailCampaignEngagement loading={loading} />
 
       {/* 4. Recent Campaigns Feed */}
-      <EmailRecentCampaigns recentEmails={overview?.recentEmails} />
+      <EmailRecentCampaigns
+        loading={loading}
+        recentEmails={overview?.recentEmails}
+      />
 
       {/* 5. Infrastructure & DNS Deliverability */}
-      <EmailDomainHealth domain={domainData} />
+      <EmailDomainHealth loading={loading} domain={domainData} />
 
       {/* 6. Quick Launchpad */}
       <div className="space-y-3 pt-2">
