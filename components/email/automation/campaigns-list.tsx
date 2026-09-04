@@ -47,6 +47,7 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -437,9 +438,91 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
       {/* ── Content Container ── */}
       <EcosystemContainer className="p-0 m-0 border-none bg-transparent shadow-none ring-0 space-y-4">
         {loading ? (
-          <div className="h-60 flex items-center justify-center">
-            <Clock className="h-5 w-5 text-muted-foreground animate-spin" />
-          </div>
+          view === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-border/60 bg-card p-4 space-y-4 shadow-2xs"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-4 w-16 rounded-[4px]" />
+                      <Skeleton className="h-4 w-14 rounded-full" />
+                    </div>
+                    <div className="space-y-1.5 pt-1">
+                      <Skeleton className="h-4 w-3/4 rounded" />
+                      <Skeleton className="h-3 w-full rounded" />
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-border/50 flex items-center justify-between">
+                    <Skeleton className="h-3 w-20 rounded" />
+                    <Skeleton className="h-7 w-24 rounded-[4px]" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-2xs">
+              <Table>
+                <TableHeader className="bg-[#f6f6f7]/50 dark:bg-zinc-900/50 border-b border-[#e1e3e5] dark:border-zinc-800">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2.5">
+                      Campaign & Module
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2.5">
+                      Frequency
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2.5">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2.5">
+                      Channel
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2.5">
+                      Last Modified
+                    </TableHead>
+                    <TableHead className="text-right text-[11px] font-bold uppercase tracking-wider text-[#616161] py-2.5">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-[#e1e3e5] dark:divide-zinc-800/60">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="py-3">
+                        <div className="flex items-center gap-2.5">
+                          <Skeleton className="h-8 w-8 rounded-[4px]" />
+                          <div className="space-y-1">
+                            <Skeleton className="h-3 w-32 rounded" />
+                            <Skeleton className="h-2.5 w-16 rounded-[3px]" />
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <Skeleton className="h-3 w-16 rounded" />
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <Skeleton className="h-4 w-14 rounded-full" />
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <Skeleton className="h-4 w-12 rounded-[3px]" />
+                      </TableCell>
+                      <TableCell className="py-3">
+                        <Skeleton className="h-3 w-20 rounded" />
+                      </TableCell>
+                      <TableCell className="py-3 text-right">
+                        <div className="flex justify-end gap-1">
+                          <Skeleton className="h-7 w-14 rounded-[4px]" />
+                          <Skeleton className="h-7 w-14 rounded-[4px]" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )
         ) : filteredCampaigns.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white dark:bg-zinc-900 rounded-[8px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 text-center space-y-2.5">
             <div className="w-10 h-10 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 flex items-center justify-center text-[#616161]">

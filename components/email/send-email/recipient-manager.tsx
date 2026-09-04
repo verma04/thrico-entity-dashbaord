@@ -5,6 +5,7 @@ import { Pencil, FileUp, Users, Globe, X, Download, Trash2, FileSpreadsheet, Ale
 import { cn } from "@/lib/utils";
 import { RecipientMode } from "./types";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { EmailUserGroup } from "@/graphql/actions/email";
 
 interface RecipientManagerProps {
@@ -189,8 +190,17 @@ export function RecipientManager({
         {recipientMode === "community" && (
           <div className="space-y-4">
             {userGroupsLoading ? (
-              <div className="h-32 flex items-center justify-center">
-                <RefreshCw className="h-5 w-5 text-muted-foreground/50 animate-spin" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-4 rounded-2xl border border-border/50 bg-card space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-9 w-9 rounded-xl" />
+                      <Skeleton className="h-6 w-10 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-28 rounded" />
+                    <Skeleton className="h-3 w-16 rounded" />
+                  </div>
+                ))}
               </div>
             ) : userGroups.length === 0 ? (
               <div className="py-8 text-center">

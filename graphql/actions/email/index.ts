@@ -294,3 +294,5 @@ export const useUpdateEmailCampaign = (options?: any) =>
     ...options,
     refetchQueries: [{ query: GET_EMAIL_CAMPAIGNS }],
   });
+
+export * from "./campaign-actions";

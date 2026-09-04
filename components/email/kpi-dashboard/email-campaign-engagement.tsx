@@ -4,8 +4,13 @@ import React from "react";
 import { TrendingUp, Eye, MousePointerClick, UserMinus, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function EmailCampaignEngagement() {
+interface EmailCampaignEngagementProps {
+  loading?: boolean;
+}
+
+export function EmailCampaignEngagement({ loading = false }: EmailCampaignEngagementProps) {
   const metrics = [
     {
       title: "Average Open Rate",
@@ -68,42 +73,60 @@ export function EmailCampaignEngagement() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {metrics.map((item, idx) => {
-          const Icon = item.icon;
-          return (
-            <Card
-              key={idx}
-              className="border-border/60 bg-card shadow-2xs hover:border-border transition-all"
-            >
-              <CardContent className="p-4 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-                    {item.title}
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className={`text-[9px] px-1.5 py-0 font-bold rounded-[4px] ${item.badgeColor}`}
-                  >
-                    {item.badge}
-                  </Badge>
-                </div>
+        {loading
+          ? Array.from({ length: 4 }).map((_, idx) => (
+              <Card
+                key={idx}
+                className="border-border/60 bg-card shadow-2xs"
+              >
+                <CardContent className="p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3.5 w-24 rounded" />
+                    <Skeleton className="h-4 w-16 rounded-[4px]" />
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <Skeleton className="h-7 w-20 rounded" />
+                    <Skeleton className="h-3.5 w-16 rounded" />
+                  </div>
+                  <Skeleton className="h-3 w-full rounded" />
+                </CardContent>
+              </Card>
+            ))
+          : metrics.map((item, idx) => {
+              return (
+                <Card
+                  key={idx}
+                  className="border-border/60 bg-card shadow-2xs hover:border-border transition-all"
+                >
+                  <CardContent className="p-4 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+                        {item.title}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={`text-[9px] px-1.5 py-0 font-bold rounded-[4px] ${item.badgeColor}`}
+                      >
+                        {item.badge}
+                      </Badge>
+                    </div>
 
-                <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-extrabold text-foreground tracking-tight tabular-nums">
-                    {item.value}
-                  </span>
-                  <span className="text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400">
-                    {item.benchmark}
-                  </span>
-                </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-2xl font-extrabold text-foreground tracking-tight tabular-nums">
+                        {item.value}
+                      </span>
+                      <span className="text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400">
+                        {item.benchmark}
+                      </span>
+                    </div>
 
-                <p className="text-[10.5px] text-muted-foreground line-clamp-1">
-                  {item.description}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
+                    <p className="text-[10.5px] text-muted-foreground line-clamp-1">
+                      {item.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
       </div>
     </div>
   );

@@ -15,13 +15,13 @@ function UsagePage() {
   return (
     <EcosystemWrapper className="gap-4">
       <EcosystemHeader
-        title="Usage & Billing"
-        description="Monitor email quota consumption, purchase top-ups, and track billing history."
+        title="Usage & Activity Logs"
+        description="Audit live email transmission events, monitor delivery quotas, and inspect transaction history."
         icon={BarChart3}
-        badgeText="Email Usage"
+        badgeText="Audit & Quotas"
         breadcrumbs={[
           { label: "Email", href: "/email" },
-          { label: "Usage & Billing" },
+          { label: "Usage & Logs" },
         ]}
         actions={
           <Button
