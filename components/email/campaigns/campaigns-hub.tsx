@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { cn } from "@/lib/utils";
 
 import { CampaignKpiSummary } from "./campaign-kpi-summary";
 import { CampaignCard } from "./campaign-card";
