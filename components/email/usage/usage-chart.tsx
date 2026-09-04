@@ -11,12 +11,13 @@ import {
   Tooltip as RechartsTooltip,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetEmailDeliveryPerformance } from "@/graphql/actions/email";
-import { RefreshCw } from "lucide-react";
+import { Activity, TrendingUp } from "lucide-react";
 
 export function UsageChart() {
   const { data: performanceData, loading } = useGetEmailDeliveryPerformance();
-  
+
   const chartData = performanceData?.getEmailDeliveryPerformance || [
     { day: "Mon", sent: 0, delivered: 0 },
     { day: "Tue", sent: 0, delivered: 0 },
@@ -29,32 +30,55 @@ export function UsageChart() {
 
   if (loading) {
     return (
-      <Card className="border-border shadow-none bg-background h-[400px] flex items-center justify-center">
-        <RefreshCw className="h-5 w-5 text-muted-foreground animate-spin" />
+      <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs rounded-[8px]">
+        <CardHeader className="px-5 py-4 border-b border-border/40">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Skeleton className="h-4 w-32 rounded-[3px]" />
+              <Skeleton className="h-3 w-48 rounded-[3px]" />
+            </div>
+            <Skeleton className="h-4 w-24 rounded-[3px]" />
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="h-[280px] w-full flex flex-col justify-end space-y-3">
+            <Skeleton className="h-48 w-full rounded-[6px]" />
+            <div className="flex justify-between">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Skeleton key={i} className="h-3 w-8 rounded-[2px]" />
+              ))}
+            </div>
+          </div>
+        </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="border-border shadow-none bg-background">
-      <CardHeader className="px-5 py-4 border-b border-border/50">
+    <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs rounded-[8px]">
+      <CardHeader className="px-5 py-4 border-b border-border/40">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-sm font-semibold text-foreground">
-              Delivery Distribution
-            </CardTitle>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Historical delivery performance
-            </p>
+          <div className="flex items-center gap-2.5">
+            <div className="h-7 w-7 rounded-[4px] bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40">
+              <Activity className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <CardTitle className="text-[13px] font-bold text-foreground">
+                Delivery Distribution & Throughput
+              </CardTitle>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Sent vs Delivered verification timeline
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-slate-900 dark:bg-slate-100" />
-              <span className="text-[10px] font-medium text-muted-foreground">Sent</span>
+              <div className="h-2 w-2 rounded-full bg-slate-900 dark:bg-slate-100" />
+              <span className="text-[11px] font-semibold text-muted-foreground">Sent</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-medium text-muted-foreground">Delivered</span>
+              <div className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-[11px] font-semibold text-muted-foreground">Delivered</span>
             </div>
           </div>
         </div>
@@ -64,25 +88,25 @@ export function UsageChart() {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-              <XAxis 
-                dataKey="day" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 10, fill: '#64748b' }} 
+              <XAxis
+                dataKey="day"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 11, fill: "#64748b" }}
                 dy={10}
               />
-              <YAxis 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 10, fill: '#64748b' }} 
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 11, fill: "#64748b" }}
               />
-              <RechartsTooltip 
-                contentStyle={{ 
-                  borderRadius: '12px', 
-                  border: '1px solid rgba(0,0,0,0.05)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                  fontSize: '12px'
-                }} 
+              <RechartsTooltip
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                  fontSize: "12px",
+                }}
               />
               <Area
                 type="monotone"
@@ -102,11 +126,11 @@ export function UsageChart() {
               />
               <defs>
                 <linearGradient id="colorSent" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#0f172a" stopOpacity={0.05} />
+                  <stop offset="5%" stopColor="#0f172a" stopOpacity={0.06} />
                   <stop offset="95%" stopColor="#0f172a" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorDelivered" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.05} />
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.08} />
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>

@@ -1,8 +1,13 @@
-import { GetEmailOverviewQuery, GetEmailTemplatesQuery, GetEmailDomainQuery } from "@/graphql/generated/graphql";
+import type { EmailTemplate, EmailDomain } from "@/graphql/actions/email";
 
-export type EmailTemplate = NonNullable<GetEmailTemplatesQuery["getEmailTemplates"]>[number];
-export type EmailUsage = NonNullable<GetEmailOverviewQuery["getEmailOverview"]>["usage"];
-export type EmailDomain = NonNullable<GetEmailDomainQuery["getEmailDomain"]>;
+export type { EmailTemplate, EmailDomain };
+export type EmailUsage = {
+  emailsSent: number;
+  numberOfEmailsPerMonth: number;
+  usagePercent: number;
+  remaining: number;
+  periodEnd?: string;
+};
 
 export type RecipientMode = "manual" | "csv" | "community";
 

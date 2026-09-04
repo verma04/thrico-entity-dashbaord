@@ -121,7 +121,7 @@ export interface SubscriptionAddon {
 
 export interface checkPlanOverview {
   planName: string;
-  planType?: string;
+  planType?: "Standard" | "Custom" | string;
   status:
     | "active"
     | "scheduled_downgrade"

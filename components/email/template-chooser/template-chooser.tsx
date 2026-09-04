@@ -1,16 +1,24 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search, Plus, LayoutTemplate, Sparkles, ArrowRight, X } from "lucide-react";
+import { Search, LayoutTemplate, Sparkles, ArrowRight, ArrowLeft, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { STARTERS, SIDEBAR_CATEGORIES } from "./template-data";
-import { EmailThumbnail } from "./email-thumbnail";
+import { EmailThumbnail, EmailThumbnailSkeleton } from "./email-thumbnail";
 
-export function TemplateChooser({ onSelect }: { onSelect: (key: string) => void }) {
+interface TemplateChooserProps {
+  onSelect: (key: string) => void;
+  loading?: boolean;
+}
+
+export function TemplateChooser({ onSelect, loading = false }: TemplateChooserProps) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
@@ -18,7 +26,7 @@ export function TemplateChooser({ onSelect }: { onSelect: (key: string) => void 
   const filtered = useMemo(() => {
     return STARTERS.filter((s) => {
       const matchCat = category === "All" || s.category === category || s.key === "blank";
-      const q = search.toLowerCase();
+      const q = search.toLowerCase().trim();
       const matchSearch =
         !q || s.label.toLowerCase().includes(q) || s.description.toLowerCase().includes(q);
       return matchCat && matchSearch;
@@ -30,174 +38,187 @@ export function TemplateChooser({ onSelect }: { onSelect: (key: string) => void 
   }, [selected]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
-      {/* Header */}
-      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 md:px-8 py-3">
-          <EcosystemHeader
-            title="Create Email Template"
-            badgeText="Template Studio"
-            description="Select a pre-configured email starter or start from scratch with the drag-and-drop builder."
-            icon={LayoutTemplate}
-            breadcrumbs={[
-              { label: "Email", href: "/email" },
-              { label: "Templates", href: "/email/templates" },
-              { label: "Create" },
-            ]}
-          />
-        </div>
-      </div>
+    <EcosystemWrapper className="animate-in fade-in duration-300 gap-4">
+      {/* Ecosystem Header matching member/create pattern */}
+      <EcosystemHeader
+        title="Create Email Template"
+        badgeText="Template Studio"
+        description="Select a pre-configured email starter blueprint or start with a blank drag-and-drop canvas."
+        icon={LayoutTemplate}
+        breadcrumbs={[
+          { label: "Email", href: "/email" },
+          { label: "Templates", href: "/email/templates" },
+          { label: "Create Template" },
+        ]}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/email/templates")}
+            className="h-[30px] gap-1.5 shrink-0 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 shadow-2xs text-[12px] font-semibold text-[#303030] dark:text-zinc-200 px-2.5 rounded-[4px] cursor-pointer"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            All Templates
+          </Button>
+        }
+      />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 md:px-8 py-6 space-y-6 pb-28">
-          {/* Filter Bar (Search + Categories) */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              {/* Category Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none flex-1">
-                {SIDEBAR_CATEGORIES.map((cat) => {
-                  const count =
-                    cat.key === "All"
-                      ? STARTERS.length
-                      : STARTERS.filter((s) => s.category === cat.key).length;
-                  const isSelected = category === cat.key;
-                  return (
-                    <button
-                      key={cat.key}
-                      onClick={() => setCategory(cat.key)}
-                      className={cn(
-                        "h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5",
-                        isSelected
-                          ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
-                          : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                      )}
-                    >
-                      <span>{cat.label}</span>
-                      <span
-                        className={cn(
-                          "text-[10px] font-bold px-1.5 py-0.2 rounded-full",
-                          isSelected
-                            ? "bg-white/20 text-white dark:bg-black/20 dark:text-zinc-900"
-                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
-                        )}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Search Bar */}
-              <div className="relative w-full sm:w-72 shrink-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-                <Input
-                  type="text"
-                  placeholder="Search template blueprints..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="h-8 pl-8 pr-7 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-medium"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0 m-0 space-y-4 pb-24">
+        {/* Filter Bar (Search + Categories) */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs">
+          {/* Category Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none flex-1">
+            {SIDEBAR_CATEGORIES.map((cat) => {
+              const count =
+                cat.key === "All"
+                  ? STARTERS.length
+                  : STARTERS.filter((s) => s.category === cat.key).length;
+              const isSelected = category === cat.key;
+              return (
+                <button
+                  key={cat.key}
+                  type="button"
+                  onClick={() => setCategory(cat.key)}
+                  className={cn(
+                    "h-7 px-2.5 rounded-[4px] text-[11px] font-semibold whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5",
+                    isSelected
+                      ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100 shadow-2xs"
+                      : "bg-[#f6f6f7] dark:bg-zinc-800/60 border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    className={cn(
+                      "text-[9.5px] font-bold px-1.5 py-0 rounded-full",
+                      isSelected
+                        ? "bg-white/20 text-white dark:bg-black/20 dark:text-zinc-900"
+                        : "bg-muted text-muted-foreground"
+                    )}
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
-            </div>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Template Blueprints Grid */}
-          {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filtered.map((starter) => (
-                <EmailThumbnail
-                  key={starter.key}
-                  starter={starter}
-                  selected={selected === starter.key}
-                  onSelect={() => {
-                    if (starter.key === "blank") {
-                      onSelect("blank");
-                    } else {
-                      setSelected(starter.key === selected ? null : starter.key);
-                    }
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center space-y-3 bg-white dark:bg-zinc-900/40 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-              <div className="h-12 w-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500">
-                <LayoutTemplate className="h-6 w-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                  No matching templates found
-                </h3>
-                <p className="text-xs text-zinc-500 max-w-sm">
-                  We couldn't find any email starters matching &quot;{search}&quot;. Try adjusting your search query or clear filters.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearch("");
-                  setCategory("All");
-                }}
-                className="h-8 text-xs font-semibold"
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-64 shrink-0">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search blueprints…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-[30px] pl-8 pr-7 bg-[#f6f6f7] dark:bg-zinc-800/60 border-border/60 text-[11.5px] font-medium rounded-[4px]"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
               >
-                Clear all filters
-              </Button>
-            </div>
-          )}
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+
+        {/* Template Blueprints Compact Grid */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
+            {Array.from({ length: 12 }).map((_, idx) => (
+              <EmailThumbnailSkeleton key={idx} />
+            ))}
+          </div>
+        ) : filtered.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
+            {filtered.map((starter) => (
+              <EmailThumbnail
+                key={starter.key}
+                starter={starter}
+                selected={selected === starter.key}
+                onSelect={() => {
+                  if (starter.key === "blank") {
+                    onSelect("blank");
+                  } else {
+                    setSelected(starter.key === selected ? null : starter.key);
+                  }
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center space-y-3 bg-white dark:bg-zinc-900 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 shadow-2xs">
+            <div className="h-10 w-10 rounded-[6px] bg-muted/60 flex items-center justify-center text-muted-foreground">
+              <LayoutTemplate className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-[13px] font-bold text-foreground">
+                No matching blueprints found
+              </h3>
+              <p className="text-[11px] text-muted-foreground max-w-sm">
+                We couldn&apos;t find any email starters matching &quot;{search}&quot;. Try adjusting your search query or clear filters.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearch("");
+                setCategory("All");
+              }}
+              className="h-7 text-[11px] font-semibold rounded-[4px] border-border"
+            >
+              Clear all filters
+            </Button>
+          </div>
+        )}
+      </EcosystemContainer>
 
       {/* Floating Bottom Launch Bar */}
       <div
         className={cn(
-          "fixed bottom-6 inset-x-0 mx-auto max-w-lg z-50 transition-all duration-300 transform",
+          "fixed bottom-6 inset-x-0 mx-auto max-w-md z-50 transition-all duration-300 transform px-4",
           selected ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0 pointer-events-none"
         )}
       >
-        <div className="flex items-center justify-between gap-4 p-3.5 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-2xl shadow-2xl border border-zinc-800 dark:border-zinc-200 backdrop-blur-md">
-          <div className="flex items-center gap-3 min-w-0 pl-1">
-            <div className="h-8 w-8 rounded-xl bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center text-zinc-200 dark:text-zinc-800 shrink-0">
-              <Sparkles className="h-4 w-4" />
+        <div className="flex items-center justify-between gap-3 p-2.5 pl-3.5 bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-[8px] shadow-xl border border-zinc-700 dark:border-zinc-300 backdrop-blur-md">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-6 w-6 rounded-[4px] bg-zinc-700 dark:bg-zinc-200 flex items-center justify-center text-zinc-200 dark:text-zinc-800 shrink-0">
+              <Sparkles className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold truncate">
-                {selectedStarter?.label || "Selected Starter"}
+              <p className="text-[11.5px] font-bold truncate leading-tight">
+                {selectedStarter?.label || "Selected Blueprint"}
               </p>
-              <p className="text-[10px] text-zinc-400 dark:text-zinc-600 truncate">
+              <p className="text-[9.5px] text-zinc-400 dark:text-zinc-600 truncate leading-tight">
                 Ready to customize in drag-and-drop studio
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelected(null)}
-              className="h-8 text-xs text-zinc-400 hover:text-white dark:hover:text-zinc-900"
+              className="h-7 px-2 text-[11px] text-zinc-400 hover:text-white dark:hover:text-zinc-900 rounded-[4px]"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={() => onSelect(selected!)}
-              className="h-8 px-4 text-xs font-bold bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 shadow-xs"
+              className="h-7 px-3 text-[11px] font-bold bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 shadow-2xs rounded-[4px] cursor-pointer"
             >
-              Launch Builder
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              Launch Studio
+              <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           </div>
         </div>
       </div>
-    </div>
+    </EcosystemWrapper>
   );
 }

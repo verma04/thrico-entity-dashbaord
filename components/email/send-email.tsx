@@ -7,7 +7,12 @@ import {
   ChevronRight,
   ChevronLeft,
   AlertTriangle,
-  RefreshCw,
+  RotateCcw,
+  Sparkles,
+  Layers,
+  Users,
+  PenLine,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -19,6 +24,8 @@ import {
   useGetEmailDomain,
   useGetEmailUserGroups,
 } from "@/graphql/actions/email";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { Button } from "@/components/ui/button";
 
 import { StepIndicator } from "./send-email/step-indicator";
 import { TemplateSelector } from "./send-email/template-selector";
@@ -44,18 +51,18 @@ export default function SendEmail() {
   const [emailInput, setEmailInput] = useState("");
   const [recipientMode, setRecipientMode] = useState<RecipientMode>("manual");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-    null,
+    null
   );
   const [subject, setSubject] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
 
   const templates = useMemo(
     () => templatesData?.getEmailTemplates || [],
-    [templatesData],
+    [templatesData]
   );
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.id === selectedTemplateId),
-    [templates, selectedTemplateId],
+    [templates, selectedTemplateId]
   );
   const domain = domainData?.getEmailDomain;
   const isDomainVerified = domain?.status === "verified";
@@ -92,14 +99,14 @@ export default function SendEmail() {
       ok: remainingQuota >= totalRecipientCount && totalRecipientCount > 0,
       message:
         remainingQuota >= totalRecipientCount
-          ? `${totalRecipientCount} recipients within quota`
+          ? `${totalRecipientCount.toLocaleString()} recipients within quota`
           : "Exceeds your remaining quota",
     },
     {
       label: "Template",
       ok: !!selectedTemplateId,
       message: !!selectedTemplateId
-        ? "Template selected"
+        ? `Selected: ${selectedTemplate?.name || "Template ready"}`
         : "No template chosen",
     },
     {
@@ -107,7 +114,7 @@ export default function SendEmail() {
       ok: totalRecipientCount > 0,
       message:
         totalRecipientCount > 0
-          ? `${totalRecipientCount} recipients added`
+          ? `${totalRecipientCount.toLocaleString()} recipients targeted`
           : "No recipients added",
     },
   ];
@@ -116,11 +123,11 @@ export default function SendEmail() {
     const email = emailInput.trim().toLowerCase();
     if (!email) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.error("Invalid email address.");
+      toast.error("Please enter a valid email address.");
       return;
     }
     if (recipients.includes(email)) {
-      toast.error("Email already in list.");
+      toast.error("This email is already in the recipient list.");
       return;
     }
     setRecipients([...recipients, email]);
@@ -129,7 +136,7 @@ export default function SendEmail() {
 
   const handleSend = async () => {
     if (!selectedTemplateId || !subject || totalRecipientCount === 0) {
-      toast.error("Please complete all required fields.");
+      toast.error("Please complete all required fields before broadcasting.");
       return;
     }
     if (totalRecipientCount > remainingQuota) {
@@ -141,10 +148,11 @@ export default function SendEmail() {
         variables: { templateId: selectedTemplateId!, to: recipients, subject },
       });
       if (data?.sendEmail.success) {
-        toast.success("Email campaign sent successfully.");
+        toast.success("Email campaign dispatched successfully!");
+        setShowConfirm(false);
         router.push("/email/usage");
       } else {
-        toast.error(data?.sendEmail.message || "Failed to send campaign.");
+        toast.error(data?.sendEmail.message || "Failed to dispatch campaign.");
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong.");
@@ -155,39 +163,96 @@ export default function SendEmail() {
     if (step === 0) return !!selectedTemplateId;
     if (step === 1)
       return totalRecipientCount > 0 && totalRecipientCount <= remainingQuota;
-    if (step === 2) return !!subject;
+    if (step === 2) return !!subject.trim();
     return true;
   };
 
-  const stepNames = ["Template", "Recipients", "Subject", "Review"];
+  const stepNames = [
+    "1. Template",
+    "2. Audience",
+    "3. Subject & Content",
+    "4. Review & Dispatch",
+  ];
 
   return (
-    <div className="max-w-6xl mx-auto w-full py-8 px-6 space-y-8 animate-in fade-in duration-500">
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        <div className="lg:col-span-3 flex flex-col gap-6">
-          {/* Step Indicator */}
-          <div className="bg-card rounded-2xl border border-border/50 p-5">
-            <StepIndicator currentStep={step} steps={stepNames} />
-          </div>
+    <div className="w-full space-y-4 animate-in fade-in duration-300">
+      {/* ── Top Action & Progress Bar ──────────────────────────────────── */}
+      <EcosystemActionBar>
+        <EcosystemActionBar.Group>
+          <StepIndicator
+            currentStep={step}
+            steps={stepNames}
+            onStepClick={(i) => setStep(i)}
+          />
+        </EcosystemActionBar.Group>
 
-          {/* Step Content */}
-          <div className="min-h-[420px]">
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Status active={remainingQuota > 0}>
+            {remainingQuota.toLocaleString()} Credits Remaining
+          </EcosystemActionBar.Status>
+
+          {step > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStep(Math.max(0, step - 1))}
+              className="h-[30px] gap-1 shrink-0 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 shadow-2xs text-[12px] font-medium text-[#303030] dark:text-zinc-200 px-2.5 rounded-[4px] cursor-pointer"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Back
+            </Button>
+          )}
+
+          {step < 3 ? (
+            <Button
+              type="button"
+              disabled={!canProceed()}
+              onClick={() => setStep(step + 1)}
+              className="h-[30px] gap-1.5 shrink-0 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-3 rounded-[4px] cursor-pointer disabled:opacity-50"
+            >
+              Continue
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              disabled={
+                !isDomainVerified ||
+                totalRecipientCount === 0 ||
+                totalRecipientCount > remainingQuota
+              }
+              onClick={() => setShowConfirm(true)}
+              className="h-[30px] gap-1.5 shrink-0 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-3 rounded-[4px] cursor-pointer disabled:opacity-50"
+            >
+              <Send className="h-3 w-3" />
+              Dispatch Campaign
+            </Button>
+          )}
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      {/* ── Main Layout: Content Grid + Infrastructure Sidebar ────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        {/* Left 3 Columns: Active Step Form */}
+        <div className="lg:col-span-3 space-y-4">
+          <div className="min-h-[460px]">
             <AnimatePresence mode="wait">
               {step === 0 && (
                 <motion.div
                   key="template"
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
                 >
                   <TemplateSelector
                     templates={templates}
                     selectedTemplateId={selectedTemplateId}
                     onSelect={(id, sub) => {
                       setSelectedTemplateId(id);
-                      setSubject(sub);
+                      if (sub) setSubject(sub);
                     }}
                     loading={templatesLoading}
                   />
@@ -196,10 +261,10 @@ export default function SendEmail() {
               {step === 1 && (
                 <motion.div
                   key="recipients"
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
                 >
                   <RecipientManager
                     recipients={recipients}
@@ -219,10 +284,10 @@ export default function SendEmail() {
               {step === 2 && (
                 <motion.div
                   key="subject"
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
                 >
                   <ContentRefinement
                     subject={subject}
@@ -234,10 +299,10 @@ export default function SendEmail() {
               {step === 3 && (
                 <motion.div
                   key="review"
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
                 >
                   <FinalDeployment
                     checks={checks}
@@ -251,61 +316,48 @@ export default function SendEmail() {
             </AnimatePresence>
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between pt-6 border-t border-border/50">
-            <button
-              onClick={() => setStep(Math.max(0, step - 1))}
+          {/* Bottom Navigation Bar */}
+          <div className="flex items-center justify-between pt-4 border-t border-border/60">
+            <Button
+              type="button"
+              variant="outline"
               disabled={step === 0}
-              className={cn(
-                "flex items-center gap-2 h-11 px-6 rounded-xl text-sm font-semibold transition-all border",
-                step === 0
-                  ? "opacity-30 cursor-not-allowed border-border/50 bg-card text-muted-foreground/80"
-                  : "border-border/50 bg-card text-foreground/90 hover:bg-muted",
-              )}
+              onClick={() => setStep(Math.max(0, step - 1))}
+              className="h-[32px] gap-1 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 shadow-2xs text-[12px] font-medium text-[#303030] dark:text-zinc-200 px-3 rounded-[4px] cursor-pointer disabled:opacity-40"
             >
-              <ChevronLeft className="h-4 w-4" />
-              Back
-            </button>
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Previous Step
+            </Button>
 
             {step < 3 ? (
-              <button
-                onClick={() => setStep(step + 1)}
+              <Button
+                type="button"
                 disabled={!canProceed()}
-                className={cn(
-                  "flex items-center gap-2 h-11 px-8 rounded-xl text-sm font-semibold transition-all",
-                  canProceed()
-                    ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm"
-                    : "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed",
-                )}
+                onClick={() => setStep(step + 1)}
+                className="h-[32px] gap-1.5 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-4 rounded-[4px] cursor-pointer disabled:opacity-40"
               >
-                Continue
-                <ChevronRight className="h-4 w-4" />
-              </button>
+                Continue to Step {step + 2}
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
             ) : (
-              <button
-                onClick={() => setShowConfirm(true)}
+              <Button
+                type="button"
                 disabled={
                   !isDomainVerified ||
                   totalRecipientCount === 0 ||
                   totalRecipientCount > remainingQuota
                 }
-                className={cn(
-                  "flex items-center gap-2 h-11 px-8 rounded-xl text-sm font-semibold transition-all",
-                  !isDomainVerified ||
-                    totalRecipientCount === 0 ||
-                    totalRecipientCount > remainingQuota
-                    ? "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed"
-                    : "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm",
-                )}
+                onClick={() => setShowConfirm(true)}
+                className="h-[32px] gap-1.5 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-5 rounded-[4px] cursor-pointer disabled:opacity-40"
               >
-                Send Campaign
-                <Send className="h-4 w-4" />
-              </button>
+                <Send className="h-3.5 w-3.5" />
+                Dispatch Campaign
+              </Button>
             )}
           </div>
         </div>
 
-        {/* Sidebar */}
+        {/* Right 1 Column: Infrastructure & Quota Sidebar */}
         <div className="lg:col-span-1 hidden lg:block">
           <InfrastructureSidebar
             usage={usage || null}
@@ -314,66 +366,92 @@ export default function SendEmail() {
         </div>
       </div>
 
-      {/* Confirm Modal */}
+      {/* ── Confirm Dispatch Polaris Modal ─────────────────────────────── */}
       <AnimatePresence>
         {showConfirm && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/30 backdrop-blur-sm p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
             onClick={() => !isSending && setShowConfirm(false)}
           >
             <motion.div
-              initial={{ scale: 0.97, opacity: 0, y: 10 }}
+              initial={{ scale: 0.98, opacity: 0, y: 8 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.97, opacity: 0, y: 10 }}
-              className="bg-card rounded-3xl shadow-xl max-w-md w-full overflow-hidden border border-border/50"
+              exit={{ scale: 0.98, opacity: 0, y: 8 }}
+              className="bg-white dark:bg-zinc-900 rounded-[8px] shadow-2xl max-w-md w-full overflow-hidden border border-[#d2d5d9] dark:border-zinc-800"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-8 text-center space-y-5">
-                <div className="h-16 w-16 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 mx-auto">
-                  <AlertTriangle className="h-8 w-8" />
+              <div className="p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-[6px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                    <Send className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="text-[14px] font-bold text-foreground">
+                      Confirm Campaign Broadcast
+                    </h3>
+                    <p className="text-[12px] text-muted-foreground">
+                      Review transmission details before final execution.
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-foreground">
-                    Send this campaign?
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    This will send to{" "}
-                    <span className="font-semibold text-foreground">
-                      {totalRecipientCount.toLocaleString()} recipients
+
+                <div className="p-3 bg-[#f6f6f7] dark:bg-zinc-800/60 rounded-[6px] border border-border/60 space-y-1.5 text-[12px]">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Audience:</span>
+                    <span className="font-bold text-foreground">
+                      {totalRecipientCount.toLocaleString()} Recipients
                     </span>
-                    . This cannot be undone once sent.
-                  </p>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Template:</span>
+                    <span className="font-bold text-foreground truncate max-w-[220px]">
+                      {selectedTemplate?.name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subject:</span>
+                    <span className="font-bold text-foreground truncate max-w-[220px]">
+                      {subject}
+                    </span>
+                  </div>
                 </div>
+
+                <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+                  Dispatched campaigns immediately enter the sending queue and consume credits from your monthly quota.
+                </p>
               </div>
-              <div className="p-6 bg-muted/30 flex gap-3 border-t border-border/50">
-                <button
+
+              <div className="p-3.5 bg-[#f6f6f7] dark:bg-zinc-900 border-t border-border/60 flex items-center justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setShowConfirm(false)}
                   disabled={isSending}
-                  className="flex-1 h-11 rounded-xl border border-border/50 bg-card text-sm font-semibold text-foreground/80 hover:bg-muted transition-all"
+                  className="h-[30px] px-3 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[12px] font-medium rounded-[4px] cursor-pointer"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
                   onClick={handleSend}
                   disabled={isSending}
-                  className={cn(
-                    "flex-1 h-11 rounded-xl text-sm font-semibold text-white dark:text-slate-900 transition-all flex items-center justify-center gap-2 shadow-sm",
-                    isSending
-                      ? "bg-slate-400"
-                      : "bg-emerald-600 hover:bg-emerald-700",
-                  )}
+                  className="h-[30px] px-4 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 text-[12px] font-semibold rounded-[4px] cursor-pointer gap-1.5"
                 >
                   {isSending ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    <>
+                      <RotateCcw className="h-3.5 w-3.5 animate-spin" />
+                      Dispatching...
+                    </>
                   ) : (
                     <>
-                      <Send className="h-4 w-4" /> Confirm & Send
+                      <Send className="h-3.5 w-3.5" />
+                      Confirm &amp; Broadcast
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </motion.div>
           </motion.div>
@@ -382,3 +460,4 @@ export default function SendEmail() {
     </div>
   );
 }
+
