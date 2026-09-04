@@ -323,7 +323,7 @@ const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 const MONTH_DATES = Array.from({ length: 28 }, (_, i) => i + 1);
 
 // ─── Main page ────────────────────────────────────────────────────────────────
-export default function NewCampaignPage() {
+function NewCampaignPage() {
   const router = useRouter();
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
