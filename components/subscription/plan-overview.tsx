@@ -101,6 +101,11 @@ const PlanOverview = () => {
   const { data, loading, error } = usePlanOverview();
   const planOverview = data?.getPlanOverview;
 
+  const isCustomPlan =
+    planOverview?.planType?.toLowerCase() === "custom" ||
+    planOverview?.planName?.toLowerCase().includes("custom") ||
+    planOverview?.package?.name?.toLowerCase().includes("custom");
+
   const status =
     statusConfig[planOverview?.status as keyof typeof statusConfig] ?? statusConfig.active;
 
@@ -275,7 +280,8 @@ const PlanOverview = () => {
       )}
 
       {/* Yearly upsell */}
-      {planOverview?.status === "active" &&
+      {!isCustomPlan &&
+        planOverview?.status === "active" &&
         planOverview.subscriptionType === "paid" &&
         planOverview?.billingCycle === "monthly" && (
           <div className="border-t border-border/50 px-5 py-4">

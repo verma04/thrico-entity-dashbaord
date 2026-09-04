@@ -118,6 +118,7 @@ export const GET_PLAN_OVERVIEW = gql`
   query GetPlanOverview {
     getPlanOverview {
       planName
+      planType
       status
       billingCycle
       nextPaymentDate
