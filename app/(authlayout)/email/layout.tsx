@@ -87,4 +87,4 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(EmailLayout, "BRANDED_EMAIL");
+export default withSubscriptionCheck(EmailLayout, "NETWORK");
