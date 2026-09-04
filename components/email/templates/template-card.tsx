@@ -53,7 +53,7 @@ export function TemplateCard({
   };
 
   return (
-    <Card className="group relative border-border bg-background overflow-hidden hover:border-primary/30 hover:shadow-sm transition-all duration-200">
+    <Card className="group relative border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-2xs hover:border-[#aeb4b9] dark:hover:border-zinc-700 hover:shadow-xs transition-all duration-200 rounded-[8px]">
       {/* Thumbnail preview */}
       <div
         className="relative bg-muted/30 border-b border-border/50 cursor-pointer overflow-hidden"

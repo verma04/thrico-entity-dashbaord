@@ -256,15 +256,15 @@ export default function TemplateList() {
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-border/60 bg-card p-4 space-y-3 shadow-2xs"
+                  className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 space-y-3 shadow-2xs"
                 >
-                  <Skeleton className="h-28 w-full rounded-lg" />
+                  <Skeleton className="h-28 w-full rounded-[6px]" />
                   <div className="space-y-1.5 pt-1">
-                    <Skeleton className="h-4 w-3/4 rounded" />
-                    <Skeleton className="h-3 w-1/2 rounded" />
+                    <Skeleton className="h-4 w-3/4 rounded-[3px]" />
+                    <Skeleton className="h-3 w-1/2 rounded-[3px]" />
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-border/40">
-                    <Skeleton className="h-3 w-16 rounded" />
+                    <Skeleton className="h-3 w-16 rounded-[3px]" />
                     <Skeleton className="h-6 w-16 rounded-[4px]" />
                   </div>
                 </div>

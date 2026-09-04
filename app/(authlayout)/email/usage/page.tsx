@@ -27,7 +27,7 @@ function UsagePage() {
           <Button
             size="sm"
             onClick={() => router.push("/email/send")}
-            className="h-8 rounded-lg gap-1.5 text-xs font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900"
+            className="h-[30px] rounded-[4px] gap-1.5 text-[12px] font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer shadow-2xs"
           >
             <Plus className="h-3.5 w-3.5" />
             Send Campaign

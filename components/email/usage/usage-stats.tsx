@@ -27,14 +27,17 @@ export function UsageStats({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="border-border/60 bg-card shadow-2xs">
+          <Card
+            key={i}
+            className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs rounded-[8px]"
+          >
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <Skeleton className="h-3 w-20 rounded" />
+                <Skeleton className="h-3 w-20 rounded-[3px]" />
                 <Skeleton className="h-7 w-7 rounded-[4px]" />
               </div>
-              <Skeleton className="h-6 w-28 rounded" />
-              <Skeleton className="h-2 w-full rounded" />
+              <Skeleton className="h-6 w-28 rounded-[3px]" />
+              <Skeleton className="h-2 w-full rounded-[3px]" />
             </CardContent>
           </Card>
         ))}
@@ -48,7 +51,7 @@ export function UsageStats({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {/* 1. Emails Sent */}
-      <Card className="border-border/60 bg-card shadow-2xs hover:border-border transition-all">
+      <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs hover:border-[#aeb4b9] dark:hover:border-zinc-700 transition-all rounded-[8px]">
         <CardContent className="p-4 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -79,7 +82,7 @@ export function UsageStats({
       </Card>
 
       {/* 2. Monthly Base Quota */}
-      <Card className="border-border/60 bg-card shadow-2xs hover:border-border transition-all">
+      <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs hover:border-[#aeb4b9] dark:hover:border-zinc-700 transition-all rounded-[8px]">
         <CardContent className="p-4 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -110,7 +113,7 @@ export function UsageStats({
       </Card>
 
       {/* 3. Available Sending Credits */}
-      <Card className="border-border/60 bg-card shadow-2xs hover:border-border transition-all">
+      <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs hover:border-[#aeb4b9] dark:hover:border-zinc-700 transition-all rounded-[8px]">
         <CardContent className="p-4 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -138,7 +141,7 @@ export function UsageStats({
       </Card>
 
       {/* 4. Days to Reset */}
-      <Card className="border-border/60 bg-card shadow-2xs hover:border-border transition-all">
+      <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs hover:border-[#aeb4b9] dark:hover:border-zinc-700 transition-all rounded-[8px]">
         <CardContent className="p-4 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">

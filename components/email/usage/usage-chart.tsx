@@ -30,22 +30,22 @@ export function UsageChart() {
 
   if (loading) {
     return (
-      <Card className="border-border/60 bg-card shadow-2xs">
+      <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs rounded-[8px]">
         <CardHeader className="px-5 py-4 border-b border-border/40">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <Skeleton className="h-4 w-32 rounded" />
-              <Skeleton className="h-3 w-48 rounded" />
+              <Skeleton className="h-4 w-32 rounded-[3px]" />
+              <Skeleton className="h-3 w-48 rounded-[3px]" />
             </div>
-            <Skeleton className="h-4 w-24 rounded" />
+            <Skeleton className="h-4 w-24 rounded-[3px]" />
           </div>
         </CardHeader>
         <CardContent className="p-6">
           <div className="h-[280px] w-full flex flex-col justify-end space-y-3">
-            <Skeleton className="h-48 w-full rounded-xl" />
+            <Skeleton className="h-48 w-full rounded-[6px]" />
             <div className="flex justify-between">
               {Array.from({ length: 7 }).map((_, i) => (
-                <Skeleton key={i} className="h-3 w-8 rounded" />
+                <Skeleton key={i} className="h-3 w-8 rounded-[2px]" />
               ))}
             </div>
           </div>
@@ -55,7 +55,7 @@ export function UsageChart() {
   }
 
   return (
-    <Card className="border-border/60 bg-card shadow-2xs">
+    <Card className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs rounded-[8px]">
       <CardHeader className="px-5 py-4 border-b border-border/40">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
