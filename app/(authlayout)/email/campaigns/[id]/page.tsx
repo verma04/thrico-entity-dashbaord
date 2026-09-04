@@ -33,6 +33,12 @@ import { CampaignRecipientsDrilldown } from "@/components/email/campaigns/campai
 import { CampaignLinkClicks } from "@/components/email/campaigns/campaign-link-clicks";
 import { ExportCampaignRecipientsModal } from "@/components/email/campaigns/export-campaign-recipients-modal";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   ResponsiveContainer,
@@ -240,76 +246,170 @@ function CampaignDetailPage() {
       />
 
       <EcosystemContainer className="p-0 m-0 border-none bg-transparent shadow-none ring-0 space-y-6">
-        {/* KPI Metric Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              Delivered
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                {delivered.toLocaleString()}
-              </span>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                ({deliveryRate}%)
-              </span>
-            </div>
-            <p className="text-[10.5px] text-muted-foreground pt-1">
-              Sent to {campaign.totalRecipients.toLocaleString()} recipients
-            </p>
-          </div>
+        {/* KPI Metric Cards with Definitions Tooltip */}
+        <TooltipProvider delayDuration={150}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs hover:border-emerald-300 dark:hover:border-emerald-700 transition-all cursor-help">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Delivered
+                    </span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                      Stage 2
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                      {delivered.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      ({deliveryRate}%)
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-muted-foreground pt-1">
+                    Sent to {campaign.totalRecipients.toLocaleString()} recipients
+                  </p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="max-w-[280px] p-3 rounded-lg bg-zinc-950 text-zinc-100 border border-zinc-800 shadow-xl space-y-1.5 text-left"
+              >
+                <p className="font-bold text-xs text-emerald-400 flex items-center gap-1">
+                  ✅ Delivered (Dispatch &amp; Transmission)
+                </p>
+                <p className="text-[11px] text-zinc-300 leading-snug">
+                  <strong className="text-white">What it means:</strong> The recipient's mail provider (Gmail, Outlook, Yahoo) accepted the email and confirmed it was placed into their mailbox.
+                </p>
+                <p className="text-[10px] text-zinc-400 leading-snug">
+                  <strong className="text-zinc-200">When it happens:</strong> AWS SES receives delivery confirmation from the destination mail server and fires a webhook.
+                </p>
+              </TooltipContent>
+            </Tooltip>
 
-          <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              Unique Opens
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                {opened.toLocaleString()}
-              </span>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                ({openRate}%)
-              </span>
-            </div>
-            <p className="text-[10.5px] text-muted-foreground pt-1">
-              Subject line & preview rate
-            </p>
-          </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-help">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Unique Opens
+                    </span>
+                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
+                      Stage 3
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {opened.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      ({openRate}%)
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-muted-foreground pt-1">
+                    Subject line &amp; preview rate
+                  </p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="max-w-[280px] p-3 rounded-lg bg-zinc-950 text-zinc-100 border border-zinc-800 shadow-xl space-y-1.5 text-left"
+              >
+                <p className="font-bold text-xs text-blue-400 flex items-center gap-1">
+                  👁️ Opened (User Engagement)
+                </p>
+                <p className="text-[11px] text-zinc-300 leading-snug">
+                  <strong className="text-white">What it means:</strong> The recipient opened and viewed the email.
+                </p>
+                <p className="text-[10px] text-zinc-400 leading-snug">
+                  <strong className="text-zinc-200">When it happens:</strong> The 1x1 transparent tracking pixel is loaded by the user's mail client. Updates openCount, firstOpenedAt, and lastOpenedAt.
+                </p>
+              </TooltipContent>
+            </Tooltip>
 
-          <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              Unique Clicks
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
-                {clicked.toLocaleString()}
-              </span>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                ({clickRate}%)
-              </span>
-            </div>
-            <p className="text-[10.5px] text-muted-foreground pt-1">
-              Link engagement across body
-            </p>
-          </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs hover:border-purple-300 dark:hover:border-purple-700 transition-all cursor-help">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Unique Clicks
+                    </span>
+                    <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">
+                      Stage 3
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-bold text-purple-600 dark:text-purple-400">
+                      {clicked.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      ({clickRate}%)
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-muted-foreground pt-1">
+                    Link engagement across body
+                  </p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="max-w-[280px] p-3 rounded-lg bg-zinc-950 text-zinc-100 border border-zinc-800 shadow-xl space-y-1.5 text-left"
+              >
+                <p className="font-bold text-xs text-purple-400 flex items-center gap-1">
+                  🖱️ Clicked (User Engagement)
+                </p>
+                <p className="text-[11px] text-zinc-300 leading-snug">
+                  <strong className="text-white">What it means:</strong> The recipient clicked on one or more links inside the email.
+                </p>
+                <p className="text-[10px] text-zinc-400 leading-snug">
+                  <strong className="text-zinc-200">When it happens:</strong> User clicks a link routed through the redirect tracking endpoint. Updates clickCount, firstClickedAt, and lastClickedAt.
+                </p>
+              </TooltipContent>
+            </Tooltip>
 
-          <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
-            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              Click-to-Open (CTOR)
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                {ctor}%
-              </span>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                engagement
-              </span>
-            </div>
-            <p className="text-[10.5px] text-muted-foreground pt-1">
-              Ratio of clickers to openers
-            </p>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-help">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Click-to-Open (CTOR)
+                    </span>
+                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                      Efficiency
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                      {ctor}%
+                    </span>
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      engagement
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-muted-foreground pt-1">
+                    Ratio of clickers to openers
+                  </p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="max-w-[280px] p-3 rounded-lg bg-zinc-950 text-zinc-100 border border-zinc-800 shadow-xl space-y-1.5 text-left"
+              >
+                <p className="font-bold text-xs text-indigo-400 flex items-center gap-1">
+                  📊 Click-to-Open Rate (CTOR)
+                </p>
+                <p className="text-[11px] text-zinc-300 leading-snug">
+                  <strong className="text-white">What it means:</strong> Measures the percentage of unique openers who went on to click a link.
+                </p>
+                <p className="text-[10px] text-zinc-400 leading-snug">
+                  Formula: <code>(Unique Clicks ÷ Unique Opens) × 100</code>. Reflects email content relevance and call-to-action strength.
+                </p>
+              </TooltipContent>
+            </Tooltip>
           </div>
-        </div>
+        </TooltipProvider>
 
         {/* Time-Series Chart */}
         {timeSeriesLoading ? (
