@@ -39,7 +39,7 @@ import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { cn } from "@/lib/utils";
 
 import { CampaignKpiSummary } from "./campaign-kpi-summary";
-import { CampaignCard } from "./campaign-card";
+import { CampaignCard, CampaignCardSkeleton } from "./campaign-card";
 import { CampaignsTable } from "./campaigns-table";
 import { CampaignAnalyticsSheet } from "./campaign-analytics-sheet";
 
@@ -239,8 +239,10 @@ export function CampaignsHub() {
             ]}
           />
           <EcosystemActionBar.Separator />
-          <EcosystemActionBar.Status active={filteredCampaigns.length > 0}>
-            Showing {filteredCampaigns.length} of {rawCampaigns.length} Campaigns
+          <EcosystemActionBar.Status active={loading || filteredCampaigns.length > 0}>
+            {loading
+              ? "Fetching campaigns…"
+              : `Showing ${filteredCampaigns.length} of ${rawCampaigns.length} Campaigns`}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -299,7 +301,23 @@ export function CampaignsHub() {
 
       {/* ── Main Content Area ────────────────────────────────────────────── */}
       <EcosystemContainer className="p-0 m-0 border-none bg-transparent shadow-none ring-0 space-y-4">
-        {filteredCampaigns.length === 0 && !loading ? (
+        {loading ? (
+          view === "grid" ? (
+            /* Grid View Skeleton */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <CampaignCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            /* List View (Table) Skeleton */
+            <CampaignsTable
+              campaigns={[]}
+              isLoading={true}
+              onSelectAnalytics={setSelectedCampaignForAnalytics}
+            />
+          )
+        ) : filteredCampaigns.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 px-4 bg-white dark:bg-zinc-900 rounded-[8px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 text-center space-y-2.5">
             <div className="w-10 h-10 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800 flex items-center justify-center text-[#616161]">
               <Megaphone className="h-5 w-5" />
@@ -340,10 +358,11 @@ export function CampaignsHub() {
           /* List View (Table) */
           <CampaignsTable
             campaigns={filteredCampaigns}
-            isLoading={loading}
+            isLoading={false}
             onSelectAnalytics={setSelectedCampaignForAnalytics}
           />
         )}
+
 
         {/* Analytics Drilldown Slide-Over Modal */}
         {selectedCampaignForAnalytics && (

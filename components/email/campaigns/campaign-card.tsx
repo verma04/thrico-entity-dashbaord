@@ -171,3 +171,52 @@ export function CampaignCard({ campaign, onSelectAnalytics }: CampaignCardProps)
     </Card>
   );
 }
+
+export function CampaignCardSkeleton() {
+  return (
+    <Card className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs flex flex-col justify-between space-y-4 p-4">
+      <div className="space-y-3">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-8 rounded-[4px]" />
+            <div className="space-y-1">
+              <Skeleton className="h-3.5 w-32 rounded-[3px]" />
+              <Skeleton className="h-2.5 w-24 rounded-[3px]" />
+            </div>
+          </div>
+          <Skeleton className="h-4 w-12 rounded-[3px]" />
+        </div>
+
+        {/* Subject and Target Box */}
+        <div className="p-2.5 rounded-[6px] bg-muted/20 border border-border/40 space-y-1.5">
+          <Skeleton className="h-3 w-3/4 rounded-[3px]" />
+          <div className="flex justify-between items-center">
+            <Skeleton className="h-2.5 w-20 rounded-[3px]" />
+            <Skeleton className="h-2.5 w-16 rounded-[3px]" />
+          </div>
+        </div>
+
+        {/* Metrics 3-Col */}
+        <div className="grid grid-cols-3 gap-2 pt-1">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="p-2 rounded-[4px] bg-[#f6f6f7] dark:bg-zinc-800/60 border border-border/40 text-center space-y-1"
+            >
+              <Skeleton className="h-2 w-10 mx-auto rounded-[2px]" />
+              <Skeleton className="h-3.5 w-8 mx-auto rounded-[2px]" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="pt-3 border-t border-border/50 flex items-center justify-between">
+        <Skeleton className="h-3 w-20 rounded-[3px]" />
+        <Skeleton className="h-6 w-16 rounded-[4px]" />
+      </div>
+    </Card>
+  );
+}
+

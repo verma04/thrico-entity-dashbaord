@@ -17,20 +17,21 @@ export function CampaignKpiSummary({ campaigns, loading }: CampaignKpiSummaryPro
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="border-border/60 bg-card shadow-2xs">
+          <Card key={i} className="border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs rounded-[8px]">
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <Skeleton className="h-3 w-24 rounded" />
+                <Skeleton className="h-3 w-24 rounded-[3px]" />
                 <Skeleton className="h-7 w-7 rounded-[4px]" />
               </div>
-              <Skeleton className="h-6 w-28 rounded" />
-              <Skeleton className="h-2.5 w-full rounded" />
+              <Skeleton className="h-6 w-28 rounded-[3px]" />
+              <Skeleton className="h-2.5 w-3/4 rounded-[3px]" />
             </CardContent>
           </Card>
         ))}
       </div>
     );
   }
+
 
   // Calculate aggregate metrics across all sent campaigns
   const totalCampaigns = campaigns.length;
