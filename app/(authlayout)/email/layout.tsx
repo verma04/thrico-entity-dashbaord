@@ -7,6 +7,7 @@ import {
   Send,
   BarChart3,
   LayoutDashboard,
+  Megaphone,
   Zap,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
@@ -30,6 +31,12 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
         key: "dashboard",
         label: "Dashboard",
         icon: <LayoutDashboard className="h-4 w-4" />,
+      },
+      {
+        key: "campaigns",
+        label: "Campaigns",
+        icon: <Megaphone className="h-4 w-4" />,
+        locked: !canReadEmail,
       },
       {
         key: "send",
