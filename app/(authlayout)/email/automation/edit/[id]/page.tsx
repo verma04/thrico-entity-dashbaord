@@ -2,12 +2,13 @@
 
 import { CanvasBuilder } from "@/components/email/automation/canvas-builder";
 import { useRouter } from "next/navigation";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 interface EditPageProps {
   params: { id: string };
 }
 
-export default function AutomationEditPage({ params }: EditPageProps) {
+function AutomationEditPage({ params }: EditPageProps) {
   const router = useRouter();
 
   return (
@@ -19,3 +20,5 @@ export default function AutomationEditPage({ params }: EditPageProps) {
     </div>
   );
 }
+
+export default withModulePermission(AutomationEditPage, "EMAIL", "canEdit");

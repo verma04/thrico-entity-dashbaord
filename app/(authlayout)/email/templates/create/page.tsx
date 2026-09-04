@@ -10,6 +10,7 @@ import { RefreshCw } from "lucide-react";
 
 import { TemplateChooser } from "@/components/email/template-chooser/template-chooser";
 import { STARTER_KEY_MAP } from "@/components/email/template-chooser/template-data";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 // ─── Page entry point ─────────────────────────────────────────────────────────
 function CreateTemplateContent() {
@@ -68,7 +69,7 @@ function CreateTemplateContent() {
   return <UnlayerEmailEditor id={id || undefined} initialData={initialData} />;
 }
 
-export default function CreateTemplatePage() {
+function CreateTemplatePage() {
   return (
     <Suspense
       fallback={
@@ -84,3 +85,5 @@ export default function CreateTemplatePage() {
     </Suspense>
   );
 }
+
+export default withModulePermission(CreateTemplatePage, "EMAIL", "canCreate");

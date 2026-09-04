@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CanvasBuilder } from "@/components/email/automation/canvas-builder";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 function CanvasContent() {
   const router = useRouter();
@@ -17,7 +18,7 @@ function CanvasContent() {
   );
 }
 
-export default function NewCampaignCanvasPage() {
+function NewCampaignCanvasPage() {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-muted/50">
       <Suspense fallback={<div className="flex-1 flex items-center justify-center">Loading...</div>}>
@@ -26,3 +27,5 @@ export default function NewCampaignCanvasPage() {
     </div>
   );
 }
+
+export default withModulePermission(NewCampaignCanvasPage, "EMAIL", "canCreate");

@@ -21,6 +21,8 @@ const useEmailLayoutStore = createLayoutStore();
 function EmailLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const canReadEmail = useModulePermission("EMAIL", "canRead");
+  const canCreateEmail = useModulePermission("EMAIL", "canCreate");
+  const canReadAutomation = useModulePermission("AUTOMATION", "canRead");
 
   const defaultItems = React.useMemo(() => {
     return [
@@ -30,16 +32,22 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
         icon: <LayoutDashboard className="h-4 w-4" />,
       },
       {
+        key: "send",
+        label: "Send Campaign",
+        icon: <Send className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+      {
         key: "templates",
         label: "Templates",
         icon: <PaintBucket className="h-4 w-4" />,
         locked: !canReadEmail,
       },
       {
-        key: "send",
-        label: "Send Email",
-        icon: <Send className="h-4 w-4" />,
-        locked: !canReadEmail,
+        key: "automation",
+        label: "Automations",
+        icon: <Zap className="h-4 w-4" />,
+        locked: !canReadAutomation && !canReadEmail,
       },
       {
         key: "usage",
@@ -47,14 +55,8 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
         icon: <BarChart3 className="h-4 w-4" />,
         locked: !canReadEmail,
       },
-      {
-        key: "automation",
-        label: "Automations",
-        icon: <Zap className="h-4 w-4" />,
-        locked: !canReadEmail,
-      },
     ];
-  }, [canReadEmail]);
+  }, [canReadEmail, canCreateEmail, canReadAutomation]);
 
   const isTakeoverPage =
     pathname.includes("/email/templates/create") ||
@@ -85,4 +87,4 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(EmailLayout, "NETWORK");
+export default withSubscriptionCheck(EmailLayout, "BRANDED_EMAIL");

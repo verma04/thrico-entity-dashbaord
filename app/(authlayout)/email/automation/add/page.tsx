@@ -17,6 +17,7 @@ import {
 } from "@/components/email/automation/types";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { toast } from "sonner";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 // ─── Campaign template definitions ────────────────────────────────────────────
 interface CampaignTemplate {
@@ -848,3 +849,5 @@ export default function NewCampaignPage() {
     </div>
   );
 }
+
+export default withModulePermission(NewCampaignPage, "EMAIL", "canCreate");
