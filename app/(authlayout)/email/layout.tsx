@@ -43,12 +43,12 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
         icon: <PaintBucket className="h-4 w-4" />,
         locked: !canReadEmail,
       },
-      {
-        key: "automation",
-        label: "Automations",
-        icon: <Zap className="h-4 w-4" />,
-        locked: !canReadAutomation && !canReadEmail,
-      },
+      // {
+      //   key: "automation",
+      //   label: "Automations",
+      //   icon: <Zap className="h-4 w-4" />,
+      //   locked: !canReadAutomation && !canReadEmail,
+      // },
       {
         key: "usage",
         label: "Usage & Billing",
@@ -60,7 +60,7 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
 
   const isTakeoverPage =
     pathname.includes("/email/templates/create") ||
-    pathname.includes("/email/automation/add") ||
+    pathname.includes("/email/automation/add/canvas") ||
     pathname.includes("/email/automation/edit");
 
   const { getOrderedTabs, onReorder } = useTabOrder(

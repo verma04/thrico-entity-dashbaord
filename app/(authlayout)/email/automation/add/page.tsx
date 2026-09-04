@@ -18,6 +18,10 @@ import {
 import { BorderBeam } from "@/components/ui/border-beam";
 import { toast } from "sonner";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { Button } from "@/components/ui/button";
 
 // ─── Campaign template definitions ────────────────────────────────────────────
 interface CampaignTemplate {
@@ -395,41 +399,55 @@ function NewCampaignPage() {
   );
 
   return (
-    <div className="min-h-screen bg-muted/50 flex flex-col">
+    <EcosystemWrapper className="animate-in fade-in duration-500 gap-4">
+      <EcosystemHeader
+        title="Create Email Campaign Automation"
+        description="Configure event triggers, target modules, execution frequency, and template workflows."
+        icon={Zap}
+        badgeText="New Workflow"
+        breadcrumbs={[
+          { label: "Email", href: "/email" },
+          { label: "Automations", href: "/email/automation" },
+          { label: "New Campaign" },
+        ]}
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 hidden sm:flex">
+              {[
+                { label: "1. Template", step: 0 },
+                { label: "2. Settings", step: 1 },
+                { label: "3. Schedule", step: 2 },
+              ].map((s) => (
+                <button
+                  key={s.step}
+                  type="button"
+                  onClick={() => setStep(s.step as any)}
+                  className={cn(
+                    "text-[11px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer",
+                    step === s.step
+                      ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 border-transparent shadow-2xs"
+                      : "bg-card text-muted-foreground border-border hover:border-border hover:text-foreground"
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
 
-      {/* ── Top bar ── */}
-      <div className="flex items-center gap-4 px-8 py-4 bg-card/70 backdrop-blur-md border-b border-border shrink-0 sticky top-0 z-50">
-        <button onClick={handleBack}
-          className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-[#5B6CFF] transition-colors">
-          <ChevronLeft size={14} /> Back
-        </button>
-        <div className="w-px h-4 bg-muted" />
-        <div className="flex items-center gap-2">
-          {[
-            { label: "Template", step: 0 },
-            { label: "Settings", step: 1 },
-            { label: "Schedule & Users", step: 2 },
-          ].map((s, i) => (
-            <React.Fragment key={s.step}>
-              {i > 0 && <ChevronRight size={11} className="text-muted-foreground" />}
-              <span className={cn("text-[11px] font-bold", step === s.step ? "text-[#5B6CFF]" : "text-muted-foreground")}>
-                {s.label}
-              </span>
-            </React.Fragment>
-          ))}
-        </div>
-        <div className="flex-1" />
-        {/* Progress dots */}
-        <div className="flex items-center gap-1.5">
-          {[0, 1, 2].map((s) => (
-            <div key={s} className={cn("h-1.5 rounded-full transition-all",
-              s === step ? "w-6 bg-[#5B6CFF]" : s < step ? "w-3 bg-[#5B6CFF]/40" : "w-3 bg-muted")} />
-          ))}
-        </div>
-      </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleBack}
+              className="h-8 rounded-lg gap-1.5 text-xs font-medium"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+              {step === 0 ? "Back to Automations" : "Previous Step"}
+            </Button>
+          </div>
+        }
+      />
 
-      {/* ── Content ── */}
-      <div className="flex-1 overflow-y-auto">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0 mt-2">
         <AnimatePresence mode="wait">
 
           {/* ────────── STEP 0: Template chooser ────────── */}
@@ -845,8 +863,8 @@ function NewCampaignPage() {
           )}
 
         </AnimatePresence>
-      </div>
-    </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }
 
