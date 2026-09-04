@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X, ChevronRight, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -56,8 +62,12 @@ export function ChildSidebarContainer({
   const { state, toggleSidebar, setOpen } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-
   const activeTab = getActiveSidebarTab(pathName);
+  const hasChildSidebar =
+    activeTab !== "mobile-app" &&
+    activeTab !== "home" &&
+    activeTab !== "team" &&
+    activeTab !== "upgrade";
 
   // Default-open the Classifications group when on the members tab
   useEffect(() => {
@@ -314,7 +324,10 @@ export function ChildSidebarContainer({
       case "integrations":
         return filteredIntegrations.length > 0;
       case "team":
-        return true;
+      case "upgrade":
+      case "home":
+      case "mobile-app":
+        return false;
       default:
         return true;
     }
@@ -368,20 +381,14 @@ export function ChildSidebarContainer({
         otherAccountsData={otherAccountsData}
         isSwitching={isSwitching}
         handleSwitch={handleSwitch}
-        showSidebarToggle={
-          activeTab !== "mobile-app" &&
-          activeTab !== "home" &&
-          activeTab !== "team"
-        }
+        showSidebarToggle={hasChildSidebar}
       />
       <div className="flex flex-1 relative w-full bg-white dark:bg-neutral-950 group/sidebar-wrapper">
         <ParentSidebar />
-        {/* ── SIDEBAR (Hidden on Home route, Mobile App & Team / Users Settings) ── */}
-        {activeTab !== "mobile-app" &&
-          activeTab !== "home" &&
-          activeTab !== "team" && (
-            <Sidebar
-              collapsible="icon"
+        {/* ── SIDEBAR (Hidden when no child route exists: Home, Mobile App, Team, Upgrade/Subscription) ── */}
+        {hasChildSidebar && (
+          <Sidebar
+            collapsible="icon"
               className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! mb-2 z-30 shadow-sm rounded-l-2xl!"
               style={{ "--sidebar-width": "210px" } as React.CSSProperties}
             >
