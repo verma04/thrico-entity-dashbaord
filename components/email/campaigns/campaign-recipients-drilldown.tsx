@@ -13,20 +13,25 @@ import {
   useGetEmailCampaignRecipients,
   EmailCampaignRecipient,
 } from "@/graphql/actions/email/campaign-actions";
-import { Mail, Search, Eye, MousePointerClick, AlertTriangle, UserCheck } from "lucide-react";
+import { Mail, Search, Eye, MousePointerClick, AlertTriangle, UserCheck, Upload } from "lucide-react";
 import { safeFormat } from "@/lib/date-utils";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ExportCampaignRecipientsModal } from "./export-campaign-recipients-modal";
 
 interface CampaignRecipientsDrilldownProps {
   campaignId: string;
+  campaign?: any;
 }
 
 export function CampaignRecipientsDrilldown({
   campaignId,
+  campaign,
 }: CampaignRecipientsDrilldownProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading } = useGetEmailCampaignRecipients(campaignId, {
     limit: 1000,
@@ -161,14 +166,26 @@ export function CampaignRecipientsDrilldown({
           ))}
         </div>
 
-        <div className="relative w-full sm:w-60">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search recipients…"
-            className="h-8 pl-8 text-xs rounded-[4px] border-border/60 bg-card"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative w-full sm:w-60">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search recipients…"
+              className="h-8 pl-8 text-xs rounded-[4px] border-border/60 bg-card"
+            />
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 text-xs font-semibold border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs rounded-[4px] px-2.5 cursor-pointer text-[#303030] dark:text-zinc-200 shrink-0 hover:bg-muted/60"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
         </div>
       </div>
 
@@ -183,6 +200,22 @@ export function CampaignRecipientsDrilldown({
         size="sm"
         pageSize={10}
         loadingRows={6}
+      />
+
+      <ExportCampaignRecipientsModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        campaignId={campaignId}
+        campaign={campaign}
+        recipients={filteredRecipients}
+        totalCount={rawRecipients.length}
+        matchingCount={
+          search.trim() || statusFilter !== "ALL"
+            ? filteredRecipients.length
+            : undefined
+        }
+        statusFilter={statusFilter}
+        search={search}
       />
     </div>
   );

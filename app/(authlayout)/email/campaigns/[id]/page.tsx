@@ -15,6 +15,7 @@ import {
   Link2,
   Calendar,
   Clock,
+  Upload,
 } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -30,6 +31,7 @@ import {
 import { safeFormat } from "@/lib/date-utils";
 import { CampaignRecipientsDrilldown } from "@/components/email/campaigns/campaign-recipients-drilldown";
 import { CampaignLinkClicks } from "@/components/email/campaigns/campaign-link-clicks";
+import { ExportCampaignRecipientsModal } from "@/components/email/campaigns/export-campaign-recipients-modal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
@@ -48,6 +50,7 @@ function CampaignDetailPage() {
   const campaignId = String(params.id);
 
   const [activeTab, setActiveTab] = useState<"recipients" | "links">("recipients");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading, refetch } = useGetEmailCampaignDetail(campaignId);
   const { data: timeSeriesData, loading: timeSeriesLoading } =
@@ -217,6 +220,15 @@ function CampaignDetailPage() {
             </Button>
             <Button
               variant="outline"
+              size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 text-xs font-semibold border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs rounded-[4px] px-2.5 cursor-pointer text-[#303030] dark:text-zinc-200 hover:bg-muted/60"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+            <Button
+              variant="outline"
               size="icon"
               onClick={() => refetch()}
               className="h-8 w-8 border-border rounded-[4px]"
@@ -368,11 +380,23 @@ function CampaignDetailPage() {
           </div>
 
           {activeTab === "recipients" ? (
-            <CampaignRecipientsDrilldown campaignId={campaignId} />
+            <CampaignRecipientsDrilldown
+              campaignId={campaignId}
+              campaign={campaign}
+            />
           ) : (
             <CampaignLinkClicks campaignId={campaignId} />
           )}
         </div>
+
+        {/* Export CSV Modal */}
+        <ExportCampaignRecipientsModal
+          open={showExportModal}
+          onOpenChange={setShowExportModal}
+          campaignId={campaignId}
+          campaign={campaign}
+          totalCount={campaign.totalRecipients}
+        />
       </EcosystemContainer>
     </EcosystemWrapper>
   );
