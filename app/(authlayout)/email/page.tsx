@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Mail, RotateCcw, Send, Plus } from "lucide-react";
+import React, { useState } from "react";
+import { Mail, RotateCcw, Send, Plus, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -11,12 +11,14 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useUrlDateRange } from "@/hooks/use-url-date-range";
 import EmailDashboard from "@/components/email/email-dashboard";
+import { ExportEmailOverviewModal } from "@/components/email/export-email-overview-modal";
 import { cn } from "@/lib/utils";
 
 function EmailPage() {
   const router = useRouter();
   const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -57,6 +59,15 @@ function EmailPage() {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="h-9 rounded-lg text-xs gap-1.5 font-medium border-border"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => router.push("/email/templates")}
               className="h-9 rounded-lg text-xs gap-1.5 font-medium"
             >
@@ -77,6 +88,11 @@ function EmailPage() {
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-8">
         <EmailDashboard dateRange={dateRange} timeRange={timeRange} />
+
+        <ExportEmailOverviewModal
+          open={showExportModal}
+          onOpenChange={setShowExportModal}
+        />
       </EcosystemContainer>
     </EcosystemWrapper>
   );
