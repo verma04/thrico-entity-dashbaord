@@ -96,7 +96,7 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
         return {
           label: "When Approved",
           icon: CheckCircle2,
-          variant: "blue" as const,
+          variant: "sky" as const,
         };
       case "MEMBER_VERIFIED":
         return {
@@ -108,7 +108,7 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
         return {
           label: trigger,
           icon: Zap,
-          variant: "slate" as const,
+          variant: "muted" as const,
         };
     }
   };
@@ -266,7 +266,7 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
       cell: (row) => {
         const t = getTriggerBadge(row.trigger);
         return (
-          <AdminTableTag variant={t.variant} icon={t.icon}>
+          <AdminTableTag variant={t.variant}>
             {t.label}
           </AdminTableTag>
         );

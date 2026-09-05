@@ -1,11 +1,11 @@
 import { gql } from "@apollo/client";
 
-export type MemberRuleTrigger =
-  | "MEMBER_JOINED"
-  | "MEMBER_VERIFIED"
-  | "MEMBER_APPROVED";
+export type SurveyRuleTrigger =
+  | "SURVEY_SUBMITTED"
+  | "SURVEY_CREATED"
+  | "SURVEY_COMPLETED";
 
-export type MemberRuleActionType =
+export type SurveyRuleActionType =
   | "ASSIGN_MEMBERSHIP_TIER"
   | "EMAIL"
   | "NOTIFICATION"
@@ -13,20 +13,20 @@ export type MemberRuleActionType =
   | "ADD_MEMBER_TAG"
   | "WHATSAPP_TEMPLATE";
 
-export interface MemberRuleCondition {
+export interface SurveyRuleCondition {
   field: string;
   operator: string;
   value: any;
 }
 
-export interface MemberRuleConditionInput {
+export interface SurveyRuleConditionInput {
   field: string;
   operator: string;
   value: any;
 }
 
-export interface MemberRuleAction {
-  type: MemberRuleActionType;
+export interface SurveyRuleAction {
+  type: SurveyRuleActionType;
   tierId?: string | null;
   tierName?: string | null;
   templateId?: string | null;
@@ -40,6 +40,8 @@ export interface MemberRuleAction {
   pushTitle?: string | null;
   pushBody?: string | null;
   push?: boolean | null;
+  conditionOperator?: "AND" | "OR" | string | null;
+  conditions?: SurveyRuleCondition[] | null;
   whatsAppTemplateName?: string | null;
   whatsAppLanguage?: string | null;
   whatsAppVariables?: string[] | null;
@@ -49,8 +51,8 @@ export interface MemberRuleAction {
   fallbackEmailBody?: string | null;
 }
 
-export interface MemberRuleActionInput {
-  type: MemberRuleActionType;
+export interface SurveyRuleActionInput {
+  type: SurveyRuleActionType;
   tierId?: string | null;
   templateId?: string | null;
   emailSubject?: string | null;
@@ -61,6 +63,8 @@ export interface MemberRuleActionInput {
   pushTitle?: string | null;
   pushBody?: string | null;
   push?: boolean | null;
+  conditionOperator?: "AND" | "OR" | string | null;
+  conditions?: SurveyRuleConditionInput[] | null;
   whatsAppTemplateName?: string | null;
   whatsAppLanguage?: string | null;
   whatsAppVariables?: string[] | null;
@@ -70,52 +74,60 @@ export interface MemberRuleActionInput {
   fallbackEmailBody?: string | null;
 }
 
-export interface MemberAutomationRule {
+export interface SurveyAutomationRule {
   id: string;
   entityId: string;
+  surveyId?: string | null;
+  surveyName?: string | null;
   name: string;
   description?: string | null;
-  trigger: MemberRuleTrigger;
+  trigger: SurveyRuleTrigger;
   conditionOperator?: "AND" | "OR" | string;
-  conditions?: MemberRuleCondition[] | null;
-  actions: MemberRuleAction[];
+  conditions?: SurveyRuleCondition[] | null;
+  actions: SurveyRuleAction[];
   isActive: boolean;
   priority?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface CreateMemberAutomationRuleInput {
+export interface CreateSurveyAutomationRuleInput {
+  surveyId?: string | null;
   name: string;
   description?: string | null;
-  trigger: MemberRuleTrigger;
+  trigger: SurveyRuleTrigger;
   conditionOperator?: string;
-  conditions?: MemberRuleConditionInput[];
-  actions: MemberRuleActionInput[];
+  conditions?: SurveyRuleConditionInput[];
+  actions: SurveyRuleActionInput[];
   isActive?: boolean;
   priority?: number;
 }
 
-export interface UpdateMemberAutomationRuleInput {
+export interface UpdateSurveyAutomationRuleInput {
+  surveyId?: string | null;
   name?: string;
   description?: string | null;
-  trigger?: MemberRuleTrigger;
+  trigger?: SurveyRuleTrigger;
   conditionOperator?: string;
-  conditions?: MemberRuleConditionInput[];
-  actions?: MemberRuleActionInput[];
+  conditions?: SurveyRuleConditionInput[];
+  actions?: SurveyRuleActionInput[];
   isActive?: boolean;
   priority?: number;
 }
 
-export const GET_MEMBER_AUTOMATION_RULES = gql`
-  query GetMemberAutomationRules {
-    getMemberAutomationRules {
+export const GET_SURVEY_AUTOMATION_RULES = gql`
+  query GetSurveyAutomationRules($surveyId: ID) {
+    getSurveyAutomationRules(surveyId: $surveyId) {
       id
       entityId
+      surveyId
+      surveyName
       name
       description
       trigger
       conditionOperator
+      isActive
+      priority
       conditions {
         field
         operator
@@ -136,24 +148,32 @@ export const GET_MEMBER_AUTOMATION_RULES = gql`
         pushTitle
         pushBody
         push
+        conditionOperator
+        conditions {
+          field
+          operator
+          value
+        }
       }
-      isActive
-      priority
       createdAt
       updatedAt
     }
   }
 `;
 
-export const GET_MEMBER_AUTOMATION_RULE = gql`
-  query GetMemberAutomationRule($id: ID!) {
-    getMemberAutomationRule(id: $id) {
+export const GET_SURVEY_AUTOMATION_RULE = gql`
+  query GetSurveyAutomationRule($id: ID!) {
+    getSurveyAutomationRule(id: $id) {
       id
       entityId
+      surveyId
+      surveyName
       name
       description
       trigger
       conditionOperator
+      isActive
+      priority
       conditions {
         field
         operator
@@ -174,24 +194,32 @@ export const GET_MEMBER_AUTOMATION_RULE = gql`
         pushTitle
         pushBody
         push
+        conditionOperator
+        conditions {
+          field
+          operator
+          value
+        }
       }
-      isActive
-      priority
       createdAt
       updatedAt
     }
   }
 `;
 
-export const CREATE_MEMBER_AUTOMATION_RULE = gql`
-  mutation CreateMemberAutomationRule($input: CreateMemberAutomationRuleInput!) {
-    createMemberAutomationRule(input: $input) {
+export const CREATE_SURVEY_AUTOMATION_RULE = gql`
+  mutation CreateSurveyAutomationRule($input: CreateSurveyAutomationRuleInput!) {
+    createSurveyAutomationRule(input: $input) {
       id
       entityId
+      surveyId
+      surveyName
       name
       description
       trigger
       conditionOperator
+      isActive
+      priority
       conditions {
         field
         operator
@@ -212,26 +240,35 @@ export const CREATE_MEMBER_AUTOMATION_RULE = gql`
         pushTitle
         pushBody
         push
+        conditionOperator
+        conditions {
+          field
+          operator
+          value
+        }
       }
-      isActive
-      priority
       createdAt
+      updatedAt
     }
   }
 `;
 
-export const UPDATE_MEMBER_AUTOMATION_RULE = gql`
-  mutation UpdateMemberAutomationRule(
+export const UPDATE_SURVEY_AUTOMATION_RULE = gql`
+  mutation UpdateSurveyAutomationRule(
     $id: ID!
-    $input: UpdateMemberAutomationRuleInput!
+    $input: UpdateSurveyAutomationRuleInput!
   ) {
-    updateMemberAutomationRule(id: $id, input: $input) {
+    updateSurveyAutomationRule(id: $id, input: $input) {
       id
       entityId
+      surveyId
+      surveyName
       name
       description
       trigger
       conditionOperator
+      isActive
+      priority
       conditions {
         field
         operator
@@ -252,31 +289,36 @@ export const UPDATE_MEMBER_AUTOMATION_RULE = gql`
         pushTitle
         pushBody
         push
+        conditionOperator
+        conditions {
+          field
+          operator
+          value
+        }
       }
-      isActive
-      priority
       updatedAt
     }
   }
 `;
 
-export const TOGGLE_MEMBER_AUTOMATION_RULE = gql`
-  mutation ToggleMemberAutomationRule($id: ID!, $isActive: Boolean!) {
-    toggleMemberAutomationRule(id: $id, isActive: $isActive) {
+export const TOGGLE_SURVEY_AUTOMATION_RULE = gql`
+  mutation ToggleSurveyAutomationRule($id: ID!, $isActive: Boolean!) {
+    toggleSurveyAutomationRule(id: $id, isActive: $isActive) {
       id
       isActive
+      updatedAt
     }
   }
 `;
 
-export const DELETE_MEMBER_AUTOMATION_RULE = gql`
-  mutation DeleteMemberAutomationRule($id: ID!) {
-    deleteMemberAutomationRule(id: $id)
+export const DELETE_SURVEY_AUTOMATION_RULE = gql`
+  mutation DeleteSurveyAutomationRule($id: ID!) {
+    deleteSurveyAutomationRule(id: $id)
   }
 `;
 
-export const REORDER_MEMBER_AUTOMATION_RULES = gql`
-  mutation ReorderMemberAutomationRules($ruleIds: [ID!]!) {
-    reorderMemberAutomationRules(ruleIds: $ruleIds)
+export const REORDER_SURVEY_AUTOMATION_RULES = gql`
+  mutation ReorderSurveyAutomationRules($ruleIds: [ID!]!) {
+    reorderSurveyAutomationRules(ruleIds: $ruleIds)
   }
 `;

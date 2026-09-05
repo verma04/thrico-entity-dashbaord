@@ -4,56 +4,59 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client";
 import {
-  CREATE_MEMBER_AUTOMATION_RULE,
-  GET_MEMBER_AUTOMATION_RULES,
-  CreateMemberAutomationRuleInput,
-  UpdateMemberAutomationRuleInput,
-} from "@/graphql/member-automation";
-import { AutomationForm } from "@/components/members/automation/automation-form";
+  CREATE_SURVEY_AUTOMATION_RULE,
+  GET_SURVEY_AUTOMATION_RULES,
+  CreateSurveyAutomationRuleInput,
+  UpdateSurveyAutomationRuleInput,
+} from "@/graphql/survey-automation";
+import { SurveyAutomationForm } from "@/components/surveys/automation/survey-automation-form";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
-import { Zap, ArrowLeft } from "lucide-react";
+import { ClipboardList, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-const CreateAutomationRulePage = () => {
+const CreateSurveyAutomationRulePage = () => {
   const router = useRouter();
 
-  const [createRule, { loading }] = useMutation(CREATE_MEMBER_AUTOMATION_RULE, {
-    refetchQueries: [{ query: GET_MEMBER_AUTOMATION_RULES }],
-    onCompleted: () => {
-      toast.success("Automation rule created successfully!");
-      router.push("/members/automation");
-    },
-    onError: (err: any) => {
-      toast.error(err.message || "Failed to create automation rule");
-    },
-  });
+  const [createRule, { loading }] = useMutation(
+    CREATE_SURVEY_AUTOMATION_RULE,
+    {
+      refetchQueries: [{ query: GET_SURVEY_AUTOMATION_RULES }],
+      onCompleted: () => {
+        toast.success("Survey automation rule created successfully!");
+        router.push("/surveys/automation");
+      },
+      onError: (err: any) => {
+        toast.error(err.message || "Failed to create survey automation rule");
+      },
+    }
+  );
 
   const handleSave = async (
-    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput
+    input: CreateSurveyAutomationRuleInput | UpdateSurveyAutomationRuleInput
   ) => {
     await createRule({
-      variables: { input: input as CreateMemberAutomationRuleInput },
+      variables: { input: input as CreateSurveyAutomationRuleInput },
     });
   };
 
   const handleCancel = () => {
-    router.push("/members/automation");
+    router.push("/surveys/automation");
   };
 
   return (
     <EcosystemWrapper className="gap-6">
       <EcosystemHeader
-        title="Create Automation Rule"
-        badgeText="New Workflow"
-        description="Configure automated tier assignment, email triggers, circle memberships, and tagging workflows."
-        icon={Zap}
+        title="Create Survey Automation"
+        badgeText="New Feedback Flow"
+        description="Configure automated tier upgrades, reward emails, circle memberships, and tags on survey response events."
+        icon={ClipboardList}
         breadcrumbs={[
-          { label: "Members", href: "/members/all" },
-          { label: "Automation", href: "/members/automation" },
+          { label: "Surveys", href: "/surveys/all" },
+          { label: "Automation", href: "/surveys/automation" },
           { label: "Create Rule" },
         ]}
         actions={
@@ -70,7 +73,7 @@ const CreateAutomationRulePage = () => {
       />
 
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <AutomationForm
+        <SurveyAutomationForm
           loading={loading}
           onSave={handleSave}
           onCancel={handleCancel}
@@ -82,7 +85,7 @@ const CreateAutomationRulePage = () => {
 };
 
 export default withModulePermission(
-  CreateAutomationRulePage,
-  "AUTOMATION",
+  CreateSurveyAutomationRulePage,
+  "SURVEYS",
   "canCreate"
 );

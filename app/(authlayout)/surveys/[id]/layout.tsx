@@ -17,6 +17,7 @@ import {
   FileQuestion,
   Calendar,
   Eye,
+  Zap,
 } from "lucide-react";
 import { useGetSurvey } from "@/graphql/surveys/survey-queries";
 import { getThricoDomain, getCustomDomain } from "@/graphql/actions/domain";
@@ -40,6 +41,7 @@ const tabItems: ManageTabItem[] = [
     path: "responses",
   },
   { key: "results", label: "Results", icon: BarChart3, path: "results" },
+  { key: "automation", label: "Automation", icon: Zap, path: "automation" },
   { key: "settings", label: "Settings", icon: Settings, path: "settings" },
 ];
 
