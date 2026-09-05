@@ -1203,12 +1203,6 @@ export const integrationsItems = [
     path: "/integrations/shopify",
     icon: <ShoppingBag size={18} />,
   },
-  {
-    key: "int-woocommerce",
-    label: "WooCommerce",
-    path: "/integrations/woocommerce",
-    icon: <Store size={18} />,
-  },
 ];
 
 export const mobileAppItems = [
