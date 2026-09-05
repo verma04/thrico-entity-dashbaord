@@ -53,17 +53,38 @@ export const useModuleCreation = () => {
       );
       const newSort = maxSort + 1;
 
+      let initialContent: Record<string, any> = {
+        title: `New ${baseName}`,
+        subtitle: "Edit this description in settings.",
+        items: [],
+      };
+
+      if (type === "html") {
+        initialContent = {
+          title: "HTML Section",
+          description: "",
+          hideTitle: true,
+          hideDescription: true,
+          htmlCode: `<div style="padding: 40px 24px; text-align: center; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);">
+  <h2 style="font-size: 26px; font-weight: 700; margin-bottom: 10px; color: #ffffff;">Custom HTML Section</h2>
+  <p style="font-size: 15px; opacity: 0.92; max-width: 580px; margin: 0 auto; line-height: 1.6;">Upload your HTML file or write custom code directly in the editor to render custom layouts, interactive widgets, or tailored components.</p>
+</div>`,
+          renderMode: "direct",
+          containerWidth: "contained",
+          padding: "medium",
+          minHeight: 200,
+          customCss: "",
+          fileName: "",
+        };
+      }
+
       const newModule: ModuleData = {
         id: tempId,
         type: type,
         name: baseName,
         isEnabled: true,
         layout: defaultLayout as any,
-        content: {
-          title: `New ${baseName}`,
-          subtitle: "Edit this description in settings.",
-          items: [],
-        },
+        content: initialContent,
         isCustomized: false,
         visibility: "public",
         order: newSort,

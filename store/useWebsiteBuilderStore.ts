@@ -198,6 +198,10 @@ export type LayoutType =
   | "minimal-map"
   | "split-map"
   | "fullwidth-embed"
+  | "contained"
+  | "direct"
+  | "iframe"
+  | "custom-html"
   | "top-strip"
   | "link-columns"
   | "grouped-sections"
@@ -384,6 +388,7 @@ export type ModuleType =
   | "wall-of-fame"
   | "announcement-bar"
   | "video"
+  | "html"
   | "footer";
 
 export interface MenuItem {
@@ -682,6 +687,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "announcement-bar": "info-message",
     "results-dashboard": "default",
     video: "video-player",
+    html: "fullwidth-embed",
     footer: "columns",
   },
   enterprise: {
@@ -749,6 +755,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "announcement-bar": "warning-alert",
     "results-dashboard": "default",
     video: "video-player",
+    html: "fullwidth-embed",
     footer: "columns",
   },
   creator: {
@@ -816,6 +823,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "announcement-bar": "promotion-banner",
     "results-dashboard": "default",
     video: "video-player",
+    html: "fullwidth-embed",
     footer: "columns",
   },
   association: {
@@ -883,6 +891,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "announcement-bar": "success-message",
     "results-dashboard": "default",
     video: "video-player",
+    html: "fullwidth-embed",
     footer: "columns",
   },
   startup: {
@@ -950,6 +959,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "announcement-bar": "countdown-alert",
     "results-dashboard": "default",
     video: "video-player",
+    html: "fullwidth-embed",
     footer: "columns",
   },
   "dark-mode": {
@@ -1017,6 +1027,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "announcement-bar": "dismissible-bar",
     "results-dashboard": "default",
     video: "video-player",
+    html: "fullwidth-embed",
     footer: "columns",
   },
 };

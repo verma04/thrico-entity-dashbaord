@@ -54,6 +54,7 @@ import { CountdownBannerModule } from "./modules/countdown-banner-module";
 import { ComparisonTableModule } from "./modules/comparison-table-module";
 import { LocationMapModule } from "./modules/location-map-module";
 import { EmbedBlockModule } from "./modules/embed-block-module";
+import { HtmlModule } from "./modules/html-module";
 import { CalloutModule } from "./modules/callout-module";
 
 // Information Modules
@@ -215,6 +216,7 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     "embed-block": (
       <EmbedBlockModule module={module} previewDevice={previewDevice} />
     ),
+    html: <HtmlModule module={module} previewDevice={previewDevice} />,
     callout: <CalloutModule module={module} previewDevice={previewDevice} />,
 
     // Information Components

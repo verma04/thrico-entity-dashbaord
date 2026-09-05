@@ -77,6 +77,7 @@ import { CountdownBannerSettings } from "./settings/countdown-banner-settings";
 import { ComparisonTableSettings } from "./settings/comparison-table-settings";
 import { LocationMapSettings } from "./settings/location-map-settings";
 import { EmbedBlockSettings } from "./settings/embed-block-settings";
+import { HtmlSettings } from "./settings/html-settings";
 import { CalloutSettings } from "./settings/callout-settings";
 
 // Information Module Settings
@@ -296,6 +297,9 @@ const getAvailableLayouts = (
   }
   if (moduleType === "embed-block") {
     return ["fullwidth-embed"];
+  }
+  if (moduleType === "html") {
+    return ["fullwidth-embed", "contained", "direct", "iframe"];
   }
   if (moduleType === "announcement") {
     return ["top-strip"];
@@ -679,9 +683,24 @@ const ModuleSettings = () => {
           currentTheme={currentTheme}
           currentLayout={selectedModule.layout}
           availableLayouts={availableLayouts}
-          onLayoutChange={(layout) =>
-            updateModuleLayout(selectedModuleId!, layout)
-          }
+          onLayoutChange={(layout) => {
+            updateModuleLayout(selectedModuleId!, layout);
+            if (selectedModule.type === "html") {
+              const updates: any = {};
+              if (layout === "fullwidth-embed") {
+                updates.containerWidth = "full";
+              } else if (layout === "contained") {
+                updates.containerWidth = "contained";
+              } else if (layout === "direct") {
+                updates.renderMode = "direct";
+              } else if (layout === "iframe") {
+                updates.renderMode = "iframe";
+              }
+              if (Object.keys(updates).length > 0) {
+                updateModuleContent(selectedModule.id, updates);
+              }
+            }
+          }}
           type={selectedModule.type}
         />
 
@@ -725,7 +744,7 @@ const ModuleSettings = () => {
           )}
 
           {/* Common fields for other modules */}
-          {!["navbar", "footer", "hero", "video"].includes(
+          {!["navbar", "footer", "hero", "video", "html"].includes(
             selectedModule.type
           ) && (
             <CommonHeaderSettings
@@ -844,6 +863,27 @@ const ModuleSettings = () => {
 
           {selectedModule.type === "location-map" && (
             <LocationMapSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
+          {/* HTML: HTML MODULE SETTINGS */}
+          {selectedModule.type === "html" && (
+            <HtmlSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {/* EMBED BLOCK SETTINGS */}
+          {selectedModule.type === "embed-block" && (
+            <EmbedBlockSettings
               content={selectedModule.content}
               onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)

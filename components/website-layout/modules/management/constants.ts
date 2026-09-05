@@ -433,6 +433,15 @@ export const AVAILABLE_MODULES: {
     category: "Media & Interactive",
   },
   {
+    type: "html",
+    name: "HTML",
+    description:
+      "Upload HTML files or write custom HTML/CSS code with real-time rendering.",
+    defaultLayout: "fullwidth-embed",
+    icon: Code,
+    category: "Media & Interactive",
+  },
+  {
     type: "embed-block",
     name: "Embed Block",
     description:
@@ -536,6 +545,7 @@ export const AVAILABLE_MODULES: {
 ];
 
 export const BASIC_MODULE_TYPES: ModuleType[] = [
+  "html",
   "custom-content",
   "faq",
   "blog",

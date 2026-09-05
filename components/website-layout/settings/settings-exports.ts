@@ -10,6 +10,8 @@ export { default as CeoMessageSettings } from "./ceo-message-settings";
 export { default as TestimonialsSettings } from "./testimonials-settings";
 export { default as MarketplaceSettings } from "./marketplace-settings";
 export { default as AboutSettings } from "./about-settings";
+export { HtmlSettings } from "./html-settings";
+export { EmbedBlockSettings } from "./embed-block-settings";
 
 // Additional settings components can be added here as they are created
 // export { NavbarSettings } from "./navbar-settings";

@@ -12,3 +12,4 @@ export { JobsModule } from "./jobs-module";
 export { MarketplaceModule } from "./marketplace-module";
 export { CommunitiesModule } from "./communities-module";
 export { CeoMessageModule } from "./ceo-message-module";
+export { HtmlModule } from "./html-module";

@@ -50,7 +50,7 @@ export const EmbedBlockModule = ({
 
             {/* Embedded Content Container */}
             <div
-              className="w-full min-h-[300px] sm:min-h-[400px] md:min-h-[500px] overflow-auto"
+              className="w-full overflow-visible"
               dangerouslySetInnerHTML={{ __html: embedCode }}
             />
           </div>

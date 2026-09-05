@@ -64,11 +64,44 @@ const layoutMetadata: Record<
     description: "Split layout",
     color: "text-pink-500",
   },
+  "fullwidth-embed": {
+    icon: Layout,
+    description: "Full width embed",
+    color: "text-indigo-500",
+  },
+  contained: {
+    icon: Square,
+    description: "Contained box",
+    color: "text-emerald-500",
+  },
+  direct: {
+    icon: Sparkles,
+    description: "Inline HTML",
+    color: "text-violet-500",
+  },
+  iframe: {
+    icon: Boxes,
+    description: "Sandboxed iframe",
+    color: "text-amber-500",
+  },
+  "custom-html": {
+    icon: LayoutGrid,
+    description: "Custom HTML",
+    color: "text-blue-500",
+  },
   default: {
     icon: Layout,
     description: "Standard layout",
     color: "text-gray-500",
   },
+};
+
+const layoutDisplayNames: Record<string, string> = {
+  "fullwidth-embed": "Full Width Embed",
+  contained: "Contained Box",
+  direct: "Direct HTML",
+  iframe: "Sandboxed IFrame",
+  "custom-html": "Custom HTML",
 };
 
 const getLayoutInfo = (layout: LayoutType) => {
@@ -147,7 +180,7 @@ export const LayoutSelector = ({
                     isSelected ? "text-primary" : "text-foreground/80 group-hover:text-foreground"
                   )}
                 >
-                  {layout.replace(/-/g, " ")}
+                  {layoutDisplayNames[layout] || layout.replace(/-/g, " ")}
                 </div>
               </div>
               

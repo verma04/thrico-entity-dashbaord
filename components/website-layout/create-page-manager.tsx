@@ -4,10 +4,9 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { Layout, Globe, Plus, Loader2, ArrowLeft, Check } from "lucide-react";
+import { Layout, Globe, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CtaButton } from "@/components/ui/cta-button";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useToast } from "@/hooks/use-toast";
 import { useCreatePage, useGetWebsite } from "@/graphql/actions/website";
@@ -31,13 +30,7 @@ const createPageSchema = Yup.object().shape({
     .required("Give your new page a recognizable name")
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must be under 50 characters"),
-  slug: Yup.string()
-    .trim()
-    .required("URL slug is required")
-    .matches(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Slug can only contain lowercase letters, numbers, and hyphens (no leading or trailing hyphens)",
-    ),
+  slug: Yup.string().trim(),
 });
 
 export function CreatePageManager() {
@@ -55,14 +48,16 @@ export function CreatePageManager() {
     onCompleted: (data) => {
       toast({
         title: "Page Created",
-        description: `Page '${data.createPage.name}' has been successfully created.`,
+        description: `Page '${data?.createPage?.name || "New Page"}' has been successfully created.`,
       });
       setSaved(true);
-      addPage(data.createPage.name, data.createPage.slug);
+      if (data?.createPage?.name && data?.createPage?.slug) {
+        addPage(data.createPage.name, data.createPage.slug);
+      }
 
       setTimeout(() => {
         router.push("/app-layout");
-      }, 800);
+      }, 500);
     },
     onError: (error) => {
       toast({
@@ -79,7 +74,7 @@ export function CreatePageManager() {
       slug: "",
     },
     validationSchema: createPageSchema,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       if (!websiteId) {
         toast({
           title: "System Error",
@@ -89,20 +84,34 @@ export function CreatePageManager() {
         return;
       }
 
-      const cleanSlug = values.slug
+      const cleanSlug = (values.slug || values.name || "")
         .toLowerCase()
         .trim()
         .replace(/[^a-z0-9-]/g, "")
+        .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         .replace(/^-+|-+$/g, "");
 
-      createPageMutation({
-        variables: {
-          websiteId,
-          name: values.name.trim(),
-          slug: cleanSlug,
-        },
-      });
+      if (!cleanSlug) {
+        toast({
+          title: "Validation Error",
+          description: "A valid URL slug is required.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        await createPageMutation({
+          variables: {
+            websiteId,
+            name: values.name.trim(),
+            slug: cleanSlug,
+          },
+        });
+      } catch (err) {
+        // Handled in onError callback
+      }
     },
   });
 
@@ -132,7 +141,7 @@ export function CreatePageManager() {
       }
       return;
     }
-    formik.handleSubmit();
+    await formik.submitForm();
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,32 +174,16 @@ export function CreatePageManager() {
           { label: "Create Page" },
         ]}
         actions={
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/app-layout")}
-              className="h-8 px-3 text-xs gap-1.5"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Cancel
-            </Button>
-            <CtaButton
-              type="button"
-              onClick={() => handleSubmit()}
-              disabled={isCreating || websiteLoading || !formik.values.name.trim()}
-              size="sm"
-              className="h-8 px-3 text-xs"
-            >
-              {isCreating ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Plus className="h-3.5 w-3.5" />
-              )}
-              {isCreating ? "Creating Page..." : "Create Page"}
-            </CtaButton>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/app-layout")}
+            className="h-8 px-3 text-xs gap-1.5"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Cancel
+          </Button>
         }
       />
 
@@ -324,7 +317,14 @@ export function CreatePageManager() {
                           .replace(/[^a-z0-9-]/g, "");
                         formik.setFieldValue("slug", val);
                       }}
-                      onBlur={formik.handleBlur}
+                      onBlur={(e) => {
+                        formik.handleBlur(e);
+                        const cleaned = (formik.values.slug || "").replace(
+                          /^-+|-+$/g,
+                          "",
+                        );
+                        formik.setFieldValue("slug", cleaned);
+                      }}
                     />
                   </div>
                   {(formik.touched.slug || formik.submitCount > 0) &&
@@ -338,30 +338,6 @@ export function CreatePageManager() {
                     (e.g. <code>thrico.community/{currentSlug}</code>).
                   </p>
                 </div>
-
-                {/* In-Card Action Footer */}
-                <div className="pt-3 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-end gap-2.5">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.push("/app-layout")}
-                    className="h-9 px-3.5 text-xs"
-                  >
-                    Cancel
-                  </Button>
-                  <CtaButton
-                    type="submit"
-                    disabled={isCreating || websiteLoading || !formik.values.name.trim()}
-                    className="h-9 px-4 text-xs"
-                  >
-                    {isCreating ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Plus className="h-3.5 w-3.5" />
-                    )}
-                    {isCreating ? "Creating Page..." : "Create Page"}
-                  </CtaButton>
-                </div>
               </div>
             </PolarisFormCard>
           </form>
@@ -372,7 +348,7 @@ export function CreatePageManager() {
         hasChanged={formik.dirty || formik.values.name.trim().length > 0}
         saved={saved}
         isSaving={isCreating}
-        onSave={() => handleSubmit()}
+        onSave={handleSubmit}
         onReset={() => {
           formik.resetForm();
           router.push("/app-layout");
