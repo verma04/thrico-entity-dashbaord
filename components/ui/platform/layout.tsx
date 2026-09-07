@@ -2,7 +2,8 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, Lock } from "lucide-react";
+import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
