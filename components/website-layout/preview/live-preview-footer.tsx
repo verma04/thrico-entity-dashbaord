@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { LogoRenderer } from "./logo-renderer";
 import { DynamicIcon } from "./dynamic-icon";
 import { MenuItem } from "@/store/useWebsiteBuilderStore";
+import { IsolatedHtmlRenderer } from "../modules/isolated-html-renderer";
 import {
   Mail,
   ArrowRight,
@@ -64,6 +65,188 @@ const DEFAULT_FLAT_LINKS: MenuItem[] = [
   { id: "l5", label: "Support", link: "#" },
   { id: "l6", label: "Contact", link: "#" },
 ];
+
+interface CustomHtmlFooterPreviewProps {
+  htmlCode: string;
+  customCss?: string;
+  renderMode?: "direct" | "iframe" | string;
+}
+
+const CustomHtmlFooterPreview: React.FC<CustomHtmlFooterPreviewProps> = ({
+  htmlCode,
+  customCss = "",
+  renderMode = "direct",
+}) => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [iframeHeight, setIframeHeight] = useState<number>(0);
+
+  // Auto-resize iframe so it never shows internal scrollbars
+  const updateHeightFromIframe = () => {
+    if (iframeRef.current) {
+      try {
+        const doc =
+          iframeRef.current.contentDocument ||
+          iframeRef.current.contentWindow?.document;
+        if (doc && doc.body) {
+          const h = Math.max(
+            doc.body.scrollHeight,
+            doc.documentElement.scrollHeight,
+            doc.body.offsetHeight,
+            doc.documentElement.offsetHeight
+          );
+          if (h > 0) {
+            setIframeHeight(h);
+          }
+        }
+      } catch (e) {
+        // Fallback handled by postMessage
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (
+        e.data &&
+        e.data.type === "HTML_FOOTER_PREVIEW_HEIGHT" &&
+        typeof e.data.height === "number" &&
+        e.data.height > 0
+      ) {
+        setIframeHeight(e.data.height);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  const iframeSrcDoc = useMemo(() => {
+    if (renderMode !== "iframe") return "";
+
+    const heightScript = `
+      <script>
+        function reportHeight() {
+          try {
+            var body = document.body;
+            var html = document.documentElement;
+            var height = Math.max(
+              body ? body.scrollHeight : 0,
+              body ? body.offsetHeight : 0,
+              html ? html.clientHeight : 0,
+              html ? html.scrollHeight : 0,
+              html ? html.offsetHeight : 0
+            );
+            if (height > 0) {
+              window.parent.postMessage({
+                type: 'HTML_FOOTER_PREVIEW_HEIGHT',
+                height: height
+              }, '*');
+            }
+          } catch (err) {}
+        }
+        window.addEventListener('load', reportHeight);
+        window.addEventListener('resize', reportHeight);
+        document.addEventListener('DOMContentLoaded', reportHeight);
+        if (window.ResizeObserver) {
+          new ResizeObserver(reportHeight).observe(document.documentElement);
+          if (document.body) {
+            new ResizeObserver(reportHeight).observe(document.body);
+          }
+        }
+        setTimeout(reportHeight, 50);
+        setTimeout(reportHeight, 200);
+        setTimeout(reportHeight, 600);
+        setTimeout(reportHeight, 1500);
+      </script>
+    `;
+
+    const baseStyles = `
+      <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden !important;
+          height: auto !important;
+          min-height: 0 !important;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          background: transparent;
+          color: inherit;
+          line-height: 1.5;
+        }
+        img, video, iframe { max-width: 100%; }
+        ${customCss}
+      </style>
+    `;
+
+    const isFullDoc = /<!DOCTYPE|<html|<head|<body/i.test(htmlCode);
+    if (isFullDoc) {
+      if (htmlCode.includes("</head>")) {
+        return htmlCode.replace(
+          "</head>",
+          `${baseStyles}${heightScript}</head>`
+        );
+      } else if (htmlCode.includes("<body")) {
+        return htmlCode.replace(
+          "<body",
+          `<head>${baseStyles}${heightScript}</head><body`
+        );
+      } else {
+        return `${baseStyles}${heightScript}${htmlCode}`;
+      }
+    }
+
+    return `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    ${baseStyles}
+    ${heightScript}
+  </head>
+  <body>
+    ${htmlCode}
+  </body>
+</html>`;
+  }, [htmlCode, customCss, renderMode]);
+
+  if (renderMode === "iframe") {
+    return (
+      <div
+        className="w-full transition-all overflow-hidden rounded-none bg-transparent"
+        style={{
+          height: iframeHeight > 0 ? `${iframeHeight}px` : "auto",
+          minHeight: "140px",
+        }}
+      >
+        <iframe
+          ref={iframeRef}
+          srcDoc={iframeSrcDoc}
+          title="Custom HTML Footer"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+          scrolling="no"
+          onLoad={updateHeightFromIframe}
+          className="w-full border-0 block overflow-hidden"
+          style={{
+            height: iframeHeight > 0 ? `${iframeHeight}px` : "100%",
+            minHeight: "140px",
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full relative overflow-visible">
+      {/* Isolated Shadow DOM HTML Renderer - guarantees 100% encapsulation with NO CSS leakage */}
+      <IsolatedHtmlRenderer
+        html={htmlCode}
+        css={customCss}
+        className="custom-html-footer-wrapper w-full overflow-visible"
+      />
+    </div>
+  );
+};
 
 export const LivePreviewFooter = ({
   content,
@@ -640,23 +823,12 @@ export const LivePreviewFooter = ({
          ───────────────────────────────────────────────────────────── */}
       {(layout === "custom-html" || layout === "html") && (
         <div className="w-full">
-          {content.customCss && (
-            <style dangerouslySetInnerHTML={{ __html: content.customCss }} />
-          )}
           {content.htmlCode?.trim() ? (
-            content.renderMode === "iframe" ? (
-              <iframe
-                srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>${content.customCss || ""}</style></head><body style="margin:0;padding:0;">${content.htmlCode}</body></html>`}
-                title="Custom HTML Footer"
-                className="w-full border-0 min-h-[140px] overflow-hidden"
-                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-              />
-            ) : (
-              <div
-                className="custom-html-footer-wrapper w-full"
-                dangerouslySetInnerHTML={{ __html: content.htmlCode }}
-              />
-            )
+            <CustomHtmlFooterPreview
+              htmlCode={content.htmlCode}
+              customCss={content.customCss}
+              renderMode={content.renderMode}
+            />
           ) : (
             <div className="p-10 max-w-md mx-auto text-center border border-dashed border-current/20 rounded-2xl bg-current/5 space-y-3">
               <div className="w-10 h-10 rounded-xl bg-primary/20 text-primary mx-auto flex items-center justify-center">

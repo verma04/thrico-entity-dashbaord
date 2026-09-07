@@ -19,11 +19,14 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
   const { content, layout } = module;
   const htmlCode = content?.htmlCode || content?.embedCode || "";
   // Support layout string values
-  let renderMode = content?.renderMode || (layout === "iframe" ? "iframe" : "direct");
+  let renderMode =
+    content?.renderMode || (layout === "iframe" ? "iframe" : "direct");
   if (layout === "direct") renderMode = "direct";
   if (layout === "iframe") renderMode = "iframe";
 
-  let containerWidth = content?.containerWidth || (layout === "fullwidth-embed" ? "full" : "contained");
+  let containerWidth =
+    content?.containerWidth ||
+    (layout === "fullwidth-embed" ? "full" : "contained");
   if (layout === "fullwidth-embed") containerWidth = "full";
   if (layout === "contained") containerWidth = "contained";
   const padding = content?.padding || "medium"; // "none" | "small" | "medium" | "large"
@@ -49,7 +52,7 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
             doc.body.scrollHeight,
             doc.documentElement.scrollHeight,
             doc.body.offsetHeight,
-            doc.documentElement.offsetHeight
+            doc.documentElement.offsetHeight,
           );
           if (h > 0) {
             setIframeHeight(h);
@@ -79,19 +82,22 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
   }, [moduleId]);
 
   // Container sizing classes
-  const widthClasses = {
-    full: "w-full",
-    contained: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
-    narrow: "max-w-3xl mx-auto px-4 sm:px-6",
-  }[containerWidth as "full" | "contained" | "narrow"] || "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8";
+  const widthClasses =
+    {
+      full: "w-full",
+      contained: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8",
+      narrow: "max-w-3xl mx-auto px-4 sm:px-6",
+    }[containerWidth as "full" | "contained" | "narrow"] ||
+    "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8";
 
   // Padding classes
-  const paddingClasses = {
-    none: "py-0",
-    small: "py-4 sm:py-6",
-    medium: "py-8 sm:py-12",
-    large: "py-16 sm:py-24",
-  }[padding as "none" | "small" | "medium" | "large"] || "py-8 sm:py-12";
+  const paddingClasses =
+    {
+      none: "py-0",
+      small: "py-4 sm:py-6",
+      medium: "py-8 sm:py-12",
+      large: "py-16 sm:py-24",
+    }[padding as "none" | "small" | "medium" | "large"] || "py-8 sm:py-12";
 
   // Build iframe document for sandboxed mode with auto-height reporter
   const iframeSrcDoc = useMemo(() => {
@@ -157,9 +163,15 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
     const isFullDoc = /<!DOCTYPE|<html|<head|<body/i.test(htmlCode);
     if (isFullDoc) {
       if (htmlCode.includes("</head>")) {
-        return htmlCode.replace("</head>", `${baseStyles}${heightScript}</head>`);
+        return htmlCode.replace(
+          "</head>",
+          `${baseStyles}${heightScript}</head>`,
+        );
       } else if (htmlCode.includes("<body")) {
-        return htmlCode.replace("<body", `<head>${baseStyles}${heightScript}</head><body`);
+        return htmlCode.replace(
+          "<body",
+          `<head>${baseStyles}${heightScript}</head><body`,
+        );
       } else {
         return `${baseStyles}${heightScript}${htmlCode}`;
       }
@@ -183,7 +195,10 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
 
   return (
     <section
-      className={cn("relative w-full transition-all duration-300 overflow-visible", paddingClasses)}
+      className={cn(
+        "relative w-full transition-all duration-300 overflow-visible",
+        paddingClasses,
+      )}
       style={{ backgroundColor }}
     >
       <div className={cn(widthClasses)}>
@@ -196,8 +211,14 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
           descriptionClassName="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto"
           titleColor={content?.titleColor}
           descriptionColor={content?.descriptionColor}
-          hideTitle={content?.hideTitle !== undefined ? content.hideTitle : true}
-          hideDescription={content?.hideDescription !== undefined ? content.hideDescription : true}
+          hideTitle={
+            content?.hideTitle !== undefined ? content.hideTitle : true
+          }
+          hideDescription={
+            content?.hideDescription !== undefined
+              ? content.hideDescription
+              : true
+          }
         />
 
         {/* Content Container */}
@@ -220,7 +241,8 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
                   onLoad={updateHeightFromIframe}
                   className="w-full border-0 block overflow-hidden"
                   style={{
-                    height: effectiveHeight > 0 ? `${effectiveHeight}px` : "100%",
+                    height:
+                      effectiveHeight > 0 ? `${effectiveHeight}px` : "100%",
                     minHeight: minHeight > 0 ? `${minHeight}px` : undefined,
                   }}
                 />
@@ -228,7 +250,9 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
             ) : (
               <div
                 className="w-full relative overflow-visible"
-                style={{ minHeight: minHeight > 0 ? `${minHeight}px` : undefined }}
+                style={{
+                  minHeight: minHeight > 0 ? `${minHeight}px` : undefined,
+                }}
               >
                 {/* Isolated Shadow DOM HTML Renderer - prevents any CSS leakage to parent page */}
                 <IsolatedHtmlRenderer
@@ -253,7 +277,8 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
               </span>
             </h3>
             <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto mb-5 leading-relaxed">
-              Upload an HTML file or write custom HTML/CSS code in the settings panel to render custom components, forms, animations, or embeds.
+              Upload an HTML file or write custom HTML/CSS code in the settings
+              panel to render custom components, forms, animations, or embeds.
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 border text-[11px] font-medium text-muted-foreground">
               <FileCode2 className="h-3.5 w-3.5 text-primary" />
