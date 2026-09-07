@@ -455,6 +455,7 @@ export interface CustomThemeColors {
 }
 
 export interface WebsiteBuilderState {
+  isInitialized: boolean;
   theme: ThemeType;
   font: FontType;
   customColors: CustomThemeColors;
@@ -502,6 +503,7 @@ export interface WebsiteBuilderState {
   togglePageSitemap: (id: string) => void;
   updateSiteSettings: (settings: Partial<SiteSettings>) => void;
   initializeWebsiteData: (websiteData: any) => void;
+  resetInitialized: () => void;
 }
 
 // --- Defaults ---
@@ -1266,6 +1268,7 @@ const DEFAULT_PAGES: Page[] = [
 
 export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
   (set, get) => ({
+    isInitialized: false,
     theme: "academia",
     font: "inter",
     customColors: {
@@ -1690,14 +1693,21 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
     initializeWebsiteData: (websiteData) => {
       if (!websiteData) return;
 
+      // Only initialize once — never overwrite unsaved in-flight changes on refetch
+      if (get().isInitialized) return;
+
       set(() => ({
+        isInitialized: true,
         theme: websiteData.theme || "academia",
         font: websiteData.font || "inter",
         customColors: websiteData.customColors || {},
         pages: websiteData.pages || [],
-        globalHeader: websiteData.navbar || get().globalHeader,
-        globalFooter: websiteData.footer || get().globalFooter,
+        // Accept globalHeader/globalFooter (enriched with id/type/name) if provided,
+        // otherwise fall back to raw navbar/footer fields
+        globalHeader: websiteData.globalHeader || websiteData.navbar || get().globalHeader,
+        globalFooter: websiteData.globalFooter || websiteData.footer || get().globalFooter,
       }));
     },
+    resetInitialized: () => set(() => ({ isInitialized: false })),
   })
 );

@@ -27,8 +27,9 @@ const BuilderLayout = () => {
     currentPageId,
     setCurrentPage,
     addPage,
-    initializeWebsiteData, // added this
+    initializeWebsiteData,
   } = useWebsiteBuilderStore();
+  const resetInitialized = useWebsiteBuilderStore((s) => s.resetInitialized);
   const [isMounted, setIsMounted] = React.useState(false);
   const [isAddPageOpen, setIsAddPageOpen] = React.useState(false);
   const { isPremium } = useIsPremium();
@@ -67,7 +68,16 @@ const BuilderLayout = () => {
 
   React.useEffect(() => {
     setIsMounted(true);
+    // Reset initialization flag on mount so fresh server data is loaded
+    resetInitialized();
   }, []);
+
+  // Cleanup: reset on unmount so next open re-fetches from server
+  React.useEffect(() => {
+    return () => {
+      resetInitialized();
+    };
+  }, [resetInitialized]);
 
   if (!isMounted) {
     return null; // Prevent hydration mismatch

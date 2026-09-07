@@ -14,18 +14,26 @@ export const LivePreviewFooter = ({
 }: LivePreviewFooterProps) => {
   const currentYear = new Date().getFullYear();
 
+  const customBg = content?.containerSettings?.background;
+  const customText = content?.containerSettings?.textColor;
+
   return (
     <footer
       className={cn(
-        "bg-slate-900 text-white w-full",
+        "w-full",
+        !customBg && "bg-slate-900",
+        !customText && "text-white",
         layout === "columns" && "py-16 px-8",
         layout === "simple" && "py-8 px-8",
         layout === "minimal" && "py-6 px-8 border-t border-slate-800",
-        layout === "corporate" && "py-12 px-8 bg-slate-950",
-        layout === "newsletter" &&
-          "py-16 px-8 bg-linear-to-br from-slate-900 to-slate-800",
+        layout === "corporate" && "py-12 px-8",
+        layout === "newsletter" && "py-16 px-8",
         layout === "default" && "py-8 px-8"
       )}
+      style={{
+        ...(customBg ? { background: customBg } : {}),
+        ...(customText ? { color: customText } : {}),
+      }}
     >
       {/* 1. COLUMNS: Classic Logo + Multi-column Links */}
       {layout === "columns" && (
