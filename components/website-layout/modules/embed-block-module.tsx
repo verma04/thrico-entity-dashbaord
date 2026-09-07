@@ -4,6 +4,7 @@ import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Code, AlertTriangle } from "lucide-react";
 import { ModuleHeader } from "./module-header";
+import { IsolatedHtmlRenderer } from "./isolated-html-renderer";
 
 interface EmbedBlockModuleProps {
   module: ModuleData;
@@ -48,10 +49,10 @@ export const EmbedBlockModule = ({
               </p>
             </div>
 
-            {/* Embedded Content Container */}
-            <div
+            {/* Embedded Content Container - Isolated with Shadow DOM */}
+            <IsolatedHtmlRenderer
+              html={embedCode}
               className="w-full overflow-visible"
-              dangerouslySetInnerHTML={{ __html: embedCode }}
             />
           </div>
         ) : (

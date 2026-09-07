@@ -5,6 +5,7 @@ import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Code, FileCode2 } from "lucide-react";
 import { ModuleHeader } from "./module-header";
+import { IsolatedHtmlRenderer } from "./isolated-html-renderer";
 
 interface HtmlModuleProps {
   module: ModuleData;
@@ -95,54 +96,82 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
   // Build iframe document for sandboxed mode with auto-height reporter
   const iframeSrcDoc = useMemo(() => {
     if (renderMode !== "iframe") return "";
+
+    const heightScript = `
+      <script>
+        function reportHeight() {
+          try {
+            var body = document.body;
+            var html = document.documentElement;
+            var height = Math.max(
+              body ? body.scrollHeight : 0,
+              body ? body.offsetHeight : 0,
+              html ? html.clientHeight : 0,
+              html ? html.scrollHeight : 0,
+              html ? html.offsetHeight : 0
+            );
+            if (height > 0) {
+              window.parent.postMessage({
+                type: 'HTML_MODULE_HEIGHT',
+                moduleId: '${moduleId}',
+                height: height
+              }, '*');
+            }
+          } catch (err) {}
+        }
+        window.addEventListener('load', reportHeight);
+        window.addEventListener('resize', reportHeight);
+        document.addEventListener('DOMContentLoaded', reportHeight);
+        if (window.ResizeObserver) {
+          new ResizeObserver(reportHeight).observe(document.documentElement);
+          if (document.body) {
+            new ResizeObserver(reportHeight).observe(document.body);
+          }
+        }
+        setTimeout(reportHeight, 50);
+        setTimeout(reportHeight, 200);
+        setTimeout(reportHeight, 600);
+        setTimeout(reportHeight, 1500);
+      </script>
+    `;
+
+    const baseStyles = `
+      <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body {
+          margin: 0;
+          padding: 0;
+          overflow: hidden !important;
+          height: auto !important;
+          min-height: 0 !important;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          background: transparent;
+          color: inherit;
+          line-height: 1.5;
+        }
+        img, video, iframe { max-width: 100%; }
+        ${customCss}
+      </style>
+    `;
+
+    const isFullDoc = /<!DOCTYPE|<html|<head|<body/i.test(htmlCode);
+    if (isFullDoc) {
+      if (htmlCode.includes("</head>")) {
+        return htmlCode.replace("</head>", `${baseStyles}${heightScript}</head>`);
+      } else if (htmlCode.includes("<body")) {
+        return htmlCode.replace("<body", `<head>${baseStyles}${heightScript}</head><body`);
+      } else {
+        return `${baseStyles}${heightScript}${htmlCode}`;
+      }
+    }
+
     return `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      *, *::before, *::after { box-sizing: border-box; }
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden !important;
-        height: auto !important;
-        min-height: 0 !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background: transparent;
-        color: inherit;
-        line-height: 1.5;
-      }
-      img, video, iframe { max-width: 100%; }
-      ${customCss}
-    </style>
-    <script>
-      function reportHeight() {
-        var body = document.body;
-        var html = document.documentElement;
-        var height = Math.max(
-          body ? body.scrollHeight : 0,
-          body ? body.offsetHeight : 0,
-          html ? html.clientHeight : 0,
-          html ? html.scrollHeight : 0,
-          html ? html.offsetHeight : 0
-        );
-        window.parent.postMessage({
-          type: 'HTML_MODULE_HEIGHT',
-          moduleId: '${moduleId}',
-          height: height
-        }, '*');
-      }
-      window.addEventListener('load', reportHeight);
-      window.addEventListener('resize', reportHeight);
-      document.addEventListener('DOMContentLoaded', reportHeight);
-      if (window.ResizeObserver) {
-        new ResizeObserver(reportHeight).observe(document.documentElement);
-      }
-      setTimeout(reportHeight, 50);
-      setTimeout(reportHeight, 300);
-      setTimeout(reportHeight, 1000);
-    </script>
+    ${baseStyles}
+    ${heightScript}
   </head>
   <body>
     ${htmlCode}
@@ -201,18 +230,12 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
                 className="w-full relative overflow-visible"
                 style={{ minHeight: minHeight > 0 ? `${minHeight}px` : undefined }}
               >
-                {/* Optional Scoped Style Tag */}
-                {customCss && (
-                  <style
-                    dangerouslySetInnerHTML={{
-                      __html: customCss,
-                    }}
-                  />
-                )}
-                {/* Direct HTML Injection - no scroll, full height */}
-                <div
+                {/* Isolated Shadow DOM HTML Renderer - prevents any CSS leakage to parent page */}
+                <IsolatedHtmlRenderer
+                  html={htmlCode}
+                  css={customCss}
+                  minHeight={minHeight}
                   className="custom-html-wrapper w-full overflow-visible"
-                  dangerouslySetInnerHTML={{ __html: htmlCode }}
                 />
               </div>
             )}

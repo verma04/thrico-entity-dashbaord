@@ -143,15 +143,19 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
     reader.onload = (e) => {
       const result = e.target?.result as string;
       if (result) {
+        const isFullDoc = /<!DOCTYPE|<html|<head|<body|<script/i.test(result);
         onChange({
           htmlCode: result,
           fileName: file.name,
           fileSize: `${(file.size / 1024).toFixed(1)} KB`,
+          ...(isFullDoc ? { renderMode: "iframe" } : {}),
         });
 
         toast({
           title: "HTML file loaded!",
-          description: `Loaded ${file.name} (${(file.size / 1024).toFixed(1)} KB) into editor.`,
+          description: isFullDoc
+            ? `Loaded ${file.name}. Enabled Sandboxed IFrame mode for complete page and script support.`
+            : `Loaded ${file.name} (${(file.size / 1024).toFixed(1)} KB) into editor.`,
         });
       }
     };
@@ -410,9 +414,14 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
                 : "border-border/60 hover:border-border hover:bg-muted/30 text-foreground"
             )}
           >
-            <div className="text-xs font-semibold">Direct HTML</div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold">Direct HTML</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-medium">
+                Shadow DOM
+              </span>
+            </div>
             <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-              Inherits website theme &amp; global CSS styles.
+              Inline flow. Isolated with Shadow DOM so CSS never leaks to app-layout.
             </p>
           </button>
 
@@ -426,9 +435,14 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
                 : "border-border/60 hover:border-border hover:bg-muted/30 text-foreground"
             )}
           >
-            <div className="text-xs font-semibold">Sandboxed IFrame</div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold">Sandboxed IFrame</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 font-medium">
+                Full Frame
+              </span>
+            </div>
             <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-              Isolated frame for complete HTML pages &amp; scripts.
+              Isolated frame for complete HTML pages, widgets &amp; scripts.
             </p>
           </button>
         </div>
