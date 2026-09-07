@@ -2,15 +2,25 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import {
   ModuleData,
   useWebsiteBuilderStore,
 } from "@/store/useWebsiteBuilderStore";
 import { SocialLinksEditor } from "./social-links-editor";
+import { MenuEditor } from "./menu-editor";
 import { ContainerSettings } from "./container-settings";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { ColorPicker } from "../color-picker";
 import { cn } from "@/lib/utils";
+import {
+  Mail,
+  Building2,
+  Columns3,
+  Rows,
+  AlignCenter,
+  Sparkles,
+} from "lucide-react";
 
 interface FooterSettingsProps {
   content: ModuleData["content"];
@@ -40,6 +50,7 @@ export const FooterSettings = ({
   const { globalFooter } = useWebsiteBuilderStore();
 
   const content = globalFooter.id === moduleId ? globalFooter.content : {};
+  const currentLayout = globalFooter.layout || "columns";
 
   const currentBg = content?.containerSettings?.background || "";
   const currentText = content?.containerSettings?.textColor || "";
@@ -133,8 +144,221 @@ export const FooterSettings = ({
         />
       </div>
 
+      {/* ─── Layout Specific Settings ─── */}
+      <div className="pt-4 border-t space-y-4">
+        <div className="flex items-center justify-between">
+          <Label className="uppercase text-[10px] text-muted-foreground/60 font-semibold tracking-wider flex items-center gap-1.5">
+            {currentLayout === "newsletter" && <Mail className="h-3.5 w-3.5 text-primary" />}
+            {currentLayout === "corporate" && <Building2 className="h-3.5 w-3.5 text-primary" />}
+            {currentLayout === "columns" && <Columns3 className="h-3.5 w-3.5 text-primary" />}
+            {currentLayout === "minimal" && <Rows className="h-3.5 w-3.5 text-primary" />}
+            {currentLayout === "simple" && <AlignCenter className="h-3.5 w-3.5 text-primary" />}
+            <span>{currentLayout.replace(/-/g, " ")} Options</span>
+          </Label>
+          <span className="text-[9px] font-semibold text-primary uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded">
+            Active Layout
+          </span>
+        </div>
+
+        {/* Newsletter Specific Fields */}
+        {currentLayout === "newsletter" && (
+          <div className="space-y-3 bg-muted/20 p-3 rounded-lg border border-border/50">
+            <div className="space-y-1.5">
+              <Label htmlFor="newsletter-title" className="text-xs">Headline</Label>
+              <Input
+                id="newsletter-title"
+                value={content.newsletterTitle ?? "Stay in the loop with our newsletter"}
+                onChange={(e) => onContentUpdate({ newsletterTitle: e.target.value })}
+                placeholder="Stay in the loop with our newsletter"
+                className="h-8 text-xs"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="newsletter-desc" className="text-xs">Subtitle</Label>
+              <Textarea
+                id="newsletter-desc"
+                value={content.newsletterDescription ?? ""}
+                onChange={(e) => onContentUpdate({ newsletterDescription: e.target.value })}
+                placeholder="Weekly product updates, design insights, and community stories..."
+                rows={2}
+                className="text-xs resize-none"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="newsletter-ph" className="text-xs">Placeholder</Label>
+                <Input
+                  id="newsletter-ph"
+                  value={content.newsletterPlaceholder ?? "Enter your email address..."}
+                  onChange={(e) => onContentUpdate({ newsletterPlaceholder: e.target.value })}
+                  placeholder="Enter your email address..."
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="newsletter-btn" className="text-xs">Button Text</Label>
+                <Input
+                  id="newsletter-btn"
+                  value={content.newsletterButtonText ?? "Subscribe"}
+                  onChange={(e) => onContentUpdate({ newsletterButtonText: e.target.value })}
+                  placeholder="Subscribe"
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="newsletter-disc" className="text-xs">Trust / Disclaimer Note</Label>
+              <Input
+                id="newsletter-disc"
+                value={content.newsletterDisclaimer ?? "We respect your privacy. No spam ever."}
+                onChange={(e) => onContentUpdate({ newsletterDisclaimer: e.target.value })}
+                placeholder="We respect your privacy. No spam ever."
+                className="h-8 text-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Corporate Specific Fields */}
+        {currentLayout === "corporate" && (
+          <div className="space-y-3 bg-muted/20 p-3 rounded-lg border border-border/50">
+            <div className="space-y-1.5">
+              <Label htmlFor="corp-company" className="text-xs">Entity / Company Name</Label>
+              <Input
+                id="corp-company"
+                value={content.companyName || ""}
+                onChange={(e) => onContentUpdate({ companyName: e.target.value })}
+                placeholder="Acme Global Inc."
+                className="h-8 text-xs"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="corp-address" className="text-xs">Office Address</Label>
+              <Input
+                id="corp-address"
+                value={content.address || ""}
+                onChange={(e) => onContentUpdate({ address: e.target.value })}
+                placeholder="100 Innovation Way, Suite 400, San Francisco, CA"
+                className="h-8 text-xs"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="corp-email" className="text-xs">Contact Email</Label>
+                <Input
+                  id="corp-email"
+                  value={content.email || ""}
+                  onChange={(e) => onContentUpdate({ email: e.target.value })}
+                  placeholder="contact@company.com"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="corp-phone" className="text-xs">Phone</Label>
+                <Input
+                  id="corp-phone"
+                  value={content.phone || ""}
+                  onChange={(e) => onContentUpdate({ phone: e.target.value })}
+                  placeholder="+1 (800) 555-0199"
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="corp-reg" className="text-xs">Registration / Compliance ID</Label>
+              <Input
+                id="corp-reg"
+                value={content.registrationNumber || ""}
+                onChange={(e) => onContentUpdate({ registrationNumber: e.target.value })}
+                placeholder="Reg. No. 8923-4410 • ISO 27001 Certified"
+                className="h-8 text-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Columns Specific Fields */}
+        {currentLayout === "columns" && (
+          <div className="space-y-3 bg-muted/20 p-3 rounded-lg border border-border/50">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="col-newsletter" className="text-xs cursor-pointer">
+                  Brand Column Newsletter Box
+                </Label>
+                <p className="text-[10px] text-muted-foreground">
+                  Show compact subscribe box below brand info
+                </p>
+              </div>
+              <Switch
+                id="col-newsletter"
+                checked={content.showNewsletterSnippet ?? false}
+                onCheckedChange={(checked) => onContentUpdate({ showNewsletterSnippet: checked })}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Minimal Specific Fields */}
+        {currentLayout === "minimal" && (
+          <div className="space-y-3 bg-muted/20 p-3 rounded-lg border border-border/50">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="min-status" className="text-xs cursor-pointer">
+                  System Status Badge
+                </Label>
+                <p className="text-[10px] text-muted-foreground">
+                  Pulsing indicator for platform status
+                </p>
+              </div>
+              <Switch
+                id="min-status"
+                checked={content.showStatusIndicator ?? true}
+                onCheckedChange={(checked) => onContentUpdate({ showStatusIndicator: checked })}
+              />
+            </div>
+            {content.showStatusIndicator !== false && (
+              <div className="space-y-1.5 pt-1">
+                <Label htmlFor="min-status-text" className="text-xs">Status Label</Label>
+                <Input
+                  id="min-status-text"
+                  value={content.statusText ?? "All systems operational"}
+                  onChange={(e) => onContentUpdate({ statusText: e.target.value })}
+                  placeholder="All systems operational"
+                  className="h-8 text-xs"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Simple Specific Fields */}
+        {currentLayout === "simple" && (
+          <div className="space-y-3 bg-muted/20 p-3 rounded-lg border border-border/50">
+            <div className="space-y-1.5">
+              <Label htmlFor="sim-badge" className="text-xs">Top Badge Pill (Optional)</Label>
+              <Input
+                id="sim-badge"
+                value={content.badgeText || ""}
+                onChange={(e) => onContentUpdate({ badgeText: e.target.value })}
+                placeholder="e.g., ✦ Official Community Hub"
+                className="h-8 text-xs"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Menu & Column Links Editor */}
+      <div className="pt-4 border-t space-y-2">
+        <Label>Footer Navigation & Columns</Label>
+        <MenuEditor
+          menuItems={content.menuItems}
+          onChange={(items) => onContentUpdate({ menuItems: items })}
+        />
+      </div>
+
       {/* Social Links Editor */}
-      <div className="space-y-2">
+      <div className="pt-4 border-t space-y-2">
         <Label>Social Media Links</Label>
         <SocialLinksEditor
           links={content.socialLinks}

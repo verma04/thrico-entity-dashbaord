@@ -13,6 +13,11 @@ import {
   Sparkles,
   Check,
   LucideIcon,
+  Columns3,
+  Building2,
+  Mail,
+  Rows,
+  AlignCenter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +34,31 @@ const layoutMetadata: Record<
   string,
   { icon: LucideIcon; description: string; color: string }
 > = {
+  columns: {
+    icon: Columns3,
+    description: "Multi-column grid",
+    color: "text-blue-500",
+  },
+  simple: {
+    icon: AlignCenter,
+    description: "Centered inline layout",
+    color: "text-emerald-500",
+  },
+  minimal: {
+    icon: Rows,
+    description: "Compact single bar",
+    color: "text-slate-500",
+  },
+  corporate: {
+    icon: Building2,
+    description: "Enterprise heavy base",
+    color: "text-indigo-500",
+  },
+  newsletter: {
+    icon: Mail,
+    description: "Email capture centric",
+    color: "text-orange-500",
+  },
   carousel: {
     icon: Circle,
     description: "Rotating slides",
@@ -48,11 +78,6 @@ const layoutMetadata: Record<
     icon: LayoutGrid,
     description: "Grid layout",
     color: "text-green-500",
-  },
-  newsletter: {
-    icon: Layout,
-    description: "Email signup",
-    color: "text-orange-500",
   },
   "single-image": {
     icon: Square,
@@ -97,6 +122,11 @@ const layoutMetadata: Record<
 };
 
 const layoutDisplayNames: Record<string, string> = {
+  columns: "Multi-Column",
+  simple: "Centered Simple",
+  minimal: "Minimal Clean Bar",
+  corporate: "Corporate Base",
+  newsletter: "Newsletter Focus",
   "fullwidth-embed": "Full Width Embed",
   contained: "Contained Box",
   direct: "Direct HTML",

@@ -11,11 +11,21 @@ import {
   PanelBottom,
   Smartphone,
   Laptop,
+  Mail,
+  Building2,
+  Columns3,
+  Rows,
+  AlignCenter,
+  Sparkles,
+  ShieldCheck,
+  Phone,
+  MapPin,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -74,6 +84,25 @@ interface FooterConfig {
   socialLinks: SocialLink[];
   menuItems: MenuItem[];
   copyrightText: string;
+  // Newsletter layout
+  newsletterTitle?: string;
+  newsletterDescription?: string;
+  newsletterPlaceholder?: string;
+  newsletterButtonText?: string;
+  newsletterDisclaimer?: string;
+  // Corporate layout
+  companyName?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  registrationNumber?: string;
+  // Columns layout
+  showNewsletterSnippet?: boolean;
+  // Minimal layout
+  showStatusIndicator?: boolean;
+  statusText?: string;
+  // Simple layout
+  badgeText?: string;
 }
 
 // ------------------------------------------------
@@ -161,6 +190,32 @@ export default function FooterManager() {
       copyrightText:
         globalFooter.content?.copyrightText ||
         `© ${new Date().getFullYear()} All rights reserved.`,
+      newsletterTitle:
+        globalFooter.content?.newsletterTitle ||
+        "Stay in the loop with our newsletter",
+      newsletterDescription:
+        globalFooter.content?.newsletterDescription ||
+        "Get our weekly product updates, design insights, and community highlights delivered directly to your inbox.",
+      newsletterPlaceholder:
+        globalFooter.content?.newsletterPlaceholder ||
+        "Enter your email address...",
+      newsletterButtonText:
+        globalFooter.content?.newsletterButtonText || "Subscribe",
+      newsletterDisclaimer:
+        globalFooter.content?.newsletterDisclaimer ||
+        "We respect your privacy. No spam ever. Unsubscribe at any time.",
+      companyName: globalFooter.content?.companyName || "",
+      address: globalFooter.content?.address || "",
+      email: globalFooter.content?.email || "",
+      phone: globalFooter.content?.phone || "",
+      registrationNumber: globalFooter.content?.registrationNumber || "",
+      showNewsletterSnippet:
+        globalFooter.content?.showNewsletterSnippet ?? false,
+      showStatusIndicator:
+        globalFooter.content?.showStatusIndicator ?? true,
+      statusText:
+        globalFooter.content?.statusText || "All systems operational",
+      badgeText: globalFooter.content?.badgeText || "",
     },
     validationSchema: footerSchema,
     enableReinitialize: true,
@@ -179,24 +234,7 @@ export default function FooterManager() {
           (link) => link.platform || link.url,
         );
 
-        await updateFooterMutation({
-          variables: {
-            websiteId: websiteData.getWebsite.id,
-            layout: values.layout,
-            content: {
-              logoText: values.logoText,
-              logoType: values.logoType,
-              logoImage: values.logoImage,
-              description: values.description,
-              socialLinks: validSocialLinks,
-              menuItems: values.menuItems,
-              copyrightText: values.copyrightText,
-            },
-          },
-        });
-
-        updateModuleLayout(globalFooter.id, values.layout);
-        updateModuleContent(globalFooter.id, {
+        const contentPayload = {
           logoText: values.logoText,
           logoType: values.logoType,
           logoImage: values.logoImage,
@@ -204,7 +242,32 @@ export default function FooterManager() {
           socialLinks: validSocialLinks,
           menuItems: values.menuItems,
           copyrightText: values.copyrightText,
+          newsletterTitle: values.newsletterTitle,
+          newsletterDescription: values.newsletterDescription,
+          newsletterPlaceholder: values.newsletterPlaceholder,
+          newsletterButtonText: values.newsletterButtonText,
+          newsletterDisclaimer: values.newsletterDisclaimer,
+          companyName: values.companyName,
+          address: values.address,
+          email: values.email,
+          phone: values.phone,
+          registrationNumber: values.registrationNumber,
+          showNewsletterSnippet: values.showNewsletterSnippet,
+          showStatusIndicator: values.showStatusIndicator,
+          statusText: values.statusText,
+          badgeText: values.badgeText,
+        };
+
+        await updateFooterMutation({
+          variables: {
+            websiteId: websiteData.getWebsite.id,
+            layout: values.layout,
+            content: contentPayload,
+          },
         });
+
+        updateModuleLayout(globalFooter.id, values.layout);
+        updateModuleContent(globalFooter.id, contentPayload);
       } catch (error) {
         console.error("Footer update failed:", error);
       }
@@ -291,15 +354,7 @@ export default function FooterManager() {
                         </div>
 
                         <LivePreviewFooter
-                          content={{
-                            logoText: formik.values.logoText,
-                            logoType: formik.values.logoType,
-                            logoImage: formik.values.logoImage,
-                            description: formik.values.description,
-                            socialLinks: formik.values.socialLinks,
-                            menuItems: formik.values.menuItems,
-                            copyrightText: formik.values.copyrightText,
-                          }}
+                          content={formik.values}
                           layout={formik.values.layout}
                           previewDevice={previewDevice}
                         />
@@ -470,9 +525,297 @@ export default function FooterManager() {
               </div>
             </PolarisFormCard>
 
-            {/* Step 2: Information Grid & Menu */}
+            {/* Step 2: Layout-Specific Configuration */}
+            {formik.values.layout === "newsletter" && (
+              <PolarisFormCard
+                step={2}
+                title="Newsletter Lead Capture Settings"
+                description="Customize the lead magnet headline, description, email placeholder, and privacy reassurance."
+                badge="Newsletter Layout"
+                icon={Mail}
+              >
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="newsletterTitle"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Newsletter Headline
+                    </Label>
+                    <Input
+                      id="newsletterTitle"
+                      placeholder="Stay in the loop with our newsletter"
+                      {...formik.getFieldProps("newsletterTitle")}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="newsletterDescription"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Supporting Subtitle
+                    </Label>
+                    <Textarea
+                      id="newsletterDescription"
+                      placeholder="Get our weekly product updates, design insights, and community highlights..."
+                      rows={2}
+                      {...formik.getFieldProps("newsletterDescription")}
+                      className="bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs resize-none shadow-none"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="newsletterPlaceholder"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      >
+                        Email Field Placeholder
+                      </Label>
+                      <Input
+                        id="newsletterPlaceholder"
+                        placeholder="Enter your email address..."
+                        {...formik.getFieldProps("newsletterPlaceholder")}
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="newsletterButtonText"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      >
+                        Button Label
+                      </Label>
+                      <Input
+                        id="newsletterButtonText"
+                        placeholder="Subscribe"
+                        {...formik.getFieldProps("newsletterButtonText")}
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="newsletterDisclaimer"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Trust & Privacy Disclaimer
+                    </Label>
+                    <Input
+                      id="newsletterDisclaimer"
+                      placeholder="We respect your privacy. No spam ever. Unsubscribe at any time."
+                      {...formik.getFieldProps("newsletterDisclaimer")}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                    />
+                  </div>
+                </div>
+              </PolarisFormCard>
+            )}
+
+            {formik.values.layout === "corporate" && (
+              <PolarisFormCard
+                step={2}
+                title="Corporate & Enterprise Information"
+                description="Display official business details, physical headquarters address, contact channels, and regulatory badges."
+                badge="Corporate Layout"
+                icon={Building2}
+              >
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="companyName"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Registered Entity Name
+                    </Label>
+                    <Input
+                      id="companyName"
+                      placeholder="Acme Global Technologies Inc."
+                      {...formik.getFieldProps("companyName")}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="address"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Headquarters / Physical Address
+                    </Label>
+                    <Input
+                      id="address"
+                      placeholder="100 Innovation Way, Suite 400, San Francisco, CA 94105"
+                      {...formik.getFieldProps("address")}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="email"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      >
+                        Corporate / Inquiries Email
+                      </Label>
+                      <Input
+                        id="email"
+                        placeholder="contact@company.com"
+                        {...formik.getFieldProps("email")}
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="phone"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      >
+                        Support / Direct Phone
+                      </Label>
+                      <Input
+                        id="phone"
+                        placeholder="+1 (800) 555-0199"
+                        {...formik.getFieldProps("phone")}
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="registrationNumber"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Registration, Tax ID or Security Certification
+                    </Label>
+                    <Input
+                      id="registrationNumber"
+                      placeholder="Reg. No. 8923-4410 • ISO 27001 Certified • SOC2 Type II"
+                      {...formik.getFieldProps("registrationNumber")}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                    />
+                  </div>
+                </div>
+              </PolarisFormCard>
+            )}
+
+            {formik.values.layout === "columns" && (
+              <PolarisFormCard
+                step={2}
+                title="Multi-Column Layout Options"
+                description="Fine-tune multi-column directory features and brand column highlights."
+                badge="Columns Layout"
+                icon={Columns3}
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
+                    <div className="space-y-0.5">
+                      <Label
+                        htmlFor="showNewsletterSnippet"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                      >
+                        Brand Column Newsletter Box
+                      </Label>
+                      <p className="text-[11px] text-zinc-500">
+                        Include a compact email subscription input directly underneath the brand statement.
+                      </p>
+                    </div>
+                    <Switch
+                      id="showNewsletterSnippet"
+                      checked={formik.values.showNewsletterSnippet}
+                      onCheckedChange={(val) =>
+                        formik.setFieldValue("showNewsletterSnippet", val)
+                      }
+                    />
+                  </div>
+                </div>
+              </PolarisFormCard>
+            )}
+
+            {formik.values.layout === "minimal" && (
+              <PolarisFormCard
+                step={2}
+                title="Minimal Bar Options"
+                description="Configure single-bar status indicator and clean horizontal alignment."
+                badge="Minimal Layout"
+                icon={Rows}
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
+                    <div className="space-y-0.5">
+                      <Label
+                        htmlFor="showStatusIndicator"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                      >
+                        Live System Status Badge
+                      </Label>
+                      <p className="text-[11px] text-zinc-500">
+                        Display a pulsing green indicator to signal live system health or platform version.
+                      </p>
+                    </div>
+                    <Switch
+                      id="showStatusIndicator"
+                      checked={formik.values.showStatusIndicator}
+                      onCheckedChange={(val) =>
+                        formik.setFieldValue("showStatusIndicator", val)
+                      }
+                    />
+                  </div>
+
+                  {formik.values.showStatusIndicator && (
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="statusText"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      >
+                        Status Label
+                      </Label>
+                      <Input
+                        id="statusText"
+                        placeholder="All systems operational"
+                        {...formik.getFieldProps("statusText")}
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                      />
+                    </div>
+                  )}
+                </div>
+              </PolarisFormCard>
+            )}
+
+            {formik.values.layout === "simple" && (
+              <PolarisFormCard
+                step={2}
+                title="Centered Simple Options"
+                description="Customize centered branding badges and community trust labels."
+                badge="Simple Layout"
+                icon={AlignCenter}
+              >
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="badgeText"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Top Badge Pill (Optional)
+                    </Label>
+                    <Input
+                      id="badgeText"
+                      placeholder="e.g., ✦ Official Community Hub"
+                      {...formik.getFieldProps("badgeText")}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none"
+                    />
+                  </div>
+                </div>
+              </PolarisFormCard>
+            )}
+
+            {/* Step 3: Information Grid & Menu */}
             <PolarisFormCard
-              step={2}
+              step={3}
               title="Footer Links & Columns"
               description="Organize navigation menus, legal links, and multi-column categories."
               badge="Navigation"
@@ -484,9 +827,9 @@ export default function FooterManager() {
               />
             </PolarisFormCard>
 
-            {/* Step 3: Social Bridges */}
+            {/* Step 4: Social Bridges */}
             <PolarisFormCard
-              step={3}
+              step={4}
               title="Social Media Profiles"
               description="Connect official social accounts (X, Instagram, LinkedIn, YouTube, Discord)."
               badge="Bridges"
