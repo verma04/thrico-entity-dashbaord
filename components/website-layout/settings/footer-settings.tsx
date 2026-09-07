@@ -1,3 +1,4 @@
+import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +21,14 @@ import {
   Rows,
   AlignCenter,
   Sparkles,
+  Code2,
+  Upload,
+  FileCode,
+  Trash2,
+  Copy,
+  Check,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface FooterSettingsProps {
   content: ModuleData["content"];
@@ -47,7 +55,41 @@ export const FooterSettings = ({
   moduleId,
   onContentUpdate,
 }: FooterSettingsProps) => {
+  const { toast } = useToast();
   const { globalFooter } = useWebsiteBuilderStore();
+  const htmlFileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [isCopied, setIsCopied] = React.useState(false);
+
+  const handleHtmlFileRead = (file: File) => {
+    if (!file) return;
+    const validExtensions = [".html", ".htm", ".txt"];
+    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+    if (!validExtensions.includes(fileExtension)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an .html, .htm, or .txt file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      if (result) {
+        onContentUpdate({
+          htmlCode: result,
+          fileName: file.name,
+        });
+        toast({
+          title: "HTML File Loaded",
+          description: `Loaded ${file.name} (${(file.size / 1024).toFixed(1)} KB).`,
+        });
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const content = globalFooter.id === moduleId ? globalFooter.content : {};
   const currentLayout = globalFooter.layout || "columns";
@@ -153,6 +195,7 @@ export const FooterSettings = ({
             {currentLayout === "columns" && <Columns3 className="h-3.5 w-3.5 text-primary" />}
             {currentLayout === "minimal" && <Rows className="h-3.5 w-3.5 text-primary" />}
             {currentLayout === "simple" && <AlignCenter className="h-3.5 w-3.5 text-primary" />}
+            {currentLayout === "custom-html" && <Code2 className="h-3.5 w-3.5 text-primary" />}
             <span>{currentLayout.replace(/-/g, " ")} Options</span>
           </Label>
           <span className="text-[9px] font-semibold text-primary uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded">
@@ -342,6 +385,146 @@ export const FooterSettings = ({
                 onChange={(e) => onContentUpdate({ badgeText: e.target.value })}
                 placeholder="e.g., ✦ Official Community Hub"
                 className="h-8 text-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Custom HTML Specific Fields */}
+        {currentLayout === "custom-html" && (
+          <div className="space-y-4 bg-muted/20 p-3 rounded-lg border border-border/50">
+            {/* File Upload Dropzone */}
+            <input
+              type="file"
+              ref={htmlFileInputRef}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  handleHtmlFileRead(file);
+                  e.target.value = "";
+                }
+              }}
+              accept=".html,.htm,.txt"
+              className="hidden"
+            />
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file) handleHtmlFileRead(file);
+              }}
+              onClick={() => htmlFileInputRef.current?.click()}
+              className={cn(
+                "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all",
+                isDragging
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50 bg-background/50"
+              )}
+            >
+              <div className="flex flex-col items-center justify-center gap-1.5">
+                <div className="p-2 rounded-full bg-primary/10 text-primary">
+                  <Upload className="h-4 w-4" />
+                </div>
+                <div className="text-xs font-medium">
+                  {content.fileName ? `File: ${content.fileName}` : "Upload .html file"}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Click to browse or drag & drop HTML
+                </div>
+              </div>
+            </div>
+
+            {/* Render Mode & Source Ref */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-xs">Render Mode</Label>
+                <RadioGroup
+                  value={content.renderMode || "direct"}
+                  onValueChange={(val) => onContentUpdate({ renderMode: val })}
+                  className="flex gap-2 pt-1"
+                >
+                  <div className="flex items-center space-x-1.5">
+                    <RadioGroupItem value="direct" id="ft-rm-direct" />
+                    <Label htmlFor="ft-rm-direct" className="text-[11px] font-normal cursor-pointer">
+                      Direct
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <RadioGroupItem value="iframe" id="ft-rm-iframe" />
+                    <Label htmlFor="ft-rm-iframe" className="text-[11px] font-normal cursor-pointer">
+                      IFrame
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-1">
+                <Label htmlFor="ft-file-ref" className="text-xs">File Reference</Label>
+                <Input
+                  id="ft-file-ref"
+                  value={content.fileName || ""}
+                  onChange={(e) => onContentUpdate({ fileName: e.target.value })}
+                  placeholder="footer.html"
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Raw HTML Editor */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="ft-html-code" className="text-xs">Raw HTML Code</Label>
+                {content.htmlCode && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(content.htmlCode || "");
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                      }}
+                      className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
+                    >
+                      {isCopied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                      <span>{isCopied ? "Copied" : "Copy"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onContentUpdate({ htmlCode: "", fileName: "" })}
+                      className="inline-flex items-center gap-1 text-[10px] text-destructive hover:opacity-80"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      <span>Clear</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              <Textarea
+                id="ft-html-code"
+                value={content.htmlCode || ""}
+                onChange={(e) => onContentUpdate({ htmlCode: e.target.value })}
+                placeholder="<!-- Paste your raw <footer> or HTML markup here -->"
+                rows={8}
+                className="font-mono text-xs bg-slate-950 text-slate-100 p-2.5 resize-none leading-relaxed"
+              />
+            </div>
+
+            {/* Custom CSS */}
+            <div className="space-y-1.5">
+              <Label htmlFor="ft-custom-css" className="text-xs">Custom CSS (Optional)</Label>
+              <Textarea
+                id="ft-custom-css"
+                value={content.customCss || ""}
+                onChange={(e) => onContentUpdate({ customCss: e.target.value })}
+                placeholder="/* Custom CSS styling for footer */"
+                rows={2}
+                className="font-mono text-xs bg-background text-xs"
               />
             </div>
           </div>

@@ -14,6 +14,7 @@ import {
   ExternalLink,
   ChevronRight,
   Globe,
+  Code2,
 } from "lucide-react";
 
 interface LivePreviewFooterProps {
@@ -116,6 +117,7 @@ export const LivePreviewFooter = ({
             : "py-6 px-8 border-t border-current/10"),
         layout === "corporate" && (isMobile ? "py-10 px-4" : "py-16 px-8"),
         layout === "newsletter" && (isMobile ? "py-12 px-4" : "py-16 px-8"),
+        (layout === "custom-html" || layout === "html") && "py-0 px-0",
         layout === "default" && "py-10 px-8"
       )}
       style={{
@@ -630,6 +632,44 @@ export const LivePreviewFooter = ({
           </div>
 
           <div className="text-center text-xs opacity-50 pt-2">{copyright}</div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          6. CUSTOM HTML: Manual Upload / Raw HTML
+         ───────────────────────────────────────────────────────────── */}
+      {(layout === "custom-html" || layout === "html") && (
+        <div className="w-full">
+          {content.customCss && (
+            <style dangerouslySetInnerHTML={{ __html: content.customCss }} />
+          )}
+          {content.htmlCode?.trim() ? (
+            content.renderMode === "iframe" ? (
+              <iframe
+                srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>${content.customCss || ""}</style></head><body style="margin:0;padding:0;">${content.htmlCode}</body></html>`}
+                title="Custom HTML Footer"
+                className="w-full border-0 min-h-[140px] overflow-hidden"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              />
+            ) : (
+              <div
+                className="custom-html-footer-wrapper w-full"
+                dangerouslySetInnerHTML={{ __html: content.htmlCode }}
+              />
+            )
+          ) : (
+            <div className="p-10 max-w-md mx-auto text-center border border-dashed border-current/20 rounded-2xl bg-current/5 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 text-primary mx-auto flex items-center justify-center">
+                <Code2 className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold">Custom HTML Footer</h4>
+                <p className="text-xs opacity-60">
+                  Upload an HTML file or write manual HTML in the Footer Manager to display your custom footer here.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

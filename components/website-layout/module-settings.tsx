@@ -117,7 +117,7 @@ const getAvailableLayouts = (
     return ["simple", "centered", "minimal", "stacked", "split"];
   }
   if (moduleType === "footer") {
-    return ["columns", "simple", "minimal", "corporate", "newsletter"];
+    return ["columns", "simple", "minimal", "corporate", "newsletter", "custom-html"];
   }
   if (["communities", "marketplace", "jobs"].includes(moduleType)) {
     return ["grid", "list", "cards", "masonry"];

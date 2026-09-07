@@ -18,6 +18,7 @@ import {
   Mail,
   Rows,
   AlignCenter,
+  Code2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -110,8 +111,8 @@ const layoutMetadata: Record<
     color: "text-amber-500",
   },
   "custom-html": {
-    icon: LayoutGrid,
-    description: "Custom HTML",
+    icon: Code2,
+    description: "Manual / Custom HTML",
     color: "text-blue-500",
   },
   default: {

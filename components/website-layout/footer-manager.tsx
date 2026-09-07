@@ -1,13 +1,14 @@
 "use client";
 
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
-import { Settings, Layers } from "lucide-react";
+import { Settings, Layers, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const FooterManager = () => {
   const { globalFooter, selectModule, selectedModuleId } = useWebsiteBuilderStore();
   
   const isSelected = selectedModuleId === globalFooter.id;
+  const isCustomHtml = globalFooter.layout === "custom-html";
 
   return (
     <div className="space-y-1">
@@ -29,12 +30,16 @@ export const FooterManager = () => {
             "p-1.5 rounded-md",
             isSelected ? "bg-primary/10" : "bg-muted/60"
           )}>
-            <Layers className="h-3 w-3 text-primary/70" />
+            {isCustomHtml ? (
+              <Code2 className="h-3 w-3 text-blue-500" />
+            ) : (
+              <Layers className="h-3 w-3 text-primary/70" />
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="font-medium text-xs">Footer</div>
             <div className="text-[10px] text-muted-foreground/60 truncate">
-              {globalFooter.layout} · All pages
+              {isCustomHtml ? "Custom HTML" : globalFooter.layout} · All pages
             </div>
           </div>
           <Settings className={cn(
