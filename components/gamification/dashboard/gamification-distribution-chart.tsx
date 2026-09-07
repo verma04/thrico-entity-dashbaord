@@ -19,66 +19,50 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+export interface DistributionItem {
+  id: string;
+  name: string;
+  shortName: string;
+  value: number;
+  percentage: number;
+  color?: string;
+  icon?: any;
+}
+
 interface GamificationDistributionChartProps {
+  data?: DistributionItem[];
   totalPoints?: number;
   loading?: boolean;
 }
 
+function getIconForCategory(id: string) {
+  const lower = id.toLowerCase();
+  if (lower.includes("post") || lower.includes("feed")) return MessageSquare;
+  if (lower.includes("comment") || lower.includes("reply")) return Sparkles;
+  if (lower.includes("streak") || lower.includes("login")) return Flame;
+  if (lower.includes("event") || lower.includes("poll") || lower.includes("survey")) return Calendar;
+  if (lower.includes("badge")) return Award;
+  return Sparkles;
+}
+
 export function GamificationDistributionChart({
-  totalPoints = 84500,
+  data = [],
+  totalPoints = 0,
   loading = false,
 }: GamificationDistributionChartProps) {
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
 
-  const chartData = [
-    {
-      id: "posts",
-      name: "Feed Posts & Media",
-      shortName: "Feed & Media",
-      value: 29575,
-      percentage: 35,
-      color: "#8b5cf6",
-      icon: MessageSquare,
-    },
-    {
-      id: "comments",
-      name: "Comments & Upvotes",
-      shortName: "Engagement",
-      value: 21125,
-      percentage: 25,
-      color: "#6366f1",
-      icon: Sparkles,
-    },
-    {
-      id: "streaks",
-      name: "Daily Login Streaks",
-      shortName: "Daily Streaks",
-      value: 16900,
-      percentage: 20,
-      color: "#f59e0b",
-      icon: Flame,
-    },
-    {
-      id: "events",
-      name: "Event RSVPs & Polls",
-      shortName: "Events & Polls",
-      value: 10140,
-      percentage: 12,
-      color: "#10b981",
-      icon: Calendar,
-    },
-    {
-      id: "badges",
-      name: "Milestone Badges",
-      shortName: "Milestones",
-      value: 6760,
-      percentage: 8,
-      color: "#f43f5e",
-      icon: Award,
-    },
-  ];
+  const chartData = React.useMemo(() => {
+    return data.map((item) => ({
+      ...item,
+      color: item.color || "#8b5cf6",
+      icon: item.icon || getIconForCategory(item.id || item.shortName),
+    }));
+  }, [data]);
 
-  const activeHoveredItem = hoveredIndex !== null && chartData[hoveredIndex] ? chartData[hoveredIndex] : null;
+  const hasData = chartData.length > 0 && totalPoints > 0;
+  const activeHoveredItem =
+    hoveredIndex !== null && chartData[hoveredIndex] ? chartData[hoveredIndex] : null;
 
   return (
     <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-xs relative h-full flex flex-col overflow-hidden">
@@ -98,7 +82,7 @@ export function GamificationDistributionChart({
         </div>
 
         <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-          5 Sources
+          {chartData.length} {chartData.length === 1 ? "Source" : "Sources"}
         </span>
       </CardHeader>
 
@@ -114,8 +98,20 @@ export function GamificationDistributionChart({
           </div>
         )}
 
-        {/* Donut Chart */}
-        <div className="relative w-[150px] h-[150px] shrink-0 flex items-center justify-center">
+        {!hasData ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-8 w-full">
+            <div className="h-10 w-10 rounded-full bg-muted/60 border border-border/70 flex items-center justify-center text-muted-foreground/50 mb-2">
+              <PieChartIcon className="h-5 w-5" />
+            </div>
+            <p className="text-xs font-bold text-foreground">No points breakdown yet</p>
+            <p className="text-[10px] text-muted-foreground max-w-[240px] mt-1 leading-snug">
+              Points earned by members in this timeframe will be categorized here by rule module.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Donut Chart */}
+            <div className="relative w-[150px] h-[150px] shrink-0 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -248,6 +244,8 @@ export function GamificationDistributionChart({
             );
           })}
         </div>
+        </>
+        )}
       </CardContent>
     </Card>
   );

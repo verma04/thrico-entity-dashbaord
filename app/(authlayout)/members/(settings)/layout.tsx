@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Settings, MessageCircleQuestion, Users, Zap } from "lucide-react";
+import { Settings, Users, Zap, MessageCircleQuestion } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
 
 const TABS = [
@@ -17,6 +17,12 @@ const TABS = [
     icon: Zap,
     href: "/members/automation",
   },
+  {
+    id: "faq",
+    label: "FAQ Support",
+    icon: MessageCircleQuestion,
+    href: "/members/settings/faq",
+  },
 ];
 
 function MembersSettingsLayout({ children }: { children: React.ReactNode }) {
@@ -31,6 +37,7 @@ function MembersSettingsLayout({ children }: { children: React.ReactNode }) {
         { label: "Settings" },
       ]}
       badge="Active"
+      layoutId="members-settings-tab-underline"
     >
       {children}
     </PlatformSettingsLayout>

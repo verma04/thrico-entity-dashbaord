@@ -23,6 +23,7 @@ import {
   Eye,
   Paintbrush,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +54,8 @@ import {
   MemberRuleActionInput,
   MemberRuleActionType,
 } from "@/graphql/member-automation";
+import { useEmailDomainStatus } from "@/hooks/use-email-domain-status";
+import { EmailDomainSetupModal } from "@/components/members/automation/email-domain-setup-modal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -104,6 +107,8 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
     "desktop"
   );
   const [isSavingGrapes, setIsSavingGrapes] = useState(false);
+  const { isVerified } = useEmailDomainStatus();
+  const [showDomainModal, setShowDomainModal] = useState(false);
 
   const tiers: any[] = tiersData?.getMembershipTiers || [];
   const emailTemplates: any[] = emailsData?.getEmailTemplates || [];
@@ -125,6 +130,13 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
     if (!enabled) {
       onChange(actions.filter((a) => a.type !== type));
     } else {
+      if (type === "EMAIL" && !isVerified) {
+        setShowDomainModal(true);
+        toast.error(
+          "Email domain setup required before enabling automated emails."
+        );
+        return;
+      }
       let defaultAction: MemberRuleActionInput;
       switch (type) {
         case "ASSIGN_MEMBERSHIP_TIER":
@@ -513,12 +525,21 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
               <div>
                 <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
                   Send Onboarding / Welcome Email
-                  <Badge
-                    variant="outline"
-                    className="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40"
-                  >
-                    Email Studio
-                  </Badge>
+                  {isVerified ? (
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40"
+                    >
+                      Email Studio
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] font-bold text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40"
+                    >
+                      Domain Setup Required
+                    </Badge>
+                  )}
                 </h4>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                   Deliver a rich visual email template created via Email Studio visual editor or saved template.
@@ -531,6 +552,32 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
               onCheckedChange={(checked) => toggleAction("EMAIL", checked)}
             />
           </div>
+
+          {/* Domain Setup Warning Banner inside Card */}
+          {!isVerified && (
+            <div className="mt-3.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <div>
+                  <span className="text-xs font-bold text-amber-900 dark:text-amber-300 block">
+                    Sender Domain Setup Required
+                  </span>
+                  <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 leading-snug">
+                    You cannot add or dispatch automated emails until your custom email domain is configured and verified in Domain Settings.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setShowDomainModal(true)}
+                className="h-7 px-3 text-xs font-bold gap-1.5 bg-amber-600 hover:bg-amber-700 text-white shrink-0 shadow-xs cursor-pointer"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                Setup Domain
+              </Button>
+            </div>
+          )}
 
           {isActionActive("EMAIL") && (
             <div className="mt-3.5 pt-3 border-t border-indigo-200/60 dark:border-indigo-900/40 space-y-3.5">
@@ -576,8 +623,15 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                     <Button
                       type="button"
                       size="sm"
-                      onClick={() => setIsGrapesModalOpen(true)}
-                      className="h-8 text-xs gap-1.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold shadow-xs"
+                      disabled={!isVerified}
+                      onClick={() => {
+                        if (!isVerified) {
+                          setShowDomainModal(true);
+                          return;
+                        }
+                        setIsGrapesModalOpen(true);
+                      }}
+                      className="h-8 text-xs gap-1.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold shadow-xs disabled:opacity-50"
                     >
                       <Paintbrush className="w-3.5 h-3.5" />
                       Open Email Studio
@@ -626,8 +680,15 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                     <Button
                       type="button"
                       size="sm"
-                      onClick={() => setIsGrapesModalOpen(true)}
-                      className="h-8 text-xs bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-bold shrink-0 gap-1.5"
+                      disabled={!isVerified}
+                      onClick={() => {
+                        if (!isVerified) {
+                          setShowDomainModal(true);
+                          return;
+                        }
+                        setIsGrapesModalOpen(true);
+                      }}
+                      className="h-8 text-xs bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-bold shrink-0 gap-1.5 disabled:opacity-50"
                     >
                       <Paintbrush className="w-3.5 h-3.5" />
                       Launch Visual Designer
@@ -1039,6 +1100,11 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      <EmailDomainSetupModal
+        open={showDomainModal}
+        onOpenChange={setShowDomainModal}
+      />
     </div>
   );
 };

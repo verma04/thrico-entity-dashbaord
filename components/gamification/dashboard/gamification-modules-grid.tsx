@@ -22,10 +22,10 @@ interface GamificationModulesGridProps {
 }
 
 export const GamificationModulesGrid: React.FC<GamificationModulesGridProps> = ({
-  pointRulesCount = 8,
-  badgesCount = 14,
-  ranksCount = 5,
-  topRankName = "Grandmaster",
+  pointRulesCount = 0,
+  badgesCount = 0,
+  ranksCount = 0,
+  topRankName = "None",
   loading = false,
 }) => {
   const cards = [
@@ -43,8 +43,8 @@ export const GamificationModulesGrid: React.FC<GamificationModulesGridProps> = (
       btnClass: "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20",
       stats: [
         { label: "Active", value: pointRulesCount.toString() },
-        { label: "Daily Cap", value: "Enabled" },
-        { label: "Decay", value: "Active" },
+        { label: "Daily Cap", value: "Configured" },
+        { label: "Rules", value: "Realtime" },
       ],
       highlights: [
         "Post, comment & reaction triggers",
@@ -66,7 +66,7 @@ export const GamificationModulesGrid: React.FC<GamificationModulesGridProps> = (
       btnClass: "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20",
       stats: [
         { label: "Total", value: badgesCount.toString() },
-        { label: "Rarity", value: "4 Tiers" },
+        { label: "Status", value: badgesCount > 0 ? "Active" : "None" },
         { label: "Auto Grant", value: "Instant" },
       ],
       highlights: [
@@ -89,8 +89,8 @@ export const GamificationModulesGrid: React.FC<GamificationModulesGridProps> = (
       btnClass: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20",
       stats: [
         { label: "Levels", value: ranksCount.toString() },
-        { label: "Top Rank", value: topRankName },
-        { label: "Ladder", value: "Thresholds" },
+        { label: "Top Rank", value: topRankName || "Unset" },
+        { label: "Ladder", value: ranksCount > 0 ? "Active" : "Unset" },
       ],
       highlights: [
         "Automated level promotions",

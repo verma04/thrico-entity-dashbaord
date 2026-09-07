@@ -40,6 +40,8 @@ import {
   Layers,
 } from "lucide-react";
 import { AutomationFlowBuilder } from "./flow/automation-flow-builder";
+import { useEmailDomainStatus } from "@/hooks/use-email-domain-status";
+import { EmailDomainSetupModal } from "./email-domain-setup-modal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -206,6 +208,8 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
     initialValues ? initialValues.isActive : true
   );
   const [savedState, setSavedState] = useState(false);
+  const { isVerified } = useEmailDomainStatus();
+  const [showDomainModal, setShowDomainModal] = useState(false);
 
   // Check for session draft on mount if not edit
   useEffect(() => {
@@ -219,16 +223,25 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           setTrigger(draft.trigger || "MEMBER_JOINED");
           setConditionOperator(draft.conditionOperator || "AND");
           setConditions(draft.conditions || []);
-          setActions(draft.actions || [{ type: "ASSIGN_MEMBERSHIP_TIER" }]);
+          const loadedActions = draft.actions || [{ type: "ASSIGN_MEMBERSHIP_TIER" }];
+          setActions(loadedActions);
           setIsActive(draft.isActive !== undefined ? draft.isActive : true);
           sessionStorage.removeItem("automation_rule_draft");
-          toast.info("Applied template recipe to canvas.");
+
+          const hasEmail = loadedActions.some((a: any) => a.type === "EMAIL");
+          if (hasEmail && !isVerified) {
+            toast.warning(
+              "Draft contains email actions, but your email domain is not verified yet in Domain Settings."
+            );
+          } else {
+            toast.info("Applied template recipe to canvas.");
+          }
         } catch (e) {
           console.error("Failed to parse draft", e);
         }
       }
     }
-  }, [isEdit]);
+  }, [isEdit, isVerified]);
 
   // Track if form has unsaved modifications
   const hasChanged = useMemo(() => {
@@ -324,6 +337,19 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
   };
 
   const handleApplyRecipe = (recipe: (typeof PRESET_RECIPES)[0]) => {
+    const hasEmail = recipe.actions.some((a) => a.type === "EMAIL");
+    if (hasEmail && !isVerified) {
+      setName(recipe.title);
+      setTrigger(recipe.trigger);
+      setConditionOperator(recipe.conditionOperator);
+      setConditions(recipe.conditions);
+      setActions(recipe.actions.filter((a) => a.type !== "EMAIL") as any);
+      toast.info(
+        `Applied ${recipe.title} template without email action (sender domain unverified).`
+      );
+      setShowDomainModal(true);
+      return;
+    }
     setName(recipe.title);
     setTrigger(recipe.trigger);
     setConditionOperator(recipe.conditionOperator);
@@ -342,6 +368,16 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
 
     if (actions.length === 0) {
       toast.error("Please configure at least one automated action.");
+      return;
+    }
+
+    // Check if rule contains EMAIL action while domain is unverified
+    const hasEmailAction = actions.some((a) => a.type === "EMAIL");
+    if (hasEmailAction && !isVerified) {
+      setShowDomainModal(true);
+      toast.error(
+        "Cannot save automation rule: Email actions require a configured and verified sender domain."
+      );
       return;
     }
 
@@ -417,6 +453,10 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           isEdit={isEdit}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+        />
+        <EmailDomainSetupModal
+          open={showDomainModal}
+          onOpenChange={setShowDomainModal}
         />
       </div>
     );
@@ -733,6 +773,11 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
         onReset={handleReset}
         title="Unsaved rule changes"
         buttonText={isEdit ? "Update Rule" : "Create Rule"}
+      />
+
+      <EmailDomainSetupModal
+        open={showDomainModal}
+        onOpenChange={setShowDomainModal}
       />
     </form>
   );

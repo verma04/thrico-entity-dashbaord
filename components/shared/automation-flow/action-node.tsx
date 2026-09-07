@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import {
   Copy,
@@ -9,11 +9,14 @@ import {
   Check,
   X,
   GitBranch,
+  AlertTriangle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getSharedActionMeta } from "./action-palette-items";
 import { SharedActionNodeData } from "./types";
+import { useEmailDomainStatus } from "@/hooks/use-email-domain-status";
+import { EmailDomainSetupModal } from "@/components/members/automation/email-domain-setup-modal";
 import { cn } from "@/lib/utils";
 
 export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
@@ -23,8 +26,13 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
   const simulation = nodeData.simulationStatus;
   const actionConditions = action.conditions || [];
 
+  const { isVerified } = useEmailDomainStatus();
+  const [showDomainModal, setShowDomainModal] = useState(false);
+  const isEmailUnverified = action.type === "EMAIL" && !isVerified;
+
   const meta = getSharedActionMeta(action.type);
   const Icon = meta.icon;
+
 
   const getSubtitle = () => {
     switch (action.type) {
@@ -152,12 +160,26 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
         <div className="p-2.5 rounded-xl bg-zinc-50/80 dark:bg-zinc-800/80 border border-border/80 space-y-1.5">
           <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
             <span className="truncate max-w-[200px]">{getSubtitle()}</span>
-            <Badge variant="outline" className={cn("text-[9px] font-bold px-1.5 py-0", meta.badgeBg)}>
-              Ready
-            </Badge>
+            {isEmailUnverified ? (
+              <Badge
+                variant="outline"
+                className="text-[9px] font-bold px-1.5 py-0 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400"
+              >
+                Setup Required
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className={cn("text-[9px] font-bold px-1.5 py-0", meta.badgeBg)}
+              >
+                Ready
+              </Badge>
+            )}
           </div>
           <p className="text-[10.5px] text-muted-foreground line-clamp-2 leading-relaxed">
-            {meta.desc}
+            {isEmailUnverified
+              ? "Cannot dispatch emails until custom sender domain is verified in Settings."
+              : meta.desc}
           </p>
 
           {action.type === "ADD_MEMBER_TAG" && action.tags && action.tags.length > 0 && (
@@ -173,6 +195,25 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
             </div>
           )}
         </div>
+
+        {/* Email Domain Warning Banner */}
+        {isEmailUnverified && (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDomainModal(true);
+            }}
+            className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-[10px] font-bold text-amber-700 dark:text-amber-400 hover:bg-amber-500/15 cursor-pointer transition-colors"
+          >
+            <span className="flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              Domain Not Verified
+            </span>
+            <span className="text-[9px] underline text-amber-600 dark:text-amber-300">
+              Setup Required →
+            </span>
+          </div>
+        )}
 
         {/* Simulation Feedback */}
         {simulation && simulation !== "idle" && (
@@ -213,6 +254,11 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
         type="source"
         position={Position.Bottom}
         className="!w-3.5 !h-3.5 !bg-amber-500 !border-2 !border-background shadow-xs"
+      />
+
+      <EmailDomainSetupModal
+        open={showDomainModal}
+        onOpenChange={setShowDomainModal}
       />
     </div>
   );

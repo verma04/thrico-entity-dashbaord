@@ -18,7 +18,6 @@ import {
   Plus,
   Trash2,
   Eye,
-  Paintbrush,
   Smartphone,
   Info,
   Code2,
@@ -29,6 +28,7 @@ import {
   ChevronRight,
   MessageSquare,
   Globe,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,10 +48,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  GrapesJsEmailEditor,
-  getDefaultStarter,
-} from "@/components/email/grapesjs-editor/grapesjs-email-editor";
+import { getDefaultStarter } from "@/components/email/email-starters";
 import { GET_MEMBERSHIP_TIERS } from "@/graphql/membership-tier";
 import { GET_EMAIL_TEMPLATES } from "@/graphql/quries/email";
 import { GET_COMMUNITIES } from "@/graphql/quries/group/approval";
@@ -66,6 +63,8 @@ import {
   CONDITION_OPERATORS,
 } from "@/components/members/settings/rules/condition-builder";
 import { SelectedNodeInfo } from "./types";
+import { useEmailDomainStatus } from "@/hooks/use-email-domain-status";
+import { EmailDomainSetupModal } from "@/components/members/automation/email-domain-setup-modal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -162,14 +161,12 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
     }
   );
 
-  const [tagInput, setTagInput] = useState("");
-  const [emailTab, setEmailTab] = useState<"custom" | "template">("custom");
-  const [isGrapesModalOpen, setIsGrapesModalOpen] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">(
     "desktop"
   );
-  const [isSavingGrapes, setIsSavingGrapes] = useState(false);
+  const { isVerified } = useEmailDomainStatus();
+  const [showDomainModal, setShowDomainModal] = useState(false);
 
   const tiers: any[] = tiersData?.getMembershipTiers || [];
   const emailTemplates: any[] = emailsData?.getEmailTemplates || [];
@@ -215,27 +212,7 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
     onConditionsChange(updated);
   };
 
-  // Action Email Studio Save
-  const handleSaveFromGrapes = async (data: {
-    html: string;
-    json: string;
-    subject?: string;
-  }) => {
-    if (selectedNode.type !== "action") return;
-    try {
-      setIsSavingGrapes(true);
-      onActionUpdate(selectedNode.index, {
-        emailBody: data.html,
-        emailSubject: data.subject || actions[selectedNode.index]?.emailSubject,
-      });
-      setIsGrapesModalOpen(false);
-      toast.success("Email template updated successfully!");
-    } catch (err: any) {
-      toast.error("Failed to save email design.");
-    } finally {
-      setIsSavingGrapes(false);
-    }
-  };
+  const [tagInput, setTagInput] = useState("");
 
   const currentAction =
     selectedNode.type === "action" ? actions[selectedNode.index] : null;
@@ -549,11 +526,18 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
               </label>
               <Select
                 value={currentAction.type}
-                onValueChange={(val) =>
+                onValueChange={(val) => {
+                  if (val === "EMAIL" && !isVerified) {
+                    setShowDomainModal(true);
+                    toast.error(
+                      "Email domain setup required before switching to email action."
+                    );
+                    return;
+                  }
                   onActionUpdate(selectedNode.index, {
                     type: val as MemberRuleActionType,
-                  })
-                }
+                  });
+                }}
               >
                 <SelectTrigger className="h-9 text-xs bg-background font-semibold">
                   <SelectValue />
@@ -563,7 +547,7 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
                     🏆 Assign Membership Tier
                   </SelectItem>
                   <SelectItem value="EMAIL" className="text-xs">
-                    ✉️ Send Onboarding Email (Email Studio)
+                    ✉️ Send Onboarding Email {!isVerified ? "(Setup Required)" : ""}
                   </SelectItem>
                   <SelectItem value="COMMUNITY_JOIN" className="text-xs">
                     👥 Auto-Join Community Circle
@@ -644,20 +628,78 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
             {/* Sub-form 2: Email */}
             {currentAction.type === "EMAIL" && (
               <div className="space-y-3.5 p-3.5 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
+                {/* Domain Warning Banner if not verified */}
+                {!isVerified && (
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 space-y-2">
+                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-xs">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span>Email Domain Setup Required</span>
+                    </div>
+                    <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                      You cannot dispatch automated emails until your custom domain is configured and verified with SPF & DKIM in Domain Settings.
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setShowDomainModal(true)}
+                      className="w-full h-7 text-xs font-bold gap-1 bg-amber-600 hover:bg-amber-700 text-white shadow-xs cursor-pointer"
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      Configure Domain in Settings
+                    </Button>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 text-xs font-bold">
                     <Mail className="w-4 h-4" />
-                    <span>Email Studio Dispatch</span>
+                    <span>Email Dispatch</span>
                   </div>
                   <Button
                     type="button"
+                    variant="outline"
                     size="sm"
-                    onClick={() => setIsGrapesModalOpen(true)}
-                    className="h-7 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-1 shadow-xs"
+                    onClick={() => setIsPreviewModalOpen(true)}
+                    className="h-7 text-xs gap-1"
                   >
-                    <Paintbrush className="w-3.5 h-3.5" />
-                    Email Studio
+                    <Eye className="w-3 h-3" />
+                    Preview Email
                   </Button>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-foreground block mb-1">
+                    Select Email Template
+                  </label>
+                  <Select
+                    value={currentAction.templateId || ""}
+                    onValueChange={(val) => {
+                      const selectedTpl = emailTemplates.find((t: any) => t.id === val);
+                      onActionUpdate(selectedNode.index, {
+                        templateId: val,
+                        emailSubject: selectedTpl?.subject || currentAction.emailSubject || "",
+                        emailBody: selectedTpl?.html || currentAction.emailBody || "",
+                      });
+                    }}
+                    disabled={emailsLoading}
+                  >
+                    <SelectTrigger className="h-8 text-xs bg-background font-medium">
+                      <SelectValue placeholder="Choose a saved template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {emailTemplates.length === 0 ? (
+                        <SelectItem value="default_welcome" className="text-xs">
+                          Default Member Onboarding Email
+                        </SelectItem>
+                      ) : (
+                        emailTemplates.map((tpl: any) => (
+                          <SelectItem key={tpl.id} value={tpl.id} className="text-xs">
+                            {tpl.name} {tpl.subject ? `(${tpl.subject})` : ""}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
@@ -677,20 +719,31 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
                   />
                 </div>
 
+                <div>
+                  <label className="text-[11px] font-semibold text-foreground block mb-1">
+                    Email Body / Message
+                  </label>
+                  <Textarea
+                    placeholder="Enter email content or HTML template..."
+                    value={currentAction.emailBody || ""}
+                    onChange={(e) =>
+                      onActionUpdate(selectedNode.index, {
+                        emailBody: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    className="text-xs bg-background font-mono resize-none"
+                  />
+                </div>
+
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[11px] text-muted-foreground">
-                    Template: {currentAction.emailBody ? "Custom HTML Ready" : "Default Starter"}
+                    {currentAction.templateId
+                      ? "Pre-saved Template Selected"
+                      : currentAction.emailBody
+                      ? "Custom Content Ready"
+                      : "Default Template"}
                   </span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsPreviewModalOpen(true)}
-                    className="h-7 text-xs gap-1"
-                  >
-                    <Eye className="w-3 h-3" />
-                    Preview Email
-                  </Button>
                 </div>
               </div>
             )}
@@ -1038,30 +1091,7 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
         )}
       </div>
 
-      {/* ── GrapesJS Email Studio Fullscreen Modal ───────────────────────── */}
-      <Dialog open={isGrapesModalOpen} onOpenChange={setIsGrapesModalOpen}>
-        <DialogContent className="max-w-[96vw] w-[96vw] h-[92vh] max-h-[92vh] p-0 flex flex-col overflow-hidden">
-          <DialogHeader className="p-3 border-b border-border bg-card shrink-0 flex flex-row items-center justify-between">
-            <DialogTitle className="text-sm font-bold flex items-center gap-2">
-              <Paintbrush className="w-4 h-4 text-indigo-600" />
-              Email Studio — Visual Designer
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 w-full h-full relative">
-            <GrapesJsEmailEditor
-              initialData={{
-                name: "Automation Rule Email",
-                subject: currentAction?.emailSubject || "Welcome to our community!",
-                html: currentAction?.emailBody || getDefaultStarter("welcome"),
-                type: "welcome",
-              }}
-              onSave={handleSaveFromGrapes}
-              onClose={() => setIsGrapesModalOpen(false)}
-              isSaving={isSavingGrapes}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+
 
       {/* ── Email Preview Modal ───────────────────────────────────────────── */}
       <Dialog open={isPreviewModalOpen} onOpenChange={setIsPreviewModalOpen}>
@@ -1115,6 +1145,11 @@ export const NodeInspector: React.FC<NodeInspectorProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      <EmailDomainSetupModal
+        open={showDomainModal}
+        onOpenChange={setShowDomainModal}
+      />
     </aside>
   );
 };

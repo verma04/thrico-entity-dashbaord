@@ -33,7 +33,7 @@ const CreateAutomationRulePage = () => {
   });
 
   const handleSave = async (
-    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput
+    input: CreateMemberAutomationRuleInput | UpdateMemberAutomationRuleInput,
   ) => {
     await createRule({
       variables: { input: input as CreateMemberAutomationRuleInput },
@@ -84,5 +84,5 @@ const CreateAutomationRulePage = () => {
 export default withModulePermission(
   CreateAutomationRulePage,
   "AUTOMATION",
-  "canCreate"
+  "canCreate",
 );

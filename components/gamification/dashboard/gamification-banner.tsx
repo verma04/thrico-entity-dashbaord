@@ -20,13 +20,17 @@ interface GamificationBannerProps {
   totalPoints?: number;
   totalBadges?: number;
   loading?: boolean;
+  participationLift?: number | null;
+  antiAbuseLabel?: string;
 }
 
 export const GamificationBanner: React.FC<GamificationBannerProps> = ({
-  totalUsers = 342,
-  totalPoints = 84500,
-  totalBadges = 124,
+  totalUsers = 0,
+  totalPoints = 0,
+  totalBadges = 0,
   loading = false,
+  participationLift,
+  antiAbuseLabel = "Active Guard",
 }) => {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/40 p-4 sm:p-5 shadow-xs">
@@ -153,10 +157,12 @@ export const GamificationBanner: React.FC<GamificationBannerProps> = ({
             </div>
             <div>
               <span className="text-[8px] uppercase font-bold text-muted-foreground tracking-wider block">
-                Participation Lift
+                {participationLift !== undefined && participationLift !== null ? "Participation Lift" : "Active Members"}
               </span>
               <span className="text-xs font-bold text-foreground tabular-nums">
-                +42.6% DAU
+                {participationLift !== undefined && participationLift !== null
+                  ? `${participationLift > 0 ? "+" : ""}${participationLift}% trend`
+                  : `${totalUsers.toLocaleString()} Joined`}
               </span>
             </div>
           </div>
@@ -170,7 +176,7 @@ export const GamificationBanner: React.FC<GamificationBannerProps> = ({
                 Anti-Abuse Guard
               </span>
               <span className="text-xs font-bold text-foreground tabular-nums">
-                Rate-Capped
+                {antiAbuseLabel}
               </span>
             </div>
           </div>

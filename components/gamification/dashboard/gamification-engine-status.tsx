@@ -8,42 +8,56 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface GamificationEngineStatusProps {
-  settings: any;
-  reloginConfig: any;
+  settings?: any;
+  reloginConfig?: any;
 }
 
 export function GamificationEngineStatus({
   settings,
   reloginConfig,
 }: GamificationEngineStatusProps) {
+  const isEnabled = settings?.isEnabled ?? true;
+  const dailyCap = settings?.dailyPointsCap;
+  const weeklyCap = settings?.weeklyPointsCap;
+  const monthlyCap = settings?.monthlyPointsCap;
+  const hasNotifications =
+    settings?.enableGlobalPushNotifications ||
+    settings?.enableGlobalEmailNotifications ||
+    settings?.pointsPushNotificationEnabled ||
+    settings?.pointsEmailNotificationEnabled;
+
   const statusItems = [
     {
       label: "Master Status",
-      value: settings.isEnabled ? "Active & Running" : "Paused",
+      value: isEnabled ? "Active & Running" : "Paused",
       icon: Activity,
-      color: settings.isEnabled
+      color: isEnabled
         ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/40 border-emerald-500/20"
         : "text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40 border-amber-500/20",
     },
     {
       label: "Daily Member Cap",
-      value: settings.dailyPointsCap ? `${settings.dailyPointsCap} pts / day` : "Unlimited",
+      value: dailyCap && dailyCap > 0 ? `${dailyCap.toLocaleString()} pts / day` : "Unlimited",
       icon: Zap,
-      color: "text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/40 border-indigo-500/20",
+      color: dailyCap && dailyCap > 0
+        ? "text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/40 border-indigo-500/20"
+        : "text-muted-foreground bg-muted border-border",
     },
     {
-      label: "Login Streaks",
-      value: reloginConfig.isEnabled ? "Enabled (+25 pts)" : "Disabled",
+      label: "Weekly / Monthly Cap",
+      value: weeklyCap && weeklyCap > 0
+        ? `${weeklyCap.toLocaleString()} pts / wk`
+        : (monthlyCap && monthlyCap > 0 ? `${monthlyCap.toLocaleString()} pts / mo` : "Unlimited"),
       icon: Repeat,
-      color: reloginConfig.isEnabled
+      color: (weeklyCap && weeklyCap > 0) || (monthlyCap && monthlyCap > 0)
         ? "text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-950/40 border-purple-500/20"
         : "text-muted-foreground bg-muted border-border",
     },
     {
-      label: "Point Decay",
-      value: settings.pointDecayEnabled ? "Quarterly" : "Never Expire",
+      label: "Notifications",
+      value: hasNotifications ? "Active Dispatch" : "Muted",
       icon: Sliders,
-      color: settings.pointDecayEnabled
+      color: hasNotifications
         ? "text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40 border-amber-500/20"
         : "text-muted-foreground bg-muted border-border",
     },
