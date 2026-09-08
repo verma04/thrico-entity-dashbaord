@@ -27,7 +27,7 @@ export interface BadgeInput {
   emailNotificationBody?: string;
 }
 
-export interface BadgeUpdateInput {
+export interface UpdateBadgeInput {
   source?: GamificationSourceType;
   name?: string;
   description?: string;
@@ -48,6 +48,8 @@ export interface BadgeUpdateInput {
   emailNotificationBody?: string;
   isActive?: boolean;
 }
+
+export type BadgeUpdateInput = UpdateBadgeInput;
 
 const CREATE_BADGE = gql`
   mutation CreateBadge($input: BadgeInput!) {
@@ -80,7 +82,7 @@ const CREATE_BADGE = gql`
 `;
 
 const UPDATE_BADGE = gql`
-  mutation UpdateBadge($id: ID!, $input: BadgeUpdateInput!) {
+  mutation UpdateBadge($id: ID!, $input: UpdateBadgeInput!) {
     updateBadge(id: $id, input: $input) {
       id
       source
