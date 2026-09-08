@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "SEO Settings",
-  description: "Configure SEO settings, meta tags, and search engine optimization for your website.",
+  description:
+    "Configure SEO settings, meta tags, and search engine optimization for your website.",
 };
 
 const page = () => {

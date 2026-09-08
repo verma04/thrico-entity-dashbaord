@@ -64,6 +64,7 @@ export const GET_WEBSITE = gql`
           description
           keywords
           schemaMarkup
+          ogImage
         }
         modules {
           id
@@ -117,6 +118,7 @@ export const GET_WEBSITE_BY_SLUG = gql`
           description
           keywords
           schemaMarkup
+          ogImage
         }
         modules {
           id
@@ -390,6 +392,7 @@ export const UPDATE_PAGE_SEO = gql`
     $description: String
     $keywords: [String!]
     $schemaMarkup: JSON
+    $ogImage: String
   ) {
     updatePageSeo(
       pageId: $pageId
@@ -397,6 +400,7 @@ export const UPDATE_PAGE_SEO = gql`
       description: $description
       keywords: $keywords
       schemaMarkup: $schemaMarkup
+      ogImage: $ogImage
     ) {
       id
       name
@@ -405,6 +409,7 @@ export const UPDATE_PAGE_SEO = gql`
         description
         keywords
         schemaMarkup
+        ogImage
       }
     }
   }
@@ -738,6 +743,7 @@ export interface UpdatePageSeoVariables {
   keywords?: string[];
   schemaMarkup?: any;
   includeInSitemap?: boolean;
+  ogImage?: string;
 }
 
 export interface CustomThemeColorsInput {

@@ -120,14 +120,28 @@ export const useGetPage = (
  * @param options - Apollo query options
  */
 export const useGetAllPagesSeo = (
-  websiteId: string,
+  websiteIdOrOptions?:
+    | string
+    | (QueryHookOptions<GetAllPagesSeoResponse, { websiteId: string }> & {
+        variables?: { websiteId: string };
+      }),
   options?: QueryHookOptions<GetAllPagesSeoResponse, { websiteId: string }>
 ) => {
+  let websiteId = "";
+  let finalOptions = options;
+
+  if (typeof websiteIdOrOptions === "string") {
+    websiteId = websiteIdOrOptions;
+  } else if (websiteIdOrOptions && typeof websiteIdOrOptions === "object") {
+    websiteId = websiteIdOrOptions.variables?.websiteId || "";
+    finalOptions = websiteIdOrOptions;
+  }
+
   return useQuery<GetAllPagesSeoResponse, { websiteId: string }>(
     GET_ALL_PAGES_SEO,
     {
-      variables: { websiteId },
-      ...options,
+      ...finalOptions,
+      variables: { websiteId, ...finalOptions?.variables },
     }
   );
 };
