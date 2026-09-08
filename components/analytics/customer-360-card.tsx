@@ -404,7 +404,7 @@ export function MemberCustomer360Card({ userId, className }: MemberCustomer360Ca
   const healthScore = profile.healthScore ?? 50;
   const attendanceRate =
     (profile.eventsRegistered || 0) > 0
-      ? Math.round(((profile.eventsAttended || 0) / profile.eventsRegistered) * 100)
+      ? Math.round(((profile.eventsAttended || 0) / (profile.eventsRegistered || 1)) * 100)
       : 0;
 
   return (

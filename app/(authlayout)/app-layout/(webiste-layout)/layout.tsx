@@ -7,7 +7,7 @@ import { useGetWebsite } from "@/graphql/actions";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardContent } from "@/components/ui/card";
-import { Layout, Menu, PanelBottom, Globe, Settings, Plus } from "lucide-react";
+import { Layout, Menu, PanelBottom, Globe, Settings, Plus, KeyRound } from "lucide-react";
 import { useTabOrder } from "@/hooks/use-tab-order";
 import { createLayoutStore } from "@/store/create-layout-store";
 
@@ -73,6 +73,11 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         key: "settings",
         label: "Settings",
         icon: <Settings className="h-4 w-4" />,
+      },
+      {
+        key: "customer-360",
+        label: "Customer 360",
+        icon: <KeyRound className="h-4 w-4" />,
       },
     ],
     [],

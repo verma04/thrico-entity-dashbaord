@@ -15,6 +15,12 @@ export const GET_WEBSITE = gql`
       customDomain
       createdAt
       updatedAt
+      siteSettings {
+        googleAnalyticsId
+        googleSearchConsoleId
+        robotsTxt
+        socialLinks
+      }
       customColors {
         primary
         secondary
@@ -439,6 +445,24 @@ export const UPDATE_WEBSITE_CUSTOM_COLORS = gql`
   }
 `;
 
+export const UPDATE_SITE_SETTINGS = gql`
+  mutation UpdateSiteSettings(
+    $websiteId: ID!
+    $siteSettings: SiteSettingsInput!
+  ) {
+    updateSiteSettings(websiteId: $websiteId, siteSettings: $siteSettings) {
+      id
+      siteSettings {
+        googleAnalyticsId
+        googleSearchConsoleId
+        robotsTxt
+        socialLinks
+      }
+      updatedAt
+    }
+  }
+`;
+
 // ============================================
 // TYPESCRIPT TYPES
 // ============================================
@@ -779,4 +803,29 @@ export interface UpdateWebsiteCustomColorsResponse {
 export interface UpdateWebsiteCustomColorsVariables {
   websiteId: string;
   customColors: CustomThemeColorsInput;
+}
+
+export interface SiteSettingsInput {
+  googleAnalyticsId?: string | null;
+  googleSearchConsoleId?: string | null;
+  robotsTxt?: string | null;
+  socialLinks?: any;
+}
+
+export interface UpdateSiteSettingsResponse {
+  updateSiteSettings: {
+    id: string;
+    siteSettings?: {
+      googleAnalyticsId?: string;
+      googleSearchConsoleId?: string;
+      robotsTxt?: string;
+      socialLinks?: any;
+    };
+    updatedAt: string;
+  };
+}
+
+export interface UpdateSiteSettingsVariables {
+  websiteId: string;
+  siteSettings: SiteSettingsInput;
 }

@@ -25,6 +25,9 @@ import {
   DELETE_MODULE,
   TOGGLE_MODULE,
   UPDATE_WEBSITE_CUSTOM_COLORS,
+  UPDATE_SITE_SETTINGS,
+  UpdateSiteSettingsResponse,
+  UpdateSiteSettingsVariables,
   GetWebsiteResponse,
   GetWebsiteBySlugResponse,
   GetPageResponse,
@@ -209,6 +212,22 @@ export const useUpdateWebsiteCustomColors = (
     UpdateWebsiteCustomColorsResponse,
     UpdateWebsiteCustomColorsVariables
   >(UPDATE_WEBSITE_CUSTOM_COLORS, options);
+};
+
+/**
+ * Hook to update website site settings (GA4, GSC, robots.txt, socialLinks)
+ * @param options - Apollo mutation options
+ */
+export const useUpdateSiteSettings = (
+  options?: MutationHookOptions<
+    UpdateSiteSettingsResponse,
+    UpdateSiteSettingsVariables
+  >
+) => {
+  return useMutation<
+    UpdateSiteSettingsResponse,
+    UpdateSiteSettingsVariables
+  >(UPDATE_SITE_SETTINGS, options);
 };
 
 // ============================================
@@ -424,4 +443,7 @@ export type {
   GetAllPagesSeoResponse,
   UpdatePageSeoResponse,
   UpdatePageSeoVariables,
+  UpdateSiteSettingsResponse,
+  UpdateSiteSettingsVariables,
+  SiteSettingsInput,
 } from "../quries/website";

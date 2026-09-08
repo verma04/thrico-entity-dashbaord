@@ -432,6 +432,8 @@ export interface Page {
 
 export interface SiteSettings {
   googleAnalyticsId: string;
+  googleSearchConsoleId?: string;
+  robotsTxt?: string;
   favicon: string;
   socialLinks: {
     twitter: string;
@@ -1299,6 +1301,8 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
     pages: [],
     siteSettings: {
       googleAnalyticsId: "",
+      googleSearchConsoleId: "",
+      robotsTxt: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\n\nSitemap: https://yourdomain.com/sitemap.xml",
       favicon: "",
       socialLinks: { twitter: "", linkedin: "", github: "", instagram: "" },
     },
@@ -1700,9 +1704,16 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
       })),
 
     updateSiteSettings: (settings) =>
-      set((state) => ({
-        siteSettings: { ...state.siteSettings, ...settings },
-      })),
+      set((state) => {
+        const isDifferent = Object.entries(settings).some(
+          ([key, value]) =>
+            state.siteSettings[key as keyof SiteSettings] !== value
+        );
+        if (!isDifferent) return state;
+        return {
+          siteSettings: { ...state.siteSettings, ...settings },
+        };
+      }),
 
     initializeWebsiteData: (websiteData) => {
       if (!websiteData) return;
@@ -1720,6 +1731,20 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         // otherwise fall back to raw navbar/footer fields
         globalHeader: websiteData.globalHeader || websiteData.navbar || get().globalHeader,
         globalFooter: websiteData.globalFooter || websiteData.footer || get().globalFooter,
+        ...(websiteData.siteSettings && {
+          siteSettings: {
+            googleAnalyticsId: websiteData.siteSettings.googleAnalyticsId || "",
+            googleSearchConsoleId: websiteData.siteSettings.googleSearchConsoleId || "",
+            robotsTxt: websiteData.siteSettings.robotsTxt || "",
+            favicon: "",
+            socialLinks: {
+              twitter: websiteData.siteSettings.socialLinks?.twitter || "",
+              linkedin: websiteData.siteSettings.socialLinks?.linkedin || "",
+              github: websiteData.siteSettings.socialLinks?.github || "",
+              instagram: websiteData.siteSettings.socialLinks?.instagram || "",
+            },
+          },
+        }),
       }));
     },
     resetInitialized: () => set(() => ({ isInitialized: false })),

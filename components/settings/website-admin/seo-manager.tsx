@@ -4,14 +4,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Edit2Icon,
-  Globe,
-  Search,
-  Upload,
-} from "lucide-react";
+import { Edit2Icon, Globe, Search, Upload } from "lucide-react";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import type {
+  ExportCsvScope,
+  ExportCsvFormat,
+} from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 
 import { getCustomDomain, getThricoDomain } from "@/graphql/actions/domain";
@@ -47,14 +45,17 @@ export default function SeoManager() {
   const { data: websiteData, loading: websiteLoading } = useGetWebsite({});
   const websiteId = websiteData?.getWebsite?.id;
 
-  const { data: seoData, refetch: refetchPagesSeo } = useGetAllPagesSeo(websiteId || "", {
-    skip: !websiteId,
-    onCompleted: (data) => {
-      if (data?.getAllPagesSeo) {
-        setPages(data.getAllPagesSeo);
-      }
+  const { data: seoData, refetch: refetchPagesSeo } = useGetAllPagesSeo(
+    websiteId || "",
+    {
+      skip: !websiteId,
+      onCompleted: (data) => {
+        if (data?.getAllPagesSeo) {
+          setPages(data.getAllPagesSeo);
+        }
+      },
     },
-  });
+  );
 
   useEffect(() => {
     if (seoData?.getAllPagesSeo) {
@@ -110,7 +111,10 @@ export default function SeoManager() {
     if (!editingPageId) return;
 
     const keywordsArray = values.keywords
-      ? values.keywords.split(",").map((k) => k.trim()).filter(Boolean)
+      ? values.keywords
+          .split(",")
+          .map((k) => k.trim())
+          .filter(Boolean)
       : [];
 
     updatePageSeoMutation({
@@ -205,34 +209,29 @@ export default function SeoManager() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
-      {/* Centered Top Header with max-w-[1040px] Breathing Space */}
-      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
-        <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 py-3">
-          <EcosystemHeader
-            title="SEO Settings"
-            description="Manage meta tags, search engine previews, and JSON-LD schema across website pages."
-            icon={Globe}
-            badgeText="Website Builder"
-            breadcrumbs={[
-              { label: "Website Builder", href: "/app-layout" },
-              { label: "General Settings", href: "/app-layout/settings" },
-              { label: "SEO & Discoverability" },
-            ]}
-            actions={
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowExportModal(true)}
-                className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                Export
-              </Button>
-            }
-          />
-        </div>
-      </div>
+      <EcosystemHeader
+        title="SEO Settings"
+        description="Manage meta tags, search engine previews, and JSON-LD schema across website pages."
+        icon={Globe}
+        badgeText="Website Builder"
+        breadcrumbs={[
+          { label: "Website Builder", href: "/app-layout" },
+          { label: "General Settings", href: "/app-layout/settings" },
+          { label: "SEO & Discoverability" },
+        ]}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
+        }
+      />
 
       <div className="flex-1 overflow-y-auto">
         <PolarisFormLayout
@@ -280,7 +279,9 @@ export default function SeoManager() {
 
               {/* Strategic Tip */}
               <PolarisTipCard title="Search Engine Best Practices">
-                Keep page titles between 45–60 characters to avoid truncation on Google search result pages. Always provide a clear, benefit-driven meta description.
+                Keep page titles between 45–60 characters to avoid truncation on
+                Google search result pages. Always provide a clear,
+                benefit-driven meta description.
               </PolarisTipCard>
             </div>
           }
@@ -344,14 +345,38 @@ export default function SeoManager() {
           }
           const csv = buildCsv(pages, [
             { header: "Page Name", getValue: (p: any) => p.name || "" },
-            { header: "Slug", getValue: (p: any) => p.slug ? `/${p.slug}` : "" },
+            {
+              header: "Slug",
+              getValue: (p: any) => (p.slug ? `/${p.slug}` : ""),
+            },
             { header: "Meta Title", getValue: (p: any) => p.seo?.title || "" },
-            { header: "Meta Description", getValue: (p: any) => p.seo?.description || "" },
-            { header: "Keywords", getValue: (p: any) => Array.isArray(p.seo?.keywords) ? p.seo.keywords.join(", ") : (p.seo?.keywords || "") },
-            { header: "SEO Status", getValue: (p: any) => (p.seo?.title && p.seo?.description) ? "Optimized" : "Draft Meta" },
-            { header: "Include in Sitemap", getValue: (p: any) => (p.seo?.includeInSitemap ?? true) ? "Yes" : "No" },
+            {
+              header: "Meta Description",
+              getValue: (p: any) => p.seo?.description || "",
+            },
+            {
+              header: "Keywords",
+              getValue: (p: any) =>
+                Array.isArray(p.seo?.keywords)
+                  ? p.seo.keywords.join(", ")
+                  : p.seo?.keywords || "",
+            },
+            {
+              header: "SEO Status",
+              getValue: (p: any) =>
+                p.seo?.title && p.seo?.description ? "Optimized" : "Draft Meta",
+            },
+            {
+              header: "Include in Sitemap",
+              getValue: (p: any) =>
+                (p.seo?.includeInSitemap ?? true) ? "Yes" : "No",
+            },
           ]);
-          downloadCsv(csv, `website-seo-${new Date().toISOString().slice(0, 10)}`, format);
+          downloadCsv(
+            csv,
+            `website-seo-${new Date().toISOString().slice(0, 10)}`,
+            format,
+          );
           toast({
             title: "Export ready",
             description: `${pages.length} page${pages.length !== 1 ? "s" : ""} exported.`,
