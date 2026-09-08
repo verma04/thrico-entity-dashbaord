@@ -389,6 +389,8 @@ export type ModuleType =
   | "announcement-bar"
   | "video"
   | "html"
+  | "login"
+  | "signup"
   | "footer";
 
 export interface MenuItem {
@@ -690,6 +692,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "results-dashboard": "default",
     video: "video-player",
     html: "fullwidth-embed",
+    login: "default",
+    signup: "default",
     footer: "columns",
   },
   enterprise: {
@@ -758,6 +762,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "results-dashboard": "default",
     video: "video-player",
     html: "fullwidth-embed",
+    login: "default",
+    signup: "default",
     footer: "columns",
   },
   creator: {
@@ -826,6 +832,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "results-dashboard": "default",
     video: "video-player",
     html: "fullwidth-embed",
+    login: "default",
+    signup: "default",
     footer: "columns",
   },
   association: {
@@ -894,6 +902,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "results-dashboard": "default",
     video: "video-player",
     html: "fullwidth-embed",
+    login: "default",
+    signup: "default",
     footer: "columns",
   },
   startup: {
@@ -962,6 +972,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "results-dashboard": "default",
     video: "video-player",
     html: "fullwidth-embed",
+    login: "default",
+    signup: "default",
     footer: "columns",
   },
   "dark-mode": {
@@ -1030,6 +1042,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "results-dashboard": "default",
     video: "video-player",
     html: "fullwidth-embed",
+    login: "default",
+    signup: "default",
     footer: "columns",
   },
 };

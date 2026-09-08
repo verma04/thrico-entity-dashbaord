@@ -56,6 +56,9 @@ export const GET_WEBSITE = gql`
         order
         createdAt
         updatedAt
+        canDelete
+        notDeleted
+        isSystem
         seo {
           title
           description
@@ -106,6 +109,9 @@ export const GET_WEBSITE_BY_SLUG = gql`
         slug
         isEnabled
         order
+        canDelete
+        notDeleted
+        isSystem
         seo {
           title
           description
@@ -462,6 +468,9 @@ export interface Page {
   seo?: SEO;
   createdAt: string;
   updatedAt: string;
+  canDelete?: boolean;
+  notDeleted?: boolean;
+  isSystem?: boolean;
 }
 
 export interface NavbarFooter {

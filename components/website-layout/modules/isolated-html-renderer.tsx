@@ -68,9 +68,30 @@ export const IsolatedHtmlRenderer: React.FC<IsolatedHtmlRendererProps> = ({
         .replace(/:root\b/gi, ":host");
     };
 
-    // Extract styles in user html and remap body/html selectors
+    // Extract styles and body if user provided a full HTML document
     let processedHtml = html || "";
+    let extractedHeadContent = "";
+
+    if (/<!DOCTYPE|<html|<body/i.test(processedHtml)) {
+      const headMatch = processedHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+      if (headMatch) {
+        extractedHeadContent = headMatch[1];
+      }
+      const bodyMatch = processedHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      if (bodyMatch) {
+        processedHtml = bodyMatch[1];
+      }
+    }
+
+    // Extract styles in user html and remap body/html selectors
     processedHtml = processedHtml.replace(
+      /<style\b([^>]*)>([\s\S]*?)<\/style>/gi,
+      (_match, attrs, styleContent) => {
+        return `<style${attrs}>${processCss(styleContent)}</style>`;
+      }
+    );
+
+    extractedHeadContent = extractedHeadContent.replace(
       /<style\b([^>]*)>([\s\S]*?)<\/style>/gi,
       (_match, attrs, styleContent) => {
         return `<style${attrs}>${processCss(styleContent)}</style>`;
@@ -127,6 +148,7 @@ export const IsolatedHtmlRenderer: React.FC<IsolatedHtmlRendererProps> = ({
 
     shadow.innerHTML = `
       ${headFontStyles}
+      ${extractedHeadContent}
       ${hostBaseStyles}
       <div class="isolated-html-root">
         ${processedHtml}
@@ -143,6 +165,102 @@ export const IsolatedHtmlRenderer: React.FC<IsolatedHtmlRendererProps> = ({
       newScript.textContent = oldScript.textContent;
       oldScript.parentNode?.replaceChild(newScript, oldScript);
     });
+
+    // Intercept all link clicks inside the Shadow DOM so they redirect the main browser window
+    const handleLinkClick = (e: MouseEvent) => {
+      const path = e.composedPath ? e.composedPath() : [];
+      let anchor: HTMLAnchorElement | null = null;
+      for (let i = 0; i < path.length; i++) {
+        const el = path[i] as HTMLElement;
+        if (el && (el.tagName === "A" || el instanceof HTMLAnchorElement)) {
+          anchor = el as HTMLAnchorElement;
+          break;
+        }
+      }
+      if (!anchor && e.target) {
+        anchor = (e.target as HTMLElement).closest?.("a") || null;
+      }
+
+      if (!anchor) return;
+
+      const rawHref = anchor.getAttribute("href") || "";
+      if (!rawHref || rawHref === "#") return;
+
+      // 1. Hash anchor links (e.g. #events, #contact, #pricing)
+      if (rawHref.startsWith("#")) {
+        e.preventDefault();
+        try {
+          const innerEl = shadow.querySelector(rawHref);
+          if (innerEl) {
+            innerEl.scrollIntoView({ behavior: "smooth" });
+            return;
+          }
+          const outerEl = document.querySelector(rawHref);
+          if (outerEl) {
+            outerEl.scrollIntoView({ behavior: "smooth" });
+            return;
+          }
+        } catch (err) {}
+        return;
+      }
+
+      // 2. Protocols like mailto:, tel:, javascript:
+      if (
+        rawHref.startsWith("javascript:") ||
+        rawHref.startsWith("mailto:") ||
+        rawHref.startsWith("tel:")
+      ) {
+        return;
+      }
+
+      // 3. User holds modifier key for new tab
+      if (e.ctrlKey || e.metaKey) {
+        return;
+      }
+
+      // 4. Redirect top-level browser window
+      e.preventDefault();
+      const destination = anchor.href;
+      const targetAttr = anchor.getAttribute("target");
+
+      let isSameHost = false;
+      try {
+        const url = new URL(destination, window.location.href);
+        isSameHost = url.host === window.location.host;
+      } catch (err) {}
+
+      if (targetAttr === "_blank" && !isSameHost) {
+        try {
+          if (window.top) {
+            window.top.open(destination, "_blank", "noopener,noreferrer");
+          } else {
+            window.open(destination, "_blank", "noopener,noreferrer");
+          }
+        } catch (err) {
+          window.open(destination, "_blank", "noopener,noreferrer");
+        }
+      } else {
+        try {
+          if (window.top && window.top !== window) {
+            window.top.location.href = destination;
+          } else {
+            window.location.href = destination;
+          }
+        } catch (err) {
+          try {
+            window.open(destination, "_top");
+          } catch (e2) {
+            window.location.href = destination;
+          }
+        }
+      }
+    };
+
+    shadow.addEventListener("click", handleLinkClick as EventListener, true);
+
+    return () => {
+      shadow.removeEventListener("click", handleLinkClick as EventListener, true);
+    };
   }, [html, css]);
 
   return (

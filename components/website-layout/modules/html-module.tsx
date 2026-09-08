@@ -138,10 +138,82 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
         setTimeout(reportHeight, 200);
         setTimeout(reportHeight, 600);
         setTimeout(reportHeight, 1500);
+        // Intercept all link clicks so they redirect the main window instead of inner iframe
+        document.addEventListener('click', function(e) {
+          var path = e.composedPath ? e.composedPath() : [];
+          var target = null;
+          for (var i = 0; i < path.length; i++) {
+            if (path[i] && (path[i].tagName === 'A' || path[i] instanceof HTMLAnchorElement)) {
+              target = path[i];
+              break;
+            }
+          }
+          if (!target && e.target && e.target.closest) {
+            target = e.target.closest('a');
+          }
+
+          if (target && target.href) {
+            var rawHref = target.getAttribute('href') || '';
+            if (rawHref.startsWith('#')) {
+              e.preventDefault();
+              try {
+                var el = window.parent.document.querySelector(rawHref) || document.querySelector(rawHref);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              } catch (err) {}
+              return;
+            }
+
+            if (rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) {
+              return;
+            }
+
+            if (e.ctrlKey || e.metaKey) {
+              return;
+            }
+
+            var isSameHost = false;
+            try {
+              var url = new URL(target.href, window.location.href);
+              isSameHost = url.host === window.location.host;
+            } catch (err) {}
+
+            var targetAttr = target.getAttribute('target');
+            if (targetAttr === '_blank' && !isSameHost) {
+              e.preventDefault();
+              try {
+                if (window.top) {
+                  window.top.open(target.href, '_blank', 'noopener,noreferrer');
+                } else {
+                  window.open(target.href, '_blank', 'noopener,noreferrer');
+                }
+              } catch (err) {
+                window.open(target.href, '_blank', 'noopener,noreferrer');
+              }
+              return;
+            }
+
+            // Same-host link OR internal redirect OR standard link: redirect top main browser window
+            e.preventDefault();
+            try {
+              if (window.top && window.top !== window) {
+                window.top.location.href = target.href;
+              } else {
+                window.location.href = target.href;
+              }
+            } catch (err) {
+              try {
+                window.open(target.href, '_top');
+              } catch (e2) {
+                window.location.href = target.href;
+              }
+            }
+          }
+        }, true);
       </script>
     `;
 
     const baseStyles = `
+      <base target="_top">
       <style>
         *, *::before, *::after { box-sizing: border-box; }
         html, body {
@@ -236,7 +308,7 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
                   ref={iframeRef}
                   srcDoc={iframeSrcDoc}
                   title={content?.title || "Custom HTML"}
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation allow-top-navigation-by-user-activation"
                   scrolling="no"
                   onLoad={updateHeightFromIframe}
                   className="w-full border-0 block overflow-hidden"

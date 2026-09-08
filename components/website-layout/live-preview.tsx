@@ -23,6 +23,8 @@ import {
   MarketplaceModule,
   CommunitiesModule,
   CeoMessageModule,
+  LoginModule,
+  SignupModule,
 } from "./modules";
 import { AboutRenderer } from "./preview/about-renderer";
 import { ContactRenderer } from "./preview/contact-renderer";
@@ -345,6 +347,8 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
         <p className="text-gray-500">Results Dashboard - Coming Soon</p>
       </div>
     ),
+    login: <LoginModule module={module} previewDevice={previewDevice} />,
+    signup: <SignupModule module={module} previewDevice={previewDevice} />,
   };
 
   return (

@@ -114,7 +114,7 @@ export function WebsitePagesManager() {
 
   const handleToggleStatus = (pageId: string, currentStatus: boolean) => {
     const page = displayPages?.find((p: any) => p.id === pageId);
-    if (!page || page.slug === "home") return;
+    if (!page || page.isSystem) return;
 
     if (currentStatus) {
       setConfirmDialog({ open: true, pageId, currentStatus });
@@ -165,8 +165,8 @@ export function WebsitePagesManager() {
           icon={Layout}
           title={row.name}
           badge={
-            row.slug === "home" ? (
-              <AdminTableTag variant="indigo">Home Page</AdminTableTag>
+            row.isSystem ? (
+              <AdminTableTag variant="indigo">System Page</AdminTableTag>
             ) : undefined
           }
         />
@@ -191,7 +191,7 @@ export function WebsitePagesManager() {
           variant="ghost"
           className="p-0 h-auto hover:bg-transparent"
           onClick={() => handleToggleStatus(row.id, row.isEnabled)}
-          disabled={row.slug === "home"}
+          disabled={row.isSystem}
         >
           <AdminStatusBadge status={row.isEnabled ? "ACTIVE" : "DRAFT"}>
             {row.isEnabled ? "Active" : "Draft"}
@@ -214,7 +214,7 @@ export function WebsitePagesManager() {
             <Layers className="h-3 w-3" />
             Design
           </CtaButton>
-          {row.slug !== "home" && (
+          {row.canDelete && (
             <CtaButton
               variant="outline"
               className="h-6 w-6 px-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20"

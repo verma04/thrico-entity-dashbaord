@@ -39,6 +39,8 @@ import {
   Star,
   Map,
   Phone,
+  Lock,
+  UserPlus,
 } from "lucide-react";
 import { ModuleType } from "@/store/useWebsiteBuilderStore";
 
@@ -542,6 +544,23 @@ export const AVAILABLE_MODULES: {
     icon: FileText,
     category: "Compliance & Legal",
   },
+  // Authentication & Access
+  {
+    type: "login",
+    name: "Login Form",
+    description: "Authentication login form skeleton for user access.",
+    defaultLayout: "default",
+    icon: Lock,
+    category: "Authentication & Access",
+  },
+  {
+    type: "signup",
+    name: "Signup Form",
+    description: "Authentication signup form skeleton for new member registration.",
+    defaultLayout: "default",
+    icon: UserPlus,
+    category: "Authentication & Access",
+  },
 ];
 
 export const BASIC_MODULE_TYPES: ModuleType[] = [
@@ -564,4 +583,6 @@ export const BASIC_MODULE_TYPES: ModuleType[] = [
   "location-map",
   "privacy-policy",
   "terms-conditions",
+  "login",
+  "signup",
 ];

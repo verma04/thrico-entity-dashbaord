@@ -44,6 +44,17 @@ export const VideoSpotlightSettings = ({
   const updateVideo = (index: number, field: string, value: any) => {
     const newVideos = [...videos];
     newVideos[index] = { ...newVideos[index], [field]: value };
+
+    // Auto-detect YouTube thumbnail if url is provided and thumbnail is empty
+    if (field === "url" && value && !newVideos[index].thumbnail) {
+      const ytMatch = value.match(
+        /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i
+      );
+      if (ytMatch && ytMatch[1]) {
+        newVideos[index].thumbnail = `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
+      }
+    }
+
     onChange({ videos: newVideos });
   };
 
