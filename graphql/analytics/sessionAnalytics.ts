@@ -1,11 +1,12 @@
 import { gql, useQuery, QueryHookOptions } from "@apollo/client";
-import { TimeRange, DateRangeInput } from "../actions/dashboard";
 
 export const GET_SESSION_ANALYTICS = gql`
   query GetSessionAnalytics($timeRange: TimeRange, $dateRange: DateRangeInput) {
     getSessionAnalytics(timeRange: $timeRange, dateRange: $dateRange) {
       totalSessions
       totalPageViews
+      totalUsers
+      activeUsersNow
       avgSessionDurationSeconds
       devices {
         deviceOs
@@ -22,50 +23,61 @@ export const GET_SESSION_ANALYTICS = gql`
         sessions
         percentage
       }
+      deviceCategories {
+        category
+        sessions
+        percentage
+      }
+      countries {
+        country
+        countryCode
+        sessions
+        percentage
+      }
+      topPages {
+        pageUrl
+        pageTitle
+        views
+        percentage
+      }
     }
   }
 `;
 
-export interface DeviceBreakdown {
-  deviceOs: string;
-  sessions: number;
-  percentage: number;
-}
-
-export interface BrowserBreakdown {
-  browser: string;
-  sessions: number;
-  percentage: number;
-}
-
-export interface SourceBreakdown {
-  source: string;
-  sessions: number;
-  percentage: number;
-}
-
-export interface SessionAnalyticsData {
-  getSessionAnalytics: {
-    totalSessions: number;
-    totalPageViews: number;
-    avgSessionDurationSeconds: number;
-    devices: DeviceBreakdown[];
-    browsers: BrowserBreakdown[];
-    sources: SourceBreakdown[];
-  };
+export interface DateRangeInput {
+  startDate: string;
+  endDate: string;
 }
 
 export interface SessionAnalyticsVariables {
-  timeRange?: TimeRange | string;
+  timeRange?: "LAST_24_HOURS" | "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS" | "THIS_MONTH" | "LAST_MONTH" | string;
   dateRange?: DateRangeInput;
 }
 
+export interface SessionAnalyticsResponse {
+  getSessionAnalytics: {
+    totalSessions: number;
+    totalPageViews: number;
+    totalUsers?: number;
+    activeUsersNow?: number;
+    avgSessionDurationSeconds?: number;
+    devices: Array<{ deviceOs: string; sessions: number; percentage: number }>;
+    browsers: Array<{ browser: string; sessions: number; percentage: number }>;
+    sources: Array<{ source: string; sessions: number; percentage: number }>;
+    deviceCategories?: Array<{ category: string; sessions: number; percentage: number }>;
+    countries?: Array<{ country: string; countryCode?: string; sessions: number; percentage: number }>;
+    topPages?: Array<{ pageUrl: string; pageTitle?: string; views: number; percentage: number }>;
+  };
+}
+
+export type SessionAnalyticsData = SessionAnalyticsResponse;
+
 export const useSessionAnalytics = (
   variables?: SessionAnalyticsVariables,
-  options?: QueryHookOptions<SessionAnalyticsData, SessionAnalyticsVariables>
+  options?: QueryHookOptions<SessionAnalyticsResponse, SessionAnalyticsVariables>
 ) => {
-  return useQuery<SessionAnalyticsData, SessionAnalyticsVariables>(GET_SESSION_ANALYTICS, {
-    variables: { timeRange: TimeRange.LAST_30_DAYS, ...variables },
+  return useQuery<SessionAnalyticsResponse, SessionAnalyticsVariables>(GET_SESSION_ANALYTICS, {
+    variables,
     fetchPolicy: "cache-and-network",
     ...options,
   });

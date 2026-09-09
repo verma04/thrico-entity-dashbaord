@@ -25,15 +25,17 @@ export function CohortRetentionMatrix({ className }: CohortRetentionMatrixProps)
     );
   }
 
-  if (error || !data?.getCohortRetention) {
+  const cohorts = Array.isArray(data?.getCohortRetention?.cohorts)
+    ? data.getCohortRetention.cohorts
+    : [];
+
+  if (error || !data?.getCohortRetention || cohorts.length === 0) {
     return (
       <Card className={`p-6 border-dashed text-center text-muted-foreground text-sm ${className || ""}`}>
         {error ? `Failed to load cohort retention: ${error.message}` : "No cohort retention data available."}
       </Card>
     );
   }
-
-  const { cohorts } = data.getCohortRetention;
 
   const getHeatmapColor = (percent: number) => {
     if (percent >= 80) return "bg-emerald-600 text-white dark:bg-emerald-500";
@@ -95,35 +97,38 @@ export function CohortRetentionMatrix({ className }: CohortRetentionMatrixProps)
               </tr>
             </thead>
             <tbody>
-              {cohorts.map((cohort, cIdx) => (
-                <tr key={cIdx} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
-                  <td className="py-2.5 px-3 font-medium whitespace-nowrap">
-                    {cohort.cohortPeriod}
-                  </td>
-                  <td className="py-2.5 px-3 text-center font-bold text-foreground">
-                    {cohort.cohortSize}
-                  </td>
-                  {Array.from({ length: 6 }).map((_, pIdx) => {
-                    const ret = cohort.retentionPeriods.find((r) => r.periodIndex === pIdx);
-                    if (!ret && pIdx > cohort.retentionPeriods.length - 1) {
-                      return <td key={pIdx} className="py-2 px-2 text-center text-muted-foreground/30">—</td>;
-                    }
-                    const percent = ret?.retentionPercent ?? 0;
-                    return (
-                      <td key={pIdx} className="py-1.5 px-1.5 text-center">
-                        <div
-                          className={`py-1 px-1.5 rounded-md font-semibold text-[11px] transition-transform hover:scale-105 ${getHeatmapColor(
-                            percent
-                          )}`}
-                          title={`${ret?.retainedCount ?? 0} members retained (${percent}%)`}
-                        >
-                          {percent}%
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {cohorts.map((cohort, cIdx) => {
+                const periods = Array.isArray(cohort?.retentionPeriods) ? cohort.retentionPeriods : [];
+                return (
+                  <tr key={cIdx} className="border-b border-border/40 hover:bg-muted/20 transition-colors">
+                    <td className="py-2.5 px-3 font-medium whitespace-nowrap">
+                      {cohort?.cohortPeriod || "Cohort"}
+                    </td>
+                    <td className="py-2.5 px-3 text-center font-bold text-foreground">
+                      {cohort?.cohortSize ?? 0}
+                    </td>
+                    {Array.from({ length: 6 }).map((_, pIdx) => {
+                      const ret = periods.find((r) => r?.periodIndex === pIdx);
+                      if (!ret && pIdx > periods.length - 1) {
+                        return <td key={pIdx} className="py-2 px-2 text-center text-muted-foreground/30">—</td>;
+                      }
+                      const percent = ret?.retentionPercent ?? 0;
+                      return (
+                        <td key={pIdx} className="py-1.5 px-1.5 text-center">
+                          <div
+                            className={`py-1 px-1.5 rounded-md font-semibold text-[11px] transition-transform hover:scale-105 ${getHeatmapColor(
+                              percent
+                            )}`}
+                            title={`${ret?.retainedCount ?? 0} members retained (${percent}%)`}
+                          >
+                            {percent}%
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

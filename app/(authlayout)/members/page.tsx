@@ -27,7 +27,11 @@ import {
   KPIAdvocacyGamification,
   KPIMonetisation,
 } from "@/components/members/kpi-dashboard";
-import { CohortRetentionMatrix, ChurnRiskTable } from "@/components/analytics";
+import {
+  CohortRetentionMatrix,
+  ChurnRiskTable,
+  SessionAnalyticsCard,
+} from "@/components/analytics";
 
 // ---------------------------------------------------------------------------
 // KPI Helpers
@@ -148,7 +152,15 @@ function MembersPage() {
         </div>
 
         {/* 3. Engagement (Engage) */}
-        <KPIEngagement loading={loading} getMetric={getMetric} />
+        <div className="space-y-4">
+          <KPIEngagement loading={loading} getMetric={getMetric} />
+          <SessionAnalyticsCard
+            variables={{
+              dateRange: formattedDateRange,
+              timeRange: !formattedDateRange ? (timeRangeMap[timeRange] || "LAST_7_DAYS") : undefined,
+            }}
+          />
+        </div>
 
         {/* 4. Community Health (Retain) */}
         <div className="space-y-4">

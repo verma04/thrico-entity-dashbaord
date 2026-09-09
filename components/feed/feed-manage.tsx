@@ -23,6 +23,7 @@ import {
   MessageSquare,
   ShieldCheck,
   LucideIcon,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -55,6 +56,7 @@ import {
 import PostModal from "./add-feed";
 import { FeedGrid } from "./feed-grid";
 import { FeedTable, feedTableColumns } from "./feed-table";
+import { ExportFeedModal } from "./export-feed-modal";
 import type { FeedProps } from "./types";
 import { cn } from "@/lib/utils";
 
@@ -200,6 +202,8 @@ export function FeedManage({
   const selectedType = searchParams.get("type") || "ALL";
   const selectedPrivacy = searchParams.get("privacy") || "ALL";
   const selectedPinned = searchParams.get("pinned") === "true";
+
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Search input state (with debouncing)
   const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -578,6 +582,17 @@ export function FeedManage({
             Refresh
           </Button>
 
+          {/* Export Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
+
           {/* View Toggle (Grid / List) */}
           <EcosystemActionBar.ViewToggle
             value={view}
@@ -696,6 +711,28 @@ export function FeedManage({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportFeedModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        feeds={filteredFeeds}
+        totalCount={totalCount}
+        matchingCount={debouncedSearch.trim() ? filteredFeeds.length : undefined}
+        filters={{
+          search: debouncedSearch.trim() || undefined,
+          source:
+            feedType === "moments"
+              ? "moments"
+              : feedType === "jobs"
+              ? "jobs"
+              : feedType === "listing"
+              ? "listing"
+              : selectedType !== "ALL"
+              ? selectedType.toLowerCase()
+              : undefined,
+        }}
+      />
     </div>
   );
 }

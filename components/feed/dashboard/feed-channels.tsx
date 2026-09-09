@@ -77,7 +77,7 @@ export function FeedChannels() {
                 <div
                   className={cn(
                     "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105",
-                    channel.bg
+                    channel.bg,
                   )}
                 >
                   <Icon className={cn("h-4 w-4", channel.color)} />

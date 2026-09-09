@@ -30,6 +30,8 @@ export function ChurnRiskTable({ limit = 10, className }: ChurnRiskTableProps) {
     );
   }
 
+  const members = Array.isArray(data?.getChurnRiskMembers) ? data.getChurnRiskMembers : [];
+
   if (error || !data?.getChurnRiskMembers) {
     return (
       <Card className={`p-6 border-dashed text-center text-muted-foreground text-sm ${className || ""}`}>
@@ -38,9 +40,7 @@ export function ChurnRiskTable({ limit = 10, className }: ChurnRiskTableProps) {
     );
   }
 
-  const members = data.getChurnRiskMembers;
-
-  const getRiskBadge = (level: string) => {
+  const getRiskBadge = (level?: string) => {
     switch (level?.toUpperCase()) {
       case "HIGH":
         return <Badge className="bg-rose-500 hover:bg-rose-600 text-white font-semibold">High Risk</Badge>;
@@ -49,7 +49,7 @@ export function ChurnRiskTable({ limit = 10, className }: ChurnRiskTableProps) {
       case "LOW":
         return <Badge className="bg-blue-500 hover:bg-blue-600 text-white font-semibold">Low Risk</Badge>;
       default:
-        return <Badge variant="secondary">{level}</Badge>;
+        return <Badge variant="secondary">{level || "Unknown"}</Badge>;
     }
   };
 
@@ -93,41 +93,43 @@ export function ChurnRiskTable({ limit = 10, className }: ChurnRiskTableProps) {
               </thead>
               <tbody className="divide-y divide-border/40">
                 {members.map((m, idx) => (
-                  <tr key={m.userId || idx} className="hover:bg-muted/30 transition-colors">
+                  <tr key={m?.userId || idx} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-3 font-mono text-[11px] text-foreground">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
                           <User className="h-3.5 w-3.5" />
                         </div>
-                        <span className="truncate max-w-[120px]">{m.userId}</span>
+                        <span className="truncate max-w-[120px]">{m?.userId || "Unknown"}</span>
                       </div>
                     </td>
                     <td className="py-3 px-3 text-center font-bold text-foreground">
-                      {m.healthScore}
+                      {m?.healthScore ?? 0}
                     </td>
                     <td className="py-3 px-3 text-center">
                       <Badge variant="outline" className="text-[10px]">
-                        {m.rfmSegment}
+                        {m?.rfmSegment || "N/A"}
                       </Badge>
                     </td>
                     <td className="py-3 px-3 text-center text-muted-foreground">
-                      {m.daysInactive} days
+                      {m?.daysInactive ?? 0} days
                     </td>
                     <td className="py-3 px-3 text-center">
-                      {getRiskBadge(m.churnRiskLevel)}
+                      {getRiskBadge(m?.churnRiskLevel)}
                     </td>
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-1.5 text-primary font-medium text-[11px]">
                         <Zap className="h-3 w-3 text-amber-500 shrink-0" />
-                        <span>{m.recommendedAction}</span>
+                        <span>{m?.recommendedAction || "None"}</span>
                       </div>
                     </td>
                     <td className="py-3 px-3 text-right">
-                      <Link href={`/members/${m.userId}/360`}>
-                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                          View 360° <ArrowRight className="h-3 w-3" />
-                        </Button>
-                      </Link>
+                      {m?.userId && (
+                        <Link href={`/members/${m.userId}/360`}>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                            View 360° <ArrowRight className="h-3 w-3" />
+                          </Button>
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 ))}

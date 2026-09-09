@@ -9,7 +9,7 @@ import {
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { toast } from "sonner";
 import { safeFormat } from "@/lib/date-utils";
-import { useExportData } from "@/graphql/actions/export";
+import { useExportMembers } from "@/graphql/actions/export";
 import { Mail } from "lucide-react";
 
 export interface MemberFilters {
@@ -40,7 +40,7 @@ export function ExportMembersModal({
   filters,
   onSuccess,
 }: ExportMembersModalProps) {
-  const [exportDataMutation, { loading }] = useExportData();
+  const [exportMembersMutation, { loading }] = useExportMembers();
 
   const handleExport = (scope: ExportCsvScope, format: ExportCsvFormat) => {
     const rows =
@@ -148,10 +148,9 @@ export function ExportMembersModal({
 
   const handleExportAll = async (format: ExportCsvFormat) => {
     try {
-      const res = await exportDataMutation({
+      const res = await exportMembersMutation({
         variables: {
           input: {
-            module: "MEMBERS",
             format,
             status:
               filters?.status && filters.status !== "ALL"
@@ -170,11 +169,11 @@ export function ExportMembersModal({
         },
       });
 
-      if (res.data?.exportData?.success) {
+      if (res.data?.exportMembers?.success) {
         toast.success("CSV will be sent to your email", {
           description:
-            res.data.exportData.message ||
-            `Exporting all ${totalCount.toLocaleString()} members — we'll email you the file when it's ready.`,
+            res.data.exportMembers.message ||
+            `Exporting all ${totalCount.toLocaleString()} members — you and community administrators will receive an email once complete.`,
           icon: <Mail className="h-4 w-4" />,
           duration: 5000,
         });
@@ -182,7 +181,7 @@ export function ExportMembersModal({
       } else {
         toast.error("Export failed", {
           description:
-            res.data?.exportData?.message || "Could not start member export.",
+            res.data?.exportMembers?.message || "Could not start member export.",
         });
       }
     } catch (err: any) {
@@ -198,7 +197,7 @@ export function ExportMembersModal({
       open={open}
       onOpenChange={onOpenChange}
       entityName="members"
-      description="Export member profiles, tier statuses, gamification scores, and contact information. For All Members, the file is processed and delivered directly to your email."
+      description="Export member profiles, tier statuses, gamification scores, and contact information. For All Members, the file is processed asynchronously and delivered directly to your email."
       totalCount={totalCount}
       matchingCount={matchingCount}
       selectedCount={selectedCount}

@@ -33,9 +33,109 @@ export const GET_CUSTOMER_360 = gql`
         summary
         properties
       }
+      # ── Google Analytics (GA4) Digital Intelligence ──────────────────
+      gaAnalytics {
+        totalSessions
+        totalPageViews
+        isCurrentlyOnline
+        firstTouch {
+          channel
+          source
+          medium
+          campaign
+          term
+          content
+          referrerUrl
+          landingPage
+        }
+        lastTouch {
+          channel
+          source
+          medium
+          campaign
+          landingPage
+        }
+        devices {
+          name
+          category
+          sessionsCount
+          percentage
+        }
+        browsers {
+          name
+          category
+          sessionsCount
+          percentage
+        }
+        operatingSystems {
+          name
+          category
+          sessionsCount
+          percentage
+        }
+        geoLocation {
+          country
+          countryCode
+          city
+          region
+          timezone
+        }
+        topPages {
+          pageUrl
+          pageTitle
+          viewsCount
+          lastVisitedAt
+        }
+      }
     }
   }
 `;
+
+export interface Customer360TrafficAcquisitionData {
+  channel?: string;
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  term?: string;
+  content?: string;
+  referrerUrl?: string;
+  landingPage?: string;
+}
+
+export interface Customer360DeviceData {
+  name: string;
+  category: "device" | "os" | "browser";
+  sessionsCount: number;
+  percentage: number;
+}
+
+export interface Customer360GeoLocationData {
+  country?: string;
+  countryCode?: string;
+  city?: string;
+  region?: string;
+  timezone?: string;
+}
+
+export interface Customer360TopPageData {
+  pageUrl: string;
+  pageTitle?: string;
+  viewsCount: number;
+  lastVisitedAt?: string;
+}
+
+export interface Customer360GaAnalyticsData {
+  totalSessions: number;
+  totalPageViews: number;
+  isCurrentlyOnline: boolean;
+  firstTouch?: Customer360TrafficAcquisitionData;
+  lastTouch?: Customer360TrafficAcquisitionData;
+  devices: Customer360DeviceData[];
+  browsers: Customer360DeviceData[];
+  operatingSystems: Customer360DeviceData[];
+  geoLocation?: Customer360GeoLocationData;
+  topPages: Customer360TopPageData[];
+}
 
 export interface Customer360Data {
   getCustomer360: {
@@ -59,15 +159,7 @@ export interface Customer360Data {
       recencyDays: number;
       frequencyScore: number;
       monetaryScore: number;
-      segment:
-        | "CHAMPION"
-        | "LOYAL"
-        | "POTENTIAL_LOYALIST"
-        | "NEW"
-        | "AT_RISK"
-        | "HIBERNATING"
-        | "LOST"
-        | string;
+      segment: string;
     };
     recentActivity?: Array<{
       eventType: string;
@@ -77,6 +169,7 @@ export interface Customer360Data {
       summary?: string;
       properties?: Record<string, any>;
     }>;
+    gaAnalytics?: Customer360GaAnalyticsData;
   };
 }
 

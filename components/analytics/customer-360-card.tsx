@@ -3,6 +3,8 @@
 import React from "react";
 import { useCustomer360 } from "@/graphql/analytics/customer360";
 import { useCustomer360AiSummary } from "@/graphql/analytics/customer360AiSummary";
+import { MemberActivityStream } from "./member-activity-stream";
+import { Customer360GaAnalyticsSection } from "./customer-360-ga-analytics";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -273,75 +275,7 @@ function InsightTile({
   );
 }
 
-/* ── Event Icon Categorization ───────────────────────────────────────────── */
 
-function getEventIcon(eventType?: string, entityType?: string) {
-  const t = (eventType || "").toUpperCase();
-  const ent = (entityType || "").toUpperCase();
-
-  if (
-    t.includes("ORDER") ||
-    t.includes("PURCHASE") ||
-    t.includes("CHECKOUT") ||
-    t.includes("PAYMENT") ||
-    ent === "ORDER"
-  ) {
-    return {
-      icon: ShoppingBag,
-      bg: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
-    };
-  }
-  if (t.includes("EVENT") || ent === "EVENT") {
-    return {
-      icon: Calendar,
-      bg: "bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400",
-    };
-  }
-  if (
-    t.includes("COMMUNITY") ||
-    t.includes("POST") ||
-    t.includes("COMMENT") ||
-    ent === "COMMUNITY" ||
-    ent === "POST"
-  ) {
-    return {
-      icon: MessageSquare,
-      bg: "bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400",
-    };
-  }
-  if (
-    t.includes("BADGE") ||
-    t.includes("POINT") ||
-    t.includes("REWARD") ||
-    t.includes("GAMIF")
-  ) {
-    return {
-      icon: Award,
-      bg: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
-    };
-  }
-  if (
-    t.includes("CAMPAIGN") ||
-    t.includes("EMAIL") ||
-    t.includes("MAIL") ||
-    ent === "CAMPAIGN"
-  ) {
-    return {
-      icon: Mail,
-      bg: "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400",
-    };
-  }
-  if (t.includes("LOGIN") || t.includes("AUTH") || t.includes("SESSION")) {
-    return {
-      icon: LogIn,
-      bg: "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400",
-    };
-  }
-  return {
-    icon: Activity,
-    bg: "bg-primary/10 text-primary",
-  };
-}
 
 /* ── Main Customer 360 Component ─────────────────────────────────────────── */
 
@@ -575,77 +509,14 @@ export function MemberCustomer360Card({ userId, className }: MemberCustomer360Ca
       </Card>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          ACTIVITY STREAM (COMPACT LIST)
+          GOOGLE ANALYTICS (GA4) DIGITAL INTELLIGENCE
           ═══════════════════════════════════════════════════════════════════ */}
-      <Card className="overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between pb-3 px-4 sm:px-5 pt-4 border-b border-border/40">
-          <div className="flex items-center gap-2.5">
-            <div className={cn("p-2 rounded-xl", METRIC_COLORS.blue.bg)}>
-              <Activity className={cn("h-4 w-4", METRIC_COLORS.blue.icon)} />
-            </div>
-            <div>
-              <CardTitle className="text-sm font-bold">Activity Stream</CardTitle>
-              <CardDescription className="text-xs">
-                Recent ClickHouse behavioral event stream
-              </CardDescription>
-            </div>
-          </div>
+      <Customer360GaAnalyticsSection gaAnalytics={profile.gaAnalytics} />
 
-          <Badge variant="outline" className="text-[10px] font-medium gap-1 text-muted-foreground">
-            <BarChart3 className="h-3 w-3" />
-            {profile.recentActivity?.length || 0} events
-          </Badge>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          {profile.recentActivity && profile.recentActivity.length > 0 ? (
-            <div className="divide-y divide-border/40 max-h-80 overflow-y-auto">
-              {profile.recentActivity.map((act, i) => {
-                const { icon: EventIcon, bg: iconBg } = getEventIcon(act.eventType, act.entityType);
-                return (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 hover:bg-muted/30 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center shrink-0", iconBg)}>
-                        <EventIcon className="h-3.5 w-3.5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-medium text-foreground truncate">
-                            {act.summary || act.eventType}
-                          </p>
-                          {act.entityType && (
-                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-normal text-muted-foreground shrink-0">
-                              {act.entityType}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
-                          {act.eventType}
-                          {act.entityId && ` · ID: ${act.entityId.substring(0, 8)}...`}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span className="text-[11px] font-medium text-muted-foreground block">
-                        {safeFormatDistanceToNow(act.timestamp, { addSuffix: true })}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <Activity className="h-6 w-6 mb-1.5 opacity-30" />
-              <span className="text-[11px] font-medium">No recent activity stream events logged for this member yet</span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* ═══════════════════════════════════════════════════════════════════
+          ACTIVITY STREAM (INTERACTIVE & DETAILED)
+          ═══════════════════════════════════════════════════════════════════ */}
+      <MemberActivityStream activities={profile.recentActivity || []} />
     </div>
   );
 }
