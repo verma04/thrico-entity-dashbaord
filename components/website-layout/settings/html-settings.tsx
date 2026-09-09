@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from "react";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -18,10 +17,11 @@ import {
   Eye,
   Sliders,
   Maximize2,
-  Info,
   CheckCircle2,
   RefreshCw,
   FileUp,
+  Columns2,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
@@ -30,13 +30,35 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { HtmlFullViewerModal } from "./html-full-viewer-modal";
+import { HtmlPreviewRenderer } from "./html-preview-renderer";
+import {
+  formatHtml,
+  HTML_SNIPPETS,
+  HtmlSnippet,
+} from "./html-editor-utils";
+
+export interface HtmlContent {
+  htmlCode?: string;
+  embedCode?: string;
+  renderMode?: "direct" | "iframe";
+  containerWidth?: "contained" | "full" | "narrow";
+  padding?: "none" | "small" | "medium" | "large";
+  minHeight?: number | string;
+  customCss?: string;
+  fileName?: string;
+  fileSize?: string;
+  hideTitle?: boolean;
+  title?: string;
+  description?: string;
+  [key: string]: unknown;
+}
 
 interface HtmlSettingsProps {
-  content: any;
-  onChange: (updates: any) => void;
+  content?: HtmlContent;
+  onChange: (updates: Partial<HtmlContent>) => void;
   layout?: string;
 }
 
@@ -75,7 +97,7 @@ const HTML_STARTER_TEMPLATES = [
   {
     name: "Pricing Highlights",
     category: "Pricing",
-    code: `<div style="max-w: 600px; margin: 0 auto; padding: 32px 24px; border-radius: 18px; background: #ffffff; border: 2px solid #4f46e5; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); text-align: center;">
+    code: `<div style="max-width: 600px; margin: 0 auto; padding: 32px 24px; border-radius: 18px; background: #ffffff; border: 2px solid #4f46e5; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); text-align: center;">
   <span style="display: inline-block; padding: 4px 12px; background: #e0e7ff; color: #4338ca; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase;">Most Popular</span>
   <h3 style="font-size: 24px; font-weight: 700; margin: 12px 0 6px 0; color: #0f172a;">Pro Membership</h3>
   <div style="font-size: 42px; font-weight: 800; color: #0f172a; margin: 12px 0;">$29<span style="font-size: 16px; font-weight: 500; color: #64748b;">/month</span></div>
@@ -111,12 +133,19 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
 }) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
+
   const [isDragging, setIsDragging] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showCssEditor, setShowCssEditor] = useState(false);
+  const [isFullViewerOpen, setIsFullViewerOpen] = useState(false);
+  const [inlineViewMode, setInlineViewMode] = useState<"code" | "preview" | "split">("code");
+  const [inlinePreviewKey, setInlinePreviewKey] = useState(0);
+  const [inlinePreviewBg, setInlinePreviewBg] = useState<"light" | "dark">("light");
 
   const htmlCode = content?.htmlCode || content?.embedCode || "";
-  const renderMode = content?.renderMode || "direct";
+  const renderMode = content?.renderMode || (layout === "iframe" ? "iframe" : "direct");
   const containerWidth = content?.containerWidth || "contained";
   const padding = content?.padding || "medium";
   const minHeight = content?.minHeight !== undefined ? Number(content.minHeight) : 200;
@@ -127,7 +156,6 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
   const handleFileRead = (file: File) => {
     if (!file) return;
 
-    // Check file extension
     const validExtensions = [".html", ".htm", ".txt"];
     const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
     if (!validExtensions.includes(fileExtension)) {
@@ -209,6 +237,16 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
     });
   };
 
+  const handleFormat = () => {
+    if (!htmlCode.trim()) return;
+    const formatted = formatHtml(htmlCode);
+    onChange({ htmlCode: formatted });
+    toast({
+      title: "Code Formatted",
+      description: "HTML code has been cleanly formatted and indented.",
+    });
+  };
+
   const handleApplyTemplate = (templateCode: string) => {
     onChange({
       htmlCode: templateCode,
@@ -218,6 +256,73 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
       title: "Template applied",
       description: "Starter HTML template has been loaded into the editor.",
     });
+  };
+
+  const handleInsertSnippet = (snippet: HtmlSnippet) => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const current = htmlCode;
+      const newText =
+        current.substring(0, start) +
+        (start > 0 && !current.substring(0, start).endsWith("\n") ? "\n" : "") +
+        snippet.code +
+        "\n" +
+        current.substring(end);
+      onChange({ htmlCode: newText });
+      setTimeout(() => {
+        textarea.focus();
+        const newPos = start + snippet.code.length + 1;
+        textarea.setSelectionRange(newPos, newPos);
+      }, 50);
+    } else {
+      onChange({
+        htmlCode: htmlCode + (htmlCode ? "\n\n" : "") + snippet.code,
+      });
+    }
+    toast({
+      title: `Snippet inserted`,
+      description: `Added ${snippet.label} snippet.`,
+    });
+  };
+
+  // Keyboard indentation handling for Tab key
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+
+      if (e.shiftKey) {
+        const beforeCursor = value.substring(0, start);
+        const lineStart = beforeCursor.lastIndexOf("\n") + 1;
+        if (value.substring(lineStart, lineStart + 2) === "  ") {
+          const nextVal =
+            value.substring(0, lineStart) + value.substring(lineStart + 2);
+          onChange({ htmlCode: nextVal });
+          requestAnimationFrame(() => {
+            textarea.selectionStart = Math.max(lineStart, start - 2);
+            textarea.selectionEnd = Math.max(lineStart, end - 2);
+          });
+        }
+      } else {
+        const nextVal = value.substring(0, start) + "  " + value.substring(end);
+        onChange({ htmlCode: nextVal });
+        requestAnimationFrame(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+        });
+      }
+    }
+  };
+
+  // Sync line numbers scroll
+  const handleTextareaScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    if (lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = e.currentTarget.scrollTop;
+    }
   };
 
   // Basic code line counting
@@ -318,36 +423,105 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
 
       <div className="h-px bg-border/40" />
 
-      {/* ─── 2. HTML Code Editor & Templates ─── */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
+      {/* ─── 2. HTML Code Editor & Live Preview ─── */}
+      <div className="space-y-2.5">
+        {/* Top Header with Mode Switcher & Full Viewer Button */}
+        <div className="flex items-center justify-between gap-2">
           <Label className="text-[10px] uppercase font-semibold text-muted-foreground/80 tracking-wider flex items-center gap-1.5">
             <Code2 className="h-3 w-3 text-primary" />
-            <span>HTML Code Editor</span>
+            <span>HTML Editor &amp; Preview</span>
           </Label>
 
+          {/* Full Viewer Expand Button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsFullViewerOpen(true)}
+            className="h-7 text-[11px] font-semibold gap-1.5 px-2.5 bg-primary/5 hover:bg-primary/15 border-primary/30 text-primary transition-all shadow-sm"
+            title="Open immersive full-screen HTML editor with live preview"
+          >
+            <Maximize2 className="h-3 w-3" />
+            <span>Full Viewer</span>
+          </Button>
+        </div>
+
+        {/* View Switcher: Code | Preview | Split */}
+        <div className="flex items-center justify-between gap-2 bg-muted/40 p-1 rounded-lg border border-border/60">
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setInlineViewMode("code")}
+              className={cn(
+                "px-2.5 py-1 rounded text-xs font-medium transition-all flex items-center gap-1",
+                inlineViewMode === "code"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Code2 className="h-3 w-3" />
+              <span>Code</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setInlineViewMode("preview")}
+              className={cn(
+                "px-2.5 py-1 rounded text-xs font-medium transition-all flex items-center gap-1",
+                inlineViewMode === "preview"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Eye className="h-3 w-3" />
+              <span>Preview</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setInlineViewMode("split")}
+              className={cn(
+                "px-2.5 py-1 rounded text-xs font-medium transition-all flex items-center gap-1",
+                inlineViewMode === "split"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Columns2 className="h-3 w-3" />
+              <span>Split</span>
+            </button>
+          </div>
+
+          {/* Action icons: Format, Copy, Clear */}
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleFormat}
+              disabled={!htmlCode.trim()}
+              className="p-1 rounded text-muted-foreground/80 hover:text-primary hover:bg-muted transition-colors"
+              title="Format HTML Code"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+            </button>
             <button
               type="button"
               onClick={handleCopyCode}
               disabled={!htmlCode}
-              className="p-1 rounded text-muted-foreground/60 hover:text-foreground hover:bg-muted transition-colors"
-              title="Copy Code"
+              className="p-1 rounded text-muted-foreground/80 hover:text-foreground hover:bg-muted transition-colors"
+              title="Copy HTML"
             >
               {isCopied ? (
-                <Check className="h-3 w-3 text-emerald-500" />
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
               ) : (
-                <Copy className="h-3 w-3" />
+                <Copy className="h-3.5 w-3.5" />
               )}
             </button>
             <button
               type="button"
               onClick={handleClearCode}
               disabled={!htmlCode}
-              className="p-1 rounded text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors"
-              title="Clear Code"
+              className="p-1 rounded text-muted-foreground/80 hover:text-destructive hover:bg-destructive/10 transition-colors"
+              title="Clear HTML"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
@@ -374,24 +548,155 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
           </Select>
         </div>
 
-        {/* Code Textarea */}
-        <div className="relative rounded-lg border bg-zinc-950 font-mono text-zinc-100 overflow-hidden shadow-inner focus-within:ring-1 focus-within:ring-primary">
-          <div className="flex items-center justify-between px-3 py-1.5 bg-zinc-900 border-b border-zinc-800 text-[10px] text-zinc-400">
-            <span>HTML / CSS</span>
-            <span>
-              {lineCount} {lineCount === 1 ? "line" : "lines"} &bull; {charCount} chars
+        {/* Quick Snippet Chips (when Code or Split is active) */}
+        {inlineViewMode !== "preview" && (
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+            <span className="text-[9px] text-muted-foreground uppercase font-semibold mr-1 shrink-0">
+              Snippets:
             </span>
+            {HTML_SNIPPETS.slice(0, 4).map((snippet) => (
+              <button
+                key={snippet.label}
+                type="button"
+                onClick={() => handleInsertSnippet(snippet)}
+                className="px-2 py-0.5 rounded bg-muted/80 hover:bg-muted text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0 border border-border/50"
+                title={snippet.description}
+              >
+                +{snippet.label}
+              </button>
+            ))}
           </div>
+        )}
 
-          <Textarea
-            value={htmlCode}
-            onChange={(e) => onChange({ htmlCode: e.target.value })}
-            placeholder="<!-- Paste or write custom HTML here -->&#10;<div style=&quot;padding: 20px;&quot;>&#10;  <h1>Hello World</h1>&#10;</div>"
-            className="w-full min-h-[220px] max-h-[360px] text-xs font-mono bg-transparent border-0 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-0 focus-visible:ring-offset-0 resize-y p-3 leading-relaxed"
-            rows={10}
-            spellCheck={false}
-          />
-        </div>
+        {/* ─── Code Textarea with Line Numbers (Code & Split mode) ─── */}
+        {(inlineViewMode === "code" || inlineViewMode === "split") && (
+          <div className="relative rounded-lg border bg-zinc-950 font-mono text-zinc-100 overflow-hidden shadow-inner focus-within:ring-1 focus-within:ring-primary">
+            <div className="flex items-center justify-between px-3 py-1.5 bg-zinc-900 border-b border-zinc-800 text-[10px] text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <FileCode className="h-3 w-3 text-amber-400" />
+                <span>HTML / Markup</span>
+              </span>
+              <span>
+                {lineCount} {lineCount === 1 ? "line" : "lines"} &bull; {charCount} chars
+              </span>
+            </div>
+
+            <div className="flex overflow-hidden relative">
+              {/* Line numbers gutter */}
+              <div
+                ref={lineNumbersRef}
+                className="w-10 bg-zinc-950 border-r border-zinc-800/80 py-3 text-right pr-2 select-none text-[11px] text-zinc-600 overflow-hidden shrink-0 leading-relaxed font-mono"
+              >
+                {Array.from({ length: lineCount }).map((_, i) => (
+                  <div key={i + 1}>{i + 1}</div>
+                ))}
+              </div>
+
+              {/* Textarea */}
+              <textarea
+                ref={textareaRef}
+                value={htmlCode}
+                onChange={(e) => onChange({ htmlCode: e.target.value })}
+                onScroll={handleTextareaScroll}
+                onKeyDown={handleKeyDown}
+                placeholder="<!-- Paste or write custom HTML here -->&#10;<div style=&quot;padding: 20px;&quot;>&#10;  <h1>Hello World</h1>&#10;</div>"
+                className={cn(
+                  "w-full text-xs font-mono bg-transparent border-0 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-0 focus:outline-none resize-y p-3 leading-relaxed",
+                  inlineViewMode === "split"
+                    ? "min-h-[140px] max-h-[220px]"
+                    : "min-h-[220px] max-h-[380px]"
+                )}
+                rows={inlineViewMode === "split" ? 6 : 10}
+                spellCheck={false}
+              />
+            </div>
+
+            <div className="flex items-center justify-between px-3 py-1 bg-zinc-900/70 border-t border-zinc-800 text-[10px] text-zinc-500">
+              <span>Press Tab to indent (2 spaces)</span>
+              <button
+                type="button"
+                onClick={() => setIsFullViewerOpen(true)}
+                className="hover:text-zinc-300 transition-colors flex items-center gap-1"
+              >
+                <span>Full Viewer</span>
+                <Maximize2 className="h-2.5 w-2.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── Inline Live Preview (Preview & Split mode) ─── */}
+        {(inlineViewMode === "preview" || inlineViewMode === "split") && (
+          <div className="rounded-lg border border-border/80 overflow-hidden bg-card shadow-sm space-y-0">
+            <div className="flex items-center justify-between px-3 py-1.5 bg-muted/60 border-b text-[10px] text-muted-foreground">
+              <span className="font-semibold flex items-center gap-1.5 text-foreground">
+                <Eye className="h-3 w-3 text-primary" />
+                <span>Live Preview</span>
+              </span>
+              <div className="flex items-center gap-1.5">
+                {/* Background theme toggle */}
+                <div className="flex items-center p-0.5 bg-background rounded border border-border/50 text-[9px]">
+                  <button
+                    type="button"
+                    onClick={() => setInlinePreviewBg("light")}
+                    className={cn(
+                      "px-1.5 py-0.5 rounded",
+                      inlinePreviewBg === "light"
+                        ? "bg-muted text-foreground font-semibold"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    Light
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInlinePreviewBg("dark")}
+                    className={cn(
+                      "px-1.5 py-0.5 rounded",
+                      inlinePreviewBg === "dark"
+                        ? "bg-muted text-foreground font-semibold"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    Dark
+                  </button>
+                </div>
+
+                {/* Reload */}
+                <button
+                  type="button"
+                  onClick={() => setInlinePreviewKey((k) => k + 1)}
+                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  title="Reload preview"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </button>
+
+                {/* Fullscreen Expand */}
+                <button
+                  type="button"
+                  onClick={() => setIsFullViewerOpen(true)}
+                  className="p-1 rounded hover:bg-muted text-primary transition-colors"
+                  title="Expand to Full Viewer"
+                >
+                  <Maximize2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-2 max-h-[300px] overflow-auto">
+              <HtmlPreviewRenderer
+                html={htmlCode}
+                customCss={customCss}
+                renderMode={renderMode}
+                previewDevice="desktop"
+                background={inlinePreviewBg}
+                minHeight={120}
+                refreshKey={inlinePreviewKey}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="h-px bg-border/40" />
@@ -469,7 +774,7 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onChange({ containerWidth: item.id })}
+                onClick={() => onChange({ containerWidth: item.id as "contained" | "full" | "narrow" })}
                 className={cn(
                   "py-1.5 px-2 rounded-md border text-xs font-medium transition-all text-center",
                   containerWidth === item.id
@@ -496,7 +801,7 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onChange({ padding: item.id })}
+                onClick={() => onChange({ padding: item.id as "none" | "small" | "medium" | "large" })}
                 className={cn(
                   "py-1 px-1.5 rounded-md border text-[11px] font-medium transition-all text-center",
                   padding === item.id
@@ -549,12 +854,13 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
         </div>
 
         {showCssEditor && (
-          <Textarea
+          <textarea
             value={customCss}
             onChange={(e) => onChange({ customCss: e.target.value })}
             placeholder="/* Add custom CSS rules here */&#10;.my-button { border-radius: 8px; }"
-            className="w-full text-xs font-mono min-h-[100px]"
+            className="w-full text-xs font-mono min-h-[100px] p-3 rounded-lg border bg-zinc-950 text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary"
             rows={4}
+            spellCheck={false}
           />
         )}
       </div>
@@ -599,6 +905,20 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
           </div>
         )}
       </div>
+
+      {/* ─── 7. Full Viewer Modal ─── */}
+      <HtmlFullViewerModal
+        isOpen={isFullViewerOpen}
+        onClose={() => setIsFullViewerOpen(false)}
+        htmlCode={htmlCode}
+        onChangeHtml={(newCode) => onChange({ htmlCode: newCode })}
+        customCss={customCss}
+        onChangeCss={(newCss) => onChange({ customCss: newCss })}
+        renderMode={renderMode}
+        onChangeRenderMode={(mode) => onChange({ renderMode: mode })}
+        fileName={fileName}
+        starterTemplates={HTML_STARTER_TEMPLATES}
+      />
     </div>
   );
 };
