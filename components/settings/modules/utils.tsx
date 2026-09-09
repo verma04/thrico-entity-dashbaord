@@ -3,7 +3,11 @@ import { Puzzle } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const getNavIcon = (icon: string | null, enabled: boolean = true) => {
+export const getNavIcon = (
+  icon: string | null,
+  enabled: boolean = true,
+  fallbackName?: string,
+) => {
   if (!icon || typeof icon !== "string" || !(icon in LucideIcons)) {
     return (
       <Puzzle

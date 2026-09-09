@@ -104,17 +104,19 @@ export default function ModuleManagement() {
     if (!modulesInitialized) return false;
     if (modules.length !== originalModules.length) return true;
     for (const m of modules) {
-      const orig = originalModules.find((o) => o.id === m.id);
+      const orig = originalModules.find((o) => String(o.id) === String(m.id));
       if (!orig) return true;
       if (
         m.enabled !== orig.enabled ||
         m.showInMobileNavigation !== orig.showInMobileNavigation ||
         m.showInWebNavigation !== orig.showInWebNavigation ||
         m.isPopular !== orig.isPopular ||
-        m.showInMobileNavigationSortNumber !==
-          orig.showInMobileNavigationSortNumber ||
-        m.showInWebNavigationSortNumber !==
-          orig.showInWebNavigationSortNumber ||
+        (m.showInMobileNavigation &&
+          m.showInMobileNavigationSortNumber !==
+            orig.showInMobileNavigationSortNumber) ||
+        (m.showInWebNavigation &&
+          m.showInWebNavigationSortNumber !==
+            orig.showInWebNavigationSortNumber) ||
         m.customName !== orig.customName ||
         m.customIcon !== orig.customIcon ||
         m.subtitle !== orig.subtitle
@@ -155,6 +157,31 @@ export default function ModuleManagement() {
         isPublicFacing: m.isPublicFacing ?? false,
         canRename: m.canRename ?? true,
       }));
+
+      // Normalize mobile nav sort numbers so active items have clean, sequential numbers 0, 1, 2
+      const activeMobileNav = parsedModules
+        .filter((m) => m.showInMobileNavigation)
+        .sort(
+          (a, b) =>
+            (a.showInMobileNavigationSortNumber ?? 0) -
+            (b.showInMobileNavigationSortNumber ?? 0),
+        );
+      activeMobileNav.forEach((m, idx) => {
+        m.showInMobileNavigationSortNumber = idx;
+      });
+
+      // Normalize web nav sort numbers so active items have clean, sequential numbers
+      const activeWebNav = parsedModules
+        .filter((m) => m.showInWebNavigation)
+        .sort(
+          (a, b) =>
+            (a.showInWebNavigationSortNumber ?? 0) -
+            (b.showInWebNavigationSortNumber ?? 0),
+        );
+      activeWebNav.forEach((m, idx) => {
+        m.showInWebNavigationSortNumber = idx;
+      });
+
       setModules(parsedModules);
       setOriginalModules(parsedModules);
       setModulesInitialized(true);
@@ -184,14 +211,49 @@ export default function ModuleManagement() {
   const toggleNavigation = (id: string) => {
     if (userRole === "directory") return;
     setModules((prev) => {
-      const currentCount = prev.filter((m) => m.showInMobileNavigation).length;
-      return prev.map((m) => {
-        if (m.id !== id) return m;
-        if (m.showInMobileNavigation)
-          return { ...m, showInMobileNavigation: false };
-        if (currentCount < 3) return { ...m, showInMobileNavigation: true };
-        return m;
-      });
+      const activeNavModules = prev
+        .filter((m) => m.showInMobileNavigation && String(m.id) !== String(id))
+        .sort(
+          (a, b) =>
+            (a.showInMobileNavigationSortNumber ?? 0) -
+            (b.showInMobileNavigationSortNumber ?? 0),
+        );
+      const target = prev.find((m) => String(m.id) === String(id));
+      if (!target) return prev;
+
+      if (target.showInMobileNavigation) {
+        // Removing from mobile nav: re-index remaining modules 0, 1, ...
+        return prev.map((m) => {
+          if (String(m.id) === String(id)) {
+            return {
+              ...m,
+              showInMobileNavigation: false,
+              showInMobileNavigationSortNumber: undefined,
+            };
+          }
+          const remainingIdx = activeNavModules.findIndex(
+            (nm) => String(nm.id) === String(m.id),
+          );
+          if (remainingIdx !== -1) {
+            return { ...m, showInMobileNavigationSortNumber: remainingIdx };
+          }
+          return m;
+        });
+      } else {
+        // Adding to mobile nav (max 3 items)
+        if (activeNavModules.length >= 3) return prev;
+        const newSortNumber = activeNavModules.length;
+        return prev.map((m) => {
+          if (String(m.id) === String(id)) {
+            return {
+              ...m,
+              showInMobileNavigation: true,
+              showInMobileNavigationSortNumber: newSortNumber,
+            };
+          }
+          return m;
+        });
+      }
     });
   };
 
@@ -225,26 +287,125 @@ export default function ModuleManagement() {
     );
   };
 
+  const navigationModules = modules
+    .filter((m) => m.showInMobileNavigation)
+    .sort(
+      (a, b) =>
+        (a.showInMobileNavigationSortNumber ?? 0) -
+        (b.showInMobileNavigationSortNumber ?? 0),
+    );
+
+  const onDragEnd = (result: DropResult) => {
+    if (
+      !result.destination ||
+      result.destination.index === result.source.index
+    ) {
+      return;
+    }
+    const navModules = Array.from(navigationModules);
+    const [removed] = navModules.splice(result.source.index, 1);
+    if (!removed) return;
+    navModules.splice(result.destination.index, 0, removed);
+    setModules((prev) =>
+      prev.map((m) => {
+        const idx = navModules.findIndex(
+          (nm) => String(nm.id) === String(m.id),
+        );
+        return idx !== -1 ? { ...m, showInMobileNavigationSortNumber: idx } : m;
+      }),
+    );
+  };
+
+  const moveNavigationModule = (id: string, direction: "up" | "down") => {
+    const navModules = Array.from(navigationModules);
+    const currentIndex = navModules.findIndex(
+      (nm) => String(nm.id) === String(id),
+    );
+    if (currentIndex === -1) return;
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= navModules.length) return;
+
+    const [moved] = navModules.splice(currentIndex, 1);
+    if (!moved) return;
+    navModules.splice(targetIndex, 0, moved);
+
+    setModules((prev) =>
+      prev.map((m) => {
+        const idx = navModules.findIndex(
+          (nm) => String(nm.id) === String(m.id),
+        );
+        return idx !== -1 ? { ...m, showInMobileNavigationSortNumber: idx } : m;
+      }),
+    );
+  };
+
+  const webNavigationModules = modules
+    .filter((m) => m.showInWebNavigation)
+    .sort(
+      (a, b) =>
+        (a.showInWebNavigationSortNumber ?? 0) -
+        (b.showInWebNavigationSortNumber ?? 0),
+    );
+
+  const onDragEndWeb = (result: DropResult) => {
+    if (
+      !result.destination ||
+      result.destination.index === result.source.index
+    ) {
+      return;
+    }
+    const navModules = Array.from(webNavigationModules);
+    const [removed] = navModules.splice(result.source.index, 1);
+    if (!removed) return;
+    navModules.splice(result.destination.index, 0, removed);
+    setModules((prev) =>
+      prev.map((m) => {
+        const idx = navModules.findIndex(
+          (nm) => String(nm.id) === String(m.id),
+        );
+        return idx !== -1 ? { ...m, showInWebNavigationSortNumber: idx } : m;
+      }),
+    );
+  };
+
   const saveChanges = async () => {
     setSaving(true);
-    const input: InputUpdateEntityModule[] = modules.map((m, idx) => ({
-      icon: m.icon ?? null,
-      id: m.id ?? null,
-      name: m.name ?? null,
-      isEnabled: m.enabled ?? null,
-      showInMobileNavigation: m.showInMobileNavigation ?? null,
-      showInMobileNavigationSortNumber: m.showInMobileNavigation
-        ? idx
-        : undefined,
-      showInWebNavigation: m.showInWebNavigation ?? null,
-      showInWebNavigationSortNumber:
-        m.showInWebNavigationSortNumber ?? undefined,
-      isPopular: m.isPopular ?? null,
-      customName: m.customName ?? null,
-      customIcon: m.customIcon ?? m.icon ?? null,
-      subtitle: m.subtitle ?? null,
-      isPublicFacing: m.isPublicFacing ?? false,
-    }));
+    const input: InputUpdateEntityModule[] = modules.map((m) => {
+      const mobileNavIdx = navigationModules.findIndex(
+        (nm) => String(nm.id) === String(m.id),
+      );
+      const webNavIdx = webNavigationModules.findIndex(
+        (wm) => String(wm.id) === String(m.id),
+      );
+      return {
+        icon: m.icon ?? null,
+        id: m.id ?? null,
+        name: m.name ?? null,
+        isEnabled: m.enabled ?? null,
+        showInMobileNavigation: m.showInMobileNavigation ?? null,
+        showInMobileNavigationSortNumber: m.showInMobileNavigation
+          ? typeof m.showInMobileNavigationSortNumber === "number"
+            ? m.showInMobileNavigationSortNumber
+            : mobileNavIdx !== -1
+              ? mobileNavIdx
+              : 0
+          : undefined,
+        showInWebNavigation: m.showInWebNavigation ?? null,
+        showInWebNavigationSortNumber: m.showInWebNavigation
+          ? typeof m.showInWebNavigationSortNumber === "number"
+            ? m.showInWebNavigationSortNumber
+            : webNavIdx !== -1
+              ? webNavIdx
+              : 0
+          : undefined,
+        isPopular: m.isPopular ?? null,
+        customName: m.customName ?? null,
+        customIcon: m.customIcon ?? m.icon ?? null,
+        subtitle: m.subtitle ?? null,
+        isPublicFacing: m.isPublicFacing ?? false,
+      };
+    });
     try {
       const response = await updateEntityModule({
         variables: { input },
@@ -278,48 +439,6 @@ export default function ModuleManagement() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const navigationModules = modules
-    .filter((m) => m.showInMobileNavigation)
-    .sort(
-      (a, b) =>
-        (a.showInMobileNavigationSortNumber ?? 0) -
-        (b.showInMobileNavigationSortNumber ?? 0),
-    );
-
-  const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-    const navModules = Array.from(navigationModules);
-    const [removed] = navModules.splice(result.source.index, 1);
-    if (removed) navModules.splice(result.destination.index, 0, removed);
-    setModules((prev) =>
-      prev.map((m) => {
-        const idx = navModules.findIndex((nm) => nm.id === m.id);
-        return idx !== -1 ? { ...m, showInMobileNavigationSortNumber: idx } : m;
-      }),
-    );
-  };
-
-  const webNavigationModules = modules
-    .filter((m) => m.showInWebNavigation)
-    .sort(
-      (a, b) =>
-        (a.showInWebNavigationSortNumber ?? 0) -
-        (b.showInWebNavigationSortNumber ?? 0),
-    );
-
-  const onDragEndWeb = (result: DropResult) => {
-    if (!result.destination) return;
-    const navModules = Array.from(webNavigationModules);
-    const [removed] = navModules.splice(result.source.index, 1);
-    if (removed) navModules.splice(result.destination.index, 0, removed);
-    setModules((prev) =>
-      prev.map((m) => {
-        const idx = navModules.findIndex((nm) => nm.id === m.id);
-        return idx !== -1 ? { ...m, showInWebNavigationSortNumber: idx } : m;
-      }),
-    );
   };
 
   const filteredModules = modules
@@ -553,6 +672,7 @@ export default function ModuleManagement() {
                   saving={saving}
                   saveChanges={saveChanges}
                   onDragEnd={onDragEnd}
+                  moveModule={moveNavigationModule}
                   toggleNavigation={toggleNavigation}
                 />
               </div>

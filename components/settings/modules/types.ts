@@ -12,6 +12,7 @@ export interface ModuleItem {
   customName?: string | null;
   customIcon?: string | null;
   subtitle?: string | null;
+  category?: string;
   isPublicFacing: boolean;
   canRename: boolean;
 }

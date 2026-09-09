@@ -22,6 +22,8 @@ import {
   Battery,
   Layers,
   CheckCircle2,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -36,6 +38,7 @@ interface MobileNavigationProps {
   saveChanges: () => void;
   onDragEnd: (result: DropResult) => void;
   toggleNavigation: (id: string) => void;
+  moveModule?: (id: string, direction: "up" | "down") => void;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -44,6 +47,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   userRole,
   onDragEnd,
   toggleNavigation,
+  moveModule,
 }) => {
   const [activePreviewTab, setActivePreviewTab] = useState<string>("home");
 
@@ -321,12 +325,37 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                     : "border-border/70 hover:border-border hover:shadow-2xs",
                                 )}
                               >
-                                {/* Drag Handle */}
-                                <div
-                                  {...dragProvided.dragHandleProps}
-                                  className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-muted"
-                                >
-                                  <GripVertical className="h-4 w-4" />
+                                {/* Drag Handle & Quick Reorder */}
+                                <div className="flex items-center gap-1">
+                                  <div
+                                    {...dragProvided.dragHandleProps}
+                                    className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-muted touch-none"
+                                    title="Drag to reorder"
+                                  >
+                                    <GripVertical className="h-4 w-4" />
+                                  </div>
+                                  {moveModule && (
+                                    <div className="flex flex-col -space-y-1">
+                                      <button
+                                        type="button"
+                                        disabled={idx === 0}
+                                        onClick={() => moveModule(module.id, "up")}
+                                        className="h-3.5 w-3.5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                                        title="Move up"
+                                      >
+                                        <ChevronUp className="h-3.5 w-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={idx === navigationModules.length - 1}
+                                        onClick={() => moveModule(module.id, "down")}
+                                        className="h-3.5 w-3.5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                                        title="Move down"
+                                      >
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* Index Number Badge */}
