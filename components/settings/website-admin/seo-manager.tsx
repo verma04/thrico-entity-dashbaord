@@ -66,7 +66,22 @@ export default function SeoManager() {
   }, [seoData, websiteData, pages.length]);
 
   const [updatePageSeoMutation, { loading: isSaving }] = useUpdatePageSeo({
-    onCompleted: () => {
+    onCompleted: (data) => {
+      if (data?.updatePageSeo) {
+        setPages((prev) =>
+          prev.map((p) =>
+            p.id === data.updatePageSeo.id
+              ? {
+                  ...p,
+                  seo: {
+                    ...p.seo,
+                    ...data.updatePageSeo.seo,
+                  },
+                }
+              : p,
+          ),
+        );
+      }
       toast({
         title: "SEO Saved",
         description: "Meta tags and semantic search data updated.",
@@ -117,14 +132,25 @@ export default function SeoManager() {
           .filter(Boolean)
       : [];
 
+    let parsedSchema: any = undefined;
+    if (values.schemaMarkup && values.schemaMarkup.trim()) {
+      try {
+        parsedSchema = JSON.parse(values.schemaMarkup);
+      } catch {
+        parsedSchema = values.schemaMarkup;
+      }
+    } else {
+      parsedSchema = null;
+    }
+
     updatePageSeoMutation({
       variables: {
         pageId: editingPageId,
         title: values.title,
         description: values.description,
         keywords: keywordsArray,
-        ogImage: values.ogImage,
-        schemaMarkup: values.schemaMarkup,
+        ogImage: values.ogImage ?? "",
+        schemaMarkup: parsedSchema,
       },
     });
   };
@@ -164,6 +190,40 @@ export default function SeoManager() {
             </span>
           ) : (
             <span className="text-xs text-zinc-400 italic">Not configured</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "og-image",
+      header: "Social Card",
+      cell: (row) => (
+        <div className="flex items-center gap-2">
+          {row.seo?.ogImage ? (
+            <div className="flex items-center gap-1.5">
+              <div className="relative w-10 h-6 rounded-[4px] overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 shrink-0 shadow-2xs">
+                <img
+                  src={
+                    row.seo.ogImage.startsWith("http://") ||
+                    row.seo.ogImage.startsWith("https://") ||
+                    row.seo.ogImage.startsWith("blob:") ||
+                    row.seo.ogImage.startsWith("data:")
+                      ? row.seo.ogImage
+                      : `https://cdn.thrico.network/${row.seo.ogImage}`
+                  }
+                  alt="OG Card"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <Badge
+                variant="outline"
+                className="text-[9px] font-medium bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800 py-0"
+              >
+                Configured
+              </Badge>
+            </div>
+          ) : (
+            <span className="text-[11px] text-zinc-400 italic">Default</span>
           )}
         </div>
       ),
@@ -365,6 +425,10 @@ export default function SeoManager() {
               header: "SEO Status",
               getValue: (p: any) =>
                 p.seo?.title && p.seo?.description ? "Optimized" : "Draft Meta",
+            },
+            {
+              header: "Social Card Image",
+              getValue: (p: any) => p.seo?.ogImage || "",
             },
             {
               header: "Include in Sitemap",

@@ -153,6 +153,7 @@ export const GET_PAGE = gql`
         description
         keywords
         schemaMarkup
+        ogImage
       }
       modules {
         id
@@ -182,6 +183,7 @@ export const GET_ALL_PAGES_SEO = gql`
         description
         keywords
         schemaMarkup
+        ogImage
       }
     }
   }
@@ -410,6 +412,7 @@ export const UPDATE_PAGE_SEO = gql`
     ) {
       id
       name
+      slug
       seo {
         title
         description
@@ -485,6 +488,7 @@ export interface SEO {
   keywords?: string[];
   schemaMarkup?: any;
   includeInSitemap?: boolean;
+  ogImage?: string;
 }
 
 export interface Page {

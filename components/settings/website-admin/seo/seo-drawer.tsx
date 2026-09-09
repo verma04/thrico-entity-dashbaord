@@ -21,6 +21,7 @@ import {
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { SeoPreview } from "./seo-preview";
 import { SchemaPreview } from "./schema-preview";
+import { OgCardPreview } from "./og-card-preview";
 import { SeoFormValues } from "./seo-types";
 
 interface SeoDrawerProps {
@@ -59,7 +60,11 @@ export function SeoDrawer({
           ? page.seo.keywords.join(", ")
           : page.seo?.keywords || "",
         ogImage: page.seo?.ogImage || "",
-        schemaMarkup: page.seo?.schemaMarkup || "",
+        schemaMarkup:
+          typeof page.seo?.schemaMarkup === "object" &&
+          page.seo?.schemaMarkup !== null
+            ? JSON.stringify(page.seo.schemaMarkup, null, 2)
+            : page.seo?.schemaMarkup || "",
       });
     }
   }, [page, isOpen, form]);
@@ -228,12 +233,21 @@ export function SeoDrawer({
             title="Social Media Card (OpenGraph)"
             description="Thumbnail image and preview displayed when this page link is shared across social media and chat apps."
           >
-            <div className="space-y-3.5">
+            <div className="space-y-4">
+              {/* Live OpenGraph Social Preview */}
+              <OgCardPreview
+                title={form.watch("title")}
+                description={form.watch("description")}
+                ogImage={form.watch("ogImage")}
+                slug={page?.slug}
+                websiteUrl={websiteUrl}
+              />
+
               <div className="p-3 rounded-[8px] bg-[#f6f6f7]/70 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700">
                 <ImageUploadWithCrop
                   currentImage={form.watch("ogImage") || ""}
                   onImageUpdate={(url) =>
-                    form.setValue("ogImage", url, { shouldDirty: true })
+                    form.setValue("ogImage", url || "", { shouldDirty: true })
                   }
                   label="Social Share Image (OG Image)"
                   aspectRatio={1200 / 630}
@@ -252,7 +266,7 @@ export function SeoDrawer({
                 label="Or Enter Direct Image URL"
                 prefix={<Globe className="h-4 w-4" />}
                 placeholder="https://images.unsplash.com/..."
-                value={form.watch("ogImage")}
+                value={form.watch("ogImage") || ""}
                 onChange={(e) =>
                   form.setValue("ogImage", e.target.value, {
                     shouldDirty: true,
