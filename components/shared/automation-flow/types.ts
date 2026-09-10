@@ -4,7 +4,10 @@ export type AutomationActionType =
   | "NOTIFICATION"
   | "COMMUNITY_JOIN"
   | "ADD_MEMBER_TAG"
-  | "WHATSAPP_TEMPLATE";
+  | "WHATSAPP_TEMPLATE"
+  | "CUSTOM_WEBHOOK"
+  | "WEBHOOK"
+  | "AWARD_POINTS";
 
 export interface SharedAutomationCondition {
   field: string;
@@ -14,6 +17,16 @@ export interface SharedAutomationCondition {
 
 export interface SharedAutomationAction {
   type: AutomationActionType | string;
+  webhook?: {
+    url?: string;
+    method?: string;
+    headers?: { key: string; value: string }[];
+    authType?: string;
+    authToken?: string;
+    authHeaderKey?: string;
+    authHeaderValue?: string;
+    mapping?: { sourceField: string; targetKey: string; transform?: string }[];
+  } | null;
   tierId?: string | null;
   tierName?: string | null;
   templateId?: string | null;
@@ -27,6 +40,7 @@ export interface SharedAutomationAction {
   pushTitle?: string | null;
   pushBody?: string | null;
   push?: boolean | null;
+  points?: number | null;
   conditionOperator?: "AND" | "OR" | string | null;
   conditions?: SharedAutomationCondition[] | null;
   // WhatsApp Template fields

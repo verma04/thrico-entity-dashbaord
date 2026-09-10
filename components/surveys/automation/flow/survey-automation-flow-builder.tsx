@@ -33,10 +33,14 @@ import {
   ClipboardList,
   GitBranch,
   Plus,
+  ArrowLeft,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import {
   SurveyRuleTrigger,
   SurveyRuleConditionInput,
@@ -92,10 +96,12 @@ interface SurveyAutomationFlowBuilderProps {
   onSave: () => Promise<void>;
   onReset: () => void;
   hasChanged: boolean;
+  saved?: boolean;
   isSaving?: boolean;
   isEdit?: boolean;
   viewMode: "flow" | "form";
   onViewModeChange: (mode: "flow" | "form") => void;
+  onCancel?: () => void;
 }
 
 const FlowCanvasInternal: React.FC<SurveyAutomationFlowBuilderProps> = ({
@@ -119,10 +125,12 @@ const FlowCanvasInternal: React.FC<SurveyAutomationFlowBuilderProps> = ({
   onSave,
   onReset,
   hasChanged,
+  saved,
   isSaving,
   isEdit,
   viewMode,
   onViewModeChange,
+  onCancel,
 }) => {
   const { fitView } = useReactFlow();
 
@@ -714,25 +722,77 @@ const FlowCanvasInternal: React.FC<SurveyAutomationFlowBuilderProps> = ({
     toast.info("Simulation feedback cleared.");
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Close on Escape if no modal or inspector is focused
+      if (e.key === "Escape" && onCancel && !isSimModalOpen && !selectedNode) {
+        onCancel();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onCancel, isSimModalOpen, selectedNode]);
+
   return (
-    <div className="relative w-full h-[calc(100vh-140px)] min-h-[680px] flex flex-col bg-background rounded-2xl border border-border overflow-hidden shadow-xl">
-      {/* Top Canvas Toolbar */}
-      <header className="h-14 px-4 bg-card border-b border-border flex items-center justify-between gap-3 shrink-0 z-10">
+    <div className="relative w-full h-full flex flex-col bg-background overflow-hidden select-none">
+      {/* Top Canvas Action Toolbar */}
+      <header className="h-14 px-4 bg-card border-b border-border flex items-center justify-between gap-3 shrink-0 z-10 shadow-xs">
+        {/* Left: Back button, Module Headline, Rule Name Input, Status Switch */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold shrink-0">
-            <ClipboardList className="w-4 h-4" />
+          {onCancel && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onCancel}
+                className="h-8 px-2.5 text-xs font-semibold gap-1.5 text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                title="Back to Automation Rules"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+              <div className="h-4 w-px bg-border shrink-0" />
+            </>
+          )}
+
+          {/* Module Headline / Identifier */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold shrink-0 shadow-xs">
+              <ClipboardList className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase leading-none">
+                  Survey Automation
+                </span>
+                <Badge
+                  variant="outline"
+                  className="text-[8.5px] font-bold px-1 py-0 h-3.5 border-cyan-200 dark:border-cyan-800 text-cyan-600 dark:text-cyan-400 bg-cyan-50/60 dark:bg-cyan-950/30"
+                >
+                  {isEdit ? "Edit Flow" : "Workflow Studio"}
+                </Badge>
+              </div>
+              <span className="text-[11px] font-semibold text-foreground/80 leading-tight">
+                Feedback Triggers & Actions
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 min-w-0 flex-1 max-w-md">
+          <div className="h-5 w-px bg-border shrink-0 hidden md:block" />
+
+          {/* Rule Name Input */}
+          <div className="flex items-center gap-2 min-w-0 flex-1 max-w-sm">
             <Input
               type="text"
-              placeholder="Rule Name (e.g. Comprehensive Survey Multi-Option Pipeline)"
+              placeholder="Rule Name (e.g. Survey Feedback Rewards Flow)"
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               className="h-8 text-xs font-bold bg-background border-border"
             />
           </div>
 
+          {/* Active / Paused Toggle */}
           <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-border">
             <Switch
               checked={isActive}
@@ -745,11 +805,12 @@ const FlowCanvasInternal: React.FC<SurveyAutomationFlowBuilderProps> = ({
                 isActive ? "text-emerald-600" : "text-muted-foreground"
               )}
             >
-              {isActive ? "Active Rule" : "Paused"}
+              {isActive ? "Active" : "Paused"}
             </span>
           </div>
         </div>
 
+        {/* Right side: Simulation, Fit View, View Switcher, Save, Close */}
         <div className="flex items-center gap-2 shrink-0">
           {simulationState && (
             <Button
@@ -827,6 +888,23 @@ const FlowCanvasInternal: React.FC<SurveyAutomationFlowBuilderProps> = ({
             <Save className="w-3.5 h-3.5" />
             {isSaving ? "Saving..." : isEdit ? "Update Rule" : "Create Rule"}
           </Button>
+
+          {/* Close Button (X) */}
+          {onCancel && (
+            <>
+              <div className="h-4 w-px bg-border shrink-0 ml-0.5" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onCancel}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg cursor-pointer"
+                title="Close Studio (Esc)"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </>
+          )}
         </div>
       </header>
 
@@ -960,14 +1038,16 @@ const FlowCanvasInternal: React.FC<SurveyAutomationFlowBuilderProps> = ({
               pannable
             />
 
-            <Panel position="bottom-center">
-              <div className="px-3.5 py-1.5 rounded-full bg-card/90 dark:bg-zinc-900/90 backdrop-blur border border-border shadow-lg flex items-center gap-2 text-[11px] text-muted-foreground">
-                <GitBranch className="w-3.5 h-3.5 text-cyan-600" />
-                <span>
-                  Multi-Branch Visual Canvas · Click any branch condition or action block to inspect
-                </span>
-              </div>
-            </Panel>
+            {!hasChanged && !saved && (
+              <Panel position="bottom-center">
+                <div className="px-3.5 py-1.5 rounded-full bg-card/90 dark:bg-zinc-900/90 backdrop-blur border border-border shadow-lg flex items-center gap-2 text-[11px] text-muted-foreground">
+                  <GitBranch className="w-3.5 h-3.5 text-cyan-600" />
+                  <span>
+                    Multi-Branch Visual Canvas · Click any branch condition or action block to inspect
+                  </span>
+                </div>
+              </Panel>
+            )}
           </ReactFlow>
         </div>
 
@@ -992,6 +1072,17 @@ const FlowCanvasInternal: React.FC<SurveyAutomationFlowBuilderProps> = ({
           onClose={() => setSelectedNode(null)}
         />
       </div>
+
+      {/* ── Floating Save Panel ─────────────────────────────────────────── */}
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={!!saved}
+        isSaving={isSaving}
+        onSave={() => onSave()}
+        onReset={onReset}
+        title={isEdit ? "Unsaved survey rule updates" : "Unsaved survey rule"}
+        buttonText={isEdit ? "Update Rule" : "Create Rule"}
+      />
 
       <SurveyFlowSimulationModal
         open={isSimModalOpen}

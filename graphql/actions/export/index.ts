@@ -1,5 +1,11 @@
 import { useMutation, MutationHookOptions } from "@apollo/client";
-import { EXPORT_DATA, EXPORT_MEMBERS, EXPORT_FEED } from "../../quries/export";
+import {
+  EXPORT_DATA,
+  EXPORT_MEMBERS,
+  EXPORT_FEED,
+  EXPORT_TOP_REFERRALS,
+  EXPORT_REFERRALS,
+} from "../../quries/export";
 
 export enum ExportFormat {
   CSV_EXCEL = "csv_excel",
@@ -14,6 +20,8 @@ export interface ExportDataInput {
   search?: string | null;
   membershipTierId?: string | null;
   industryId?: string | null;
+  limit?: number | null;
+  referrerId?: string | null;
 }
 
 export interface ExportMembersInput {
@@ -29,6 +37,18 @@ export interface ExportFeedInput {
   search?: string | null;
   targetId?: string | null;
   source?: string | null;
+  format?: "csv_excel" | "csv_plain" | ExportFormat;
+}
+
+export interface ExportTopReferralsInput {
+  limit?: number | null;
+  format?: "csv_excel" | "csv_plain" | ExportFormat;
+}
+
+export interface ExportReferralsInput {
+  status?: string | null;
+  search?: string | null;
+  referrerId?: string | null;
   format?: "csv_excel" | "csv_plain" | ExportFormat;
 }
 
@@ -49,6 +69,14 @@ export interface ExportMembersResponse {
 
 export interface ExportFeedResponse {
   exportFeed: ExportResponse;
+}
+
+export interface ExportTopReferralsResponse {
+  exportTopReferrals: ExportResponse;
+}
+
+export interface ExportReferralsResponse {
+  exportReferrals: ExportResponse;
 }
 
 export const useExportData = (
@@ -86,5 +114,30 @@ export const useExportFeed = (
     options
   );
 };
+
+export const useExportTopReferrals = (
+  options?: MutationHookOptions<
+    ExportTopReferralsResponse,
+    { input?: ExportTopReferralsInput }
+  >
+) => {
+  return useMutation<
+    ExportTopReferralsResponse,
+    { input?: ExportTopReferralsInput }
+  >(EXPORT_TOP_REFERRALS, options);
+};
+
+export const useExportReferrals = (
+  options?: MutationHookOptions<
+    ExportReferralsResponse,
+    { input?: ExportReferralsInput }
+  >
+) => {
+  return useMutation<ExportReferralsResponse, { input?: ExportReferralsInput }>(
+    EXPORT_REFERRALS,
+    options
+  );
+};
+
 
 

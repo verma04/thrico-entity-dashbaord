@@ -24,10 +24,7 @@ import {
   Search,
   Upload,
 } from "lucide-react";
-import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
-import { buildCsv, downloadCsv } from "@/lib/export-csv";
-import { toast } from "sonner";
+import { ExportReferralsModal } from "./export-referrals-modal";
 import { UserHoverCard } from "@/components/shared/user-hover-card";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -66,6 +63,7 @@ export function ReferralsUI() {
   const [activeTab, setActiveTab] = useState("top");
   const [selectedReferrerId, setSelectedReferrerId] = useState<string>("all");
   const [selectedReferrerName, setSelectedReferrerName] = useState<string | null>(null);
+  const [selectedReferrerUserId, setSelectedReferrerUserId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
@@ -199,9 +197,11 @@ export function ReferralsUI() {
       return referrals;
     }
     return referrals.filter(
-      (r) => r.referrer?.user?.email === selectedReferrerId,
+      (r) =>
+        r.referrer?.user?.email === selectedReferrerId ||
+        (selectedReferrerUserId && r.referrer?.user?.id === selectedReferrerUserId),
     );
-  }, [referrals, selectedReferrerId]);
+  }, [referrals, selectedReferrerId, selectedReferrerUserId]);
 
   if (loading && !referrals.length && !topReferrers.length) {
     return (
@@ -492,6 +492,7 @@ export function ReferralsUI() {
                             onSelect={() => {
                               setSelectedReferrerId("all");
                               setSelectedReferrerName(null);
+                              setSelectedReferrerUserId(null);
                               setOpen(false);
                               setSearchQuery("");
                             }}
@@ -525,6 +526,7 @@ export function ReferralsUI() {
                                     setSelectedReferrerName(
                                       `${u.firstName} ${u.lastName}`,
                                     );
+                                    setSelectedReferrerUserId(u.id);
                                     setOpen(false);
                                     setSearchQuery("");
                                   }}
@@ -559,6 +561,9 @@ export function ReferralsUI() {
                                       );
                                       setSelectedReferrerName(
                                         `${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName}`,
+                                      );
+                                      setSelectedReferrerUserId(
+                                        r.referrer?.user?.id,
                                       );
                                       setOpen(false);
                                       setSearchQuery("");
@@ -654,31 +659,24 @@ export function ReferralsUI() {
         />
       </EcosystemContainer>
 
-      <ExportCsvModal
+      <ExportReferralsModal
         open={showExportModal}
         onOpenChange={setShowExportModal}
-        entityName="referrals"
-        description="Export all referral pairs as CSV. Includes referrer name, referee name, email, status, and join date."
-        totalCount={totalReferralsCount}
-        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
-          const rows = referrals as any[];
-          if (rows.length === 0) {
-            toast.error("Nothing to export", { description: "No referral records found." });
-            return;
-          }
-          const csv = buildCsv(rows, [
-            { header: "Referrer First Name", getValue: (r) => r.referrer?.user?.firstName || "" },
-            { header: "Referrer Last Name",  getValue: (r) => r.referrer?.user?.lastName || "" },
-            { header: "Referrer Email",      getValue: (r) => r.referrer?.user?.email || "" },
-            { header: "Referee First Name",  getValue: (r) => r.referee?.user?.firstName || "" },
-            { header: "Referee Last Name",   getValue: (r) => r.referee?.user?.lastName || "" },
-            { header: "Referee Email",       getValue: (r) => r.referee?.user?.email || "" },
-            { header: "Status",              getValue: (r) => r.referee?.isApproved ? "Active" : "Pending" },
-            { header: "Joined",              getValue: (r) => r.referee?.user?.createdAt ? new Date(r.referee.user.createdAt).toISOString().slice(0, 10) : "" },
-          ]);
-          downloadCsv(csv, `referrals-${new Date().toISOString().slice(0, 10)}`, format);
-          toast.success("Export ready", { description: `${rows.length} referral${rows.length !== 1 ? "s" : ""} exported.` });
-        }}
+        defaultType={activeTab === "history" ? "history" : "top"}
+        topReferrers={topReferrers}
+        totalActiveReferrers={totalActiveReferrers}
+        referrals={selectedReferrerId === "all" ? referrals : timelineHistory}
+        totalReferralsCount={totalReferralsCount}
+        selectedReferrer={
+          selectedReferrerId !== "all"
+            ? {
+                id: selectedReferrerUserId || undefined,
+                name: selectedReferrerName || undefined,
+                email: selectedReferrerId || undefined,
+              }
+            : null
+        }
+        searchQuery={searchQuery}
       />
     </EcosystemWrapper>
   );

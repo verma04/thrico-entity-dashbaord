@@ -6,6 +6,9 @@ import {
   Trash2,
   Sliders,
   CheckCircle2,
+  ShieldCheck,
+  Check,
+  X,
   HelpCircle,
   Sparkles,
   School,
@@ -15,6 +18,7 @@ import {
   Tag,
   Briefcase,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,12 +36,60 @@ export interface ConditionFieldOption {
   label: string;
   category: string;
   placeholder: string;
-  type: "text" | "select" | "tags";
+  type: "text" | "select" | "tags" | "boolean";
   icon?: any;
   options?: { value: string; label: string }[];
 }
 
 export const CONDITION_FIELDS: ConditionFieldOption[] = [
+  {
+    value: "profile.isVerified",
+    label: "Account Verified?",
+    category: "Verification",
+    placeholder: "Identity or KYC verification status",
+    type: "boolean",
+    icon: ShieldCheck,
+  },
+  {
+    value: "user.isApproved",
+    label: "Admin Approved?",
+    category: "Status",
+    placeholder: "Administrative approval status",
+    type: "boolean",
+    icon: CheckCircle2,
+  },
+  {
+    value: "profile.isStudent",
+    label: "Currently a Student?",
+    category: "Education",
+    placeholder: "Active student status",
+    type: "boolean",
+    icon: School,
+  },
+  {
+    value: "profile.isAlumni",
+    label: "Is Alumni?",
+    category: "Education",
+    placeholder: "Graduated alumnus status",
+    type: "boolean",
+    icon: School,
+  },
+  {
+    value: "profile.isEmployed",
+    label: "Currently Employed?",
+    category: "Professional",
+    placeholder: "Active employment status",
+    type: "boolean",
+    icon: Briefcase,
+  },
+  {
+    value: "userToEntity.hasAccess",
+    label: "Active Access Granted?",
+    category: "Account",
+    placeholder: "Entity access permissions",
+    type: "boolean",
+    icon: Tag,
+  },
   {
     value: "profile.college",
     label: "College / University",
@@ -150,12 +202,15 @@ export const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
   onChange,
 }) => {
   const handleAddCondition = (presetField?: string) => {
+    const fieldName = presetField || "profile.college";
+    const fieldMeta = CONDITION_FIELDS.find((f) => f.value === fieldName);
+    const isBool = fieldMeta?.type === "boolean";
     onChange([
       ...conditions,
       {
-        field: presetField || "profile.college",
-        operator: "contains",
-        value: "",
+        field: fieldName,
+        operator: isBool ? "equals" : "contains",
+        value: isBool ? "true" : "",
       },
     ]);
   };
@@ -175,6 +230,16 @@ export const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
       ...updated[index],
       [field]: val,
     };
+    // If field changed to boolean, default to equals and true
+    if (field === "field") {
+      const fieldMeta = CONDITION_FIELDS.find((f) => f.value === val);
+      if (fieldMeta?.type === "boolean") {
+        updated[index].operator = "equals";
+        if (updated[index].value !== "true" && updated[index].value !== "false") {
+          updated[index].value = "true";
+        }
+      }
+    }
     // Reset value if field changes to an empty-check operator
     if (
       field === "operator" &&
@@ -273,6 +338,16 @@ export const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
               <Building className="w-3.5 h-3.5 text-emerald-500" />
               Filter by Company
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handleAddCondition("profile.isVerified")}
+              className="text-xs h-8 gap-1.5 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-500" />
+              Verified Only (YES/NO)
+            </Button>
           </div>
         </div>
       ) : (
@@ -355,7 +430,42 @@ export const ConditionBuilder: React.FC<ConditionBuilderProps> = ({
                 {/* Value Input / Selector */}
                 <div className="flex-1">
                   {!isNoValueOperator ? (
-                    selectedField.type === "select" &&
+                    selectedField.type === "boolean" ||
+                    condition.value === "true" ||
+                    condition.value === "false" ||
+                    condition.value === "YES" ||
+                    condition.value === "NO" ||
+                    condition.value === true ||
+                    condition.value === false ? (
+                      <div className="flex items-center gap-1.5 h-9 bg-white dark:bg-zinc-800 p-1 rounded-lg border border-zinc-200 dark:border-zinc-700 w-fit">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateCondition(index, "value", "true")}
+                          className={cn(
+                            "flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-md transition-all cursor-pointer",
+                            condition.value === "true" || condition.value === "YES" || condition.value === true
+                              ? "bg-emerald-600 text-white shadow-xs"
+                              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-700/50"
+                          )}
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          YES
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateCondition(index, "value", "false")}
+                          className={cn(
+                            "flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-md transition-all cursor-pointer",
+                            condition.value === "false" || condition.value === "NO" || condition.value === false
+                              ? "bg-rose-600 text-white shadow-xs"
+                              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-700/50"
+                          )}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          NO
+                        </button>
+                      </div>
+                    ) : selectedField.type === "select" &&
                     selectedField.options ? (
                       <Select
                         value={

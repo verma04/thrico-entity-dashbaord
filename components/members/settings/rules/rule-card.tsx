@@ -129,6 +129,14 @@ export const RuleCard: React.FC<RuleCardProps> = ({
                     Paused
                   </Badge>
                 )}
+                {rule.executionCount !== undefined && rule.executionCount !== null && (
+                  <Badge
+                    variant="outline"
+                    className="text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 text-[10px] font-mono"
+                  >
+                    {rule.executionCount.toLocaleString()} runs
+                  </Badge>
+                )}
               </div>
               {rule.description && (
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-1">

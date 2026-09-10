@@ -26,6 +26,10 @@ import {
   CheckCircle2,
   TrendingUp,
   ClipboardList,
+  ArrowLeft,
+  X,
+  Save,
+  ListFilter,
 } from "lucide-react";
 import { SurveyAutomationFlowBuilder } from "./flow/survey-automation-flow-builder";
 import { useGetSurveys } from "@/graphql/surveys/survey-queries";
@@ -348,166 +352,219 @@ export const SurveyAutomationForm: React.FC<SurveyAutomationFormProps> = ({
 
   if (viewMode === "flow") {
     return (
-      <SurveyAutomationFlowBuilder
-        name={name}
-        description={description}
-        surveyId={surveyId}
-        surveyName={surveyName}
-        trigger={trigger}
-        conditionOperator={conditionOperator}
-        conditions={conditions}
-        actions={actions}
-        isActive={isActive}
-        onNameChange={setName}
-        onDescriptionChange={setDescription}
-        onSurveyIdChange={setSurveyId}
-        onTriggerChange={setTrigger}
-        onConditionOperatorChange={setConditionOperator}
-        onConditionsChange={setConditions}
-        onActionsChange={setActions}
-        onIsActiveChange={setIsActive}
-        onSave={() => handleSubmit()}
-        onReset={handleReset}
-        hasChanged={hasChanged}
-        isSaving={loading}
-        isEdit={isEdit}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-      />
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Top Banner View Mode Switcher */}
-      <div className="flex items-center justify-between p-3.5 rounded-2xl bg-card border border-border shadow-xs">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold">
-            <ClipboardList className="w-4 h-4" />
-          </div>
-          <div>
-            <h3 className="text-xs font-bold text-foreground">
-              {isEdit
-                ? "Edit Survey Automation Rule"
-                : "Create Survey Automation Rule"}
-            </h3>
-            <p className="text-[11px] text-muted-foreground">
-              Configure respondent rewards, emails, tiers, and circles triggered
-              by survey submissions.
-            </p>
-          </div>
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setViewMode("flow")}
-          className="text-xs gap-1.5 font-bold border-cyan-500/40 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/10 cursor-pointer"
-        >
-          <Zap className="w-3.5 h-3.5 text-cyan-600" />
-          Switch to Visual Canvas
-        </Button>
-      </div>
-
-      <PolarisFormLayout
-        sidebar={
-          <>
-            <PolarisSidebarCard title="Rule Summary" icon={Sparkles}>
-              <PolarisSummaryRow
-                label="Workflow Scope"
-                value={surveyName || "All Surveys (Global)"}
-              />
-              <PolarisSummaryRow
-                label="Trigger Event"
-                value={trigger.replace(/_/g, " ")}
-              />
-              <PolarisSummaryRow
-                label="Rule Logic"
-                value={`${conditionOperator} (Match ${conditionOperator === "AND" ? "All" : "Any"})`}
-              />
-              <PolarisSummaryRow
-                label="Global Criteria"
-                value={`${conditions.length} rule${conditions.length === 1 ? "" : "s"}`}
-              />
-              <PolarisSummaryRow
-                label="Action Pipeline"
-                value={`${actions.length} action${actions.length === 1 ? "" : "s"}`}
-              />
-              <PolarisSummaryRow
-                label="Active Status"
-                value={
-                  <Badge
-                    variant="outline"
-                    className={
-                      isActive
-                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                        : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
-                    }
-                  >
-                    {isActive ? "Active" : "Paused"}
-                  </Badge>
-                }
-              />
-            </PolarisSidebarCard>
-
-            <PolarisTipCard title="Survey Automation Tips" icon={TrendingUp}>
-              <ul className="space-y-2 text-[11px] text-muted-foreground list-disc pl-3 leading-relaxed">
-                <li>
-                  Use <strong>Action-Level Filters</strong> to build
-                  multi-option branching paths (e.g. Option contains
-                  "Mentorship").
-                </li>
-                <li>
-                  Assign VIP membership tiers to 5-star respondents
-                  automatically.
-                </li>
-                <li>
-                  Send transactional follow-up emails via the integrated
-                  GrapesJS Studio.
-                </li>
-              </ul>
-            </PolarisTipCard>
-          </>
-        }
-      >
-        <SurveyRuleDetailsCard
+      <div className="w-full h-full flex flex-col overflow-hidden bg-background">
+        <SurveyAutomationFlowBuilder
           name={name}
           description={description}
           surveyId={surveyId}
+          surveyName={surveyName}
           trigger={trigger}
+          conditionOperator={conditionOperator}
+          conditions={conditions}
+          actions={actions}
           isActive={isActive}
-          surveysList={surveysList}
-          surveysLoading={surveysLoading}
           onNameChange={setName}
           onDescriptionChange={setDescription}
           onSurveyIdChange={setSurveyId}
           onTriggerChange={setTrigger}
-          onIsActiveChange={setIsActive}
-        />
-
-        <SurveyGlobalConditionsCard
-          conditions={conditions}
-          conditionOperator={conditionOperator}
           onConditionOperatorChange={setConditionOperator}
           onConditionsChange={setConditions}
-        />
-
-        <SurveyActionPipelineCard
-          actions={actions}
           onActionsChange={setActions}
+          onIsActiveChange={setIsActive}
+          onSave={() => handleSubmit()}
+          onReset={handleReset}
+          onCancel={onCancel}
+          hasChanged={hasChanged}
+          saved={savedState}
+          isSaving={loading}
+          isEdit={isEdit}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
-      </PolarisFormLayout>
+      </div>
+    );
+  }
 
-      <FloatingSavePanel
-        hasChanged={hasChanged}
-        saved={savedState}
-        isSaving={loading}
-        onSave={() => handleSubmit()}
-        onReset={handleReset}
-        title="Unsaved survey rule changes"
-        buttonText={isEdit ? "Update Rule" : "Create Rule"}
-      />
-    </form>
+  return (
+    <div className="w-full h-full flex flex-col overflow-hidden bg-background">
+      {/* Top Navbar */}
+      <header className="h-14 px-4 bg-card border-b border-border flex items-center justify-between gap-3 shrink-0 z-10 shadow-xs">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          {onCancel && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onCancel}
+                className="h-8 px-2.5 text-xs font-semibold gap-1.5 text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                title="Back to Automation Rules"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+              <div className="h-4 w-px bg-border shrink-0" />
+            </>
+          )}
+
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold shrink-0 shadow-xs">
+              <ClipboardList className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase leading-none">
+                  Survey Automation
+                </span>
+                <Badge
+                  variant="outline"
+                  className="text-[8.5px] font-bold px-1 py-0 h-3.5 border-cyan-200 dark:border-cyan-800 text-cyan-600 dark:text-cyan-400 bg-cyan-50/60 dark:bg-cyan-950/30"
+                >
+                  {isEdit ? "Edit Form" : "Step Form"}
+                </Badge>
+              </div>
+              <span className="text-[11px] font-semibold text-foreground/80 leading-tight">
+                Feedback Lifecycle Rules
+              </span>
+            </div>
+          </div>
+
+          <div className="h-5 w-px bg-border shrink-0 hidden md:block" />
+
+          {/* Rule Title Preview */}
+          <span className="text-xs font-bold text-foreground truncate max-w-xs hidden sm:inline">
+            {name || "Untitled Rule"}
+          </span>
+        </div>
+
+        {/* Right Action Tools */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* View Switcher: Canvas <-> Form */}
+          <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg border border-border">
+            <button
+              type="button"
+              onClick={() => setViewMode("flow")}
+              className="px-2.5 py-1 text-xs font-bold rounded-md flex items-center gap-1.5 transition-all text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              <span>Canvas</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("form")}
+              className="px-2.5 py-1 text-xs font-bold rounded-md flex items-center gap-1.5 transition-all bg-card text-foreground shadow-xs cursor-pointer"
+            >
+              <ListFilter className="w-3.5 h-3.5" />
+              <span>Step Form</span>
+            </button>
+          </div>
+
+          {/* Primary Save Button */}
+          <Button
+            type="button"
+            size="sm"
+            disabled={loading}
+            onClick={() => handleSubmit()}
+            className="h-8 px-3 text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            {loading ? "Saving..." : isEdit ? "Update Rule" : "Create Rule"}
+          </Button>
+
+          {/* Close Button (X) */}
+          {onCancel && (
+            <>
+              <div className="h-4 w-px bg-border shrink-0 ml-0.5" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onCancel}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg cursor-pointer"
+                title="Close Studio (Esc)"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </>
+          )}
+        </div>
+      </header>
+
+      {/* Main Scrollable Form Body */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-zinc-50/60 dark:bg-zinc-950/40">
+        <div className="max-w-5xl mx-auto pb-16">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <PolarisFormLayout
+              sidebar={
+                <>
+                  <PolarisSidebarCard title="Rule Summary" icon={Sparkles}>
+                    <PolarisSummaryRow
+                      label="Workflow Scope"
+                      value={surveyName || "All Surveys (Global)"}
+                    />
+                    <PolarisSummaryRow
+                      label="Trigger Event"
+                      value={trigger.replace(/_/g, " ")}
+                    />
+                    <PolarisSummaryRow
+                      label="Active Branches"
+                      value={`${actions.length} Action${
+                        actions.length === 1 ? "" : "s"
+                      }`}
+                    />
+                    <PolarisSummaryRow
+                      label="Status"
+                      value={isActive ? "Active Rule" : "Paused"}
+                    />
+                  </PolarisSidebarCard>
+
+                  <PolarisTipCard title="Pro-Tip">
+                    Branch conditions allow segmenting respondent actions based
+                    on specific question answers, ratings, or tags.
+                  </PolarisTipCard>
+                </>
+              }
+            >
+              <SurveyRuleDetailsCard
+                name={name}
+                description={description}
+                surveyId={surveyId}
+                trigger={trigger}
+                isActive={isActive}
+                surveysList={surveysList}
+                surveysLoading={surveysLoading}
+                onNameChange={setName}
+                onDescriptionChange={setDescription}
+                onSurveyIdChange={setSurveyId}
+                onTriggerChange={setTrigger}
+                onIsActiveChange={setIsActive}
+              />
+
+              <SurveyGlobalConditionsCard
+                conditions={conditions}
+                conditionOperator={conditionOperator}
+                onConditionOperatorChange={setConditionOperator}
+                onConditionsChange={setConditions}
+              />
+
+              <SurveyActionPipelineCard
+                actions={actions}
+                onActionsChange={setActions}
+              />
+            </PolarisFormLayout>
+
+            <FloatingSavePanel
+              hasChanged={hasChanged}
+              saved={savedState}
+              isSaving={loading}
+              onSave={() => handleSubmit()}
+              onReset={handleReset}
+              title="Unsaved survey rule changes"
+              buttonText={isEdit ? "Update Rule" : "Create Rule"}
+            />
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };

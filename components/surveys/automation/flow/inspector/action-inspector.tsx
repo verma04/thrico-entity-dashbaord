@@ -26,6 +26,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/ui/select";
 import {
   Dialog,
@@ -177,25 +179,42 @@ export const ActionInspector: React.FC<ActionInspectorProps> = ({
           <SelectTrigger className="h-8 text-xs bg-background">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ASSIGN_MEMBERSHIP_TIER" className="text-xs">
-              🏆 Assign Membership Tier
-            </SelectItem>
-            <SelectItem value="EMAIL" className="text-xs">
-              ✉️ Send Email (Email Studio)
-            </SelectItem>
-            <SelectItem value="COMMUNITY_JOIN" className="text-xs">
-              👥 Auto-Join Community Circle
-            </SelectItem>
-            <SelectItem value="NOTIFICATION" className="text-xs">
-              🔔 Mobile Push Notification
-            </SelectItem>
-            <SelectItem value="ADD_MEMBER_TAG" className="text-xs">
-              🏷️ Assign Member Tags
-            </SelectItem>
-            <SelectItem value="WHATSAPP_TEMPLATE" className="text-xs">
-              💬 WhatsApp Template Message
-            </SelectItem>
+          <SelectContent className="max-h-80">
+            <SelectGroup>
+              <SelectLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                👥 Community Channels
+              </SelectLabel>
+              <SelectItem value="COMMUNITY_JOIN" className="text-xs">
+                Auto-Join Community Circle
+              </SelectItem>
+            </SelectGroup>
+
+            <SelectGroup>
+              <SelectLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pt-2">
+                🎖️ Member & Identity (Entity Channels)
+              </SelectLabel>
+              <SelectItem value="ASSIGN_MEMBERSHIP_TIER" className="text-xs">
+                Assign Membership Tier
+              </SelectItem>
+              <SelectItem value="ADD_MEMBER_TAG" className="text-xs">
+                Assign Member Tags
+              </SelectItem>
+            </SelectGroup>
+
+            <SelectGroup>
+              <SelectLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pt-2">
+                📬 Communication Channels
+              </SelectLabel>
+              <SelectItem value="EMAIL" className="text-xs">
+                Send Email (Email Studio)
+              </SelectItem>
+              <SelectItem value="NOTIFICATION" className="text-xs">
+                Mobile Push Notification
+              </SelectItem>
+              <SelectItem value="WHATSAPP_TEMPLATE" className="text-xs">
+                WhatsApp Template Message
+              </SelectItem>
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

@@ -10,12 +10,7 @@ import {
   UpdateMemberAutomationRuleInput,
 } from "@/graphql/member-automation";
 import { AutomationForm } from "@/components/members/automation/automation-form";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { Button } from "@/components/ui/button";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
-import { Zap, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 const CreateAutomationRulePage = () => {
@@ -45,39 +40,14 @@ const CreateAutomationRulePage = () => {
   };
 
   return (
-    <EcosystemWrapper className="gap-6">
-      <EcosystemHeader
-        title="Create Automation Rule"
-        badgeText="New Workflow"
-        description="Configure automated tier assignment, email triggers, circle memberships, and tagging workflows."
-        icon={Zap}
-        breadcrumbs={[
-          { label: "Members", href: "/members/all" },
-          { label: "Automation", href: "/members/automation" },
-          { label: "Create Rule" },
-        ]}
-        actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCancel}
-            className="h-8 gap-1.5 text-xs"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to Rules
-          </Button>
-        }
+    <div className="fixed inset-0 z-50 bg-background w-screen h-screen p-0 m-0 flex flex-col overflow-hidden animate-in fade-in duration-200">
+      <AutomationForm
+        loading={loading}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isEdit={false}
       />
-
-      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        <AutomationForm
-          loading={loading}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          isEdit={false}
-        />
-      </EcosystemContainer>
-    </EcosystemWrapper>
+    </div>
   );
 };
 

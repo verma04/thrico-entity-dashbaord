@@ -3,7 +3,10 @@ import { gql } from "@apollo/client";
 export type MemberRuleTrigger =
   | "MEMBER_JOINED"
   | "MEMBER_VERIFIED"
-  | "MEMBER_APPROVED";
+  | "MEMBER_APPROVED"
+  | "MEMBER_REJECTED"
+  | "MEMBER_DISABLED"
+  | "MEMBER_BLOCKED";
 
 export type MemberRuleActionType =
   | "ASSIGN_MEMBERSHIP_TIER"
@@ -11,22 +14,58 @@ export type MemberRuleActionType =
   | "NOTIFICATION"
   | "COMMUNITY_JOIN"
   | "ADD_MEMBER_TAG"
-  | "WHATSAPP_TEMPLATE";
+  | "WHATSAPP_TEMPLATE"
+  | "CUSTOM_WEBHOOK"
+  | "WEBHOOK"
+  | "AWARD_POINTS";
+
+export interface WebhookHeader {
+  key: string;
+  value: string;
+}
+
+export interface WebhookFieldMapping {
+  field: string;
+  value: string;
+}
+
+export interface AutomationWebhookActionInput {
+  url: string;
+  method: string;
+  authType?: string | null;
+  authToken?: string | null;
+  authHeaderKey?: string | null;
+  authHeaderValue?: string | null;
+  headers?: WebhookHeader[] | null;
+  mapping?: WebhookFieldMapping[] | null;
+  customBody?: string | null;
+}
+
+export interface TriggerAvailableField {
+  category: string;
+  key: string;
+  label: string;
+  path: string;
+  type: string;
+}
 
 export interface MemberRuleCondition {
   field: string;
   operator: string;
   value: any;
+  branch?: string | null;
 }
 
 export interface MemberRuleConditionInput {
   field: string;
   operator: string;
   value: any;
+  branch?: string | null;
 }
 
 export interface MemberRuleAction {
   type: MemberRuleActionType;
+  branch?: string | null;
   tierId?: string | null;
   tierName?: string | null;
   templateId?: string | null;
@@ -47,10 +86,13 @@ export interface MemberRuleAction {
   fallbackChannel?: string | null;
   fallbackEmailSubject?: string | null;
   fallbackEmailBody?: string | null;
+  webhook?: AutomationWebhookActionInput | null;
+  points?: number | null;
 }
 
 export interface MemberRuleActionInput {
   type: MemberRuleActionType;
+  branch?: string | null;
   tierId?: string | null;
   templateId?: string | null;
   emailSubject?: string | null;
@@ -68,6 +110,15 @@ export interface MemberRuleActionInput {
   fallbackChannel?: string | null;
   fallbackEmailSubject?: string | null;
   fallbackEmailBody?: string | null;
+  webhook?: AutomationWebhookActionInput | null;
+  points?: number | null;
+}
+
+export interface MemberRuleBranchItem {
+  id: string;
+  name: string;
+  isDefault?: boolean | null;
+  hasNoPath?: boolean | null;
 }
 
 export interface MemberAutomationRule {
@@ -79,10 +130,13 @@ export interface MemberAutomationRule {
   conditionOperator?: "AND" | "OR" | string;
   conditions?: MemberRuleCondition[] | null;
   actions: MemberRuleAction[];
+  branches?: MemberRuleBranchItem[] | null;
   isActive: boolean;
   priority?: number | null;
   createdAt?: string;
   updatedAt?: string;
+  executionCount?: number | null;
+  lastRunAt?: string | null;
 }
 
 export interface CreateMemberAutomationRuleInput {
@@ -92,6 +146,7 @@ export interface CreateMemberAutomationRuleInput {
   conditionOperator?: string;
   conditions?: MemberRuleConditionInput[];
   actions: MemberRuleActionInput[];
+  branches?: MemberRuleBranchItem[];
   isActive?: boolean;
   priority?: number;
 }
@@ -103,6 +158,7 @@ export interface UpdateMemberAutomationRuleInput {
   conditionOperator?: string;
   conditions?: MemberRuleConditionInput[];
   actions?: MemberRuleActionInput[];
+  branches?: MemberRuleBranchItem[];
   isActive?: boolean;
   priority?: number;
 }
@@ -120,9 +176,11 @@ export const GET_MEMBER_AUTOMATION_RULES = gql`
         field
         operator
         value
+        branch
       }
       actions {
         type
+        branch
         tierId
         tierName
         templateId
@@ -136,11 +194,31 @@ export const GET_MEMBER_AUTOMATION_RULES = gql`
         pushTitle
         pushBody
         push
+        points
+        webhook {
+          url
+          method
+          authType
+          authToken
+          authHeaderKey
+          authHeaderValue
+          headers { key value }
+          mapping { field value }
+          customBody
+        }
+      }
+      branches {
+        id
+        name
+        isDefault
+        hasNoPath
       }
       isActive
       priority
       createdAt
       updatedAt
+      executionCount
+      lastRunAt
     }
   }
 `;
@@ -158,9 +236,11 @@ export const GET_MEMBER_AUTOMATION_RULE = gql`
         field
         operator
         value
+        branch
       }
       actions {
         type
+        branch
         tierId
         tierName
         templateId
@@ -174,11 +254,31 @@ export const GET_MEMBER_AUTOMATION_RULE = gql`
         pushTitle
         pushBody
         push
+        points
+        webhook {
+          url
+          method
+          authType
+          authToken
+          authHeaderKey
+          authHeaderValue
+          headers { key value }
+          mapping { field value }
+          customBody
+        }
+      }
+      branches {
+        id
+        name
+        isDefault
+        hasNoPath
       }
       isActive
       priority
       createdAt
       updatedAt
+      executionCount
+      lastRunAt
     }
   }
 `;
@@ -196,9 +296,11 @@ export const CREATE_MEMBER_AUTOMATION_RULE = gql`
         field
         operator
         value
+        branch
       }
       actions {
         type
+        branch
         tierId
         tierName
         templateId
@@ -212,6 +314,24 @@ export const CREATE_MEMBER_AUTOMATION_RULE = gql`
         pushTitle
         pushBody
         push
+        points
+        webhook {
+          url
+          method
+          authType
+          authToken
+          authHeaderKey
+          authHeaderValue
+          headers { key value }
+          mapping { field value }
+          customBody
+        }
+      }
+      branches {
+        id
+        name
+        isDefault
+        hasNoPath
       }
       isActive
       priority
@@ -236,9 +356,11 @@ export const UPDATE_MEMBER_AUTOMATION_RULE = gql`
         field
         operator
         value
+        branch
       }
       actions {
         type
+        branch
         tierId
         tierName
         templateId
@@ -252,6 +374,24 @@ export const UPDATE_MEMBER_AUTOMATION_RULE = gql`
         pushTitle
         pushBody
         push
+        points
+        webhook {
+          url
+          method
+          authType
+          authToken
+          authHeaderKey
+          authHeaderValue
+          headers { key value }
+          mapping { field value }
+          customBody
+        }
+      }
+      branches {
+        id
+        name
+        isDefault
+        hasNoPath
       }
       isActive
       priority
@@ -278,5 +418,31 @@ export const DELETE_MEMBER_AUTOMATION_RULE = gql`
 export const REORDER_MEMBER_AUTOMATION_RULES = gql`
   mutation ReorderMemberAutomationRules($ruleIds: [ID!]!) {
     reorderMemberAutomationRules(ruleIds: $ruleIds)
+  }
+`;
+
+export const GET_TRIGGER_AVAILABLE_FIELDS = gql`
+  query GetTriggerAvailableFields($trigger: String!) {
+    getTriggerAvailableFields(trigger: $trigger) {
+      category
+      key
+      label
+      path
+      type
+    }
+  }
+`;
+
+export const TEST_AUTOMATION_WEBHOOK = gql`
+  mutation TestAutomationWebhook($input: TestWebhookInput!) {
+    testAutomationWebhook(input: $input) {
+      success
+      statusCode
+      responseBody
+      requestHeaders
+      requestBody
+      errorMessage
+      latencyMs
+    }
   }
 `;

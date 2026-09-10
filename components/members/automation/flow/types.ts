@@ -21,7 +21,9 @@ export interface ConditionNodeData {
   onRemoveCondition?: (index: number) => void;
   onOperatorChange?: (op: "AND" | "OR") => void;
   onSelect?: () => void;
+  onSelectConditionField?: (field: string) => void;
   simulationStatus?: "passed" | "failed" | "idle" | "running";
+  focusedField?: string;
   [key: string]: any;
 }
 

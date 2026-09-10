@@ -36,12 +36,15 @@ import {
   TrendingUp,
   School,
   Building,
-  ListFilter,
   Layers,
+  ArrowLeft,
+  Save,
+  X,
 } from "lucide-react";
 import { AutomationFlowBuilder } from "./flow/automation-flow-builder";
 import { useEmailDomainStatus } from "@/hooks/use-email-domain-status";
 import { EmailDomainSetupModal } from "./email-domain-setup-modal";
+import { useAutomationStore } from "@/store/useAutomationStore";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -167,212 +170,103 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
   onCancel,
   isEdit = false,
 }) => {
-  const [viewMode, setViewMode] = useState<"flow" | "form">("flow");
-  const [name, setName] = useState(initialValues?.name || "");
-  const [description, setDescription] = useState(
-    initialValues?.description || ""
-  );
-  const [trigger, setTrigger] = useState<MemberRuleTrigger>(
-    initialValues?.trigger || "MEMBER_JOINED"
-  );
-  const [conditionOperator, setConditionOperator] = useState<"AND" | "OR">(
-    (initialValues?.conditionOperator as "AND" | "OR") || "AND"
-  );
-  const [conditions, setConditions] = useState<MemberRuleConditionInput[]>(
-    initialValues?.conditions
-      ? initialValues.conditions.map((c) => ({
-          field: c.field,
-          operator: c.operator,
-          value: c.value,
-        }))
-      : []
-  );
-  const [actions, setActions] = useState<MemberRuleActionInput[]>(
-    initialValues?.actions
-      ? initialValues.actions.map((a) => ({
-          type: a.type,
-          tierId: a.tierId,
-          templateId: a.templateId,
-          emailSubject: a.emailSubject,
-          emailBody: a.emailBody,
-          communityId: a.communityId,
-          tags: a.tags,
-          notificationMessage: a.notificationMessage,
-          pushTitle: a.pushTitle,
-          pushBody: a.pushBody,
-          push: a.push,
-        }))
-      : [{ type: "ASSIGN_MEMBERSHIP_TIER" }]
-  );
-  const [isActive, setIsActive] = useState(
-    initialValues ? initialValues.isActive : true
-  );
+  const viewMode = useAutomationStore((s) => s.viewMode);
+  const setViewMode = useAutomationStore((s) => s.setViewMode);
+  const name = useAutomationStore((s) => s.name);
+  const setName = useAutomationStore((s) => s.setName);
+  const description = useAutomationStore((s) => s.description);
+  const setDescription = useAutomationStore((s) => s.setDescription);
+  const trigger = useAutomationStore((s) => s.trigger);
+  const setTrigger = useAutomationStore((s) => s.setTrigger);
+  const conditionOperator = useAutomationStore((s) => s.conditionOperator);
+  const setConditionOperator = useAutomationStore((s) => s.setConditionOperator);
+  const conditions = useAutomationStore((s) => s.conditions);
+  const setConditions = useAutomationStore((s) => s.setConditions);
+  const actions = useAutomationStore((s) => s.actions);
+  const setActions = useAutomationStore((s) => s.setActions);
+  const isActive = useAutomationStore((s) => s.isActive);
+  const setIsActive = useAutomationStore((s) => s.setIsActive);
+  const hasChanged = useAutomationStore((s) => s.hasChanged);
+  const initFromRule = useAutomationStore((s) => s.initFromRule);
+  const reset = useAutomationStore((s) => s.reset);
+  const applyRecipe = useAutomationStore((s) => s.applyRecipe);
+
   const [savedState, setSavedState] = useState(false);
   const { isVerified } = useEmailDomainStatus();
   const [showDomainModal, setShowDomainModal] = useState(false);
 
-  // Check for session draft on mount if not edit
+  // Initialize store on mount or when initialValues changes
   useEffect(() => {
-    if (!isEdit && typeof window !== "undefined") {
-      const draftStr = sessionStorage.getItem("automation_rule_draft");
-      if (draftStr) {
-        try {
-          const draft = JSON.parse(draftStr);
-          setName(draft.name || "");
-          setDescription(draft.description || "");
-          setTrigger(draft.trigger || "MEMBER_JOINED");
-          setConditionOperator(draft.conditionOperator || "AND");
-          setConditions(draft.conditions || []);
-          const loadedActions = draft.actions || [{ type: "ASSIGN_MEMBERSHIP_TIER" }];
-          setActions(loadedActions);
-          setIsActive(draft.isActive !== undefined ? draft.isActive : true);
-          sessionStorage.removeItem("automation_rule_draft");
-
-          const hasEmail = loadedActions.some((a: any) => a.type === "EMAIL");
-          if (hasEmail && !isVerified) {
-            toast.warning(
-              "Draft contains email actions, but your email domain is not verified yet in Domain Settings."
-            );
-          } else {
-            toast.info("Applied template recipe to canvas.");
+    if (initialValues) {
+      initFromRule(initialValues);
+    } else {
+      if (!isEdit && typeof window !== "undefined") {
+        const draftStr = sessionStorage.getItem("automation_rule_draft");
+        if (draftStr) {
+          try {
+            const draft = JSON.parse(draftStr);
+            initFromRule(draft);
+            sessionStorage.removeItem("automation_rule_draft");
+            const hasEmail = draft.actions?.some((a: any) => a.type === "EMAIL");
+            if (hasEmail && !isVerified) {
+              toast.warning(
+                "Draft contains email actions, but your email domain is not verified yet in Domain Settings."
+              );
+            } else {
+              toast.info("Applied template recipe to canvas.");
+            }
+            return;
+          } catch (e) {
+            console.error("Failed to parse draft", e);
           }
-        } catch (e) {
-          console.error("Failed to parse draft", e);
         }
       }
+      initFromRule(null);
     }
-  }, [isEdit, isVerified]);
-
-  // Track if form has unsaved modifications
-  const hasChanged = useMemo(() => {
-    if (!initialValues) {
-      return name.trim().length > 0 || description.trim().length > 0;
-    }
-    return (
-      name !== initialValues.name ||
-      description !== (initialValues.description || "") ||
-      trigger !== initialValues.trigger ||
-      conditionOperator !== (initialValues.conditionOperator || "AND") ||
-      isActive !== initialValues.isActive ||
-      JSON.stringify(conditions) !==
-        JSON.stringify(
-          initialValues.conditions?.map((c) => ({
-            field: c.field,
-            operator: c.operator,
-            value: c.value,
-          })) || []
-        ) ||
-      JSON.stringify(actions) !==
-        JSON.stringify(
-          initialValues.actions?.map((a) => ({
-            type: a.type,
-            tierId: a.tierId,
-            templateId: a.templateId,
-            emailSubject: a.emailSubject,
-            emailBody: a.emailBody,
-            communityId: a.communityId,
-            tags: a.tags,
-            notificationMessage: a.notificationMessage,
-            pushTitle: a.pushTitle,
-            pushBody: a.pushBody,
-            push: a.push,
-          })) || []
-        )
-    );
-  }, [
-    name,
-    description,
-    trigger,
-    conditionOperator,
-    conditions,
-    actions,
-    isActive,
-    initialValues,
-  ]);
+  }, [initialValues, isEdit, initFromRule, isVerified]);
 
   const handleReset = () => {
     if (initialValues) {
-      setName(initialValues.name || "");
-      setDescription(initialValues.description || "");
-      setTrigger(initialValues.trigger || "MEMBER_JOINED");
-      setConditionOperator(
-        (initialValues.conditionOperator as "AND" | "OR") || "AND"
-      );
-      setConditions(
-        initialValues.conditions
-          ? initialValues.conditions.map((c) => ({
-              field: c.field,
-              operator: c.operator,
-              value: c.value,
-            }))
-          : []
-      );
-      setActions(
-        initialValues.actions
-          ? initialValues.actions.map((a) => ({
-              type: a.type,
-              tierId: a.tierId,
-              templateId: a.templateId,
-              emailSubject: a.emailSubject,
-              emailBody: a.emailBody,
-              communityId: a.communityId,
-              tags: a.tags,
-              notificationMessage: a.notificationMessage,
-              pushTitle: a.pushTitle,
-              pushBody: a.pushBody,
-              push: a.push,
-            }))
-          : []
-      );
-      setIsActive(initialValues.isActive);
+      initFromRule(initialValues);
     } else {
-      setName("");
-      setDescription("");
-      setTrigger("MEMBER_JOINED");
-      setConditionOperator("AND");
-      setConditions([]);
-      setActions([{ type: "ASSIGN_MEMBERSHIP_TIER" }]);
-      setIsActive(true);
+      reset();
     }
   };
 
   const handleApplyRecipe = (recipe: (typeof PRESET_RECIPES)[0]) => {
     const hasEmail = recipe.actions.some((a) => a.type === "EMAIL");
     if (hasEmail && !isVerified) {
-      setName(recipe.title);
-      setTrigger(recipe.trigger);
-      setConditionOperator(recipe.conditionOperator);
-      setConditions(recipe.conditions);
-      setActions(recipe.actions.filter((a) => a.type !== "EMAIL") as any);
+      const sanitized = {
+        ...recipe,
+        actions: recipe.actions.filter((a) => a.type !== "EMAIL"),
+      };
+      applyRecipe(sanitized);
       toast.info(
         `Applied ${recipe.title} template without email action (sender domain unverified).`
       );
       setShowDomainModal(true);
       return;
     }
-    setName(recipe.title);
-    setTrigger(recipe.trigger);
-    setConditionOperator(recipe.conditionOperator);
-    setConditions(recipe.conditions);
-    setActions(recipe.actions as any);
+    applyRecipe(recipe);
     toast.success(`Applied ${recipe.title} template.`);
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    const state = useAutomationStore.getState();
 
-    if (!name.trim()) {
+    if (!state.name.trim()) {
       toast.error("Please enter a rule name.");
       return;
     }
 
-    if (actions.length === 0) {
+    if (state.actions.length === 0) {
       toast.error("Please configure at least one automated action.");
       return;
     }
 
     // Check if rule contains EMAIL action while domain is unverified
-    const hasEmailAction = actions.some((a) => a.type === "EMAIL");
+    const hasEmailAction = state.actions.some((a) => a.type === "EMAIL");
     if (hasEmailAction && !isVerified) {
       setShowDomainModal(true);
       toast.error(
@@ -382,21 +276,35 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
     }
 
     // Clean conditions
-    const validConditions = conditions.filter((c) => {
-      if (c.operator === "is_not_empty" || c.operator === "is_empty")
-        return true;
-      if (typeof c.value === "string") return c.value.trim().length > 0;
-      return c.value !== null && c.value !== undefined;
-    });
+    const validConditions = state.conditions
+      .filter((c) => {
+        if (c.operator === "is_not_empty" || c.operator === "is_empty")
+          return true;
+        if (typeof c.value === "string") return c.value.trim().length > 0;
+        return c.value !== null && c.value !== undefined;
+      })
+      .map((c) => ({
+        field: c.field,
+        operator: c.operator,
+        value: c.value,
+        branch: c.branch || "branch_1",
+      }));
 
     const payload: CreateMemberAutomationRuleInput = {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      trigger,
-      conditionOperator,
+      name: state.name.trim(),
+      description: state.description?.trim() || undefined,
+      trigger: state.trigger,
+      conditionOperator: state.conditionOperator,
       conditions: validConditions,
-      actions: actions.map((a) => ({
+      branches: (state.branches || []).map((b) => ({
+        id: b.id,
+        name: b.name,
+        isDefault: Boolean(b.isDefault),
+        hasNoPath: Boolean(b.hasNoPath),
+      })),
+      actions: state.actions.map((a) => ({
         type: a.type,
+        branch: a.branch || "yes",
         tierId: a.tierId || undefined,
         templateId: a.templateId || undefined,
         emailSubject: a.emailSubject || undefined,
@@ -407,8 +315,31 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
         pushTitle: a.pushTitle || undefined,
         pushBody: a.pushBody || undefined,
         push: a.push ?? undefined,
+        points:
+          a.type === "AWARD_POINTS"
+            ? (Number(a.points) || 0)
+            : undefined,
+        webhook:
+          (a.type === "CUSTOM_WEBHOOK" || a.type === "WEBHOOK") && a.webhook
+            ? {
+                url: a.webhook.url || "",
+                method: a.webhook.method || "POST",
+                authType: a.webhook.authType || "NONE",
+                authToken: a.webhook.authToken || undefined,
+                authHeaderKey: a.webhook.authHeaderKey || undefined,
+                authHeaderValue: a.webhook.authHeaderValue || undefined,
+                mapping: a.webhook.mapping
+                  ? a.webhook.mapping
+                      .filter((m: any) => m.field && m.field.trim())
+                      .map((m: any) => ({
+                        field: m.field.trim(),
+                        value: m.value,
+                      }))
+                  : [],
+              }
+            : undefined,
       })),
-      isActive,
+      isActive: state.isActive,
     };
 
     try {
@@ -430,27 +361,15 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
   // If in Flow Canvas View Mode (Default), render the interactive React Flow visual canvas builder!
   if (viewMode === "flow") {
     return (
-      <div className="w-full">
+      <div className="w-full h-full h-screen flex flex-col overflow-hidden bg-background">
         <AutomationFlowBuilder
-          name={name}
-          description={description}
-          trigger={trigger}
-          conditionOperator={conditionOperator}
-          conditions={conditions}
-          actions={actions}
-          isActive={isActive}
-          onNameChange={setName}
-          onDescriptionChange={setDescription}
-          onTriggerChange={setTrigger}
-          onConditionOperatorChange={setConditionOperator}
-          onConditionsChange={setConditions}
-          onActionsChange={setActions}
-          onIsActiveChange={setIsActive}
           onSave={handleSubmit}
           onReset={handleReset}
-          hasChanged={hasChanged}
+          onCancel={onCancel}
           isSaving={loading}
           isEdit={isEdit}
+          saved={savedState}
+          hasChanged={hasChanged}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />
@@ -464,28 +383,97 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
 
   // Classic Form Layout View Mode
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Top Mode Banner when in Form view */}
-      <div className="p-3 rounded-xl bg-card border border-border flex items-center justify-between shadow-xs">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px] font-bold">
-            Step Form View
-          </Badge>
-          <span className="text-xs text-muted-foreground">
-            Linear step configuration mode. Switch to Canvas for interactive node diagram.
-          </span>
+    <div className="w-full h-full h-screen flex flex-col overflow-hidden bg-background">
+      {/* Top Navbar */}
+      <header className="h-14 px-4 bg-card border-b border-border flex items-center justify-between gap-3 shrink-0 z-10 shadow-xs">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          {onCancel && (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onCancel}
+                className="h-8 px-2.5 text-xs font-semibold gap-1.5 text-muted-foreground hover:text-foreground shrink-0 cursor-pointer"
+                title="Back to Automation Rules"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+              <div className="h-4 w-px bg-border shrink-0" />
+            </>
+          )}
+
+          {/* Module Headline / Identifier */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center font-bold shrink-0 shadow-xs">
+              <Users className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase leading-none">
+                  Member Automation
+                </span>
+                <Badge
+                  variant="outline"
+                  className="text-[8.5px] font-bold px-1 py-0 h-3.5 border-violet-200 dark:border-violet-800 text-violet-600 dark:text-violet-400 bg-violet-50/60 dark:bg-violet-950/30"
+                >
+                  Step Form Mode
+                </Badge>
+              </div>
+              <span className="text-[11px] font-semibold text-foreground/80 leading-tight">
+                {name || "Untitled Workflow"}
+              </span>
+            </div>
+          </div>
         </div>
 
-        <Button
-          type="button"
-          size="sm"
-          onClick={() => setViewMode("flow")}
-          className="h-7 text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Zap className="w-3.5 h-3.5" />
-          Switch to Interactive Canvas
-        </Button>
-      </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setViewMode("flow")}
+            className="h-8 text-xs font-bold gap-1.5 border-primary/30 text-primary hover:bg-primary/5 cursor-pointer"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            Switch to Canvas
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            disabled={loading}
+            onClick={() => handleSubmit()}
+            className="h-8 px-3 text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md cursor-pointer"
+          >
+            <Save className="w-3.5 h-3.5" />
+            {loading ? "Saving..." : isEdit ? "Update Rule" : "Create Rule"}
+          </Button>
+
+          {/* Close Button (X) */}
+          {onCancel && (
+            <>
+              <div className="h-4 w-px bg-border shrink-0 ml-0.5" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onCancel}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg shrink-0 cursor-pointer"
+                title="Close (Esc)"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </>
+          )}
+        </div>
+      </header>
+
+      {/* Scrollable Form Body */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="max-w-7xl mx-auto space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
 
       <PolarisFormLayout
         sidebar={
@@ -759,7 +747,11 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
           icon={Sparkles}
         >
           <div className="space-y-3">
-            <ActionBuilder actions={actions} onChange={setActions} />
+            <ActionBuilder
+              actions={actions}
+              onChange={setActions}
+              trigger={trigger}
+            />
           </div>
         </PolarisFormCard>
       </PolarisFormLayout>
@@ -775,10 +767,13 @@ export const AutomationForm: React.FC<AutomationFormProps> = ({
         buttonText={isEdit ? "Update Rule" : "Create Rule"}
       />
 
-      <EmailDomainSetupModal
-        open={showDomainModal}
-        onOpenChange={setShowDomainModal}
-      />
-    </form>
+        <EmailDomainSetupModal
+          open={showDomainModal}
+          onOpenChange={setShowDomainModal}
+        />
+      </form>
+        </div>
+      </div>
+    </div>
   );
 };

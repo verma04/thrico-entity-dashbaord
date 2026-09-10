@@ -211,9 +211,12 @@ export const AutomationManage: React.FC = () => {
     priority: true,
     rule: true,
     trigger: true,
+    branches: true,
     conditions: true,
     actions: true,
     status: true,
+    executions: true,
+    lastRunAt: true,
     updatedAt: true,
     actionsMenu: true,
   });
@@ -288,6 +291,9 @@ export const AutomationManage: React.FC = () => {
 
   const activeCount = sortedRules.filter((r) => r.isActive).length;
   const pausedCount = sortedRules.filter((r) => !r.isActive).length;
+  const totalExecutions = useMemo(() => {
+    return sortedRules.reduce((acc, r) => acc + (r.executionCount || 0), 0);
+  }, [sortedRules]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleToggle = async (id: string, isActive: boolean) => {
@@ -424,7 +430,7 @@ export const AutomationManage: React.FC = () => {
         description={
           loading
             ? "Loading automation rules…"
-            : `${sortedRules.length} automated rule${sortedRules.length === 1 ? "" : "s"} configured (${activeCount} active, ${pausedCount} paused).`
+            : `${sortedRules.length} automated rule${sortedRules.length === 1 ? "" : "s"} configured (${activeCount} active, ${pausedCount} paused) • ${totalExecutions.toLocaleString()} total execution${totalExecutions === 1 ? "" : "s"}.`
         }
         icon={Zap}
         breadcrumbs={[
@@ -549,6 +555,24 @@ export const AutomationManage: React.FC = () => {
                   className="text-xs font-medium py-1 px-2"
                 >
                   When Verified
+                </SelectItem>
+                <SelectItem
+                  value="MEMBER_REJECTED"
+                  className="text-xs font-medium py-1 px-2"
+                >
+                  When Rejected
+                </SelectItem>
+                <SelectItem
+                  value="MEMBER_DISABLED"
+                  className="text-xs font-medium py-1 px-2"
+                >
+                  When Disabled
+                </SelectItem>
+                <SelectItem
+                  value="MEMBER_BLOCKED"
+                  className="text-xs font-medium py-1 px-2"
+                >
+                  When Blocked
                 </SelectItem>
               </SelectContent>
             </Select>

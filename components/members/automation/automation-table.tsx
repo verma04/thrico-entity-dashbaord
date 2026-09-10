@@ -34,6 +34,9 @@ import {
   ArrowUp,
   ArrowDown,
   UserPlus,
+  UserX,
+  UserMinus,
+  Ban,
   CheckCircle2,
   ShieldCheck,
   Award,
@@ -43,16 +46,44 @@ import {
   Tag,
   Sliders,
   Filter,
+  Globe,
+  Coins,
+  Activity,
+  GitBranch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+export const getRuleBranchCount = (rule: MemberAutomationRule): number => {
+  if (rule.branches && rule.branches.length > 0) {
+    return rule.branches.length;
+  }
+  const detected = new Set<string>();
+  detected.add("branch_1");
+  rule.conditions?.forEach((c: any) => {
+    if (c.branch) detected.add(c.branch);
+  });
+  rule.actions?.forEach((a: any) => {
+    const b = a.branch;
+    if (b) {
+      const bId = b.replace(/_(yes|no)$/, "");
+      if (bId && bId !== "yes" && bId !== "no") {
+        detected.add(bId);
+      }
+    }
+  });
+  return detected.size;
+};
 
 export const automationTableColumns = [
   { key: "priority", header: "Order" },
   { key: "rule", header: "Rule Name" },
   { key: "trigger", header: "Trigger Event" },
+  { key: "branches", header: "Branches" },
   { key: "conditions", header: "Target Conditions" },
   { key: "actions", header: "Automated Actions" },
   { key: "status", header: "Status" },
+  { key: "executions", header: "Runs" },
+  { key: "lastRunAt", header: "Last Run" },
   { key: "updatedAt", header: "Updated" },
   { key: "actionsMenu", header: "Actions" },
 ];
@@ -103,6 +134,24 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
           label: "When Verified",
           icon: ShieldCheck,
           variant: "purple" as const,
+        };
+      case "MEMBER_REJECTED":
+        return {
+          label: "When Rejected",
+          icon: UserX,
+          variant: "rose" as const,
+        };
+      case "MEMBER_DISABLED":
+        return {
+          label: "When Disabled",
+          icon: UserMinus,
+          variant: "amber" as const,
+        };
+      case "MEMBER_BLOCKED":
+        return {
+          label: "When Blocked",
+          icon: Ban,
+          variant: "rose" as const,
         };
       default:
         return {
@@ -174,6 +223,31 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
                 ? action.tags.slice(0, 2).join(", ") + (tagCount > 2 ? ` +${tagCount - 2}` : "")
                 : "Add Tags"}
             </span>
+          </span>
+        );
+      case "CUSTOM_WEBHOOK":
+      case "WEBHOOK":
+        return (
+          <span
+            key={index}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
+          >
+            <Globe className="w-3 h-3 shrink-0" />
+            <span className="truncate max-w-[110px]">
+              {action.webhook?.url
+                ? `${action.webhook.method || "POST"} Webhook`
+                : "Webhook"}
+            </span>
+          </span>
+        );
+      case "AWARD_POINTS":
+        return (
+          <span
+            key={index}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+          >
+            <Coins className="w-3 h-3 shrink-0" />
+            <span>+{action.points ?? 0} Pts</span>
           </span>
         );
       default:
@@ -273,6 +347,45 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
       },
     },
     {
+      key: "branches",
+      header: "Branches",
+      headerClassName: "w-28 text-center",
+      className: "text-center",
+      cell: (row) => {
+        const count = getRuleBranchCount(row);
+        const hasNo = Boolean(
+          row.branches?.some((b) => b.hasNoPath) ||
+          row.actions?.some((a) => {
+            const b = a.branch;
+            return b === "no" || b?.endsWith("_no");
+          })
+        );
+        return (
+          <div className="flex items-center justify-center gap-1.5">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold font-mono border",
+                count > 1
+                  ? "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/25 shadow-2xs"
+                  : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700"
+              )}
+            >
+              <GitBranch className="w-3 h-3 text-purple-500 shrink-0" />
+              <span>{count} {count === 1 ? "Branch" : "Branches"}</span>
+            </span>
+            {hasNo && (
+              <span
+                className="inline-flex items-center text-[9px] font-bold px-1.5 py-0.2 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                title="Contains Else (NO) fallback path"
+              >
+                YES/NO
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       key: "conditions",
       header: "Conditions",
       cell: (row) => {
@@ -326,7 +439,7 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
               checked={row.isActive}
               disabled={isToggling}
               onCheckedChange={(checked) => onToggle(row.id, checked)}
-              className="data-[state=checked]:bg-emerald-600 h-4 w-8"
+              className="data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-zinc-200 dark:data-[state=unchecked]:bg-zinc-700 cursor-pointer"
             />
             <span
               className={cn(
@@ -340,6 +453,45 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({
             </span>
           </div>
         );
+      },
+    },
+    {
+      key: "executions",
+      header: "Runs",
+      headerClassName: "w-28 text-center",
+      className: "text-center",
+      cell: (row) => {
+        const count = row.executionCount ?? 0;
+        return (
+          <div className="flex items-center justify-center">
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono",
+                count > 0
+                  ? "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
+                  : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
+              )}
+            >
+              <Activity className="w-3 h-3 shrink-0" />
+              {count.toLocaleString()}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      key: "lastRunAt",
+      header: "Last Run",
+      headerClassName: "w-32",
+      cell: (row) => {
+        if (!row.lastRunAt) {
+          return (
+            <span className="text-[11px] text-zinc-400 dark:text-zinc-500 italic">
+              Never run
+            </span>
+          );
+        }
+        return <AdminTableDate date={row.lastRunAt} />;
       },
     },
     {

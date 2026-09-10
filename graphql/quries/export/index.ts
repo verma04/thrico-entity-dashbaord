@@ -33,4 +33,27 @@ export const EXPORT_FEED = gql`
   }
 `;
 
+export const EXPORT_TOP_REFERRALS = gql`
+  mutation ExportTopReferrals($input: ExportTopReferralsInput) {
+    exportTopReferrals(input: $input) {
+      success
+      message
+      totalCount
+      fileUrl
+    }
+  }
+`;
+
+export const EXPORT_REFERRALS = gql`
+  mutation ExportReferrals($input: ExportReferralsInput) {
+    exportReferrals(input: $input) {
+      success
+      message
+      totalCount
+      fileUrl
+    }
+  }
+`;
+
+
 

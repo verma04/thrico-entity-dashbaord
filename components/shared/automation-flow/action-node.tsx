@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getSharedActionMeta } from "./action-palette-items";
+import { getSharedActionMeta, ACTION_CATEGORIES } from "./action-palette-items";
 import { SharedActionNodeData } from "./types";
 import { useEmailDomainStatus } from "@/hooks/use-email-domain-status";
 import { EmailDomainSetupModal } from "@/components/members/automation/email-domain-setup-modal";
@@ -31,7 +31,9 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
   const isEmailUnverified = action.type === "EMAIL" && !isVerified;
 
   const meta = getSharedActionMeta(action.type);
+  const categoryMeta = ACTION_CATEGORIES[meta.category];
   const Icon = meta.icon;
+  const isNoBranch = action.branch === "no" || (typeof action.branch === "string" && action.branch.endsWith("_no"));
 
 
   const getSubtitle = () => {
@@ -48,6 +50,13 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
         return action.tags?.join(", ") || "No tags set";
       case "WHATSAPP_TEMPLATE":
         return action.whatsAppTemplateName || "Select Template";
+      case "CUSTOM_WEBHOOK":
+      case "WEBHOOK":
+        return action.webhook?.url
+          ? `${action.webhook.method || "POST"} ${action.webhook.url}`
+          : "Configure Webhook";
+      case "AWARD_POINTS":
+        return action.points ? `+${action.points} Gamification Points` : "Set Points";
       default:
         return action.type;
     }
@@ -69,11 +78,14 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3.5 !h-3.5 !bg-amber-500 !border-2 !border-background shadow-xs"
+        className={cn(
+          "!w-3.5 !h-3.5 !border-2 !border-background shadow-xs",
+          isNoBranch ? "!bg-rose-500" : "!bg-emerald-500"
+        )}
       />
 
       {/* Top Gradient Banner */}
-      <div className={cn("h-2 w-full rounded-t-2xl bg-gradient-to-r", meta.color)} />
+      <div className={cn("h-2 w-full rounded-t-2xl bg-gradient-to-r", isNoBranch ? "from-rose-500 via-rose-600 to-red-600" : meta.color)} />
 
       <div className="p-4 space-y-3">
         {/* Header */}
@@ -88,10 +100,31 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
               <Icon className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase block truncate">
-                Action #{index + 1} · {meta.badgeLabel}
-              </span>
-              <h4 className="text-xs font-bold text-foreground truncate">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
+                  Action #{index + 1}
+                </span>
+                <span className="text-[9px] text-muted-foreground/60">·</span>
+                <span
+                  className={cn(
+                    "text-[8.5px] font-semibold px-1.5 py-0.2 rounded border uppercase tracking-wider",
+                    categoryMeta?.color || meta.badgeBg
+                  )}
+                >
+                  {categoryMeta?.badge || meta.badgeLabel}
+                </span>
+                <span
+                  className={cn(
+                    "text-[8.5px] font-bold px-1.5 py-0.2 rounded border uppercase tracking-wider",
+                    isNoBranch
+                      ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30"
+                      : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                  )}
+                >
+                  {isNoBranch ? "NO Path" : "YES Path"}
+                </span>
+              </div>
+              <h4 className="text-xs font-bold text-foreground truncate mt-0.5">
                 {meta.label}
               </h4>
             </div>
@@ -192,6 +225,26 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
                   #{tag}
                 </span>
               ))}
+            </div>
+          )}
+
+          {(action.type === "CUSTOM_WEBHOOK" || action.type === "WEBHOOK") && (
+            <div className="flex items-center gap-1.5 pt-1 text-[10px] font-mono">
+              <span className="px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-700 dark:text-violet-300 font-bold border border-violet-500/30">
+                {action.webhook?.method || "POST"}
+              </span>
+              <span className="truncate text-muted-foreground max-w-[200px]">
+                {action.webhook?.url || "No URL configured"}
+              </span>
+            </div>
+          )}
+
+          {action.type === "AWARD_POINTS" && (
+            <div className="flex items-center gap-2 pt-1">
+              <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[11px] font-bold border border-amber-500/30 flex items-center gap-1">
+                🪙 +{action.points ?? 0} Points
+              </span>
+              <span className="text-[10px] text-muted-foreground">Direct wallet credit</span>
             </div>
           )}
         </div>

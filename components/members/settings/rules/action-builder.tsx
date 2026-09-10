@@ -24,6 +24,7 @@ import {
   Paintbrush,
   ExternalLink,
   AlertTriangle,
+  Coins,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,12 +57,14 @@ import {
 } from "@/graphql/member-automation";
 import { useEmailDomainStatus } from "@/hooks/use-email-domain-status";
 import { EmailDomainSetupModal } from "@/components/members/automation/email-domain-setup-modal";
+import { WebhookFieldMappingBuilder } from "@/components/members/automation/webhook-field-mapping";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface ActionBuilderProps {
   actions: MemberRuleActionInput[];
   onChange: (actions: MemberRuleActionInput[]) => void;
+  trigger?: string;
 }
 
 const TEMPLATE_VARIABLES = [
@@ -87,6 +90,7 @@ const SUGGESTED_TAGS = [
 export const ActionBuilder: React.FC<ActionBuilderProps> = ({
   actions,
   onChange,
+  trigger = "MEMBER_JOINED",
 }) => {
   const { data: tiersData, loading: tiersLoading } =
     useQuery(GET_MEMBERSHIP_TIERS);
@@ -175,6 +179,23 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
             tags: ["VIP", "Auto-Assigned"],
           };
           break;
+        case "CUSTOM_WEBHOOK":
+          defaultAction = {
+            type: "CUSTOM_WEBHOOK",
+            webhook: {
+              url: "",
+              method: "POST",
+              authType: "NONE",
+              mapping: [],
+            },
+          };
+          break;
+        case "AWARD_POINTS":
+          defaultAction = {
+            type: "AWARD_POINTS",
+            points: 50,
+          };
+          break;
         default:
           defaultAction = { type };
       }
@@ -196,6 +217,8 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
   const emailAction = getAction("EMAIL");
   const notificationAction = getAction("NOTIFICATION");
   const tagAction = getAction("ADD_MEMBER_TAG");
+  const webhookAction = getAction("CUSTOM_WEBHOOK");
+  const pointsAction = getAction("AWARD_POINTS");
 
   const selectedTier = tiers.find((t) => t.id === tierAction?.tierId);
   const selectedCommunity = communities.find(
@@ -310,13 +333,13 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 <Award className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 flex-wrap">
                   Assign Membership Tier
                   <Badge
                     variant="outline"
-                    className="text-[9px] font-bold text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800"
+                    className="text-[9px] font-bold text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40"
                   >
-                    Primary
+                    Member & Identity
                   </Badge>
                 </h4>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
@@ -422,8 +445,14 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 <Users className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 flex-wrap">
                   Auto-Join Community Circle
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-bold text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40"
+                  >
+                    Community Channel
+                  </Badge>
                 </h4>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                   Instantly enroll matched members into a specific community or hub.
@@ -523,8 +552,14 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 <Mail className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 flex-wrap">
                   Send Onboarding / Welcome Email
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 border-indigo-300 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40"
+                  >
+                    Communication Channel
+                  </Badge>
                   {isVerified ? (
                     <Badge
                       variant="outline"
@@ -800,8 +835,14 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 <Bell className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 flex-wrap">
                   Send Mobile Push & In-App Alert
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-bold text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40"
+                  >
+                    Communication Channel
+                  </Badge>
                 </h4>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                   Deliver instant notifications directly to the member's mobile device and bell feed.
@@ -898,8 +939,14 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                 <Tag className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 flex-wrap">
                   Assign Member Tags & Badges
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40"
+                  >
+                    Member & Identity
+                  </Badge>
                 </h4>
                 <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                   Append custom labels and segments to the user profile for categorization.
@@ -989,6 +1036,333 @@ export const ActionBuilder: React.FC<ActionBuilderProps> = ({
                     + {st}
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ================================================================ */}
+        {/* Action 6: Custom Webhook                                         */}
+        {/* ================================================================ */}
+        <div
+          className={`p-4 rounded-xl border transition-all duration-200 ${
+            isActionActive("CUSTOM_WEBHOOK")
+              ? "bg-violet-50/40 dark:bg-violet-950/20 border-violet-200/80 dark:border-violet-900/60 shadow-xs"
+              : "bg-zinc-50/50 dark:bg-zinc-900/40 border-zinc-200/70 dark:border-zinc-800/70 hover:border-zinc-300 dark:hover:border-zinc-700"
+          }`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+                  isActionActive("CUSTOM_WEBHOOK")
+                    ? "bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-xs"
+                    : "bg-zinc-200 dark:bg-zinc-800 text-zinc-500"
+                }`}
+              >
+                <Globe className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 flex-wrap">
+                  Custom Webhook
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-bold text-violet-600 dark:text-violet-400 border-violet-300 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/40"
+                  >
+                    Developer & Integrations
+                  </Badge>
+                </h4>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Send member data to an external API, CRM, or third-party service.
+                </p>
+              </div>
+            </div>
+
+            <Switch
+              checked={isActionActive("CUSTOM_WEBHOOK")}
+              onCheckedChange={(checked) =>
+                toggleAction("CUSTOM_WEBHOOK", checked)
+              }
+            />
+          </div>
+
+          {isActionActive("CUSTOM_WEBHOOK") && (
+            <div className="mt-3.5 pt-3 border-t border-violet-200/60 dark:border-violet-900/40 space-y-3">
+              {/* Method + URL */}
+              <div className="flex gap-2">
+                <Select
+                  value={webhookAction?.webhook?.method || "POST"}
+                  onValueChange={(val) =>
+                    updateAction("CUSTOM_WEBHOOK", {
+                      webhook: { ...webhookAction?.webhook!, method: val },
+                    })
+                  }
+                >
+                  <SelectTrigger className="w-28 h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-mono font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GET" className="text-xs font-mono">GET</SelectItem>
+                    <SelectItem value="POST" className="text-xs font-mono">POST</SelectItem>
+                    <SelectItem value="PUT" className="text-xs font-mono">PUT</SelectItem>
+                    <SelectItem value="PATCH" className="text-xs font-mono">PATCH</SelectItem>
+                    <SelectItem value="DELETE" className="text-xs font-mono">DELETE</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="url"
+                  placeholder="https://your-api.com/webhook/endpoint"
+                  value={webhookAction?.webhook?.url || ""}
+                  onChange={(e) =>
+                    updateAction("CUSTOM_WEBHOOK", {
+                      webhook: { ...webhookAction?.webhook!, url: e.target.value },
+                    })
+                  }
+                  className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-mono flex-1"
+                />
+              </div>
+
+              {/* Auth Type */}
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                  Authentication
+                </label>
+                <Select
+                  value={webhookAction?.webhook?.authType || "NONE"}
+                  onValueChange={(val) =>
+                    updateAction("CUSTOM_WEBHOOK", {
+                      webhook: {
+                        ...webhookAction?.webhook!,
+                        authType: val,
+                        authToken: val === "NONE" ? undefined : webhookAction?.webhook?.authToken,
+                        authHeaderKey: val === "API_KEY" ? (webhookAction?.webhook?.authHeaderKey || "X-API-Key") : undefined,
+                        authHeaderValue: val === "API_KEY" ? webhookAction?.webhook?.authHeaderValue : undefined,
+                      },
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
+                    <SelectValue placeholder="Select authentication method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NONE" className="text-xs">No Authentication</SelectItem>
+                    <SelectItem value="BEARER_TOKEN" className="text-xs">Bearer Token</SelectItem>
+                    <SelectItem value="API_KEY" className="text-xs">API Key (Custom Header)</SelectItem>
+                    <SelectItem value="BASIC_AUTH" className="text-xs">Basic Auth</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Bearer Token Input */}
+              {webhookAction?.webhook?.authType === "BEARER_TOKEN" && (
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                    Bearer Token
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="Enter bearer token"
+                    value={webhookAction?.webhook?.authToken || ""}
+                    onChange={(e) =>
+                      updateAction("CUSTOM_WEBHOOK", {
+                        webhook: { ...webhookAction?.webhook!, authToken: e.target.value },
+                      })
+                    }
+                    className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-mono"
+                  />
+                </div>
+              )}
+
+              {/* API Key Inputs */}
+              {webhookAction?.webhook?.authType === "API_KEY" && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                      Header Name
+                    </label>
+                    <Input
+                      placeholder="X-API-Key"
+                      value={webhookAction?.webhook?.authHeaderKey || ""}
+                      onChange={(e) =>
+                        updateAction("CUSTOM_WEBHOOK", {
+                          webhook: { ...webhookAction?.webhook!, authHeaderKey: e.target.value },
+                        })
+                      }
+                      className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                      Header Value
+                    </label>
+                    <Input
+                      type="password"
+                      placeholder="sk-abc123..."
+                      value={webhookAction?.webhook?.authHeaderValue || ""}
+                      onChange={(e) =>
+                        updateAction("CUSTOM_WEBHOOK", {
+                          webhook: { ...webhookAction?.webhook!, authHeaderValue: e.target.value },
+                        })
+                      }
+                      className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-mono"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Basic Auth Inputs */}
+              {webhookAction?.webhook?.authType === "BASIC_AUTH" && (
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                    Basic Auth Token (Base64)
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="base64(username:password)"
+                    value={webhookAction?.webhook?.authToken || ""}
+                    onChange={(e) =>
+                      updateAction("CUSTOM_WEBHOOK", {
+                        webhook: { ...webhookAction?.webhook!, authToken: e.target.value },
+                      })
+                    }
+                    className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-mono"
+                  />
+                </div>
+              )}
+
+              {/* 2-Column Key-Value Field Mapping */}
+              <div className="pt-2 border-t border-violet-200/60 dark:border-violet-900/40">
+                <WebhookFieldMappingBuilder
+                  mapping={webhookAction?.webhook?.mapping || []}
+                  onChange={(newMapping) =>
+                    updateAction("CUSTOM_WEBHOOK", {
+                      webhook: {
+                        ...webhookAction?.webhook!,
+                        mapping: newMapping,
+                      },
+                    })
+                  }
+                  trigger={trigger}
+                  webhookConfig={{
+                    url: webhookAction?.webhook?.url || "",
+                    method: webhookAction?.webhook?.method || "POST",
+                    authType: webhookAction?.webhook?.authType || "NONE",
+                    authToken: webhookAction?.webhook?.authToken,
+                    authHeaderKey: webhookAction?.webhook?.authHeaderKey,
+                    authHeaderValue: webhookAction?.webhook?.authHeaderValue,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ================================================================ */}
+        {/* ACTION 7: AWARD GAMIFICATION POINTS                             */}
+        {/* ================================================================ */}
+        <div
+          className={cn(
+            "rounded-xl border transition-all duration-200 overflow-hidden",
+            isActionActive("AWARD_POINTS")
+              ? "border-amber-500/40 bg-amber-500/[0.02] shadow-sm"
+              : "border-border bg-card opacity-80 hover:opacity-100"
+          )}
+        >
+          <div className="p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                  isActionActive("AWARD_POINTS")
+                    ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                <Coins className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="text-sm font-semibold text-foreground">
+                    Award Gamification Points
+                  </h4>
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-bold text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40"
+                  >
+                    Member & Identity
+                  </Badge>
+                  {isActionActive("AWARD_POINTS") && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                    >
+                      +{pointsAction?.points ?? 0} Pts
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Automatically credit reward points directly to the member's wallet
+                </p>
+              </div>
+            </div>
+
+            <Switch
+              checked={isActionActive("AWARD_POINTS")}
+              onCheckedChange={(checked) =>
+                toggleAction("AWARD_POINTS", checked)
+              }
+            />
+          </div>
+
+          {isActionActive("AWARD_POINTS") && (
+            <div className="px-4 pb-4 pt-1 border-t border-amber-500/20 space-y-4">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-foreground block">
+                  Points to Credit
+                </label>
+                <div className="relative max-w-xs">
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="e.g. 50"
+                    value={pointsAction?.points ?? ""}
+                    onChange={(e) => {
+                      const val =
+                        e.target.value === "" ? 0 : Number(e.target.value);
+                      updateAction("AWARD_POINTS", { points: val });
+                    }}
+                    className="h-9 text-xs bg-background font-bold pl-8"
+                  />
+                  <Coins className="w-4 h-4 text-amber-500 absolute left-2.5 top-2.5 pointer-events-none" />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Points are credited directly to the member's wallet balance and recorded in the automation gamification history.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                  Quick Preset Amounts
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[10, 25, 50, 100, 250, 500].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() =>
+                        updateAction("AWARD_POINTS", { points: preset })
+                      }
+                      className={cn(
+                        "px-2.5 py-1 rounded-md text-xs font-semibold border transition-all",
+                        pointsAction?.points === preset
+                          ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                          : "bg-background hover:bg-muted text-muted-foreground border-border"
+                      )}
+                    >
+                      +{preset} Pts
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}

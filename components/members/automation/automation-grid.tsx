@@ -33,9 +33,17 @@ import {
   Users,
   Tag,
   Clock,
+  Globe,
+  Coins,
+  Activity,
+  UserX,
+  UserMinus,
+  Ban,
+  GitBranch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { safeFormat } from "@/lib/date-utils";
+import { getRuleBranchCount } from "./automation-table";
 
 interface AutomationGridProps {
   rules: MemberAutomationRule[];
@@ -81,6 +89,27 @@ export const AutomationGrid: React.FC<AutomationGridProps> = ({
           badgeClass: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
           bannerClass: "from-purple-500/10 via-purple-500/5 to-transparent",
         };
+      case "MEMBER_REJECTED":
+        return {
+          label: "When Rejected",
+          icon: UserX,
+          badgeClass: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+          bannerClass: "from-rose-500/10 via-rose-500/5 to-transparent",
+        };
+      case "MEMBER_DISABLED":
+        return {
+          label: "When Disabled",
+          icon: UserMinus,
+          badgeClass: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+          bannerClass: "from-amber-500/10 via-amber-500/5 to-transparent",
+        };
+      case "MEMBER_BLOCKED":
+        return {
+          label: "When Blocked",
+          icon: Ban,
+          badgeClass: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+          bannerClass: "from-red-500/10 via-red-500/5 to-transparent",
+        };
       default:
         return {
           label: trigger,
@@ -120,7 +149,7 @@ export const AutomationGrid: React.FC<AutomationGridProps> = ({
             <div className="p-4 space-y-3.5 flex-1">
               {/* Header: Priority, Trigger Badge, Switch & Actions */}
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700">
                     #{rule.priority ?? index + 1}
                   </span>
@@ -133,6 +162,35 @@ export const AutomationGrid: React.FC<AutomationGridProps> = ({
                     <TriggerIcon className="w-3 h-3" />
                     {triggerMeta.label}
                   </span>
+                  {(() => {
+                    const branchCount = getRuleBranchCount(rule);
+                    const hasNo = Boolean(
+                      rule.branches?.some((b) => b.hasNoPath) ||
+                      rule.actions?.some((a) => {
+                        const b = a.branch;
+                        return b === "no" || b?.endsWith("_no");
+                      })
+                    );
+                    return (
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono border",
+                          branchCount > 1
+                            ? "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/25"
+                            : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700"
+                        )}
+                        title={`${branchCount} condition branches${hasNo ? " (with YES/NO paths)" : ""}`}
+                      >
+                        <GitBranch className="w-2.5 h-2.5 text-purple-500 shrink-0" />
+                        {branchCount} {branchCount === 1 ? "Branch" : "Branches"}
+                        {hasNo && (
+                          <span className="text-[8.5px] font-bold text-amber-600 dark:text-amber-400">
+                            ±
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -140,7 +198,7 @@ export const AutomationGrid: React.FC<AutomationGridProps> = ({
                     checked={rule.isActive}
                     disabled={isToggling}
                     onCheckedChange={(checked) => onToggle(rule.id, checked)}
-                    className="data-[state=checked]:bg-emerald-600 h-4 w-8"
+                    className="data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-zinc-200 dark:data-[state=unchecked]:bg-zinc-700 cursor-pointer"
                   />
 
                   <DropdownMenu>
@@ -314,11 +372,54 @@ export const AutomationGrid: React.FC<AutomationGridProps> = ({
                             </span>
                           </span>
                         );
+                      case "CUSTOM_WEBHOOK":
+                      case "WEBHOOK":
+                        return (
+                          <span
+                            key={i}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20"
+                          >
+                            <Globe className="w-3 h-3 shrink-0" />
+                            <span className="truncate max-w-[120px]">
+                              {act.webhook?.url
+                                ? `${act.webhook.method || "POST"} Webhook`
+                                : "Webhook"}
+                            </span>
+                          </span>
+                        );
+                      case "AWARD_POINTS":
+                        return (
+                          <span
+                            key={i}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                          >
+                            <Coins className="w-3 h-3 shrink-0" />
+                            <span>+{act.points ?? 0} Pts</span>
+                          </span>
+                        );
                       default:
                         return null;
                     }
                   })}
                 </div>
+              </div>
+            </div>
+
+            {/* Execution Activity Stats */}
+            <div className="px-4 py-2 bg-zinc-50/70 dark:bg-zinc-800/30 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px]">
+              <div className="flex items-center gap-1.5 font-medium text-zinc-600 dark:text-zinc-300">
+                <Activity className="w-3.5 h-3.5 text-violet-500" />
+                <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">
+                  {(rule.executionCount ?? 0).toLocaleString()}
+                </span>
+                <span className="text-[10px] text-zinc-400">runs</span>
+              </div>
+              <div className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                {rule.lastRunAt ? (
+                  <span>Ran {safeFormat(rule.lastRunAt, "MMM dd, HH:mm", "Never")}</span>
+                ) : (
+                  <span className="italic text-zinc-400">Never executed</span>
+                )}
               </div>
             </div>
 

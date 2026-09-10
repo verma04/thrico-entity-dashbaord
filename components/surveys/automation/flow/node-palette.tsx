@@ -26,57 +26,11 @@ import {
   SurveyRuleTrigger,
   SurveyRuleActionType,
 } from "@/graphql/survey-automation";
+import {
+  SHARED_PALETTE_ACTIONS,
+  getCategorizedActions,
+} from "@/components/shared/automation-flow/action-palette-items";
 import { cn } from "@/lib/utils";
-
-const SURVEY_PALETTE_ACTIONS: {
-  type: SurveyRuleActionType;
-  label: string;
-  desc: string;
-  icon: any;
-  color: string;
-  badge: string;
-}[] = [
-  {
-    type: "ASSIGN_MEMBERSHIP_TIER",
-    label: "Assign Tier",
-    desc: "Reward tier upgrade",
-    icon: Award,
-    color: "from-amber-500 to-amber-600 text-amber-600 bg-amber-500/10 border-amber-500/20",
-    badge: "Reward",
-  },
-  {
-    type: "EMAIL",
-    label: "Send Email",
-    desc: "Email Studio template",
-    icon: Mail,
-    color: "from-indigo-500 to-indigo-600 text-indigo-600 bg-indigo-500/10 border-indigo-500/20",
-    badge: "Email",
-  },
-  {
-    type: "COMMUNITY_JOIN",
-    label: "Join Circle",
-    desc: "Auto-enroll respondent",
-    icon: Users,
-    color: "from-blue-500 to-blue-600 text-blue-600 bg-blue-500/10 border-blue-500/20",
-    badge: "Community",
-  },
-  {
-    type: "NOTIFICATION",
-    label: "Push Alert",
-    desc: "Mobile & bell alert",
-    icon: Bell,
-    color: "from-purple-500 to-purple-600 text-purple-600 bg-purple-500/10 border-purple-500/20",
-    badge: "Alert",
-  },
-  {
-    type: "ADD_MEMBER_TAG",
-    label: "Member Tags",
-    desc: "Tag respondent profile",
-    icon: Tag,
-    color: "from-emerald-500 to-emerald-600 text-emerald-600 bg-emerald-500/10 border-emerald-500/20",
-    badge: "Tagging",
-  },
-];
 
 export const SURVEY_TEMPLATE_RECIPES = [
   {
@@ -401,45 +355,78 @@ export const SurveyNodePalette: React.FC<NodePaletteProps> = ({
                   </button>
                 </div>
 
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-                    Add Action Block
-                  </span>
-                  <div className="space-y-1.5">
-                    {SURVEY_PALETTE_ACTIONS.map((item) => {
-                      const Icon = item.icon;
-                      return (
-                        <button
-                          key={item.type}
-                          type="button"
-                          onClick={() => onAddAction(item.type)}
-                          className="w-full p-2 rounded-xl border border-border bg-card hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-muted/30 text-left transition-all flex items-center justify-between group cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div
+                {/* Available Action Nodes Grouped by Sub-Category / Channel */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                      Action Blocks by Channel
+                    </span>
+                    <span className="text-[9px] font-mono text-muted-foreground">
+                      {SHARED_PALETTE_ACTIONS.length} Actions
+                    </span>
+                  </div>
+
+                  {getCategorizedActions(SHARED_PALETTE_ACTIONS).map((group) => {
+                    const CategoryIcon = group.category.icon;
+                    return (
+                      <div key={group.category.id} className="space-y-1.5">
+                        <div className="flex items-center justify-between px-1 pt-1">
+                          <span className="text-[10.5px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                            <span
                               className={cn(
-                                "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border",
-                                item.color
+                                "w-4 h-4 rounded flex items-center justify-center border",
+                                group.category.color
                               )}
                             >
-                              <Icon className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="min-w-0">
-                              <span className="text-xs font-bold text-foreground block truncate">
-                                {item.label}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground truncate block">
-                                {item.desc}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
-                            <Plus className="w-3 h-3" />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                              <CategoryIcon className="w-2.5 h-2.5" />
+                            </span>
+                            {group.category.label}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground font-mono">
+                            {group.items.length}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          {group.items.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                              <button
+                                key={item.type}
+                                type="button"
+                                onClick={() =>
+                                  onAddAction(item.type as SurveyRuleActionType)
+                                }
+                                className="w-full p-2 rounded-xl border border-border bg-card hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-muted/30 text-left transition-all flex items-center justify-between group cursor-pointer"
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div
+                                    className={cn(
+                                      "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border",
+                                      item.badgeBg
+                                    )}
+                                  >
+                                    <Icon className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <span className="text-xs font-bold text-foreground block truncate">
+                                      {item.label}
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground truncate block">
+                                      {item.desc}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
+                                  <Plus className="w-3 h-3" />
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
@@ -498,18 +485,18 @@ export const SurveyNodePalette: React.FC<NodePaletteProps> = ({
             <Filter className="w-4 h-4" />
           </button>
           <div className="w-6 h-px bg-border my-1" />
-          {SURVEY_PALETTE_ACTIONS.map((item) => {
+          {SHARED_PALETTE_ACTIONS.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.type}
                 type="button"
-                onClick={() => onAddAction(item.type)}
+                onClick={() => onAddAction(item.type as SurveyRuleActionType)}
                 className={cn(
                   "w-9 h-9 rounded-xl flex items-center justify-center hover:scale-105 transition-transform border",
-                  item.color
+                  item.badgeBg
                 )}
-                title={`Add ${item.label}`}
+                title={item.label}
               >
                 <Icon className="w-4 h-4" />
               </button>

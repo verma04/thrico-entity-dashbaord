@@ -91,7 +91,18 @@ export const CustomFlowEdge = memo(
             className="nodrag nopan group flex items-center gap-1"
           >
             {label && (
-              <span className="px-2 py-0.5 rounded-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[9px] font-bold text-muted-foreground shadow-2xs">
+              <span
+                className={cn(
+                  "px-2 py-0.5 rounded-full border text-[9px] font-bold shadow-2xs transition-all flex items-center gap-1",
+                  customData.branch === "yes"
+                    ? "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
+                    : customData.branch === "no"
+                    ? "bg-rose-50 dark:bg-rose-950/80 border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300"
+                    : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-muted-foreground"
+                )}
+              >
+                {customData.branch === "yes" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
+                {customData.branch === "no" && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />}
                 {label}
               </span>
             )}
