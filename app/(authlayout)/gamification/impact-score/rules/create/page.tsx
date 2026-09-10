@@ -48,6 +48,7 @@ export default function CreateImpactRulePage() {
         },
       },
     });
+    router.push("/gamification/impact-score/rules");
   };
 
   const isLoading = modulesLoading || templatesLoading;

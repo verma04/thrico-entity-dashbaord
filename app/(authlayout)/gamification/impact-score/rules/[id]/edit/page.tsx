@@ -75,6 +75,7 @@ export default function EditImpactRulePage() {
         },
       },
     });
+    router.push("/gamification/impact-score/rules");
   };
 
   const isLoading = ruleLoading || modulesLoading || templatesLoading;
