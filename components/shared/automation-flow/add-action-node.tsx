@@ -51,12 +51,12 @@ export const SharedAddActionNode = memo(({ data }: NodeProps<any>) => {
   };
 
   return (
-    <div className="group relative w-[240px]">
+    <div className="group relative w-[180px]">
       <Handle
         type="target"
         position={Position.Top}
         className={cn(
-          "!w-3 !h-3 !border-2 !border-background shadow-xs",
+          "!w-2.5 !h-2.5 !border-2 !border-background shadow-xs",
           isNoBranch ? "!bg-rose-500" : "!bg-emerald-500"
         )}
       />
@@ -66,7 +66,7 @@ export const SharedAddActionNode = memo(({ data }: NodeProps<any>) => {
           <button
             type="button"
             className={cn(
-              "nodrag w-full p-3 rounded-2xl border-2 border-dashed transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-xs group-hover:scale-[1.02] bg-white/60 dark:bg-zinc-900/60",
+              "nodrag w-full p-2 rounded-xl border-2 border-dashed transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs group-hover:scale-[1.02] bg-white/60 dark:bg-zinc-900/60",
               isNoBranch
                 ? "border-rose-300/80 dark:border-rose-900/60 hover:border-rose-500 hover:bg-rose-500/5 text-rose-600 dark:text-rose-400"
                 : "border-emerald-300/80 dark:border-emerald-900/60 hover:border-emerald-500 hover:bg-emerald-500/5 text-emerald-600 dark:text-emerald-400"
@@ -74,15 +74,15 @@ export const SharedAddActionNode = memo(({ data }: NodeProps<any>) => {
           >
             <div
               className={cn(
-                "w-6 h-6 rounded-full flex items-center justify-center",
+                "w-5 h-5 rounded-full flex items-center justify-center",
                 isNoBranch
                   ? "bg-rose-500/10 text-rose-600"
                   : "bg-emerald-500/10 text-emerald-600"
               )}
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3 h-3" />
             </div>
-            <span className="text-xs font-bold">{label}</span>
+            <span className="text-[10.5px] font-bold truncate">{label}</span>
           </button>
         </DropdownMenuTrigger>
 

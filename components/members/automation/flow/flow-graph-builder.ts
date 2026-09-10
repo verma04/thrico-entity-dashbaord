@@ -65,9 +65,9 @@ export const generateAutomationGraph = ({
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  const startX = 60;
-  const columnGap = 60;
-  const branchY = 220;
+  const startX = 50;
+  const columnGap = 40;
+  const branchY = 170;
 
   let currentX = startX;
 
@@ -99,13 +99,13 @@ export const generateAutomationGraph = ({
     // NO path is enabled if marked on branch or if NO actions exist
     const hasNoPath = Boolean(br.hasNoPath || branchNoActions.length > 0);
 
-    const singleColWidth = 320;
-    const subLaneWidth = 280;
-    const subLaneGap = 30;
-    const splitBranchWidth = subLaneWidth * 2 + subLaneGap; // 590px
+    const singleColWidth = 230;
+    const subLaneWidth = 220;
+    const subLaneGap = 20;
+    const splitBranchWidth = subLaneWidth * 2 + subLaneGap; // 460px
 
     const branchWidth = hasNoPath ? splitBranchWidth : singleColWidth;
-    const condNodeWidth = hasNoPath ? 350 : 320;
+    const condNodeWidth = hasNoPath ? 260 : 230;
     const condNodeX = hasNoPath
       ? currentX + (branchWidth - condNodeWidth) / 2
       : currentX;
@@ -207,7 +207,7 @@ export const generateAutomationGraph = ({
     // ── 1. YES Action Chain ───────────────────────────────────────────
     const yesLaneX = hasNoPath ? currentX : currentX;
     let prevYesNodeId = condNodeId;
-    let currentYesY = branchY + 230;
+    let currentYesY = branchY + 175;
 
     branchYesActions.forEach(({ act, originalIndex }, actIdx) => {
       const actId = `node-action-${originalIndex}`;
@@ -269,7 +269,7 @@ export const generateAutomationGraph = ({
       });
 
       prevYesNodeId = actId;
-      currentYesY += 240;
+      currentYesY += 175;
     });
 
     // Add Action Node at end of YES chain
@@ -307,7 +307,7 @@ export const generateAutomationGraph = ({
     if (hasNoPath) {
       const noLaneX = currentX + subLaneWidth + subLaneGap;
       let prevNoNodeId = condNodeId;
-      let currentNoY = branchY + 230;
+      let currentNoY = branchY + 175;
 
       branchNoActions.forEach(({ act, originalIndex }, actIdx) => {
         const actId = `node-action-${originalIndex}`;
@@ -364,7 +364,7 @@ export const generateAutomationGraph = ({
         });
 
         prevNoNodeId = actId;
-        currentNoY += 240;
+        currentNoY += 175;
       });
 
       // Add Action Node at end of NO chain
@@ -430,8 +430,8 @@ export const generateAutomationGraph = ({
   // ── Trigger Node (Centered above all branches) ─────────────────────
   const totalSpan = currentX - startX;
   const triggerCenterX = startX + totalSpan / 2;
-  const triggerX = Math.max(startX, triggerCenterX - 140);
-  const triggerY = 30;
+  const triggerX = Math.max(startX, triggerCenterX - 105);
+  const triggerY = 20;
 
   nodes.unshift({
     id: "node-trigger",
