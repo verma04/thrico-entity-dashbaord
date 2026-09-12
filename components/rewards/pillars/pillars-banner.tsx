@@ -20,12 +20,14 @@ interface PillarsBannerProps {
   totalRedemptions?: number;
   activeCoupons?: number;
   loading?: boolean;
+  showStore?: boolean;
 }
 
 export const PillarsBanner: React.FC<PillarsBannerProps> = ({
   totalRedemptions = 0,
   activeCoupons = 0,
   loading = false,
+  showStore = false,
 }) => {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/40 p-4 sm:p-5 shadow-xs">
@@ -43,21 +45,22 @@ export const PillarsBanner: React.FC<PillarsBannerProps> = ({
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary border border-primary/20">
               <Layers className="h-3 w-3" />
-              Multi-Pillar Engine
+              {showStore ? "Multi-Pillar Engine" : "Voucher Engine"}
             </span>
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <ShieldCheck className="h-2.5 w-2.5" />
-              All 3 Active
+              {showStore ? "All 3 Active" : "Active"}
             </span>
           </div>
 
           <div>
             <h2 className="text-base sm:text-lg lg:text-xl font-extrabold tracking-tight text-foreground leading-snug">
-              3 Foundational Fulfillment Pillars
+              {showStore ? "3 Foundational Fulfillment Pillars" : "Foundational Fulfillment Pillars"}
             </h2>
             <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed max-w-xl">
-              Combine zero-cost internal vouchers, on-win Shopify discount synthesis,
-              and 200+ top brand digital gift cards in one automated pipeline.
+              {showStore
+                ? "Combine zero-cost internal vouchers, on-win Shopify discount synthesis, and 200+ top brand digital gift cards in one automated pipeline."
+                : "Combine zero-cost internal vouchers and 200+ top brand digital gift cards in one automated pipeline."}
             </p>
           </div>
 
@@ -80,22 +83,24 @@ export const PillarsBanner: React.FC<PillarsBannerProps> = ({
               </div>
             </Link>
 
-            <Link href="/gamification/rewards/pillars/store">
-              <div className="group flex items-center gap-1.5 rounded-lg bg-background/80 hover:bg-indigo-500/10 border border-border/80 hover:border-indigo-500/30 px-2.5 py-1 transition-all cursor-pointer shadow-2xs">
-                <div className="h-4 w-4 rounded bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                  <ShoppingBag className="h-2.5 w-2.5" />
+            {showStore && (
+              <Link href="/gamification/rewards/pillars/store">
+                <div className="group flex items-center gap-1.5 rounded-lg bg-background/80 hover:bg-indigo-500/10 border border-border/80 hover:border-indigo-500/30 px-2.5 py-1 transition-all cursor-pointer shadow-2xs">
+                  <div className="h-4 w-4 rounded bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <ShoppingBag className="h-2.5 w-2.5" />
+                  </div>
+                  <div className="text-left">
+                    <span className="text-[9px] font-bold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 block leading-tight">
+                      Pillar 2: E-Commerce
+                    </span>
+                    <span className="text-[8px] text-muted-foreground block leading-none">
+                      Shopify
+                    </span>
+                  </div>
+                  <ArrowRight className="h-2.5 w-2.5 text-muted-foreground group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all ml-0.5" />
                 </div>
-                <div className="text-left">
-                  <span className="text-[9px] font-bold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 block leading-tight">
-                    Pillar 2: E-Commerce
-                  </span>
-                  <span className="text-[8px] text-muted-foreground block leading-none">
-                    Shopify
-                  </span>
-                </div>
-                <ArrowRight className="h-2.5 w-2.5 text-muted-foreground group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all ml-0.5" />
-              </div>
-            </Link>
+              </Link>
+            )}
 
             <Link href="/gamification/rewards/pillars/gift-cards">
               <div className="group flex items-center gap-1.5 rounded-lg bg-background/80 hover:bg-violet-500/10 border border-border/80 hover:border-violet-500/30 px-2.5 py-1 transition-all cursor-pointer shadow-2xs">

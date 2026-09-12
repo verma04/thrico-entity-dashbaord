@@ -23,11 +23,13 @@ import { cn } from "@/lib/utils";
 interface ComparisonTableProps {
   onSelectPillar?: (pillarId: "manual" | "store" | "giftcards") => void;
   activePillar?: string;
+  showStore?: boolean;
 }
 
 export const PillarsComparisonTable: React.FC<ComparisonTableProps> = ({
   onSelectPillar,
   activePillar,
+  showStore = false,
 }) => {
   const pillars = [
     {
@@ -45,21 +47,25 @@ export const PillarsComparisonTable: React.FC<ComparisonTableProps> = ({
       highlights: ["Static & batch vouchers", "TC & Entity coins", "Badges & event passes"],
       idealFor: "Community engagement & gamification burn loops",
     },
-    {
-      id: "store",
-      number: "Pillar 2",
-      name: "E-Commerce",
-      badge: "Shopify Store",
-      badgeColor: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200/60",
-      icon: ShoppingBag,
-      iconColor: "text-indigo-600 dark:text-indigo-400 bg-indigo-100/60 dark:bg-indigo-950/60",
-      source: "Connected Shopify Store",
-      fulfillment: "Unique, on-demand store discounts",
-      funding: "Merchant-funded",
-      speed: "On-Win API",
-      highlights: ["₹100, ₹500 fixed discounts", "10%, 20% order rules", "Free shipping codes"],
-      idealFor: "Direct sales uplift & store conversions",
-    },
+    ...(showStore
+      ? [
+          {
+            id: "store",
+            number: "Pillar 2",
+            name: "E-Commerce",
+            badge: "Shopify Store",
+            badgeColor: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200/60",
+            icon: ShoppingBag,
+            iconColor: "text-indigo-600 dark:text-indigo-400 bg-indigo-100/60 dark:bg-indigo-950/60",
+            source: "Connected Shopify Store",
+            fulfillment: "Unique, on-demand store discounts",
+            funding: "Merchant-funded",
+            speed: "On-Win API",
+            highlights: ["₹100, ₹500 fixed discounts", "10%, 20% order rules", "Free shipping codes"],
+            idealFor: "Direct sales uplift & store conversions",
+          },
+        ]
+      : []),
     {
       id: "giftcards",
       number: "Pillar 3",
@@ -87,7 +93,7 @@ export const PillarsComparisonTable: React.FC<ComparisonTableProps> = ({
           </h4>
         </div>
         <span className="text-[10px] font-medium text-muted-foreground">
-          3 Foundational Fulfillment Mechanisms
+          {pillars.length} Foundational Fulfillment Mechanisms
         </span>
       </div>
 

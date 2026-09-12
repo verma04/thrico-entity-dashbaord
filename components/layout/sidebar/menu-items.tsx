@@ -105,6 +105,7 @@ import {
   useCheckEntitySubscription,
   useHasAnyIntegration,
 } from "@/graphql/actions";
+import { useGetShopifyConnection } from "@/graphql/actions/settings/shopify";
 import { useUserStore } from "@/store/store";
 import { hasUserModulePermission } from "@/hooks/use-module-permission";
 
@@ -1227,7 +1228,16 @@ export const useFilteredExtendedItems = () => {
   const { data, loading: subLoading } = useCheckEntitySubscription();
   const { data: integrationsData, loading: integrationsLoading } =
     useHasAnyIntegration();
+  const { data: shopifyData } = useGetShopifyConnection();
   const user = useUserStore((state) => state.user);
+
+  const isShopifyConnected = Boolean(
+    shopifyData?.shopifyConnection &&
+      shopifyData.shopifyConnection.status !== "DISCONNECTED" &&
+      (shopifyData.shopifyConnection.status === "CONNECTED" ||
+        Boolean(shopifyData.shopifyConnection.shopDomain) ||
+        shopifyData.shopifyConnection.isActive)
+  );
 
   const filterItems = (
     items: any[],
@@ -1335,6 +1345,16 @@ export const useFilteredExtendedItems = () => {
         });
       }
 
+      // Filter out E-Commerce Store pillar under Reward Pillars when Shopify integration is off
+      if (mappedChildren) {
+        mappedChildren = mappedChildren.filter((child: any) => {
+          if (child.key === "rew-pillars-store") {
+            return isShopifyConnected;
+          }
+          return true;
+        });
+      }
+
       const mappedItem = {
         ...item,
         label:
@@ -1404,7 +1424,7 @@ export const useFilteredExtendedItems = () => {
   );
   const filteredGamification = useMemo(
     () => filterItems(gamificationEngine, false, true),
-    [data, user],
+    [data, user, isShopifyConnected],
   );
   const filteredModules = useMemo(
     () => filterItems(modules, false, true),

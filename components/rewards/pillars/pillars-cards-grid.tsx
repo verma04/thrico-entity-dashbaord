@@ -18,6 +18,7 @@ interface PillarsCardsGridProps {
   giftCardsCount?: number;
   walletBalance?: number;
   loading?: boolean;
+  showStore?: boolean;
 }
 
 export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
@@ -26,6 +27,7 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
   giftCardsCount = 0,
   walletBalance = 0,
   loading = false,
+  showStore = false,
 }) => {
   const cards = [
     {
@@ -53,31 +55,35 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
       badgeBg: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
       btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
     },
-    {
-      id: "store",
-      number: "Pillar 2",
-      name: "Connected E-Commerce",
-      subtitle: "Shopify Discounts",
-      description:
-        "Dynamically synthesize unique one-time cart discount codes via store API directly when a member wins an interaction.",
-      icon: ShoppingBag,
-      href: "/gamification/rewards/pillars/store",
-      badge: "Merchant Funded",
-      stats: [
-        { label: "Rules / Codes", value: storeCount.toString() },
-        { label: "Conversion Lift", value: "+38%" },
-        { label: "Speed", value: "<150ms" },
-      ],
-      highlights: [
-        "Fixed ₹ & % Off Discounts",
-        "Minimum Cart Value Conditions",
-        "Automatic Expiry & Single-Use",
-      ],
-      borderHover: "hover:border-indigo-500/50 hover:shadow-indigo-500/10",
-      iconBg: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30",
-      badgeBg: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
-      btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
-    },
+    ...(showStore
+      ? [
+          {
+            id: "store",
+            number: "Pillar 2",
+            name: "Connected E-Commerce",
+            subtitle: "Shopify Discounts",
+            description:
+              "Dynamically synthesize unique one-time cart discount codes via store API directly when a member wins an interaction.",
+            icon: ShoppingBag,
+            href: "/gamification/rewards/pillars/store",
+            badge: "Merchant Funded",
+            stats: [
+              { label: "Rules / Codes", value: storeCount.toString() },
+              { label: "Conversion Lift", value: "+38%" },
+              { label: "Speed", value: "<150ms" },
+            ],
+            highlights: [
+              "Fixed ₹ & % Off Discounts",
+              "Minimum Cart Value Conditions",
+              "Automatic Expiry & Single-Use",
+            ],
+            borderHover: "hover:border-indigo-500/50 hover:shadow-indigo-500/10",
+            iconBg: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30",
+            badgeBg: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+            btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground",
+          },
+        ]
+      : []),
     {
       id: "giftcards",
       number: "Pillar 3",
@@ -106,7 +112,7 @@ export const PillarsCardsGrid: React.FC<PillarsCardsGridProps> = ({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+    <div className={cn("grid gap-3.5", cards.length === 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-3")}>
       {cards.map((card) => {
         const Icon = card.icon;
 

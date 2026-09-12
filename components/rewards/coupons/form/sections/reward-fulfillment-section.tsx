@@ -16,6 +16,7 @@ import { PolarisFormCard } from "@/components/gamification/shared/polaris-form-u
 import { PillarManualSection } from "./pillars/pillar-manual-section";
 import { PillarStoreSection } from "./pillars/pillar-store-section";
 import { PillarGiftCardSection } from "./pillars/pillar-gift-card-section";
+import { useGetShopifyConnection } from "@/graphql/actions/settings/shopify";
 import { cn } from "@/lib/utils";
 
 interface RewardFulfillmentSectionProps {
@@ -47,6 +48,15 @@ export function RewardFulfillmentSection({
   walletBalance,
   err,
 }: RewardFulfillmentSectionProps) {
+  const { data: shopifyData } = useGetShopifyConnection();
+  const isShopifyConnected = Boolean(
+    shopifyData?.shopifyConnection &&
+      shopifyData.shopifyConnection.status !== "DISCONNECTED" &&
+      (shopifyData.shopifyConnection.status === "CONNECTED" ||
+        Boolean(shopifyData.shopifyConnection.shopDomain) ||
+        shopifyData.shopifyConnection.isActive)
+  );
+
   const PILLARS = [
     {
       id: "INTERNAL" as const,
@@ -58,16 +68,20 @@ export function RewardFulfillmentSection({
       bgColor: "bg-emerald-500/10",
       activeBorder: "border-emerald-600 ring-1 ring-emerald-600/30 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-xs",
     },
-    {
-      id: "ECOMMERCE" as const,
-      title: "Pillar 2: Store Discounts",
-      subtitle: "On-demand Shopify single-use win codes",
-      countLabel: `${storeRules.length} rules`,
-      icon: ShoppingBag,
-      color: "text-indigo-600 dark:text-indigo-400",
-      bgColor: "bg-indigo-500/10",
-      activeBorder: "border-indigo-600 ring-1 ring-indigo-600/30 bg-indigo-50/20 dark:bg-indigo-950/20 shadow-xs",
-    },
+    ...(isShopifyConnected
+      ? [
+          {
+            id: "ECOMMERCE" as const,
+            title: "Pillar 2: Store Discounts",
+            subtitle: "On-demand Shopify single-use win codes",
+            countLabel: `${storeRules.length} rules`,
+            icon: ShoppingBag,
+            color: "text-indigo-600 dark:text-indigo-400",
+            bgColor: "bg-indigo-500/10",
+            activeBorder: "border-indigo-600 ring-1 ring-indigo-600/30 bg-indigo-50/20 dark:bg-indigo-950/20 shadow-xs",
+          },
+        ]
+      : []),
     {
       id: "DIGITAL_GIFT_CARD" as const,
       title: "Pillar 3: Digital Gift Cards",
@@ -98,7 +112,7 @@ export function RewardFulfillmentSection({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className={cn("grid grid-cols-1 gap-2.5", PILLARS.length <= 2 ? "sm:grid-cols-2" : "sm:grid-cols-3")}>
           {PILLARS.map((pillar) => {
             const isSelected = currentPillar === pillar.id;
             const Icon = pillar.icon;

@@ -26,6 +26,7 @@ import {
   useGetDigitalCardRules,
   useGetEntityRewardWallet,
 } from "@/graphql/actions/rewards/gift-cards";
+import { useGetShopifyConnection } from "@/graphql/actions/settings/shopify";
 import { TRY_AGAIN_PRESETS } from "@/components/rewards/shared/engagement-game-reward-types";
 import { cn } from "@/lib/utils";
 
@@ -111,6 +112,15 @@ export function DeliveryFulfillmentSection({
 
   const { data: walletData } = useGetEntityRewardWallet();
   const walletBalance = walletData?.getEntityRewardWallet?.balance ?? 0;
+
+  const { data: shopifyData } = useGetShopifyConnection();
+  const isShopifyConnected = Boolean(
+    shopifyData?.shopifyConnection &&
+      shopifyData.shopifyConnection.status !== "DISCONNECTED" &&
+      (shopifyData.shopifyConnection.status === "CONNECTED" ||
+        Boolean(shopifyData.shopifyConnection.shopDomain) ||
+        shopifyData.shopifyConnection.isActive)
+  );
 
   // ── Game vs Coupon Mode ───────────────────────────────────────────────────
   const isGameMode = allowPoints || allowTryAgain;
@@ -249,19 +259,20 @@ export function DeliveryFulfillmentSection({
       });
     }
 
-    list.push(
-      {
-        id: "INTERNAL",
-        title: "Pillar 1: Internal Vouchers",
-        subtitle: "1:1 serial pools or single promo codes",
-        countLabel: `${manualVouchers.length} vouchers`,
-        icon: Ticket,
-        color: "text-emerald-600 dark:text-emerald-400",
-        bgColor: "bg-emerald-500/10",
-        activeBorder:
-          "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
-      },
-      {
+    list.push({
+      id: "INTERNAL",
+      title: "Pillar 1: Internal Vouchers",
+      subtitle: "1:1 serial pools or single promo codes",
+      countLabel: `${manualVouchers.length} vouchers`,
+      icon: Ticket,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bgColor: "bg-emerald-500/10",
+      activeBorder:
+        "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
+    });
+
+    if (isShopifyConnected) {
+      list.push({
         id: "ECOMMERCE",
         title: "Pillar 2: Store Discounts",
         subtitle: "On-demand Shopify single-use codes",
@@ -271,19 +282,20 @@ export function DeliveryFulfillmentSection({
         bgColor: "bg-indigo-500/10",
         activeBorder:
           "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
-      },
-      {
-        id: "DIGITAL_GIFT_CARD",
-        title: "Pillar 3: Digital Gift Cards",
-        subtitle: "Amazon, Swiggy, Flipkart API cards",
-        countLabel: `${digitalCardRules.length} offers`,
-        icon: Gift,
-        color: "text-violet-600 dark:text-violet-400",
-        bgColor: "bg-violet-500/10",
-        activeBorder:
-          "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
-      },
-    );
+      });
+    }
+
+    list.push({
+      id: "DIGITAL_GIFT_CARD",
+      title: "Pillar 3: Digital Gift Cards",
+      subtitle: "Amazon, Swiggy, Flipkart API cards",
+      countLabel: `${digitalCardRules.length} offers`,
+      icon: Gift,
+      color: "text-violet-600 dark:text-violet-400",
+      bgColor: "bg-violet-500/10",
+      activeBorder:
+        "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-xs",
+    });
 
     return list;
   }, [
@@ -294,6 +306,7 @@ export function DeliveryFulfillmentSection({
     manualVouchers.length,
     storeRules.length,
     digitalCardRules.length,
+    isShopifyConnected,
   ]);
 
   const cardTitle =

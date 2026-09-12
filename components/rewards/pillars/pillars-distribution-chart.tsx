@@ -23,6 +23,7 @@ interface PillarsDistributionChartProps {
   storeCount?: number;
   giftCardsCount?: number;
   loading?: boolean;
+  showStore?: boolean;
 }
 
 export function PillarsDistributionChart({
@@ -30,13 +31,14 @@ export function PillarsDistributionChart({
   storeCount = 0,
   giftCardsCount = 0,
   loading = false,
+  showStore = false,
 }: PillarsDistributionChartProps) {
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
 
-  const totalRewards = manualCount + storeCount + giftCardsCount;
+  const totalRewards = manualCount + (showStore ? storeCount : 0) + giftCardsCount;
 
   const chartData = React.useMemo(() => {
-    return [
+    const list = [
       {
         id: "manual",
         name: "Pillar 1: Manual",
@@ -49,7 +51,10 @@ export function PillarsDistributionChart({
         tag: "Zero Cost",
         tagClass: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
       },
-      {
+    ];
+
+    if (showStore) {
+      list.push({
         id: "store",
         name: "Pillar 2: E-Commerce",
         shortName: "Store Discounts",
@@ -60,21 +65,24 @@ export function PillarsDistributionChart({
         funding: "Merchant Funded (Shopify)",
         tag: "Merchant Funded",
         tagClass: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
-      },
-      {
-        id: "giftcards",
-        name: "Pillar 3: Gift Cards",
-        shortName: "Brand Gift Cards",
-        value: giftCardsCount,
-        percentage: totalRewards > 0 ? (giftCardsCount / totalRewards) * 100 : 0,
-        color: "#a855f7",
-        icon: Gift,
-        funding: "Prepaid Wallet (Brands)",
-        tag: "Prepaid Wallet",
-        tagClass: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-      },
-    ];
-  }, [manualCount, storeCount, giftCardsCount, totalRewards]);
+      });
+    }
+
+    list.push({
+      id: "giftcards",
+      name: "Pillar 3: Gift Cards",
+      shortName: "Brand Gift Cards",
+      value: giftCardsCount,
+      percentage: totalRewards > 0 ? (giftCardsCount / totalRewards) * 100 : 0,
+      color: "#a855f7",
+      icon: Gift,
+      funding: "Prepaid Wallet (Brands)",
+      tag: "Prepaid Wallet",
+      tagClass: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+    });
+
+    return list;
+  }, [manualCount, storeCount, giftCardsCount, totalRewards, showStore]);
 
   // Placeholder data when total is 0 so the donut ring renders cleanly
   const renderData =
@@ -110,13 +118,13 @@ export function PillarsDistributionChart({
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Volume distribution across 3 mechanisms
+            {showStore ? "Volume distribution across 3 fulfillment pillars" : "Volume distribution across active pillars"}
           </p>
         </div>
 
         <div className="flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
           <ShieldCheck className="h-2.5 w-2.5" />
-          {totalRewards > 0 ? "3 Active Pillars" : "Ready"}
+          {totalRewards > 0 ? (showStore ? "3 Active Pillars" : "2 Active Pillars") : "Ready"}
         </div>
       </CardHeader>
 

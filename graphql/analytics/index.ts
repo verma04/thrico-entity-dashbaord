@@ -6,3 +6,5 @@ export * from "./churnRisk";
 export * from "./sessionAnalytics";
 export * from "./userAnalytics";
 export * from "./aiAnalytics";
+export * from "./analytics360";
+

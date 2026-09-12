@@ -29,6 +29,8 @@ import {
   SlidersHorizontal,
   X,
   FileText,
+  Table as TableIcon,
+  LayoutGrid,
 } from "lucide-react";
 
 /* ── Types ───────────────────────────────────────────────────────────────── */
@@ -131,7 +133,6 @@ const CATEGORY_CONFIG: Record<
     badgeBg: string;
     badgeText: string;
     border: string;
-    glow: string;
   }
 > = {
   ALL: {
@@ -140,7 +141,6 @@ const CATEGORY_CONFIG: Record<
     badgeBg: "bg-slate-100 dark:bg-slate-800",
     badgeText: "text-slate-700 dark:text-slate-200",
     border: "border-slate-200 dark:border-slate-700",
-    glow: "hover:border-slate-300 dark:hover:border-slate-600",
   },
   COMMERCE: {
     label: "Commerce",
@@ -148,7 +148,6 @@ const CATEGORY_CONFIG: Record<
     badgeBg: "bg-emerald-50 dark:bg-emerald-950/40",
     badgeText: "text-emerald-700 dark:text-emerald-300",
     border: "border-emerald-200 dark:border-emerald-900/50",
-    glow: "hover:border-emerald-300 dark:hover:border-emerald-700",
   },
   COMMUNITY: {
     label: "Community",
@@ -156,7 +155,6 @@ const CATEGORY_CONFIG: Record<
     badgeBg: "bg-violet-50 dark:bg-violet-950/40",
     badgeText: "text-violet-700 dark:text-violet-300",
     border: "border-violet-200 dark:border-violet-900/50",
-    glow: "hover:border-violet-300 dark:hover:border-violet-700",
   },
   EVENTS: {
     label: "Events",
@@ -164,7 +162,6 @@ const CATEGORY_CONFIG: Record<
     badgeBg: "bg-blue-50 dark:bg-blue-950/40",
     badgeText: "text-blue-700 dark:text-blue-300",
     border: "border-blue-200 dark:border-blue-900/50",
-    glow: "hover:border-blue-300 dark:hover:border-blue-700",
   },
   GAMIFICATION: {
     label: "Gamification",
@@ -172,31 +169,27 @@ const CATEGORY_CONFIG: Record<
     badgeBg: "bg-amber-50 dark:bg-amber-950/40",
     badgeText: "text-amber-700 dark:text-amber-300",
     border: "border-amber-200 dark:border-amber-900/50",
-    glow: "hover:border-amber-300 dark:hover:border-amber-700",
   },
   WEB: {
-    label: "Web & Forms",
+    label: "Web & Telemetry",
     icon: Globe,
     badgeBg: "bg-cyan-50 dark:bg-cyan-950/40",
     badgeText: "text-cyan-700 dark:text-cyan-300",
     border: "border-cyan-200 dark:border-cyan-900/50",
-    glow: "hover:border-cyan-300 dark:hover:border-cyan-700",
   },
   EMAIL: {
-    label: "Email & Outreach",
+    label: "Email & Mail",
     icon: Mail,
     badgeBg: "bg-sky-50 dark:bg-sky-950/40",
     badgeText: "text-sky-700 dark:text-sky-300",
     border: "border-sky-200 dark:border-sky-900/50",
-    glow: "hover:border-sky-300 dark:hover:border-sky-700",
   },
   AUTH: {
-    label: "Auth & Sessions",
+    label: "Auth & Access",
     icon: LogIn,
     badgeBg: "bg-indigo-50 dark:bg-indigo-950/40",
     badgeText: "text-indigo-700 dark:text-indigo-300",
     border: "border-indigo-200 dark:border-indigo-900/50",
-    glow: "hover:border-indigo-300 dark:hover:border-indigo-700",
   },
   OTHER: {
     label: "System",
@@ -204,7 +197,6 @@ const CATEGORY_CONFIG: Record<
     badgeBg: "bg-slate-100 dark:bg-slate-800",
     badgeText: "text-slate-700 dark:text-slate-300",
     border: "border-slate-200 dark:border-slate-700",
-    glow: "hover:border-slate-300 dark:hover:border-slate-600",
   },
 };
 
@@ -216,7 +208,7 @@ function formatEventDetails(act: ActivityStreamItem) {
 
   let title = act.summary || act.eventType.replace(/_/g, " ");
   let subtitle = "";
-  let highlights: Array<{ label: string; value: string; variant?: "default" | "secondary" | "outline" }> = [];
+  let highlights: Array<{ label: string; value: string }> = [];
 
   // Commerce
   if (ev === "ORDER_COMPLETED" || ev.includes("ORDER") || ev.includes("PURCHASE")) {
@@ -236,12 +228,12 @@ function formatEventDetails(act: ActivityStreamItem) {
   // Community Posts & Comments
   else if (ev === "POST_CREATED" || ev === "COMMUNITY_POST_CREATED") {
     title = props.title ? `Published Post: "${props.title}"` : "Published Community Post";
-    if (props.content) subtitle = props.content.slice(0, 90) + (props.content.length > 90 ? "..." : "");
+    if (props.content) subtitle = props.content.slice(0, 80) + (props.content.length > 80 ? "..." : "");
     if (props.channelName) highlights.push({ label: "Channel", value: props.channelName });
   } else if (ev === "COMMENT_CREATED" || ev === "COMMUNITY_COMMENT_CREATED") {
     title = "Commented on Discussion";
     if (props.text || props.content) {
-      subtitle = `"${(props.text || props.content).slice(0, 90)}${(props.text || props.content).length > 90 ? "..." : ""}"`;
+      subtitle = `"${(props.text || props.content).slice(0, 80)}${(props.text || props.content).length > 80 ? "..." : ""}"`;
     }
   }
   // Events
@@ -261,17 +253,17 @@ function formatEventDetails(act: ActivityStreamItem) {
     highlights.push({ label: "Reward", value: `+${pts} pts` });
   } else if (ev.includes("BADGE")) {
     title = props.badgeName ? `Unlocked Badge: ${props.badgeName}` : "Unlocked Achievement Badge";
-    highlights.push({ label: "Achievement", value: props.badgeName || "Badge" });
+    highlights.push({ label: "Badge", value: props.badgeName || "Badge" });
   }
   // Web telemetry
   else if (ev === "PAGE_VIEW" || ev === "WEB_PAGE_VIEW") {
     const pageTitle = props.page_title || props.title;
     const pageUrl = props.page_url || props.url || props.path;
-    title = pageTitle ? `Viewed Page: ${pageTitle}` : pageUrl ? `Visited ${pageUrl}` : "Viewed Website Page";
+    title = pageTitle ? `Viewed: ${pageTitle}` : pageUrl ? `Visited ${pageUrl}` : "Viewed Web Page";
     if (pageUrl && pageTitle) subtitle = pageUrl;
-    if (props.referrer) highlights.push({ label: "Referrer", value: props.referrer });
+    if (props.referrer) highlights.push({ label: "Ref", value: props.referrer });
   } else if (ev === "WEB_CLICK") {
-    title = `Clicked ${props.text || props.tag || "Element"}`;
+    title = `Clicked: ${props.text || props.tag || "Element"}`;
     if (props.target || props.href) subtitle = props.target || props.href;
   } else if (ev === "WEB_SCROLL") {
     title = `Scrolled Page (${props.depthPercent || props.depth || 0}%)`;
@@ -281,9 +273,8 @@ function formatEventDetails(act: ActivityStreamItem) {
     if (props.page_url) subtitle = props.page_url;
   }
 
-  // Fallback subtitle if empty
   if (!subtitle && act.entityId) {
-    subtitle = `Target ID: ${act.entityId}`;
+    subtitle = `ID: ${act.entityId}`;
   }
 
   return { title, subtitle, highlights };
@@ -312,7 +303,7 @@ function CopyButton({
       variant="ghost"
       size="sm"
       className={cn(
-        "h-6 px-1.5 text-xs text-muted-foreground hover:text-foreground transition-all",
+        "h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-all gap-1",
         copied && "text-emerald-600 dark:text-emerald-400 font-medium",
       )}
       onClick={handleCopy}
@@ -320,50 +311,28 @@ function CopyButton({
     >
       {copied ? (
         <>
-          <Check className="h-3 w-3 mr-1 text-emerald-500" />
-          <span className="text-[10px]">Copied</span>
+          <Check className="h-2.5 w-2.5 text-emerald-500" />
+          <span>Copied</span>
         </>
       ) : (
         <>
-          <Copy className="h-3 w-3 mr-1 opacity-70" />
-          <span className="text-[10px]">{label}</span>
+          <Copy className="h-2.5 w-2.5 opacity-70" />
+          <span>{label}</span>
         </>
       )}
     </Button>
   );
 }
 
-/* ── Single Event Row with Expandable Drawer ─────────────────────────────── */
+/* ── Expandable Event Detail Drawer ──────────────────────────────────────── */
 
-interface ActivityEventItemProps {
-  activity: ActivityStreamItem;
-  isExpanded: boolean;
-  onToggle: () => void;
-  key?: React.Key;
-}
-
-function ActivityEventItem({
-  activity,
-  isExpanded,
-  onToggle,
-}: ActivityEventItemProps) {
-  const category = getEventCategory(activity.eventType, activity.entityType);
-  const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.OTHER;
-  const CategoryIcon = cfg.icon;
-  const { title, subtitle, highlights } = formatEventDetails(activity);
+function ActivityEventDetailDrawer({ activity }: { activity: ActivityStreamItem }) {
   const props = activity.properties || {};
-
-  // Formatted date values
-  const relativeTime = safeFormatDistanceToNow(activity.timestamp, { addSuffix: true });
   const exactDate = safeFormat(activity.timestamp, "PPP 'at' pp", "Recent");
-  const shortDate = safeFormat(activity.timestamp, "MMM d, h:mm a");
-
-  // Page link if available
+  const relativeTime = safeFormatDistanceToNow(activity.timestamp, { addSuffix: true });
   const pageUrl = props.page_url || props.url || props.pageUrl;
   const pageTitle = props.page_title || props.pageTitle;
-  const sourceChannel = props.source || "web";
 
-  // Filter out properties already highlighted to show clean extra key-values
   const extraProps = useMemo(() => {
     const hiddenKeys = new Set([
       "page_url",
@@ -378,271 +347,114 @@ function ActivityEventItem({
   }, [props]);
 
   return (
-    <div
-      className={cn(
-        "border rounded-xl transition-all duration-200 overflow-hidden",
-        isExpanded
-          ? "bg-card shadow-sm border-primary/30 dark:border-primary/20 ring-1 ring-primary/10"
-          : "bg-card/60 hover:bg-muted/30 border-border/50",
-      )}
-    >
-      {/* ── Row Header (Click to toggle) ── */}
-      <div
-        onClick={onToggle}
-        className="flex items-start justify-between gap-3 p-3.5 sm:p-4 cursor-pointer select-none group"
-      >
-        <div className="flex items-start gap-3 min-w-0 flex-1">
-          {/* Categorized Icon */}
-          <div
-            className={cn(
-              "h-8 w-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border shadow-2xs transition-transform group-hover:scale-105",
-              cfg.badgeBg,
-              cfg.border,
-            )}
-          >
-            <CategoryIcon className={cn("h-4 w-4", cfg.badgeText)} />
-          </div>
-
-          {/* Core Content */}
-          <div className="min-w-0 flex-1 space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs sm:text-sm font-semibold text-foreground tracking-tight">
-                {title}
-              </span>
-
-              {/* Category Badge */}
-              <Badge
-                variant="outline"
-                className={cn(
-                  "text-[10px] font-medium px-2 py-0 h-4.5 rounded-md shrink-0 border",
-                  cfg.badgeBg,
-                  cfg.badgeText,
-                  cfg.border,
-                )}
-              >
-                {cfg.label}
-              </Badge>
-
-              {/* Entity Type Badge */}
-              {activity.entityType && (
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] px-1.5 py-0 h-4 font-normal text-muted-foreground shrink-0 uppercase tracking-wider"
-                >
-                  {activity.entityType}
-                </Badge>
-              )}
-
-              {/* Source Pill */}
-              {sourceChannel && (
-                <span className="text-[10px] text-muted-foreground/80 font-mono px-1.5 py-0.5 rounded bg-muted/60 shrink-0">
-                  {sourceChannel}
-                </span>
-              )}
-            </div>
-
-            {/* Subtitle / Context Snippet */}
-            {subtitle && (
-              <p className="text-xs text-muted-foreground line-clamp-1 break-all">
-                {subtitle}
-              </p>
-            )}
-
-            {/* Quick Property Highlight Badges */}
-            {highlights.length > 0 && (
-              <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
-                {highlights.map((h, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md font-medium bg-muted/70 text-foreground/90 border border-border/60"
-                  >
-                    <span className="text-muted-foreground">{h.label}:</span>
-                    <span className="font-semibold">{h.value}</span>
-                  </span>
-                ))}
-              </div>
-            )}
+    <div className="p-3 sm:p-4 bg-muted/15 border-t border-border/40 space-y-3 animate-in fade-in-50 duration-200">
+      {/* 1. Metadata Specs Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="p-2 rounded-md bg-card border border-border/50">
+          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">
+            Event Type
+          </span>
+          <div className="flex items-center justify-between gap-1 mt-0.5">
+            <span className="text-xs font-mono font-bold truncate text-foreground">
+              {activity.eventType}
+            </span>
+            <CopyButton text={activity.eventType} label="Copy" />
           </div>
         </div>
 
-        {/* Timestamp & Expand Button */}
-        <div className="flex items-center gap-2 shrink-0 ml-1">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-right flex items-center gap-1 text-muted-foreground text-xs font-medium cursor-help">
-                  <Clock className="h-3 w-3 opacity-60" />
-                  <span className="hidden sm:inline">{relativeTime}</span>
-                  <span className="sm:hidden">{shortDate}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p className="text-xs font-medium">{exactDate}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <div className="p-2 rounded-md bg-card border border-border/50">
+          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">
+            Target Entity ({activity.entityType || "Generic"})
+          </span>
+          <div className="flex items-center justify-between gap-1 mt-0.5">
+            <span className="text-xs font-mono truncate text-foreground" title={activity.entityId}>
+              {activity.entityId || "N/A"}
+            </span>
+            {activity.entityId && <CopyButton text={activity.entityId} label="Copy" />}
+          </div>
+        </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 rounded-lg text-muted-foreground group-hover:text-foreground group-hover:bg-muted/80 transition-colors"
-          >
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </Button>
+        <div className="p-2 rounded-md bg-card border border-border/50">
+          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">
+            Timestamp
+          </span>
+          <div className="mt-0.5">
+            <span className="text-xs font-medium text-foreground block truncate">
+              {exactDate}
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {relativeTime}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* ── Expanded Details Panel ── */}
-      {isExpanded && (
-        <div className="border-t border-border/50 bg-muted/15 p-4 sm:p-5 space-y-4 animate-in fade-in-50 duration-200">
-          {/* Metadata Specs Grid */}
-          <div>
-            <h5 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
-              <SlidersHorizontal className="h-3 w-3" /> Event Telemetry Metadata
-            </h5>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-              {/* Event Type */}
-              <div className="p-2.5 rounded-lg bg-card border border-border/60 flex flex-col justify-between">
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">
-                  Event Type
-                </span>
-                <div className="flex items-center justify-between gap-1 mt-1">
-                  <span className="text-xs font-mono font-bold truncate text-foreground">
-                    {activity.eventType}
-                  </span>
-                  <CopyButton text={activity.eventType} label="Type" />
-                </div>
-              </div>
-
-              {/* Entity Target */}
-              <div className="p-2.5 rounded-lg bg-card border border-border/60 flex flex-col justify-between">
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">
-                  Entity ID ({activity.entityType || "Generic"})
-                </span>
-                <div className="flex items-center justify-between gap-1 mt-1">
-                  <span className="text-xs font-mono truncate text-foreground" title={activity.entityId}>
-                    {activity.entityId || "N/A"}
-                  </span>
-                  {activity.entityId && (
-                    <CopyButton text={activity.entityId} label="ID" />
-                  )}
-                </div>
-              </div>
-
-              {/* Timestamp */}
-              <div className="p-2.5 rounded-lg bg-card border border-border/60 flex flex-col justify-between">
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">
-                  Event Timestamp
-                </span>
-                <div className="mt-1">
-                  <span className="text-xs font-medium text-foreground block truncate">
-                    {exactDate}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {relativeTime}
-                  </span>
-                </div>
-              </div>
-            </div>
+      {/* 2. Web & Page Context (If Available) */}
+      {(pageUrl || pageTitle) && (
+        <div className="p-2.5 rounded-md bg-card border border-border/50 flex items-center justify-between gap-2 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+              <Globe className="h-3 w-3 text-cyan-500" /> Web Context
+            </span>
+            {pageTitle && <p className="text-xs font-semibold text-foreground truncate mt-0.5">{pageTitle}</p>}
+            {pageUrl && <p className="text-[10px] font-mono text-muted-foreground truncate">{pageUrl}</p>}
           </div>
+          {pageUrl && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 text-[10px] px-2 gap-1 shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(pageUrl, "_blank", "noopener,noreferrer");
+              }}
+            >
+              <ExternalLink className="h-2.5 w-2.5" />
+              Visit
+            </Button>
+          )}
+        </div>
+      )}
 
-          {/* Web / Page Context (If Available) */}
-          {(pageUrl || pageTitle) && (
-            <div className="p-3 rounded-lg bg-card border border-border/60 space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                <Globe className="h-3 w-3 text-cyan-500" /> Page & Navigation Context
-              </span>
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="min-w-0 flex-1">
-                  {pageTitle && (
-                    <p className="text-xs font-semibold text-foreground truncate">
-                      {pageTitle}
-                    </p>
-                  )}
-                  {pageUrl && (
-                    <p className="text-[11px] font-mono text-muted-foreground truncate">
-                      {pageUrl}
-                    </p>
-                  )}
+      {/* 3. Event Properties (If any) */}
+      {extraProps.length > 0 && (
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <FileText className="h-3 w-3" /> Event Properties ({extraProps.length})
+          </span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
+            {extraProps.map(([key, val]) => {
+              const displayVal = typeof val === "object" && val !== null ? JSON.stringify(val) : String(val);
+              return (
+                <div key={key} className="p-1.5 rounded bg-card border border-border/40 text-xs">
+                  <span className="text-[9px] font-semibold text-muted-foreground block truncate">{key}</span>
+                  <span className="font-mono text-[11px] text-foreground block truncate mt-0.5" title={displayVal}>
+                    {displayVal}
+                  </span>
                 </div>
-                {pageUrl && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-[11px] gap-1 shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(pageUrl, "_blank", "noopener,noreferrer");
-                    }}
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    Visit Page
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Key Attributes List (If Extra Props exist) */}
-          {extraProps.length > 0 && (
-            <div className="space-y-2">
-              <h5 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <FileText className="h-3 w-3" /> Event Properties ({extraProps.length})
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {extraProps.map(([key, val]) => {
-                  const displayVal =
-                    typeof val === "object" && val !== null
-                      ? JSON.stringify(val)
-                      : String(val);
-
-                  return (
-                    <div
-                      key={key}
-                      className="p-2.5 rounded-lg bg-card/80 border border-border/50 text-xs"
-                    >
-                      <span className="text-[10px] font-semibold text-muted-foreground block truncate">
-                        {key}
-                      </span>
-                      <span
-                        className="font-medium text-foreground block truncate mt-0.5"
-                        title={displayVal}
-                      >
-                        {displayVal}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Raw JSON Telemetry Payload Inspector */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <Code2 className="h-3 w-3 text-primary" /> Raw Telemetry Payload (JSON)
-              </span>
-              <CopyButton
-                text={JSON.stringify(activity, null, 2)}
-                label="Copy JSON"
-              />
-            </div>
-            <pre className="p-3 rounded-lg bg-slate-950 text-slate-100 font-mono text-[11px] leading-relaxed overflow-x-auto max-h-52 border border-slate-800 shadow-inner">
-              {JSON.stringify(activity.properties || {}, null, 2)}
-            </pre>
+              );
+            })}
           </div>
         </div>
       )}
+
+      {/* 4. Raw JSON Telemetry Payload */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+            <Code2 className="h-3 w-3 text-primary" /> Telemetry Payload (JSON)
+          </span>
+          <CopyButton text={JSON.stringify(activity, null, 2)} label="Copy JSON" />
+        </div>
+        <pre className="p-2.5 rounded-md bg-slate-950 text-slate-100 font-mono text-[10px] leading-relaxed overflow-x-auto max-h-40 border border-slate-800 shadow-inner">
+          {JSON.stringify(activity.properties || {}, null, 2)}
+        </pre>
+      </div>
     </div>
   );
 }
 
-/* ── Main Activity Stream Card ───────────────────────────────────────────── */
+/* ── Main Activity Stream Component ──────────────────────────────────────── */
 
 export function MemberActivityStream({
   activities = [],
@@ -651,8 +463,11 @@ export function MemberActivityStream({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<EventCategory>("ALL");
   const [expandedIndices, setExpandedIndices] = useState<Set<number>>(new Set());
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [pageSize, setPageSize] = useState<number>(15);
+  const [page, setPage] = useState<number>(0);
 
-  // Compute counts per category
+  // Compute category counts
   const categoryCounts = useMemo(() => {
     const counts: Record<EventCategory, number> = {
       ALL: activities.length,
@@ -674,16 +489,14 @@ export function MemberActivityStream({
     return counts;
   }, [activities]);
 
-  // Filtered activities
+  // Filter activities
   const filteredActivities = useMemo(() => {
     return activities.filter((act) => {
-      // Category filter
       if (selectedCategory !== "ALL") {
         const cat = getEventCategory(act.eventType, act.entityType);
         if (cat !== selectedCategory) return false;
       }
 
-      // Search query filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const evType = (act.eventType || "").toLowerCase();
@@ -705,70 +518,99 @@ export function MemberActivityStream({
     });
   }, [activities, selectedCategory, searchQuery]);
 
-  // Toggle individual item
+  // Pagination slice
+  const totalPages = Math.ceil(filteredActivities.length / pageSize) || 1;
+  const paginatedActivities = useMemo(() => {
+    const start = page * pageSize;
+    return filteredActivities.slice(start, start + pageSize);
+  }, [filteredActivities, page, pageSize]);
+
+  // Toggle single item
   const toggleItem = (index: number) => {
     setExpandedIndices((prev) => {
       const next = new Set(prev);
-      if (next.has(index)) {
-        next.delete(index);
-      } else {
-        next.add(index);
-      }
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
       return next;
     });
   };
 
-  // Expand / Collapse All
   const isAllExpanded =
-    filteredActivities.length > 0 &&
-    filteredActivities.every((_, i) => expandedIndices.has(i));
+    paginatedActivities.length > 0 &&
+    paginatedActivities.every((_, i) => expandedIndices.has(page * pageSize + i));
 
   const toggleExpandAll = () => {
     if (isAllExpanded) {
       setExpandedIndices(new Set());
     } else {
-      setExpandedIndices(new Set(filteredActivities.map((_, i) => i)));
+      const indices = paginatedActivities.map((_, i) => page * pageSize + i);
+      setExpandedIndices(new Set(indices));
     }
   };
 
   return (
-    <Card className={cn("overflow-hidden border border-border/60 shadow-sm", className)}>
-      {/* ── Card Header ── */}
-      <CardHeader className="p-4 sm:p-5 border-b border-border/40 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
-              <Activity className="h-4 w-4" />
+    <Card className={cn("border border-border/60 shadow-xs overflow-hidden", className)}>
+      {/* ── Compact Header & Toolbar ── */}
+      <CardHeader className="p-3 sm:p-4 border-b border-border/50 space-y-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+              <Activity className="h-3.5 w-3.5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <CardTitle className="text-base font-bold">Activity Stream</CardTitle>
-                <Badge variant="outline" className="text-xs font-semibold px-2 py-0.5">
-                  {activities.length} total events
+                <CardTitle className="text-xs sm:text-sm font-bold text-foreground">
+                  Activity Telemetry Stream
+                </CardTitle>
+                <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0 h-4.5">
+                  {filteredActivities.length} events
                 </Badge>
               </div>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                Real-time behavioral telemetry, event properties & interaction history
+              <CardDescription className="text-[10px] text-muted-foreground mt-0.5 hidden sm:block">
+                Sub-second behavioral events and real-time interaction logs
               </CardDescription>
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex items-center gap-2 self-start sm:self-auto">
+          {/* Quick View Controls: Table vs Card & Expand All */}
+          <div className="flex items-center gap-1.5 self-start sm:self-auto">
+            <div className="flex items-center bg-muted/60 p-0.5 rounded-md border border-border/50">
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                className="h-6 px-2 text-[11px] gap-1 rounded-xs"
+                onClick={() => setViewMode("table")}
+                title="Compact Table View"
+              >
+                <TableIcon className="h-3 w-3" />
+                <span>Table</span>
+              </Button>
+              <Button
+                variant={viewMode === "cards" ? "default" : "ghost"}
+                size="sm"
+                className="h-6 px-2 text-[11px] gap-1 rounded-xs"
+                onClick={() => setViewMode("cards")}
+                title="Compact Card View"
+              >
+                <LayoutGrid className="h-3 w-3" />
+                <span>Cards</span>
+              </Button>
+            </div>
+
             {filteredActivities.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-medium gap-1.5"
+                className="h-7 text-[10px] font-medium gap-1 px-2 border-border/60"
                 onClick={toggleExpandAll}
               >
                 {isAllExpanded ? (
                   <>
-                    <ChevronUp className="h-3.5 w-3.5" /> Collapse All
+                    <ChevronUp className="h-3 w-3" /> Collapse All
                   </>
                 ) : (
                   <>
-                    <ChevronDown className="h-3.5 w-3.5" /> Expand All
+                    <ChevronDown className="h-3 w-3" /> Expand All
                   </>
                 )}
               </Button>
@@ -776,29 +618,31 @@ export function MemberActivityStream({
           </div>
         </div>
 
-        {/* ── Search & Filter Controls ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-1">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        {/* ── Search & Filter Chips ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-0.5">
+          <div className="relative flex-1 min-w-[180px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
             <Input
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search event type, IDs, URLs, attributes..."
-              className="pl-8 pr-8 h-8 text-xs bg-muted/30 focus:bg-background"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(0);
+              }}
+              placeholder="Search event type, IDs, paths..."
+              className="pl-7 pr-7 h-7 text-xs bg-muted/25 focus:bg-background border-border/60"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-3 w-3" />
               </button>
             )}
           </div>
 
           {/* Category Filter Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
             {(
               [
                 "ALL",
@@ -820,22 +664,23 @@ export function MemberActivityStream({
               return (
                 <button
                   key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setPage(0);
+                  }}
                   className={cn(
-                    "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap border shrink-0",
+                    "flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium transition-all whitespace-nowrap border shrink-0 h-6",
                     isSelected
-                      ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold"
-                      : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-border/60",
+                      ? "bg-primary text-primary-foreground border-primary font-bold shadow-2xs"
+                      : "bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground border-border/50",
                   )}
                 >
-                  <CatIcon className="h-3 w-3" />
+                  <CatIcon className="h-2.5 w-2.5" />
                   <span>{cat === "ALL" ? "All" : cfg.label}</span>
                   <span
                     className={cn(
-                      "text-[10px] px-1 py-0 rounded-full font-mono",
-                      isSelected
-                        ? "bg-primary-foreground/20 text-primary-foreground"
-                        : "bg-muted-foreground/10 text-muted-foreground",
+                      "text-[9px] px-1 rounded-full font-mono",
+                      isSelected ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground",
                     )}
                   >
                     {count}
@@ -847,49 +692,298 @@ export function MemberActivityStream({
         </div>
       </CardHeader>
 
-      {/* ── Card Content: Event Stream ── */}
-      <CardContent className="p-4 sm:p-5">
+      {/* ── Card Content: Dual Table / Card Rendering ── */}
+      <CardContent className="p-0">
         {activities.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-            <div className="p-3 rounded-full bg-muted/50 mb-2.5">
-              <Activity className="h-6 w-6 opacity-40" />
-            </div>
-            <p className="text-sm font-semibold text-foreground">No Activity Events Logged</p>
-            <p className="text-xs text-muted-foreground max-w-sm mt-1">
-              There are no behavioral telemetry events recorded for this member in ClickHouse yet.
+          <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
+            <Activity className="h-5 w-5 opacity-30 mb-1" />
+            <p className="text-xs font-semibold text-foreground">No Telemetry Events</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              No activity logged for this member in ClickHouse yet.
             </p>
           </div>
         ) : filteredActivities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
-            <div className="p-3 rounded-full bg-muted/50 mb-2.5">
-              <Search className="h-5 w-5 opacity-40" />
-            </div>
-            <p className="text-sm font-semibold text-foreground">No Matching Events</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              No events found matching your search query and filters.
-            </p>
+            <Search className="h-5 w-5 opacity-30 mb-1" />
+            <p className="text-xs font-semibold text-foreground">No Matching Events</p>
             <Button
               variant="outline"
               size="sm"
-              className="mt-3 text-xs"
+              className="mt-2 text-[10px] h-6 px-2"
               onClick={() => {
                 setSearchQuery("");
                 setSelectedCategory("ALL");
               }}
             >
-              Reset Filters
+              Clear Search
             </Button>
           </div>
+        ) : viewMode === "table" ? (
+          /* ═════════════════════════════════════════════════════════════════
+             COMPACT DATA TABLE VIEW
+             ═════════════════════════════════════════════════════════════════ */
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border/60 bg-muted/20 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold select-none">
+                  <th className="py-2 px-3">Event Type</th>
+                  <th className="py-2 px-2.5">Category</th>
+                  <th className="py-2 px-2.5">Summary / Context</th>
+                  <th className="py-2 px-2 hidden md:table-cell">Entity</th>
+                  <th className="py-2 px-2 hidden sm:table-cell">Source</th>
+                  <th className="py-2 px-3 text-right">Time</th>
+                  <th className="py-2 px-2 text-center w-8"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40">
+                {paginatedActivities.map((act, idx) => {
+                  const globalIdx = page * pageSize + idx;
+                  const isExpanded = expandedIndices.has(globalIdx);
+                  const category = getEventCategory(act.eventType, act.entityType);
+                  const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.OTHER;
+                  const CatIcon = cfg.icon;
+                  const { title, subtitle, highlights } = formatEventDetails(act);
+                  const relativeTime = safeFormatDistanceToNow(act.timestamp, { addSuffix: true });
+                  const exactDate = safeFormat(act.timestamp, "PPP 'at' pp", "Recent");
+                  const source = act.properties?.source || "web";
+
+                  return (
+                    <React.Fragment key={`${act.eventType}-${act.timestamp}-${globalIdx}`}>
+                      <tr
+                        onClick={() => toggleItem(globalIdx)}
+                        className={cn(
+                          "transition-colors cursor-pointer group text-xs",
+                          isExpanded
+                            ? "bg-primary/5 dark:bg-primary/10"
+                            : "hover:bg-muted/40",
+                        )}
+                      >
+                        {/* Event Name & Mini-Icon */}
+                        <td className="py-2 px-3 align-middle font-medium text-foreground">
+                          <div className="flex items-center gap-2">
+                            <div className={cn("p-1 rounded shrink-0 border", cfg.badgeBg, cfg.border)}>
+                              <CatIcon className={cn("h-3 w-3", cfg.badgeText)} />
+                            </div>
+                            <span className="font-semibold text-xs text-foreground truncate max-w-[180px] sm:max-w-[220px]">
+                              {title}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Category Badge */}
+                        <td className="py-2 px-2.5 align-middle">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "text-[9px] font-semibold px-1.5 py-0 h-4 rounded border",
+                              cfg.badgeBg,
+                              cfg.badgeText,
+                              cfg.border,
+                            )}
+                          >
+                            {cfg.label}
+                          </Badge>
+                        </td>
+
+                        {/* Summary / Context */}
+                        <td className="py-2 px-2.5 align-middle text-muted-foreground">
+                          <div className="flex items-center gap-1.5 flex-wrap max-w-sm">
+                            {subtitle && (
+                              <span className="text-[11px] truncate max-w-[200px] text-foreground/80">
+                                {subtitle}
+                              </span>
+                            )}
+                            {highlights.slice(0, 2).map((h, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-0.5 text-[9px] px-1 py-0 rounded bg-muted/60 text-foreground border border-border/40 font-mono"
+                              >
+                                <span className="text-muted-foreground">{h.label}:</span>
+                                <b>{h.value}</b>
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+
+                        {/* Entity Target */}
+                        <td className="py-2 px-2 align-middle hidden md:table-cell text-muted-foreground font-mono text-[10px]">
+                          {act.entityType ? (
+                            <span className="truncate max-w-[120px] block" title={`${act.entityType}:${act.entityId || ""}`}>
+                              {act.entityType}
+                              {act.entityId && `:${act.entityId.slice(0, 6)}`}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground/50">—</span>
+                          )}
+                        </td>
+
+                        {/* Source Tag */}
+                        <td className="py-2 px-2 align-middle hidden sm:table-cell">
+                          <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-muted/60 text-muted-foreground uppercase">
+                            {source}
+                          </span>
+                        </td>
+
+                        {/* Timestamp */}
+                        <td className="py-2 px-3 align-middle text-right text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-help flex items-center justify-end gap-1">
+                                  <Clock className="h-2.5 w-2.5 opacity-50" />
+                                  {relativeTime}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="left">
+                                <p className="text-[10px] font-medium">{exactDate}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </td>
+
+                        {/* Chevron Expand Toggle */}
+                        <td className="py-2 px-2 align-middle text-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 rounded text-muted-foreground group-hover:text-foreground"
+                          >
+                            {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          </Button>
+                        </td>
+                      </tr>
+
+                      {/* Expandable Table Detail Drawer */}
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={7} className="p-0 border-b border-border/60">
+                            <ActivityEventDetailDrawer activity={act} />
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <div className="space-y-2.5 max-h-[580px] overflow-y-auto pr-1">
-            {filteredActivities.map((act, idx) => (
-              <ActivityEventItem
-                key={`${act.eventType}-${act.timestamp}-${idx}`}
-                activity={act}
-                isExpanded={expandedIndices.has(idx)}
-                onToggle={() => toggleItem(idx)}
-              />
-            ))}
+          /* ═════════════════════════════════════════════════════════════════
+             COMPACT CARD VIEW (STREAMLINED TILES)
+             ═════════════════════════════════════════════════════════════════ */
+          <div className="p-3 sm:p-4 space-y-2">
+            {paginatedActivities.map((act, idx) => {
+              const globalIdx = page * pageSize + idx;
+              const isExpanded = expandedIndices.has(globalIdx);
+              const category = getEventCategory(act.eventType, act.entityType);
+              const cfg = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.OTHER;
+              const CatIcon = cfg.icon;
+              const { title, subtitle, highlights } = formatEventDetails(act);
+              const relativeTime = safeFormatDistanceToNow(act.timestamp, { addSuffix: true });
+              const source = act.properties?.source || "web";
+
+              return (
+                <div
+                  key={`${act.eventType}-${act.timestamp}-${globalIdx}`}
+                  className={cn(
+                    "border rounded-lg transition-all duration-150 overflow-hidden",
+                    isExpanded
+                      ? "bg-card border-primary/40 ring-1 ring-primary/10 shadow-2xs"
+                      : "bg-card/60 hover:bg-muted/30 border-border/50",
+                  )}
+                >
+                  <div
+                    onClick={() => toggleItem(globalIdx)}
+                    className="p-2.5 sm:p-3 flex items-start justify-between gap-2.5 cursor-pointer select-none group"
+                  >
+                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                      <div className={cn("p-1.5 rounded-md shrink-0 mt-0.5 border", cfg.badgeBg, cfg.border)}>
+                        <CatIcon className={cn("h-3.5 w-3.5", cfg.badgeText)} />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-semibold text-foreground tracking-tight">
+                            {title}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={cn("text-[9px] px-1.5 py-0 h-4 border", cfg.badgeBg, cfg.badgeText, cfg.border)}
+                          >
+                            {cfg.label}
+                          </Badge>
+                          {source && (
+                            <span className="text-[9px] font-mono px-1 rounded bg-muted/60 text-muted-foreground">
+                              {source}
+                            </span>
+                          )}
+                        </div>
+                        {subtitle && <p className="text-[11px] text-muted-foreground truncate">{subtitle}</p>}
+                        {highlights.length > 0 && (
+                          <div className="flex items-center gap-1 pt-0.5 flex-wrap">
+                            {highlights.map((h, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0 rounded bg-muted/60 text-foreground border border-border/40 font-mono"
+                              >
+                                <span className="text-muted-foreground">{h.label}:</span>
+                                <b>{h.value}</b>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0 self-start mt-0.5">
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-2.5 w-2.5 opacity-50" />
+                        {relativeTime}
+                      </span>
+                      <Button variant="ghost" size="icon" className="h-5 w-5 rounded">
+                        {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {isExpanded && <ActivityEventDetailDrawer activity={act} />}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── Compact Pagination Bar ── */}
+        {filteredActivities.length > pageSize && (
+          <div className="p-2.5 px-3 border-t border-border/50 bg-muted/10 flex items-center justify-between gap-2 text-xs">
+            <div className="text-[11px] text-muted-foreground">
+              Showing{" "}
+              <b>{page * pageSize + 1}</b> - <b>{Math.min((page + 1) * pageSize, filteredActivities.length)}</b> of{" "}
+              <b>{filteredActivities.length}</b> events
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-[11px] px-2"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+              >
+                Previous
+              </Button>
+              <span className="text-[10px] font-mono text-muted-foreground px-1">
+                {page + 1}/{totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 text-[11px] px-2"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

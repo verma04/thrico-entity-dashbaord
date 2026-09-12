@@ -34,6 +34,7 @@ interface PillarsGrowthChartProps {
   giftCardsCount?: number;
   timeRange?: "7d" | "30d" | "90d";
   onTimeRangeChange?: (range: "7d" | "30d" | "90d") => void;
+  showStore?: boolean;
 }
 
 export function PillarsGrowthChart({
@@ -45,6 +46,7 @@ export function PillarsGrowthChart({
   giftCardsCount = 0,
   timeRange: controlledTimeRange,
   onTimeRangeChange,
+  showStore = false,
 }: PillarsGrowthChartProps) {
   const [internalTimeRange, setInternalTimeRange] = React.useState<"7d" | "30d" | "90d">("7d");
   const [activeFilter, setActiveFilter] = React.useState<PillarFilterType>("all");
@@ -61,15 +63,15 @@ export function PillarsGrowthChart({
   };
 
   const chartData = React.useMemo(() => {
-    const totalAssets = manualCount + storeCount + giftCardsCount || 1;
-    const manualRatio = manualCount / totalAssets || 0.33;
-    const storeRatio = storeCount / totalAssets || 0.33;
+    const totalAssets = (manualCount + (showStore ? storeCount : 0) + giftCardsCount) || 1;
+    const manualRatio = manualCount / totalAssets || 1;
+    const storeRatio = showStore ? storeCount / totalAssets || 0 : 0;
 
     if (redemptionTrend && redemptionTrend.length > 0) {
       return redemptionTrend.map((item) => {
         const total = item.count || 0;
         const manual = Math.round(total * manualRatio);
-        const store = Math.round(total * storeRatio);
+        const store = showStore ? Math.round(total * storeRatio) : 0;
         const giftcards = Math.max(0, total - manual - store);
 
         let formattedDate = item.date;
@@ -125,7 +127,7 @@ export function PillarsGrowthChart({
     }
 
     return result;
-  }, [redemptionTrend, manualCount, storeCount, giftCardsCount, timeRange]);
+  }, [redemptionTrend, manualCount, storeCount, giftCardsCount, timeRange, showStore]);
 
   const computedTotalClaims = React.useMemo(() => {
     if (totalRedemptions !== undefined && totalRedemptions > 0) return totalRedemptions;
@@ -198,7 +200,7 @@ export function PillarsGrowthChart({
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              All 3 Tiers
+              Breakdown
             </button>
           </div>
 
@@ -267,46 +269,46 @@ export function PillarsGrowthChart({
               </defs>
 
               <CartesianGrid
+                strokeDasharray="3 3"
                 vertical={false}
-                strokeDasharray="4 4"
-                className="stroke-border/40"
+                stroke="currentColor"
+                className="text-border/40"
               />
 
               <XAxis
                 dataKey="date"
+                stroke="currentColor"
+                className="text-[10px] text-muted-foreground"
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
-                className="text-[10px] font-medium text-muted-foreground"
+                dy={6}
               />
 
               <YAxis
+                stroke="currentColor"
+                className="text-[10px] text-muted-foreground"
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(v) => `${v}`}
-                className="text-[10px] font-medium text-muted-foreground"
+                dx={-4}
                 allowDecimals={false}
-                width={32}
               />
 
               <RechartsTooltip
-                content={({ active, payload, label }) => {
+                content={({ active, payload }) => {
                   if (active && payload && payload.length) {
-                    const data = payload[0]?.payload;
-                    if (!data) return null;
-
-                    const p1 = Number(data.manual || 0);
-                    const p2 = Number(data.store || 0);
-                    const p3 = Number(data.giftcards || 0);
-                    const total = Number(data.total || p1 + p2 + p3 || 0);
+                    const d = payload[0].payload;
+                    const total = d.total || 0;
+                    const p1 = d.manual || 0;
+                    const p2 = d.store || 0;
+                    const p3 = d.giftcards || 0;
 
                     return (
-                      <div className="rounded-xl border border-border/80 bg-background/95 backdrop-blur-md p-2.5 shadow-xl min-w-[170px] space-y-1.5 z-50">
-                        <div className="flex items-center justify-between border-b border-border/50 pb-1">
-                          <span className="text-[11px] font-bold text-foreground">
-                            {label}
+                      <div className="rounded-lg border border-border/80 bg-background/95 backdrop-blur-md p-2.5 shadow-md min-w-[160px] space-y-1.5 z-30">
+                        <div className="flex items-center justify-between border-b border-border/40 pb-1">
+                          <span className="text-[10px] font-bold text-foreground">
+                            {d.date}
                           </span>
-                          <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded-full bg-primary/10 text-primary">
+                          <span className="text-[10px] font-extrabold text-foreground tabular-nums">
                             {total} total claims
                           </span>
                         </div>
@@ -322,15 +324,17 @@ export function PillarsGrowthChart({
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between">
-                            <span className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
-                              <span className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
-                              Store Discounts:
-                            </span>
-                            <span className="font-bold tabular-nums text-foreground">
-                              {p2}
-                            </span>
-                          </div>
+                          {showStore && (
+                            <div className="flex items-center justify-between">
+                              <span className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+                                <span className="h-2 w-2 rounded-full bg-indigo-500 shrink-0" />
+                                Store Discounts:
+                              </span>
+                              <span className="font-bold tabular-nums text-foreground">
+                                {p2}
+                              </span>
+                            </div>
+                          )}
 
                           <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
@@ -349,7 +353,7 @@ export function PillarsGrowthChart({
                 }}
               />
 
-              {/* View 1: Combined Smooth Flow */}
+              {/* Combined Flow */}
               {(activeFilter === "all" || activeFilter === "manual" || activeFilter === "store" || activeFilter === "giftcards") && (
                 <Area
                   dataKey={
@@ -362,15 +366,6 @@ export function PillarsGrowthChart({
                       : "total"
                   }
                   type="monotone"
-                  fill={
-                    activeFilter === "manual"
-                      ? "url(#fillPillar1Clean)"
-                      : activeFilter === "store"
-                      ? "url(#fillPillar2Clean)"
-                      : activeFilter === "giftcards"
-                      ? "url(#fillPillar3Clean)"
-                      : "url(#fillCombined)"
-                  }
                   stroke={
                     activeFilter === "manual"
                       ? "#10b981"
@@ -381,70 +376,46 @@ export function PillarsGrowthChart({
                       : "#6366f1"
                   }
                   strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    r: 4,
-                    strokeWidth: 2,
-                    stroke: "hsl(var(--background))",
-                    fill:
-                      activeFilter === "manual"
-                        ? "#10b981"
-                        : activeFilter === "store"
-                        ? "#6366f1"
-                        : activeFilter === "giftcards"
-                        ? "#a855f7"
-                        : "#6366f1",
-                  }}
+                  fill={
+                    activeFilter === "manual"
+                      ? "url(#fillPillar1Clean)"
+                      : activeFilter === "store"
+                      ? "url(#fillPillar2Clean)"
+                      : activeFilter === "giftcards"
+                      ? "url(#fillPillar3Clean)"
+                      : "url(#fillCombined)"
+                  }
                 />
               )}
 
-              {/* View 2: All 3 Tiers Discrete Smooth Layers */}
+              {/* Stacked Breakdown View */}
               {activeFilter === "breakdown" && (
                 <>
                   <Area
                     dataKey="manual"
                     type="monotone"
-                    fill="url(#fillPillar1Clean)"
+                    stackId="1"
                     stroke="#10b981"
-                    strokeWidth={hoveredPillar === "manual" ? 2.5 : 1.75}
-                    opacity={hoveredPillar && hoveredPillar !== "manual" ? 0.35 : 1}
-                    dot={false}
-                    activeDot={{
-                      r: 4,
-                      strokeWidth: 2,
-                      stroke: "hsl(var(--background))",
-                      fill: "#10b981",
-                    }}
+                    strokeWidth={1.5}
+                    fill="url(#fillPillar1Clean)"
                   />
-                  <Area
-                    dataKey="store"
-                    type="monotone"
-                    fill="url(#fillPillar2Clean)"
-                    stroke="#6366f1"
-                    strokeWidth={hoveredPillar === "store" ? 2.5 : 1.75}
-                    opacity={hoveredPillar && hoveredPillar !== "store" ? 0.35 : 1}
-                    dot={false}
-                    activeDot={{
-                      r: 4,
-                      strokeWidth: 2,
-                      stroke: "hsl(var(--background))",
-                      fill: "#6366f1",
-                    }}
-                  />
+                  {showStore && (
+                    <Area
+                      dataKey="store"
+                      type="monotone"
+                      stackId="1"
+                      stroke="#6366f1"
+                      strokeWidth={1.5}
+                      fill="url(#fillPillar2Clean)"
+                    />
+                  )}
                   <Area
                     dataKey="giftcards"
                     type="monotone"
-                    fill="url(#fillPillar3Clean)"
+                    stackId="1"
                     stroke="#a855f7"
-                    strokeWidth={hoveredPillar === "giftcards" ? 2.5 : 1.75}
-                    opacity={hoveredPillar && hoveredPillar !== "giftcards" ? 0.35 : 1}
-                    dot={false}
-                    activeDot={{
-                      r: 4,
-                      strokeWidth: 2,
-                      stroke: "hsl(var(--background))",
-                      fill: "#a855f7",
-                    }}
+                    strokeWidth={1.5}
+                    fill="url(#fillPillar3Clean)"
                   />
                 </>
               )}
@@ -471,21 +442,23 @@ export function PillarsGrowthChart({
               <span>Pillar 1: Manual</span>
             </button>
 
-            {/* Pillar 2 Button */}
-            <button
-              onClick={() => setActiveFilter(activeFilter === "store" ? "all" : "store")}
-              onMouseEnter={() => setHoveredPillar("store")}
-              onMouseLeave={() => setHoveredPillar(null)}
-              className={cn(
-                "flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all cursor-pointer",
-                activeFilter === "store"
-                  ? "bg-indigo-500/15 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-2xs"
-                  : "border-border/50 hover:border-indigo-500/40 text-muted-foreground hover:text-foreground bg-muted/20"
-              )}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-              <span>Pillar 2: Store</span>
-            </button>
+            {/* Pillar 2 Button (only when showStore) */}
+            {showStore && (
+              <button
+                onClick={() => setActiveFilter(activeFilter === "store" ? "all" : "store")}
+                onMouseEnter={() => setHoveredPillar("store")}
+                onMouseLeave={() => setHoveredPillar(null)}
+                className={cn(
+                  "flex items-center gap-1.5 px-2 py-0.5 rounded-full border transition-all cursor-pointer",
+                  activeFilter === "store"
+                    ? "bg-indigo-500/15 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-2xs"
+                    : "border-border/50 hover:border-indigo-500/40 text-muted-foreground hover:text-foreground bg-muted/20"
+                )}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                <span>Pillar 2: Store</span>
+              </button>
+            )}
 
             {/* Pillar 3 Button */}
             <button

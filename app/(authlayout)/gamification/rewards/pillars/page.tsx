@@ -38,6 +38,7 @@ import {
   useGetRewardSecuritySettings,
   TimeRange,
 } from "@/graphql/actions/rewards";
+import { useGetShopifyConnection } from "@/graphql/actions/settings/shopify";
 
 const timeRangeMap: Record<string, TimeRange> = {
   "24h": TimeRange.LAST_24_HOURS,
@@ -58,6 +59,21 @@ export default function RewardPillarsPage() {
     }
     return undefined;
   }, [dateRange]);
+
+  // Shopify Integration Connection Check
+  const {
+    data: shopifyData,
+    loading: shopifyLoading,
+    refetch: refetchShopify,
+  } = useGetShopifyConnection();
+
+  const isShopifyConnected = Boolean(
+    shopifyData?.shopifyConnection &&
+      shopifyData.shopifyConnection.status !== "DISCONNECTED" &&
+      (shopifyData.shopifyConnection.status === "CONNECTED" ||
+        Boolean(shopifyData.shopifyConnection.shopDomain) ||
+        shopifyData.shopifyConnection.isActive)
+  );
 
   // 1. Rewards & Pillar Rules Queries
   const {
@@ -95,7 +111,10 @@ export default function RewardPillarsPage() {
     data: statsData,
     loading: statsLoading,
     refetch: refetchStats,
-  } = useGetRewardStats(timeRangeMap[timeRange] || TimeRange.LAST_7_DAYS, formattedDateRange);
+  } = useGetRewardStats(
+    timeRangeMap[timeRange] || TimeRange.LAST_7_DAYS,
+    formattedDateRange,
+  );
 
   const {
     data: redemptionsData,
@@ -119,7 +138,8 @@ export default function RewardPillarsPage() {
     digitalCardRulesLoading ||
     walletLoading ||
     redemptionsLoading ||
-    securityLoading;
+    securityLoading ||
+    shopifyLoading;
 
   const handleRefreshAll = () => {
     refetchRewards?.();
@@ -130,6 +150,7 @@ export default function RewardPillarsPage() {
     refetchWallet?.();
     refetchRedemptions?.();
     refetchSecurity?.();
+    refetchShopify?.();
   };
 
   interface PillarRewardItem {
@@ -142,13 +163,28 @@ export default function RewardPillarsPage() {
   }
 
   // 3. Process Multi-Pillar Categorizations
-  const rewards = useMemo(() => (rewardsData?.getRewards || []) as PillarRewardItem[], [rewardsData]);
-  const manualBatches = useMemo(() => manualBatchesData?.getManualVoucherBatches?.batches || [], [manualBatchesData]);
-  const storeRules = useMemo(() => storeRulesData?.getStoreDiscountRules?.rules || [], [storeRulesData]);
-  const digitalCardRules = useMemo(() => digitalCardRulesData?.getDigitalCardRules?.rules || [], [digitalCardRulesData]);
+  const rewards = useMemo(
+    () => (rewardsData?.getRewards || []) as PillarRewardItem[],
+    [rewardsData],
+  );
+  const manualBatches = useMemo(
+    () => manualBatchesData?.getManualVoucherBatches?.batches || [],
+    [manualBatchesData],
+  );
+  const storeRules = useMemo(
+    () => storeRulesData?.getStoreDiscountRules?.rules || [],
+    [storeRulesData],
+  );
+  const digitalCardRules = useMemo(
+    () => digitalCardRulesData?.getDigitalCardRules?.rules || [],
+    [digitalCardRulesData],
+  );
   const wallet = walletData?.getEntityRewardWallet;
   const stats = statsData?.getRewardStats;
-  const redemptions = useMemo(() => redemptionsData?.getRedemptions || [], [redemptionsData]);
+  const redemptions = useMemo(
+    () => redemptionsData?.getRedemptions || [],
+    [redemptionsData],
+  );
   const securitySettings = securityData?.getRewardSecuritySettings;
 
   const manualRewards = useMemo(() => {
@@ -197,28 +233,39 @@ export default function RewardPillarsPage() {
   // Derived Pillar Asset Counts
   const manualCount = Math.max(manualBatches.length, manualRewards.length);
   const storeCount = Math.max(storeRules.length, storeRewards.length);
-  const giftCardsCount = Math.max(digitalCardRules.length, giftCardRewards.length);
-  const totalAssetsCount = manualCount + storeCount + giftCardsCount;
+  const giftCardsCount = Math.max(
+    digitalCardRules.length,
+    giftCardRewards.length,
+  );
+  const totalAssetsCount = manualCount + (isShopifyConnected ? storeCount : 0) + giftCardsCount;
 
   // Real Redemptions Metrics
   const totalRedemptions = stats?.totalRedemptions ?? redemptions.length;
   const activeCouponsCount = stats?.activeCoupons ?? rewards.length;
   const totalTcBurned = stats?.totalTcBurned ?? 0;
   const walletBalance = wallet?.balance ?? 0;
-  const redemptionTrend = useMemo(() => stats?.redemptionTrend || [], [stats?.redemptionTrend]);
+  const redemptionTrend = useMemo(
+    () => stats?.redemptionTrend || [],
+    [stats?.redemptionTrend],
+  );
 
   // Sparkline Trend Calculations
   const totalTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
-      return redemptionTrend.map((t: { date: string; count: number }) => t.count);
+      return redemptionTrend.map(
+        (t: { date: string; count: number }) => t.count,
+      );
     }
     return [0, 0, 0, 0, totalRedemptions];
   }, [redemptionTrend, totalRedemptions]);
 
   const manualTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
-      const ratio = totalAssetsCount > 0 ? manualCount / totalAssetsCount : 0.33;
-      return redemptionTrend.map((t: { date: string; count: number }) => Math.round(t.count * ratio));
+      const ratio =
+        totalAssetsCount > 0 ? manualCount / totalAssetsCount : 0.33;
+      return redemptionTrend.map((t: { date: string; count: number }) =>
+        Math.round(t.count * ratio),
+      );
     }
     return [0, 0, 0, 0, manualCount];
   }, [redemptionTrend, manualCount, totalAssetsCount]);
@@ -226,15 +273,20 @@ export default function RewardPillarsPage() {
   const storeTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
       const ratio = totalAssetsCount > 0 ? storeCount / totalAssetsCount : 0.33;
-      return redemptionTrend.map((t: { date: string; count: number }) => Math.round(t.count * ratio));
+      return redemptionTrend.map((t: { date: string; count: number }) =>
+        Math.round(t.count * ratio),
+      );
     }
     return [0, 0, 0, 0, storeCount];
   }, [redemptionTrend, storeCount, totalAssetsCount]);
 
   const giftTrendData = useMemo(() => {
     if (redemptionTrend.length > 0) {
-      const ratio = totalAssetsCount > 0 ? giftCardsCount / totalAssetsCount : 0.34;
-      return redemptionTrend.map((t: { date: string; count: number }) => Math.round(t.count * ratio));
+      const ratio =
+        totalAssetsCount > 0 ? giftCardsCount / totalAssetsCount : 0.34;
+      return redemptionTrend.map((t: { date: string; count: number }) =>
+        Math.round(t.count * ratio),
+      );
     }
     return [0, 0, 0, 0, giftCardsCount];
   }, [redemptionTrend, giftCardsCount, totalAssetsCount]);
@@ -261,17 +313,21 @@ export default function RewardPillarsPage() {
       tooltip: "Internal promo codes and token batches (Zero cost)",
       href: "/gamification/rewards/pillars/manual",
     },
-    {
-      title: "Pillar 2: E-Commerce Store",
-      value: storeRulesLoading ? "..." : storeCount.toString(),
-      trend: 28.4,
-      trendData: storeTrendData,
-      icon: ShoppingBag,
-      colorScheme: "indigo" as const,
-      suffix: " rules",
-      tooltip: "Dynamic Shopify coupons synthesized on-demand",
-      href: "/gamification/rewards/pillars/store",
-    },
+    ...(isShopifyConnected
+      ? [
+          {
+            title: "Pillar 2: E-Commerce Store",
+            value: storeRulesLoading ? "..." : storeCount.toString(),
+            trend: 28.4,
+            trendData: storeTrendData,
+            icon: ShoppingBag,
+            colorScheme: "indigo" as const,
+            suffix: " rules",
+            tooltip: "Dynamic Shopify coupons synthesized on-demand",
+            href: "/gamification/rewards/pillars/store",
+          },
+        ]
+      : []),
     {
       title: "Pillar 3: Brand Gift Cards",
       value: digitalCardRulesLoading ? "..." : giftCardsCount.toString(),
@@ -291,7 +347,7 @@ export default function RewardPillarsPage() {
       icon: TrendingUp,
       colorScheme: "orange" as const,
       suffix: " claims",
-      tooltip: "Cumulative claims fulfilled across all 3 pillars",
+      tooltip: "Cumulative claims fulfilled across reward pillars",
       href: "/gamification/rewards/redemptions",
     },
     {
@@ -305,7 +361,11 @@ export default function RewardPillarsPage() {
     },
     {
       title: "Security & Fraud Guard",
-      value: securityLoading ? "..." : securitySettings?.lockToDeviceId ? "100%" : "Active",
+      value: securityLoading
+        ? "..."
+        : securitySettings?.lockToDeviceId
+          ? "100%"
+          : "Active",
       trend: 0,
       trendData: [100, 100, 100, 100, 100, 100, 100],
       icon: ShieldCheck,
@@ -318,7 +378,11 @@ export default function RewardPillarsPage() {
     <EcosystemWrapper anonymized-1="reward-pillars-analytics">
       <EcosystemHeader
         title="Reward Fulfillment Pillars"
-        description="Comprehensive 3-tier rewards infrastructure powering zero-cost internal vouchers, Shopify coupons, and digital gift cards."
+        description={
+          isShopifyConnected
+            ? "Comprehensive 3-tier rewards infrastructure powering zero-cost internal vouchers, Shopify coupons, and digital gift cards."
+            : "Comprehensive rewards infrastructure powering zero-cost internal vouchers and digital brand gift cards."
+        }
         badgeText="Fulfillment Hub"
         icon={Layers}
         breadcrumbs={[
@@ -340,7 +404,10 @@ export default function RewardPillarsPage() {
               onClick={handleRefreshAll}
               title="Refresh Analytics"
             >
-              <RotateCcw size={13} className={cn(isGlobalLoading && "animate-spin")} />
+              <RotateCcw
+                size={13}
+                className={cn(isGlobalLoading && "animate-spin")}
+              />
             </Button>
           </div>
         }
@@ -352,15 +419,21 @@ export default function RewardPillarsPage() {
           totalRedemptions={totalRedemptions}
           activeCoupons={activeCouponsCount}
           loading={isGlobalLoading}
+          showStore={isShopifyConnected}
         />
 
         {/* 2. Compact Core Vitals Grid */}
         <section className="space-y-2">
           <DashboardSectionHeading
-            title="MULTI-PILLAR CORE VITALS &amp; METRICS"
+            title="CORE VITALS &amp; METRICS"
             titleClassName="normal-case tracking-normal text-[10px] text-foreground font-bold"
           />
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          <div
+            className={cn(
+              "grid grid-cols-2 md:grid-cols-3 gap-2.5",
+              isShopifyConnected ? "lg:grid-cols-6" : "lg:grid-cols-5",
+            )}
+          >
             {kpis.map((kpi, i) => (
               <EcosystemKPI key={i} {...kpi} />
             ))}
@@ -382,7 +455,10 @@ export default function RewardPillarsPage() {
                 manualCount={manualCount}
                 storeCount={storeCount}
                 giftCardsCount={giftCardsCount}
-                timeRange={timeRange === "30d" || timeRange === "90d" ? timeRange : "7d"}
+                timeRange={
+                  timeRange === "30d" || timeRange === "90d" ? timeRange : "7d"
+                }
+                showStore={isShopifyConnected}
               />
             </div>
             <div className="lg:col-span-5 flex flex-col">
@@ -391,15 +467,16 @@ export default function RewardPillarsPage() {
                 storeCount={storeCount}
                 giftCardsCount={giftCardsCount}
                 loading={isGlobalLoading}
+                showStore={isShopifyConnected}
               />
             </div>
           </div>
         </section>
 
-        {/* 4. Compact 3 Pillars Showcase Cards */}
+        {/* 4. Compact Pillars Showcase Cards */}
         <section className="space-y-2">
           <DashboardSectionHeading
-            title="THE 3 REWARD PILLARS ARCHITECTURE"
+            title="REWARD PILLARS ARCHITECTURE"
             titleClassName="normal-case tracking-normal text-[10px] text-foreground font-bold"
           />
           <PillarsCardsGrid
@@ -408,6 +485,7 @@ export default function RewardPillarsPage() {
             giftCardsCount={giftCardsCount}
             walletBalance={walletBalance}
             loading={isGlobalLoading}
+            showStore={isShopifyConnected}
           />
         </section>
 
@@ -429,7 +507,7 @@ export default function RewardPillarsPage() {
             title="PILLAR CAPABILITIES &amp; INTEGRATION MATRIX"
             titleClassName="normal-case tracking-normal text-[10px] text-foreground font-bold"
           />
-          <PillarsComparisonTable />
+          <PillarsComparisonTable showStore={isShopifyConnected} />
         </section>
       </EcosystemContainer>
     </EcosystemWrapper>
