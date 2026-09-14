@@ -33,8 +33,7 @@ const statusMessages: Record<string, string> = {
     "Your subscription was cancelled. Choose a plan below to reactivate and regain access to all premium features.",
   suspended:
     "Resolve your payment issues by selecting a plan below. Once activated, you'll regain full access.",
-  pending:
-    "Complete your subscription setup by choosing a plan below.",
+  pending: "Complete your subscription setup by choosing a plan below.",
   active:
     "Upgrade your current plan to unlock even more features and capabilities.",
   scheduled_downgrade:
@@ -44,11 +43,14 @@ const statusMessages: Record<string, string> = {
 };
 
 const BuyPlan = ({ displayStatus = "no_subscription" }: BuyPlanProps) => {
-  const { data, loading } = useCountryPackage();
+  const { data, loading } = useCountryPackage({});
   const [isYearly, setIsYearly] = useState<boolean>(false);
-  const [activePackage, setActivePackage] = useState<CountryPackage | null>(null);
+  const [activePackage, setActivePackage] = useState<CountryPackage | null>(
+    null,
+  );
 
-  const message = statusMessages[displayStatus] ?? statusMessages.no_subscription;
+  const message =
+    statusMessages[displayStatus] ?? statusMessages.no_subscription;
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
@@ -58,7 +60,9 @@ const BuyPlan = ({ displayStatus = "no_subscription" }: BuyPlanProps) => {
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
             Select a Plan
           </p>
-          <p className="text-[13px] text-muted-foreground mt-1 max-w-lg">{message}</p>
+          <p className="text-[13px] text-muted-foreground mt-1 max-w-lg">
+            {message}
+          </p>
         </div>
         <PlanToggle
           isYearly={isYearly}

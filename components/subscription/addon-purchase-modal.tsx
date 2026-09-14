@@ -146,7 +146,7 @@ const AddonPurchaseModal = ({
 
   return (
     <Dialog open={!!addon} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-card border-border z-50 p-0 overflow-hidden">
+      <DialogContent className="max-w-2xl bg-card border-border z-[160] p-0 overflow-hidden">
         {/* HEADER WITH GRADIENT */}
         <div className="relative px-6 pt-6 pb-4 border-b border-border">
           <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent" />
