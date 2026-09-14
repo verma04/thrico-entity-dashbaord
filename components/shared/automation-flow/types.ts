@@ -7,7 +7,10 @@ export type AutomationActionType =
   | "WHATSAPP_TEMPLATE"
   | "CUSTOM_WEBHOOK"
   | "WEBHOOK"
-  | "AWARD_POINTS";
+  | "AWARD_POINTS"
+  | "AWARD_CURRENCY"
+  | "ISSUE_COUPON"
+  | "AWARD_BADGE";
 
 export interface SharedAutomationCondition {
   field: string;
@@ -40,7 +43,10 @@ export interface SharedAutomationAction {
   pushTitle?: string | null;
   pushBody?: string | null;
   push?: boolean | null;
-  points?: number | null;
+  points?: number | { points: number } | null;
+  currency?: { amount: number; currencyType: string } | null;
+  reward?: { rewardId?: string; rewardTitle?: string } | null;
+  badge?: { badgeId?: string; badgeName?: string } | null;
   conditionOperator?: "AND" | "OR" | string | null;
   conditions?: SharedAutomationCondition[] | null;
   // WhatsApp Template fields
@@ -61,12 +67,13 @@ export interface SharedActionNodeData {
   onDuplicate?: () => void;
   onSelect?: () => void;
   simulationStatus?: "executed" | "skipped" | "idle" | "running";
-  moduleType?: "member" | "survey";
+  moduleType?: "member" | "survey" | "rewards";
   [key: string]: any;
 }
 
 export interface SharedAddActionNodeData {
   onAddAction: (type: AutomationActionType) => void;
-  moduleType?: "member" | "survey";
+  moduleType?: "member" | "survey" | "rewards";
   [key: string]: any;
 }
+

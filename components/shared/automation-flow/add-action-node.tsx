@@ -35,7 +35,7 @@ export const SharedAddActionNode = memo(({ data }: NodeProps<any>) => {
     nodeData.label || (isNoBranch ? "Add Action (NO Path)" : "Add Action (YES Path)");
 
   const paletteItems =
-    nodeData.moduleType === "survey"
+    nodeData.moduleType === "survey" || nodeData.moduleType === "rewards"
       ? SHARED_PALETTE_ACTIONS
       : MEMBER_PALETTE_ACTIONS;
 

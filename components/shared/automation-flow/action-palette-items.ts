@@ -11,6 +11,9 @@ import {
   ShieldCheck,
   Send,
   Code2,
+  DollarSign,
+  Gift,
+  Trophy,
 } from "lucide-react";
 import { AutomationActionType } from "./types";
 
@@ -154,6 +157,36 @@ export const MEMBER_PALETTE_ACTIONS: ActionMetadataItem[] = [
 
 export const SHARED_PALETTE_ACTIONS: ActionMetadataItem[] = [
   ...MEMBER_PALETTE_ACTIONS,
+  {
+    type: "AWARD_CURRENCY",
+    label: "Credit Currency",
+    desc: "Credit virtual coins or token currency to member wallet",
+    icon: DollarSign,
+    color: "from-emerald-500 to-teal-600 text-emerald-600 bg-emerald-500/10 border-emerald-500/20",
+    badgeBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    badgeLabel: "Currency",
+    category: "ENTITY",
+  },
+  {
+    type: "ISSUE_COUPON",
+    label: "Issue Voucher / Coupon",
+    desc: "Grant entity discount coupon or physical reward voucher",
+    icon: Gift,
+    color: "from-rose-500 to-pink-600 text-rose-600 bg-rose-500/10 border-rose-500/20",
+    badgeBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+    badgeLabel: "Rewards",
+    category: "ENTITY",
+  },
+  {
+    type: "AWARD_BADGE",
+    label: "Award Gamification Badge",
+    desc: "Unlock an achievement or gamification profile badge",
+    icon: Trophy,
+    color: "from-amber-500 to-yellow-600 text-amber-600 bg-amber-500/10 border-amber-500/20",
+    badgeBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    badgeLabel: "Achievement",
+    category: "ENTITY",
+  },
   {
     type: "WHATSAPP_TEMPLATE",
     label: "WhatsApp Message",

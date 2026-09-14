@@ -45,7 +45,7 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
       case "COMMUNITY_JOIN":
         return action.communityName || "Select Circle";
       case "NOTIFICATION":
-        return action.pushTitle || "Push Notification";
+        return action.pushTitle || action.notificationMessage || "Push Notification";
       case "ADD_MEMBER_TAG":
         return action.tags?.join(", ") || "No tags set";
       case "WHATSAPP_TEMPLATE":
@@ -55,8 +55,18 @@ export const SharedActionNode = memo(({ data, selected }: NodeProps<any>) => {
         return action.webhook?.url
           ? `${action.webhook.method || "POST"} ${action.webhook.url}`
           : "Configure Webhook";
-      case "AWARD_POINTS":
-        return action.points ? `+${action.points} Gamification Points` : "Set Points";
+      case "AWARD_POINTS": {
+        const pts = typeof action.points === "object" ? action.points?.points : action.points;
+        return pts ? `+${pts} Gamification Points` : "Set Points";
+      }
+      case "AWARD_CURRENCY":
+        return action.currency?.amount
+          ? `+${action.currency.amount} ${action.currency.currencyType || "Coins"}`
+          : "Credit Currency";
+      case "ISSUE_COUPON":
+        return action.reward?.rewardTitle || "Reward Voucher";
+      case "AWARD_BADGE":
+        return action.badge?.badgeName || "Gamification Badge";
       default:
         return action.type;
     }

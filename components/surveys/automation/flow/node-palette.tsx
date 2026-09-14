@@ -26,10 +26,7 @@ import {
   SurveyRuleTrigger,
   SurveyRuleActionType,
 } from "@/graphql/survey-automation";
-import {
-  SHARED_PALETTE_ACTIONS,
-  getCategorizedActions,
-} from "@/components/shared/automation-flow/action-palette-items";
+import { ActionBlocksByChannel } from "@/components/shared/automation-flow";
 import { cn } from "@/lib/utils";
 
 export const SURVEY_TEMPLATE_RECIPES = [
@@ -355,79 +352,12 @@ export const SurveyNodePalette: React.FC<NodePaletteProps> = ({
                   </button>
                 </div>
 
-                {/* Available Action Nodes Grouped by Sub-Category / Channel */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-                      Action Blocks by Channel
-                    </span>
-                    <span className="text-[9px] font-mono text-muted-foreground">
-                      {SHARED_PALETTE_ACTIONS.length} Actions
-                    </span>
-                  </div>
-
-                  {getCategorizedActions(SHARED_PALETTE_ACTIONS).map((group) => {
-                    const CategoryIcon = group.category.icon;
-                    return (
-                      <div key={group.category.id} className="space-y-1.5">
-                        <div className="flex items-center justify-between px-1 pt-1">
-                          <span className="text-[10.5px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-                            <span
-                              className={cn(
-                                "w-4 h-4 rounded flex items-center justify-center border",
-                                group.category.color
-                              )}
-                            >
-                              <CategoryIcon className="w-2.5 h-2.5" />
-                            </span>
-                            {group.category.label}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground font-mono">
-                            {group.items.length}
-                          </span>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          {group.items.map((item) => {
-                            const Icon = item.icon;
-                            return (
-                              <button
-                                key={item.type}
-                                type="button"
-                                onClick={() =>
-                                  onAddAction(item.type as SurveyRuleActionType)
-                                }
-                                className="w-full p-2 rounded-xl border border-border bg-card hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-muted/30 text-left transition-all flex items-center justify-between group cursor-pointer"
-                              >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  <div
-                                    className={cn(
-                                      "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border",
-                                      item.badgeBg
-                                    )}
-                                  >
-                                    <Icon className="w-3.5 h-3.5" />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <span className="text-xs font-bold text-foreground block truncate">
-                                      {item.label}
-                                    </span>
-                                    <span className="text-[10px] text-muted-foreground truncate block">
-                                      {item.desc}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
-                                  <Plus className="w-3 h-3" />
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                {/* Reusable Action Blocks by Channel */}
+                <ActionBlocksByChannel
+                  moduleType="survey"
+                  layout="list"
+                  onAddAction={(type) => onAddAction(type as SurveyRuleActionType)}
+                />
               </div>
             ) : (
               <div className="space-y-2">

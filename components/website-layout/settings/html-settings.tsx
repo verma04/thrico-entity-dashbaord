@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { Slider } from "@/components/ui/slider";
 import {
   Upload,
@@ -22,6 +23,8 @@ import {
   FileUp,
   Columns2,
   RotateCcw,
+  ImagePlus,
+  Link2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
@@ -54,6 +57,7 @@ export interface HtmlContent {
   title?: string;
   description?: string;
   [key: string]: unknown;
+  uploadedImages?: Array<{ url: string; cdnUrl: string; name: string }>;
 }
 
 interface HtmlSettingsProps {
@@ -139,6 +143,8 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [showCssEditor, setShowCssEditor] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<Array<{ url: string; cdnUrl: string; name: string }>>(content?.uploadedImages || []);
+  const [copiedImageUrl, setCopiedImageUrl] = useState<string | null>(null);
   const [isFullViewerOpen, setIsFullViewerOpen] = useState(false);
   const [inlineViewMode, setInlineViewMode] = useState<"code" | "preview" | "split">("code");
   const [inlinePreviewKey, setInlinePreviewKey] = useState(0);
@@ -867,7 +873,167 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
 
       <div className="h-px bg-border/40" />
 
-      {/* ─── 6. Section Header Settings ─── */}
+      {/* ─── 6. Image Upload & Gallery ─── */}
+      <div className="space-y-3">
+        <Label className="text-[10px] uppercase font-semibold text-muted-foreground/80 tracking-wider flex items-center gap-1.5">
+          <ImagePlus className="h-3 w-3 text-primary" />
+          <span>Upload Images</span>
+        </Label>
+        <p className="text-[10px] text-muted-foreground leading-tight -mt-1">
+          Upload images and insert them into your HTML code with one click.
+        </p>
+
+        <ImageUploadWithCrop
+          label="Upload Image for HTML"
+          currentImage={undefined}
+          onImageUpdate={(cdnUrl, url) => {
+            const newImage = {
+              url: url || cdnUrl,
+              cdnUrl,
+              name: `image-${(uploadedImages.length + 1).toString().padStart(2, '0')}`,
+            };
+            const updated = [...uploadedImages, newImage];
+            setUploadedImages(updated);
+            onChange({ uploadedImages: updated });
+            toast({
+              title: "Image uploaded!",
+              description: "Click the insert button to add it to your HTML.",
+            });
+          }}
+          recommendedWidth={1200}
+          recommendedHeight={800}
+          maxFileSize={5}
+          showDimensions={true}
+          hideRecommendedSize={false}
+          customDescription="Upload an image to use in your custom HTML section"
+        />
+
+        {/* Uploaded Images Gallery */}
+        {uploadedImages.length > 0 && (
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                Uploaded ({uploadedImages.length})
+              </span>
+            </div>
+
+            <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+              {uploadedImages.map((img, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 p-2 rounded-lg border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors group"
+                >
+                  {/* Thumbnail */}
+                  <div className="h-9 w-9 rounded-md overflow-hidden border border-border/40 bg-background shrink-0">
+                    <img
+                      src={img.cdnUrl || img.url}
+                      alt={img.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium text-foreground truncate">
+                      {img.name}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground truncate">
+                      {img.cdnUrl || img.url}
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Copy URL */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const imageUrl = img.cdnUrl || img.url;
+                        navigator.clipboard.writeText(imageUrl);
+                        setCopiedImageUrl(imageUrl);
+                        toast({
+                          title: "URL Copied",
+                          description: "Image URL copied to clipboard.",
+                        });
+                        setTimeout(() => setCopiedImageUrl(null), 2000);
+                      }}
+                      className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                      title="Copy image URL"
+                    >
+                      {copiedImageUrl === (img.cdnUrl || img.url) ? (
+                        <Check className="h-3 w-3 text-emerald-500" />
+                      ) : (
+                        <Link2 className="h-3 w-3" />
+                      )}
+                    </button>
+
+                    {/* Insert as <img> tag */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const imageUrl = img.cdnUrl || img.url;
+                        const imgTag = `<img src="${imageUrl}" alt="${img.name}" style="max-width: 100%; height: auto; border-radius: 8px;" />`;
+                        const textarea = textareaRef.current;
+                        if (textarea) {
+                          const start = textarea.selectionStart;
+                          const end = textarea.selectionEnd;
+                          const current = htmlCode;
+                          const newText =
+                            current.substring(0, start) +
+                            (start > 0 && !current.substring(0, start).endsWith("\n") ? "\n" : "") +
+                            imgTag +
+                            "\n" +
+                            current.substring(end);
+                          onChange({ htmlCode: newText });
+                          setTimeout(() => {
+                            textarea.focus();
+                            const newPos = start + imgTag.length + 1;
+                            textarea.setSelectionRange(newPos, newPos);
+                          }, 50);
+                        } else {
+                          onChange({
+                            htmlCode: htmlCode + (htmlCode ? "\n\n" : "") + imgTag,
+                          });
+                        }
+                        toast({
+                          title: "Image inserted",
+                          description: `Added <img> tag for ${img.name} into your HTML.`,
+                        });
+                      }}
+                      className="p-1 rounded hover:bg-primary/10 text-primary transition-colors"
+                      title="Insert <img> tag into HTML"
+                    >
+                      <Code2 className="h-3 w-3" />
+                    </button>
+
+                    {/* Remove */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = uploadedImages.filter((_, i) => i !== index);
+                        setUploadedImages(updated);
+                        onChange({ uploadedImages: updated });
+                        toast({
+                          title: "Image removed",
+                          description: `${img.name} removed from gallery.`,
+                        });
+                      }}
+                      className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                      title="Remove image"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="h-px bg-border/40" />
+
+      {/* ─── 7. Section Header Settings ─── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
@@ -906,7 +1072,7 @@ export const HtmlSettings: React.FC<HtmlSettingsProps> = ({
         )}
       </div>
 
-      {/* ─── 7. Full Viewer Modal ─── */}
+      {/* ─── 8. Full Viewer Modal ─── */}
       <HtmlFullViewerModal
         isOpen={isFullViewerOpen}
         onClose={() => setIsFullViewerOpen(false)}

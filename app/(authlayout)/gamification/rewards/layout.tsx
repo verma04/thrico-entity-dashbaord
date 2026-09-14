@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Layers,
   BookOpen,
+  Zap,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
@@ -44,6 +45,12 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
       key: "coupons",
       label: `${rewardsModuleName} & Vouchers`,
       icon: <Ticket className="h-4 w-4" />,
+      section: "Manage",
+    },
+    {
+      key: "automation",
+      label: "Automation",
+      icon: <Zap className="h-4 w-4" />,
       section: "Manage",
     },
     {

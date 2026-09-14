@@ -44,6 +44,14 @@ const columns: AdminTableColumn<UserDetail>[] = [
     cell: (_, index) => index + 1,
   },
   {
+    key: "actions",
+    header: "Action",
+    headerClassName: "w-10 text-left",
+    className: "text-left",
+    isFixedLeft: true,
+    cell: (row) => <UserActions user={row} />,
+  },
+  {
     key: "member",
     header: "Member",
     cell: (row) => {
@@ -269,14 +277,6 @@ const columns: AdminTableColumn<UserDetail>[] = [
         )}
       </div>
     ),
-  },
-  {
-    key: "actions",
-    header: "Action",
-    headerClassName: "w-10 text-right",
-    className: "text-right",
-    isFixedRight: true,
-    cell: (row) => <UserActions user={row} />,
   },
 ];
 

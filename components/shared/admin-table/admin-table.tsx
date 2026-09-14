@@ -42,6 +42,7 @@ export interface AdminTableColumn<T = any> {
   className?: string;
   headerClassName?: string;
   isFixedRight?: boolean;
+  isFixedLeft?: boolean;
   cell: (row: T, index: number) => React.ReactNode;
 }
 
@@ -788,7 +789,7 @@ export function AdminTable<T = any>({
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {columns
-                    .filter((c) => !c.isFixedRight && c.header)
+                    .filter((c) => !c.isFixedRight && !c.isFixedLeft && c.header)
                     .map((col) => (
                       <DropdownMenuCheckboxItem
                         key={col.key}
@@ -817,6 +818,8 @@ export function AdminTable<T = any>({
                     "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap",
                     col.isFixedRight &&
                       "sticky right-0 bg-muted z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
+                    col.isFixedLeft &&
+                      "sticky left-0 bg-muted z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]",
                     col.headerClassName,
                   )}
                 >
@@ -856,6 +859,8 @@ export function AdminTable<T = any>({
                               : "px-4 py-2 text-[12px]",
                             col.isFixedRight &&
                               "sticky right-0 bg-card group-hover:bg-muted/50 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
+                            col.isFixedLeft &&
+                              "sticky left-0 bg-card group-hover:bg-muted/50 z-10 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]",
                             col.className,
                           )}
                         >
