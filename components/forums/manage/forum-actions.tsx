@@ -81,13 +81,13 @@ export function ForumActions({ forum, refetch, trigger }: ForumActionsProps) {
     });
   };
 
-  const handleStatusChange = async (status: string) => {
+  const handleStatusChange = async (action: string) => {
     try {
       await changeStatus({
         variables: {
           input: {
-            id: forum.id,
-            status,
+            discussionForumId: forum.id,
+            action,
             reason: "",
           },
         },
@@ -103,9 +103,9 @@ export function ForumActions({ forum, refetch, trigger }: ForumActionsProps) {
       await changeVerification({
         variables: {
           input: {
-            id: forum.id,
-            isVerified: !isVerified,
-            verificationReason: "",
+            discussionForumId: forum.id,
+            action: isVerified ? "UNVERIFY" : "VERIFY",
+            reason: "",
           },
         },
       });
@@ -184,7 +184,7 @@ export function ForumActions({ forum, refetch, trigger }: ForumActionsProps) {
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-36 p-1">
             <DropdownMenuItem
-              onClick={() => handleStatusChange("APPROVED")}
+              onClick={() => handleStatusChange("APPROVE")}
               className="text-xs font-medium cursor-pointer gap-2 text-emerald-600 dark:text-emerald-400"
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -198,14 +198,14 @@ export function ForumActions({ forum, refetch, trigger }: ForumActionsProps) {
               Pending
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => handleStatusChange("DISABLED")}
+              onClick={() => handleStatusChange("DISABLE")}
               className="text-xs font-medium cursor-pointer gap-2 text-orange-600 dark:text-orange-400"
             >
               <Ban className="h-3.5 w-3.5" />
               Disable
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => handleStatusChange("REJECTED")}
+              onClick={() => handleStatusChange("REJECT")}
               className="text-xs font-medium cursor-pointer gap-2 text-rose-600 dark:text-rose-400"
             >
               <XCircle className="h-3.5 w-3.5" />
