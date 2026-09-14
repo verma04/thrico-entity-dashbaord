@@ -1,4 +1,5 @@
 export * from "./customer-360-card";
+export * from "./customer-360-ai-summary-card";
 export * from "./customer-360-ga-analytics";
 export * from "./conversion-funnel-card";
 export * from "./cohort-retention-matrix";
