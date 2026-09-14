@@ -2,9 +2,9 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { addDiscussionForum } from "@/graphql/actions/discussion-form";
 import { ForumCreationForm } from "@/components/forums/create/forum-creation-form";
-import { useToast } from "@/components/ui/use-toast";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
@@ -17,24 +17,18 @@ import { MessageSquare } from "lucide-react";
 
 const CreateForumPage = () => {
   const router = useRouter();
-  const { toast } = useToast();
   const moduleName = useModuleStore((state) => state.forumModuleName);
   const singularName = useModuleStore((state) => state.forumSingularName);
 
   const [add, { loading }] = addDiscussionForum({
-    onCompleted: (data: any) => {
-      toast({
-        title: "Success",
-        description: `${singularName} posted successfully!`,
-      });
+    onCompleted: () => {
+      toast.success(`${singularName} posted successfully!`);
       router.push("/forums/all");
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || `Failed to post ${singularName.toLowerCase()}`,
-        variant: "destructive",
-      });
+      toast.error(
+        error.message || `Failed to post ${singularName.toLowerCase()}`,
+      );
     },
   });
 
@@ -52,22 +46,22 @@ const CreateForumPage = () => {
   };
 
   const onCancel = () => {
-    router.back();
+    router.push("/forums/all");
   };
 
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title={`New ${singularName}`}
-        badgeText={moduleName}
+        title={`Create ${singularName}`}
+        badgeText="Community Dialogues"
         description={`Start a new discussion thread or question in your ${moduleName.toLowerCase()}.`}
         icon={MessageSquare}
         breadcrumbs={[
           { label: moduleName, href: "/forums/all" },
-          { label: `New ${singularName}` },
+          { label: "Create" },
         ]}
       />
-      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+      <EcosystemContainer className="p-0 border-none shadow-none ring-0 bg-transparent">
         <ForumCreationForm
           initialValues={{}}
           loading={loading}
@@ -81,5 +75,5 @@ const CreateForumPage = () => {
 
 export default withSubscriptionCheck(
   withModulePermission(CreateForumPage, "FORUMS", "canCreate"),
-  "forums"
+  "forums",
 );

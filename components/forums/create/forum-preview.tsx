@@ -3,10 +3,9 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { MessageSquare, User, Clock } from "lucide-react";
+import { MessageSquare, User, Clock, ShieldCheck, ThumbsUp, MessageCircle, Sparkles } from "lucide-react";
 import { useGetUser } from "@/graphql/actions";
+import { cn } from "@/lib/utils";
 
 interface ForumPreviewProps {
   formData: {
@@ -16,99 +15,96 @@ interface ForumPreviewProps {
     isAnonymous: boolean;
   };
   categories?: any[];
+  singularName?: string;
 }
 
-export function ForumPreview({ formData, categories = [] }: ForumPreviewProps) {
+export function ForumPreview({
+  formData,
+  categories = [],
+  singularName = "Discussion",
+}: ForumPreviewProps) {
   const { data: userData } = useGetUser();
   const user = userData?.getUser;
 
   const selectedCategory = categories.find((c) => c.id === formData.category);
 
   return (
-    <Card className="border-none shadow-xl ring-1 ring-border/50 overflow-hidden bg-card/50 backdrop-blur-sm">
-      <div className="h-2 bg-gradient-to-r from-primary to-primary/60" />
-      <CardContent className="pt-6 space-y-6">
-        {/* Header/Author Info */}
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-primary/20">
+    <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#fbfbfc] dark:bg-zinc-900/70 p-3.5 space-y-3 shadow-2xs transition-all">
+      {/* Author & Metadata */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Avatar className="h-7 w-7 rounded-full border border-[#d2d5d9] dark:border-zinc-700 shrink-0">
             {!formData.isAnonymous && user?.avatar ? (
               <AvatarImage
                 src={user.avatar}
-                alt={`${user.firstName} ${user.lastName}`}
+                alt={`${user.firstName || ""} ${user.lastName || ""}`}
               />
             ) : null}
-            <AvatarFallback className="bg-primary/5 text-primary">
-              <User className="h-5 w-5" />
+            <AvatarFallback className="bg-[#f0f0f1] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 text-[11px] font-semibold">
+              {formData.isAnonymous ? (
+                <ShieldCheck className="h-3.5 w-3.5 text-zinc-500" />
+              ) : (
+                (user?.firstName?.[0] || "U").toUpperCase()
+              )}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <h4 className="font-semibold text-sm leading-tight">
-              {formData.isAnonymous ? "Anonymous User" : user ? `${user.firstName} ${user.lastName}` : "User Name"}
+          <div className="min-w-0">
+            <h4 className="font-semibold text-[12.5px] text-[#303030] dark:text-zinc-100 truncate leading-tight">
+              {formData.isAnonymous
+                ? "Anonymous Member"
+                : user
+                ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Community Member"
+                : "You"}
             </h4>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-              <Clock className="h-3 w-3" />
+            <div className="flex items-center gap-1.5 text-[10.5px] text-[#616161] dark:text-zinc-400 mt-0.5">
+              <Clock className="h-2.5 w-2.5" />
               <span>Just now</span>
+              {formData.isAnonymous && (
+                <>
+                  <span>•</span>
+                  <span className="text-zinc-500 font-medium">Hidden author</span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="space-y-3">
-          {/* Title */}
-          <h3 className="font-bold text-lg leading-tight break-words">
-            {formData.title || "Discussion Title"}
-          </h3>
+        {/* Category Badge */}
+        <Badge
+          variant="outline"
+          className="bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[10px] font-medium px-2 py-0.5 rounded-[4px] shrink-0"
+        >
+          {selectedCategory?.name || "General"}
+        </Badge>
+      </div>
 
-          {/* Tags / Category */}
-          <div className="flex flex-wrap gap-2">
-            <Badge
-              variant="secondary"
-              className="bg-primary/5 text-primary border-primary/10 hover:bg-primary/10"
-            >
-              <MessageSquare className="h-3 w-3 mr-1" />
-              {selectedCategory?.name || "General Discussion"}
-            </Badge>
-            {formData.isAnonymous && (
-              <Badge
-                variant="outline"
-                className="bg-muted text-muted-foreground"
-              >
-                Anonymous
-              </Badge>
-            )}
-          </div>
-
-          <Separator className="opacity-50" />
-
-          {/* Content */}
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <p className="text-sm text-foreground/80 leading-relaxed break-words whitespace-pre-wrap">
-              {formData.content ||
-                "Write your discussion content here to see how it looks to other members..."}
-            </p>
-          </div>
-        </div>
-
-        {/* Mock Actions */}
-        <div className="flex items-center gap-4 pt-4 mt-4 border-t opacity-60">
-          <div className="flex items-center gap-1.5 text-xs font-medium">
-            <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
-              <span className="text-[10px]">▲</span>
-            </div>
-            <span>0</span>
-            <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center">
-              <span className="text-[10px]">▼</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <MessageSquare className="h-4 w-4" />
-            <span>0 Comments</span>
-          </div>
-        </div>
-
-        <p className="text-[10px] text-center text-muted-foreground italic pt-2">
-          Preview version - Final layout may vary slightly
+      {/* Discussion Title */}
+      <div className="space-y-1">
+        <h3 className="font-semibold text-[14px] text-[#202223] dark:text-zinc-100 leading-snug break-words">
+          {formData.title?.trim() || `${singularName} title will appear here…`}
+        </h3>
+        <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[17px] break-words line-clamp-4 whitespace-pre-wrap">
+          {formData.content?.trim() ||
+            "Discussion content and detailed description will be previewed here in real-time as you write…"}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Interactive Mock Bar */}
+      <div className="flex items-center justify-between pt-2 border-t border-[#f1f2f3] dark:border-zinc-800/80 text-[11px] text-[#616161] dark:text-zinc-400">
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[4px] bg-white dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 font-medium text-[10.5px]">
+            <ThumbsUp className="h-2.5 w-2.5 text-zinc-500" />
+            0 upvotes
+          </span>
+          <span className="inline-flex items-center gap-1 font-medium text-[10.5px]">
+            <MessageCircle className="h-2.5 w-2.5 text-zinc-500" />
+            0 replies
+          </span>
+        </div>
+        <span className="text-[9.5px] text-zinc-400 italic">
+          Live feed card simulation
+        </span>
+      </div>
+    </div>
   );
 }

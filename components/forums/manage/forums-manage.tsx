@@ -3,12 +3,14 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useDebounce } from "use-debounce";
+import Link from "next/link";
 import {
   MessageSquare,
   SlidersHorizontal,
   LayoutGrid,
   List as ListIcon,
   Upload,
+  Plus,
 } from "lucide-react";
 import {
   Select,
@@ -37,7 +39,7 @@ import { useModuleStore } from "@/store/useModuleStore";
 
 import { getDiscussionForum } from "@/graphql/actions/discussion-form";
 import { discussionForm, discussionForumStatus } from "../ts-types";
-import Post from "@/components/forums/post/forum-post";
+import { CtaButton } from "@/components/ui/cta-button";
 import {
   STATUS_TABS,
   VERIFICATION_OPTIONS,
@@ -410,7 +412,12 @@ export function ForumsManage({ status: initialStatus }: ForumsManageProps) {
           />
 
           {/* Create CTA Button */}
-          <Post />
+          <Link href="/forums/create">
+            <CtaButton>
+              <Plus className="h-3.5 w-3.5" />
+              Create {singularName}
+            </CtaButton>
+          </Link>
 
           <EcosystemActionBar.Separator />
 

@@ -841,7 +841,7 @@ export const modules = [
     icon: <MessageSquare size={18} />,
     children: [
       { key: "for-dash", label: "Dashboard", path: "/forums" },
-
+      { key: "for-create", label: "Create Discussion", path: "/forums/create" },
       { key: "for-manage", label: "Manage Forums", path: "/forums/all" },
       {
         key: "for-cats",
