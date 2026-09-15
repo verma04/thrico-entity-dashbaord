@@ -35,11 +35,19 @@ export * from "./gift-cards";
 export * from "./eligibility";
 
 
-export const useGetRewards = (variables?: {
-  status?: string;
-  search?: string;
-  pagination?: { page: number; limit: number };
-}) => useQuery(GET_REWARDS, { variables });
+export const useGetRewards = (
+  variables?: {
+    status?: string;
+    search?: string;
+    pagination?: { page: number; limit: number };
+  },
+  options?: any
+) =>
+  useQuery(GET_REWARDS, {
+    variables,
+    fetchPolicy: "cache-and-network",
+    ...options,
+  });
 
 export const useGetRewardById = (id: string, options?: any) =>
   useQuery(GET_REWARD_BY_ID, {
@@ -103,20 +111,49 @@ export const useGetRewardSecuritySettings = () =>
 
 export const useCreateReward = (options?: any) =>
   useMutation(CREATE_REWARD, {
+    refetchQueries: ["GetRewards", "GetRewardStats", "GetPopularRewards"],
+    awaitRefetchQueries: true,
+    update(cache) {
+      cache.evict({ fieldName: "getRewards" });
+      cache.evict({ fieldName: "getRewardStats" });
+      cache.evict({ fieldName: "getPopularRewards" });
+      cache.gc();
+    },
     ...options,
-    refetchQueries: ["GetRewards", "GetRewardStats"],
   });
 
 export const useUpdateReward = (options?: any) =>
   useMutation(UPDATE_REWARD, {
+    refetchQueries: ["GetRewards", "GetRewardStats", "GetRewardById", "GetPopularRewards"],
+    awaitRefetchQueries: true,
+    update(cache) {
+      cache.evict({ fieldName: "getRewards" });
+      cache.evict({ fieldName: "getRewardStats" });
+      cache.evict({ fieldName: "getRewardById" });
+      cache.evict({ fieldName: "getPopularRewards" });
+      cache.gc();
+    },
     ...options,
-    refetchQueries: ["GetRewards", "GetRewardStats"],
   });
 
 export const useUploadVouchers = (options?: any) =>
   useMutation(UPLOAD_VOUCHERS, {
+    refetchQueries: [
+      "GetRewardStats",
+      "GetRewardById",
+      "GetRewards",
+      "GetVouchers",
+      "GetAllVouchers",
+    ],
+    awaitRefetchQueries: true,
+    update(cache) {
+      cache.evict({ fieldName: "getRewards" });
+      cache.evict({ fieldName: "getRewardStats" });
+      cache.evict({ fieldName: "getVouchers" });
+      cache.evict({ fieldName: "getAllVouchers" });
+      cache.gc();
+    },
     ...options,
-    refetchQueries: ["GetRewardStats", "GetRewardById"],
   });
 
 export const useUpdateRewardSecuritySettings = (options?: any) =>
@@ -127,20 +164,39 @@ export const useUpdateRewardSecuritySettings = (options?: any) =>
 
 export const useMarkVoucherAsUsed = (options?: any) =>
   useMutation(MARK_VOUCHER_AS_USED, {
+    refetchQueries: [{ query: GET_ALL_VOUCHERS }, "GetRewards", "GetRewardStats"],
+    awaitRefetchQueries: true,
+    update(cache) {
+      cache.evict({ fieldName: "getAllVouchers" });
+      cache.evict({ fieldName: "getRewards" });
+      cache.gc();
+    },
     ...options,
-    refetchQueries: [{ query: GET_ALL_VOUCHERS }],
   });
 
 export const useDeleteVoucher = (options?: any) =>
   useMutation(DELETE_VOUCHER, {
+    refetchQueries: [{ query: GET_ALL_VOUCHERS }, { query: GET_REWARD_STATS }, "GetRewards"],
+    awaitRefetchQueries: true,
+    update(cache) {
+      cache.evict({ fieldName: "getAllVouchers" });
+      cache.evict({ fieldName: "getRewardStats" });
+      cache.evict({ fieldName: "getRewards" });
+      cache.gc();
+    },
     ...options,
-    refetchQueries: [{ query: GET_ALL_VOUCHERS }, { query: GET_REWARD_STATS }],
   });
 
 export const useEditVoucher = (options?: any) =>
   useMutation(EDIT_VOUCHER, {
+    refetchQueries: [{ query: GET_ALL_VOUCHERS }, "GetVouchers"],
+    awaitRefetchQueries: true,
+    update(cache) {
+      cache.evict({ fieldName: "getAllVouchers" });
+      cache.evict({ fieldName: "getVouchers" });
+      cache.gc();
+    },
     ...options,
-    refetchQueries: [{ query: GET_ALL_VOUCHERS }],
   });
 
 export const useGetSpinScratchStats = (

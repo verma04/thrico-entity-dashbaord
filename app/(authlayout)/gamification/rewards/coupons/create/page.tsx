@@ -3,6 +3,7 @@
 import React from "react";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
+import { useApolloClient } from "@apollo/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateReward } from "@/graphql/actions/rewards";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
@@ -11,15 +12,53 @@ import { RewardPreviewSidebar } from "@/components/rewards/coupons/form/reward-p
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { Ticket } from "lucide-react";
+import { Ticket, RotateCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { couponSchema } from "@/components/rewards/coupons/types";
 import { PolarisFormLayout } from "@/components/gamification/shared/polaris-form-ui";
 
 export default function CreateCouponPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const client = useApolloClient();
   const [createReward, { loading }] = useCreateReward();
   const [saved, setSaved] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
+
+  const handleRefreshCache = async () => {
+    try {
+      setIsRefreshing(true);
+      client.cache.evict({ fieldName: "getManualVouchers" });
+      client.cache.evict({ fieldName: "getStoreDiscountRules" });
+      client.cache.evict({ fieldName: "getDigitalCardRules" });
+      client.cache.evict({ fieldName: "getEntityRewardWallet" });
+      client.cache.evict({ fieldName: "getMembershipTiers" });
+      client.cache.evict({ fieldName: "getCommunities" });
+      client.cache.gc();
+      await client.refetchQueries({
+        include: [
+          "GetManualVouchers",
+          "GetStoreDiscountRules",
+          "GetDigitalCardRules",
+          "GetEntityRewardWallet",
+          "GetMembershipTiers",
+          "GetCommunities",
+        ],
+      });
+      toast({
+        title: "Cache Refreshed",
+        description: "Blueprint rules, vouchers, and member tiers synchronized.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Refresh Warning",
+        description: err.message || "Failed to fully refresh cache.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -132,6 +171,15 @@ export default function CreateCouponPage() {
             },
           },
         });
+        // Invalidate and refetch rewards catalog cache
+        client.cache.evict({ fieldName: "getRewards" });
+        client.cache.evict({ fieldName: "getRewardStats" });
+        client.cache.evict({ fieldName: "getPopularRewards" });
+        client.cache.gc();
+        await client.refetchQueries({
+          include: ["GetRewards", "GetRewardStats", "GetPopularRewards"],
+        });
+
         toast({
           title: "Reward Published",
           description: `${values.title} has been added to the catalog.`,
@@ -139,7 +187,8 @@ export default function CreateCouponPage() {
         setSaved(true);
         setTimeout(() => {
           router.push("/gamification/rewards/coupons");
-        }, 1500);
+          router.refresh();
+        }, 1200);
       } catch (err: any) {
         toast({
           title: "Failed to create reward",
@@ -163,6 +212,19 @@ export default function CreateCouponPage() {
           { label: "Reward Coupons", href: "/gamification/rewards/coupons" },
           { label: "Create" },
         ]}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshCache}
+            disabled={isRefreshing}
+            className="h-8 px-3 text-xs font-medium gap-1.5 bg-card border-border shadow-2xs hover:bg-muted"
+          >
+            <RotateCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span>{isRefreshing ? "Refreshing..." : "Refresh Cache"}</span>
+          </Button>
+        }
       />
       <EcosystemContainer className="h-full w-full border-none shadow-none bg-transparent p-0 ring-0">
         <PolarisFormLayout

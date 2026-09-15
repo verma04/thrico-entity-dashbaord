@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   List as ListIcon,
   Upload,
+  RotateCw,
 } from "lucide-react";
 import {
   Select,
@@ -419,10 +420,31 @@ export function CouponsManage({ status: initialStatus }: CouponsManageProps) {
           { label: "Coupons" },
         ]}
         actions={
-          <CtaButton onClick={handleCreate}>
-            <Plus className="h-3.5 w-3.5 mr-1" />
-            New Reward
-          </CtaButton>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                try {
+                  await refetch();
+                  toast.success("Rewards refreshed", {
+                    description: "Reward coupons list is now synchronized.",
+                  });
+                } catch (e: any) {
+                  toast.error("Failed to refresh", { description: e.message });
+                }
+              }}
+              disabled={rewardsLoading}
+              className="h-8 px-2.5 text-xs font-medium gap-1.5 bg-card border-border shadow-2xs hover:bg-muted text-foreground"
+            >
+              <RotateCw className={cn("h-3.5 w-3.5", rewardsLoading && "animate-spin")} />
+              <span>Refresh</span>
+            </Button>
+            <CtaButton onClick={handleCreate}>
+              <Plus className="h-3.5 w-3.5 mr-1" />
+              New Reward
+            </CtaButton>
+          </div>
         }
       />
 
