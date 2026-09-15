@@ -102,7 +102,7 @@ export function Customer360LiveFeedTab({
               <div className="flex items-center gap-2">
                 <Radio className="w-4 h-4 text-emerald-500" />
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  Real-Time Activity Telemetry
+                  Real-Time Activity Stream
                   {isLiveStreaming && (
                     <span className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
@@ -166,7 +166,7 @@ export function Customer360LiveFeedTab({
           ) : filteredEvents.length === 0 ? (
             <div className="py-16 text-center text-muted-foreground text-xs">
               <Activity className="w-8 h-8 opacity-30 mx-auto mb-2" />
-              No live telemetry events recorded yet.
+              No live activity events recorded yet.
             </div>
           ) : (
             <div className="divide-y divide-border/60">

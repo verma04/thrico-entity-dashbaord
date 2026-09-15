@@ -213,7 +213,7 @@ export function Customer360CohortsTab({
             <div className="flex items-center gap-2">
               <Info className="w-3.5 h-3.5 text-primary" />
               <span>
-                Calculated dynamically via ClickHouse retention engine based on user activity events.
+                Calculated dynamically via retention engine based on user activity events.
               </span>
             </div>
 

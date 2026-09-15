@@ -272,7 +272,7 @@ export function StatsTab({ userId }: { userId: string }) {
                 <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform text-indigo-500" />
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                View ClickHouse behavioral event stream, RFM persona, health score, and AI recommendations
+                View behavioral event stream, RFM persona, health score, and AI recommendations
               </p>
             </div>
           </div>

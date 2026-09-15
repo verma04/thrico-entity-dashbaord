@@ -63,7 +63,7 @@ export function ChurnRiskTable({ limit = 10, className }: ChurnRiskTableProps) {
               <CardTitle className="text-base font-bold">Churn Risk & Retention Triggers</CardTitle>
             </div>
             <CardDescription className="text-xs">
-              At-risk members detected via ClickHouse inactivity and engagement drop-offs
+              At-risk members detected via inactivity and engagement drop-offs
             </CardDescription>
           </div>
           <Badge variant="outline" className="text-xs font-semibold">

@@ -56,7 +56,7 @@ export function CohortRetentionMatrix({ className }: CohortRetentionMatrixProps)
               <CardTitle className="text-base font-bold">Cohort Retention Matrix</CardTitle>
             </div>
             <CardDescription className="text-xs">
-              Weekly and monthly retention cohorts computed via ClickHouse
+              Weekly and monthly retention cohorts computed dynamically
             </CardDescription>
           </div>
 

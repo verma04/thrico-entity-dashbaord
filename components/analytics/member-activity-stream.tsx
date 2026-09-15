@@ -171,7 +171,7 @@ const CATEGORY_CONFIG: Record<
     border: "border-amber-200 dark:border-amber-900/50",
   },
   WEB: {
-    label: "Web & Telemetry",
+    label: "Web Activity",
     icon: Globe,
     badgeBg: "bg-cyan-50 dark:bg-cyan-950/40",
     badgeText: "text-cyan-700 dark:text-cyan-300",
@@ -255,7 +255,7 @@ function formatEventDetails(act: ActivityStreamItem) {
     title = props.badgeName ? `Unlocked Badge: ${props.badgeName}` : "Unlocked Achievement Badge";
     highlights.push({ label: "Badge", value: props.badgeName || "Badge" });
   }
-  // Web telemetry
+  // Web activity
   else if (ev === "PAGE_VIEW" || ev === "WEB_PAGE_VIEW") {
     const pageTitle = props.page_title || props.title;
     const pageUrl = props.page_url || props.url || props.path;
@@ -438,11 +438,11 @@ function ActivityEventDetailDrawer({ activity }: { activity: ActivityStreamItem 
         </div>
       )}
 
-      {/* 4. Raw JSON Telemetry Payload */}
+      {/* 4. Raw JSON Event Payload */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-            <Code2 className="h-3 w-3 text-primary" /> Telemetry Payload (JSON)
+            <Code2 className="h-3 w-3 text-primary" /> Event Payload (JSON)
           </span>
           <CopyButton text={JSON.stringify(activity, null, 2)} label="Copy JSON" />
         </div>
@@ -560,7 +560,7 @@ export function MemberActivityStream({
             <div>
               <div className="flex items-center gap-2">
                 <CardTitle className="text-xs sm:text-sm font-bold text-foreground">
-                  Activity Telemetry Stream
+                  Activity Stream
                 </CardTitle>
                 <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0 h-4.5">
                   {filteredActivities.length} events
@@ -697,9 +697,9 @@ export function MemberActivityStream({
         {activities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
             <Activity className="h-5 w-5 opacity-30 mb-1" />
-            <p className="text-xs font-semibold text-foreground">No Telemetry Events</p>
+            <p className="text-xs font-semibold text-foreground">No Activity Events</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              No activity logged for this member in ClickHouse yet.
+              No activity logged for this member yet.
             </p>
           </div>
         ) : filteredActivities.length === 0 ? (

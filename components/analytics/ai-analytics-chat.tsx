@@ -68,7 +68,7 @@ export function AiAnalyticsChat({ className }: { className?: string }) {
           <div>
             <CardTitle className="text-base font-semibold">AI Analytics Assistant</CardTitle>
             <CardDescription className="text-xs">
-              Natural Language ClickHouse & User 360 Insights
+              Natural Language & User 360 Insights
             </CardDescription>
           </div>
         </div>
@@ -106,7 +106,7 @@ export function AiAnalyticsChat({ className }: { className?: string }) {
         {loading && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground italic">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            Analyzing query with ClickHouse...
+            Analyzing query...
           </div>
         )}
       </CardContent>

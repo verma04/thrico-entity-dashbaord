@@ -171,7 +171,7 @@ export function Customer360OverviewTab({
                   Activity & Growth Trends
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Aggregated telemetry data across time intervals
+                  Aggregated activity data across time intervals
                 </CardDescription>
               </div>
 
@@ -341,14 +341,14 @@ export function Customer360OverviewTab({
               Top Event Types
             </CardTitle>
             <CardDescription className="text-xs">
-              Distribution of telemetry signals
+              Distribution of activity signals
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto space-y-3.5 pr-2">
             {topEventTypes.length === 0 ? (
               <div className="h-48 flex flex-col items-center justify-center text-muted-foreground text-xs">
                 <Layers className="w-7 h-7 opacity-30 mb-2" />
-                No event telemetry recorded yet.
+                No event activity recorded yet.
               </div>
             ) : (
               topEventTypes.slice(0, 7).map((item, idx) => (

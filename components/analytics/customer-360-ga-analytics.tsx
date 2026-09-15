@@ -30,7 +30,7 @@ export function Customer360GaAnalyticsSection({ gaAnalytics }: Customer360GaAnal
     return (
       <Card className="border-dashed border-border/60 bg-muted/10">
         <CardContent className="p-3 text-center text-muted-foreground text-[11px]">
-          No web or browser sessions recorded in ClickHouse for this member yet.
+          No web or browser sessions recorded for this member yet.
         </CardContent>
       </Card>
     );
