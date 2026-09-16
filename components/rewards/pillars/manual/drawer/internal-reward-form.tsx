@@ -33,7 +33,10 @@ import { useGetEntity } from "@/graphql/actions";
 import {
   useCreateManualVoucherBatch,
   useGetManualVoucherBatchById,
+  useUpdateManualVoucher,
   ManualCouponType,
+  ManualVoucherStatus,
+  UpdateManualVoucherInput,
 } from "@/graphql/actions/rewards/manual";
 import { ManualRewardItem } from "../table/manual-reward-card";
 import { safeFormat } from "@/lib/date-utils";
@@ -44,6 +47,8 @@ interface InternalRewardFormProps {
   id?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
+  onUpdate?: (values: any) => Promise<void> | void;
+  isSaving?: boolean;
 }
 
 const internalRewardSchema = Yup.object().shape({
@@ -86,9 +91,13 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
   id,
   onSuccess,
   onCancel,
+  onUpdate,
+  isSaving,
 }) => {
   const [createBatch, { loading: creatingBatch }] =
     useCreateManualVoucherBatch();
+  const [updateManualVoucherMutation, { loading: updatingVoucher }] =
+    useUpdateManualVoucher();
   const [isSaved, setIsSaved] = useState(false);
   const [hasUserEditedPrefix, setHasUserEditedPrefix] = useState(false);
   const [generatedSampleCodes, setGeneratedSampleCodes] = useState<string[]>(
@@ -288,9 +297,80 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
             onSuccess?.();
           }
         } else {
-          toast.success("Manual voucher configuration updated");
-          setIsSaved(true);
-          onSuccess?.();
+          if (onUpdate) {
+            await onUpdate(values);
+            setIsSaved(true);
+            onSuccess?.();
+            return;
+          }
+
+          if (ruleId) {
+            let resolvedExpiryDate: string | undefined = undefined;
+            if (values.expiryDate) {
+              const parsedDate = new Date(values.expiryDate);
+              if (!isNaN(parsedDate.getTime())) {
+                resolvedExpiryDate = parsedDate.toISOString();
+              }
+            } else if (values.validityDays) {
+              const d = new Date();
+              d.setDate(d.getDate() + Number(values.validityDays));
+              resolvedExpiryDate = d.toISOString();
+            }
+
+            const metadataObj: Record<string, any> = {
+              title: values.title,
+              name: values.title,
+              description: values.description,
+              image: values.image || undefined,
+              url: values.url || undefined,
+              prefix: values.prefix,
+              couponCode: values.couponCode,
+              validityDays: values.validityDays,
+            };
+
+            const input: UpdateManualVoucherInput = {
+              code:
+                values.couponType === ManualCouponType.ONE_TO_MANY
+                  ? values.couponCode || values.title
+                  : values.couponCode || undefined,
+              claimUrl: values.url || undefined,
+              faceValue: Number(currentItem?.faceValue) || 0,
+              currency: currentItem?.currency || "TC",
+              inventoryRequired: values.inventoryRequired ?? true,
+              totalInventory:
+                values.couponType === ManualCouponType.ONE_TO_ONE
+                  ? Number(values.count) || undefined
+                  : Number(values.totalUsageLimit) || undefined,
+              remainingInventory:
+                values.couponType === ManualCouponType.ONE_TO_ONE
+                  ? Number(values.count) || undefined
+                  : Number(values.totalUsageLimit) || undefined,
+              totalUsageLimit: Number(values.totalUsageLimit) || 0,
+              perUserLimit: 1,
+              status: values.isActive
+                ? ManualVoucherStatus.UNASSIGNED
+                : ManualVoucherStatus.VOID,
+              expiryDate: resolvedExpiryDate,
+              metadata: JSON.stringify(metadataObj),
+            };
+
+            const res = await updateManualVoucherMutation({
+              variables: {
+                id: ruleId,
+                input,
+              },
+            });
+
+            if (res.data?.updateManualVoucher) {
+              toast.success("Manual voucher configuration updated successfully");
+              setIsSaved(true);
+              onSuccess?.();
+            }
+          } else {
+            toast.success("Manual voucher configuration updated");
+            setIsSaved(true);
+            onSuccess?.();
+          }
         }
       } catch (err: any) {
         toast.error(
@@ -756,7 +836,7 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
       <FloatingSavePanel
         hasChanged={formik.dirty}
         saved={isSaved}
-        isSaving={creatingBatch}
+        isSaving={creatingBatch || updatingVoucher || Boolean(isSaving)}
         onSave={() => formik.submitForm()}
         onReset={() => formik.resetForm()}
         title="Unsaved Internal Reward"
