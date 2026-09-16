@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import {
   useUpgradePlan,
   useVerifyRazorpayPayment,
+  useGetRazorpayKeyId,
 } from "@/graphql/actions/plan";
 import {
   useCheckEntitySubscription,
@@ -97,7 +98,13 @@ export default function UpgradeModal({
   const { Razorpay } = useRazorpay();
   const { refetch } = useCheckEntitySubscription();
   const { data: userData } = useGetUser();
+  const { data: keyData } = useGetRazorpayKeyId();
   const user = userData?.getUser;
+
+  const razorpayKey =
+    keyData?.getRazorpayKeyId ||
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY ||
+    "";
 
   const [verify] = useVerifyRazorpayPayment({
     onCompleted: (data: { verifyRazorpayPayment: boolean }) => {
@@ -115,7 +122,7 @@ export default function UpgradeModal({
       if (!data?.upgradePlan) return;
 
       const options: RazorpayOrderOptions = {
-        key: "rzp_live_SiqzWXdijA6k6U",
+        key: razorpayKey,
         amount: data.upgradePlan.amount,
         currency: data.upgradePlan.currency,
         name: "Thrico",

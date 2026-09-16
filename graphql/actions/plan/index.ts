@@ -12,6 +12,7 @@ import {
   UPGRADE_PLAN,
   VERIFY_RAZORPAY_PAYMENT,
   GET_COUNTRY,
+  GET_RAZORPAY_KEY_ID,
 } from "../../quries/plan";
 import { CountryPackage } from "@/components/subscription/ts-types";
 
@@ -213,3 +214,11 @@ export interface GetCountryResponse {
 }
 
 export const useCountry = () => useQuery<GetCountryResponse>(GET_COUNTRY);
+
+export interface GetRazorpayKeyIdResponse {
+  getRazorpayKeyId: string;
+}
+
+export const useGetRazorpayKeyId = (options?: any) =>
+  useQuery<GetRazorpayKeyIdResponse>(GET_RAZORPAY_KEY_ID, options);
+

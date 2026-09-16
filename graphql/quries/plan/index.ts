@@ -260,3 +260,10 @@ export const GET_COUNTRY = gql`
     }
   }
 `;
+
+export const GET_RAZORPAY_KEY_ID = gql`
+  query GetRazorpayKeyId {
+    getRazorpayKeyId
+  }
+`;
+

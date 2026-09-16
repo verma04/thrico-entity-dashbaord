@@ -35,6 +35,7 @@ import {
   useAddAddon,
   useVerifyRazorpayPayment,
   useCountry,
+  useGetRazorpayKeyId,
 } from "@/graphql/actions/plan";
 import { useGetUser } from "@/graphql/actions";
 import { RazorpayOrderOptions, useRazorpay } from "react-razorpay";
@@ -57,7 +58,13 @@ const AddonPurchaseModal = ({
   const { Razorpay } = useRazorpay();
   const { data: countryData } = useCountry();
   const { data: userData } = useGetUser();
+  const { data: keyData } = useGetRazorpayKeyId();
   const user = userData?.getUser;
+
+  const razorpayKey =
+    keyData?.getRazorpayKeyId ||
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY ||
+    "";
 
   const country = countryData?.country;
   const taxPercentage = country?.taxPercentage || 0;
@@ -87,7 +94,7 @@ const AddonPurchaseModal = ({
 
       if (response.razorpayOrder) {
         const options: RazorpayOrderOptions = {
-          key: "rzp_live_SiqzWXdijA6k6U",
+          key: razorpayKey,
           amount: response.razorpayOrder.amount,
           currency: response.razorpayOrder.currency,
           name: "Thrico",

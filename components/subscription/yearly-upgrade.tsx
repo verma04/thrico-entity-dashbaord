@@ -28,6 +28,7 @@ import {
   useUpdateToYearlySummary,
   useVerifyRazorpayPayment,
   useCountry,
+  useGetRazorpayKeyId,
 } from "@/graphql/actions/plan";
 import PaymentLoading from "./loading";
 
@@ -49,7 +50,13 @@ const YearlyUpgrade = ({ planOverview }: { planOverview: PlanOverview }) => {
   const { data: countryData } = useCountry();
   const { Razorpay } = useRazorpay();
   const { data: userData } = useGetUser();
+  const { data: keyData } = useGetRazorpayKeyId();
   const user = userData?.getUser;
+
+  const razorpayKey =
+    keyData?.getRazorpayKeyId ||
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY ||
+    "";
 
   const country = countryData?.country;
   const summary = summaryData?.getUpdateToYearlySummary;
@@ -73,7 +80,7 @@ const YearlyUpgrade = ({ planOverview }: { planOverview: PlanOverview }) => {
 
       if (result.razorpayOrder) {
         const options: RazorpayOrderOptions = {
-          key: "rzp_live_SiqzWXdijA6k6U",
+          key: razorpayKey,
           amount: result.razorpayOrder.amount,
           currency: result.razorpayOrder
             .currency as RazorpayOrderOptions["currency"],

@@ -30,6 +30,7 @@ import {
   useUpdateTrialToPackage,
   useVerifyRazorpayPayment,
   useCountry,
+  useGetRazorpayKeyId,
 } from "@/graphql/actions/plan";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 
@@ -67,7 +68,14 @@ export default function BuyPlanPopUp({
   const { refetch, loading: statusLoader } = useCheckEntitySubscription();
   const { data: countryData } = useCountry();
   const { data: userData } = useGetUser();
+  const { data: keyData } = useGetRazorpayKeyId();
   const user = userData?.getUser;
+
+  const razorpayKey =
+    keyData?.getRazorpayKeyId ||
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY ||
+    "";
+
 
   const country = countryData?.country;
   const taxPercentage = country?.taxPercentage || 0;
@@ -137,7 +145,7 @@ export default function BuyPlanPopUp({
       if (!order) return;
 
       const options = {
-        key: "rzp_live_SiqzWXdijA6k6U",
+        key: razorpayKey,
         amount: order.amount,
         currency: order.currency,
         name: "Test Company",

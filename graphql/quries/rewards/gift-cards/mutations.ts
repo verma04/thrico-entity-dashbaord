@@ -34,6 +34,11 @@ export const CREATE_REWARD_WALLET_TOPUP_ORDER = gql`
       currency
       razorpayKeyId
       entityId
+      billingId
+      taxAmount
+      totalAmount
+      taxName
+      taxPercentage
     }
   }
 `;

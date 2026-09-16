@@ -189,6 +189,11 @@ export interface RewardWalletTopupOrderResult {
   currency: string;
   razorpayKeyId: string;
   entityId: string;
+  billingId?: string | null;
+  taxAmount?: number | null;
+  totalAmount?: number | null;
+  taxName?: string | null;
+  taxPercentage?: number | null;
 }
 
 export interface CreateWalletTopupOrderInput {
