@@ -150,6 +150,24 @@ export interface CreateManualVoucherEntryInput {
   metadata?: string;
 }
 
+export interface UpdateManualVoucherBatchInput {
+  name?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+  fileName?: string;
+  couponType?: ManualCouponType | string;
+  inventoryRequired?: boolean;
+  faceValue?: number;
+  currency?: string;
+  expiryDate?: string;
+  status?: string;
+  metadata?: string;
+  prefix?: string;
+  couponCode?: string;
+  totalUsageLimit?: number;
+}
+
 export interface UpdateManualVoucherInput {
   code?: string;
   cardNumber?: string;

@@ -7,6 +7,7 @@ import {
   CREATE_MANUAL_VOUCHER_BATCH,
   CREATE_MANUAL_VOUCHER,
   UPDATE_MANUAL_VOUCHER,
+  UPDATE_MANUAL_VOUCHER_BATCH,
   DELETE_MANUAL_VOUCHER,
   DELETE_MANUAL_VOUCHER_BATCH,
   VOID_MANUAL_VOUCHER,
@@ -14,6 +15,7 @@ import {
   CreateManualVoucherBatchInput,
   CreateManualVoucherEntryInput,
   UpdateManualVoucherInput,
+  UpdateManualVoucherBatchInput,
 } from "../../quries/rewards/manual";
 
 export * from "../../quries/rewards/manual/types";
@@ -98,6 +100,22 @@ export const useUpdateManualVoucher = (options?: any) =>
     refetchQueries: ["GetManualVouchers", "GetManualVoucherById"],
     awaitRefetchQueries: true,
     update(cache) {
+      cache.evict({ fieldName: "getManualVouchers" });
+    },
+    ...options,
+  });
+
+export const useUpdateManualVoucherBatch = (options?: any) =>
+  useMutation(UPDATE_MANUAL_VOUCHER_BATCH, {
+    refetchQueries: [
+      "GetManualVoucherBatches",
+      "GetManualVoucherBatchById",
+      "GetManualVouchers",
+      "GetRewardStats",
+    ],
+    awaitRefetchQueries: true,
+    update(cache) {
+      cache.evict({ fieldName: "getManualVoucherBatches" });
       cache.evict({ fieldName: "getManualVouchers" });
       cache.gc();
     },

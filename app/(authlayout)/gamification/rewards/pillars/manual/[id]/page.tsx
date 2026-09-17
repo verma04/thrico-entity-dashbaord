@@ -14,9 +14,11 @@ import {
   useGetManualVoucherBatchById,
   useGetManualVoucherById,
   useUpdateManualVoucher,
+  useUpdateManualVoucherBatch,
   ManualCouponType,
   ManualVoucherStatus,
   UpdateManualVoucherInput,
+  UpdateManualVoucherBatchInput,
 } from "@/graphql/actions/rewards/manual";
 import { ManualRewardItem } from "@/components/rewards/pillars/manual/table/manual-reward-card";
 import { toast } from "sonner";
@@ -41,8 +43,11 @@ export default function EditManualVoucherBatchPage() {
     skip: !id || Boolean(batchData?.getManualVoucherBatchById),
   });
 
-  const [updateManualVoucher, { loading: isUpdating }] =
+  const [updateManualVoucherBatch, { loading: isUpdatingBatch }] =
+    useUpdateManualVoucherBatch();
+  const [updateManualVoucher, { loading: isUpdatingVoucher }] =
     useUpdateManualVoucher();
+  const isUpdating = isUpdatingBatch || isUpdatingVoucher;
 
   const rawBatch = batchData?.getManualVoucherBatchById;
   const rawVoucher = voucherData?.getManualVoucherById;
@@ -160,43 +165,75 @@ export default function EditManualVoucherBatchPage() {
         validityDays: values.validityDays,
       };
 
-      const input: UpdateManualVoucherInput = {
-        code:
-          values.couponType === ManualCouponType.ONE_TO_MANY
-            ? values.couponCode || values.title
-            : values.couponCode || undefined,
-        claimUrl: values.url || undefined,
-        faceValue:
-          Number(values.faceValue) || Number(rawItem?.faceValue) || 0,
-        currency: values.currency || rawItem?.currency || "TC",
-        inventoryRequired: values.inventoryRequired ?? true,
-        totalInventory:
-          values.couponType === ManualCouponType.ONE_TO_ONE
-            ? Number(values.count) || undefined
-            : Number(values.totalUsageLimit) || undefined,
-        remainingInventory:
-          values.couponType === ManualCouponType.ONE_TO_ONE
-            ? Number(values.count) || undefined
-            : Number(values.totalUsageLimit) || undefined,
-        totalUsageLimit: Number(values.totalUsageLimit) || 0,
-        perUserLimit: 1,
-        status: values.isActive
-          ? ManualVoucherStatus.UNASSIGNED
-          : ManualVoucherStatus.VOID,
-        expiryDate: resolvedExpiryDate,
-        metadata: JSON.stringify(metadataObj),
-      };
+      if (rawBatch || !rawVoucher) {
+        const batchInput: UpdateManualVoucherBatchInput = {
+          name: values.title,
+          description: values.description,
+          image: values.image || undefined,
+          url: values.url || undefined,
+          couponType: values.couponType as ManualCouponType,
+          inventoryRequired: values.inventoryRequired ?? true,
+          faceValue:
+            Number(values.faceValue) || Number(rawItem?.faceValue) || 0,
+          currency: values.currency || rawItem?.currency || "TC",
+          status: values.isActive ? "ACTIVE" : "INACTIVE",
+          expiryDate: resolvedExpiryDate,
+          metadata: JSON.stringify(metadataObj),
+          prefix: values.prefix,
+          couponCode: values.couponCode,
+          totalUsageLimit: Number(values.totalUsageLimit) || undefined,
+        };
 
-      const res = await updateManualVoucher({
-        variables: {
-          id,
-          input,
-        },
-      });
+        const res = await updateManualVoucherBatch({
+          variables: {
+            id,
+            input: batchInput,
+          },
+        });
 
-      if (res.data?.updateManualVoucher) {
-        toast.success("Manual voucher updated successfully");
-        router.push("/gamification/rewards/pillars/manual");
+        if (res.data?.updateManualVoucherBatch) {
+          toast.success("Manual voucher updated successfully");
+          router.push("/gamification/rewards/pillars/manual");
+        }
+      } else {
+        const input: UpdateManualVoucherInput = {
+          code:
+            values.couponType === ManualCouponType.ONE_TO_MANY
+              ? values.couponCode || values.title
+              : values.couponCode || undefined,
+          claimUrl: values.url || undefined,
+          faceValue:
+            Number(values.faceValue) || Number(rawItem?.faceValue) || 0,
+          currency: values.currency || rawItem?.currency || "TC",
+          inventoryRequired: values.inventoryRequired ?? true,
+          totalInventory:
+            values.couponType === ManualCouponType.ONE_TO_ONE
+              ? Number(values.count) || undefined
+              : Number(values.totalUsageLimit) || undefined,
+          remainingInventory:
+            values.couponType === ManualCouponType.ONE_TO_ONE
+              ? Number(values.count) || undefined
+              : Number(values.totalUsageLimit) || undefined,
+          totalUsageLimit: Number(values.totalUsageLimit) || 0,
+          perUserLimit: 1,
+          status: values.isActive
+            ? ManualVoucherStatus.UNASSIGNED
+            : ManualVoucherStatus.VOID,
+          expiryDate: resolvedExpiryDate,
+          metadata: JSON.stringify(metadataObj),
+        };
+
+        const res = await updateManualVoucher({
+          variables: {
+            id,
+            input,
+          },
+        });
+
+        if (res.data?.updateManualVoucher) {
+          toast.success("Manual voucher updated successfully");
+          router.push("/gamification/rewards/pillars/manual");
+        }
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to update manual voucher");

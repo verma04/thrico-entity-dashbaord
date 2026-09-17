@@ -95,6 +95,42 @@ export const UPDATE_MANUAL_VOUCHER = gql`
   }
 `;
 
+export const UPDATE_MANUAL_VOUCHER_BATCH = gql`
+  mutation UpdateManualVoucherBatch(
+    $id: ID!
+    $input: UpdateManualVoucherBatchInput!
+  ) {
+    updateManualVoucherBatch(id: $id, input: $input) {
+      id
+      entityId
+      rewardId
+      name
+      description
+      image
+      url
+      fileName
+      couponType
+      inventoryRequired
+      totalCount
+      allocatedCount
+      redeemedCount
+      remainingCount
+      faceValue
+      currency
+      expiryDate
+      status
+      metadata
+      createdAt
+      updatedAt
+      reward {
+        id
+        title
+        image
+      }
+    }
+  }
+`;
+
 export const DELETE_MANUAL_VOUCHER = gql`
   mutation DeleteManualVoucher($id: ID!) {
     deleteManualVoucher(id: $id)

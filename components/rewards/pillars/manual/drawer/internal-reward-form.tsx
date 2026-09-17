@@ -34,9 +34,11 @@ import {
   useCreateManualVoucherBatch,
   useGetManualVoucherBatchById,
   useUpdateManualVoucher,
+  useUpdateManualVoucherBatch,
   ManualCouponType,
   ManualVoucherStatus,
   UpdateManualVoucherInput,
+  UpdateManualVoucherBatchInput,
 } from "@/graphql/actions/rewards/manual";
 import { ManualRewardItem } from "../table/manual-reward-card";
 import { safeFormat } from "@/lib/date-utils";
@@ -96,6 +98,8 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
 }) => {
   const [createBatch, { loading: creatingBatch }] =
     useCreateManualVoucherBatch();
+  const [updateManualVoucherBatchMutation, { loading: updatingBatch }] =
+    useUpdateManualVoucherBatch();
   const [updateManualVoucherMutation, { loading: updatingVoucher }] =
     useUpdateManualVoucher();
   const [isSaved, setIsSaved] = useState(false);
@@ -328,43 +332,75 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
               validityDays: values.validityDays,
             };
 
-            const input: UpdateManualVoucherInput = {
-              code:
-                values.couponType === ManualCouponType.ONE_TO_MANY
-                  ? values.couponCode || values.title
-                  : values.couponCode || undefined,
-              claimUrl: values.url || undefined,
-              faceValue: Number(currentItem?.faceValue) || 0,
-              currency: currentItem?.currency || "TC",
-              inventoryRequired: values.inventoryRequired ?? true,
-              totalInventory:
-                values.couponType === ManualCouponType.ONE_TO_ONE
-                  ? Number(values.count) || undefined
-                  : Number(values.totalUsageLimit) || undefined,
-              remainingInventory:
-                values.couponType === ManualCouponType.ONE_TO_ONE
-                  ? Number(values.count) || undefined
-                  : Number(values.totalUsageLimit) || undefined,
-              totalUsageLimit: Number(values.totalUsageLimit) || 0,
-              perUserLimit: 1,
-              status: values.isActive
-                ? ManualVoucherStatus.UNASSIGNED
-                : ManualVoucherStatus.VOID,
-              expiryDate: resolvedExpiryDate,
-              metadata: JSON.stringify(metadataObj),
-            };
+            if (fetchedBatchData?.getManualVoucherBatchById || initialItem) {
+              const batchInput: UpdateManualVoucherBatchInput = {
+                name: values.title,
+                description: values.description,
+                image: values.image || undefined,
+                url: values.url || undefined,
+                couponType: values.couponType as ManualCouponType,
+                inventoryRequired: values.inventoryRequired ?? true,
+                faceValue: Number(currentItem?.faceValue) || 0,
+                currency: currentItem?.currency || "TC",
+                status: values.isActive ? "ACTIVE" : "INACTIVE",
+                expiryDate: resolvedExpiryDate,
+                metadata: JSON.stringify(metadataObj),
+                prefix: values.prefix,
+                couponCode: values.couponCode,
+                totalUsageLimit: Number(values.totalUsageLimit) || undefined,
+              };
 
-            const res = await updateManualVoucherMutation({
-              variables: {
-                id: ruleId,
-                input,
-              },
-            });
+              const res = await updateManualVoucherBatchMutation({
+                variables: {
+                  id: ruleId,
+                  input: batchInput,
+                },
+              });
 
-            if (res.data?.updateManualVoucher) {
-              toast.success("Manual voucher configuration updated successfully");
-              setIsSaved(true);
-              onSuccess?.();
+              if (res.data?.updateManualVoucherBatch) {
+                toast.success("Manual voucher configuration updated successfully");
+                setIsSaved(true);
+                onSuccess?.();
+              }
+            } else {
+              const input: UpdateManualVoucherInput = {
+                code:
+                  values.couponType === ManualCouponType.ONE_TO_MANY
+                    ? values.couponCode || values.title
+                    : values.couponCode || undefined,
+                claimUrl: values.url || undefined,
+                faceValue: Number(currentItem?.faceValue) || 0,
+                currency: currentItem?.currency || "TC",
+                inventoryRequired: values.inventoryRequired ?? true,
+                totalInventory:
+                  values.couponType === ManualCouponType.ONE_TO_ONE
+                    ? Number(values.count) || undefined
+                    : Number(values.totalUsageLimit) || undefined,
+                remainingInventory:
+                  values.couponType === ManualCouponType.ONE_TO_ONE
+                    ? Number(values.count) || undefined
+                    : Number(values.totalUsageLimit) || undefined,
+                totalUsageLimit: Number(values.totalUsageLimit) || 0,
+                perUserLimit: 1,
+                status: values.isActive
+                  ? ManualVoucherStatus.UNASSIGNED
+                  : ManualVoucherStatus.VOID,
+                expiryDate: resolvedExpiryDate,
+                metadata: JSON.stringify(metadataObj),
+              };
+
+              const res = await updateManualVoucherMutation({
+                variables: {
+                  id: ruleId,
+                  input,
+                },
+              });
+
+              if (res.data?.updateManualVoucher) {
+                toast.success("Manual voucher configuration updated successfully");
+                setIsSaved(true);
+                onSuccess?.();
+              }
             }
           } else {
             toast.success("Manual voucher configuration updated");
@@ -836,7 +872,7 @@ export const InternalRewardForm: React.FC<InternalRewardFormProps> = ({
       <FloatingSavePanel
         hasChanged={formik.dirty}
         saved={isSaved}
-        isSaving={creatingBatch || updatingVoucher || Boolean(isSaving)}
+        isSaving={creatingBatch || updatingBatch || updatingVoucher || Boolean(isSaving)}
         onSave={() => formik.submitForm()}
         onReset={() => formik.resetForm()}
         title="Unsaved Internal Reward"
