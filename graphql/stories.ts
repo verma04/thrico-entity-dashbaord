@@ -134,13 +134,3 @@ export const EXPORT_STORIES_DATA = gql`
   }
 `;
 
-
-export const ADD_STORY = gql`
-  mutation UserStoryPostedByUser($input: inputUserStoryPostedByUser) {
-    userStoryPostedByUser(input: $input) {
-      id
-      email
-      success
-    }
-  }
-`;
