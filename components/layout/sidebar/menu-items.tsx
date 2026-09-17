@@ -378,6 +378,12 @@ export const feedItems = [
     icon: <Video size={18} />,
   },
   {
+    key: "feed-stories",
+    label: "Stories",
+    path: "/stories",
+    icon: <BookOpen size={18} />,
+  },
+  {
     key: "feed-jobs",
     label: "Jobs",
     path: "/feed/jobs",
@@ -814,6 +820,16 @@ export const modules = [
         path: "/moments/reports",
       },
       { key: "mom-settings", label: "Settings", path: "/moments/settings" },
+    ],
+  },
+  {
+    key: "stories",
+    label: "Stories",
+    path: "/stories",
+    icon: <BookOpen size={18} />,
+    children: [
+      { key: "stories-dash", label: "Stories Hub", path: "/stories" },
+      { key: "stories-all", label: "All Stories", path: "/stories/all" },
     ],
   },
   {
@@ -1326,10 +1342,12 @@ export const useFilteredExtendedItems = () => {
         modulesSub.find(
           (m: any) => m.name?.toLowerCase().replace(/'/g, "_") === subKey,
         );
-      const isSubscribed = Boolean(matchingModule);
-      const isModuleEnabled = matchingModule
-        ? Boolean(matchingModule.enabled)
-        : false;
+      const isSubscribed = item.key === "stories" ? true : Boolean(matchingModule);
+      const isModuleEnabled = item.key === "stories"
+        ? true
+        : matchingModule
+          ? Boolean(matchingModule.enabled)
+          : false;
       let mappedChildren = item.children;
       if (isModules && matchingModule?.customName && mappedChildren) {
         mappedChildren = mappedChildren.map((child: any) => {
@@ -1371,11 +1389,15 @@ export const useFilteredExtendedItems = () => {
       }
 
       // 3. Regular users need explicit module permissions
-      const hasPermission = hasUserModulePermission(user, item.key, "canRead");
+      const hasPermission = item.key === "stories"
+        ? hasUserModulePermission(user, "STORIES", "canRead") ||
+          hasUserModulePermission(user, "stories", "canRead")
+        : hasUserModulePermission(user, item.key, "canRead");
 
       if (hasPermission) {
         acc.push(mappedItem);
       }
+
       return acc;
     }, []);
 

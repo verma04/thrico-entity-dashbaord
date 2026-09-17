@@ -76,6 +76,14 @@ export function ChildSidebarContainer({
     }
   }, [activeTab]);
 
+  // Default-open the Stories group when on stories route
+  useEffect(() => {
+    if (pathName.startsWith("/stories")) {
+      setOpenGroup("stories");
+    }
+  }, [pathName]);
+
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
