@@ -19,7 +19,9 @@ import {
   ShieldCheck,
   ChevronDown,
   ChevronUp,
+  History,
 } from "lucide-react";
+import { UserStatusTimelineModal } from "../manage/user-status-timeline-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -154,6 +156,7 @@ function TagSection({
 export function UserInfoCard({ member }: { member: any }) {
   const user = member?.user;
   const [showKyc, setShowKyc] = React.useState(false);
+  const [showTimeline, setShowTimeline] = React.useState(false);
   if (!user) return null;
 
   const statusStyle = getStatusStyle(member.status);
@@ -230,17 +233,20 @@ export function UserInfoCard({ member }: { member: any }) {
                 )}
                 <Badge
                   variant="outline"
+                  onClick={() => setShowTimeline(true)}
                   className={cn(
-                    "text-[10px] font-semibold gap-1.5 px-2.5",
+                    "text-[10px] font-semibold gap-1.5 px-2.5 cursor-pointer hover:opacity-85 transition-all shadow-xs",
                     statusStyle.bg,
                     statusStyle.text,
                     statusStyle.border,
                   )}
+                  title="Click to view status audit history"
                 >
                   <span
                     className={cn("h-1.5 w-1.5 rounded-full", statusStyle.dot)}
                   />
                   {member.status}
+                  <History className="h-2.5 w-2.5 opacity-60 hover:opacity-100 ml-0.5" />
                 </Badge>
               </div>
             </div>
@@ -457,6 +463,16 @@ export function UserInfoCard({ member }: { member: any }) {
           )}
         </Card>
       )}
+
+      <UserStatusTimelineModal
+        isOpen={showTimeline}
+        onClose={() => setShowTimeline(false)}
+        userId={user?.id || member?.id}
+        userName={`${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Member"}
+        userEmail={user?.email}
+        userAvatar={user?.avatar}
+        currentStatus={member.status}
+      />
     </div>
   );
 }

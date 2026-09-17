@@ -204,3 +204,117 @@ export const GET_MODERATION_LOGS = gql`
     }
   }
 `;
+
+export const GET_AI_MODERATION_SETTINGS = gql`
+  query GetAiModerationSettings {
+    getAiModerationSettings {
+      aiModerationFeed
+      aiModerationComments
+      aiModerationEvents
+      aiModerationCommunities
+      aiModerationDiscussionForums
+      aiModerationJobs
+      aiModerationMentorship
+      aiModerationListing
+      aiModerationShop
+      aiModerationOffers
+      aiModerationOpportunities
+      aiModerationSurveys
+      aiModerationPolls
+      aiModerationStories
+    }
+  }
+`;
+
+export const GET_AI_TOKEN_USAGE = gql`
+  query GetAiTokenUsage($limit: Int, $offset: Int) {
+    getAiTokenUsage(limit: $limit, offset: $offset) {
+      items {
+        module
+        tokens
+        model
+        createdAt
+      }
+      totalCount
+    }
+  }
+`;
+
+export const GET_USER_STATUS_TIMELINE = gql`
+  query GetUserStatusTimeline($userId: ID!, $limit: Int, $offset: Int) {
+    getUserStatusTimeline(userId: $userId, limit: $limit, offset: $offset) {
+      totalCount
+      items {
+        eventId
+        tenantId
+        userId
+        userToEntityId
+        action
+        previousStatus
+        newStatus
+        reason
+        performedBy
+        source
+        metadata
+        createdAt
+      }
+    }
+  }
+`;
+
+export const GET_USER_MODERATION_TIMELINE = gql`
+  query GetUserModerationTimeline(
+    $userId: ID!
+    $limit: Int
+    $offset: Int
+    $decision: String
+    $contentType: ModerationContentType
+  ) {
+    getUserModerationTimeline(
+      userId: $userId
+      limit: $limit
+      offset: $offset
+      decision: $decision
+      contentType: $contentType
+    ) {
+      items {
+        eventId
+        tenantId
+        userId
+        contentId
+        contentType
+        contentPreview
+        originalContent
+        label
+        score
+        confidence
+        categories
+        isSpam
+        isViolation
+        decision
+        status
+        model
+        reason
+        tokens
+        createdAt
+      }
+      totalCount
+    }
+  }
+`;
+
+export const GET_USER_MODERATION_SUMMARY = gql`
+  query GetUserModerationSummary($userId: ID!) {
+    getUserModerationSummary(userId: $userId) {
+      totalChecked
+      spamCount
+      violationsCount
+      blockedCount
+      flaggedCount
+      approvedCount
+      lastViolationAt
+    }
+  }
+`;
+
+

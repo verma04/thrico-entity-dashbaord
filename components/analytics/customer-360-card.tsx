@@ -1,7 +1,11 @@
 "use client";
 
 import React from "react";
-import { useCustomer360 } from "@/graphql/analytics/customer360";
+import {
+  useCustomer360,
+  Customer360Response,
+  Customer360Message,
+} from "@/graphql/analytics/customer360";
 import { Customer360AiSummaryCard } from "./customer-360-ai-summary-card";
 import { MemberActivityStream } from "./member-activity-stream";
 import { Customer360GaAnalyticsSection } from "./customer-360-ga-analytics";
@@ -256,7 +260,18 @@ export function MemberCustomer360Card({ userId, className }: MemberCustomer360Ca
   }
 
   /* ── Error State ───────────────────────────────────────────────────────── */
-  if (error || !data?.getCustomer360) {
+  const responseData = data?.getCustomer360;
+
+  const isCustomerMessage =
+    responseData?.__typename === "Customer360Message" ||
+    (Boolean(responseData) && "message" in responseData! && !("userId" in responseData!));
+
+  const customerMessage =
+    isCustomerMessage && responseData && "message" in responseData
+      ? (responseData as Customer360Message).message
+      : null;
+
+  if (error || !responseData || isCustomerMessage) {
     return (
       <Card className="p-4 border-dashed border-rose-200 dark:border-rose-900 bg-rose-50/20 dark:bg-rose-950/10">
         <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
@@ -266,7 +281,7 @@ export function MemberCustomer360Card({ userId, className }: MemberCustomer360Ca
           <div>
             <p className="text-xs font-semibold">Unable to load intelligence profile</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
-              {error ? error.message : "No 360° profile found for this member."}
+              {customerMessage || (error ? error.message : "No 360° profile found for this member.")}
             </p>
           </div>
         </div>
@@ -274,7 +289,7 @@ export function MemberCustomer360Card({ userId, className }: MemberCustomer360Ca
     );
   }
 
-  const profile = data.getCustomer360;
+  const profile = responseData as Customer360Response;
   const rfm = profile?.rfm || { recencyDays: 0, frequencyScore: 1, monetaryScore: 1, segment: "NEW" };
   const healthScore = profile.healthScore ?? 50;
   const attendanceRate =
@@ -375,7 +390,7 @@ export function MemberCustomer360Card({ userId, className }: MemberCustomer360Ca
       {/* ═══════════════════════════════════════════════════════════════════
           AI EXECUTIVE SUMMARY & PERSONA (COMPACT ACCORDION CARD)
           ═══════════════════════════════════════════════════════════════════ */}
-      <Customer360AiSummaryCard userId={userId} />
+      <Customer360AiSummaryCard userId={userId} initialSummary={profile.aiSummary} />
 
       {/* ═══════════════════════════════════════════════════════════════════
           GOOGLE ANALYTICS (GA4) DIGITAL INTELLIGENCE (COMPACT)

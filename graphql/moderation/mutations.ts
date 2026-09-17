@@ -131,3 +131,24 @@ export const UPDATE_MODERATION_SETTINGS = gql`
     }
   }
 `;
+
+export const UPDATE_AI_MODERATION_SETTINGS = gql`
+  mutation UpdateAiModerationSettings($input: AiModerationSettingsInput!) {
+    updateAiModerationSettings(input: $input) {
+      aiModerationFeed
+      aiModerationComments
+      aiModerationEvents
+      aiModerationCommunities
+      aiModerationDiscussionForums
+      aiModerationJobs
+      aiModerationMentorship
+      aiModerationListing
+      aiModerationShop
+      aiModerationOffers
+      aiModerationOpportunities
+      aiModerationSurveys
+      aiModerationPolls
+      aiModerationStories
+    }
+  }
+`;

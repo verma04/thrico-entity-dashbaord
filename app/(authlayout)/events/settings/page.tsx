@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 interface EventsSettingsState {
   allowEvents: boolean;
   autoApproveEvents: boolean;
+  aiModerationEvents: boolean;
 }
 
 function EventsSettings() {
@@ -41,6 +42,7 @@ function EventsSettings() {
   const initialSettings: EventsSettingsState = {
     allowEvents: data?.getEntitySettings?.allowEvents ?? true,
     autoApproveEvents: data?.getEntitySettings?.autoApproveEvents ?? false,
+    aiModerationEvents: data?.getEntitySettings?.aiModerationEvents ?? true,
   };
 
   const [formData, setFormData] = useState<EventsSettingsState>(initialSettings);
@@ -51,6 +53,7 @@ function EventsSettings() {
       setFormData({
         allowEvents: data.getEntitySettings.allowEvents ?? true,
         autoApproveEvents: data.getEntitySettings.autoApproveEvents ?? false,
+        aiModerationEvents: data.getEntitySettings.aiModerationEvents ?? true,
       });
       setHasChanged(false);
     }
@@ -69,6 +72,7 @@ function EventsSettings() {
       setFormData({
         allowEvents: data.getEntitySettings.allowEvents ?? true,
         autoApproveEvents: data.getEntitySettings.autoApproveEvents ?? false,
+        aiModerationEvents: data.getEntitySettings.aiModerationEvents ?? true,
       });
       setHasChanged(false);
     }
@@ -81,6 +85,7 @@ function EventsSettings() {
           input: {
             allowEvents: formData.allowEvents,
             autoApproveEvents: formData.autoApproveEvents,
+            aiModerationEvents: formData.aiModerationEvents,
           },
         },
       });
@@ -99,8 +104,8 @@ function EventsSettings() {
           <div className="space-y-4">
             {/* Live Governance Preview Card */}
             <PolarisSidebarCard
-              title={`${singularName} Protocols`}
-              badge="Schedule State"
+              title={`${singularName} Framework`}
+              badge="Engine State"
               icon={Sparkles}
             >
               <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3 space-y-2.5 shadow-2xs">
@@ -129,15 +134,21 @@ function EventsSettings() {
                 {/* Status breakdown */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Event Creation:</span>
+                    <span>Submission Access:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
                       {formData.allowEvents ? "Open to Members" : "Admin Only"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Publishing Mode:</span>
+                    <span>Validation Mode:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
-                      {formData.autoApproveEvents ? "Auto-Approved" : "Manual Approval"}
+                      {formData.autoApproveEvents ? "Direct Live" : "Review Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
+                    <span>AI Moderation:</span>
+                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                      {formData.aiModerationEvents ? "Active Sentinel" : "Disabled"}
                     </span>
                   </div>
                 </div>
@@ -146,23 +157,28 @@ function EventsSettings() {
               {/* Summary Rows */}
               <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
-                  label="Public Scheduling"
-                  value={formData.allowEvents ? "Enabled" : "Paused"}
+                  label="Event Creation"
+                  value={formData.allowEvents ? "Open" : "Paused"}
                   highlight={formData.allowEvents}
                 />
                 <PolarisSummaryRow
-                  label="Approval Gateway"
-                  value={formData.autoApproveEvents ? "Direct Live" : "Review Required"}
+                  label="Direct Publishing"
+                  value={formData.autoApproveEvents ? "Automated" : "Verification Required"}
+                />
+                <PolarisSummaryRow
+                  label="AI Sentinel"
+                  value={formData.aiModerationEvents ? "Protected" : "Bypassed"}
+                  highlight={formData.aiModerationEvents}
                   isLast
                 />
               </div>
             </PolarisSidebarCard>
 
             {/* Tip Card */}
-            <PolarisTipCard title={`${singularName} Strategy Tip`}>
-              Auto-approving {moduleName.toLowerCase()} enables high-tempo
-              community meetups, while manual review keeps your official calendar
-              tightly curated.
+            <PolarisTipCard title={`${singularName} Scheduling Tip`}>
+              Encouraging community-driven events drives local node engagement.
+              With AI Moderation enabled, submitted descriptions and promotional media
+              are automatically inspected for safety.
             </PolarisTipCard>
           </div>
         }
@@ -171,8 +187,8 @@ function EventsSettings() {
           {/* Section 1: Creation & Scheduling Gateway */}
           <PolarisFormCard
             step={1}
-            title="Activation & Scheduling Policy"
-            description={`Enable or disable the ability for members to create new ${singularName.toLowerCase()} sessions.`}
+            title="Scheduling & Access Policy"
+            description={`Configure whether ecosystem members are permitted to schedule new ${moduleName.toLowerCase()}.`}
             badge="Access"
           >
             <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
@@ -262,6 +278,54 @@ function EventsSettings() {
               <Switch
                 checked={formData.autoApproveEvents}
                 onCheckedChange={() => handleToggle("autoApproveEvents")}
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: AI Safety Sentinel */}
+          <PolarisFormCard
+            step={3}
+            title="AI Moderation Sentinel"
+            description="Autonomous natural language and media verification for event listings."
+            badge="AI Safety"
+          >
+            <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+              <div className="flex items-start gap-2.5">
+                <div
+                  className={cn(
+                    "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                    formData.aiModerationEvents
+                      ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
+                      : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                  )}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                      AI Event Moderation
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                        formData.aiModerationEvents
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                          : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                      )}
+                    >
+                      {formData.aiModerationEvents ? "Active Sentinel" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                    Automatically analyze event titles, descriptions, and promotional assets with AI in real time to protect members from scams or offensive activities.
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={formData.aiModerationEvents}
+                onCheckedChange={() => handleToggle("aiModerationEvents")}
               />
             </div>
           </PolarisFormCard>

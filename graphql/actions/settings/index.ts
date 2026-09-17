@@ -50,6 +50,8 @@ export interface EntitySettings {
   autoApproveShop: boolean;
   allowOffers: boolean;
   autoApproveOffers: boolean;
+  allowOpportunities?: boolean;
+  autoApproveOpportunities?: boolean;
   allowSurveys: boolean;
   autoApproveSurveys: boolean;
   allowPolls: boolean;
@@ -63,11 +65,29 @@ export interface EntitySettings {
   allowEntityPollsInFeed: boolean;
   allowEntityFeedInFeed: boolean;
   allowEntityMomentsInFeed: boolean;
+  allowEntityOpportunitiesInFeed?: boolean;
   feedOrder: string[];
   feedEntityName: string;
 
   // Media Gallery
   allowMediaGalleryComments: boolean;
+
+  // AI Moderation Settings
+  aiModerationFeed?: boolean;
+  aiModerationComments?: boolean;
+  aiModerationEvents?: boolean;
+  aiModerationCommunities?: boolean;
+  aiModerationMessages?: boolean;
+  aiModerationDiscussionForums?: boolean;
+  aiModerationJobs?: boolean;
+  aiModerationMentorship?: boolean;
+  aiModerationListing?: boolean;
+  aiModerationShop?: boolean;
+  aiModerationOffers?: boolean;
+  aiModerationOpportunities?: boolean;
+  aiModerationSurveys?: boolean;
+  aiModerationPolls?: boolean;
+  aiModerationStories?: boolean;
 }
 
 export interface GetEntitySettingsResponse {
@@ -109,6 +129,8 @@ export interface UpdateEntitySettingsInput {
   autoApproveShop?: boolean;
   allowOffers?: boolean;
   autoApproveOffers?: boolean;
+  allowOpportunities?: boolean;
+  autoApproveOpportunities?: boolean;
   allowSurveys?: boolean;
   autoApproveSurveys?: boolean;
   allowPolls?: boolean;
@@ -122,6 +144,9 @@ export interface UpdateEntitySettingsInput {
   allowEntityPollsInFeed?: boolean;
   allowEntityFeedInFeed?: boolean;
   allowEntityMomentsInFeed?: boolean;
+  allowEntityOpportunitiesInFeed?: boolean;
+  feedOrder?: string[];
+  feedEntityName?: string;
 
   // FAQ & Terms Fields
   termAndConditionsEvents?: string | null;
@@ -143,6 +168,23 @@ export interface UpdateEntitySettingsInput {
 
   // Media Gallery
   allowMediaGalleryComments?: boolean;
+
+  // AI Moderation Settings
+  aiModerationFeed?: boolean;
+  aiModerationComments?: boolean;
+  aiModerationEvents?: boolean;
+  aiModerationCommunities?: boolean;
+  aiModerationMessages?: boolean;
+  aiModerationDiscussionForums?: boolean;
+  aiModerationJobs?: boolean;
+  aiModerationMentorship?: boolean;
+  aiModerationListing?: boolean;
+  aiModerationShop?: boolean;
+  aiModerationOffers?: boolean;
+  aiModerationOpportunities?: boolean;
+  aiModerationSurveys?: boolean;
+  aiModerationPolls?: boolean;
+  aiModerationStories?: boolean;
 }
 
 export interface UpdateEntitySettingsResponse {

@@ -168,6 +168,21 @@ export const GET_ENTITY_SETTINGS = gql`
       feedOrder
       feedEntityName
       allowMediaGalleryComments
+      aiModerationFeed
+      aiModerationComments
+      aiModerationEvents
+      aiModerationCommunities
+      aiModerationMessages
+      aiModerationDiscussionForums
+      aiModerationJobs
+      aiModerationMentorship
+      aiModerationListing
+      aiModerationShop
+      aiModerationOffers
+      aiModerationOpportunities
+      aiModerationSurveys
+      aiModerationPolls
+      aiModerationStories
     }
   }
 `;
@@ -218,6 +233,21 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       feedOrder
       feedEntityName
       allowMediaGalleryComments
+      aiModerationFeed
+      aiModerationComments
+      aiModerationEvents
+      aiModerationCommunities
+      aiModerationMessages
+      aiModerationDiscussionForums
+      aiModerationJobs
+      aiModerationMentorship
+      aiModerationListing
+      aiModerationShop
+      aiModerationOffers
+      aiModerationOpportunities
+      aiModerationSurveys
+      aiModerationPolls
+      aiModerationStories
     }
   }
 `;

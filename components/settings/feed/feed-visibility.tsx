@@ -11,6 +11,8 @@ import {
   Sparkles,
   Layers,
   CheckCircle2,
+  Briefcase,
+  ShieldCheck,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -81,6 +83,14 @@ export const FEED_FIELDS: FeedField[] = [
     icon: BarChart2,
     type: "switch",
   },
+  {
+    key: "allowEntityOpportunitiesInFeed",
+    label: "Show Opportunities in Feed",
+    description:
+      "Surface job openings, grants, internships, and partnerships directly in member feed streams.",
+    icon: Briefcase,
+    type: "switch",
+  },
 ];
 
 interface FeedVisibilitySettings {
@@ -89,7 +99,10 @@ interface FeedVisibilitySettings {
   allowEntityPollsInFeed: boolean;
   allowEntityMomentsInFeed: boolean;
   allowEntityFeedInFeed: boolean;
+  allowEntityOpportunitiesInFeed: boolean;
   feedEntityName: string;
+  aiModerationFeed: boolean;
+  aiModerationComments: boolean;
 }
 
 export default function FeedVisibility() {
@@ -109,7 +122,11 @@ export default function FeedVisibility() {
       data?.getEntitySettings?.allowEntityMomentsInFeed ?? true,
     allowEntityFeedInFeed:
       data?.getEntitySettings?.allowEntityFeedInFeed ?? true,
+    allowEntityOpportunitiesInFeed:
+      data?.getEntitySettings?.allowEntityOpportunitiesInFeed ?? true,
     feedEntityName: data?.getEntitySettings?.feedEntityName || "",
+    aiModerationFeed: data?.getEntitySettings?.aiModerationFeed ?? true,
+    aiModerationComments: data?.getEntitySettings?.aiModerationComments ?? true,
   };
 
   const [formData, setFormData] =
@@ -129,7 +146,12 @@ export default function FeedVisibility() {
           data.getEntitySettings.allowEntityMomentsInFeed ?? true,
         allowEntityFeedInFeed:
           data.getEntitySettings.allowEntityFeedInFeed ?? true,
+        allowEntityOpportunitiesInFeed:
+          data.getEntitySettings.allowEntityOpportunitiesInFeed ?? true,
         feedEntityName: data.getEntitySettings.feedEntityName || "",
+        aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
+        aiModerationComments:
+          data.getEntitySettings.aiModerationComments ?? true,
       };
       setFormData(serverSettings);
       setHasChanged(false);
@@ -166,7 +188,12 @@ export default function FeedVisibility() {
           data.getEntitySettings.allowEntityMomentsInFeed ?? true,
         allowEntityFeedInFeed:
           data.getEntitySettings.allowEntityFeedInFeed ?? true,
+        allowEntityOpportunitiesInFeed:
+          data.getEntitySettings.allowEntityOpportunitiesInFeed ?? true,
         feedEntityName: data.getEntitySettings.feedEntityName || "",
+        aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
+        aiModerationComments:
+          data.getEntitySettings.aiModerationComments ?? true,
       });
       setHasChanged(false);
     }
@@ -181,6 +208,9 @@ export default function FeedVisibility() {
         allowEntityPollsInFeed: formData.allowEntityPollsInFeed,
         allowEntityMomentsInFeed: formData.allowEntityMomentsInFeed,
         allowEntityFeedInFeed: formData.allowEntityFeedInFeed,
+        allowEntityOpportunitiesInFeed: formData.allowEntityOpportunitiesInFeed,
+        aiModerationFeed: formData.aiModerationFeed,
+        aiModerationComments: formData.aiModerationComments,
       };
 
       const promises = [];
@@ -214,6 +244,7 @@ export default function FeedVisibility() {
     formData.allowEntityPollsInFeed,
     formData.allowEntityMomentsInFeed,
     formData.allowEntityFeedInFeed,
+    formData.allowEntityOpportunitiesInFeed,
   ].filter(Boolean).length;
 
   const contentSources = [
@@ -257,6 +288,14 @@ export default function FeedVisibility() {
       icon: ShieldAlert,
       enabled: formData.allowEntityFeedInFeed,
     },
+    {
+      key: "allowEntityOpportunitiesInFeed" as const,
+      label: "Show Opportunities in Feed",
+      description:
+        "Surface job openings, grants, internships, and partnerships directly in member feed streams.",
+      icon: Briefcase,
+      enabled: formData.allowEntityOpportunitiesInFeed,
+    },
   ];
 
   return (
@@ -292,7 +331,7 @@ export default function FeedVisibility() {
                 {/* Enabled Content Types Pill Cloud */}
                 <div className="space-y-1.5">
                   <span className="text-[11px] font-medium text-[#616161] dark:text-zinc-400">
-                    Active Stream Sources ({activeSourcesCount}/5):
+                    Active Stream Sources ({activeSourcesCount}/6):
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {contentSources.map((source) => (
@@ -322,12 +361,18 @@ export default function FeedVisibility() {
                 />
                 <PolarisSummaryRow
                   label="Enabled Protocols"
-                  value={`${activeSourcesCount} of 5 Active`}
+                  value={`${activeSourcesCount} of 6 Active`}
                   highlight={activeSourcesCount >= 4}
                 />
                 <PolarisSummaryRow
-                  label="Stream Architecture"
-                  value="Multi-Source Unified"
+                  label="AI Feed Sentinel"
+                  value={formData.aiModerationFeed ? "Active" : "Disabled"}
+                  highlight={formData.aiModerationFeed}
+                />
+                <PolarisSummaryRow
+                  label="AI Comment Sentinel"
+                  value={formData.aiModerationComments ? "Active" : "Disabled"}
+                  highlight={formData.aiModerationComments}
                   isLast
                 />
               </div>
@@ -336,8 +381,8 @@ export default function FeedVisibility() {
             {/* Engagement Strategy Tip */}
             <PolarisTipCard title="Feed Optimization Tip">
               Enabling interactive sources like community polls and moments
-              increases member return rates and keeps the home stream fresh with
-              dynamic discussions.
+              increases member return rates. Keep AI Moderation active to automatically
+              filter toxicity and maintain clean community discussions.
             </PolarisTipCard>
           </div>
         }
@@ -411,6 +456,57 @@ export default function FeedVisibility() {
                   />
                 </div>
               ))}
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: AI Safety Sentinel */}
+          <PolarisFormCard
+            step={3}
+            icon={ShieldCheck}
+            title="AI Moderation Sentinel"
+            description="Automated AI safety analysis and toxicity filtration for feed posts and comment threads."
+            badge="AI Safety"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs">
+                <div className="flex items-start gap-3 min-w-0 pr-2">
+                  <div className="h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 border bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <PolarisLabel className="cursor-pointer">
+                      AI Feed Post Moderation
+                    </PolarisLabel>
+                    <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                      Inspect all feed publications, links, and captions using AI safety checks in real time.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.aiModerationFeed}
+                  onCheckedChange={() => handleToggle("aiModerationFeed")}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3.5 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs">
+                <div className="flex items-start gap-3 min-w-0 pr-2">
+                  <div className="h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 border bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400">
+                    <MessageSquare className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <PolarisLabel className="cursor-pointer">
+                      AI Feed Comments Moderation
+                    </PolarisLabel>
+                    <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                      Automatically analyze and block spam, abusive remarks, or toxic replies under feed items.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.aiModerationComments}
+                  onCheckedChange={() => handleToggle("aiModerationComments")}
+                />
+              </div>
             </div>
           </PolarisFormCard>
         </div>

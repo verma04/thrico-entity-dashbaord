@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 interface CommunitySettingsState {
   allowCommunity: boolean;
   autoApproveCommunity: boolean;
+  autoApproveGroup: boolean;
+  aiModerationCommunities: boolean;
 }
 
 export default function CommunitySettings() {
@@ -40,6 +42,9 @@ export default function CommunitySettings() {
   const initialSettings: CommunitySettingsState = {
     allowCommunity: data?.getEntitySettings?.allowCommunity ?? true,
     autoApproveCommunity: data?.getEntitySettings?.autoApproveCommunity ?? false,
+    autoApproveGroup: data?.getEntitySettings?.autoApproveGroup ?? true,
+    aiModerationCommunities:
+      data?.getEntitySettings?.aiModerationCommunities ?? true,
   };
 
   const [formData, setFormData] =
@@ -52,6 +57,9 @@ export default function CommunitySettings() {
         allowCommunity: data.getEntitySettings.allowCommunity ?? true,
         autoApproveCommunity:
           data.getEntitySettings.autoApproveCommunity ?? false,
+        autoApproveGroup: data.getEntitySettings.autoApproveGroup ?? true,
+        aiModerationCommunities:
+          data.getEntitySettings.aiModerationCommunities ?? true,
       });
       setHasChanged(false);
     }
@@ -71,6 +79,9 @@ export default function CommunitySettings() {
         allowCommunity: data.getEntitySettings.allowCommunity ?? true,
         autoApproveCommunity:
           data.getEntitySettings.autoApproveCommunity ?? false,
+        autoApproveGroup: data.getEntitySettings.autoApproveGroup ?? true,
+        aiModerationCommunities:
+          data.getEntitySettings.aiModerationCommunities ?? true,
       });
       setHasChanged(false);
     }
@@ -83,6 +94,8 @@ export default function CommunitySettings() {
           input: {
             allowCommunity: formData.allowCommunity,
             autoApproveCommunity: formData.autoApproveCommunity,
+            autoApproveGroup: formData.autoApproveGroup,
+            aiModerationCommunities: formData.aiModerationCommunities,
           },
         },
       });
@@ -141,6 +154,18 @@ export default function CommunitySettings() {
                       {formData.autoApproveCommunity ? "Instant (Live)" : "Manual Verification"}
                     </span>
                   </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
+                    <span>Group Approval:</span>
+                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                      {formData.autoApproveGroup ? "Instant" : "Review Required"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
+                    <span>AI Moderation:</span>
+                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                      {formData.aiModerationCommunities ? "Active Sentinel" : "Disabled"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -152,8 +177,13 @@ export default function CommunitySettings() {
                   highlight={formData.allowCommunity}
                 />
                 <PolarisSummaryRow
-                  label="Verification Policy"
+                  label="Community Approval"
                   value={formData.autoApproveCommunity ? "Automated" : "Review Required"}
+                />
+                <PolarisSummaryRow
+                  label="AI Sentinel"
+                  value={formData.aiModerationCommunities ? "Protected" : "Bypassed"}
+                  highlight={formData.aiModerationCommunities}
                   isLast
                 />
               </div>
@@ -162,8 +192,8 @@ export default function CommunitySettings() {
             {/* Tip Card */}
             <PolarisTipCard title={`${singularName} Strategy Tip`}>
               Enabling member-initiated {moduleName.toLowerCase()} accelerates organic
-              growth. If you want strict brand curation, disable auto-approval to review
-              applications first.
+              growth. With AI moderation enabled, user submissions are vetted in real-time
+              for community guidelines and brand safety.
             </PolarisTipCard>
           </div>
         }
@@ -222,47 +252,137 @@ export default function CommunitySettings() {
           <PolarisFormCard
             step={2}
             title="Automation & Verification Protocols"
-            description={`Determine whether new ${moduleName.toLowerCase()} require admin review before going live.`}
+            description={`Determine whether new ${moduleName.toLowerCase()} and sub-groups require admin review before going live.`}
             badge="Automation"
+          >
+            <div className="space-y-3">
+              <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={cn(
+                      "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                      formData.autoApproveCommunity
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
+                        : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                    )}
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                        Auto Approve New {moduleName}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                          formData.autoApproveCommunity
+                            ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
+                            : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                        )}
+                      >
+                        {formData.autoApproveCommunity ? "Instant" : "Manual"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                      Instantly publish newly created {moduleName.toLowerCase()} in the public discovery
+                      directory without moderation delays.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.autoApproveCommunity}
+                  onCheckedChange={() => handleToggle("autoApproveCommunity")}
+                />
+              </div>
+
+              <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={cn(
+                      "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                      formData.autoApproveGroup
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
+                        : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                    )}
+                  >
+                    <Users2 className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                        Auto Approve Sub-Groups
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                          formData.autoApproveGroup
+                            ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
+                            : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                        )}
+                      >
+                        {formData.autoApproveGroup ? "Instant" : "Manual"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                      Automatically activate and publish new sub-groups and channels formed within existing communities.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.autoApproveGroup}
+                  onCheckedChange={() => handleToggle("autoApproveGroup")}
+                />
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: AI Safety Sentinel */}
+          <PolarisFormCard
+            step={3}
+            title="AI Moderation Sentinel"
+            description={`Autonomous real-time safety inspection for ${moduleName.toLowerCase()} descriptions and member discussions.`}
+            badge="AI Safety"
           >
             <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
               <div className="flex items-start gap-2.5">
                 <div
                   className={cn(
                     "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                    formData.autoApproveCommunity
-                      ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
+                    formData.aiModerationCommunities
+                      ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
                       : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
                   )}
                 >
-                  <Zap className="h-3.5 w-3.5" />
+                  <ShieldCheck className="h-3.5 w-3.5" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                      Auto Approve New {moduleName}
+                      AI Content Moderation
                     </span>
                     <Badge
                       variant="outline"
                       className={cn(
                         "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                        formData.autoApproveCommunity
-                          ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
+                        formData.aiModerationCommunities
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
                           : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
                       )}
                     >
-                      {formData.autoApproveCommunity ? "Instant" : "Manual"}
+                      {formData.aiModerationCommunities ? "Active Sentinel" : "Disabled"}
                     </Badge>
                   </div>
                   <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
-                    Instantly publish newly created {moduleName.toLowerCase()} in the public discovery
-                    directory without moderation delays.
+                    Automatically scan community profiles, group updates, and descriptions in real-time with AI to prevent harassment, toxicity, and policy breaches.
                   </p>
                 </div>
               </div>
               <Switch
-                checked={formData.autoApproveCommunity}
-                onCheckedChange={() => handleToggle("autoApproveCommunity")}
+                checked={formData.aiModerationCommunities}
+                onCheckedChange={() => handleToggle("aiModerationCommunities")}
               />
             </div>
           </PolarisFormCard>

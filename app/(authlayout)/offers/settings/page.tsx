@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 interface OffersSettingsState {
   allowOffers: boolean;
   autoApproveOffers: boolean;
+  aiModerationOffers: boolean;
 }
 
 function OffersSettings() {
@@ -42,6 +43,7 @@ function OffersSettings() {
   const initialSettings: OffersSettingsState = {
     allowOffers: data?.getEntitySettings?.allowOffers ?? true,
     autoApproveOffers: data?.getEntitySettings?.autoApproveOffers ?? false,
+    aiModerationOffers: data?.getEntitySettings?.aiModerationOffers ?? true,
   };
 
   const [formData, setFormData] = useState<OffersSettingsState>(initialSettings);
@@ -52,6 +54,7 @@ function OffersSettings() {
       setFormData({
         allowOffers: data.getEntitySettings.allowOffers ?? true,
         autoApproveOffers: data.getEntitySettings.autoApproveOffers ?? false,
+        aiModerationOffers: data.getEntitySettings.aiModerationOffers ?? true,
       });
       setHasChanged(false);
     }
@@ -70,6 +73,7 @@ function OffersSettings() {
       setFormData({
         allowOffers: data.getEntitySettings.allowOffers ?? true,
         autoApproveOffers: data.getEntitySettings.autoApproveOffers ?? false,
+        aiModerationOffers: data.getEntitySettings.aiModerationOffers ?? true,
       });
       setHasChanged(false);
     }
@@ -82,6 +86,7 @@ function OffersSettings() {
           input: {
             allowOffers: formData.allowOffers,
             autoApproveOffers: formData.autoApproveOffers,
+            aiModerationOffers: formData.aiModerationOffers,
           },
         },
       });
@@ -98,20 +103,20 @@ function OffersSettings() {
       <PolarisFormLayout
         sidebar={
           <div className="space-y-4">
-            {/* Live Perks State Preview */}
+            {/* Live Governance Preview Card */}
             <PolarisSidebarCard
-              title={`${moduleName} Engine`}
-              badge="Perks State"
+              title={`${moduleName} Framework`}
+              badge="Directory State"
               icon={Sparkles}
             >
               <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3 space-y-2.5 shadow-2xs">
                 <div className="flex items-center justify-between pb-2 border-b border-[#e1e3e5] dark:border-zinc-800">
                   <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center text-[10px] font-bold">
-                      <Percent className="h-3 w-3" />
+                      <Gift className="h-3 w-3" />
                     </div>
                     <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                      Discounts Gateway
+                      {singularName} Gateway
                     </span>
                   </div>
                   <Badge
@@ -130,15 +135,21 @@ function OffersSettings() {
                 {/* Status breakdown */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Deal Submissions:</span>
+                    <span>Submission Access:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
-                      {formData.allowOffers ? "Open to Partners" : "Admin Only"}
+                      {formData.allowOffers ? "Open to Members" : "Admin Only"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Publishing Mode:</span>
+                    <span>Validation Mode:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
-                      {formData.autoApproveOffers ? "Instant (Live)" : "Manual Review"}
+                      {formData.autoApproveOffers ? "Instant (Live)" : "Manual Verification"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
+                    <span>AI Moderation:</span>
+                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                      {formData.aiModerationOffers ? "Active Sentinel" : "Disabled"}
                     </span>
                   </div>
                 </div>
@@ -147,31 +158,36 @@ function OffersSettings() {
               {/* Summary Rows */}
               <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
-                  label="Community Perks"
-                  value={formData.allowOffers ? "Active Deals" : "Paused"}
+                  label="Perk Creation"
+                  value={formData.allowOffers ? "Permitted" : "Paused"}
                   highlight={formData.allowOffers}
                 />
                 <PolarisSummaryRow
-                  label="Verification Mode"
-                  value={formData.autoApproveOffers ? "Direct Live" : "Vetting Required"}
+                  label="Publishing Mode"
+                  value={formData.autoApproveOffers ? "Direct Live" : "Review Required"}
+                />
+                <PolarisSummaryRow
+                  label="AI Sentinel"
+                  value={formData.aiModerationOffers ? "Protected" : "Bypassed"}
+                  highlight={formData.aiModerationOffers}
                   isLast
                 />
               </div>
             </PolarisSidebarCard>
 
             {/* Tip Card */}
-            <PolarisTipCard title={`${singularName} Strategy Tip`}>
-              Offering exclusive discounts and partner promos increases member retention.
-              Review partner submissions manually to ensure coupon code reliability.
+            <PolarisTipCard title={`${singularName} Verification Tip`}>
+              Direct publishing speeds up time-sensitive promotions. Enabling AI Moderation ensures
+              discount codes and partner promotions conform to truth-in-advertising guidelines.
             </PolarisTipCard>
           </div>
         }
       >
         <div className="space-y-3.5">
-          {/* Section 1: Perks Gateway */}
+          {/* Section 1: Activation & Creation Gateway */}
           <PolarisFormCard
             step={1}
-            title="Perk & Offer Creation Policy"
+            title="Publication & Creation Policy"
             description={`Enable or disable the ability for members and partners to submit new ${singularName.toLowerCase()} deals.`}
             badge="Access"
           >
@@ -185,12 +201,12 @@ function OffersSettings() {
                       : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
                   )}
                 >
-                  <Gift className="h-3.5 w-3.5" />
+                  <Tag className="h-3.5 w-3.5" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                      Allow Member {singularName} Creation
+                      Allow Member {singularName} Postings
                     </span>
                     <Badge
                       variant="outline"
@@ -205,7 +221,7 @@ function OffersSettings() {
                     </Badge>
                   </div>
                   <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
-                    When active, approved partners and members can publish special promo discounts and member-only coupons.
+                    When active, members and partners can publish exclusive discount codes, vouchers, and perks.
                   </p>
                 </div>
               </div>
@@ -261,6 +277,54 @@ function OffersSettings() {
               <Switch
                 checked={formData.autoApproveOffers}
                 onCheckedChange={() => handleToggle("autoApproveOffers")}
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: AI Safety Sentinel */}
+          <PolarisFormCard
+            step={3}
+            title="AI Moderation Sentinel"
+            description="Autonomous natural language and deal verification for member discount postings."
+            badge="AI Safety"
+          >
+            <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+              <div className="flex items-start gap-2.5">
+                <div
+                  className={cn(
+                    "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                    formData.aiModerationOffers
+                      ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
+                      : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                  )}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                      AI Offer & Perk Moderation
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                        formData.aiModerationOffers
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                          : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                      )}
+                    >
+                      {formData.aiModerationOffers ? "Active Sentinel" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                    Automatically analyze discount titles, promotional copy, and destination links using AI to prevent deceptive promotions or spam.
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={formData.aiModerationOffers}
+                onCheckedChange={() => handleToggle("aiModerationOffers")}
               />
             </div>
           </PolarisFormCard>

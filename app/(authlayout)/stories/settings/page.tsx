@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { Share2, ShieldCheck, Zap } from "lucide-react";
+import { Share2, ShieldCheck, Zap, Sparkles } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 
@@ -20,6 +20,13 @@ const FIELDS: SettingsField[] = [
     description: "Automatically validate and publish new story nodes in real-time without manual review.",
     icon: Zap,
     section: "Automation Protocol",
+  },
+  {
+    key: "aiModerationStories",
+    label: "AI Story Moderation",
+    description: "Autonomously scan story media, captions, and overlays for harmful, adult, or copyrighted content.",
+    icon: Sparkles,
+    section: "AI Safety Sentinel",
   },
 ];
 

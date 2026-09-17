@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 interface MentorshipSettingsState {
   allowMentorship: boolean;
   autoApproveMentorship: boolean;
+  aiModerationMentorship: boolean;
 }
 
 function MentorshipSettings() {
@@ -43,6 +44,8 @@ function MentorshipSettings() {
     allowMentorship: data?.getEntitySettings?.allowMentorship ?? true,
     autoApproveMentorship:
       data?.getEntitySettings?.autoApproveMentorship ?? false,
+    aiModerationMentorship:
+      data?.getEntitySettings?.aiModerationMentorship ?? true,
   };
 
   const [formData, setFormData] =
@@ -55,6 +58,8 @@ function MentorshipSettings() {
         allowMentorship: data.getEntitySettings.allowMentorship ?? true,
         autoApproveMentorship:
           data.getEntitySettings.autoApproveMentorship ?? false,
+        aiModerationMentorship:
+          data.getEntitySettings.aiModerationMentorship ?? true,
       });
       setHasChanged(false);
     }
@@ -74,6 +79,8 @@ function MentorshipSettings() {
         allowMentorship: data.getEntitySettings.allowMentorship ?? true,
         autoApproveMentorship:
           data.getEntitySettings.autoApproveMentorship ?? false,
+        aiModerationMentorship:
+          data.getEntitySettings.aiModerationMentorship ?? true,
       });
       setHasChanged(false);
     }
@@ -86,6 +93,7 @@ function MentorshipSettings() {
           input: {
             allowMentorship: formData.allowMentorship,
             autoApproveMentorship: formData.autoApproveMentorship,
+            aiModerationMentorship: formData.aiModerationMentorship,
           },
         },
       });
@@ -102,10 +110,10 @@ function MentorshipSettings() {
       <PolarisFormLayout
         sidebar={
           <div className="space-y-4">
-            {/* Live Mentorship State Preview */}
+            {/* Live Governance Preview Card */}
             <PolarisSidebarCard
-              title={`${moduleName} Network`}
-              badge="Learning State"
+              title={`${moduleName} Framework`}
+              badge="Engine State"
               icon={Sparkles}
             >
               <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3 space-y-2.5 shadow-2xs">
@@ -115,7 +123,7 @@ function MentorshipSettings() {
                       <GraduationCap className="h-3 w-3" />
                     </div>
                     <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                      Mentorship Gateway
+                      {singularName} Network
                     </span>
                   </div>
                   <Badge
@@ -134,15 +142,21 @@ function MentorshipSettings() {
                 {/* Status breakdown */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Program Status:</span>
+                    <span>Program Access:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
-                      {formData.allowMentorship ? "Open to Applicants" : "Closed"}
+                      {formData.allowMentorship ? "Open to Members" : "Admin Only"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Onboarding Mode:</span>
+                    <span>Mentor Verification:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
-                      {formData.autoApproveMentorship ? "Instant (Live)" : "Manual Review"}
+                      {formData.autoApproveMentorship ? "Instant (Live)" : "Manual Verification"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
+                    <span>AI Moderation:</span>
+                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                      {formData.aiModerationMentorship ? "Active Sentinel" : "Disabled"}
                     </span>
                   </div>
                 </div>
@@ -151,32 +165,37 @@ function MentorshipSettings() {
               {/* Summary Rows */}
               <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
-                  label="Learning Network"
-                  value={formData.allowMentorship ? "Active" : "Paused"}
+                  label="Mentorship Program"
+                  value={formData.allowMentorship ? "Permitted" : "Paused"}
                   highlight={formData.allowMentorship}
                 />
                 <PolarisSummaryRow
-                  label="Mentor Verification"
-                  value={formData.autoApproveMentorship ? "Auto-Enrolled" : "Vetting Required"}
+                  label="Mentor Approval"
+                  value={formData.autoApproveMentorship ? "Automated" : "Verification Required"}
+                />
+                <PolarisSummaryRow
+                  label="AI Sentinel"
+                  value={formData.aiModerationMentorship ? "Protected" : "Bypassed"}
+                  highlight={formData.aiModerationMentorship}
                   isLast
                 />
               </div>
             </PolarisSidebarCard>
 
             {/* Tip Card */}
-            <PolarisTipCard title={`${singularName} Pairing Tip`}>
-              Vetting mentor profiles through manual review ensures high coaching
-              quality and creates trust for mentees booking 1-on-1 guidance sessions.
+            <PolarisTipCard title={`${singularName} Strategy Tip`}>
+              Open mentorship connections foster peer learning. With AI moderation enabled,
+              mentor profiles and communication requests are safely monitored for trust and adherence to community standards.
             </PolarisTipCard>
           </div>
         }
       >
         <div className="space-y-3.5">
-          {/* Section 1: Mentorship Gateway */}
+          {/* Section 1: Activation & Creation Gateway */}
           <PolarisFormCard
             step={1}
-            title="Program & Mentorship Policy"
-            description={`Enable or disable the peer-to-peer learning network and ${singularName.toLowerCase()} directory.`}
+            title="Program & Access Gateway"
+            description={`Configure access permissions for members to initiate and participate in ${moduleName.toLowerCase()}.`}
             badge="Access"
           >
             <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
@@ -265,6 +284,54 @@ function MentorshipSettings() {
               <Switch
                 checked={formData.autoApproveMentorship}
                 onCheckedChange={() => handleToggle("autoApproveMentorship")}
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: AI Safety Sentinel */}
+          <PolarisFormCard
+            step={3}
+            title="AI Moderation Sentinel"
+            description="Autonomous natural language inspection for mentor profiles, bio credentials, and session requests."
+            badge="AI Safety"
+          >
+            <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+              <div className="flex items-start gap-2.5">
+                <div
+                  className={cn(
+                    "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                    formData.aiModerationMentorship
+                      ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
+                      : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                  )}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                      AI Mentorship Safety & Moderation
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                        formData.aiModerationMentorship
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                          : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                      )}
+                    >
+                      {formData.aiModerationMentorship ? "Active Sentinel" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                    Automatically inspect mentor applications, mentor bios, and session proposals using AI to guarantee member protection and brand authenticity.
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={formData.aiModerationMentorship}
+                onCheckedChange={() => handleToggle("aiModerationMentorship")}
               />
             </div>
           </PolarisFormCard>

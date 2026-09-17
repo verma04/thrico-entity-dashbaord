@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 interface ListingSettingsState {
   allowListing: boolean;
   autoApproveListing: boolean;
+  autoApproveMarketPlace: boolean;
+  aiModerationListing: boolean;
 }
 
 function ListingSettings() {
@@ -40,6 +42,9 @@ function ListingSettings() {
   const initialSettings: ListingSettingsState = {
     allowListing: data?.getEntitySettings?.allowListing ?? true,
     autoApproveListing: data?.getEntitySettings?.autoApproveListing ?? false,
+    autoApproveMarketPlace:
+      data?.getEntitySettings?.autoApproveMarketPlace ?? false,
+    aiModerationListing: data?.getEntitySettings?.aiModerationListing ?? true,
   };
 
   const [formData, setFormData] =
@@ -52,6 +57,10 @@ function ListingSettings() {
         allowListing: data.getEntitySettings.allowListing ?? true,
         autoApproveListing:
           data.getEntitySettings.autoApproveListing ?? false,
+        autoApproveMarketPlace:
+          data.getEntitySettings.autoApproveMarketPlace ?? false,
+        aiModerationListing:
+          data.getEntitySettings.aiModerationListing ?? true,
       });
       setHasChanged(false);
     }
@@ -71,6 +80,10 @@ function ListingSettings() {
         allowListing: data.getEntitySettings.allowListing ?? true,
         autoApproveListing:
           data.getEntitySettings.autoApproveListing ?? false,
+        autoApproveMarketPlace:
+          data.getEntitySettings.autoApproveMarketPlace ?? false,
+        aiModerationListing:
+          data.getEntitySettings.aiModerationListing ?? true,
       });
       setHasChanged(false);
     }
@@ -83,6 +96,8 @@ function ListingSettings() {
           input: {
             allowListing: formData.allowListing,
             autoApproveListing: formData.autoApproveListing,
+            autoApproveMarketPlace: formData.autoApproveMarketPlace,
+            aiModerationListing: formData.aiModerationListing,
           },
         },
       });
@@ -101,7 +116,7 @@ function ListingSettings() {
           <div className="space-y-4">
             {/* Live Governance Preview Card */}
             <PolarisSidebarCard
-              title={`${moduleName} Protocols`}
+              title={`${moduleName} Framework`}
               badge="Directory State"
               icon={Sparkles}
             >
@@ -109,10 +124,10 @@ function ListingSettings() {
                 <div className="flex items-center justify-between pb-2 border-b border-[#e1e3e5] dark:border-zinc-800">
                   <div className="flex items-center gap-2">
                     <div className="h-6 w-6 rounded-full bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center text-[10px] font-bold">
-                      <ClipboardList className="h-3 w-3" />
+                      <Tag className="h-3 w-3" />
                     </div>
                     <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                      Directory Gateway
+                      {singularName} Gateway
                     </span>
                   </div>
                   <Badge
@@ -131,15 +146,27 @@ function ListingSettings() {
                 {/* Status breakdown */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Item Submissions:</span>
+                    <span>Submissions:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
                       {formData.allowListing ? "Open to Members" : "Admin Only"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
-                    <span>Catalog Status:</span>
+                    <span>Listing Approval:</span>
                     <span className="font-semibold text-[#303030] dark:text-zinc-200">
-                      {formData.autoApproveListing ? "Instant (Live)" : "Manual Verification"}
+                      {formData.autoApproveListing ? "Instant" : "Manual Verification"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
+                    <span>Marketplace Approval:</span>
+                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                      {formData.autoApproveMarketPlace ? "Instant" : "Manual Verification"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[#616161]">
+                    <span>AI Moderation:</span>
+                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                      {formData.aiModerationListing ? "Active Sentinel" : "Disabled"}
                     </span>
                   </div>
                 </div>
@@ -148,32 +175,41 @@ function ListingSettings() {
               {/* Summary Rows */}
               <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
-                  label="Catalog Submissions"
-                  value={formData.allowListing ? "Public Listings" : "Restricted"}
+                  label="Directory Access"
+                  value={formData.allowListing ? "Public" : "Paused"}
                   highlight={formData.allowListing}
                 />
                 <PolarisSummaryRow
-                  label="Validation Gateway"
-                  value={formData.autoApproveListing ? "Direct Live" : "Review Required"}
+                  label="Listing Verification"
+                  value={formData.autoApproveListing ? "Automated" : "Review Required"}
+                />
+                <PolarisSummaryRow
+                  label="Marketplace Verification"
+                  value={formData.autoApproveMarketPlace ? "Automated" : "Review Required"}
+                />
+                <PolarisSummaryRow
+                  label="AI Sentinel"
+                  value={formData.aiModerationListing ? "Protected" : "Bypassed"}
+                  highlight={formData.aiModerationListing}
                   isLast
                 />
               </div>
             </PolarisSidebarCard>
 
             {/* Tip Card */}
-            <PolarisTipCard title={`${singularName} Catalog Tip`}>
-              Permitting member listings enables P2P marketplace commerce.
-              Enabling manual review helps protect buyer safety and prevents spam items.
+            <PolarisTipCard title={`${singularName} Curation Tip`}>
+              Direct publishing accelerates marketplace velocity. Enable AI Moderation to
+              protect buyers and sellers by autonomously screening item descriptions and prohibited commodities.
             </PolarisTipCard>
           </div>
         }
       >
         <div className="space-y-3.5">
-          {/* Section 1: Directory Gateway */}
+          {/* Section 1: Activation & Creation Gateway */}
           <PolarisFormCard
             step={1}
-            title="Catalog & Listing Policy"
-            description={`Enable or disable the ability for members to create and publish new ${moduleName.toLowerCase()}.`}
+            title="Activation & Directory Policy"
+            description={`Enable or disable the ability for ecosystem members to create and post new ${singularName.toLowerCase()} entries.`}
             badge="Access"
           >
             <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
@@ -191,7 +227,7 @@ function ListingSettings() {
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                      Allow {moduleName} Creation
+                      Allow Member {singularName} Postings
                     </span>
                     <Badge
                       variant="outline"
@@ -222,47 +258,137 @@ function ListingSettings() {
           <PolarisFormCard
             step={2}
             title="Validation & Approval Protocols"
-            description={`Configure automated moderation protocols for newly submitted ${moduleName.toLowerCase()}.`}
+            description={`Configure automated moderation protocols for newly submitted ${moduleName.toLowerCase()} and marketplace goods.`}
             badge="Automation"
+          >
+            <div className="space-y-3">
+              <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={cn(
+                      "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                      formData.autoApproveListing
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
+                        : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                    )}
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                        Auto Approve Classified Listings
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                          formData.autoApproveListing
+                            ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
+                            : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                        )}
+                      >
+                        {formData.autoApproveListing ? "Instant" : "Manual"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                      Instantly publish classified listings to the directory without
+                      requiring manual review from an administrator.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.autoApproveListing}
+                  onCheckedChange={() => handleToggle("autoApproveListing")}
+                />
+              </div>
+
+              <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={cn(
+                      "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                      formData.autoApproveMarketPlace
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
+                        : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                    )}
+                  >
+                    <Package className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                        Auto Approve Marketplace Products
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                          formData.autoApproveMarketPlace
+                            ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
+                            : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                        )}
+                      >
+                        {formData.autoApproveMarketPlace ? "Instant" : "Manual"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                      Instantly publish commerce products and marketplace items to public view.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.autoApproveMarketPlace}
+                  onCheckedChange={() => handleToggle("autoApproveMarketPlace")}
+                />
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: AI Safety Sentinel */}
+          <PolarisFormCard
+            step={3}
+            title="AI Moderation Sentinel"
+            description="Autonomous natural language and product description screening for marketplace listings."
+            badge="AI Safety"
           >
             <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
               <div className="flex items-start gap-2.5">
                 <div
                   className={cn(
                     "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                    formData.autoApproveListing
-                      ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
+                    formData.aiModerationListing
+                      ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
                       : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
                   )}
                 >
-                  <Zap className="h-3.5 w-3.5" />
+                  <ShieldCheck className="h-3.5 w-3.5" />
                 </div>
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                      Auto Approve New {moduleName}
+                      AI Marketplace Listing Moderation
                     </span>
                     <Badge
                       variant="outline"
                       className={cn(
                         "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                        formData.autoApproveListing
-                          ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
+                        formData.aiModerationListing
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
                           : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
                       )}
                     >
-                      {formData.autoApproveListing ? "Instant" : "Manual"}
+                      {formData.aiModerationListing ? "Active Sentinel" : "Disabled"}
                     </Badge>
                   </div>
                   <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
-                    Instantly publish marketplace items to the discovery directory without
-                    requiring manual review from an administrator.
+                    Automatically analyze listing titles, item condition descriptions, and seller notes with AI to prevent prohibited goods and fraud.
                   </p>
                 </div>
               </div>
               <Switch
-                checked={formData.autoApproveListing}
-                onCheckedChange={() => handleToggle("autoApproveListing")}
+                checked={formData.aiModerationListing}
+                onCheckedChange={() => handleToggle("aiModerationListing")}
               />
             </div>
           </PolarisFormCard>

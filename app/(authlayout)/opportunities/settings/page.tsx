@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   TrendingUp,
   FileCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ import { cn } from "@/lib/utils";
 interface OpportunitiesSettingsState {
   allowOpportunities: boolean;
   autoApproveOpportunities: boolean;
+  aiModerationOpportunities: boolean;
 }
 
 function OpportunitiesSettingsPage() {
@@ -44,6 +46,8 @@ function OpportunitiesSettingsPage() {
     allowOpportunities: data?.getEntitySettings?.allowOpportunities ?? true,
     autoApproveOpportunities:
       data?.getEntitySettings?.autoApproveOpportunities ?? false,
+    aiModerationOpportunities:
+      data?.getEntitySettings?.aiModerationOpportunities ?? false,
   };
 
   const [formData, setFormData] =
@@ -57,6 +61,8 @@ function OpportunitiesSettingsPage() {
           data.getEntitySettings.allowOpportunities ?? true,
         autoApproveOpportunities:
           data.getEntitySettings.autoApproveOpportunities ?? false,
+        aiModerationOpportunities:
+          data.getEntitySettings.aiModerationOpportunities ?? false,
       });
       setHasChanged(false);
     }
@@ -77,6 +83,8 @@ function OpportunitiesSettingsPage() {
           data.getEntitySettings.allowOpportunities ?? true,
         autoApproveOpportunities:
           data.getEntitySettings.autoApproveOpportunities ?? false,
+        aiModerationOpportunities:
+          data.getEntitySettings.aiModerationOpportunities ?? false,
       });
       setHasChanged(false);
     }
@@ -89,6 +97,7 @@ function OpportunitiesSettingsPage() {
           input: {
             allowOpportunities: formData.allowOpportunities,
             autoApproveOpportunities: formData.autoApproveOpportunities,
+            aiModerationOpportunities: formData.aiModerationOpportunities,
           },
         },
       });
@@ -172,6 +181,11 @@ function OpportunitiesSettingsPage() {
                   <PolarisSummaryRow
                     label="Verification Mode"
                     value={formData.autoApproveOpportunities ? "Auto-Approved" : "Manual Moderation"}
+                  />
+                  <PolarisSummaryRow
+                    label="AI Moderation"
+                    value={formData.aiModerationOpportunities ? "Active" : "Disabled"}
+                    highlight={formData.aiModerationOpportunities}
                     isLast
                   />
                 </div>
@@ -280,6 +294,54 @@ function OpportunitiesSettingsPage() {
                 <Switch
                   checked={formData.autoApproveOpportunities}
                   onCheckedChange={() => handleToggle("autoApproveOpportunities")}
+                />
+              </div>
+            </PolarisFormCard>
+
+            {/* Section 3: AI Moderation Sentinel */}
+            <PolarisFormCard
+              step={3}
+              title="AI Moderation Sentinel"
+              description={`Automate opportunity inspection and spam filtering with autonomous AI moderation.`}
+              badge="AI Safety"
+            >
+              <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={cn(
+                      "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                      formData.aiModerationOpportunities
+                        ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
+                        : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                    )}
+                  >
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                        AI Opportunity Moderation
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                          formData.aiModerationOpportunities
+                            ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                            : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                        )}
+                      >
+                        {formData.aiModerationOpportunities ? "Protected" : "Disabled"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                      Leverage AI models to scan newly posted opportunities for fraudulent listings, scams, policy violations, and spam.
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={formData.aiModerationOpportunities}
+                  onCheckedChange={() => handleToggle("aiModerationOpportunities")}
                 />
               </div>
             </PolarisFormCard>

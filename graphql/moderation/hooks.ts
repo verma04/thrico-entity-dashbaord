@@ -1,7 +1,9 @@
 import {
   QueryHookOptions,
+  LazyQueryHookOptions,
   MutationHookOptions,
   useQuery,
+  useLazyQuery,
   useMutation,
 } from "@apollo/client";
 import {
@@ -17,6 +19,13 @@ import {
   PaginatedAiTokenUsageResponse,
   ModerationContentType,
   AiClassification,
+  AiModerationSettings,
+  AiModerationSettingsInput,
+  PaginatedUserStatusTimeline,
+  UserStatusEvent,
+  UserModerationEvent,
+  PaginatedUserModerationTimeline,
+  UserModerationSummary,
 } from "./types";
 import {
   TimeRange,
@@ -35,6 +44,11 @@ import {
   GET_AI_MODERATION_LOGS,
   GET_HISTORY,
   GET_MODERATION_LOGS,
+  GET_AI_MODERATION_SETTINGS,
+  GET_AI_TOKEN_USAGE,
+  GET_USER_STATUS_TIMELINE,
+  GET_USER_MODERATION_TIMELINE,
+  GET_USER_MODERATION_SUMMARY,
 } from "./queries";
 import {
   ADD_BANNED_WORD,
@@ -46,6 +60,7 @@ import {
   RESOLVE_REPORT,
   DISMISS_REPORT,
   UPDATE_MODERATION_SETTINGS,
+  UPDATE_AI_MODERATION_SETTINGS,
 } from "./mutations";
 
 // Queries
@@ -247,3 +262,110 @@ export function useUpdateModerationSettings(options?: MutationHookOptions) {
     ...options,
   });
 }
+
+export function useGetAiModerationSettings(
+  options?: QueryHookOptions<{ getAiModerationSettings: AiModerationSettings }>
+) {
+  return useQuery<{ getAiModerationSettings: AiModerationSettings }>(
+    GET_AI_MODERATION_SETTINGS,
+    options
+  );
+}
+
+export function useUpdateAiModerationSettings(
+  options?: MutationHookOptions<
+    { updateAiModerationSettings: AiModerationSettings },
+    { input: AiModerationSettingsInput }
+  >
+) {
+  return useMutation<
+    { updateAiModerationSettings: AiModerationSettings },
+    { input: AiModerationSettingsInput }
+  >(UPDATE_AI_MODERATION_SETTINGS, {
+    refetchQueries: [{ query: GET_AI_MODERATION_SETTINGS }],
+    ...options,
+  });
+}
+
+export function useGetAiTokenUsage(
+  variables?: { limit?: number; offset?: number },
+  options?: QueryHookOptions<{ getAiTokenUsage: PaginatedAiTokenUsageResponse }>
+) {
+  return useQuery<{ getAiTokenUsage: PaginatedAiTokenUsageResponse }>(
+    GET_AI_TOKEN_USAGE,
+    { variables, ...options }
+  );
+}
+
+export function useGetUserStatusTimeline(
+  variables?: { userId: string; limit?: number; offset?: number },
+  options?: QueryHookOptions<
+    { getUserStatusTimeline: PaginatedUserStatusTimeline },
+    { userId: string; limit?: number; offset?: number }
+  >
+) {
+  return useQuery<
+    { getUserStatusTimeline: PaginatedUserStatusTimeline },
+    { userId: string; limit?: number; offset?: number }
+  >(GET_USER_STATUS_TIMELINE, { variables, ...options });
+}
+
+export function useLazyGetUserStatusTimeline(
+  options?: LazyQueryHookOptions<
+    { getUserStatusTimeline: PaginatedUserStatusTimeline },
+    { userId: string; limit?: number; offset?: number }
+  >
+) {
+  return useLazyQuery<
+    { getUserStatusTimeline: PaginatedUserStatusTimeline },
+    { userId: string; limit?: number; offset?: number }
+  >(GET_USER_STATUS_TIMELINE, options);
+}
+
+export interface GetUserModerationTimelineVariables {
+  userId: string;
+  limit?: number;
+  offset?: number;
+  decision?: string;
+  contentType?: ModerationContentType;
+}
+
+export function useGetUserModerationTimeline(
+  variables?: GetUserModerationTimelineVariables,
+  options?: QueryHookOptions<
+    { getUserModerationTimeline: PaginatedUserModerationTimeline },
+    GetUserModerationTimelineVariables
+  >
+) {
+  return useQuery<
+    { getUserModerationTimeline: PaginatedUserModerationTimeline },
+    GetUserModerationTimelineVariables
+  >(GET_USER_MODERATION_TIMELINE, { variables, ...options });
+}
+
+export function useLazyGetUserModerationTimeline(
+  options?: LazyQueryHookOptions<
+    { getUserModerationTimeline: PaginatedUserModerationTimeline },
+    GetUserModerationTimelineVariables
+  >
+) {
+  return useLazyQuery<
+    { getUserModerationTimeline: PaginatedUserModerationTimeline },
+    GetUserModerationTimelineVariables
+  >(GET_USER_MODERATION_TIMELINE, options);
+}
+
+export function useGetUserModerationSummary(
+  variables?: { userId: string },
+  options?: QueryHookOptions<
+    { getUserModerationSummary: UserModerationSummary },
+    { userId: string }
+  >
+) {
+  return useQuery<
+    { getUserModerationSummary: UserModerationSummary },
+    { userId: string }
+  >(GET_USER_MODERATION_SUMMARY, { variables, ...options });
+}
+
+

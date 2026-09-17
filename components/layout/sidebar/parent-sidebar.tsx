@@ -95,7 +95,7 @@ export function ParentSidebar() {
         <NavRailItem
           icon={<Sparkles size={18} />}
           label="AI"
-          href="/ai-agent"
+          href="/ai"
           active={activeTab === "ai"}
         />
         <NavRailItem

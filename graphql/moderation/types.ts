@@ -143,7 +143,105 @@ export interface PaginatedModerationLogResponse {
   totalCount: number;
 }
 
+export interface PaginatedAiModerationLogResponse {
+  items: AiModerationLog[];
+  totalCount: number;
+}
+
 export interface PaginatedAiTokenUsageResponse {
   items: AiTokenUsage[];
   totalCount: number;
 }
+
+export interface AiModerationSettings {
+  __typename?: "AiModerationSettings";
+  aiModerationFeed: boolean;
+  aiModerationComments: boolean;
+  aiModerationEvents: boolean;
+  aiModerationCommunities: boolean;
+  aiModerationDiscussionForums: boolean;
+  aiModerationJobs: boolean;
+  aiModerationMentorship: boolean;
+  aiModerationListing: boolean;
+  aiModerationShop: boolean;
+  aiModerationOffers: boolean;
+  aiModerationOpportunities: boolean;
+  aiModerationSurveys: boolean;
+  aiModerationPolls: boolean;
+  aiModerationStories: boolean;
+}
+
+export interface AiModerationSettingsInput {
+  aiModerationFeed?: boolean;
+  aiModerationComments?: boolean;
+  aiModerationEvents?: boolean;
+  aiModerationCommunities?: boolean;
+  aiModerationDiscussionForums?: boolean;
+  aiModerationJobs?: boolean;
+  aiModerationMentorship?: boolean;
+  aiModerationListing?: boolean;
+  aiModerationShop?: boolean;
+  aiModerationOffers?: boolean;
+  aiModerationOpportunities?: boolean;
+  aiModerationSurveys?: boolean;
+  aiModerationPolls?: boolean;
+  aiModerationStories?: boolean;
+}
+
+export interface UserStatusEvent {
+  eventId: string;
+  tenantId: string;
+  userId: string;
+  userToEntityId?: string;
+  action: string;
+  previousStatus?: string;
+  newStatus: string;
+  reason: string;
+  performedBy?: string;
+  source: string;
+  metadata?: string;
+  createdAt: string;
+}
+
+export interface PaginatedUserStatusTimeline {
+  items: UserStatusEvent[];
+  totalCount: number;
+}
+
+export interface UserModerationEvent {
+  eventId: string;
+  tenantId: string;
+  userId: string;
+  contentId: string;
+  contentType: string;
+  contentPreview?: string;
+  originalContent?: string;
+  label: string;
+  score: number;
+  confidence: number;
+  categories: string[];
+  isSpam: boolean;
+  isViolation: boolean;
+  decision: string;
+  status: string;
+  model?: string;
+  reason: string;
+  tokens: number;
+  createdAt: string;
+}
+
+export interface PaginatedUserModerationTimeline {
+  items: UserModerationEvent[];
+  totalCount: number;
+}
+
+export interface UserModerationSummary {
+  totalChecked: number;
+  spamCount: number;
+  violationsCount: number;
+  blockedCount: number;
+  flaggedCount: number;
+  approvedCount: number;
+  lastViolationAt?: string;
+}
+

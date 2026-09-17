@@ -41,7 +41,7 @@ export function getActiveSidebarTab(pathName?: string | null): ActiveSidebarTab 
   }
 
   // 4. AI Studio & Agents
-  if (path.startsWith("/ai-agent") || path.startsWith("/ai")) {
+  if (path.startsWith("/ai") || path.startsWith("/ai-agent")) {
     return "ai";
   }
 

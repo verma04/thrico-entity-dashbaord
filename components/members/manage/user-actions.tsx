@@ -53,7 +53,9 @@ import {
   Smartphone,
   LogOut,
   Award,
+  History,
 } from "lucide-react";
+import { UserStatusTimelineModal } from "./user-status-timeline-modal";
 
 enum Action {
   APPROVE = "APPROVE",
@@ -79,6 +81,7 @@ export default function UserActions({ user, hideViewProfile }: { user: UserDetai
 
   const [isTierModalOpen, setIsTierModalOpen] = useState(false);
   const [selectedTierId, setSelectedTierId] = useState<string>("NONE");
+  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
 
   const { data: tiersData } = useQuery(GET_MEMBERSHIP_TIERS, { skip: !isTierModalOpen });
   const [assignTier, { loading: isAssigningTier }] = useMutation(ASSIGN_MEMBERS_TO_TIER);
@@ -164,7 +167,7 @@ export default function UserActions({ user, hideViewProfile }: { user: UserDetai
     });
   };
 
-  const isReasonRequired =
+  const isReasonRequired = Boolean(
     selectedAction &&
     [
       Action.BLOCK,
@@ -172,7 +175,8 @@ export default function UserActions({ user, hideViewProfile }: { user: UserDetai
       Action.REJECT,
       Action.FLAG,
       Action.VERIFY,
-    ].includes(selectedAction);
+    ].includes(selectedAction)
+  );
 
   interface ActionItem {
     label?: string;
@@ -203,6 +207,11 @@ export default function UserActions({ user, hideViewProfile }: { user: UserDetai
         setSelectedTierId(user.membershipTierId || "NONE");
         setIsTierModalOpen(true);
       },
+    },
+    {
+      label: "Status History",
+      icon: History,
+      onClick: () => setIsTimelineModalOpen(true),
     },
     { type: "separator" },
   ];
@@ -593,6 +602,15 @@ export default function UserActions({ user, hideViewProfile }: { user: UserDetai
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <UserStatusTimelineModal
+        isOpen={isTimelineModalOpen}
+        onClose={() => setIsTimelineModalOpen(false)}
+        userId={user.user?.id || user.id}
+        userName={`${user.user?.firstName || ""} ${user.user?.lastName || ""}`.trim() || "Member"}
+        userEmail={user.user?.email}
+        userAvatar={user.user?.avatar}
+        currentStatus={user.status}
+      />
     </>
   );
 }

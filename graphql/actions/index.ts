@@ -23,6 +23,26 @@ import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 export * from "./membership/membership-queries";
 export * from "./membership/membership-mutations";
 export * from "./export";
+export {
+  useGetUserStatusTimeline,
+  useLazyGetUserStatusTimeline,
+  useGetUserModerationTimeline,
+  useLazyGetUserModerationTimeline,
+  useGetUserModerationSummary,
+} from "../moderation/hooks";
+export {
+  GET_USER_STATUS_TIMELINE,
+  GET_USER_MODERATION_TIMELINE,
+  GET_USER_MODERATION_SUMMARY,
+} from "../moderation/queries";
+export type {
+  UserStatusEvent,
+  PaginatedUserStatusTimeline,
+  UserModerationEvent,
+  PaginatedUserModerationTimeline,
+  UserModerationSummary,
+} from "../moderation/types";
+
 
 // import { CHECK_PAYMENTS } from "../../../payments/graphql/quries";
 
@@ -85,6 +105,11 @@ export interface EntitySettings {
   entity: string;
   allowNewUser: boolean;
   autoApproveUser: boolean;
+  sendWelcomeEmail?: boolean;
+  welcomeEmailSubject?: string;
+  sendApprovalEmail?: boolean;
+  approvalEmailSubject?: string;
+  actionEmails?: any;
   allowCommunity: boolean;
   autoApproveCommunity: boolean;
   autoApproveGroup: boolean;
@@ -103,12 +128,44 @@ export interface EntitySettings {
   autoApproveShop: boolean;
   allowOffers: boolean;
   autoApproveOffers: boolean;
+  allowOpportunities?: boolean;
+  autoApproveOpportunities?: boolean;
   allowSurveys: boolean;
   autoApproveSurveys: boolean;
   allowPolls: boolean;
   autoApprovePolls: boolean;
   allowStories: boolean;
   autoApproveStories: boolean;
+
+  // Feed Settings
+  allowEntityCommunityInFeed?: boolean;
+  allowEntityDiscussionForumInFeed?: boolean;
+  allowEntityPollsInFeed?: boolean;
+  allowEntityFeedInFeed?: boolean;
+  allowEntityMomentsInFeed?: boolean;
+  allowEntityOpportunitiesInFeed?: boolean;
+  feedOrder?: any;
+  feedEntityName?: string;
+
+  // Media Gallery
+  allowMediaGalleryComments?: boolean;
+
+  // AI Moderation Settings
+  aiModerationFeed?: boolean;
+  aiModerationComments?: boolean;
+  aiModerationEvents?: boolean;
+  aiModerationCommunities?: boolean;
+  aiModerationMessages?: boolean;
+  aiModerationDiscussionForums?: boolean;
+  aiModerationJobs?: boolean;
+  aiModerationMentorship?: boolean;
+  aiModerationListing?: boolean;
+  aiModerationShop?: boolean;
+  aiModerationOffers?: boolean;
+  aiModerationOpportunities?: boolean;
+  aiModerationSurveys?: boolean;
+  aiModerationPolls?: boolean;
+  aiModerationStories?: boolean;
 }
 
 export interface GetEntitySettingsResponse {
@@ -338,6 +395,8 @@ export * from "./impact";
 export * from "./sponsors";
 export * from "../analytics";
 export * from "./customer-360-api-key";
+export { TimeRange } from "./dashbaord/dashboard-quries";
+export type { DateRangeInput } from "./dashbaord/dashboard-quries";
 
 export const useGetModuleCustomName = (id: string) =>
   useQuery(GET_MODULE_CUSTOM_NAME, {

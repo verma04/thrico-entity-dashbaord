@@ -6,7 +6,7 @@ import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check"
 
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { ShoppingBag, ShieldCheck, Zap } from "lucide-react";
+import { ShoppingBag, ShieldCheck, Zap, Sparkles } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -29,6 +29,13 @@ const ShopSettings = () => {
       description: `New ${singularName.toLowerCase()} listings will be live instantly without manual review.`,
       icon: Zap,
       section: "Automation Protocols",
+    },
+    {
+      key: "aiModerationShop",
+      label: "AI Catalog Moderation",
+      description: "Automatically scan product titles, descriptions, and digital assets with AI for compliance and prohibited items.",
+      icon: Sparkles,
+      section: "AI Safety Sentinel",
     },
   ];
 

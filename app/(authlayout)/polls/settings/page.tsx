@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 interface PollsSettingsState {
   allowPolls: boolean;
   autoApprovePolls: boolean;
+  aiModerationPolls: boolean;
 }
 
 function PollsSettings() {
@@ -41,6 +42,7 @@ function PollsSettings() {
   const initialSettings: PollsSettingsState = {
     allowPolls: data?.getEntitySettings?.allowPolls ?? true,
     autoApprovePolls: data?.getEntitySettings?.autoApprovePolls ?? false,
+    aiModerationPolls: data?.getEntitySettings?.aiModerationPolls ?? false,
   };
 
   const [formData, setFormData] = useState<PollsSettingsState>(initialSettings);
@@ -51,6 +53,7 @@ function PollsSettings() {
       setFormData({
         allowPolls: data.getEntitySettings.allowPolls ?? true,
         autoApprovePolls: data.getEntitySettings.autoApprovePolls ?? false,
+        aiModerationPolls: data.getEntitySettings.aiModerationPolls ?? false,
       });
       setHasChanged(false);
     }
@@ -69,6 +72,7 @@ function PollsSettings() {
       setFormData({
         allowPolls: data.getEntitySettings.allowPolls ?? true,
         autoApprovePolls: data.getEntitySettings.autoApprovePolls ?? false,
+        aiModerationPolls: data.getEntitySettings.aiModerationPolls ?? false,
       });
       setHasChanged(false);
     }
@@ -81,6 +85,7 @@ function PollsSettings() {
           input: {
             allowPolls: formData.allowPolls,
             autoApprovePolls: formData.autoApprovePolls,
+            aiModerationPolls: formData.aiModerationPolls,
           },
         },
       });
@@ -153,6 +158,11 @@ function PollsSettings() {
                 <PolarisSummaryRow
                   label="Validation Gateway"
                   value={formData.autoApprovePolls ? "Direct Live" : "Review Required"}
+                />
+                <PolarisSummaryRow
+                  label="AI Moderation"
+                  value={formData.aiModerationPolls ? "Active" : "Disabled"}
+                  highlight={formData.aiModerationPolls}
                   isLast
                 />
               </div>
@@ -260,6 +270,54 @@ function PollsSettings() {
               <Switch
                 checked={formData.autoApprovePolls}
                 onCheckedChange={() => handleToggle("autoApprovePolls")}
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: AI Moderation Sentinel */}
+          <PolarisFormCard
+            step={3}
+            title="AI Moderation Sentinel"
+            description={`Automate poll content inspection and spam filtering with autonomous AI moderation.`}
+            badge="AI Safety"
+          >
+            <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
+              <div className="flex items-start gap-2.5">
+                <div
+                  className={cn(
+                    "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
+                    formData.aiModerationPolls
+                      ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
+                      : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700",
+                  )}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                </div>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                      AI Poll Moderation
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                        formData.aiModerationPolls
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                          : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800",
+                      )}
+                    >
+                      {formData.aiModerationPolls ? "Protected" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                    Leverage AI models to scan poll titles, options, and descriptions for offensive content, harassment, and spam.
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={formData.aiModerationPolls}
+                onCheckedChange={() => handleToggle("aiModerationPolls")}
               />
             </div>
           </PolarisFormCard>
