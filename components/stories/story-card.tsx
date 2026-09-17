@@ -6,7 +6,6 @@ import {
   Eye,
   Trash2,
   Copy,
-  Layers,
   Clock,
   Radio,
   Calendar,
@@ -54,20 +53,6 @@ export function StoryCard({
     [author?.firstName, author?.lastName].filter(Boolean).join(" ") ||
     "Unknown User";
 
-  // Parse text overlays safely
-  let overlayCount = 0;
-  if (story.textOverlays) {
-    if (Array.isArray(story.textOverlays)) {
-      overlayCount = story.textOverlays.length;
-    } else if (typeof story.textOverlays === "string") {
-      try {
-        const parsed = JSON.parse(story.textOverlays);
-        overlayCount = Array.isArray(parsed) ? parsed.length : 1;
-      } catch {
-        overlayCount = 1;
-      }
-    }
-  }
 
   const handleCopyId = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -97,7 +82,7 @@ export function StoryCard({
               {authorName}
             </p>
             <p className="text-[10px] text-muted-foreground truncate">
-              {author?.headline || author?.email || "Storyteller"}
+              {author?.headline || author?.email || "Story Maker"}
             </p>
           </div>
         </div>
@@ -174,15 +159,6 @@ export function StoryCard({
         {/* Gradient shadow overlay for legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
 
-        {/* Text Overlays Indicator Pill */}
-        {overlayCount > 0 && (
-          <div className="absolute top-2.5 right-2.5 z-10">
-            <Badge className="bg-black/65 backdrop-blur-md text-white border-white/20 text-[9px] px-1.5 py-0 font-medium gap-1 shadow-sm">
-              <Layers className="h-2.5 w-2.5 text-indigo-300" />
-              {overlayCount} {overlayCount === 1 ? "Overlay" : "Overlays"}
-            </Badge>
-          </div>
-        )}
 
         {/* Caption snippet floating over image bottom */}
         {story.caption && (

@@ -22,7 +22,6 @@ interface ExportStoriesModalProps {
 
 const STORY_CSV_COLUMNS: CsvColumn<Story>[] = [
   { header: "Story ID", getValue: (s) => s.id },
-  { header: "Entity ID", getValue: (s) => s.entityId },
   {
     header: "Author Name",
     getValue: (s) =>

@@ -12,8 +12,6 @@ import {
   BookOpen,
   Eye,
   Trash2,
-  Copy,
-  Layers,
   MoreHorizontal,
   Clock,
   Radio,
@@ -111,11 +109,8 @@ export function StoriesTable({
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px] sm:max-w-[240px]">
-                {story.caption || "Untitled Story"}
-              </p>
-              <p className="text-[10px] text-muted-foreground font-mono truncate max-w-[180px]">
-                ID: {story.id.slice(0, 12)}...
+              <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[220px] sm:max-w-[280px]">
+                {story.caption || "Story"}
               </p>
             </div>
           </div>
@@ -156,38 +151,6 @@ export function StoriesTable({
             variant={isLive ? "success" : "neutral"}
             className="text-[10px]"
           />
-        );
-      },
-    },
-    {
-      key: "overlays",
-      header: "Overlays",
-      cell: (story: Story) => {
-        let count = 0;
-        if (story.textOverlays) {
-          if (Array.isArray(story.textOverlays)) {
-            count = story.textOverlays.length;
-          } else if (typeof story.textOverlays === "string") {
-            try {
-              const p = JSON.parse(story.textOverlays);
-              count = Array.isArray(p) ? p.length : 1;
-            } catch {
-              count = 1;
-            }
-          }
-        }
-
-        if (count === 0) {
-          return (
-            <span className="text-[11px] text-muted-foreground/60">—</span>
-          );
-        }
-
-        return (
-          <AdminTableTag variant="indigo" className="text-[9.5px] gap-1">
-            <Layers className="h-2.5 w-2.5" />
-            {count} {count === 1 ? "layer" : "layers"}
-          </AdminTableTag>
         );
       },
     },
