@@ -158,12 +158,12 @@ export function StoriesKpiSummary({
         </CardContent>
       </Card>
 
-      {/* 4. Active Storytellers */}
+      {/* 4. Active Story Makers */}
       <Card className="border-border/60 bg-card shadow-2xs hover:border-border transition-all">
         <CardContent className="p-4 space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              Storytellers
+              Story Makers
             </span>
             <div className="h-7 w-7 rounded-[4px] bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/40">
               <Users className="h-3.5 w-3.5" />

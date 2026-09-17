@@ -260,7 +260,9 @@ export function ChildSidebarContainer({
   const allSearchItems = useMemo(() => {
     return [
       ...flattenItems(homeItems as MenuItem[], "Home"),
-      ...flattenItems(aiStudioItems as MenuItem[], "AI Engine"),
+      ...flattenItems(aiStudioItems as MenuItem[], "AI"),
+      ...flattenItems(aiSuperAgentsItems as MenuItem[], "AI"),
+      ...flattenItems(aiChatItems as MenuItem[], "AI"),
       ...flattenItems(membersIntelligence as MenuItem[], "Member Engine"),
       ...flattenItems(feedItems as MenuItem[], "Content Engine"),
       ...flattenItems(moderationItems as MenuItem[], "Content Engine"),
@@ -277,6 +279,8 @@ export function ChildSidebarContainer({
   }, [
     homeItems,
     aiStudioItems,
+    aiSuperAgentsItems,
+    aiChatItems,
     membersIntelligence,
     feedItems,
     moderationItems,
@@ -296,7 +300,11 @@ export function ChildSidebarContainer({
     if (!searchQuery.trim()) return true;
     switch (activeTab) {
       case "ai":
-        return filteredAiStudio.length > 0;
+        return (
+          filteredAiStudio.length > 0 ||
+          filteredAiSuperAgents.length > 0 ||
+          filteredAiChat.length > 0
+        );
       case "members":
         return filteredMembers.length > 0;
       case "content":
@@ -335,6 +343,8 @@ export function ChildSidebarContainer({
     searchQuery,
     activeTab,
     filteredAiStudio,
+    filteredAiSuperAgents,
+    filteredAiChat,
     filteredMembers,
     filteredFeed,
     filteredModeration,
@@ -402,7 +412,7 @@ export function ChildSidebarContainer({
                           : activeTab === "modules"
                             ? "Module Engine"
                             : activeTab === "ai"
-                              ? "AI Engine"
+                              ? "AI Studio"
                               : activeTab === "integrations"
                                 ? "Integrations"
                                 : activeTab === "email"
@@ -446,16 +456,33 @@ export function ChildSidebarContainer({
                   </div>
                 )}
 
-
                 {activeTab === "ai" && (
-                  <CollapsibleSection
-                    sectionKey="ai-engine"
-                    label="AI Engine"
-                    items={filteredAiStudio}
-                    renderItems={renderItems}
-                    searchQuery={searchQuery}
-                    className="mb-1"
-                  />
+                  <>
+                    <CollapsibleSection
+                      sectionKey="ai-studio"
+                      label="AI Studio"
+                      items={filteredAiStudio}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="ai-super-agents"
+                      label="Super Agents"
+                      items={filteredAiSuperAgents}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                    <CollapsibleSection
+                      sectionKey="ai-chat"
+                      label="Chat"
+                      items={filteredAiChat}
+                      renderItems={renderItems}
+                      searchQuery={searchQuery}
+                      className="mb-1"
+                    />
+                  </>
                 )}
 
                 {activeTab === "members" && (
