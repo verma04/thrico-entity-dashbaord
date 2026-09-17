@@ -75,31 +75,38 @@ interface PostCreationFormProps {
 }
 
 const postSchema = Yup.object().shape({
-  description: Yup.string()
-    .required("Please enter post content")
-    .min(2, "Post content must be at least 2 characters")
-    .max(2000, "Post content cannot exceed 2000 characters"),
+  postType: Yup.string().oneOf(["general", "poll"]),
+  description: Yup.string().when("postType", {
+    is: "poll",
+    then: () => Yup.string().optional().max(2000, "Post content cannot exceed 2000 characters"),
+    otherwise: () =>
+      Yup.string()
+        .required("Please enter post content")
+        .min(2, "Post content must be at least 2 characters")
+        .max(2000, "Post content cannot exceed 2000 characters"),
+  }),
   source: Yup.string().optional(),
   privacy: Yup.string().optional(),
   isPinned: Yup.boolean(),
-  postType: Yup.string().oneOf(["general", "poll", "celebration"]),
   poll: Yup.object().when("postType", {
     is: "poll",
     then: () =>
       Yup.object().shape({
+        title: Yup.string().optional().max(100, "Title must be under 100 characters"),
         question: Yup.string()
           .required("Poll question is required")
           .min(3, "Question must be at least 3 characters")
-          .max(200, "Question must be under 200 characters"),
+          .max(255, "Question must be under 255 characters"),
         options: Yup.array()
           .of(
             Yup.object().shape({
-              text: Yup.string().required("Option text is required"),
+              text: Yup.string().required("Option text is required").min(1, "Option cannot be empty"),
             }),
           )
           .min(2, "Poll must have at least 2 options")
           .max(6, "Maximum 6 options allowed"),
         durationDays: Yup.number().default(7),
+        resultVisibility: Yup.string().default("ALWAYS"),
       }),
     otherwise: () => Yup.object().notRequired(),
   }),
@@ -126,11 +133,13 @@ export function PostCreationForm({
       source: "feed",
       privacy: "PUBLIC",
       isPinned: false,
-      postType: "general" as "general" | "poll" | "celebration",
+      postType: "general" as "general" | "poll",
       poll: {
+        title: "",
         question: "",
         options: [{ text: "" }, { text: "" }],
         durationDays: 7,
+        resultVisibility: "ALWAYS",
       },
     },
     validationSchema: postSchema,
@@ -437,9 +446,7 @@ export function PostCreationForm({
                     value={
                       values.postType === "poll"
                         ? "Interactive Poll"
-                        : values.postType === "celebration"
-                          ? "Celebration"
-                          : "Standard Post"
+                        : "Standard Post"
                     }
                   />
                   <PolarisSummaryRow
@@ -485,9 +492,7 @@ export function PostCreationForm({
               badge={
                 values.postType === "poll"
                   ? "Interactive Poll"
-                  : values.postType === "celebration"
-                    ? "Milestone / Celebration"
-                    : "Standard Post"
+                  : "Standard Post"
               }
             >
               {/* Post Type Selector Tabs */}
@@ -495,7 +500,7 @@ export function PostCreationForm({
                 <label className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block">
                   Post Format
                 </label>
-                <div className="grid grid-cols-3 gap-2 p-1 bg-[#f6f6f7] dark:bg-zinc-800 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-700">
+                <div className="grid grid-cols-2 gap-2 p-1 bg-[#f6f6f7] dark:bg-zinc-800 rounded-[8px] border border-[#d2d5d9] dark:border-zinc-700">
                   <button
                     type="button"
                     onClick={() => setFieldValue("postType", "general")}
@@ -522,19 +527,6 @@ export function PostCreationForm({
                     <BarChart2 className="h-3.5 w-3.5 text-emerald-600" />
                     <span>Poll & Vote</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setFieldValue("postType", "celebration")}
-                    className={cn(
-                      "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-[6px] text-[12.5px] font-semibold transition-all cursor-pointer",
-                      values.postType === "celebration"
-                        ? "bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-100 shadow-xs border border-[#d2d5d9] dark:border-zinc-700"
-                        : "text-[#616161] hover:text-[#303030]",
-                    )}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-                    <span>Celebration</span>
-                  </button>
                 </div>
               </div>
 
@@ -543,15 +535,13 @@ export function PostCreationForm({
                 <PolarisTextarea
                   id="description"
                   name="description"
-                  label="Message Body"
-                  required
+                  label={values.postType === "poll" ? "Context / Overview (Optional)" : "Message Body"}
+                  required={values.postType !== "poll"}
                   rows={4}
                   placeholder={
                     values.postType === "poll"
-                      ? "Add background context or instructions for your poll..."
-                      : values.postType === "celebration"
-                        ? "Share a special milestone, welcome a member, or celebrate an achievement..."
-                        : "Share an update, news, article summary, or announcement with your community. Mention @members or add #hashtags..."
+                      ? "Add background context or instructions for your poll (optional)..."
+                      : "Share an update, news, article summary, or announcement with your community. Mention @members or add #hashtags..."
                   }
                   value={values.description}
                   onChange={formik.handleChange}
@@ -602,6 +592,18 @@ export function PostCreationForm({
                 description="Set the question members will vote on and configure response choices."
                 badge="Voting Setup"
               >
+                {/* Poll Topic / Title */}
+                <PolarisInput
+                  id="poll-title"
+                  name="poll.title"
+                  label="Poll Topic / Title (Optional)"
+                  placeholder="e.g. Community Feedback (defaults to Question if left blank)"
+                  value={values.poll.title}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={touched.poll?.title && errors.poll?.title ? errors.poll.title : undefined}
+                />
+
                 {/* Poll Question */}
                 <PolarisInput
                   id="poll-question"
@@ -670,7 +672,7 @@ export function PostCreationForm({
                   </FieldArray>
                 </div>
 
-                {/* Poll Duration */}
+                {/* Poll Duration & Visibility */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                   <PolarisSelect
                     id="poll-duration"
@@ -685,6 +687,20 @@ export function PostCreationForm({
                       { value: "7", label: "1 Week (Default)" },
                       { value: "14", label: "2 Weeks" },
                       { value: "30", label: "1 Month" },
+                    ]}
+                  />
+
+                  <PolarisSelect
+                    id="poll-visibility"
+                    label="Result Visibility"
+                    value={values.poll.resultVisibility || "ALWAYS"}
+                    onChange={(val) =>
+                      setFieldValue("poll.resultVisibility", val)
+                    }
+                    options={[
+                      { value: "ALWAYS", label: "Always Public (Live Results)" },
+                      { value: "AFTER_VOTE", label: "After Voting (Unlock on Vote)" },
+                      { value: "ADMIN", label: "Only Admins (Confidential)" },
                     ]}
                   />
                 </div>

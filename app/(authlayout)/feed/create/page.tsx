@@ -30,8 +30,14 @@ export default function CreateFeedPostPage() {
   });
 
   const onFinish = (values: any) => {
+    const isPoll = values.postType === "poll";
+    const descriptionText =
+      values.description?.trim() ||
+      (isPoll ? values.poll?.question?.trim() : "") ||
+      "Community Post";
+
     const input: any = {
-      description: values.description,
+      description: descriptionText,
     };
 
     if (values.media && values.media.length > 0) {
@@ -39,7 +45,9 @@ export default function CreateFeedPostPage() {
     }
 
     if (values.source) {
-      input.source = values.source === "feed" ? "admin" : values.source;
+      input.source = isPoll ? "poll" : values.source === "feed" ? "admin" : values.source;
+    } else if (isPoll) {
+      input.source = "poll";
     }
 
     if (values.privacy) {
@@ -48,6 +56,31 @@ export default function CreateFeedPostPage() {
 
     if (typeof values.isPinned === "boolean") {
       input.isPinned = values.isPinned;
+    }
+
+    if (isPoll && values.poll) {
+      const validOptions = (values.poll.options || [])
+        .map((opt: any) =>
+          typeof opt === "string" ? opt : opt.option || opt.text,
+        )
+        .filter((text: string) => Boolean(text && text.trim()))
+        .map((optText: string) => ({ option: optText.trim() }));
+
+      const durationDays = Number(values.poll.durationDays) || 7;
+      const endDate = new Date(
+        Date.now() + durationDays * 24 * 60 * 60 * 1000,
+      );
+      const question = values.poll.question?.trim() || descriptionText;
+      const title = values.poll.title?.trim() || question || "Community Poll";
+
+      input.poll = {
+        title,
+        question,
+        options: validOptions,
+        resultVisibility: values.poll.resultVisibility || "ALWAYS",
+        endDate: endDate.toISOString(),
+      };
+      input.source = "poll";
     }
 
     addFeed({

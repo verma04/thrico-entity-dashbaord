@@ -594,6 +594,25 @@ export const ADD_FEED = gql`
       createdAt
       isPinned
       pinnedAt
+      poll {
+        id
+        title
+        question
+        resultVisibility
+        options {
+          id
+          text
+          order
+          votes
+        }
+        updatedAt
+        createdAt
+        endDate
+        status
+        totalVotes
+        isVoted
+        votedOptionId
+      }
       user {
         id
         firstName
