@@ -128,42 +128,37 @@ export const homeItems = [
   },
 ];
 
-// --- 1b. AI ---
+// --- 1b. AI Engine ---
 export const aiStudioItems = [
   {
-    key: "ai-ask",
-    label: "Ask or Create",
-    path: "/ai-agent",
-    icon: <Wand2 size={18} />,
-    badge: "Beta",
+    key: "ai-overview",
+    label: "Overview",
+    path: "/ai",
+    icon: <LayoutDashboard size={18} />,
   },
   {
-    key: "ai-analytics",
-    label: "Analytics",
-    path: "/ai-agent",
-    icon: <BarChart2 size={18} />,
-    badge: "Beta",
+    key: "ai-agents",
+    label: "Agents",
+    path: "/ai/agents",
+    icon: <Bot size={18} />,
   },
   {
-    key: "ai-skills",
-    label: "Skills",
-    path: "/ai-agent",
-    icon: <BrainCircuit size={18} />,
-    badge: "Beta",
+    key: "ai-moderation",
+    label: "Moderation",
+    path: "/ai/moderation",
+    icon: <ShieldAlert size={18} />,
   },
   {
-    key: "ai-connections",
-    label: "Connectors",
-    path: "/ai-agent",
-    icon: <Link2 size={18} />,
-    badge: "Beta",
+    key: "ai-usage",
+    label: "Usage & Billing",
+    path: "/ai/usage",
+    icon: <BarChart3 size={18} />,
   },
   {
-    key: "ai-onboarding",
-    label: "Onboarding Assistant",
-    path: "/ai-agent",
-    icon: <Rocket size={18} />,
-    badge: "Beta",
+    key: "ai-settings",
+    label: "Settings",
+    path: "/ai/settings",
+    icon: <Settings size={18} />,
   },
 ];
 
@@ -171,49 +166,49 @@ export const aiSuperAgentsItems = [
   {
     key: "ai-create-agent",
     label: "Create Agent",
-    path: "/ai-agent",
+    path: "/ai",
     icon: <Plus size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-all-agents",
     label: "All Agents",
-    path: "/ai-agent",
+    path: "/ai",
     icon: <List size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-my-agents",
     label: "My Agents",
-    path: "/ai-agent",
+    path: "/ai",
     icon: <User2 size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-recent-super-agents",
     label: "Recent Super Agents",
-    path: "/ai-agent",
+    path: "/ai",
     icon: <Clock size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-communities-agent",
     label: "Communities Agent",
-    path: "/ai-agent",
+    path: "/ai",
     icon: <Users size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-survey-agent",
     label: "Survey Agent",
-    path: "/ai-agent",
+    path: "/ai",
     icon: <ClipboardList size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-membership-manager-agent",
     label: "Membership Manager Agent",
-    path: "/ai-agent",
+    path: "/ai",
     icon: <UserCog size={18} />,
     badge: "Beta",
   },
@@ -223,21 +218,21 @@ export const aiChatItems = [
   {
     key: "ai-recent-chats",
     label: "Recent Chats",
-    path: "/ai-agent/chat/recent",
+    path: "/ai/chat/recent",
     icon: <Clock size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-all-chats",
     label: "All Chats",
-    path: "/ai-agent/chat/all",
+    path: "/ai/chat/all",
     icon: <List size={18} />,
     badge: "Beta",
   },
   {
     key: "ai-new-conversation",
     label: "New Conversation",
-    path: "/ai-agent/chat/new",
+    path: "/ai/chat/new",
     icon: <Plus size={18} />,
     badge: "Beta",
   },
@@ -1331,7 +1326,10 @@ export const useFilteredExtendedItems = () => {
         modulesSub.find(
           (m: any) => m.name?.toLowerCase().replace(/'/g, "_") === subKey,
         );
-      const isSubscribed = enabledModuleIds.has(subKey);
+      const isSubscribed = Boolean(matchingModule);
+      const isModuleEnabled = matchingModule
+        ? Boolean(matchingModule.enabled)
+        : false;
       let mappedChildren = item.children;
       if (isModules && matchingModule?.customName && mappedChildren) {
         mappedChildren = mappedChildren.map((child: any) => {
@@ -1363,6 +1361,7 @@ export const useFilteredExtendedItems = () => {
             : item.label,
         children: mappedChildren,
         isLocked: !isSubscribed,
+        isDisabled: isSubscribed && !isModuleEnabled,
         sortNumber: matchingModule?.showInWebNavigationSortNumber ?? 999,
       };
 
@@ -1383,6 +1382,9 @@ export const useFilteredExtendedItems = () => {
     return filteredList.sort((a: any, b: any) => {
       if (a.isLocked !== b.isLocked) {
         return a.isLocked ? 1 : -1;
+      }
+      if (a.isDisabled !== b.isDisabled) {
+        return a.isDisabled ? 1 : -1;
       }
       const sortA = a.sortNumber ?? 999;
       const sortB = b.sortNumber ?? 999;

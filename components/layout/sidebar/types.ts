@@ -9,4 +9,5 @@ export interface MenuItem {
   isLogout?: boolean;
   badge?: string;
   isLocked?: boolean;
+  isDisabled?: boolean;
 }

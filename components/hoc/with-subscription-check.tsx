@@ -19,9 +19,11 @@ export function withSubscriptionCheck<P extends object>(
   return function SubscriptionCheckedComponent(props: P) {
     const { data, loading, error } = useCheckEntitySubscription();
 
-    const isEnabled = React.useMemo(() => {
+    const moduleStatus = React.useMemo(() => {
       if (loading && !data) return null;
-      if (!data?.checkEntitySubscription?.modules) return false;
+      if (!data?.checkEntitySubscription?.modules) {
+        return { isSubscribed: false, isEnabled: false, moduleName: undefined };
+      }
 
       const modules = data.checkEntitySubscription.modules;
       let normalizedKey = moduleKey.toLowerCase().replace(/'/g, "_");
@@ -35,14 +37,25 @@ export function withSubscriptionCheck<P extends object>(
         normalizedKey = "rewards";
       }
 
-      return modules.some(
+      const matchingModule = modules.find(
         (m) =>
-          m.enabled &&
-          m.name?.toLowerCase().replace(/'/g, "_") === normalizedKey
+          m.name?.toLowerCase().replace(/'/g, "_") === normalizedKey ||
+          (m.customName &&
+            m.customName.toLowerCase().replace(/'/g, "_") === normalizedKey)
       );
+
+      if (!matchingModule) {
+        return { isSubscribed: false, isEnabled: false, moduleName: undefined };
+      }
+
+      return {
+        isSubscribed: true,
+        isEnabled: Boolean(matchingModule.enabled),
+        moduleName: matchingModule.customName || matchingModule.name || undefined,
+      };
     }, [data, loading]);
 
-    if ((loading && !data) || isEnabled === null) {
+    if ((loading && !data) || moduleStatus === null) {
       return (
         <div className="p-8 space-y-4 w-full h-full min-h-[400px]">
           <Skeleton className="h-12 w-3/4" />
@@ -52,8 +65,14 @@ export function withSubscriptionCheck<P extends object>(
       );
     }
 
-    if (isEnabled === false) {
-      return <ModuleLocked moduleKey={moduleKey} />;
+    if (!moduleStatus.isEnabled) {
+      return (
+        <ModuleLocked
+          moduleKey={moduleKey}
+          isDisabled={moduleStatus.isSubscribed}
+          moduleName={moduleStatus.moduleName}
+        />
+      );
     }
 
     if (error && !data) {

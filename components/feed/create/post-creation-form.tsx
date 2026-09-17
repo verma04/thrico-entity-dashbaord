@@ -55,7 +55,7 @@ import {
   PolarisSelect,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
-import { useGetEntity } from "@/graphql/actions";
+import { useGetEntity, useCheckEntitySubscription } from "@/graphql/actions";
 import UserAvatar from "@/components/layout/user-avatar";
 import { cn } from "@/lib/utils";
 
@@ -119,6 +119,22 @@ export function PostCreationForm({
 }: PostCreationFormProps) {
   const router = useRouter();
   const { data: entityData } = useGetEntity();
+  const { data: subData } = useCheckEntitySubscription();
+
+  const isPollsModuleEnabled = React.useMemo(() => {
+    const modules = subData?.checkEntitySubscription?.modules;
+    if (!modules) return true;
+    const pollModule = modules.find(
+      (m) =>
+        m.name?.toLowerCase() === "polls" ||
+        m.name?.toLowerCase() === "poll" ||
+        (m.customName &&
+          (m.customName.toLowerCase() === "polls" ||
+            m.customName.toLowerCase() === "poll"))
+    );
+    return pollModule ? Boolean(pollModule.enabled) : true;
+  }, [subData]);
+
   const [mediaList, setMediaList] = useState<MediaPreviewItem[]>([]);
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">(
     "desktop",
@@ -516,16 +532,40 @@ export function PostCreationForm({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFieldValue("postType", "poll")}
+                    disabled={!isPollsModuleEnabled}
+                    onClick={() => {
+                      if (isPollsModuleEnabled) {
+                        setFieldValue("postType", "poll");
+                      }
+                    }}
+                    title={
+                      !isPollsModuleEnabled
+                        ? "Polls module is disabled in organization settings"
+                        : undefined
+                    }
                     className={cn(
-                      "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-[6px] text-[12.5px] font-semibold transition-all cursor-pointer",
-                      values.postType === "poll"
-                        ? "bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-100 shadow-xs border border-[#d2d5d9] dark:border-zinc-700"
-                        : "text-[#616161] hover:text-[#303030]",
+                      "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-[6px] text-[12.5px] font-semibold transition-all",
+                      !isPollsModuleEnabled
+                        ? "opacity-50 cursor-not-allowed text-[#9e9e9e] dark:text-zinc-500"
+                        : values.postType === "poll"
+                          ? "bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-100 shadow-xs border border-[#d2d5d9] dark:border-zinc-700 cursor-pointer"
+                          : "text-[#616161] hover:text-[#303030] cursor-pointer",
                     )}
                   >
-                    <BarChart2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <BarChart2
+                      className={cn(
+                        "h-3.5 w-3.5",
+                        isPollsModuleEnabled
+                          ? "text-emerald-600"
+                          : "text-muted-foreground",
+                      )}
+                    />
                     <span>Poll & Vote</span>
+                    {!isPollsModuleEnabled && (
+                      <span className="text-[10px] font-normal px-1 py-0.5 rounded bg-muted text-muted-foreground ml-0.5">
+                        Disabled
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>

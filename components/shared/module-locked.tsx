@@ -2,14 +2,32 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, ArrowUpRight, ArrowLeft } from "lucide-react";
+import {
+  Lock,
+  Sparkles,
+  ArrowUpRight,
+  ArrowLeft,
+  PowerOff,
+  Sliders,
+  CheckCircle2,
+} from "lucide-react";
 import Link from "next/link";
 
 interface ModuleLockedProps {
   moduleKey: string;
+  isDisabled?: boolean;
+  moduleName?: string;
 }
 
-export function ModuleLocked({ moduleKey }: ModuleLockedProps) {
+export function ModuleLocked({
+  moduleKey,
+  isDisabled = false,
+  moduleName,
+}: ModuleLockedProps) {
+  const displayName =
+    moduleName ||
+    moduleKey.charAt(0).toUpperCase() + moduleKey.slice(1).toLowerCase();
+
   return (
     <div className="relative flex items-center justify-center p-8 h-full min-h-[calc(100vh-16rem)] w-full overflow-hidden">
       {/* Ambient background glow */}
@@ -17,8 +35,9 @@ export function ModuleLocked({ moduleKey }: ModuleLockedProps) {
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.07]"
           style={{
-            background:
-              "radial-gradient(circle, var(--primary) 0%, transparent 70%)",
+            background: isDisabled
+              ? "radial-gradient(circle, var(--muted-foreground) 0%, transparent 70%)"
+              : "radial-gradient(circle, var(--primary) 0%, transparent 70%)",
           }}
         />
       </div>
@@ -27,7 +46,7 @@ export function ModuleLocked({ moduleKey }: ModuleLockedProps) {
       <div className="absolute inset-0 bg-dots-grid opacity-40 pointer-events-none" />
 
       <div className="relative max-w-md w-full flex flex-col items-center text-center">
-        {/* Lock icon with animated rings */}
+        {/* Icon with animated rings */}
         <div className="relative mb-10">
           {/* Outermost pulse ring */}
           <div
@@ -40,71 +59,120 @@ export function ModuleLocked({ moduleKey }: ModuleLockedProps) {
           <div
             className="absolute inset-0 rounded-full scale-[1.8] blur-2xl opacity-20"
             style={{
-              background:
-                "linear-gradient(135deg, var(--primary), var(--muted-foreground))",
+              background: isDisabled
+                ? "linear-gradient(135deg, var(--muted-foreground), var(--border))"
+                : "linear-gradient(135deg, var(--primary), var(--muted-foreground))",
             }}
           />
           {/* Icon container */}
           <div className="relative flex items-center justify-center w-[72px] h-[72px] rounded-2xl bg-background border border-border shadow-lg">
             <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-muted/80">
-              <Lock className="h-5 w-5 text-foreground/70" strokeWidth={1.8} />
+              {isDisabled ? (
+                <PowerOff
+                  className="h-5 w-5 text-muted-foreground"
+                  strokeWidth={1.8}
+                />
+              ) : (
+                <Lock
+                  className="h-5 w-5 text-foreground/70"
+                  strokeWidth={1.8}
+                />
+              )}
             </div>
           </div>
         </div>
 
         {/* Badge */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/60 border border-border/50 mb-5">
-          <Sparkles className="h-3 w-3 text-muted-foreground" />
-          <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
-            Premium Feature
-          </span>
+          {isDisabled ? (
+            <>
+              <PowerOff className="h-3 w-3 text-amber-500" />
+              <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
+                Module Disabled
+              </span>
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[11px] font-medium tracking-wider uppercase text-muted-foreground">
+                Premium Feature
+              </span>
+            </>
+          )}
         </div>
 
         {/* Content */}
         <div className="space-y-2.5 mb-8">
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
-            Unlock{" "}
-            {moduleKey.charAt(0).toUpperCase() +
-              moduleKey.slice(1).toLowerCase()}
+            {isDisabled ? `${displayName} is Disabled` : `Unlock ${displayName}`}
           </h2>
-          <p className="text-muted-foreground text-sm leading-relaxed max-w-[320px] mx-auto">
-            This module requires an upgraded subscription. Upgrade your plan to
-            access powerful{" "}
-            <span className="font-medium text-foreground/80 capitalize">
-              {moduleKey.toLowerCase()}
-            </span>{" "}
-            capabilities and elevate your workflow.
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-[340px] mx-auto">
+            {isDisabled
+              ? `${displayName} is included in your active plan, but is currently turned off in your organization settings. Enable it to start using ${displayName.toLowerCase()} features.`
+              : `This module requires an upgraded subscription. Upgrade your plan to access powerful ${displayName.toLowerCase()} capabilities and elevate your workflow.`}
           </p>
         </div>
 
         {/* Feature hints */}
         <div className="flex items-center gap-6 mb-8 text-muted-foreground/60">
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
-            <span className="text-xs">Full Access</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
-            <span className="text-xs">Analytics</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
-            <span className="text-xs">Integrations</span>
-          </div>
+          {isDisabled ? (
+            <>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500/70" />
+                <span className="text-xs">Included in Plan</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                <span className="text-xs">Easy Setup</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                <span className="text-xs">Instant Activation</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                <span className="text-xs">Full Access</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                <span className="text-xs">Analytics</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                <span className="text-xs">Integrations</span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* CTA */}
         <div className="flex flex-col gap-2.5 w-full max-w-[260px]">
-          <Link href="/settings/subscription" className="w-full">
-            <Button
-              className="w-full gap-2 h-10 text-sm font-medium shadow-md hover:shadow-lg transition-shadow"
-              size="sm"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              Upgrade Plan
-              <ArrowUpRight className="h-3.5 w-3.5 ml-auto" />
-            </Button>
-          </Link>
+          {isDisabled ? (
+            <Link href="/settings/modules" className="w-full">
+              <Button
+                className="w-full gap-2 h-10 text-sm font-medium shadow-md hover:shadow-lg transition-shadow"
+                size="sm"
+              >
+                <Sliders className="h-3.5 w-3.5" />
+                Enable in Settings
+                <ArrowUpRight className="h-3.5 w-3.5 ml-auto" />
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/settings/subscription" className="w-full">
+              <Button
+                className="w-full gap-2 h-10 text-sm font-medium shadow-md hover:shadow-lg transition-shadow"
+                size="sm"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Upgrade Plan
+                <ArrowUpRight className="h-3.5 w-3.5 ml-auto" />
+              </Button>
+            </Link>
+          )}
           <Link href="/" className="w-full">
             <Button
               variant="ghost"
