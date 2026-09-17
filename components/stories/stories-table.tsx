@@ -54,11 +54,6 @@ export function StoriesTable({
   const someSelected =
     stories.some((s) => selectedIds.includes(s.id)) && !allSelected;
 
-  const handleCopyId = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(id);
-    toast.success("Story ID copied to clipboard");
-  };
 
   const columns = [
     ...(onToggleSelect
@@ -201,13 +196,6 @@ export function StoriesTable({
               >
                 <Eye className="h-3.5 w-3.5 mr-2 text-indigo-500" />
                 Inspect Story
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => handleCopyId(story.id, e)}
-                className="text-xs font-medium cursor-pointer"
-              >
-                <Copy className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                Copy ID
               </DropdownMenuItem>
               {onDeleteStory && (
                 <>

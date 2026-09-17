@@ -5,7 +5,6 @@ import {
   MoreHorizontal,
   Eye,
   Trash2,
-  Copy,
   Clock,
   Radio,
   Calendar,
@@ -54,11 +53,6 @@ export function StoryCard({
     "Unknown User";
 
 
-  const handleCopyId = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(story.id);
-    toast.success("Story ID copied to clipboard");
-  };
 
   const imageUrl = getMediaUrl(story.image);
   const avatarUrl = getMediaUrl(author?.avatar);
@@ -116,13 +110,6 @@ export function StoryCard({
               >
                 <Eye className="h-3.5 w-3.5 mr-2 text-indigo-500" />
                 Inspect Story
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleCopyId}
-                className="text-xs font-medium cursor-pointer"
-              >
-                <Copy className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                Copy Story ID
               </DropdownMenuItem>
               {onDeleteStory && (
                 <>
