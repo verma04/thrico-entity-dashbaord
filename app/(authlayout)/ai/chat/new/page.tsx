@@ -13,6 +13,12 @@ import {
   ArrowUpRight,
   Loader2,
   PanelLeft,
+  BarChart3,
+  CheckSquare,
+  Briefcase,
+  Search,
+  LifeBuoy,
+  Rocket,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -101,39 +107,60 @@ export default function NewAIChatPage() {
 
   const aiQuickActions = [
     {
+      label: "Search Members",
+      desc: "Find members, profile details, activity & stats",
+      message: "Search active community members",
+      icon: Users,
+      badge: "Member Agent",
+    },
+    {
       label: "Platform Analytics",
       desc: "Dashboard analytics overview for the last 30 days",
       message: "Show me dashboard analytics overview for the last 30 days",
+      icon: BarChart3,
+      badge: "Analytics Agent",
     },
     {
       label: "Create Community Poll",
-      desc: "Create and publish a poll for the community",
+      desc: "Create and publish an interactive poll for the community",
       message: "Create a poll for the community",
-    },
-    {
-      label: "Launch CSAT Survey",
-      desc: "Customer satisfaction CSAT survey from template",
-      message: "Create a customer satisfaction CSAT survey from template",
+      icon: CheckSquare,
+      badge: "Surveys Agent",
     },
     {
       label: "Manage Communities",
       desc: "Show active communities and member clusters",
       message: "Show my communities",
+      icon: Compass,
+      badge: "Community Agent",
     },
     {
       label: "Post a Job",
       desc: "Publish a new job opening in the community",
       message: "Post a job opening in the community",
+      icon: Briefcase,
+      badge: "Jobs Agent",
+    },
+    {
+      label: "Network & Talent Search",
+      desc: "Find founders, skills, live docs, or internet search",
+      message: "Search network for talent and founders",
+      icon: Search,
+      badge: "Search Agent",
     },
     {
       label: "Support Tickets",
-      desc: "Check and inspect open support tickets",
+      desc: "Check, inspect, or create support tickets",
       message: "Check my support tickets",
+      icon: LifeBuoy,
+      badge: "Support Agent",
     },
     {
       label: "Member Onboarding",
       desc: "Step-by-step guidance on member onboarding",
       message: "Guide me on member onboarding",
+      icon: Rocket,
+      badge: "Onboarding Agent",
     },
   ];
 
@@ -197,14 +224,14 @@ export default function NewAIChatPage() {
                   </span>
                 </div>
 
-                <div className="space-y-1.5 max-w-md">
+                <div className="space-y-1.5 max-w-lg">
                   <h2 className="text-base font-bold text-foreground">
                     What can Thrico AI Copilot help you with?
                   </h2>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Query live community data, launch surveys & polls, audit
-                    content safety, or manage jobs and tickets through
-                    autonomous agent tooling.
+                    Query member profiles, search talent graphs, launch surveys & polls,
+                    monitor platform analytics, or manage jobs and tickets through
+                    8 autonomous specialized agents.
                   </p>
                 </div>
 
@@ -219,25 +246,36 @@ export default function NewAIChatPage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
-                    {aiQuickActions.map((item, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleSend(item.message)}
-                        className="group flex items-center justify-between p-3 rounded-xl border border-border/70 bg-card hover:bg-muted/40 hover:border-border hover:shadow-2xs transition-all cursor-pointer text-left gap-2"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <strong className="text-xs font-semibold text-foreground block truncate">
-                            {item.label}
-                          </strong>
-                          <span className="text-[11px] text-muted-foreground leading-tight line-clamp-1 mt-0.5">
-                            {item.desc}
-                          </span>
-                        </div>
-                        <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+                    {aiQuickActions.map((item, idx) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSend(item.message)}
+                          className="group flex items-center justify-between p-3 rounded-xl border border-border/70 bg-card hover:bg-muted/40 hover:border-border hover:shadow-2xs transition-all cursor-pointer text-left gap-2.5"
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border/60 flex items-center justify-center text-muted-foreground group-hover:text-foreground group-hover:bg-background transition-colors shrink-0">
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <strong className="text-xs font-semibold text-foreground block truncate">
+                                {item.label}
+                              </strong>
+                              <span className="text-[9px] font-medium text-muted-foreground/70 bg-muted/80 px-1.5 py-0.5 rounded shrink-0">
+                                {item.badge}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-muted-foreground leading-tight line-clamp-1 mt-0.5">
+                              {item.desc}
+                            </span>
+                          </div>
+                          <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
