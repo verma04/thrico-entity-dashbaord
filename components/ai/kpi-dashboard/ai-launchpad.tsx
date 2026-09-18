@@ -70,7 +70,7 @@ export function AILaunchpad({ onOpenCopilot, onOpenTopup }: AILaunchpadProps) {
         </div>
         <div>
           <h3 className="text-sm font-bold text-foreground">
-            6. Quick Launchpad & Copilot Console
+            3. Quick Launchpad & Copilot Console
           </h3>
           <p className="text-[11px] text-muted-foreground">
             Direct access to conversational Copilot, agent builders, and quota controls

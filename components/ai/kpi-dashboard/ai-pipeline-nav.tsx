@@ -5,18 +5,12 @@ import { cn } from "@/lib/utils";
 import {
   ShieldCheck,
   BarChart3,
-  TrendingUp,
-  Bot,
-  Link2,
   Zap,
 } from "lucide-react";
 
 const aiStages = [
   { key: "health", label: "Health & Latency", icon: ShieldCheck, color: "from-emerald-500 to-teal-500" },
   { key: "quota", label: "Token Quota", icon: BarChart3, color: "from-blue-500 to-indigo-500" },
-  { key: "performance", label: "Performance", icon: TrendingUp, color: "from-indigo-500 to-violet-500" },
-  { key: "agents", label: "Super Agents", icon: Bot, color: "from-violet-500 to-purple-500" },
-  { key: "connectors", label: "MCP & Models", icon: Link2, color: "from-purple-500 to-pink-500" },
   { key: "launchpad", label: "Quick Launchpad", icon: Zap, color: "from-pink-500 to-rose-500" },
 ];
 

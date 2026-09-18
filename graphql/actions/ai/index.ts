@@ -44,9 +44,37 @@ export const LIST_AI_SESSIONS = gql`
     listAiSessions {
       sessionId
       title
+      lastMessage
+      messageCount
+      createdAt
+      updatedAt
     }
   }
 `;
+
+export const GET_AI_SESSION = gql`
+  query GetAiSession($sessionId: ID!) {
+    getAiSession(sessionId: $sessionId) {
+      sessionId
+      title
+      createdAt
+      updatedAt
+      messages {
+        id
+        role
+        content
+        widgets
+        actions {
+          label
+          payload
+        }
+        createdAt
+      }
+    }
+  }
+`;
+
+
 
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
@@ -102,10 +130,20 @@ export const useGetMyActiveAdapter = () =>
   });
 
 export const useListAiSessions = () =>
-  useQuery(LIST_AI_SESSIONS, {
+  useQuery<{ listAiSessions: AiSessionSummary[] }>(LIST_AI_SESSIONS, {
     fetchPolicy: "cache-and-network",
     errorPolicy: "all",
   });
+
+export const useGetAiSession = (sessionId?: string, options?: any) =>
+  useQuery<{ getAiSession: AiSessionDetail | null }>(GET_AI_SESSION, {
+    variables: { sessionId },
+    skip: !sessionId,
+    fetchPolicy: "cache-and-network",
+    errorPolicy: "all",
+    ...options,
+  });
+
 
 export const useBuyAiTopup = (options?: any) =>
   useMutation(BUY_AI_TOPUP, {
@@ -317,4 +355,94 @@ export type {
   AiModerationSettings,
   AiModerationDashboard,
 } from "../../moderation/types";
+
+// ─── AI Chat Session & Widget Types ─────────────────────────────────────────
+
+export interface AiChatMessage {
+  id: string;
+  role: "human" | "ai" | "system" | "user" | "assistant";
+  content: string;
+  widgets?: AgentWidget[];
+  actions?: AgentAction[];
+  createdAt: string;
+}
+
+export interface AiSessionDetail {
+  sessionId: string;
+  title: string | null;
+  messages: AiChatMessage[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AiSessionSummary {
+  sessionId: string;
+  title: string | null;
+  lastMessage?: string | null;
+  messageCount: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AgentAction {
+  label: string;
+  payload: {
+    message: string;
+    [key: string]: any;
+  };
+}
+
+export type AgentWidget =
+  | {
+      type: "community-card";
+      communityId: string;
+      name: string;
+      description: string;
+      memberCount: number;
+    }
+  | {
+      type: "job-card";
+      jobId: string;
+      title: string;
+      company: string;
+      location: string;
+    }
+  | {
+      type: "table";
+      entityType: "community" | "job" | "analytics";
+      columns: string[];
+      rows: Record<string, any>[];
+    }
+  | {
+      type: "form";
+      id: string;
+      title: string;
+      fields: Array<{
+        name: string;
+        label: string;
+        type: string;
+        required?: boolean;
+      }>;
+    }
+  | {
+      type: "metric-card";
+      title: string;
+      value: string | number;
+      change?: string;
+      trend?: "up" | "down" | "neutral";
+    }
+  | {
+      type: "funnel-chart";
+      title: string;
+      steps: Array<{ name: string; count: number; conversionRate: number }>;
+    }
+  | {
+      type: "customer-360-card";
+      userId: string;
+      healthScore: number;
+      rfmSegment: string;
+      totalSpend: number;
+      lastActive: string;
+    };
+
 

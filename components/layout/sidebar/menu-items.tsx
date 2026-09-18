@@ -137,10 +137,10 @@ export const aiStudioItems = [
     icon: <LayoutDashboard size={18} />,
   },
   {
-    key: "ai-agents",
-    label: "Agents",
-    path: "/ai/agents",
-    icon: <Bot size={18} />,
+    key: "ai-chat-studio",
+    label: "Chat",
+    path: "/ai/chat",
+    icon: <MessageSquare size={18} />,
   },
   {
     key: "ai-moderation",
@@ -216,25 +216,16 @@ export const aiSuperAgentsItems = [
 
 export const aiChatItems = [
   {
-    key: "ai-recent-chats",
-    label: "Recent Chats",
-    path: "/ai/chat/recent",
-    icon: <Clock size={18} />,
-    badge: "Beta",
-  },
-  {
-    key: "ai-all-chats",
-    label: "All Chats",
-    path: "/ai/chat/all",
-    icon: <List size={18} />,
-    badge: "Beta",
+    key: "ai-all-conversations",
+    label: "All Conversations",
+    path: "/ai/chat",
+    icon: <MessageSquare size={18} />,
   },
   {
     key: "ai-new-conversation",
     label: "New Conversation",
     path: "/ai/chat/new",
     icon: <Plus size={18} />,
-    badge: "Beta",
   },
 ];
 

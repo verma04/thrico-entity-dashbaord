@@ -411,7 +411,7 @@ export function DateRangePicker({
     setIsOpen(false);
   };
 
-  const handleClear = (e: React.MouseEvent) => {
+  const handleClear = (e: React.MouseEvent | React.KeyboardEvent | React.SyntheticEvent) => {
     e.stopPropagation();
     onDateChange?.(undefined);
     setTempDate(undefined);
@@ -508,16 +508,25 @@ export function DateRangePicker({
 
               <AnimatePresence>
                 {date && (
-                  <motion.button
+                  <motion.span
                     key="clear"
+                    role="button"
+                    tabIndex={0}
                     initial={{ opacity: 0, scale: 0.6 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.6 }}
                     onClick={handleClear}
-                    className="h-5 w-5 flex items-center justify-center rounded-md hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleClear(e);
+                      }
+                    }}
+                    className="h-5 w-5 flex items-center justify-center rounded-md hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     <X className="h-3 w-3" />
-                  </motion.button>
+                  </motion.span>
                 )}
               </AnimatePresence>
 

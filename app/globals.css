@@ -294,3 +294,46 @@ div[class*="razorpay"] {
   --tc-input: 217.2 32.6% 17.5%;
   --tc-ring: 224.3 76.3% 48%;
 }
+
+/* ─── June 2026 shadcn Chat Primitives Utilities ────────────────────────────── */
+
+@keyframes chat-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    currentColor 0%,
+    var(--color-muted-foreground, #71717a) 50%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: chat-shimmer 2.2s infinite linear;
+}
+
+.scroll-fade {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 16px,
+    black calc(100% - 16px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 16px,
+    black calc(100% - 16px),
+    transparent 100%
+  );
+}
+

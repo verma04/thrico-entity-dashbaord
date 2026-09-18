@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { LayoutDashboard, ShieldAlert, Bot, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, ShieldAlert, Bot, BarChart3, Settings, MessageSquare } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 function AILayout({ children }: { children: React.ReactNode }) {
@@ -13,9 +13,9 @@ function AILayout({ children }: { children: React.ReactNode }) {
         icon: <LayoutDashboard className="h-4 w-4" />,
       },
       {
-        key: "agents",
-        label: "Agents",
-        icon: <Bot className="h-4 w-4" />,
+        key: "chat",
+        label: "Chat",
+        icon: <MessageSquare className="h-4 w-4" />,
       },
       {
         key: "moderation",

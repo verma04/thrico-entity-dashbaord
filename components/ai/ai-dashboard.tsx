@@ -5,7 +5,6 @@ import { AlertTriangle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   useGetAiWalletOverview,
-  useGetMyActiveAdapter,
 } from "@/graphql/actions/ai";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import {
@@ -13,9 +12,6 @@ import {
   AIPipelineNav,
   AIHealthTelemetry,
   AIQuotaCapacity,
-  AIPerformanceActivity,
-  AIAgentsDirectory,
-  AIConnectorsHealth,
   AILaunchpad,
 } from "./kpi-dashboard";
 import { AICopilotModal } from "./ai-copilot-modal";
@@ -39,23 +35,16 @@ export default function AIDashboard({ dateRange, timeRange }: AIDashboardProps) 
     refetch: refetchWallet,
   } = useGetAiWalletOverview();
 
-  const {
-    data: adapterData,
-    loading: adapterLoading,
-    refetch: refetchAdapter,
-  } = useGetMyActiveAdapter();
-
   // Listen to refresh events from page header
   useEffect(() => {
     const handleRefreshEvent = () => {
       refetchWallet();
-      refetchAdapter();
     };
     window.addEventListener("refresh-ai-dashboard", handleRefreshEvent);
     return () => {
       window.removeEventListener("refresh-ai-dashboard", handleRefreshEvent);
     };
-  }, [refetchWallet, refetchAdapter]);
+  }, [refetchWallet]);
 
   const scrollToSection = (key: string) => {
     setActiveSection(key);
@@ -77,7 +66,7 @@ export default function AIDashboard({ dateRange, timeRange }: AIDashboardProps) 
   };
 
   const usagePercent = quota.usagePercent ?? 0;
-  const loading = walletLoading || adapterLoading;
+  const loading = walletLoading;
   const totalInvocations = quota.totalUsed || 0;
 
   return (
@@ -129,22 +118,7 @@ export default function AIDashboard({ dateRange, timeRange }: AIDashboardProps) 
         onManagePlan={() => setShowBuyPlanDialog(true)}
       />
 
-      {/* 3. Performance & Workload Distribution */}
-      <AIPerformanceActivity loading={loading} />
-
-      {/* 4. Super Agents Directory */}
-      <AIAgentsDirectory
-        loading={loading}
-        onOpenCopilot={handleOpenCopilot}
-      />
-
-      {/* 5. Infrastructure & Connectors */}
-      <AIConnectorsHealth
-        loading={loading}
-        adapter={adapterData?.getMyActiveAdapter}
-      />
-
-      {/* 6. Quick Launchpad */}
+      {/* 3. Quick Launchpad */}
       <AILaunchpad
         onOpenCopilot={handleOpenCopilot}
         onOpenTopup={() => setShowTopupModal(true)}

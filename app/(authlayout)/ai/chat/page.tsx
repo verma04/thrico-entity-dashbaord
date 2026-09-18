@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AIAgentsRedirectPage() {
+export default function AIChatRootPage() {
   const router = useRouter();
 
   useEffect(() => {
