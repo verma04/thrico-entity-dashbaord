@@ -78,12 +78,12 @@ const postSchema = Yup.object().shape({
   postType: Yup.string().oneOf(["general", "poll"]),
   description: Yup.string().when("postType", {
     is: "poll",
-    then: () => Yup.string().optional().max(2000, "Post content cannot exceed 2000 characters"),
+    then: () => Yup.string().optional().max(3000, "Post content cannot exceed 3000 characters"),
     otherwise: () =>
       Yup.string()
         .required("Please enter post content")
         .min(2, "Post content must be at least 2 characters")
-        .max(2000, "Post content cannot exceed 2000 characters"),
+        .max(3000, "Post content cannot exceed 3000 characters"),
   }),
   source: Yup.string().optional(),
   privacy: Yup.string().optional(),
@@ -591,12 +591,12 @@ export function PostCreationForm({
                     <span
                       className={cn(
                         "text-[11px] font-mono",
-                        charCount > 1800
+                        charCount > 2700
                           ? "text-amber-600 font-bold"
                           : "text-[#616161]",
                       )}
                     >
-                      {charCount} / 2000
+                      {charCount} / 3000
                     </span>
                   }
                 />
