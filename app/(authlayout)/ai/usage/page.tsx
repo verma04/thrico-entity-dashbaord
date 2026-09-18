@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import {
   BarChart3,
   Coins,
@@ -13,6 +13,7 @@ import {
   Zap,
   Layers,
   Cpu,
+  AlertCircle,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -37,13 +38,18 @@ function AIUsageContent() {
   const initialModule = searchParams.get("module") || undefined;
   const initialAction = searchParams.get("action") || undefined;
   const urlTab = searchParams.get("tab");
+  const isInsufficientBalanceParam =
+    searchParams.get("insufficient_balance") === "true";
 
   const [activeTab, setActiveTab] = useState<string>(
-    urlTab === "topups" || urlTab === "quota" ? urlTab : "ledger"
+    urlTab === "topups" || urlTab === "quota" || isInsufficientBalanceParam
+      ? "topups"
+      : "ledger"
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [showTopupModal, setShowTopupModal] = useState(false);
+  const [hasAutoOpenedModal, setHasAutoOpenedModal] = useState(false);
   const { setShowBuyPlanDialog } = useSubscriptionStore();
 
   const {
@@ -57,6 +63,14 @@ function AIUsageContent() {
     loading: historyLoading,
     refetch: refetchHistory,
   } = useGetAiBillingHistory();
+
+  // Automatically trigger top-up modal if redirected from chat due to zero balance
+  useEffect(() => {
+    if (isInsufficientBalanceParam && !hasAutoOpenedModal) {
+      setShowTopupModal(true);
+      setHasAutoOpenedModal(true);
+    }
+  }, [isInsufficientBalanceParam, hasAutoOpenedModal]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -104,7 +118,7 @@ function AIUsageContent() {
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all cursor-pointer"
               onClick={handleRefresh}
               disabled={isRefreshing}
               title="Refresh All AI Metrics"
@@ -118,7 +132,7 @@ function AIUsageContent() {
               variant="outline"
               size="sm"
               onClick={() => setShowBuyPlanDialog(true)}
-              className="h-9 rounded-lg text-xs gap-1.5 font-medium border-border"
+              className="h-9 rounded-lg text-xs gap-1.5 font-medium border-border cursor-pointer"
             >
               <Zap className="h-3.5 w-3.5 text-amber-500" />
               Manage Tier
@@ -126,7 +140,7 @@ function AIUsageContent() {
             <Button
               size="sm"
               onClick={() => setShowTopupModal(true)}
-              className="h-9 rounded-lg gap-2 text-xs font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900"
+              className="h-9 rounded-lg gap-2 text-xs font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Credits
@@ -136,6 +150,36 @@ function AIUsageContent() {
       />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+        {/* ─── Zero Balance Notification Banner ─── */}
+        {(isInsufficientBalanceParam || (!loading && balance <= 0)) && (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-950 dark:text-amber-200 animate-in fade-in duration-300">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-foreground">
+                  AI Chat Copilot Access Paused
+                </h4>
+                <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                  Your token balance is currently{" "}
+                  <span className="font-semibold text-foreground">0 tokens</span>.
+                  AI Chat Copilot requires available compute tokens. Add credits below to restore immediate access.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <Button
+                size="sm"
+                onClick={() => setShowTopupModal(true)}
+                className="h-8 text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-lg gap-1.5 shadow-2xs cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Credits Now
+              </Button>
+            </div>
+          </div>
+        )}
         {/* ─── 4 Top Usage Metric Cards ────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Card className="border-border/60 bg-card shadow-2xs">

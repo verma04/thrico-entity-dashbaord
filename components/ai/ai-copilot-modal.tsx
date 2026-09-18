@@ -9,8 +9,10 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Send, Bot, User, Loader2, RotateCcw, AlertCircle } from "lucide-react";
-import { useAiAnalyticsChat } from "@/graphql/actions/ai";
+import { Sparkles, Send, Bot, User, Loader2, RotateCcw, AlertCircle, Coins } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useAiAnalyticsChat, useGetAiWalletOverview } from "@/graphql/actions/ai";
 import { cn } from "@/lib/utils";
 
 interface AICopilotModalProps {
@@ -32,10 +34,15 @@ export function AICopilotModal({
   onOpenChange,
   initialPrompt = "",
 }: AICopilotModalProps) {
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(initialPrompt);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: walletData } = useGetAiWalletOverview();
+  const balance = walletData?.getAiWalletOverview?.quota?.balance;
+  const isZeroBalance = balance !== undefined && balance <= 0;
 
   const { sendMessage, loading } = useAiAnalyticsChat();
 
@@ -56,6 +63,16 @@ export function AICopilotModal({
   const handleSend = async (textToSend?: string) => {
     const text = (textToSend ?? input).trim();
     if (!text || loading) return;
+
+    if (isZeroBalance) {
+      toast.error(
+        "AI Copilot is unavailable. Your token balance is 0. Please top up tokens in AI Usage.",
+        { id: "zero-ai-balance" }
+      );
+      router.push("/ai/usage?insufficient_balance=true");
+      onOpenChange(false);
+      return;
+    }
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -115,44 +132,49 @@ export function AICopilotModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl sm:max-w-2xl h-[85vh] max-h-[700px] flex flex-col p-0 overflow-hidden gap-0">
-        <DialogHeader className="px-5 py-4 border-b border-border bg-muted/20 flex flex-row items-center justify-between">
+      <DialogContent className="max-w-2xl h-[600px] flex flex-col p-0 gap-0 rounded-2xl overflow-hidden border border-border shadow-2xl">
+        <DialogHeader className="p-4 border-b border-border bg-card flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+            <div className="h-8 w-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-500/20">
               <Sparkles className="h-4 w-4" />
             </div>
             <div>
-              <DialogTitle className="text-sm font-bold text-foreground">
-                Thrico AI Copilot
+              <DialogTitle className="text-sm font-bold flex items-center gap-2">
+                <span>Autonomous AI Copilot</span>
+                <span className="text-[10px] font-medium bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  Ready
+                </span>
               </DialogTitle>
-              <DialogDescription className="text-[11px] text-muted-foreground">
-                Autonomous intelligence assistant and prompt orchestration
+              <DialogDescription className="text-xs text-muted-foreground">
+                Ask analytical questions, trigger moderation, or issue autonomous actions
               </DialogDescription>
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="h-7 text-xs text-muted-foreground hover:text-foreground gap-1 mr-6"
-          >
-            <RotateCcw className="h-3 w-3" />
-            Reset
-          </Button>
+          <div className="flex items-center gap-1.5 mr-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleReset}
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              title="Reset conversation"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* Chat Stream Body */}
-        <div ref={scrollRef} className="flex-1 p-5 overflow-y-auto space-y-4 min-h-0 bg-background">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/10">
           {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4 my-auto">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shadow-sm">
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
+              <div className="h-12 w-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 border border-indigo-100 dark:border-indigo-900">
                 <Bot className="h-6 w-6" />
               </div>
-              <div>
-                <h4 className="text-sm font-bold text-foreground">How can Copilot assist you?</h4>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Query engagement trends, audit moderation reports, create surveys, or trigger workflows.
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-foreground">How can I assist your operations?</h4>
+                <p className="text-[11px] text-muted-foreground max-w-sm">
+                  Try asking: &quot;Show me community health&quot;, &quot;Run batch moderation&quot;, or &quot;Who are high-churn members?&quot;
                 </p>
               </div>
 
@@ -180,10 +202,10 @@ export function AICopilotModal({
               >
                 <div
                   className={cn(
-                    "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 border text-xs",
+                    "h-7 w-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-semibold",
                     msg.role === "user"
-                      ? "bg-foreground text-background border-foreground"
-                      : "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800"
+                      ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900"
+                      : "bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
                   )}
                 >
                   {msg.role === "user" ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
@@ -194,7 +216,7 @@ export function AICopilotModal({
                     "p-3.5 rounded-2xl space-y-2",
                     msg.role === "user"
                       ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-tr-xs"
-                      : "bg-muted/50 border border-border/70 text-foreground rounded-tl-xs"
+                      : "bg-card border border-border text-foreground rounded-tl-xs shadow-xs"
                   )}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -204,7 +226,8 @@ export function AICopilotModal({
                       {msg.actions.map((act, idx) => (
                         <span
                           key={idx}
-                          className="text-[10px] font-medium px-2 py-0.5 rounded bg-background border border-border text-foreground"
+                          onClick={() => handleSend(act.payload?.message || act.label)}
+                          className="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 cursor-pointer transition-colors"
                         >
                           {act.label}
                         </span>
@@ -232,31 +255,52 @@ export function AICopilotModal({
 
         {/* Input Footer */}
         <div className="p-3 border-t border-border bg-card">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="flex items-center gap-2"
-          >
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Copilot a question or issue an instruction..."
-              disabled={loading}
-              className="flex-1 bg-muted/40 rounded-xl px-3.5 py-2.5 text-xs outline-none border border-border/80 focus:border-indigo-500 focus:bg-background transition-all placeholder:text-muted-foreground"
-            />
-            <Button
-              type="submit"
-              disabled={!input.trim() || loading}
-              size="sm"
-              className="h-9 px-4 text-xs font-semibold gap-1.5 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 rounded-xl"
+          {isZeroBalance ? (
+            <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                <Coins className="h-4 w-4 shrink-0" />
+                <span className="text-[11px] font-medium">
+                  AI token balance is 0. Top up to interact with Copilot.
+                </span>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => {
+                  onOpenChange(false);
+                  router.push("/ai/usage?insufficient_balance=true");
+                }}
+                className="h-7 px-2.5 text-[11px] font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-lg cursor-pointer"
+              >
+                Top Up
+              </Button>
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+              className="flex items-center gap-2"
             >
-              <span>Send</span>
-              <Send className="h-3.5 w-3.5" />
-            </Button>
-          </form>
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask Copilot a question or issue an instruction..."
+                disabled={loading}
+                className="flex-1 bg-muted/40 rounded-xl px-3.5 py-2.5 text-xs outline-none border border-border/80 focus:border-indigo-500 focus:bg-background transition-all placeholder:text-muted-foreground"
+              />
+              <Button
+                type="submit"
+                disabled={!input.trim() || loading}
+                size="sm"
+                className="h-9 px-4 text-xs font-semibold gap-1.5 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 rounded-xl cursor-pointer"
+              >
+                <span>Send</span>
+                <Send className="h-3.5 w-3.5" />
+              </Button>
+            </form>
+          )}
         </div>
       </DialogContent>
     </Dialog>

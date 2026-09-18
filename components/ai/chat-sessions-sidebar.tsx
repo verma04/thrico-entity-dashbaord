@@ -16,9 +16,11 @@ import {
   X,
   Sparkles,
   Calendar,
+  Coins,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +45,7 @@ import {
 import {
   useListAiSessions,
   useClearAiSession,
+  useGetAiWalletOverview,
   AiSessionSummary,
 } from "@/graphql/actions/ai";
 import { cn } from "@/lib/utils";
@@ -142,6 +145,9 @@ export function ChatSessionsSidebar({
     refetch: refetchSessions,
   } = useListAiSessions();
 
+  const { data: walletData } = useGetAiWalletOverview();
+  const balance = walletData?.getAiWalletOverview?.quota?.balance;
+
   const [clearAiSessionMutation] = useClearAiSession();
 
   const sessions: AiSessionSummary[] = sessionsData?.listAiSessions || [];
@@ -163,25 +169,41 @@ export function ChatSessionsSidebar({
     return groupSessionsByDate(filteredSessions);
   }, [filteredSessions]);
 
+  const handleSelectSession = (sessionId: string) => {
+    if (balance !== undefined && balance <= 0) {
+      toast.error(
+        "AI Chat is unavailable. Your token balance is 0. Please top up tokens in Usage & Billing.",
+        { id: "zero-ai-balance" }
+      );
+      router.push("/ai/usage?insufficient_balance=true");
+      return;
+    }
+    router.push(`/ai/chat/${sessionId}`);
+  };
+
+  const handleNewChat = () => {
+    if (balance !== undefined && balance <= 0) {
+      toast.error(
+        "AI Chat is unavailable. Your token balance is 0. Please top up tokens in Usage & Billing.",
+        { id: "zero-ai-balance" }
+      );
+      router.push("/ai/usage?insufficient_balance=true");
+      return;
+    }
+    router.push("/ai/chat/new");
+  };
+
   // Keyboard shortcut ⌘N / Ctrl+N to trigger new chat
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "n") {
         e.preventDefault();
-        router.push("/ai/chat/new");
+        handleNewChat();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
-
-  const handleSelectSession = (sessionId: string) => {
-    router.push(`/ai/chat/${sessionId}`);
-  };
-
-  const handleNewChat = () => {
-    router.push("/ai/chat/new");
-  };
+  }, [balance, router]);
 
   const handleCopyId = (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
@@ -463,20 +485,23 @@ export function ChatSessionsSidebar({
 
         {/* Bottom Status Bar */}
         <div className="p-3 border-t border-border/70 bg-muted/20 text-[11px] text-muted-foreground flex items-center justify-between shrink-0">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-medium">Memory Synced</span>
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Coins className="h-3 w-3 text-indigo-500 shrink-0" />
+            <span className="text-[10px] font-medium truncate">
+              {balance !== undefined
+                ? `${balance.toLocaleString()} tokens`
+                : "Checking tokens…"}
+            </span>
+          </div>
 
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => refetchSessions()}
-            className="h-6 px-2 text-[10px] gap-1 hover:text-foreground cursor-pointer rounded-md"
-            title="Refresh session history"
+            onClick={() => router.push("/ai/usage")}
+            className="h-6 px-2 text-[10px] gap-1 hover:text-foreground cursor-pointer rounded-md shrink-0"
+            title="View AI compute balance and usage"
           >
-            <RotateCcw className="h-2.5 w-2.5" />
-            <span>Sync</span>
+            <span>Top up</span>
           </Button>
         </div>
       </aside>
