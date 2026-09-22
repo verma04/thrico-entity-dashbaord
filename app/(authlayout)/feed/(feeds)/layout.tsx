@@ -15,6 +15,7 @@ import {
   Pin,
   Upload,
   Plus,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
@@ -50,6 +51,14 @@ const TAB_CONFIG: Record<
       "Explore announcements, discussions, and updates across your entire community ecosystem.",
     badgeText: "Real-time Feed",
     icon: Globe,
+  },
+  communities: {
+    label: "Communities",
+    title: "Communities Feed",
+    description:
+      "Discussions, announcements, and posts happening across all ecosystem communities.",
+    badgeText: "Community Feed",
+    icon: Users,
   },
   pinned: {
     label: "Pinned",
@@ -121,6 +130,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
       count: feedData?.numberOfFeeds,
       icon: Globe,
     },
+    { key: "communities", label: "Communities", icon: Users },
     { key: "pinned", label: "Pinned", icon: Pin },
     { key: "admin", label: "Admin", icon: ShieldCheck },
     { key: "moments", label: "Moments", icon: Sparkles },

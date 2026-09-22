@@ -23,6 +23,24 @@ export interface FeedProps {
   isPinned?: boolean;
   pinnedAt?: string;
   isCommunityFeed?: boolean;
+  status?: string;
+  moderationStatus?: string;
+  community?: {
+    id: string;
+    title?: string;
+    cover?: string;
+    slug?: string;
+    description?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    isApproved?: boolean;
+    creator?: {
+      id?: string;
+      firstName?: string;
+      lastName?: string;
+      avatar?: string;
+    } | null;
+  } | null;
   media?: {
     url: string;
   }[];

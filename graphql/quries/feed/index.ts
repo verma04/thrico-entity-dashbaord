@@ -15,6 +15,24 @@ export const GET_ALL_FEED = gql`
       isLiked
       id
       description
+      status
+      moderationStatus
+      community {
+        id
+        title
+        cover
+        slug
+        description
+        createdAt
+        isApproved
+        updatedAt
+        creator {
+          id
+          firstName
+          lastName
+          avatar
+        }
+      }
       user {
         firstName
         avatar
@@ -115,11 +133,29 @@ export const GET_ALL_FEED = gql`
 `;
 
 export const GET_COMMUNITY_FEED = gql`
-  query GetCommunityFeeds($communityId: ID!, $status: String, $input: PaginationInput) {
+  query GetCommunityFeeds($communityId: ID, $status: String, $input: PaginationInput) {
     getCommunityFeeds(communityId: $communityId, status: $status, input: $input) {
       isLiked
       id
       description
+      status
+      moderationStatus
+      community {
+        id
+        title
+        cover
+        slug
+        description
+        createdAt
+        isApproved
+        updatedAt
+        creator {
+          id
+          firstName
+          lastName
+          avatar
+        }
+      }
       user {
         firstName
         avatar

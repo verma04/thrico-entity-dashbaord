@@ -27,6 +27,8 @@ import {
   Lock,
   Image as ImageIcon,
   Loader2,
+  Users,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +66,7 @@ export const feedTableColumns = [
   { key: "serial", header: "S.No" },
   { key: "author", header: "Author" },
   { key: "content", header: "Content" },
+  { key: "community", header: "Community" },
   { key: "type", header: "Type" },
   { key: "privacy", header: "Privacy" },
   { key: "reactions", header: "Likes" },
@@ -290,6 +293,41 @@ export function FeedTable({
       },
     },
     {
+      key: "community",
+      header: "Community",
+      cell: (row) => {
+        if (!row.community?.title) {
+          return <span className="text-xs text-muted-foreground/60">—</span>;
+        }
+        return (
+          <div className="flex flex-col gap-0.5 max-w-[170px]">
+            <div className="flex items-center gap-1">
+              <Badge
+                variant="outline"
+                className="text-[11px] font-medium bg-muted/50 truncate max-w-[150px]"
+                title={row.community.title}
+              >
+                {row.community.title}
+              </Badge>
+              {row.community.isApproved && (
+                <span title="Approved Community" className="inline-flex">
+                  <ShieldCheck className="h-3 w-3 text-emerald-500 shrink-0" />
+                </span>
+              )}
+            </div>
+            {row.community.creator && (
+              <span
+                className="text-[10px] text-muted-foreground truncate"
+                title={`Created by ${row.community.creator.firstName || ""} ${row.community.creator.lastName || ""}`}
+              >
+                by {row.community.creator.firstName} {row.community.creator.lastName}
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       key: "type",
       header: "Type",
       cell: (row) => {
@@ -330,6 +368,14 @@ export function FeedTable({
             <AdminTableTag variant="amber">
               <Sparkles className="h-2.5 w-2.5 mr-1" />
               Celebration
+            </AdminTableTag>
+          );
+        }
+        if (row.community) {
+          return (
+            <AdminTableTag variant="sky">
+              <Users className="h-2.5 w-2.5 mr-1" />
+              Community
             </AdminTableTag>
           );
         }

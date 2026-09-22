@@ -24,6 +24,7 @@ import {
   ShieldCheck,
   LucideIcon,
   Upload,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,6 +47,7 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { Pagination } from "@/components/shared/admin-table/admin-table";
 import {
   useAllFeed,
+  useCommunityFeeds,
   usePinnedFeed,
   useAdminFeed,
   useMomentsFeed,
@@ -141,6 +143,7 @@ function FeedSkeletonTable() {
 
 const TYPE_OPTIONS = [
   { value: "ALL", label: "All Types", icon: MessageSquare },
+  { value: "COMMUNITY", label: "Community", icon: Users },
   { value: "POST", label: "General Posts", icon: MessageSquare },
   { value: "POLL", label: "Polls", icon: BarChart2 },
   { value: "MOMENT", label: "Moments", icon: Play },
@@ -155,7 +158,7 @@ const PRIVACY_OPTIONS = [
   { value: "CONNECTIONS", label: "Connections", icon: Lock },
 ];
 
-export type FeedType = "all" | "pinned" | "admin" | "moments" | "jobs" | "listing";
+export type FeedType = "all" | "communities" | "pinned" | "admin" | "moments" | "jobs" | "listing";
 
 export interface FeedManageProps {
   feedType?: FeedType;
@@ -221,6 +224,7 @@ export function FeedManage({
     serial: true,
     author: true,
     content: true,
+    community: true,
     type: true,
     privacy: true,
     reactions: true,
@@ -243,6 +247,7 @@ export function FeedManage({
   const queryOptions = { variables, fetchPolicy: "cache-and-network" as const };
 
   const allQuery = useAllFeed({ ...queryOptions, skip: feedType !== "all" });
+  const communityQuery = useCommunityFeeds({ ...queryOptions, skip: feedType !== "communities" });
   const pinnedQuery = usePinnedFeed({ ...queryOptions, skip: feedType !== "pinned" });
   const adminQuery = useAdminFeed({ ...queryOptions, skip: feedType !== "admin" });
   const momentsQuery = useMomentsFeed({ ...queryOptions, skip: feedType !== "moments" });
@@ -251,6 +256,8 @@ export function FeedManage({
 
   const activeQueryResult = useMemo(() => {
     switch (feedType) {
+      case "communities":
+        return { data: communityQuery.data?.getCommunityFeeds, loading: communityQuery.loading, refetch: communityQuery.refetch };
       case "pinned":
         return { data: pinnedQuery.data?.getPinnedFeed, loading: pinnedQuery.loading, refetch: pinnedQuery.refetch };
       case "admin":
@@ -268,6 +275,7 @@ export function FeedManage({
   }, [
     feedType,
     allQuery.data, allQuery.loading, allQuery.refetch,
+    communityQuery.data, communityQuery.loading, communityQuery.refetch,
     pinnedQuery.data, pinnedQuery.loading, pinnedQuery.refetch,
     adminQuery.data, adminQuery.loading, adminQuery.refetch,
     momentsQuery.data, momentsQuery.loading, momentsQuery.refetch,
@@ -308,7 +316,8 @@ export function FeedManage({
     // Type Filter
     if (showTypeFilter && selectedType !== "ALL") {
       result = result.filter((item) => {
-        if (selectedType === "POST") return !item.poll && !item.moment && !item.job && !item.marketPlace && !item.celebration;
+        if (selectedType === "COMMUNITY") return !!item.community || !!item.isCommunityFeed;
+        if (selectedType === "POST") return !item.poll && !item.moment && !item.job && !item.marketPlace && !item.celebration && !item.community && !item.isCommunityFeed;
         if (selectedType === "POLL") return !!item.poll;
         if (selectedType === "MOMENT") return !!item.moment;
         if (selectedType === "JOB") return !!item.job || item.source === "jobs";
@@ -353,7 +362,9 @@ export function FeedManage({
   // Default placeholders and labels based on feedType
   const defaultPlaceholder =
     searchPlaceholder ||
-    (feedType === "pinned"
+    (feedType === "communities"
+      ? "Search community posts…"
+      : feedType === "pinned"
       ? "Search pinned posts…"
       : feedType === "admin"
       ? "Search admin posts…"
@@ -394,7 +405,9 @@ export function FeedManage({
       : "Start the conversation by sharing news, announcements, polls, or media with your ecosystem.");
 
   const EmptyIcon: LucideIcon =
-    feedType === "pinned"
+    feedType === "communities"
+      ? Users
+      : feedType === "pinned"
       ? Pin
       : feedType === "admin"
       ? ShieldCheck
@@ -407,7 +420,9 @@ export function FeedManage({
       : MessageSquarePlus;
 
   const typeLabel =
-    feedType === "pinned"
+    feedType === "communities"
+      ? "Community Posts"
+      : feedType === "pinned"
       ? "Pinned Posts"
       : feedType === "admin"
       ? "Admin Posts"

@@ -19,6 +19,7 @@ const FeedUserDetails: React.FC<FeedProps> = ({
   createdAt,
   privacy,
   addedBy,
+  community,
 }) => {
   const { data } = useGetEntity();
 
@@ -88,6 +89,20 @@ const FeedUserDetails: React.FC<FeedProps> = ({
               className="text-[10px] font-semibold px-1.5 py-0 h-4 bg-primary/10 text-primary border-primary/20 leading-none"
             >
               Official
+            </Badge>
+          )}
+
+          {community?.title && (
+            <Badge
+              variant="secondary"
+              className="text-[10px] font-medium px-1.5 py-0 h-4 bg-muted/80 text-muted-foreground border border-border/50 leading-none max-w-[160px] truncate"
+              title={
+                community.creator?.firstName
+                  ? `${community.title} • Created by ${community.creator.firstName} ${community.creator.lastName || ""}`
+                  : community.title
+              }
+            >
+              in {community.title}
             </Badge>
           )}
 
