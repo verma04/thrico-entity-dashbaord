@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
 import {
   ADD_COMMUNITY,
   CHANGE_DISCUSSION_COMMUNITY_STATUS,
@@ -105,6 +105,9 @@ export const getCreatedCommunities = (options: any) =>
 
 export const getCommunityById = (options: any) =>
   useQuery(GET_COMMUNITY_BY_ID, options);
+
+export const useLazyGetCommunityById = (options?: any) =>
+  useLazyQuery(GET_COMMUNITY_BY_ID, options);
 
 export const updateCommunity = (options: any) =>
   useMutation(UPDATE_COMMUNITY, {

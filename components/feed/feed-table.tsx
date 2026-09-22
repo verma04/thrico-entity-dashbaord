@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CommunityHoverCard } from "@/components/shared/community-hover-card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -300,30 +301,32 @@ export function FeedTable({
           return <span className="text-xs text-muted-foreground/60">—</span>;
         }
         return (
-          <div className="flex flex-col gap-0.5 max-w-[170px]">
-            <div className="flex items-center gap-1">
-              <Badge
-                variant="outline"
-                className="text-[11px] font-medium bg-muted/50 truncate max-w-[150px]"
-                title={row.community.title}
-              >
-                {row.community.title}
-              </Badge>
-              {row.community.isApproved && (
-                <span title="Approved Community" className="inline-flex">
-                  <ShieldCheck className="h-3 w-3 text-emerald-500 shrink-0" />
+          <CommunityHoverCard communityId={row.community.id} initialData={row.community}>
+            <div className="flex flex-col gap-0.5 max-w-[170px] group/comm">
+              <div className="flex items-center gap-1">
+                <Badge
+                  variant="outline"
+                  className="text-[11px] font-medium bg-muted/50 group-hover/comm:bg-muted group-hover/comm:border-primary/40 transition-colors truncate max-w-[150px]"
+                  title={row.community.title}
+                >
+                  {row.community.title}
+                </Badge>
+                {row.community.isApproved && (
+                  <span title="Approved Community" className="inline-flex">
+                    <ShieldCheck className="h-3 w-3 text-emerald-500 shrink-0" />
+                  </span>
+                )}
+              </div>
+              {row.community.creator && (
+                <span
+                  className="text-[10px] text-muted-foreground truncate"
+                  title={`Created by ${row.community.creator.firstName || ""} ${row.community.creator.lastName || ""}`}
+                >
+                  by {row.community.creator.firstName} {row.community.creator.lastName}
                 </span>
               )}
             </div>
-            {row.community.creator && (
-              <span
-                className="text-[10px] text-muted-foreground truncate"
-                title={`Created by ${row.community.creator.firstName || ""} ${row.community.creator.lastName || ""}`}
-              >
-                by {row.community.creator.firstName} {row.community.creator.lastName}
-              </span>
-            )}
-          </div>
+          </CommunityHoverCard>
         );
       },
     },

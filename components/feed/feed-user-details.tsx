@@ -13,6 +13,7 @@ import type { FeedProps } from "./types";
 import UserAvatar from "../layout/user-avatar";
 import { useGetEntity } from "@/graphql/actions";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { CommunityHoverCard } from "@/components/shared/community-hover-card";
 
 const FeedUserDetails: React.FC<FeedProps> = ({
   user,
@@ -93,17 +94,14 @@ const FeedUserDetails: React.FC<FeedProps> = ({
           )}
 
           {community?.title && (
-            <Badge
-              variant="secondary"
-              className="text-[10px] font-medium px-1.5 py-0 h-4 bg-muted/80 text-muted-foreground border border-border/50 leading-none max-w-[160px] truncate"
-              title={
-                community.creator?.firstName
-                  ? `${community.title} • Created by ${community.creator.firstName} ${community.creator.lastName || ""}`
-                  : community.title
-              }
-            >
-              in {community.title}
-            </Badge>
+            <CommunityHoverCard communityId={community.id} initialData={community}>
+              <Badge
+                variant="secondary"
+                className="text-[10px] font-medium px-1.5 py-0 h-4 bg-muted/80 hover:bg-muted text-muted-foreground border border-border/50 hover:border-primary/40 transition-colors leading-none max-w-[160px] truncate cursor-pointer"
+              >
+                in {community.title}
+              </Badge>
+            </CommunityHoverCard>
           )}
 
           <span className="text-muted-foreground/40 text-xs select-none">•</span>
