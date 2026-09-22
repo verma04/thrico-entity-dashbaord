@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Linkedin } from "lucide-react";
+import { Linkedin } from "@/components/ui/brand-icons";
 import { getMediaUrl } from "@/utils/utils";
 
 export interface TeamMember {

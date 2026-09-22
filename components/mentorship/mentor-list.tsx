@@ -23,12 +23,12 @@ import {
   XCircle,
   Clock,
   ExternalLink,
-  Linkedin,
   Globe,
   Mail,
   Award,
   Loader2,
 } from "lucide-react";
+import { Linkedin } from "@/components/ui/brand-icons";
 
 interface MentorListProps {
   onEdit: (mentor: Mentor | any) => void;

@@ -15,7 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Edit, Trash2, GripVertical, Award, Star, Globe, Linkedin, Twitter } from "lucide-react";
+import { Edit, Trash2, GripVertical, Award, Star, Globe } from "lucide-react";
+import { Linkedin, Twitter } from "@/components/ui/brand-icons";
 
 interface EntryListProps {
   onEdit: (entry: WallOfFameEntry) => void;

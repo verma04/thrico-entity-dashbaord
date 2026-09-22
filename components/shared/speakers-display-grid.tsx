@@ -1,6 +1,6 @@
 "use client";
 
-import { Linkedin } from "lucide-react";
+import { Linkedin } from "@/components/ui/brand-icons";
 import Image from "next/image";
 import { getMediaUrl } from "@/utils/utils";
 

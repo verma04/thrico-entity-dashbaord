@@ -10,9 +10,6 @@ import {
   Globe,
   Briefcase,
   Phone,
-  Twitter,
-  Linkedin,
-  Github,
   Link as LinkIcon,
   Network,
   Circle,
@@ -21,6 +18,7 @@ import {
   ChevronUp,
   History,
 } from "lucide-react";
+import { Twitter, Linkedin, Github } from "@/components/ui/brand-icons";
 import { UserStatusTimelineModal } from "../manage/user-status-timeline-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -468,7 +466,9 @@ export function UserInfoCard({ member }: { member: any }) {
         isOpen={showTimeline}
         onClose={() => setShowTimeline(false)}
         userId={user?.id || member?.id}
-        userName={`${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Member"}
+        userName={
+          `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Member"
+        }
         userEmail={user?.email}
         userAvatar={user?.avatar}
         currentStatus={member.status}

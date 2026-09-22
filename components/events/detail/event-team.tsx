@@ -52,12 +52,12 @@ import {
   MoreVertical,
   User,
   Upload,
-  Linkedin,
   LayoutGrid,
   List as ListIcon,
   Pencil,
   Trash2,
 } from "lucide-react";
+import { Linkedin } from "@/components/ui/brand-icons";
 
 import {
   EventTeamMember,

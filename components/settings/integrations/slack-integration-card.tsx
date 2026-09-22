@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Slack, Loader2, Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
+import { Slack } from "@/components/ui/brand-icons";
 import { toast } from "sonner";
 import {
   Select,
