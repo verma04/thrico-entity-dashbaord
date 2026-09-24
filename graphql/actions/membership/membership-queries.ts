@@ -5,7 +5,6 @@ import {
   GET_USER_GROWTH,
   GET_USER_ROLE_DISTRIBUTION,
   GET_ALL_USER,
-  GET_ALL_USER_LIST,
   GET_USER_DETIALS,
   GET_USER_STATS,
   GET_MEMBERS_STATS,
@@ -299,12 +298,7 @@ export const useGetAllUser = (input?: AllUserInput) =>
     fetchPolicy: "network-only",
   });
 
-// Lightweight hook for list/table views — fetches minimal fields
-export const useGetAllUserList = (input?: AllUserInput) =>
-  useQuery<GetAllUserResponse>(GET_ALL_USER_LIST, {
-    variables: buildAllUserVariables(input),
-    fetchPolicy: "cache-and-network",
-  });
+
 
 export const useGetUserDetailsById = (options: any) =>
   useQuery(GET_USER_DETIALS, options);
