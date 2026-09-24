@@ -41,8 +41,8 @@ export function useSiteDomain() {
   const getDestinationUrl = useMemo(() => {
     return (type: "SIGNUP" | "LOGIN" | "CUSTOM", customBaseUrl?: string) => {
       const base = (customBaseUrl || primaryUrl).replace(/\/+$/, "");
-      if (type === "SIGNUP") return `${base}/auth/signup`;
-      if (type === "LOGIN") return `${base}/auth/login`;
+      if (type === "SIGNUP") return `${base}/signup`;
+      if (type === "LOGIN") return `${base}/login`;
       return `${base}/`;
     };
   }, [primaryUrl]);

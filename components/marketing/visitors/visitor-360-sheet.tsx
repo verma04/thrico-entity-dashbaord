@@ -88,7 +88,7 @@ export function Visitor360Sheet({
         eventType: "click",
         category: "Engagement",
         title: "Clicked Join Community CTA",
-        description: "Target: /auth/signup",
+        description: "Target: /signup",
         timestamp: visitor.firstSeenAt,
       },
     ],

@@ -546,7 +546,7 @@ export default function CreateUtmCampaignPage() {
                 <DestinationTile
                   value="SIGNUP"
                   label="Signup Funnel"
-                  description="Routes to /auth/signup — track new member acquisition."
+                  description="Routes to /signup — track new member acquisition."
                   icon={Globe}
                   selected={destinationType === "SIGNUP"}
                   onClick={() => handleDestinationTypeChange("SIGNUP")}
@@ -554,7 +554,7 @@ export default function CreateUtmCampaignPage() {
                 <DestinationTile
                   value="LOGIN"
                   label="Login Funnel"
-                  description="Routes to /auth/login — track re-engagement campaigns."
+                  description="Routes to /login — track re-engagement campaigns."
                   icon={LogIn}
                   selected={destinationType === "LOGIN"}
                   onClick={() => handleDestinationTypeChange("LOGIN")}

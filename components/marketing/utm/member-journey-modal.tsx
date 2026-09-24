@@ -107,7 +107,7 @@ export function MemberJourneyModal({
                 Landing Page
               </span>
               <div className="font-mono text-[11px] text-foreground truncate">
-                {touch.landingPage || "/auth/signup"}
+                {touch.landingPage || "/signup"}
               </div>
             </div>
           </div>

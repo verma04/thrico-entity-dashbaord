@@ -871,7 +871,7 @@ export function Campaign360Dashboard({
                             <span>{m.lastTouch.medium}</span>
                           </div>
                           <div className="text-[10px] text-muted-foreground font-mono">
-                            {m.lastTouch.landingPage || "/auth/login"}
+                            {m.lastTouch.landingPage || "/login"}
                           </div>
                         </div>
                       </td>
