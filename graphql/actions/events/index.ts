@@ -667,46 +667,7 @@ export function useEventStats(
 export function useChangeEventStatus(options?: MutationHookOptions<any, any>) {
   return useMutation(CHANGE_EVENT_STATUS, {
     ...options,
-    refetchQueries: [
-      {
-        query: GET_ALL_EVENTS,
-        variables: {
-          input: {},
-        },
-      },
-      {
-        query: GET_ALL_EVENTS,
-        variables: {
-          input: {
-            status: "PENDING",
-          },
-        },
-      },
-      {
-        query: GET_ALL_EVENTS,
-        variables: {
-          input: {
-            status: "DISABLED",
-          },
-        },
-      },
-      {
-        query: GET_ALL_EVENTS,
-        variables: {
-          input: {
-            status: "APPROVED",
-          },
-        },
-      },
-      {
-        query: GET_ALL_EVENTS,
-        variables: {
-          input: {
-            status: "REJECTED",
-          },
-        },
-      },
-    ],
+    refetchQueries: ["GetAllEvents"],
     awaitRefetchQueries: true,
   });
 }
@@ -716,22 +677,7 @@ export function useChangeEventVerification(
 ) {
   return useMutation(CHANGE_EVENT_VERIFICATION, {
     ...options,
-    refetchQueries: [
-      {
-        query: GET_ALL_EVENTS,
-        variables: {
-          input: {},
-        },
-      },
-      {
-        query: GET_ALL_EVENTS,
-        variables: {
-          input: {
-            status: "APPROVED",
-          },
-        },
-      },
-    ],
+    refetchQueries: ["GetAllEvents"],
     awaitRefetchQueries: true,
   });
 }
