@@ -166,6 +166,77 @@ export const GET_ALL_USER = gql`
     }
   }
 `;
+
+// Lightweight query for the members list/table view — fetches only the fields
+// that table columns actually render, skipping education, experience, skills
+// details, social links, KYC, phone, etc.
+export const GET_ALL_USER_LIST = gql`
+  query GetAllUserList($input: allStatusInput) {
+    getAllUser(input: $input) {
+      data {
+        id
+        isApproved
+        isRequested
+        lastActive
+        status
+        verification {
+          id
+          isVerified
+        }
+        user {
+          id
+          firstName
+          lastName
+          email
+          loginType
+          avatar
+          location
+          createdAt
+          about {
+            headline
+          }
+        }
+        industries {
+          id
+          title
+        }
+        lastSession {
+          deviceName
+          lastUsed
+          isActive
+        }
+        referrer {
+          user {
+            id
+            firstName
+            lastName
+            avatar
+          }
+        }
+        membershipTierId
+        membershipTier {
+          id
+          name
+          badgeIcon
+          badgeColor
+        }
+        entityCurrencyWallet {
+          id
+          balance
+        }
+        gamificationSummary {
+          totalPointsEarned
+          totalBadgesEarned
+          rankPosition
+        }
+        impactScore
+      }
+      totalCount
+      hasNextPage
+      message
+    }
+  }
+`;
 export const CHANGE_USER_STATUS = gql`
   mutation ChangeUserStatus($input: statusInput) {
     changeUserStatus(input: $input) {

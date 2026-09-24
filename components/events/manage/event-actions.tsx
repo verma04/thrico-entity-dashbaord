@@ -97,7 +97,7 @@ export function EventActions({ event, trigger }: EventActionsProps) {
         variables: {
           input: {
             eventId: event.id,
-            status,
+            action: status,
           },
         },
       });

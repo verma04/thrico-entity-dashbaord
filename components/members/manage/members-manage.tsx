@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { userTableColumns } from "./user-list";
-import { useGetAllUser } from "@/graphql/actions/membership/membership-queries";
+import { useGetAllUserList } from "@/graphql/actions/membership/membership-queries";
 import { useDebounce } from "use-debounce";
 import { useQuery } from "@apollo/client";
 import { GET_MEMBERSHIP_TIERS } from "@/graphql/membership-tier";
@@ -190,7 +190,7 @@ const User = ({
   const { data: tiersData } = useQuery(GET_MEMBERSHIP_TIERS);
   const tiers = tiersData?.getMembershipTiers || [];
 
-  const { data, loading } = useGetAllUser({
+  const { data, loading } = useGetAllUserList({
     status: status === "ALL" ? "ALL" : status,
     industryId: selectedIndustry === "ALL" ? null : selectedIndustry,
     membershipTierId: selectedTier === "ALL" ? null : selectedTier,

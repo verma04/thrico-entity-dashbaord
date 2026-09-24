@@ -5,6 +5,7 @@ import {
   GET_USER_GROWTH,
   GET_USER_ROLE_DISTRIBUTION,
   GET_ALL_USER,
+  GET_ALL_USER_LIST,
   GET_USER_DETIALS,
   GET_USER_STATS,
   GET_MEMBERS_STATS,
@@ -260,7 +261,7 @@ export const useGetUserRoleDistribution = (
     ...options,
   });
 
-export const useGetAllUser = (input?: {
+type AllUserInput = {
   status?: string | null;
   limit?: number | null;
   offset?: number | null;
@@ -273,26 +274,36 @@ export const useGetAllUser = (input?: {
   functionTitle?: string[] | null;
   interestTitle?: string[] | null;
   skillName?: string[] | null;
-}) =>
-  useQuery<GetAllUserResponse>(GET_ALL_USER, {
-    variables: {
-      input: {
-        status: input?.status ?? "ALL",
-        limit: input?.limit ?? null,
-        offset: input?.offset,
-        industryId: input?.industryId ?? null,
-        search: input?.search ?? null,
-        membershipTierId: input?.membershipTierId ?? null,
-        location: input?.location ?? null,
-        company: input?.company ?? null,
-        college: input?.college ?? null,
-        functionTitle: input?.functionTitle ?? null,
-        interestTitle: input?.interestTitle ?? null,
-        skillName: input?.skillName ?? null,
-      },
-    },
+};
 
+const buildAllUserVariables = (input?: AllUserInput) => ({
+  input: {
+    status: input?.status ?? "ALL",
+    limit: input?.limit ?? null,
+    offset: input?.offset,
+    industryId: input?.industryId ?? null,
+    search: input?.search ?? null,
+    membershipTierId: input?.membershipTierId ?? null,
+    location: input?.location ?? null,
+    company: input?.company ?? null,
+    college: input?.college ?? null,
+    functionTitle: input?.functionTitle ?? null,
+    interestTitle: input?.interestTitle ?? null,
+    skillName: input?.skillName ?? null,
+  },
+});
+
+export const useGetAllUser = (input?: AllUserInput) =>
+  useQuery<GetAllUserResponse>(GET_ALL_USER, {
+    variables: buildAllUserVariables(input),
     fetchPolicy: "network-only",
+  });
+
+// Lightweight hook for list/table views — fetches minimal fields
+export const useGetAllUserList = (input?: AllUserInput) =>
+  useQuery<GetAllUserResponse>(GET_ALL_USER_LIST, {
+    variables: buildAllUserVariables(input),
+    fetchPolicy: "cache-and-network",
   });
 
 export const useGetUserDetailsById = (options: any) =>
