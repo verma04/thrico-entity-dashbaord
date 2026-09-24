@@ -383,12 +383,8 @@ export function UtmManagerDashboard() {
             campaigns={filteredCampaigns}
             loading={loading}
             viewMode={viewMode}
-            onSelect360={(slug) => {
-              // Find campaign by utmCampaign slug, navigate to /utm/[id]
-              const campaign = localCampaigns.find((c) => c.utmCampaign === slug);
-              if (campaign) {
-                router.push(`/marketing/utm/${campaign.id}`);
-              }
+            onSelect360={(c) => {
+              router.push(`/marketing/utm/${c.id}`);
             }}
             onOpenQr={setSelectedForQr}
             onInspectCampaign={(c) => router.push(`/marketing/utm/${c.id}`)}

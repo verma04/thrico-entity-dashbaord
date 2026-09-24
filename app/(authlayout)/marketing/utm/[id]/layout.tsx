@@ -1,10 +1,11 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
-import { useQuery } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import {
   ADMIN_GET_UTM_CAMPAIGN_BY_ID,
+  ADMIN_DELETE_UTM_CAMPAIGN,
 } from "@/graphql/actions/utm/admin-utm.graphql";
 import { UtmCampaignItem } from "@/types/utm";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,23 @@ import {
   BarChart3,
   Edit3,
   ExternalLink,
+  Copy,
+  Check,
+  QrCode,
+  Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
+import { QrCodeModal } from "@/components/marketing/utm/qr-code-modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 
 // ── Campaign Context ───────────────────────────────────────────────────────
@@ -100,7 +117,35 @@ export default function CampaignDetailLayout({
     fetchPolicy: "cache-and-network",
   });
 
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const [deleteCampaignMutation, { loading: isDeleting }] = useMutation(
+    ADMIN_DELETE_UTM_CAMPAIGN
+  );
+
   const campaign: UtmCampaignItem | null = data?.getUtmCampaignById || null;
+
+  const handleCopyLink = () => {
+    if (!campaign?.generatedUrl) return;
+    navigator.clipboard.writeText(campaign.generatedUrl);
+    setCopiedUrl(true);
+    toast.success("Tracking link copied to clipboard");
+    setTimeout(() => setCopiedUrl(false), 2000);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteCampaignMutation({ variables: { id } });
+      toast.success("Campaign deleted successfully");
+      setShowDeleteDialog(false);
+      router.push("/marketing/utm");
+    } catch (err: any) {
+      console.error("Error deleting campaign:", err);
+      toast.error(err.message || "Failed to delete campaign");
+    }
+  };
 
   if (loading && !campaign) return <CampaignDetailSkeleton />;
 
@@ -184,6 +229,30 @@ export default function CampaignDetailLayout({
             <Button
               variant="outline"
               size="sm"
+              onClick={handleCopyLink}
+              className="h-8 text-xs gap-1.5 cursor-pointer"
+              title="Copy Tracking Link"
+            >
+              {copiedUrl ? (
+                <Check className="h-3.5 w-3.5 text-emerald-600" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+              {copiedUrl ? "Copied" : "Copy Link"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowQrModal(true)}
+              className="h-8 text-xs gap-1.5 cursor-pointer"
+              title="QR Code & Short Link"
+            >
+              <QrCode className="h-3.5 w-3.5" />
+              QR Code
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => window.open(campaign.generatedUrl, "_blank")}
               className="h-8 text-xs gap-1.5 cursor-pointer"
             >
@@ -198,6 +267,16 @@ export default function CampaignDetailLayout({
             >
               <Edit3 className="h-3.5 w-3.5" />
               Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDeleteDialog(true)}
+              className="h-8 text-xs gap-1.5 cursor-pointer text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/60"
+              title="Delete Campaign"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
             </Button>
           </div>
         </div>
@@ -222,6 +301,38 @@ export default function CampaignDetailLayout({
             {children}
           </div>
         </div>
+
+        {/* ── QR Code Modal ─────────────────────────────────────────────── */}
+        <QrCodeModal
+          campaign={campaign}
+          open={showQrModal}
+          onOpenChange={setShowQrModal}
+        />
+
+        {/* ── Delete Confirmation Dialog ─────────────────────────────── */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete <span className="font-semibold text-foreground">{campaign.name}</span> (<code className="font-mono text-xs">{campaign.utmCampaign}</code>)? This will permanently remove the tracking link. Inbound traffic will no longer be tracked.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDelete();
+                }}
+                disabled={isDeleting}
+                className="bg-rose-600 hover:bg-rose-700 text-white dark:bg-rose-600 dark:hover:bg-rose-700 cursor-pointer"
+              >
+                {isDeleting ? "Deleting…" : "Delete Campaign"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </CampaignDetailContext.Provider>
   );

@@ -36,7 +36,7 @@ interface CampaignDetailsModalProps {
   onOpenChange: (open: boolean) => void;
   campaignId: string | null;
   initialCampaign?: UtmCampaignItem | null;
-  onSelect360?: (campaignSlug: string) => void;
+  onSelect360?: (campaign: UtmCampaignItem) => void;
   onEdit?: (campaign: UtmCampaignItem) => void;
   onOpenQr?: (campaign: UtmCampaignItem) => void;
   onDelete?: (id: string) => void;
@@ -405,7 +405,7 @@ export function CampaignDetailsModal({
                 size="sm"
                 onClick={() => {
                   onOpenChange(false);
-                  onSelect360(campaign.utmCampaign);
+                  onSelect360(campaign);
                 }}
                 className="text-xs h-8 font-semibold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer gap-1.5 shadow-2xs"
               >

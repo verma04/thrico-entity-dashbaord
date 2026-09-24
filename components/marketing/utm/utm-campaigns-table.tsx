@@ -28,6 +28,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { safeFormat } from "@/lib/date-utils";
 import { toast } from "sonner";
 import { UtmCampaignItem, UtmCampaignStatus } from "@/types/utm";
@@ -36,7 +46,7 @@ interface UtmCampaignsTableProps {
   campaigns: UtmCampaignItem[];
   loading?: boolean;
   viewMode?: "table" | "grid";
-  onSelect360: (campaignSlug: string) => void;
+  onSelect360: (campaign: UtmCampaignItem) => void;
   onOpenQr: (campaign: UtmCampaignItem) => void;
   onInspectCampaign?: (campaign: UtmCampaignItem) => void;
   onEditCampaign?: (campaign: UtmCampaignItem) => void;
@@ -56,6 +66,7 @@ export function UtmCampaignsTable({
   onDeleteCampaign,
 }: UtmCampaignsTableProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [campaignToDelete, setCampaignToDelete] = useState<UtmCampaignItem | null>(null);
 
   const handleCopyLink = (url: string, id: string) => {
     navigator.clipboard.writeText(url);
@@ -158,10 +169,54 @@ export function UtmCampaignsTable({
     );
   }
 
+  const deleteConfirmationModal = (
+    <AlertDialog
+      open={!!campaignToDelete}
+      onOpenChange={(open) => {
+        if (!open) setCampaignToDelete(null);
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-foreground">
+              {campaignToDelete?.name}
+            </span>{" "}
+            (
+            <code className="font-mono text-xs">
+              {campaignToDelete?.utmCampaign}
+            </code>
+            )? This will permanently remove the tracking link. Inbound traffic will
+            no longer be tracked.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => setCampaignToDelete(null)}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              if (campaignToDelete) {
+                onDeleteCampaign(campaignToDelete.id);
+                setCampaignToDelete(null);
+              }
+            }}
+            className="bg-rose-600 hover:bg-rose-700 text-white dark:bg-rose-600 dark:hover:bg-rose-700 cursor-pointer"
+          >
+            Delete Campaign
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   // ── Grid View ─────────────────────────────────────────────────────────────
   if (viewMode === "grid") {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {campaigns.map((c) => (
           <Card
             key={c.id}
@@ -236,7 +291,7 @@ export function UtmCampaignsTable({
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => onSelect360(c.utmCampaign)}
+                    onClick={() => onSelect360(c)}
                     className="h-7 text-xs gap-1 font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 cursor-pointer"
                   >
                     <BarChart3 className="h-3 w-3" />
@@ -271,7 +326,7 @@ export function UtmCampaignsTable({
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => onDeleteCampaign(c.id)}
+                        onClick={() => setCampaignToDelete(c)}
                         className="text-rose-600 dark:text-rose-400 focus:text-rose-600"
                       >
                         <Trash2 className="h-3.5 w-3.5 mr-2" />
@@ -284,13 +339,16 @@ export function UtmCampaignsTable({
             </CardContent>
           </Card>
         ))}
-      </div>
+        </div>
+        {deleteConfirmationModal}
+      </>
     );
   }
 
   // ── Table View ────────────────────────────────────────────────────────────
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-border/60 shadow-2xs overflow-hidden">
+    <>
+      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-border/60 shadow-2xs overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs text-foreground">
           <thead className="bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
@@ -406,11 +464,21 @@ export function UtmCampaignsTable({
 
                     <Button
                       size="sm"
-                      onClick={() => onSelect360(c.utmCampaign)}
+                      onClick={() => onSelect360(c)}
                       className="h-[28px] text-[11px] gap-1 px-2.5 font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 rounded-[4px] cursor-pointer"
                     >
                       <BarChart3 className="h-3 w-3" />
                       360 Stats
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setCampaignToDelete(c)}
+                      className="h-[28px] w-[28px] rounded-[4px] text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                      title="Delete Campaign"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
 
                     <DropdownMenu>
@@ -446,7 +514,7 @@ export function UtmCampaignsTable({
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => onDeleteCampaign(c.id)}
+                          onClick={() => setCampaignToDelete(c)}
                           className="text-rose-600 dark:text-rose-400 focus:text-rose-600"
                         >
                           <Trash2 className="h-3.5 w-3.5 mr-2" />
@@ -462,5 +530,7 @@ export function UtmCampaignsTable({
         </table>
       </div>
     </div>
+    {deleteConfirmationModal}
+  </>
   );
 }

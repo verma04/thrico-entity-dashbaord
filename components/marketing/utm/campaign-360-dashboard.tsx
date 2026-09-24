@@ -30,6 +30,9 @@ import {
   ChevronsRight,
   TrendingDown,
   Zap,
+  Copy,
+  Check,
+  Link2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +50,7 @@ import {
 } from "@/components/ui/select";
 import { safeFormat } from "@/lib/date-utils";
 import {
+  UtmCampaignItem,
   UtmCampaign360Stats,
   AttributedMemberProfile,
   UtmSourceBreakdown,
@@ -60,6 +64,7 @@ import { cn } from "@/lib/utils";
 
 interface Campaign360DashboardProps {
   campaignSlug: string;
+  campaign?: UtmCampaignItem;
   onBack?: () => void;
   availableCampaigns?: { name: string; slug: string }[];
   onSelectCampaign?: (slug: string) => void;
@@ -76,6 +81,7 @@ const TIME_RANGES: { label: string; value: TimeRange }[] = [
 
 export function Campaign360Dashboard({
   campaignSlug,
+  campaign,
   onBack,
   availableCampaigns,
   onSelectCampaign,
@@ -86,11 +92,26 @@ export function Campaign360Dashboard({
   const [memberSearch, setMemberSearch] = useState<string>("");
   const [selectedMember, setSelectedMember] = useState<AttributedMemberProfile | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [copiedTrackingUrl, setCopiedTrackingUrl] = useState(false);
+  const [copiedShortUrl, setCopiedShortUrl] = useState(false);
   const [expandedSources, setExpandedSources] = useState<Record<string, boolean>>({
     google: true,
     twitter: true,
     newsletter: true,
+    ...(campaign?.utmSource ? { [campaign.utmSource]: true } : {}),
   });
+
+  const handleCopyText = (text: string, isShort = false) => {
+    navigator.clipboard.writeText(text);
+    if (isShort) {
+      setCopiedShortUrl(true);
+      setTimeout(() => setCopiedShortUrl(false), 2000);
+    } else {
+      setCopiedTrackingUrl(true);
+      setTimeout(() => setCopiedTrackingUrl(false), 2000);
+    }
+    toast.success(isShort ? "Short link copied!" : "Tracking URL copied!");
+  };
 
   // Query 1: 360 Stats with timeRange
   const {
@@ -223,7 +244,7 @@ export function Campaign360Dashboard({
             </div>
           </div>
           <h2 className="text-xl font-bold text-foreground">
-            360° Attribution Performance: {stats.campaign}
+            360° Attribution Performance: {campaign?.name || stats.campaign}
           </h2>
           <p className="text-xs text-muted-foreground">
             Aggregated multi-touch conversion telemetry, creative variants, and attributed member audit trail.
@@ -273,6 +294,114 @@ export function Campaign360Dashboard({
           </Button>
         </div>
       </div>
+
+      {/* ── Campaign's Own Details & Tracking Parameters Card ── */}
+      {campaign && (
+        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-border/60 shadow-2xs p-4 sm:p-5 space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40 shrink-0">
+                <Link2 className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-sm text-foreground truncate">{campaign.name}</h3>
+                  <Badge variant="outline" className="text-[10px] font-semibold border-indigo-200 text-indigo-700 dark:border-indigo-800 dark:text-indigo-300">
+                    {campaign.status}
+                  </Badge>
+                  {campaign.destinationType && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {campaign.destinationType === "SIGNUP" ? "Signup Funnel" : campaign.destinationType === "LOGIN" ? "Login Funnel" : "Custom Landing"}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                  Destination Target: <span className="font-mono text-foreground font-medium">{campaign.destinationUrl}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleCopyText(campaign.generatedUrl)}
+                className="h-8 text-xs gap-1.5 cursor-pointer"
+              >
+                {copiedTrackingUrl ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedTrackingUrl ? "Copied" : "Copy Tracking URL"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(campaign.generatedUrl, "_blank")}
+                className="h-8 text-xs gap-1.5 cursor-pointer"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Test Link
+              </Button>
+            </div>
+          </div>
+
+          {/* Configured Parameters Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-0.5">
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/50">
+              <span className="text-[10px] text-muted-foreground block font-medium">utm_source</span>
+              <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate block">
+                {campaign.utmSource}
+              </span>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/50">
+              <span className="text-[10px] text-muted-foreground block font-medium">utm_medium</span>
+              <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate block">
+                {campaign.utmMedium}
+              </span>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/50">
+              <span className="text-[10px] text-muted-foreground block font-medium">utm_campaign</span>
+              <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate block">
+                {campaign.utmCampaign}
+              </span>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/50">
+              <span className="text-[10px] text-muted-foreground block font-medium">utm_term</span>
+              <span className="font-mono text-xs font-medium text-foreground truncate block">
+                {campaign.utmTerm || <span className="text-muted-foreground italic font-normal">none</span>}
+              </span>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/50">
+              <span className="text-[10px] text-muted-foreground block font-medium">utm_content</span>
+              <span className="font-mono text-xs font-medium text-foreground truncate block">
+                {campaign.utmContent || <span className="text-muted-foreground italic font-normal">none</span>}
+              </span>
+            </div>
+          </div>
+
+          {/* Generated URL Box */}
+          <div className="p-2.5 rounded-lg bg-muted/30 border border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+            <div className="flex items-center gap-2 min-w-0">
+              <Sparkles className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
+              <span className="truncate text-muted-foreground select-all">{campaign.generatedUrl}</span>
+            </div>
+            {campaign.shortCode && (
+              <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
+                <Badge variant="secondary" className="font-mono text-[10px]">
+                  https://{campaign.shortCode}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleCopyText(`https://${campaign.shortCode}`, true)}
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                  title="Copy Short Link"
+                >
+                  {copiedShortUrl ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── 5 KPI Metric Cards ───────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">

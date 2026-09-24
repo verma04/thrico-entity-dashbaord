@@ -4,10 +4,14 @@ import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client";
 import { useCampaignDetail } from "../layout";
-import { ADMIN_UPDATE_UTM_CAMPAIGN } from "@/graphql/actions/utm/admin-utm.graphql";
+import {
+  ADMIN_UPDATE_UTM_CAMPAIGN,
+  ADMIN_DELETE_UTM_CAMPAIGN,
+} from "@/graphql/actions/utm/admin-utm.graphql";
 import { UtmCampaignStatus } from "@/types/utm";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { Button } from "@/components/ui/button";
 import {
   PolarisFormLayout,
   PolarisFormCard,
@@ -18,6 +22,16 @@ import {
 } from "@/components/gamification/shared/polaris-form-ui";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Copy,
   Check,
@@ -30,6 +44,7 @@ import {
   Tag,
   Zap,
   BarChart3,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -202,12 +217,14 @@ function UtmEditPreview({
 
 // ── Status Tile ────────────────────────────────────────────────────────────
 function StatusTile({
+  value,
   label,
   description,
   icon: Icon,
   selected,
   onClick,
 }: {
+  value?: string;
   label: string;
   description: string;
   icon: React.ElementType;
@@ -252,6 +269,9 @@ export default function EditCampaignPage() {
   const { campaign } = useCampaignDetail();
   const router = useRouter();
   const [updateCampaignMutation] = useMutation(ADMIN_UPDATE_UTM_CAMPAIGN);
+  const [deleteCampaignMutation, { loading: isDeleting }] = useMutation(
+    ADMIN_DELETE_UTM_CAMPAIGN
+  );
 
   const [name, setName] = useState(campaign.name || "");
   const [status, setStatus] = useState<UtmCampaignStatus>(campaign.status || "ACTIVE");
@@ -260,8 +280,21 @@ export default function EditCampaignPage() {
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const markDirty = () => { setIsDirty(true); setSaved(false); };
+
+  const handleDelete = async () => {
+    try {
+      await deleteCampaignMutation({ variables: { id: campaign.id } });
+      toast.success("Campaign deleted successfully");
+      setShowDeleteDialog(false);
+      router.push("/marketing/utm");
+    } catch (err: any) {
+      console.error("Error deleting campaign:", err);
+      toast.error(err.message || "Failed to delete campaign");
+    }
+  };
 
   const previewUrl = useMemo(() => {
     try {
@@ -480,6 +513,56 @@ export default function EditCampaignPage() {
             </div>
           </div>
         </PolarisFormCard>
+
+        {/* ── Danger Zone: Delete Campaign ── */}
+        <div className="rounded-[6px] border border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20 p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h4 className="text-xs font-bold text-rose-700 dark:text-rose-400">
+                Delete Campaign
+              </h4>
+              <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5">
+                Permanently delete this tracking link. Inbound traffic will no longer be tracked.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowDeleteDialog(true)}
+              className="border-rose-300 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/50 text-xs shrink-0 cursor-pointer h-8"
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+              Delete Campaign
+            </Button>
+          </div>
+        </div>
+
+        {/* Delete Dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-foreground">{campaign.name}</span>{" "}
+                (<code className="font-mono text-xs">{campaign.utmCampaign}</code>)? This will permanently remove the tracking link. Inbound traffic will no longer be tracked.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDelete();
+                }}
+                disabled={isDeleting}
+                className="bg-rose-600 hover:bg-rose-700 text-white dark:bg-rose-600 dark:hover:bg-rose-700 cursor-pointer"
+              >
+                {isDeleting ? "Deleting…" : "Delete Campaign"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Floating Save Panel */}
         <FloatingSavePanel

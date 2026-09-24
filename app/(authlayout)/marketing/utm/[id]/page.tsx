@@ -10,6 +10,7 @@ export default function CampaignAnalyticsPage() {
   return (
     <Campaign360Dashboard
       campaignSlug={campaign.utmCampaign}
+      campaign={campaign}
     />
   );
 }

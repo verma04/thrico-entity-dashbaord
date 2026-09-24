@@ -232,12 +232,14 @@ function QuickChip({
 
 // ── Destination Tile ───────────────────────────────────────────────────────
 function DestinationTile({
+  value,
   label,
   description,
   icon: Icon,
   selected,
   onClick,
 }: {
+  value?: string;
   label: string;
   description: string;
   icon: React.ElementType;
