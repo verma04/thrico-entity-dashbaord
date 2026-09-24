@@ -314,6 +314,12 @@ export function Campaign360Dashboard({
                       {campaign.destinationType === "SIGNUP" ? "Signup Funnel" : campaign.destinationType === "LOGIN" ? "Login Funnel" : "Custom Landing"}
                     </Badge>
                   )}
+                  {campaign.userCount !== undefined && (
+                    <Badge variant="secondary" className="text-[10px] gap-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800">
+                      <Users className="h-2.5 w-2.5" />
+                      {campaign.userCount} Attributed Users
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-[11px] text-muted-foreground truncate mt-0.5">
                   Destination Target: <span className="font-mono text-foreground font-medium">{campaign.destinationUrl}</span>

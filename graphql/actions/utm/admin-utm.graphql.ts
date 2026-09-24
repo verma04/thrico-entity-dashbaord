@@ -35,6 +35,7 @@ export const ADMIN_GET_UTM_CAMPAIGNS = gql`
       createdBy
       createdAt
       updatedAt
+      userCount
     }
   }
 `;
@@ -61,6 +62,69 @@ export const ADMIN_GET_UTM_CAMPAIGN_BY_ID = gql`
       createdBy
       createdAt
       updatedAt
+      userCount
+    }
+  }
+`;
+
+// ===================================================
+// 2B. GET TOTAL / FILTERED ATTRIBUTED USERS COUNT FOR UTM
+// ===================================================
+export const ADMIN_GET_UTM_USER_COUNT = gql`
+  query AdminGetUtmUserCount(
+    $campaign: String
+    $source: String
+    $medium: String
+  ) {
+    getUtmUserCount(campaign: $campaign, source: $source, medium: $medium)
+  }
+`;
+
+// ===================================================
+// 2C. GET ATTRIBUTED USERS & FULL USER DETAILS FOR UTM
+// ===================================================
+export const ADMIN_GET_UTM_USERS = gql`
+  query AdminGetUtmUsers(
+    $campaign: String
+    $source: String
+    $medium: String
+    $limit: Int
+    $offset: Int
+  ) {
+    getUtmUsers(
+      campaign: $campaign
+      source: $source
+      medium: $medium
+      limit: $limit
+      offset: $offset
+    ) {
+      totalCount
+      users {
+        userId
+        firstName
+        lastName
+        email
+        avatar
+        loginCount
+        firstTouch {
+          source
+          medium
+          campaign
+          term
+          content
+          landingPage
+          seenAt
+        }
+        lastTouch {
+          source
+          medium
+          campaign
+          term
+          content
+          landingPage
+          seenAt
+        }
+      }
     }
   }
 `;

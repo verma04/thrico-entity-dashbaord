@@ -18,6 +18,13 @@ export interface UtmCampaignItem {
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
+  userCount?: number;
+  users?: AttributedMemberProfile[];
+}
+
+export interface UtmUsersPayload {
+  totalCount: number;
+  users: AttributedMemberProfile[];
 }
 
 export interface UtmContentBreakdown {

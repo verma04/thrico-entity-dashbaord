@@ -17,6 +17,7 @@ import {
   Share2,
   Edit3,
   Info,
+  Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -248,6 +249,10 @@ export function UtmCampaignsTable({
                 <Badge variant="outline" className="text-[10px] font-mono">
                   {c.utmSource} / {c.utmMedium}
                 </Badge>
+                <Badge variant="secondary" className="text-[10px] gap-1 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-100">
+                  <Users className="h-2.5 w-2.5" />
+                  {c.userCount ?? 0} users
+                </Badge>
               </div>
 
               {/* URL Preview Box */}
@@ -356,6 +361,7 @@ export function UtmCampaignsTable({
               <th className="px-5 py-3.5 font-bold">Campaign Name & Tag</th>
               <th className="px-5 py-3.5 font-bold">Destination</th>
               <th className="px-5 py-3.5 font-bold">Source / Medium</th>
+              <th className="px-5 py-3.5 font-bold">Users</th>
               <th className="px-5 py-3.5 font-bold">Tracking URL</th>
               <th className="px-5 py-3.5 font-bold">Status</th>
               <th className="px-5 py-3.5 font-bold text-right">Actions</th>
@@ -404,6 +410,14 @@ export function UtmCampaignsTable({
                       • {c.utmContent}
                     </div>
                   )}
+                </td>
+
+                {/* Users Acquired */}
+                <td className="px-5 py-3.5 whitespace-nowrap">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-semibold rounded-md bg-indigo-50/80 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/40">
+                    <Users className="h-3 w-3" />
+                    <span>{c.userCount ?? 0}</span>
+                  </span>
                 </td>
 
                 {/* Tracking URL */}
