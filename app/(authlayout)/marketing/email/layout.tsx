@@ -1,0 +1,101 @@
+"use client";
+
+import * as React from "react";
+import { usePathname } from "next/navigation";
+import {
+  PaintBucket,
+  Send,
+  BarChart3,
+  LayoutDashboard,
+  Megaphone,
+  Zap,
+} from "lucide-react";
+import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useModulePermission } from "@/hooks/use-module-permission";
+import { useTabOrder } from "@/hooks/use-tab-order";
+import { createLayoutStore } from "@/store/create-layout-store";
+import { EmailDomainGate } from "@/components/email/domain-gate";
+
+const useEmailLayoutStore = createLayoutStore();
+
+function EmailLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const canReadEmail = useModulePermission("EMAIL", "canRead");
+  const canCreateEmail = useModulePermission("EMAIL", "canCreate");
+  const canReadAutomation = useModulePermission("AUTOMATION", "canRead");
+
+  const defaultItems = React.useMemo(() => {
+    return [
+      {
+        key: "dashboard",
+        label: "Dashboard",
+        icon: <LayoutDashboard className="h-4 w-4" />,
+      },
+      {
+        key: "campaigns",
+        label: "Campaigns",
+        icon: <Megaphone className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+      {
+        key: "send",
+        label: "Send Campaign",
+        icon: <Send className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+      {
+        key: "templates",
+        label: "Templates",
+        icon: <PaintBucket className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+      // {
+      //   key: "automation",
+      //   label: "Automations",
+      //   icon: <Zap className="h-4 w-4" />,
+      //   locked: !canReadAutomation && !canReadEmail,
+      // },
+      {
+        key: "usage",
+        label: "Usage & Billing",
+        icon: <BarChart3 className="h-4 w-4" />,
+        locked: !canReadEmail,
+      },
+    ];
+  }, [canReadEmail, canCreateEmail, canReadAutomation]);
+
+  const isTakeoverPage =
+    pathname.includes("/marketing/email/templates/create") ||
+    pathname.includes("/marketing/email/automation/add/canvas") ||
+    pathname.includes("/marketing/email/automation/edit") ||
+    pathname.includes("/email/templates/create") ||
+    pathname.includes("/email/automation/add/canvas") ||
+    pathname.includes("/email/automation/edit");
+
+  const { getOrderedTabs, onReorder } = useTabOrder(
+    "EMAIL",
+    useEmailLayoutStore,
+    defaultItems,
+  );
+
+  const sortedItems = getOrderedTabs(defaultItems);
+
+  return (
+    <MenuItemsLayout
+      fixed={isTakeoverPage}
+      fullHeight={isTakeoverPage}
+      active="marketing/email"
+      items={sortedItems}
+      hideDefaultTabs={true}
+      showAdminTabs={false}
+      enableReorder={true}
+      onReorder={onReorder}
+      className="mt-0 bg-transparent dark:bg-transparent border-t-0"
+    >
+      <EmailDomainGate>{children}</EmailDomainGate>
+    </MenuItemsLayout>
+  );
+}
+
+export default withSubscriptionCheck(EmailLayout, "NETWORK");

@@ -223,7 +223,7 @@ export function CampaignsHub() {
           </Button>
 
           <Button
-            onClick={() => router.push("/email/send")}
+            onClick={() => router.push("/marketing/email/send")}
             className="h-[30px] gap-1.5 shrink-0 bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-2.5 rounded-[4px] cursor-pointer hover:bg-[#202020]"
           >
             <Plus className="h-3 w-3" />
@@ -262,7 +262,7 @@ export function CampaignsHub() {
               <button
                 key={idx}
                 type="button"
-                onClick={() => router.push("/email/send")}
+                onClick={() => router.push("/marketing/email/send")}
                 className="group flex flex-col justify-between p-3.5 rounded-xl border border-border/60 bg-card hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-2xs transition-all text-left cursor-pointer"
               >
                 <div className="space-y-2">
@@ -335,7 +335,7 @@ export function CampaignsHub() {
             {!search && (
               <Button
                 type="button"
-                onClick={() => router.push("/email/send")}
+                onClick={() => router.push("/marketing/email/send")}
                 className="h-[30px] px-3 text-[12px] font-semibold gap-1.5 mt-1 bg-[#303030] text-white rounded-[4px] cursor-pointer"
               >
                 <Plus className="h-3 w-3" />

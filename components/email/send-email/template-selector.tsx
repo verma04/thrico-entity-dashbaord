@@ -73,7 +73,7 @@ export function TemplateSelector({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/email/templates/create")}
+            onClick={() => router.push("/marketing/email/templates/create")}
             className="h-[30px] gap-1.5 shrink-0 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 shadow-2xs text-[12px] font-medium text-[#303030] dark:text-zinc-200 px-2.5 rounded-[4px] cursor-pointer"
           >
             <Plus className="h-3 w-3" />
@@ -185,7 +185,7 @@ export function TemplateSelector({
               </p>
               <Button
                 type="button"
-                onClick={() => router.push("/email/templates/create")}
+                onClick={() => router.push("/marketing/email/templates/create")}
                 className="h-[30px] px-3 text-[12px] font-semibold gap-1.5 mt-2 bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-[4px] cursor-pointer"
               >
                 <Plus className="h-3 w-3" />

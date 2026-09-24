@@ -21,11 +21,25 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  async rewrites() {
+    async rewrites() {
     return [
       {
         source: "/admin/:path*",
         destination: "/:path*",
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/email",
+        destination: "/marketing/email",
+        permanent: false,
+      },
+      {
+        source: "/email/:path*",
+        destination: "/marketing/email/:path*",
+        permanent: false,
       },
     ];
   },

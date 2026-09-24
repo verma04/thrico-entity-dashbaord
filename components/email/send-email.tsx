@@ -150,7 +150,7 @@ export default function SendEmail() {
       if (data?.sendEmail.success) {
         toast.success("Email campaign dispatched successfully!");
         setShowConfirm(false);
-        router.push("/email/usage");
+        router.push("/marketing/email/usage");
       } else {
         toast.error(data?.sendEmail.message || "Failed to dispatch campaign.");
       }

@@ -226,7 +226,7 @@ export default function TemplateList() {
           </Button>
 
           <Button
-            onClick={() => router.push("/email/templates/create")}
+            onClick={() => router.push("/marketing/email/templates/create")}
             className="h-[30px] gap-1.5 shrink-0 bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-2.5 rounded-[4px] cursor-pointer hover:bg-[#202020]"
           >
             <Plus className="h-3 w-3" />
@@ -343,7 +343,7 @@ export default function TemplateList() {
             {!search && (
               <Button
                 type="button"
-                onClick={() => router.push("/email/templates/create")}
+                onClick={() => router.push("/marketing/email/templates/create")}
                 className="h-[30px] px-3 text-[12px] font-semibold gap-1.5 mt-1 bg-[#303030] text-white rounded-[4px] cursor-pointer"
               >
                 <Plus className="h-3 w-3" />
@@ -356,7 +356,7 @@ export default function TemplateList() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {/* New template tile */}
             <button
-              onClick={() => router.push("/email/templates/create")}
+              onClick={() => router.push("/marketing/email/templates/create")}
               className="group rounded-xl border-2 border-dashed border-border bg-muted/20 flex flex-col items-center justify-center hover:border-primary/40 hover:bg-muted/40 transition-all cursor-pointer min-h-[220px]"
             >
               <div className="h-9 w-9 rounded-lg border border-border bg-background group-hover:bg-primary group-hover:border-primary flex items-center justify-center transition-all">
@@ -477,7 +477,7 @@ export default function TemplateList() {
                             className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800"
                           >
                             <DropdownMenuItem
-                              onClick={() => router.push(`/email/templates/create?id=${template.id}`)}
+                              onClick={() => router.push(`/marketing/email/templates/create?id=${template.id}`)}
                               className="text-[12px] font-semibold cursor-pointer"
                             >
                               <Pencil className="h-3 w-3 mr-2" /> Edit Template

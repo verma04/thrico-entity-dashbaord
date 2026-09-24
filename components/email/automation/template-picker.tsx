@@ -129,7 +129,7 @@ interface TemplatePickerProps {
   createHref?: string;
 }
 
-export function TemplatePicker({ value, onChange, createHref = "/email/templates/create" }: TemplatePickerProps) {
+export function TemplatePicker({ value, onChange, createHref = "/marketing/email/templates/create" }: TemplatePickerProps) {
   const [open, setOpen]         = useState(false);
   const [search, setSearch]     = useState("");
   const [category, setCategory] = useState("All");

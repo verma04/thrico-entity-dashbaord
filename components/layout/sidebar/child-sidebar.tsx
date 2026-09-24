@@ -415,7 +415,7 @@ export function ChildSidebarContainer({
                             : activeTab === "integrations"
                               ? "Integrations"
                               : activeTab === "email"
-                                ? "Email"
+                                ? "Marketing"
                                 : activeTab === "website"
                                   ? "Website Builder"
                                   : activeTab === "settings"
@@ -597,7 +597,7 @@ export function ChildSidebarContainer({
               {activeTab === "email" && (
                 <CollapsibleSection
                   sectionKey="email"
-                  label="Email"
+                  label="Marketing"
                   items={filteredEmail}
                   renderItems={renderItems}
                   searchQuery={searchQuery}

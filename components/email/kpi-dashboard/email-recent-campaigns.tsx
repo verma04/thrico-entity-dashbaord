@@ -112,7 +112,7 @@ export function EmailRecentCampaigns({
         <Button
           size="sm"
           variant="outline"
-          onClick={() => router.push("/email/send")}
+          onClick={() => router.push("/marketing/email/send")}
           className="h-7 text-[11px] font-semibold gap-1.5 border-border rounded-[4px]"
         >
           View All Sends

@@ -140,7 +140,7 @@ export function ConfigPanel({ node, onUpdate, onClose, module }: ConfigPanelProp
                     setSelectedTemplate(t);
                     setConfig({ ...config, templateId: t?.id ?? null, templateObj: t });
                   }}
-                  createHref="/email/templates/create"
+                  createHref="/marketing/email/templates/create"
                 />
                 <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block mt-1">Subject Line</label>
                 <input

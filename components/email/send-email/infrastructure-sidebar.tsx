@@ -82,7 +82,7 @@ export function InfrastructureSidebar({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/email/usage")}
+            onClick={() => router.push("/marketing/email/usage")}
             className="w-full h-[28px] text-[11.5px] font-medium gap-1.5 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 rounded-[4px] cursor-pointer"
           >
             <CreditCard className="h-3 w-3" />

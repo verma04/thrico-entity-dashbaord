@@ -16,7 +16,7 @@ export default function AutomationCampaignBuilder() {
   const router = useRouter();
   return (
     <div className="flex flex-col h-full min-h-[calc(100vh-120px)] bg-muted/50 overflow-hidden">
-      <CampaignsList onCreate={() => router.push("/email/automation/add")} />
+      <CampaignsList onCreate={() => router.push("/marketing/email/automation/add")} />
     </div>
   );
 }

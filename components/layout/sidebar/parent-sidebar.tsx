@@ -18,6 +18,7 @@ import {
   FileText,
   Sparkles,
   Zap,
+  Megaphone,
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 import { useHasAnyIntegration } from "@/graphql/actions";
@@ -74,9 +75,9 @@ export function ParentSidebar() {
         )}
 
         <NavRailItem
-          icon={<Mail size={18} />}
-          label="Email"
-          href="/email"
+          icon={<Megaphone size={18} />}
+          label="Marketing"
+          href="/marketing/utm"
           active={activeTab === "email"}
         />
 

@@ -65,8 +65,8 @@ export function getActiveSidebarTab(pathName?: string | null): ActiveSidebarTab 
     return "content";
   }
 
-  // 8. Email
-  if (path.startsWith("/email")) {
+  // 8. Email & Marketing
+  if (path.startsWith("/marketing") || path.startsWith("/email")) {
     return "email";
   }
 

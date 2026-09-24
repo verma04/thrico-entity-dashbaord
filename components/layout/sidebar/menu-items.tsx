@@ -1167,25 +1167,50 @@ export const gamification = gamificationEngine;
 
 export const emailItems = [
   {
-    key: "email-dash",
-    label: "Usage Dashboard",
-    path: "/email/usage",
+    key: "marketing-utm",
+    label: "UTM Campaigns",
+    path: "/marketing/utm",
+    icon: <Link2 size={18} />,
+  },
+  {
+    key: "marketing-visitors",
+    label: "Visitor Intelligence",
+    path: "/marketing/visitors/all",
+    icon: <Users size={18} />,
+  },
+  {
+    key: "marketing-attribution",
+    label: "Attribution Reports",
+    path: "/marketing/attribution/first-touch",
     icon: <BarChart3 size={18} />,
+  },
+  {
+    key: "email-campaigns",
+    label: "Email Campaigns",
+    path: "/marketing/email/campaigns",
+    icon: <Megaphone size={18} />,
   },
   {
     key: "email-templates",
     label: "Manage Templates",
-    path: "/email/templates",
+    path: "/marketing/email/templates",
     icon: <FileText size={18} />,
   },
-
+  {
+    key: "email-dash",
+    label: "Usage Dashboard",
+    path: "/marketing/email/usage",
+    icon: <BarChart3 size={18} />,
+  },
   {
     key: "email-settings",
     label: "Email Settings",
-    path: "/email/usage",
+    path: "/marketing/email/usage",
     icon: <Settings size={18} />,
   },
 ];
+export const marketingItems = emailItems;
+
 
 export const integrationsItems = [
   {

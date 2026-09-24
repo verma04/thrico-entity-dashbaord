@@ -270,8 +270,8 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
     });
   }, [campaigns, debouncedSearch, selectedModule, selectedStatus]);
 
-  const handleNew = () => router.push("/email/automation/add");
-  const handleEdit = (id: string) => router.push(`/email/automation/edit/${id}`);
+  const handleNew = () => router.push("/marketing/email/automation/add");
+  const handleEdit = (id: string) => router.push(`/marketing/email/automation/edit/${id}`);
 
   return (
     <div className="space-y-4">

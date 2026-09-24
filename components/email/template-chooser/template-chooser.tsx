@@ -46,8 +46,9 @@ export function TemplateChooser({ onSelect, loading = false }: TemplateChooserPr
         description="Select a pre-configured email starter blueprint or start with a blank drag-and-drop canvas."
         icon={LayoutTemplate}
         breadcrumbs={[
-          { label: "Email", href: "/email" },
-          { label: "Templates", href: "/email/templates" },
+          { label: "Marketing", href: "/marketing" },
+          { label: "Email", href: "/marketing/email" },
+          { label: "Templates", href: "/marketing/email/templates" },
           { label: "Create Template" },
         ]}
         actions={
@@ -55,7 +56,7 @@ export function TemplateChooser({ onSelect, loading = false }: TemplateChooserPr
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => router.push("/email/templates")}
+            onClick={() => router.push("/marketing/email/templates")}
             className="h-[30px] gap-1.5 shrink-0 bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 shadow-2xs text-[12px] font-semibold text-[#303030] dark:text-zinc-200 px-2.5 rounded-[4px] cursor-pointer"
           >
             <ArrowLeft className="h-3 w-3" />
