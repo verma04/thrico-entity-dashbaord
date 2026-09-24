@@ -245,10 +245,7 @@ export function UtmManagerDashboard() {
             </Button>
             <Button
               size="sm"
-              onClick={() => {
-                setSelectedStarter(null);
-                setShowCreateDrawer(true);
-              }}
+              onClick={() => router.push("/marketing/utm/create")}
               className="h-9 rounded-lg gap-2 text-xs font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer shadow-2xs"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -352,10 +349,7 @@ export function UtmManagerDashboard() {
               </Button>
 
               <Button
-                onClick={() => {
-                  setSelectedStarter(null);
-                  setShowCreateDrawer(true);
-                }}
+                onClick={() => router.push("/marketing/utm/create")}
                 className="h-[30px] gap-1.5 shrink-0 bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-[12px] font-semibold px-2.5 rounded-[4px] cursor-pointer hover:bg-[#202020]"
               >
                 <Plus className="h-3 w-3" />
