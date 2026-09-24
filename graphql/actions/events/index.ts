@@ -528,7 +528,7 @@ export function useAddEvent(
         if (addEvent && addEvent.status === "APPROVED") {
           // Update for status: "APPROVED"
           const approvedData: any = cache.readQuery({
-            query: GET_EVENTS,
+            query: GET_ALL_EVENTS,
             variables: {
               input: {
                 status: "APPROVED",
@@ -536,39 +536,39 @@ export function useAddEvent(
             },
           });
 
-          cache.writeQuery({
-            query: GET_EVENTS,
-            data: {
-              getEvents: [addEvent, ...(approvedData?.getEvents || [])],
-            },
-            variables: {
-              input: {
-                status: "APPROVED",
+          if (approvedData?.getAllEvents) {
+            cache.writeQuery({
+              query: GET_ALL_EVENTS,
+              data: {
+                getAllEvents: [addEvent, ...approvedData.getAllEvents],
               },
-            },
-          });
+              variables: {
+                input: {
+                  status: "APPROVED",
+                },
+              },
+            });
+          }
 
-          // Update for status: "ALL"
+          // Update for default list (all)
           const allData: any = cache.readQuery({
-            query: GET_EVENTS,
+            query: GET_ALL_EVENTS,
             variables: {
-              input: {
-                status: "ALL",
-              },
+              input: {},
             },
           });
 
-          cache.writeQuery({
-            query: GET_EVENTS,
-            data: {
-              getEvents: [addEvent, ...(allData?.getEvents || [])],
-            },
-            variables: {
-              input: {
-                status: "ALL",
+          if (allData?.getAllEvents) {
+            cache.writeQuery({
+              query: GET_ALL_EVENTS,
+              data: {
+                getAllEvents: [addEvent, ...allData.getAllEvents],
               },
-            },
-          });
+              variables: {
+                input: {},
+              },
+            });
+          }
         }
       } catch (error) {
         console.log(error);
@@ -669,15 +669,13 @@ export function useChangeEventStatus(options?: MutationHookOptions<any, any>) {
     ...options,
     refetchQueries: [
       {
-        query: GET_EVENTS,
+        query: GET_ALL_EVENTS,
         variables: {
-          input: {
-            status: "ALL",
-          },
+          input: {},
         },
       },
       {
-        query: GET_EVENTS,
+        query: GET_ALL_EVENTS,
         variables: {
           input: {
             status: "PENDING",
@@ -685,7 +683,7 @@ export function useChangeEventStatus(options?: MutationHookOptions<any, any>) {
         },
       },
       {
-        query: GET_EVENTS,
+        query: GET_ALL_EVENTS,
         variables: {
           input: {
             status: "DISABLED",
@@ -693,10 +691,18 @@ export function useChangeEventStatus(options?: MutationHookOptions<any, any>) {
         },
       },
       {
-        query: GET_EVENTS,
+        query: GET_ALL_EVENTS,
         variables: {
           input: {
             status: "APPROVED",
+          },
+        },
+      },
+      {
+        query: GET_ALL_EVENTS,
+        variables: {
+          input: {
+            status: "REJECTED",
           },
         },
       },
@@ -712,15 +718,13 @@ export function useChangeEventVerification(
     ...options,
     refetchQueries: [
       {
-        query: GET_EVENTS,
+        query: GET_ALL_EVENTS,
         variables: {
-          input: {
-            status: "ALL",
-          },
+          input: {},
         },
       },
       {
-        query: GET_EVENTS,
+        query: GET_ALL_EVENTS,
         variables: {
           input: {
             status: "APPROVED",
