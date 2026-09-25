@@ -261,4 +261,5 @@ export * from "./woocommerce";
 export * from "./roles";
 export * from "./hr";
 export * from "./crm";
+export * from "./whatsapp";
 

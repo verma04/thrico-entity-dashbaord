@@ -830,7 +830,7 @@ export default function PollResultsPage() {
                 variant="outline"
                 size="sm"
                 className="w-full text-xs justify-between h-8 text-muted-foreground hover:text-foreground"
-                onClick={() => router.push(`/polls/${id}/manage`)}
+                onClick={() => router.push(`/polls/${id}`)}
               >
                 <span>Edit {singularName}</span>
                 <ChevronRight className="h-3.5 w-3.5" />

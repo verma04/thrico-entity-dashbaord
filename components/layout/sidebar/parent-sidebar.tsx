@@ -19,6 +19,13 @@ import {
   Sparkles,
   Zap,
   Megaphone,
+  UserGroup,
+  TableOfContents,
+  NotebookDot,
+  Workflow,
+  GlobeCode,
+  Houses,
+  TabletSmartphone,
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 import { useHasAnyIntegration } from "@/graphql/actions";
@@ -35,20 +42,20 @@ export function ParentSidebar() {
       <div className="flex flex-col gap-2.5 w-full items-center">
         {/* Nav Items */}
         <NavRailItem
-          icon={<Home size={18} />}
+          icon={<Houses size={18} />}
           label="Home"
           href="/"
           active={activeTab === "home"}
         />
 
         <NavRailItem
-          icon={<Users size={18} />}
+          icon={<UserGroup size={18} />}
           label="Members"
           href="/members"
           active={activeTab === "members"}
         />
         <NavRailItem
-          icon={<FileText size={18} />}
+          icon={<NotebookDot size={18} />}
           label="Content"
           href="/feed"
           active={activeTab === "content"}
@@ -67,7 +74,7 @@ export function ParentSidebar() {
         />
         {showIntegrations && (
           <NavRailItem
-            icon={<Zap size={18} />}
+            icon={<Workflow size={18} />}
             label="Integrations"
             href="/settings/integrations"
             active={activeTab === "integrations"}
@@ -82,13 +89,13 @@ export function ParentSidebar() {
         />
 
         <NavRailItem
-          icon={<Globe size={18} />}
+          icon={<GlobeCode size={18} />}
           label="Website"
           href="/app-layout"
           active={activeTab === "website"}
         />
         <NavRailItem
-          icon={<Smartphone size={18} />}
+          icon={<TabletSmartphone size={18} />}
           label="Mobile App"
           href="/mobile-app"
           active={activeTab === "mobile-app"}

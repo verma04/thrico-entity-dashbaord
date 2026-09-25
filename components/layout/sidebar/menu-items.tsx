@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import {
   Home,
   BarChartBigIcon as ChartBarIcon,
@@ -1185,28 +1186,60 @@ export const emailItems = [
     icon: <BarChart3 size={18} />,
   },
   {
-    key: "email-campaigns",
+    key: "email-parent",
     label: "Email Campaigns",
     path: "/marketing/email/campaigns",
-    icon: <Megaphone size={18} />,
+    icon: <Mail size={18} />,
+    children: [
+      {
+        key: "email-campaigns",
+        label: "Campaigns",
+        path: "/marketing/email/campaigns",
+      },
+      {
+        key: "email-templates",
+        label: "Templates",
+        path: "/marketing/email/templates",
+      },
+      {
+        key: "email-dash",
+        label: "Analytics & Usage",
+        path: "/marketing/email/usage",
+      },
+    ],
   },
   {
-    key: "email-templates",
-    label: "Manage Templates",
-    path: "/marketing/email/templates",
-    icon: <FileText size={18} />,
-  },
-  {
-    key: "email-dash",
-    label: "Usage Dashboard",
-    path: "/marketing/email/usage",
-    icon: <BarChart3 size={18} />,
-  },
-  {
-    key: "email-settings",
-    label: "Email Settings",
-    path: "/marketing/email/usage",
-    icon: <Settings size={18} />,
+    key: "whatsapp-parent",
+    label: "WhatsApp Campaigns",
+    path: "/marketing/whatsapp",
+    icon: <WhatsAppIcon size={18} className="size-4 shrink-0" />,
+    children: [
+      {
+        key: "whatsapp-hub",
+        label: "Dashboard",
+        path: "/marketing/whatsapp",
+      },
+      {
+        key: "whatsapp-campaigns",
+        label: "Campaigns & Logs",
+        path: "/marketing/whatsapp/campaigns",
+      },
+      {
+        key: "whatsapp-send",
+        label: "Send Message",
+        path: "/marketing/whatsapp/send",
+      },
+      {
+        key: "whatsapp-templates",
+        label: "Templates",
+        path: "/marketing/whatsapp/templates",
+      },
+      {
+        key: "whatsapp-usage",
+        label: "Usage & Health",
+        path: "/marketing/whatsapp/usage",
+      },
+    ],
   },
 ];
 export const marketingItems = emailItems;

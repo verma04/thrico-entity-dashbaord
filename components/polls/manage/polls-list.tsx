@@ -37,7 +37,7 @@ export const getPollTableColumns = (
     cell: (row) => (
       <div className="flex flex-col min-w-[200px]">
         <Link
-          href={`/polls/${row.id}/manage`}
+          href={`/polls/${row.id}`}
           className="text-[12px] font-semibold text-foreground leading-tight truncate max-w-[240px] hover:text-primary hover:underline transition-colors"
           title={row.title}
         >

@@ -132,10 +132,15 @@ export function MenuItemRow({
   const isCollapsed = state === "collapsed";
 
   const hasChildren = !!(item.children && item.children.length > 0);
+  const isChildActive =
+    hasChildren &&
+    item.children?.some(
+      (c) =>
+        pathName === c.path ||
+        (c.path && c.path !== "/" && pathName.startsWith(c.path)),
+    );
   const isOpen = openGroup === item.key || Boolean(searchQuery.trim());
-  const isActive =
-    pathName === item.path ||
-    (hasChildren && item.children?.some((c) => pathName === c.path));
+  const isActive = pathName === item.path || isChildActive;
 
   const tooltipLabel = typeof item.label === "string" ? item.label : undefined;
 
@@ -148,7 +153,9 @@ export function MenuItemRow({
         {
           size: depth > 0 ? 12 : 14,
           className: cn(
+            depth > 0 ? "size-3 min-w-3" : "size-3.5 min-w-3.5",
             "shrink-0 transition-colors duration-150",
+            (item.icon as React.ReactElement<{ className?: string }>).props?.className,
             isActive
               ? "text-neutral-900 dark:text-neutral-100"
               : "text-[#636363] group-hover:text-neutral-600 dark:text-neutral-500 dark:group-hover:text-neutral-300",

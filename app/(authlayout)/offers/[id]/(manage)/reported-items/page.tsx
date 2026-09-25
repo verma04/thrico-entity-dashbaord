@@ -1,15 +1,19 @@
 "use client";
 
 import React from "react";
-
-import { useModuleStore } from "@/store/useModuleStore";
+import { useParams } from "next/navigation";
+import ItemReports from "@/components/reports/item-reports";
+import { ReportModule } from "@/graphql/actions";
 
 export default function OfferReportedItemsPage() {
-  const singularName = useModuleStore((state) => state.offerSingularName);
+  const params = useParams();
+  const id = params?.id as string;
+
   return (
-    <div className="p-6 bg-card rounded-xl border border-border shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Reported Items</h2>
-      <p className="text-muted-foreground">Manage reports related to this {singularName.toLowerCase()}.</p>
-    </div>
+    <ItemReports
+      targetId={id}
+      moduleName={ReportModule.OFFER}
+      permissionModule="OFFERS"
+    />
   );
 }

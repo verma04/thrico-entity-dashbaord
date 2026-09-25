@@ -9,29 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Trash2, AlertTriangle, Save } from "lucide-react";
+import { Save, Sparkles, Layout, Settings } from "lucide-react";
 import {
   useEventSettings,
   useUpsertEventSettings,
   useDeleteEvent,
+  useEventById,
 } from "@/graphql/actions/events";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -43,17 +26,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { ReusableDangerZone } from "@/components/shared/reusable-danger-zone";
+import { Users, Calendar, Ticket, Mic } from "lucide-react";
 
 export default function EventSettings({ eventId }: { eventId: string }) {
   const router = useRouter();
   const { data, loading } = useEventSettings(eventId);
+  const { data: eventData } = useEventById(eventId);
+  const event = eventData?.getEventById;
   const settings = data?.getEventSettings;
 
   const [layout, setLayout] = useState(settings?.layout || "layout-1");
 
   const [upsertSettings, { loading: saving }] = useUpsertEventSettings({
     onCompleted: () => {
-      toast.success("Settings saved successfully");
+      toast.success("Event settings saved successfully");
     },
     onError: (error) => toast.error(error.message),
   });
@@ -61,7 +49,7 @@ export default function EventSettings({ eventId }: { eventId: string }) {
   const [deleteEvent, { loading: deleting }] = useDeleteEvent({
     onCompleted: () => {
       toast.success("Event deleted successfully");
-      router.push("/events");
+      router.push("/events/all");
     },
     onError: (error) => toast.error(error.message),
   });
@@ -84,115 +72,115 @@ export default function EventSettings({ eventId }: { eventId: string }) {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Settings</h2>
-        <Button onClick={handleSave} disabled={saving} className="gap-2">
-          <Save className="h-4 w-4" />
-          {saving ? "Saving..." : "Save Changes"}
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* ── Top Header Strip ────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/60 rounded-xl p-4 shadow-2xs">
+        <div>
+          <div className="flex items-center gap-2">
+            <Settings className="h-4 w-4 text-primary" />
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
+              Event Display &amp; Configuration
+            </h2>
+            <Badge variant="secondary" className="text-[10px] font-semibold">
+              Preferences
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Configure attendee-facing presentation layouts and manage destructive operations.
+          </p>
+        </div>
+
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          size="sm"
+          className="h-8 text-xs font-semibold gap-1.5 rounded-lg shadow-2xs bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer"
+        >
+          <Save className="h-3.5 w-3.5" />
+          {saving ? "Saving…" : "Save Display Settings"}
         </Button>
       </div>
 
-      <Card className="border-none shadow-sm ring-1 ring-border/50">
-        <CardHeader className="bg-muted/30">
-          <CardTitle>Display Settings</CardTitle>
-          <CardDescription>
-            Configure how your event appears to attendees
+      {/* ── Display Settings Card ────────────────────────────────────────── */}
+      <Card className="border border-border/60 shadow-2xs rounded-xl overflow-hidden bg-card">
+        <CardHeader className="bg-muted/30 border-b border-border/60 pb-3">
+          <div className="flex items-center gap-2">
+            <Layout className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-semibold">
+              Public Event Page Layout
+            </CardTitle>
+          </div>
+          <CardDescription className="text-xs text-muted-foreground">
+            Configure how your event schedule and speaker cards appear on public member portals
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 space-y-4">
-          <div className="space-y-2">
-            <Label>Event Layout</Label>
+        <CardContent className="p-6 space-y-4">
+          <div className="max-w-md space-y-2">
+            <Label className="text-xs font-semibold text-foreground">
+              Layout Style
+            </Label>
             <Select value={layout} onValueChange={setLayout}>
-              <SelectTrigger>
+              <SelectTrigger className="h-8 text-xs rounded-lg border-border/60 bg-background shadow-2xs">
                 <SelectValue placeholder="Select a layout" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="text-xs">
                 <SelectItem value="layout-1">
-                  Modern Default (Layout 1)
+                  Modern Hero Focus (Layout 1)
                 </SelectItem>
-                <SelectItem value="layout-2">Clean List (Layout 2)</SelectItem>
-                <SelectItem value="layout-3">Grid Focus (Layout 3)</SelectItem>
+                <SelectItem value="layout-2">
+                  Clean Agenda List (Layout 2)
+                </SelectItem>
+                <SelectItem value="layout-3">
+                  Media &amp; Grid Focus (Layout 3)
+                </SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground italic">
-              * Changing the layout will affect the public event page.
+            <p className="text-[11px] text-muted-foreground">
+              Controls visual positioning of schedule tracks, speakers roster, and ticket checkout cards.
             </p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-sm ring-1 ring-border/50">
-        <CardHeader className="bg-muted/30">
-          <CardTitle>Advanced Settings</CardTitle>
-          <CardDescription>
-            Manage advanced configuration and danger zone actions
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="danger-zone">
-              <AccordionTrigger className="text-destructive hover:text-destructive/80">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
-                  Danger Zone
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-4">
-                <Alert variant="destructive" className="mb-4">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong className="font-semibold block mb-1">
-                      Delete Event
-                    </strong>
-                    Once you delete an event, there is no going back. This
-                    action cannot be undone and will remove all tickets,
-                    registrations, and media.
-                  </AlertDescription>
-                </Alert>
-
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="gap-2">
-                      <Trash2 className="h-4 w-4" />
-                      Delete Event
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you absolutely sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete your event and remove all associated data from
-                        our servers.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={handleDelete}
-                        disabled={deleting}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        {deleting ? "Deleting..." : "Confirm Delete"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
+      {/* ── Reusable Danger Zone Section ─────────────────────────────────── */}
+      <div className="pt-2">
+        <ReusableDangerZone
+          entityName="Event"
+          entityTitle={event?.title || `Event #${eventId}`}
+          entityId={eventId}
+          onDelete={handleDelete}
+          loading={deleting}
+          holdTime={2000}
+          requireTypeMatch={true}
+          warningDescription="Deleting this event will immediately cancel all attendee tickets, remove all scheduled speaker sessions, wipe sponsor linkages, and delete check-in telemetry."
+          impactMetrics={[
+            {
+              label: "Registered Attendees",
+              value: event?.attendeeCount || 0,
+              icon: Users,
+              description: "Tickets revoked immediately",
+            },
+            {
+              label: "Speakers Scheduled",
+              value: event?.speakers?.length || 0,
+              icon: Mic,
+              description: "Agenda slots erased",
+            },
+            {
+              label: "Schedule Status",
+              value: event?.startDate ? "Scheduled" : "Draft",
+              icon: Calendar,
+              description: "Calendar slots cleared",
+            },
+          ]}
+        />
+      </div>
     </div>
   );
 }

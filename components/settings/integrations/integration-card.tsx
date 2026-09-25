@@ -82,12 +82,12 @@ export const IntegrationCard = ({
   return (
     <div
       className={cn(
-        "group/card relative flex flex-col justify-between h-full rounded-xl border bg-card transition-all duration-200 ease-out overflow-hidden",
-        "shadow-[0_1px_2px_0_rgba(0,0,0,0.03)]",
-        "hover:shadow-[0_4px_14px_-2px_rgba(0,0,0,0.07),0_1px_3px_0_rgba(0,0,0,0.03)]",
+        "group/card relative flex flex-col justify-between h-full rounded-[10px] border transition-all duration-150 ease-out overflow-hidden",
+        "bg-white dark:bg-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
+        "hover:shadow-[0_3px_8px_rgba(0,0,0,0.07)]",
         isConnected
-          ? "border-emerald-500/30 dark:border-emerald-500/25 hover:border-emerald-500/50 bg-card"
-          : "border-border/50 hover:border-border/80 hover:bg-card/90",
+          ? "border-emerald-500/40 dark:border-emerald-500/30 hover:border-emerald-500/60"
+          : "border-[#d2d5d9] dark:border-zinc-800 hover:border-[#aeb4b9] dark:hover:border-zinc-700",
         className
       )}
     >
@@ -97,18 +97,18 @@ export const IntegrationCard = ({
       )}
 
       {/* Main Content Area */}
-      <div className="p-4 flex flex-col justify-between gap-3 flex-1">
+      <div className="p-3.5 flex flex-col justify-between gap-2.5 flex-1">
         {/* Top Header: Brand Icon + Title + Action */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-2.5">
           {/* Left: Brand Icon + Titles */}
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             {/* Compact Brand Icon */}
             <div className="relative shrink-0">
               <div
                 style={resolvedBgStyle}
                 className={cn(
-                  "h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-200",
-                  "shadow-[0_1px_2px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.15)]",
+                  "h-8.5 w-8.5 rounded-[8px] flex items-center justify-center transition-all duration-150",
+                  "shadow-[0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.15)]",
                   "group-hover/card:scale-105",
                   resolvedBgClass
                 )}
@@ -118,8 +118,8 @@ export const IntegrationCard = ({
               {/* Mini Status Dot */}
               <div
                 className={cn(
-                  "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card transition-colors duration-200",
-                  isConnected ? "bg-emerald-500" : "bg-muted-foreground/30"
+                  "absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border-2 border-white dark:border-zinc-900 transition-colors duration-150",
+                  isConnected ? "bg-emerald-500" : "bg-[#8c9196]/40"
                 )}
               />
             </div>
@@ -127,16 +127,16 @@ export const IntegrationCard = ({
             {/* Title + Badges + Status */}
             <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="text-[13.5px] font-semibold tracking-tight text-foreground truncate leading-snug">
+                <h3 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 truncate leading-snug tracking-tight">
                   {title}
                 </h3>
                 {category && (
-                  <span className="text-[9px] font-semibold text-muted-foreground/80 bg-muted/70 px-1.5 py-[1px] rounded-md border border-border/40 shrink-0 uppercase tracking-wider">
+                  <span className="text-[9.5px] font-medium text-[#616161] dark:text-zinc-400 bg-[#f6f6f7] dark:bg-zinc-800 px-1.5 py-[1px] rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 shrink-0 uppercase tracking-wider">
                     {category}
                   </span>
                 )}
                 {badge && (
-                  <span className="text-[9px] font-semibold text-primary bg-primary/10 px-1.5 py-[1px] rounded-md border border-primary/20 shrink-0">
+                  <span className="text-[9.5px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-[1px] rounded-[4px] border border-emerald-500/20 shrink-0">
                     {badge}
                   </span>
                 )}
@@ -145,16 +145,16 @@ export const IntegrationCard = ({
               {/* Status Indicator */}
               <div className="flex items-center gap-1.5">
                 {isConnected ? (
-                  <span className="inline-flex items-center gap-1.5 text-[10.5px] font-medium text-emerald-600 dark:text-emerald-400 leading-none">
+                  <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-600 dark:text-emerald-400 leading-none">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                     </span>
-                    Active Sync
+                    Connected & Syncing
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-[10.5px] font-medium text-muted-foreground/60 leading-none">
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
+                  <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-[#8c9196] leading-none">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#8c9196]/40" />
                     Not connected
                   </span>
                 )}
@@ -174,8 +174,8 @@ export const IntegrationCard = ({
                     size="sm"
                     onClick={() => setShowConfig(!showConfig)}
                     className={cn(
-                      "h-7 text-[11px] px-2 font-medium rounded-lg text-muted-foreground hover:text-foreground transition-all duration-150 cursor-pointer",
-                      showConfig && "bg-muted/70 text-foreground font-semibold"
+                      "h-7 text-[11px] px-2 font-medium rounded-[6px] text-[#616161] dark:text-zinc-400 hover:text-[#303030] dark:hover:text-zinc-100 transition-all duration-150 cursor-pointer",
+                      showConfig && "bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 font-semibold"
                     )}
                     title="Toggle Settings"
                   >
@@ -201,7 +201,7 @@ export const IntegrationCard = ({
                       <CtaButton
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-150 cursor-pointer"
+                        className="h-7 w-7 p-0 text-[#8c9196] hover:text-destructive hover:bg-destructive/10 rounded-[6px] transition-all duration-150 cursor-pointer"
                         title="Disconnect"
                       >
                         <Unplug className="h-3.5 w-3.5" />
@@ -246,7 +246,7 @@ export const IntegrationCard = ({
               onConnect && (
                 <CtaButton
                   size="sm"
-                  className="h-7.5 text-[11.5px] px-3 gap-1 rounded-lg font-semibold transition-all duration-150 active:scale-98 shadow-xs cursor-pointer"
+                  className="h-7 text-[11px] px-2.5 gap-1 rounded-[6px] font-medium transition-all duration-150 active:scale-98 shadow-2xs cursor-pointer"
                   onClick={onConnect}
                   disabled={isConnecting}
                 >
@@ -270,7 +270,7 @@ export const IntegrationCard = ({
                 href={docsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-7 w-7 flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/60 rounded-lg transition-colors duration-150"
+                className="h-7 w-7 flex items-center justify-center text-[#8c9196] hover:text-[#303030] dark:hover:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 rounded-[6px] transition-colors duration-150"
                 title="View documentation & setup guide"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -280,14 +280,14 @@ export const IntegrationCard = ({
         </div>
 
         {/* Description */}
-        <p className="text-[12px] text-muted-foreground/80 leading-relaxed line-clamp-2 min-h-[36px] mt-0.5">
+        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 leading-[16px] line-clamp-2 min-h-[32px] mt-0.5">
           {description}
         </p>
       </div>
 
       {/* Connected Drawer / Settings Area */}
       {isConnected && children && showConfig && (
-        <div className="border-t border-border/40 bg-muted/25 px-4 py-3.5 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="border-t border-[#e1e3e5] dark:border-zinc-800 bg-[#fbfbfa] dark:bg-zinc-900/60 px-3.5 py-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
           {children}
         </div>
       )}

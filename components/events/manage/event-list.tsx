@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import moment from "moment";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Calendar,
@@ -12,6 +11,7 @@ import {
   Globe,
   Clock,
   Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { Event, useChangeEventStatus } from "@/graphql/actions/events";
 import { EventActions } from "./event-actions";
@@ -20,159 +20,135 @@ import {
   AdminStatusBadge,
   AdminVerifiedBadge,
   AdminTableColumn,
-  AdminTableDate,
+  AdminTableItem,
+  AdminTableText,
   AdminTableMetric,
+  AdminTableTag,
+  AdminTableDate,
 } from "@/components/shared/admin-table/admin-table";
 import { useModuleStore } from "@/store/useModuleStore";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Type Badge
-// ─────────────────────────────────────────────────────────────────────────────
-
-const TYPE_CONFIG: Record<
-  string,
-  { label: string; bg: string; text: string; border: string }
-> = {
-  ONLINE: {
-    label: "Online",
-    bg: "bg-cyan-500/10",
-    text: "text-cyan-700 dark:text-cyan-400",
-    border: "border-cyan-500/20",
-  },
-  VIRTUAL: {
-    label: "Online",
-    bg: "bg-cyan-500/10",
-    text: "text-cyan-700 dark:text-cyan-400",
-    border: "border-cyan-500/20",
-  },
-  OFFLINE: {
-    label: "In-Person",
-    bg: "bg-violet-500/10",
-    text: "text-violet-700 dark:text-violet-400",
-    border: "border-violet-500/20",
-  },
-  IN_PERSON: {
-    label: "In-Person",
-    bg: "bg-violet-500/10",
-    text: "text-violet-700 dark:text-violet-400",
-    border: "border-violet-500/20",
-  },
-  HYBRID: {
-    label: "Hybrid",
-    bg: "bg-amber-500/10",
-    text: "text-amber-700 dark:text-amber-400",
-    border: "border-amber-500/20",
-  },
-};
-
-function EventTypeBadge({ type }: { type: string }) {
-  const norm = type?.toUpperCase() || "OFFLINE";
-  const cfg = TYPE_CONFIG[norm] || {
-    label: type || "Event",
-    bg: "bg-muted",
-    text: "text-muted-foreground",
-    border: "border-border",
-  };
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-tight",
-        cfg.bg,
-        cfg.text,
-        cfg.border,
-      )}
-    >
-      {cfg.label}
-    </span>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Column definitions
+// Column definitions matching member/all table architecture
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const getEventTableColumns = (
   singularName: string,
+  router?: ReturnType<typeof useRouter>,
+  rowSelection?: Record<string, boolean>,
+  onToggleRow?: (index: number, checked: boolean) => void,
 ): AdminTableColumn<Event>[] => [
+  {
+    key: "select",
+    header: "",
+    headerClassName: "w-8 text-center",
+    className: "text-center",
+    cell: (_, index) => (
+      <div
+        className="flex items-center justify-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <input
+          type="checkbox"
+          checked={!!rowSelection?.[index]}
+          onChange={(e) => onToggleRow?.(index, e.target.checked)}
+          className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary cursor-pointer accent-primary"
+        />
+      </div>
+    ),
+  },
   {
     key: "serial",
     header: "S.No",
-    headerClassName: "w-12 text-center",
+    headerClassName: "w-10 text-center",
     className: "text-center text-[11px] font-medium text-muted-foreground",
     cell: (_, index) => index + 1,
   },
   {
+    key: "actions",
+    header: "Action",
+    headerClassName: "w-10 text-left",
+    className: "text-left",
+    isFixedLeft: true,
+    cell: (row) => <EventActions event={row} />,
+  },
+  {
     key: "event",
     header: singularName,
-    cell: (row) => (
-      <div className="flex items-center gap-2.5 min-w-[200px]">
-        <Avatar className="h-8 w-8 rounded-lg border border-border/60 shrink-0">
-          <AvatarImage
-            src={
-              row.cover
-                ? `https://cdn.thrico.network/${row.cover}`
-                : "https://cdn.thrico.network/defaultEventCover.png"
-            }
-            alt={row.title}
-            className="object-cover"
-          />
-          <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-[10px] font-bold">
-            <Calendar className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col min-w-0">
-          <p
-            className="text-[12px] font-semibold text-foreground leading-tight truncate max-w-[220px]"
-            title={row.title}
-          >
-            {row.title}
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-0.5 truncate max-w-[200px]">
-            {row.type?.replace("_", " ").toLowerCase()} ·{" "}
-            {row.startDate ? moment(row.startDate).format("MMM D, YYYY") : "No date"}
-          </p>
-        </div>
-      </div>
-    ),
+    cell: (row) => {
+      const coverUrl = row.cover
+        ? row.cover.startsWith("http")
+          ? row.cover
+          : `https://cdn.thrico.network/${row.cover}`
+        : "https://cdn.thrico.network/defaultEventCover.png";
+
+      return (
+        <AdminTableItem
+          avatar={coverUrl}
+          title={row.title}
+          subtitle={
+            row.description
+              ? row.description.slice(0, 60) + (row.description.length > 60 ? "…" : "")
+              : "No description provided"
+          }
+          fallbackText={row.title?.slice(0, 2).toUpperCase() || "EV"}
+          shape="rounded"
+          maxTitleWidth="max-w-[240px]"
+          onClick={() => router?.push(`/events/${row.id}`)}
+        />
+      );
+    },
   },
   {
     key: "type",
-    header: "Type",
-    cell: (row) => <EventTypeBadge type={row.type} />,
-  },
-  {
-    key: "date",
-    header: "Date & Time",
-    cell: (row) => (
-      <div className="flex flex-col text-[12px]">
-        <span className="font-medium text-foreground/90 whitespace-nowrap">
-          {row.startDate ? moment(row.startDate).format("MMM D, YYYY") : "—"}
-        </span>
-        {row.startTime && (
-          <span className="text-[10px] text-muted-foreground">{row.startTime}</span>
-        )}
-      </div>
-    ),
+    header: "Format",
+    cell: (row) => {
+      const t = row.type?.toUpperCase() || "OFFLINE";
+      const variant =
+        t === "ONLINE" || t === "VIRTUAL"
+          ? "sky"
+          : t === "HYBRID"
+            ? "amber"
+            : "purple";
+      return (
+        <AdminTableTag variant={variant}>
+          {row.type?.replace("_", " ") || "EVENT"}
+        </AdminTableTag>
+      );
+    },
   },
   {
     key: "location",
     header: "Location",
+    cell: (row) => {
+      const isOnline =
+        row.type?.toUpperCase() === "ONLINE" ||
+        row.type?.toUpperCase() === "VIRTUAL";
+      return (
+        <AdminTableText
+          primary={
+            row.location?.name ||
+            (isOnline ? "Virtual / Online Event" : "Location TBD")
+          }
+          secondary={row.location?.address}
+          icon={isOnline ? Globe : MapPin}
+        />
+      );
+    },
+  },
+  {
+    key: "date",
+    header: "Schedule",
     cell: (row) => (
-      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground max-w-[160px]">
-        {row.type?.toUpperCase() === "ONLINE" ||
-        row.type?.toUpperCase() === "VIRTUAL" ? (
-          <Globe className="h-3.5 w-3.5 shrink-0 text-cyan-600" />
-        ) : (
-          <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+      <div className="flex flex-col gap-0.5">
+        <AdminTableDate date={row.startDate} format="MMM d, yyyy" />
+        {row.startTime && (
+          <span className="text-[10px] text-muted-foreground font-mono">
+            {row.startTime}
+          </span>
         )}
-        <span className="truncate">
-          {row.location?.name ||
-            (row.type?.toUpperCase() === "ONLINE"
-              ? "Virtual"
-              : "Location TBD")}
-        </span>
       </div>
     ),
   },
@@ -183,7 +159,7 @@ export const getEventTableColumns = (
   },
   {
     key: "verification",
-    header: "Verified",
+    header: "Verification",
     cell: (row) => (
       <AdminVerifiedBadge verified={!!row.verification?.isVerified} />
     ),
@@ -191,12 +167,10 @@ export const getEventTableColumns = (
   {
     key: "attendees",
     header: "Attendees",
-    headerClassName: "text-right",
-    className: "text-right",
     cell: (row) => (
       <AdminTableMetric
         icon={Users}
-        value={row.numberOfAttendees || 0}
+        value={row.numberOfAttendees?.toLocaleString() || "0"}
         variant="indigo"
       />
     ),
@@ -204,27 +178,17 @@ export const getEventTableColumns = (
   {
     key: "views",
     header: "Views",
-    headerClassName: "text-right",
-    className: "text-right",
     cell: (row) => (
       <AdminTableMetric
         icon={Eye}
-        value={row.numberOfViews || 0}
+        value={row.numberOfViews?.toLocaleString() || "0"}
       />
     ),
   },
   {
     key: "created",
     header: "Created",
-    cell: (row) => <AdminTableDate date={row.createdAt} />,
-  },
-  {
-    key: "actions",
-    header: "Action",
-    headerClassName: "w-10 text-right",
-    className: "text-right",
-    isFixedRight: true,
-    cell: (row) => <EventActions event={row} />,
+    cell: (row) => <AdminTableDate date={row.createdAt} relative />,
   },
 ];
 
@@ -243,21 +207,115 @@ export function EventList({
   visibleColumns,
   offset = 0,
 }: EventListProps) {
-  const moduleName = useModuleStore((state) => state.eventModuleName);
-  const singularName = useModuleStore((state) => state.eventSingularName);
+  const router = useRouter();
+  const moduleName = useModuleStore((state) => state.eventModuleName) || "Events";
+  const singularName = useModuleStore((state) => state.eventSingularName) || "Event";
 
-  const baseColumns = React.useMemo(
-    () => getEventTableColumns(singularName),
-    [singularName],
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+  const [changeStatus, { loading: bulkLoading }] = useChangeEventStatus();
+
+  const handleToggleRow = (index: number, checked: boolean) => {
+    setRowSelection((prev) => ({
+      ...prev,
+      [index]: checked,
+    }));
+  };
+
+  const selectedRowsIds = useMemo(() => {
+    return Object.keys(rowSelection)
+      .filter((key) => rowSelection[key])
+      .map((key) => events[Number(key)]?.id)
+      .filter(Boolean);
+  }, [rowSelection, events]);
+
+  const handleBulkAction = async (statusAction: string) => {
+    if (!selectedRowsIds.length) return;
+    try {
+      await Promise.all(
+        selectedRowsIds.map((eventId) =>
+          changeStatus({
+            variables: {
+              input: {
+                eventId,
+                action: statusAction,
+              },
+            },
+          })
+        )
+      );
+      toast.success(
+        `Updated ${selectedRowsIds.length} ${moduleName.toLowerCase()} to ${statusAction.toLowerCase()}`
+      );
+      setRowSelection({});
+    } catch (e: any) {
+      toast.error("Bulk action failed", { description: e?.message });
+    }
+  };
+
+  const baseColumns = useMemo(
+    () =>
+      getEventTableColumns(
+        singularName,
+        router,
+        rowSelection,
+        handleToggleRow
+      ),
+    [singularName, router, rowSelection]
   );
 
-  const activeColumns = React.useMemo(() => {
+  const activeColumns = useMemo(() => {
     if (!visibleColumns) return baseColumns;
     return baseColumns.filter((col) => visibleColumns[col.key] !== false);
   }, [baseColumns, visibleColumns]);
 
   return (
     <div className="space-y-3">
+      {/* ── Bulk Action Bar ────────────────────────────────────────────── */}
+      {selectedRowsIds.length > 0 && (
+        <div className="flex items-center gap-2 p-2.5 bg-primary/5 border border-primary/10 rounded-xl animate-in fade-in slide-in-from-top-2">
+          <span className="text-xs font-semibold text-foreground px-2.5 py-1 bg-primary/10 rounded-lg whitespace-nowrap">
+            {selectedRowsIds.length} selected
+          </span>
+          <div className="h-3.5 w-px bg-border mx-1 shrink-0" />
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 px-2.5 text-xs font-medium border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 whitespace-nowrap cursor-pointer"
+            onClick={() => handleBulkAction("APPROVED")}
+            disabled={bulkLoading}
+          >
+            Approve
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 px-2.5 text-xs font-medium border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 whitespace-nowrap cursor-pointer"
+            onClick={() => handleBulkAction("PAUSED")}
+            disabled={bulkLoading}
+          >
+            Pause
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 px-2.5 text-xs font-medium border-rose-200 text-rose-700 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-400 whitespace-nowrap cursor-pointer"
+            onClick={() => handleBulkAction("DISABLED")}
+            disabled={bulkLoading}
+          >
+            Disable
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-foreground ml-auto cursor-pointer"
+            onClick={() => setRowSelection({})}
+          >
+            Deselect all
+          </Button>
+        </div>
+      )}
+
+      {/* ── Standard AdminTable ────────────────────────────────────────── */}
       <AdminTable<Event>
         columns={activeColumns}
         data={events}
@@ -271,3 +329,5 @@ export function EventList({
     </div>
   );
 }
+
+export default EventList;

@@ -8,6 +8,7 @@ import {
   useUpdateOffer,
   useGetOfferCategories,
   useVerifyOffer,
+  useDeleteOffer,
 } from "@/graphql/actions/offers";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -49,6 +50,8 @@ import {
   Camera,
   CheckCircle2,
   ShieldAlert,
+  Ticket,
+  Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFormik } from "formik";
@@ -57,6 +60,7 @@ import Image from "next/image";
 import { ImageCropper } from "@/components/communities/add/image-cropper";
 import { useModuleStore } from "@/store/useModuleStore";
 import { PolarisEligibilityCard } from "@/components/gamification/shared/polaris-eligibility-card";
+import { ReusableDangerZone } from "@/components/shared/reusable-danger-zone";
 
 const validationSchema = Yup.object({
   title: Yup.string().required("Title is required"),
@@ -120,7 +124,7 @@ export default function OfferSettingsPage() {
     },
   });
 
-  const [verifyOfferMutation, { loading: verifying }] = useVerifyOffer({
+  const [verifyOffer, { loading: verifyLoading }] = useVerifyOffer({
     onCompleted: () => {
       toast({
         title: "Success",
@@ -133,6 +137,23 @@ export default function OfferSettingsPage() {
       toast({
         title: "Error",
         description: error.message || "Failed to update verification",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const [deleteOffer, { loading: isDeleting }] = useDeleteOffer({
+    onCompleted: () => {
+      toast({
+        title: "Success",
+        description: `${singularName} deleted permanently.`,
+      });
+      router.push("/offers/all");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || `Failed to delete ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -286,7 +307,9 @@ export default function OfferSettingsPage() {
     );
   }
 
-  const handleAction = (action: string) => {
+  const handleAction = (
+    action: "APPROVE" | "REJECT" | "EXPIRE" | "ACTIVATE" | "DEACTIVATE",
+  ) => {
     changeStatus({ variables: { input: { id, action } } });
   };
 
@@ -307,27 +330,26 @@ export default function OfferSettingsPage() {
     });
   };
 
-  const statusActions = [
+  const statusActions: {
+    label: string;
+    action: "APPROVE" | "REJECT" | "EXPIRE" | "ACTIVATE" | "DEACTIVATE";
+    icon: any;
+    variant: string;
+    show: (s: string) => boolean;
+  }[] = [
     {
       label: "Activate",
       action: "ACTIVATE",
       icon: CheckCircle,
       variant: "success",
-      show: (s: string) => s !== "ACTIVE" && s !== "APPROVED",
-    },
-    {
-      label: "Approve",
-      action: "APPROVE",
-      icon: CheckCircle,
-      variant: "success",
-      show: (s: string) => s === "PENDING" || s === "INACTIVE",
+      show: (s: string) => s !== "ACTIVE",
     },
     {
       label: "Deactivate",
       action: "DEACTIVATE",
       icon: PauseCircle,
       variant: "warning",
-      show: (s: string) => s === "ACTIVE" || s === "APPROVED",
+      show: (s: string) => s === "ACTIVE",
     },
     {
       label: "Expire",
@@ -373,11 +395,7 @@ export default function OfferSettingsPage() {
                 Current Status
               </span>
               <Badge
-                variant={
-                  offer?.status === "APPROVED" || offer?.status === "ACTIVE"
-                    ? "default"
-                    : "secondary"
-                }
+                variant={offer?.status === "ACTIVE" ? "default" : "secondary"}
                 className="rounded-md px-2.5 py-0.5 text-xs font-semibold uppercase"
               >
                 {offer?.status}
@@ -809,6 +827,34 @@ export default function OfferSettingsPage() {
             />
           )}
         </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="pt-2">
+        <ReusableDangerZone
+          entityName={singularName}
+          entityTitle={offer?.title || "Untitled Offer"}
+          impactMetrics={[
+            {
+              label: "Total Redemptions",
+              value: offer?.claimsCount ?? 0,
+              icon: Ticket,
+            },
+            {
+              label: "Page Impressions",
+              value: offer?.viewsCount ?? 0,
+              icon: Eye,
+            },
+          ]}
+          onDelete={async () => {
+            await deleteOffer({ variables: { id } });
+          }}
+          loading={isDeleting}
+          deleteButtonLabel={`Hold 2s to Delete ${singularName}`}
+          deleteDoneLabel="Deleted"
+          holdTime={2000}
+          requireTypeMatch={false}
+        />
       </div>
 
       <Dialog open={isVerifyModalOpen} onOpenChange={setIsVerifyModalOpen}>

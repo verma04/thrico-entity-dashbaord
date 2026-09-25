@@ -33,17 +33,26 @@ import {
   Mail,
   Phone,
   Calendar,
+  RotateCcw,
+  Upload,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import moment from "moment";
+import { cn } from "@/lib/utils";
 
 export default function JobApplicantsPage() {
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
   const [page, setPage] = useState(1);
   const [view, setView] = useState<"grid" | "list">("list");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const limit = 12;
 
-  const { data, loading } = useJobApplicants(id, page, limit, {
+  const { data, loading, refetch } = useJobApplicants(id, page, limit, {
     skip: !id,
   });
 
@@ -51,20 +60,67 @@ export default function JobApplicantsPage() {
   const total = data?.getJobApplicants?.total || 0;
   const totalPages = data?.getJobApplicants?.totalPages || 1;
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      if (refetch) {
+        await refetch();
+      }
+      toast.success("Applicants roster updated");
+    } catch {
+      toast.error("Failed to refresh applicants");
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 400);
+    }
+  };
+
+  const handleExportApplicants = () => {
+    if (applicants.length === 0) {
+      toast.error("No applicants to export");
+      return;
+    }
+
+    const csv = buildCsv(applicants, [
+      { header: "Applicant ID", getValue: (a: any) => a.id },
+      { header: "Full Name", getValue: (a: any) => a.fullName || "" },
+      { header: "Email", getValue: (a: any) => a.email || "" },
+      { header: "Phone", getValue: (a: any) => a.phone || "" },
+      { header: "Resume URL", getValue: (a: any) => a.resume || "" },
+      {
+        header: "Application Date",
+        getValue: (a: any) =>
+          a.createdAt
+            ? moment(a.createdAt).format("YYYY-MM-DD HH:mm:ss")
+            : "",
+      },
+    ]);
+
+    downloadCsv(csv, `job-applicants-${moment().format("YYYY-MM-DD")}`);
+    toast.success(`Exported ${applicants.length} applicant records`);
+  };
+
+  const withResumeCount = applicants.filter((a: any) => !!a.resume).length;
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card/60 backdrop-blur-sm border border-border/70 rounded-xl p-4 shadow-sm">
+      {/* ── Subheader Action Bar ─────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/60 rounded-xl p-4 shadow-2xs">
         <div>
-          <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
-            Applicants
-          </h2>
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
+              Candidate Roster & Submissions
+            </h2>
+            <Badge variant="secondary" className="text-[10px] font-semibold">
+              {total} Candidates
+            </Badge>
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {total} total application{total !== 1 ? "s" : ""} received for this position.
+            Review submissions, applicant contact details, and attached portfolios for this listing.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* View Mode Toggle: Grid / List */}
           <Tabs
             value={view}
@@ -74,14 +130,14 @@ export default function JobApplicantsPage() {
             <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
               <TabsTrigger
                 value="grid"
-                className="h-7 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1"
+                className="h-7 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-2xs data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1"
               >
                 <LayoutGrid className="h-3 w-3" />
                 Grid
               </TabsTrigger>
               <TabsTrigger
                 value="list"
-                className="h-7 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1"
+                className="h-7 px-2.5 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-2xs data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium gap-1"
               >
                 <ListIcon className="h-3 w-3" />
                 List
@@ -89,23 +145,88 @@ export default function JobApplicantsPage() {
             </TabsList>
           </Tabs>
 
-          <Badge
-            variant="secondary"
-            className="gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold"
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={isRefreshing || loading}
+            className="h-8 w-8 rounded-lg border-border/60 text-muted-foreground hover:text-foreground shadow-2xs"
+            title="Refresh applicants"
           >
-            <Users className="h-3.5 w-3.5" />
-            {total}
-          </Badge>
+            <RotateCcw
+              className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin text-primary")}
+            />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportApplicants}
+            className="h-8 text-xs font-medium gap-1.5 border-border/60 rounded-lg shadow-2xs hover:bg-muted"
+          >
+            <Upload className="h-3.5 w-3.5 text-muted-foreground" />
+            Export CSV
+          </Button>
         </div>
       </div>
 
-      <Card className="border border-border/70 shadow-sm rounded-xl overflow-hidden">
+      {/* ── KPI Telemetry Row ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="border-border/60 bg-card shadow-2xs rounded-xl">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Total Submissions
+              </p>
+              <p className="text-xl font-bold text-foreground mt-0.5">{total}</p>
+            </div>
+            <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40">
+              <Users className="h-4 w-4" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 bg-card shadow-2xs rounded-xl">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Resumes Attached
+              </p>
+              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                {withResumeCount}
+              </p>
+            </div>
+            <div className="h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/40">
+              <FileText className="h-4 w-4" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 bg-card shadow-2xs rounded-xl">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Current Page
+              </p>
+              <p className="text-xl font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                {page} <span className="text-xs text-muted-foreground font-normal">of {totalPages}</span>
+              </p>
+            </div>
+            <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-100 dark:border-blue-900/40">
+              <Sparkles className="h-4 w-4" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── Main Candidates Container ────────────────────────────────────── */}
+      <Card className="border border-border/60 shadow-2xs rounded-xl overflow-hidden">
         <CardHeader className="pb-3 border-b border-border/40 bg-muted/20">
-          <CardTitle className="text-sm font-semibold">
+          <CardTitle className="text-sm font-semibold text-foreground">
             All Candidates
           </CardTitle>
-          <CardDescription className="text-xs">
-            Review submissions and attached resumes for this listing.
+          <CardDescription className="text-xs text-muted-foreground">
+            Review submissions, portfolio documents, and candidate profiles.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-5">
@@ -137,18 +258,18 @@ export default function JobApplicantsPage() {
                 return (
                   <div
                     key={applicant.id}
-                    className="bg-card border border-border/80 hover:border-border rounded-xl p-3.5 shadow-sm flex flex-col justify-between gap-3 group transition-all"
+                    className="bg-card border border-border/80 hover:border-primary/40 rounded-xl p-3.5 shadow-2xs hover:shadow-md flex flex-col justify-between gap-3 group transition-all"
                   >
                     <div className="space-y-2.5">
                       <div className="flex items-start justify-between gap-2">
                         <Avatar className="h-10 w-10 rounded-lg border border-border/60">
-                          <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
 
                         {applicant.createdAt && (
-                          <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                          <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1 font-mono">
                             <Calendar className="h-2.5 w-2.5 shrink-0" />
                             {new Date(applicant.createdAt).toLocaleDateString()}
                           </span>
@@ -156,7 +277,7 @@ export default function JobApplicantsPage() {
                       </div>
 
                       <div className="min-w-0">
-                        <h4 className="text-xs font-semibold text-foreground truncate">
+                        <h4 className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                           {applicant.fullName || "Candidate"}
                         </h4>
                         <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-1">
@@ -174,13 +295,13 @@ export default function JobApplicantsPage() {
 
                     <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-2">
                       {applicant.resume ? (
-                        <Button variant="outline" size="sm" className="h-7 text-[11px] w-full gap-1" asChild>
+                        <Button variant="outline" size="sm" className="h-7 text-[11px] w-full gap-1 shadow-2xs font-semibold" asChild>
                           <a
                             href={applicant.resume}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <FileText className="h-3 w-3" />
+                            <FileText className="h-3 w-3 text-primary" />
                             View Resume
                             <ExternalLink className="h-2.5 w-2.5 ml-auto opacity-70" />
                           </a>
@@ -197,15 +318,15 @@ export default function JobApplicantsPage() {
             </div>
           ) : (
             /* ─── LIST VIEW ─────────────────────────────────────────────── */
-            <div className="border border-border/80 rounded-xl overflow-hidden bg-card">
+            <div className="border border-border/80 rounded-xl overflow-hidden bg-card shadow-2xs">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="text-xs">Candidate</TableHead>
-                    <TableHead className="text-xs">Email</TableHead>
-                    <TableHead className="text-xs">Phone</TableHead>
-                    <TableHead className="text-xs">Applied Date</TableHead>
-                    <TableHead className="text-right text-xs">Resume</TableHead>
+                    <TableHead className="text-xs font-semibold">Candidate</TableHead>
+                    <TableHead className="text-xs font-semibold">Email</TableHead>
+                    <TableHead className="text-xs font-semibold">Phone</TableHead>
+                    <TableHead className="text-xs font-semibold">Applied Date</TableHead>
+                    <TableHead className="text-right text-xs font-semibold">Resume</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -218,45 +339,51 @@ export default function JobApplicantsPage() {
                       .toUpperCase() || "A";
 
                     return (
-                      <TableRow key={applicant.id}>
-                        <TableCell className="py-3">
+                      <TableRow key={applicant.id} className="hover:bg-muted/30">
+                        <TableCell className="font-medium">
                           <div className="flex items-center gap-2.5">
-                            <Avatar className="h-7 w-7 rounded-md border border-border/60">
-                              <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
+                            <Avatar className="h-8 w-8 rounded-lg border border-border/60">
+                              <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                                 {initials}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-xs font-semibold text-foreground truncate">
-                              {applicant.fullName}
+                            <span className="text-xs font-semibold text-foreground">
+                              {applicant.fullName || "Candidate"}
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-xs py-3">
-                          {applicant.email}
+                        <TableCell className="text-xs text-muted-foreground">
+                          {applicant.email || "—"}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-xs py-3">
+                        <TableCell className="text-xs text-muted-foreground font-mono">
                           {applicant.phone || "—"}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-xs py-3">
+                        <TableCell className="text-xs text-muted-foreground font-mono">
                           {applicant.createdAt
                             ? new Date(applicant.createdAt).toLocaleDateString()
                             : "—"}
                         </TableCell>
-                        <TableCell className="text-right py-3">
+                        <TableCell className="text-right">
                           {applicant.resume ? (
-                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1 text-primary hover:text-primary/80" asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-xs gap-1 shadow-2xs font-semibold"
+                              asChild
+                            >
                               <a
                                 href={applicant.resume}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                <FileText className="h-3.5 w-3.5" />
-                                <ExternalLink className="h-3 w-3" />
+                                <FileText className="h-3 w-3 text-primary" />
+                                Resume
+                                <ExternalLink className="h-2.5 w-2.5 ml-0.5 opacity-70" />
                               </a>
                             </Button>
                           ) : (
-                            <span className="text-muted-foreground text-xs">
-                              —
+                            <span className="text-xs text-muted-foreground/60 italic">
+                              None
                             </span>
                           )}
                         </TableCell>
@@ -270,38 +397,26 @@ export default function JobApplicantsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/40">
-              <p className="text-xs text-muted-foreground font-medium">
-                Page{" "}
-                <span className="text-foreground font-semibold">
-                  {page}
-                </span>{" "}
-                of{" "}
-                <span className="text-foreground font-semibold">
-                  {totalPages}
-                </span>
+            <div className="flex items-center justify-between pt-4 border-t border-border/40 mt-4">
+              <p className="text-xs text-muted-foreground">
+                Page {page} of {totalPages}
               </p>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="h-7 w-7 p-0 rounded-md"
+                  disabled={page <= 1}
+                  className="h-7 w-7 p-0 rounded-lg shadow-2xs"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
-                <div className="px-2.5 py-0.5 rounded-md bg-muted/60 text-xs font-semibold tabular-nums">
-                  {page}
-                </div>
                 <Button
                   variant="outline"
                   size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  className="h-7 w-7 p-0 rounded-md"
+                  className="h-7 w-7 p-0 rounded-lg shadow-2xs"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
@@ -313,4 +428,3 @@ export default function JobApplicantsPage() {
     </div>
   );
 }
-

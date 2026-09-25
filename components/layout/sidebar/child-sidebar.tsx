@@ -36,7 +36,6 @@ import {
   emailItems,
   mobileAppItems,
   websiteItems,
-  aiItems as aiItemsRaw,
 } from "./menu-items";
 import { useWorkspaceSwitch } from "@/hooks/use-workspace-switch";
 
@@ -47,6 +46,38 @@ import { ParentSidebar } from "./parent-sidebar";
 import LogoutModal from "./logout";
 import { SwitchingLoader } from "./switching-loader";
 import { getActiveSidebarTab, isFormRoute } from "./sidebar-utils";
+
+interface SearchItem {
+  key: string;
+  label: string;
+  path: string;
+  icon?: React.ReactNode;
+  section: string;
+}
+
+function flattenItems(
+  items: MenuItem[] = [],
+  section: string,
+  parentIcon?: React.ReactNode,
+): SearchItem[] {
+  if (!items) return [];
+  return items.reduce((acc: SearchItem[], item) => {
+    const icon = item.icon || parentIcon;
+    if (item.children && item.children.length > 0) {
+      return [...acc, ...flattenItems(item.children, section, icon)];
+    }
+    if (item.path) {
+      acc.push({
+        key: item.key,
+        label: typeof item.label === "string" ? item.label : item.key,
+        path: item.path,
+        icon: icon,
+        section: section,
+      });
+    }
+    return acc;
+  }, []);
+}
 
 export function ChildSidebarContainer({
   children,
@@ -69,19 +100,18 @@ export function ChildSidebarContainer({
     activeTab !== "team" &&
     activeTab !== "upgrade";
 
-  // Default-open the Classifications group when on the members tab
+  // Default-open group based on active route
   useEffect(() => {
     if (activeTab === "members") {
       setOpenGroup("members-classifications");
-    }
-  }, [activeTab]);
-
-  // Default-open the Stories group when on stories route
-  useEffect(() => {
-    if (pathName.startsWith("/stories")) {
+    } else if (pathName.startsWith("/stories")) {
       setOpenGroup("stories");
+    } else if (pathName.startsWith("/marketing/whatsapp")) {
+      setOpenGroup("whatsapp-parent");
+    } else if (pathName.startsWith("/marketing/email")) {
+      setOpenGroup("email-parent");
     }
-  }, [pathName]);
+  }, [activeTab, pathName]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -224,38 +254,6 @@ export function ChildSidebarContainer({
     () => profile(nameOfUser) as MenuItem[],
     [nameOfUser],
   );
-  const filteredProfile = useMemo(
-    () => filterList(profileItems, searchQuery),
-    [searchQuery, profileItems, filterList],
-  );
-
-  const flattenItems = useCallback(
-    (
-      items: MenuItem[] = [],
-      section: string,
-      parentIcon?: React.ReactNode,
-    ): any[] => {
-      if (!items) return [];
-      return items.reduce((acc: any[], item) => {
-        const icon = item.icon || parentIcon;
-        if (item.children && item.children.length > 0) {
-          return [...acc, ...flattenItems(item.children, section, icon)];
-        }
-        if (item.path) {
-          acc.push({
-            key: item.key,
-            label: item.label,
-            path: item.path,
-            icon: icon,
-            section: section,
-          });
-        }
-        return acc;
-      }, []);
-    },
-    [],
-  );
-
   const allSearchItems = useMemo(() => {
     return [
       ...flattenItems(homeItems as MenuItem[], "Home"),
@@ -268,6 +266,7 @@ export function ChildSidebarContainer({
       ...flattenItems(reportedItems as MenuItem[], "Content Engine"),
       ...flattenItems(gamificationEngine as MenuItem[], "Gamification Engine"),
       ...flattenItems(modulesItems as MenuItem[], "Module Engine"),
+      ...flattenItems(emailItems as MenuItem[], "Marketing"),
       ...flattenItems(integrationsItems as MenuItem[], "Integrations"),
       ...flattenItems(websiteItems as MenuItem[], "Website"),
       ...flattenItems(billingAndTeamItems as MenuItem[], "Settings"),
@@ -287,12 +286,10 @@ export function ChildSidebarContainer({
     gamificationEngine,
     modulesItems,
     integrationsItems,
-    websiteItems,
     billingAndTeamItems,
     setupAndDesignItems,
     supportAndLegalItems,
     profileItems,
-    flattenItems,
   ]);
 
   const hasCurrentTabResults = useMemo(() => {
@@ -667,6 +664,7 @@ export function ChildSidebarContainer({
             "Content Engine",
             "Gamification Engine",
             "Module Engine",
+            "Marketing",
             "Integrations",
             "Website",
             "Settings",

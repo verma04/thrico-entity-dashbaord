@@ -9,6 +9,9 @@ import {
   LayoutGrid,
   List as ListIcon,
   Upload,
+  RotateCcw,
+  X,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   Select,
@@ -24,9 +27,14 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { safeFormat } from "@/lib/date-utils";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -35,7 +43,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { Pagination } from "@/components/shared/admin-table/admin-table";
 import { useModuleStore } from "@/store/useModuleStore";
 
-import { useAllEvents, EventStatus } from "@/graphql/actions/events";
+import { useAllEvents, EventStatus, Event } from "@/graphql/actions/events";
 import Create from "@/components/events/create/create";
 import {
   STATUS_TABS,
@@ -47,6 +55,8 @@ import {
 } from "./events-manage-ui";
 import { getEventTableColumns } from "./event-list";
 import { ExportEventsModal } from "./export-events-modal";
+import { EventKpiSummary } from "./event-kpi-summary";
+import { EventStarters } from "./event-starters";
 
 interface EventsManageProps {
   status?: string;
@@ -151,7 +161,8 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
     updateParams({ page: p <= 1 ? null : String(p) });
 
   // ── Fetch Events ──────────────────────────────────────────────────────────
-  const { data: eventsData, loading } = useAllEvents({
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: eventsData, loading: queryLoading, refetch } = useAllEvents({
     variables: {
       input: {
         status: status === EventStatus.ALL ? undefined : (status as EventStatus),
@@ -159,8 +170,82 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
     },
   });
 
+  const loading = queryLoading || isRefreshing;
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      toast.success(`${moduleName} refreshed`);
+    } catch {
+      toast.error("Failed to refresh events");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const allEvents = eventsData?.getAllEvents || [];
   const totalCount = allEvents.length;
+
+  // ── Quick CSV Export ───────────────────────────────────────────────────────
+  const handleQuickExport = () => {
+    if (filteredEvents.length === 0) {
+      toast.error("Nothing to export");
+      return;
+    }
+    const csv = buildCsv(filteredEvents, [
+      { header: "Title", getValue: (r: Event) => r.title || "" },
+      { header: "Type", getValue: (r: Event) => r.type || "" },
+      { header: "Status", getValue: (r: Event) => r.status || "" },
+      {
+        header: "Start Date",
+        getValue: (r: Event) => safeFormat(r.startDate, "yyyy-MM-dd", ""),
+      },
+      {
+        header: "End Date",
+        getValue: (r: Event) => safeFormat(r.endDate, "yyyy-MM-dd", ""),
+      },
+      { header: "Start Time", getValue: (r: Event) => r.startTime || "" },
+      {
+        header: "Location",
+        getValue: (r: Event) => r.location?.name || r.location?.address || "",
+      },
+      {
+        header: "Attendees",
+        getValue: (r: Event) => r.numberOfAttendees ?? 0,
+      },
+      {
+        header: "Views",
+        getValue: (r: Event) => r.numberOfViews ?? 0,
+      },
+      {
+        header: "Created At",
+        getValue: (r: Event) => safeFormat(r.createdAt, "yyyy-MM-dd", ""),
+      },
+      { header: "Description", getValue: (r: Event) => r.description || "" },
+    ]);
+
+    downloadCsv(csv, `${moduleName.toLowerCase()}-${safeFormat(new Date(), "yyyy-MM-dd", "")}`);
+    toast.success(`Exported ${filteredEvents.length} ${moduleName.toLowerCase()} to CSV`);
+  };
+
+  const hasActiveFilters = Boolean(
+    debouncedSearch.trim() ||
+      status !== EventStatus.ALL ||
+      selectedType !== "ALL" ||
+      sortBy !== "newest"
+  );
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    updateParams({
+      q: null,
+      status: null,
+      type: null,
+      sort: null,
+      page: null,
+    });
+  };
 
   // ── Filter and Sort Events ────────────────────────────────────────────────
   const filteredEvents = useMemo(() => {
@@ -246,7 +331,7 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
   );
 
   return (
-    <EcosystemWrapper className="gap-6">
+    <EcosystemWrapper className="gap-5 animate-in fade-in duration-500">
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <EcosystemHeader
         title={pageTitle}
@@ -254,14 +339,50 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
         description={
           loading
             ? `Loading ${moduleName.toLowerCase()}…`
-            : `${totalCount} total ${moduleName.toLowerCase()} in your community.`
+            : `${totalCount} total ${moduleName.toLowerCase()} registered across your community ecosystem.`
         }
         icon={Calendar}
         breadcrumbs={[
           { label: moduleName, href: "/events/all" },
           { label: pageTitle },
         ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleQuickExport}
+              className="h-8 gap-1.5 rounded-lg border-border/60 text-xs font-semibold shadow-2xs hover:bg-muted"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleRefresh}
+              disabled={loading}
+              className="h-8 w-8 rounded-lg border-border/60 text-muted-foreground hover:text-foreground shadow-2xs"
+              title="Refresh roster"
+            >
+              <RotateCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+            </Button>
+            <Create />
+          </div>
+        }
       />
+
+      {/* ── KPI Summary Cards ────────────────────────────────────────────── */}
+      <EventKpiSummary
+        events={allEvents}
+        loading={queryLoading}
+        moduleName={moduleName}
+        activeStatus={status}
+        onFilterStatus={(s) => setStatus(s as EventStatusValue)}
+      />
+
+      {/* ── Fast Assembly Launchpads ─────────────────────────────────────── */}
+      <EventStarters />
 
       {/* ── Action / Filter Bar ───────────────────────────────────────────── */}
       <EcosystemActionBar shadow="none">
@@ -271,7 +392,7 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
             <EcosystemActionBar.Search
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder={`Search ${moduleName.toLowerCase()}…`}
+              placeholder={`Search ${moduleName.toLowerCase()} by title, venue, or details…`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -285,7 +406,7 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
               value={status}
               onValueChange={(v) => setStatus(v as EventStatusValue)}
             >
-              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+              <SelectTrigger className="w-[135px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <div className="flex items-center gap-2">
                   {STATUS_TABS.find((t) => t.value === status)?.dot && (
                     <span
@@ -298,7 +419,7 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
                   <SelectValue placeholder="Status" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[145px]">
                 {STATUS_TABS.map((opt) => (
                   <SelectItem
                     key={opt.value}
@@ -328,10 +449,10 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
               value={selectedType}
               onValueChange={(v) => setSelectedType(v)}
             >
-              <SelectTrigger className="w-[125px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
-                <SelectValue placeholder="Type" />
+              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                <SelectValue placeholder="Format" />
               </SelectTrigger>
-              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[135px]">
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
                 {EVENT_TYPE_OPTIONS.map((opt) => (
                   <SelectItem
                     key={opt.value}
@@ -351,10 +472,10 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
               value={sortBy}
               onValueChange={(v) => setSortBy(v)}
             >
-              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+              <SelectTrigger className="w-[135px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
-              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[145px]">
                 {SORT_OPTIONS.map((opt) => (
                   <SelectItem
                     key={opt.value}
@@ -367,6 +488,21 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
               </SelectContent>
             </Select>
           </EcosystemActionBar.Item>
+
+          {/* Clear Filters Button */}
+          {hasActiveFilters && (
+            <EcosystemActionBar.Item>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearFilters}
+                className="h-8 px-2 text-xs font-semibold text-muted-foreground hover:text-foreground gap-1"
+              >
+                <X className="h-3.5 w-3.5" />
+                Reset
+              </Button>
+            </EcosystemActionBar.Item>
+          )}
         </EcosystemActionBar.Group>
 
         {/* Right controls */}
@@ -404,15 +540,34 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
             </DropdownMenu>
           )}
 
-          {/* Export Button */}
-          <Button
-            variant="outline"
-            onClick={() => setShowExportModal(true)}
-            className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            Export
-          </Button>
+          {/* Export Options Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuItem
+                onClick={handleQuickExport}
+                className="text-xs font-medium cursor-pointer gap-2"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-600" />
+                Quick CSV Download
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setShowExportModal(true)}
+                className="text-xs font-medium cursor-pointer gap-2"
+              >
+                <Upload className="h-3.5 w-3.5 text-primary" />
+                Advanced Export…
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* View Toggle */}
           <EcosystemActionBar.ViewToggle
@@ -424,9 +579,6 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
             ]}
           />
 
-          {/* Create CTA Button */}
-          <Create />
-
           <EcosystemActionBar.Separator />
 
           {/* Live Status Count */}
@@ -437,7 +589,7 @@ export function EventsManage({ status: initialStatus }: EventsManageProps) {
       </EcosystemActionBar>
 
       {/* ── Content Container ─────────────────────────────────────────────── */}
-      <EcosystemContainer className="p-0 m-3 mt-0 border-none bg-transparent shadow-none ring-0 space-y-3">
+      <EcosystemContainer className="p-0 m-0 border-none bg-transparent shadow-none ring-0 space-y-3">
         {/* Section Header (appears when filtered by non-ALL status) */}
         <SectionHeader
           status={status}

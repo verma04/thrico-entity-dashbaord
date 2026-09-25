@@ -7,6 +7,16 @@ import {
   Terminal,
   User,
   Eye,
+  Activity,
+  RotateCcw,
+  Globe,
+  Fingerprint,
+  ShieldCheck,
+  ShieldAlert,
+  Upload,
+  Calendar,
+  Layers,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetAuditLogs, useGetAuditLogById } from "@/graphql/actions/audit";
@@ -17,11 +27,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AdminTable } from "@/components/shared/admin-table/admin-table";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import moment from "moment";
+import { useModuleStore } from "@/store/useModuleStore";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { toast } from "sonner";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 
 export default function EventAuditLogPage() {
+  const singularName = useModuleStore((state) => state.eventSingularName) || "Event";
   const params = useParams();
   const id = params?.id as string;
   const [page, setPage] = useState(1);
@@ -30,7 +46,7 @@ export default function EventAuditLogPage() {
   const { data: logDetailsData, loading: logDetailsLoading } =
     useGetAuditLogById(
       { auditLogByIdId: selectedLogId || "" },
-      { skip: !selectedLogId, fetchPolicy: "network-only" },
+      { skip: !selectedLogId, fetchPolicy: "network-only" }
     );
 
   const {
@@ -38,7 +54,7 @@ export default function EventAuditLogPage() {
     loading: logLoading,
     refetch,
   } = useGetAuditLogs({
-    pagination: { page, limit: 12 },
+    pagination: { page, limit: 15 },
     resourceId: id,
     module: "EVENT",
   });
@@ -46,11 +62,46 @@ export default function EventAuditLogPage() {
   const logs = logData?.auditLogs?.data || [];
   const meta = logData?.auditLogs?.meta || { totalItems: 0, totalPages: 0 };
 
+  const handleExportLogs = () => {
+    if (logs.length === 0) {
+      toast.error("No audit logs to export");
+      return;
+    }
+
+    const csv = buildCsv(logs, [
+      { header: "Log ID", getValue: (l: any) => l.id },
+      { header: "Action", getValue: (l: any) => l.action },
+      { header: "Module", getValue: (l: any) => l.module || "EVENT" },
+      {
+        header: "Admin",
+        getValue: (l: any) =>
+          l.admin
+            ? `${l.admin.firstName || ""} ${l.admin.lastName || ""}`.trim()
+            : "System",
+      },
+      { header: "IP Address", getValue: (l: any) => l.ipAddress || "Internal" },
+      {
+        header: "Target ID",
+        getValue: (l: any) => l.resourceId || l.targetUserId || id,
+      },
+      {
+        header: "Timestamp",
+        getValue: (l: any) =>
+          moment(l.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+      },
+    ]);
+
+    downloadCsv(csv, `event-audit-${moment().format("YYYY-MM-DD")}`);
+    toast.success(`Exported ${logs.length} audit records`);
+  };
+
   const renderStateFields = (statePayload: any, isRed: boolean) => {
     let parsedState = statePayload;
     if (!parsedState)
       return (
-        <span className="text-xs text-zinc-400 italic block mt-2">No data</span>
+        <span className="text-xs text-muted-foreground italic block mt-2">
+          No state recorded
+        </span>
       );
 
     if (typeof parsedState === "string") {
@@ -58,7 +109,7 @@ export default function EventAuditLogPage() {
         parsedState = JSON.parse(parsedState);
       } catch {
         return (
-          <span className="text-[11px] font-mono text-zinc-700 break-all block mt-2 p-3 bg-zinc-50 border border-zinc-200/60 rounded-xl shadow-sm">
+          <span className="text-[11px] font-mono text-foreground break-all block mt-2 p-3 bg-muted/40 border border-border/60 rounded-xl shadow-xs">
             {parsedState}
           </span>
         );
@@ -67,7 +118,7 @@ export default function EventAuditLogPage() {
 
     if (typeof parsedState !== "object" || parsedState === null) {
       return (
-        <span className="text-[11px] font-mono text-zinc-700 break-all block mt-2 p-3 bg-zinc-50 border border-zinc-200/60 rounded-xl shadow-sm">
+        <span className="text-[11px] font-mono text-foreground break-all block mt-2 p-3 bg-muted/40 border border-border/60 rounded-xl shadow-xs">
           {String(parsedState)}
         </span>
       );
@@ -90,25 +141,29 @@ export default function EventAuditLogPage() {
             <div
               key={key}
               className={cn(
-                "flex flex-col gap-1 p-3 rounded-xl border shadow-sm",
+                "flex flex-col gap-1 p-2.5 rounded-lg border shadow-2xs",
                 isRed
-                  ? "bg-red-50/50 border-red-100"
-                  : "bg-emerald-50/50 border-emerald-100",
+                  ? "bg-red-50/40 dark:bg-red-950/20 border-red-200/50 dark:border-red-900/40"
+                  : "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-900/40"
               )}
             >
               <span
                 className={cn(
-                  "text-[9px] font-semibold uppercase tracking-widest",
-                  isRed ? "text-red-400" : "text-emerald-500",
+                  "text-[9px] font-bold uppercase tracking-wider",
+                  isRed
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-emerald-600 dark:text-emerald-400"
                 )}
               >
                 {label}
               </span>
               <span
                 className={cn(
-                  "text-xs font-medium truncate",
-                  isRed ? "text-red-900" : "text-emerald-900",
-                  displayVal === "—" && "opacity-50",
+                  "text-xs font-semibold truncate",
+                  isRed
+                    ? "text-red-950 dark:text-red-200"
+                    : "text-emerald-950 dark:text-emerald-200",
+                  displayVal === "—" && "opacity-40"
                 )}
                 title={String(displayVal)}
               >
@@ -124,16 +179,16 @@ export default function EventAuditLogPage() {
   const columns = [
     {
       key: "createdAt",
-      header: "Date & Time",
+      header: "Timestamp",
       cell: (log: any) => (
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <Clock className="h-3.5 w-3.5 text-zinc-400" />
-            <span className="text-sm font-medium text-foreground">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3 text-muted-foreground" />
+            <span className="text-xs font-semibold text-foreground">
               {moment(log.createdAt).format("MMM D, YYYY")}
             </span>
           </div>
-          <span className="text-[10px] text-zinc-500 ml-5.5 tabular-nums font-medium">
+          <span className="text-[10px] text-muted-foreground ml-4.5 tabular-nums font-mono">
             {moment(log.createdAt).format("HH:mm:ss")}
           </span>
         </div>
@@ -141,19 +196,19 @@ export default function EventAuditLogPage() {
     },
     {
       key: "action",
-      header: "Action",
+      header: "Action / Event",
       cell: (log: any) => (
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-zinc-100/80 border border-zinc-200 flex items-center justify-center shrink-0">
-            <Terminal className="h-4 w-4 text-zinc-500" />
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-lg bg-muted border border-border/60 flex items-center justify-center shrink-0 shadow-2xs">
+            <Terminal className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground">
+          <div className="flex flex-col min-w-0">
+            <span className="text-xs font-semibold text-foreground truncate">
               {log.action}
             </span>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[9px] font-semibold uppercase tracking-widest bg-zinc-100 text-zinc-500 border border-zinc-200/50">
-                {log.module || "SYSTEM"}
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-muted text-muted-foreground border border-border/60">
+                {log.module || "EVENT"}
               </span>
             </div>
           </div>
@@ -162,37 +217,39 @@ export default function EventAuditLogPage() {
     },
     {
       key: "admin",
-      header: "Performed By",
+      header: "Operator",
       cell: (log: any) => {
         const hasAdmin = !!log?.admin?.firstName;
         return (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {hasAdmin && log?.admin?.id ? (
               <UserProfileHoverCard user={log.admin}>
-                <div className="flex items-center gap-3 cursor-pointer group">
-                  <div className="h-8 w-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm group-hover:ring-2 group-hover:ring-primary/20 transition-all">
-                    <User className="h-3.5 w-3.5 text-zinc-400" />
+                <div className="flex items-center gap-2.5 cursor-pointer group">
+                  <div className="h-7 w-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 shadow-2xs group-hover:ring-2 group-hover:ring-primary/20 transition-all">
+                    <User className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <div className="flex flex-col">
+                  <div className="flex flex-col min-w-0">
                     <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors leading-none">
                       {log.admin.firstName} {log.admin?.lastName || ""}
                     </span>
-                    <span className="text-[10px] font-medium text-zinc-400 mt-1 uppercase tracking-tighter">
+                    <span className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-mono">
                       {log?.ipAddress || "Internal"}
                     </span>
                   </div>
                 </div>
               </UserProfileHoverCard>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
-                  <User className="h-3.5 w-3.5 text-zinc-400" />
+              <div className="flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-muted border border-border/60 flex items-center justify-center shrink-0 shadow-2xs">
+                  <User className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-foreground leading-none">
-                    {hasAdmin ? `${log.admin.firstName} ${log.admin?.lastName || ""}` : "System"}
+                    {hasAdmin
+                      ? `${log.admin.firstName} ${log.admin?.lastName || ""}`
+                      : "System Automation"}
                   </span>
-                  <span className="text-[10px] font-medium text-zinc-400 mt-1 uppercase tracking-tighter">
+                  <span className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-mono">
                     {log?.ipAddress || "Internal"}
                   </span>
                 </div>
@@ -204,11 +261,11 @@ export default function EventAuditLogPage() {
     },
     {
       key: "target",
-      header: "Target ID",
+      header: "Target Entity",
       cell: (log: any) => (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-medium text-zinc-600 truncate max-w-[140px] bg-zinc-100/50 px-2.5 py-1 rounded-lg border border-zinc-200 shadow-sm">
-            {log.resourceId || log.targetUserId || "System"}
+          <span className="font-mono text-[11px] font-medium text-muted-foreground truncate max-w-[140px] bg-muted/40 px-2 py-0.5 rounded-md border border-border/60 shadow-2xs">
+            {log.resourceId || log.targetUserId || id}
           </span>
         </div>
       ),
@@ -223,9 +280,10 @@ export default function EventAuditLogPage() {
             variant="ghost"
             size="icon"
             onClick={() => setSelectedLogId(log.id)}
-            className="h-8 w-8 text-zinc-400 hover:text-foreground hover:bg-zinc-100 rounded-lg transition-all"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/70 rounded-lg transition-all"
+            title="Inspect state details"
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),
@@ -233,35 +291,63 @@ export default function EventAuditLogPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in duration-500">
+      {/* ── Subheader Action Bar ─────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/60 rounded-xl p-4 shadow-2xs">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary" />
-            Audit Log
-          </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Track all activity and administrative changes made to this event.
+          <div className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" />
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-foreground">
+              Audit Trail & Operational History
+            </h2>
+            <Badge variant="secondary" className="text-[10px] font-semibold">
+              {meta.totalItems} Recorded Events
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Cryptographically recorded mutations, registrations, scheduling changes, and status adjustments for this {singularName.toLowerCase()}.
           </p>
         </div>
-        <Button variant="outline" onClick={() => refetch()} className="gap-2 rounded-xl h-10 shadow-sm">
-          <RotateCcw className={cn("h-4 w-4", logLoading && "animate-spin")} />
-          Refresh
-        </Button>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => refetch()}
+            disabled={logLoading}
+            className="h-8 w-8 rounded-lg border-border/60 text-muted-foreground hover:text-foreground shadow-2xs"
+            title="Refresh logs"
+          >
+            <RotateCcw
+              className={cn("h-3.5 w-3.5", logLoading && "animate-spin text-primary")}
+            />
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportLogs}
+            className="h-8 text-xs font-medium gap-1.5 border-border/60 rounded-lg shadow-2xs hover:bg-muted/60"
+          >
+            <Upload className="h-3.5 w-3.5 text-muted-foreground" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
-      <div className="bg-card rounded-2xl border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 overflow-hidden">
+      {/* ── Main Logs Table Container ───────────────────────────────────── */}
+      <div className="bg-card rounded-xl border border-border/60 shadow-2xs overflow-hidden">
         <div className="p-1">
           <AdminTable
             columns={columns}
             data={logs}
             loading={logLoading}
             keyExtractor={(log) => log.id}
-            emptyTitle="No logs found"
-            emptyDescription="No activity has been recorded for this event yet."
+            emptyTitle="No audit logs found"
+            emptyDescription={`No activity has been recorded for this ${singularName.toLowerCase()} yet.`}
             pagination={{
               pageIndex: page - 1,
-              pageSize: 12,
+              pageSize: 15,
               pageCount: meta.totalPages,
               onPageChange: (i) => setPage(i + 1),
             }}
@@ -269,36 +355,37 @@ export default function EventAuditLogPage() {
         </div>
       </div>
 
+      {/* ── Detailed State Diff Modal ────────────────────────────────────── */}
       <Dialog
         open={!!selectedLogId}
         onOpenChange={(open) => !open && setSelectedLogId(null)}
       >
-        <DialogContent className="sm:max-w-[700px] rounded-3xl p-0 overflow-hidden border-border/60 shadow-2xl">
-          <DialogHeader className="bg-zinc-50 border-b border-border/50 p-6 flex flex-row items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white border border-border/60 text-zinc-900 shadow-sm">
-              <Terminal className="h-6 w-6" />
+        <DialogContent className="sm:max-w-[700px] rounded-2xl p-0 overflow-hidden border border-border/60 shadow-2xl">
+          <DialogHeader className="bg-muted/30 border-b border-border/60 p-6 flex flex-row items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-background border border-border/60 text-foreground shadow-2xs">
+              <Terminal className="h-5 w-5 text-primary" />
             </div>
-            <div className="space-y-1 mt-2">
-              <DialogTitle className="text-xl font-bold text-foreground tracking-tight">
-                Log Details
+            <div className="space-y-0.5 min-w-0">
+              <DialogTitle className="text-base font-bold text-foreground tracking-tight">
+                Log Event Details
               </DialogTitle>
-              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">
-                ID: {selectedLogId}
+              <p className="text-[10px] font-mono text-muted-foreground">
+                Log ID: {selectedLogId}
               </p>
             </div>
           </DialogHeader>
 
-          <div className="p-6 overflow-y-auto max-h-[70vh] scrollbar-hide">
+          <div className="p-6 overflow-y-auto max-h-[70vh] space-y-6">
             {logDetailsLoading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <RotateCcw className="h-8 w-8 animate-spin text-zinc-300" />
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">
-                  Loading Details...
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <RotateCcw className="h-8 w-8 animate-spin text-muted-foreground" />
+                <p className="text-xs font-medium text-muted-foreground">
+                  Fetching state payload…
                 </p>
               </div>
             ) : logDetailsData?.auditLogById ? (
-              <div className="space-y-8">
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                   {[
                     {
                       label: "Action",
@@ -307,22 +394,22 @@ export default function EventAuditLogPage() {
                     },
                     {
                       label: "Module",
-                      val: logDetailsData.auditLogById.module || "System",
+                      val: logDetailsData.auditLogById.module || "EVENT",
                       icon: Globe,
                     },
                     {
                       label: "Time",
                       val: moment(logDetailsData.auditLogById.createdAt).format(
-                        "MMM D, YYYY · HH:mm:ss",
+                        "MMM D, YYYY · HH:mm:ss"
                       ),
                       icon: Clock,
                     },
                     {
-                      label: "Target",
+                      label: "Target ID",
                       val:
                         logDetailsData.auditLogById.resourceId ||
                         logDetailsData.auditLogById.targetUserId ||
-                        "System",
+                        id,
                       icon: Fingerprint,
                       mono: true,
                     },
@@ -330,7 +417,7 @@ export default function EventAuditLogPage() {
                       label: "Performed By",
                       val: logDetailsData.auditLogById.admin?.firstName
                         ? `${logDetailsData.auditLogById.admin.firstName} ${logDetailsData.auditLogById.admin?.lastName || ""}`
-                        : logDetailsData.auditLogById.adminId || "System",
+                        : logDetailsData.auditLogById.adminId || "System Automation",
                       icon: User,
                     },
                     {
@@ -340,16 +427,16 @@ export default function EventAuditLogPage() {
                       mono: true,
                     },
                   ].map((s, i) => (
-                    <div key={i} className="space-y-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 ml-1">
+                    <div key={i} className="space-y-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         {s.label}
                       </span>
-                      <div className="flex items-center gap-3 px-3.5 py-2.5 bg-zinc-50 rounded-xl border border-zinc-200/60 shadow-sm">
-                        <s.icon className="h-4 w-4 text-zinc-400 shrink-0" />
+                      <div className="flex items-center gap-2.5 px-3 py-2 bg-muted/30 rounded-lg border border-border/60 shadow-2xs">
+                        <s.icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span
                           className={cn(
-                            "text-sm font-semibold text-foreground truncate",
-                            s.mono && "font-mono text-xs",
+                            "text-xs font-semibold text-foreground truncate",
+                            s.mono && "font-mono text-[11px]"
                           )}
                         >
                           {s.val}
@@ -360,38 +447,38 @@ export default function EventAuditLogPage() {
                 </div>
 
                 {logDetailsData.auditLogById.reason && (
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 ml-1">
-                      Reason
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Administrative Note / Reason
                     </span>
-                    <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/60 shadow-sm text-sm font-medium text-zinc-700 leading-relaxed italic">
-                      "{logDetailsData.auditLogById.reason}"
+                    <div className="p-3.5 rounded-lg bg-muted/30 border border-border/60 shadow-2xs text-xs font-medium text-foreground italic">
+                      &ldquo;{logDetailsData.auditLogById.reason}&rdquo;
                     </div>
                   </div>
                 )}
 
                 {(logDetailsData.auditLogById.previousState ||
                   logDetailsData.auditLogById.newState) && (
-                  <div className="pt-8 border-t border-border/40 grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="pt-4 border-t border-border/60 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {logDetailsData.auditLogById.previousState && (
-                      <div className="space-y-3">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 flex items-center gap-2 bg-red-50 border border-red-200/50 px-3 py-1.5 w-fit rounded-lg shadow-sm">
-                          <ShieldX className="h-3.5 w-3.5" /> Previous State
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-600 flex items-center gap-1.5 bg-red-50 dark:bg-red-950/50 border border-red-200/50 dark:border-red-900/40 px-2.5 py-1 w-fit rounded-md shadow-2xs">
+                          <ShieldAlert className="h-3 w-3" /> Previous State
                         </span>
                         {renderStateFields(
                           logDetailsData.auditLogById.previousState,
-                          true,
+                          true
                         )}
                       </div>
                     )}
                     {logDetailsData.auditLogById.newState && (
-                      <div className="space-y-3">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 flex items-center gap-2 bg-emerald-50 border border-emerald-200/50 px-3 py-1.5 w-fit rounded-lg shadow-sm">
-                          <ShieldCheck className="h-3.5 w-3.5" /> New State
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/50 dark:border-emerald-900/40 px-2.5 py-1 w-fit rounded-md shadow-2xs">
+                          <ShieldCheck className="h-3 w-3" /> New State
                         </span>
                         {renderStateFields(
                           logDetailsData.auditLogById.newState,
-                          false,
+                          false
                         )}
                       </div>
                     )}
@@ -401,10 +488,11 @@ export default function EventAuditLogPage() {
             ) : null}
           </div>
 
-          <div className="bg-zinc-50/80 p-5 flex items-center justify-end border-t border-border/50 backdrop-blur-sm">
+          <div className="bg-muted/30 p-4 flex items-center justify-end border-t border-border/60">
             <Button
               variant="outline"
-              className="rounded-xl text-xs font-bold uppercase tracking-widest px-8 shadow-sm h-11"
+              size="sm"
+              className="rounded-lg text-xs font-semibold px-6 shadow-2xs h-8"
               onClick={() => setSelectedLogId(null)}
             >
               Close Details
@@ -412,16 +500,6 @@ export default function EventAuditLogPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <style jsx global>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </div>
   );
 }

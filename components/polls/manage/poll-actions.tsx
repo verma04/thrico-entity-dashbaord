@@ -78,7 +78,7 @@ export function PollActions({ poll, refetch, trigger }: PollActionsProps) {
 
   const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/polls/${poll.id}/manage`;
+    const url = `${window.location.origin}/polls/${poll.id}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copied to clipboard", {
       description: `Copied link for "${poll.title}"`,
@@ -142,7 +142,7 @@ export function PollActions({ poll, refetch, trigger }: PollActionsProps) {
             Actions
           </DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => router.push(`/polls/${poll.id}/manage`)}
+            onClick={() => router.push(`/polls/${poll.id}`)}
             className="text-xs font-medium cursor-pointer gap-2 py-1.5"
           >
             <Settings className="h-3.5 w-3.5 text-muted-foreground" />

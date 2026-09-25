@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { Link2, Mail, Users, BarChart3 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
@@ -30,6 +31,11 @@ function MarketingLayout({ children }: { children: React.ReactNode }) {
         key: "email",
         label: "Email Campaigns",
         icon: <Mail className="h-4 w-4" />,
+      },
+      {
+        key: "whatsapp",
+        label: "WhatsApp Campaigns",
+        icon: <WhatsAppIcon className="h-4 w-4" />,
       },
     ],
     [],

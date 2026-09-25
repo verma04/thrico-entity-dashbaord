@@ -41,6 +41,46 @@ const nextConfig: NextConfig = {
         destination: "/marketing/email/:path*",
         permanent: false,
       },
+      {
+        source: "/whatsapp",
+        destination: "/marketing/whatsapp",
+        permanent: false,
+      },
+      {
+        source: "/whatsapp/:path*",
+        destination: "/marketing/whatsapp/:path*",
+        permanent: false,
+      },
+      {
+        source: "/settings/integrations/whatsapp",
+        destination: "/marketing/whatsapp",
+        permanent: false,
+      },
+      {
+        source: "/settings/integrations/whatsapp/:path*",
+        destination: "/marketing/whatsapp/:path*",
+        permanent: false,
+      },
+      {
+        source: "/settings/marketing/whatsapp",
+        destination: "/marketing/whatsapp",
+        permanent: false,
+      },
+      {
+        source: "/settings/marketing/whatsapp/:path*",
+        destination: "/marketing/whatsapp/:path*",
+        permanent: false,
+      },
+      {
+        source: "/settings/marketing/whatssp",
+        destination: "/marketing/whatsapp",
+        permanent: false,
+      },
+      {
+        source: "/settings/marketing/whatssp/:path*",
+        destination: "/marketing/whatsapp/:path*",
+        permanent: false,
+      },
     ];
   },
 };

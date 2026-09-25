@@ -3,24 +3,24 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEventById, useUpdateEvent } from "@/graphql/actions/events";
 import { EventsCreationForm } from "@/components/events/create/events-creation-form";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemContainer } from "@/components/layout/ecosystem";
 import { PolarisFormSkeleton } from "@/components/ui/platform/polaris-primitives";
 import { Calendar, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 import Link from "next/link";
 import moment from "moment";
 import { toast } from "sonner";
 import { useModuleStore } from "@/store/useModuleStore";
 
 function EventGeneralInfo() {
-  const singularName = useModuleStore((state) => state.eventSingularName);
-  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName =
+    useModuleStore((state) => state.eventSingularName) || "Event";
+  const moduleName =
+    useModuleStore((state) => state.eventModuleName) || "Events";
   const params = useParams();
   const eventId = params?.id as string;
   const router = useRouter();
@@ -41,146 +41,219 @@ function EventGeneralInfo() {
     },
   });
 
+  if (fetchingEvent) {
+    return <PolarisFormSkeleton showHeader={false} />;
+  }
+
+  if (!event) {
+    return (
+      <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed border-border/80 rounded-xl bg-card space-y-4 shadow-2xs">
+        <div className="h-14 w-14 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20 shadow-xs">
+          <Calendar className="h-7 w-7" />
+        </div>
+        <div className="space-y-1 max-w-sm">
+          <h3 className="text-base font-bold text-foreground">
+            {singularName} Not Found
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            This event may have been deleted or the link is invalid.
+          </p>
+        </div>
+        <Link href="/events/all">
+          <Button
+            variant="outline"
+            className="gap-2 text-xs font-semibold h-8 rounded-lg shadow-2xs"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to {moduleName}
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <EcosystemWrapper>
-      <EcosystemHeader
-        title={event?.title ? `Edit · ${event.title}` : `Edit ${singularName}`}
-        badgeText="Events Studio"
-        description={`Update ${singularName.toLowerCase()} schedule, venue coordinates, and registration timeline.`}
-        icon={Calendar}
-        breadcrumbs={[
-          { label: moduleName, href: "/events/all" },
-          { label: event?.title || `Edit ${singularName}` },
-        ]}
-        actions={
-          <div className="flex items-center gap-2">
-            <Link href="/events/all">
-              <Button
-                variant="outline"
-                className="text-[13px] font-medium h-[36px] gap-1.5 border-[#aeb4b9] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-100 text-[#303030] dark:text-zinc-100 cursor-pointer shadow-xs rounded-[6px]"
-              >
-                <ArrowLeft className="h-4 w-4 text-[#616161]" />
-                Back to {moduleName}
-              </Button>
-            </Link>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* ── Top Event Telemetry Scorecards ──────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Schedule
+            </span>
+            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold px-1.5 py-0.2 bg-blue-50 dark:bg-blue-950/50 rounded">
+              Timeline
+            </span>
           </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
+              {event.startDate
+                ? moment(event.startDate).format("MMM D, YYYY")
+                : "Not set"}
+            </span>
+          </div>
+          <p className="text-[10.5px] text-muted-foreground pt-0.5 truncate">
+            {event.startTime
+              ? `Starts at ${event.startTime}`
+              : "Time not specified"}
+          </p>
+        </div>
+
+        <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Format &amp; Venue
+            </span>
+            <span className="text-[10px] text-purple-600 dark:text-purple-400 font-semibold px-1.5 py-0.2 bg-purple-50 dark:bg-purple-950/50 rounded">
+              Type
+            </span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
+              {event.type === "IN_PERSON"
+                ? "In-Person"
+                : event.type === "VIRTUAL"
+                  ? "Virtual"
+                  : "Hybrid"}
+            </span>
+          </div>
+          <p className="text-[10.5px] text-muted-foreground pt-0.5 truncate">
+            {event.location?.name || event.location?.address || "Online Link"}
+          </p>
+        </div>
+
+        <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Roster
+            </span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold px-1.5 py-0.2 bg-emerald-50 dark:bg-emerald-950/50 rounded">
+              Attendees
+            </span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+              {(event.attendeeCount ?? 0).toLocaleString()}
+            </span>
+            <span className="text-[11px] text-muted-foreground font-medium">
+              registered
+            </span>
+          </div>
+          <p className="text-[10.5px] text-muted-foreground pt-0.5 truncate">
+            {event.lastDateOfRegistration
+              ? `Deadline ${moment(event.lastDateOfRegistration).format("MMM D")}`
+              : "Open registration"}
+          </p>
+        </div>
+
+        <div className="p-4 rounded-xl border border-border/60 bg-card space-y-1 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Publication
+            </span>
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.2 bg-amber-50 dark:bg-amber-950/50 rounded">
+              Status
+            </span>
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              {event.status || (event.isActive ? "Active" : "Draft")}
+            </span>
+          </div>
+          <p className="text-[10.5px] text-muted-foreground pt-0.5 truncate">
+            {event.isActive
+              ? "Visible on community portal"
+              : "Hidden from public"}
+          </p>
+        </div>
+      </div>
+
+      {/* ── Event Edit Form ─────────────────────────────────────────────── */}
+      <EventsCreationForm
+        headerTitle={`Edit ${singularName}`}
+        buttonText="Save Changes"
+        initialValues={{
+          title: event?.title || "",
+          description: event?.description || "",
+          location: event?.location?.address || event?.location?.name || "",
+          type: event?.type?.toLowerCase() || "in_person",
+          startDate: event?.startDate
+            ? moment(event.startDate).format("YYYY-MM-DD")
+            : "",
+          endDate: event?.endDate
+            ? moment(event.endDate).format("YYYY-MM-DD")
+            : "",
+          startTime: event?.startTime || "",
+          lastDateOfRegistration: event?.lastDateOfRegistration
+            ? moment(event.lastDateOfRegistration).format("YYYY-MM-DD")
+            : "",
+          isActive: event?.isActive ?? false,
+          memberEligibility:
+            event?.memberEligibility ||
+            event?.eligibility?.memberEligibility ||
+            event?.eligibilityRule?.memberEligibility ||
+            "ALL",
+          membershipTierId:
+            event?.eligibility?.membershipTierId ||
+            event?.eligibilityRule?.membershipTierId ||
+            [],
+          eligibleTierIds:
+            event?.eligibility?.eligibleTierIds ||
+            event?.eligibilityRule?.eligibleTierIds ||
+            [],
+          eligibleUserIds:
+            event?.eligibility?.eligibleUserIds ||
+            event?.eligibilityRule?.eligibleUserIds ||
+            [],
+          eligibleSegmentIds:
+            event?.eligibility?.eligibleSegmentIds ||
+            event?.eligibilityRule?.eligibleSegmentIds ||
+            [],
+        }}
+        initialCoverUrl={
+          event?.cover ? `https://cdn.thrico.network/${event.cover}` : null
         }
+        loading={updating}
+        onFinish={(values) => {
+          const eventInput: any = {
+            title: values.title,
+            location:
+              typeof values.location === "string"
+                ? { name: values.location }
+                : values.location,
+            description: values.description,
+            startDate: values.startDate
+              ? new Date(values.startDate).toISOString()
+              : undefined,
+            endDate: values.endDate
+              ? new Date(values.endDate).toISOString()
+              : undefined,
+            startTime: values.startTime || undefined,
+            type: values.type?.toUpperCase(),
+            lastDateOfRegistration: values.lastDateOfRegistration
+              ? new Date(values.lastDateOfRegistration).toISOString()
+              : undefined,
+            isActive: values.isActive,
+            memberEligibility: values.memberEligibility,
+            eligibility: values.eligibility,
+          };
+
+          if (cover) {
+            eventInput.coverImage = cover;
+          }
+
+          updateEvent({
+            variables: {
+              eventId,
+              input: eventInput,
+            },
+          });
+        }}
+        onCancel={() => router.back()}
+        cover={cover}
+        setCover={setCover}
       />
-
-      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
-        {fetchingEvent ? (
-          <PolarisFormSkeleton showHeader={false} />
-        ) : !event ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center border border-dashed border-[#d2d5d9] dark:border-zinc-800 rounded-[12px] bg-white dark:bg-zinc-900 space-y-4">
-            <div className="h-14 w-14 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20 shadow-xs">
-              <Calendar className="h-7 w-7" />
-            </div>
-            <div className="space-y-1 max-w-sm">
-              <h3 className="text-base font-bold text-[#303030] dark:text-zinc-100">
-                {singularName} Not Found
-              </h3>
-              <p className="text-[13px] text-[#616161] dark:text-zinc-400">
-                This event may have been deleted or the link is invalid.
-              </p>
-            </div>
-            <Link href="/events/all">
-              <Button
-                variant="outline"
-                className="gap-2 text-[13px] font-medium h-[36px] border-[#aeb4b9] rounded-[6px]"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to {moduleName}
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <EventsCreationForm
-            headerTitle={`Edit ${singularName}`}
-            buttonText="Save Changes"
-            initialValues={{
-              title: event?.title || "",
-              description: event?.description || "",
-              location: event?.location?.address || event?.location?.name || "",
-              type: event?.type?.toLowerCase() || "in_person",
-              startDate: event?.startDate
-                ? moment(event.startDate).format("YYYY-MM-DD")
-                : "",
-              endDate: event?.endDate
-                ? moment(event.endDate).format("YYYY-MM-DD")
-                : "",
-              startTime: event?.startTime || "",
-              lastDateOfRegistration: event?.lastDateOfRegistration
-                ? moment(event.lastDateOfRegistration).format("YYYY-MM-DD")
-                : "",
-              isActive: event?.isActive ?? false,
-              memberEligibility:
-                event?.memberEligibility ||
-                event?.eligibility?.memberEligibility ||
-                event?.eligibilityRule?.memberEligibility ||
-                "ALL",
-              membershipTierId:
-                event?.eligibility?.membershipTierId ||
-                event?.eligibilityRule?.membershipTierId ||
-                [],
-              eligibleTierIds:
-                event?.eligibility?.eligibleTierIds ||
-                event?.eligibilityRule?.eligibleTierIds ||
-                [],
-              eligibleUserIds:
-                event?.eligibility?.eligibleUserIds ||
-                event?.eligibilityRule?.eligibleUserIds ||
-                [],
-              eligibleSegmentIds:
-                event?.eligibility?.eligibleSegmentIds ||
-                event?.eligibilityRule?.eligibleSegmentIds ||
-                [],
-            }}
-            initialCoverUrl={
-              event?.cover ? `https://cdn.thrico.network/${event.cover}` : null
-            }
-            loading={updating}
-            onFinish={(values) => {
-              const eventInput: any = {
-                title: values.title,
-                location:
-                  typeof values.location === "string"
-                    ? { name: values.location }
-                    : values.location,
-                description: values.description,
-                startDate: values.startDate
-                  ? new Date(values.startDate).toISOString()
-                  : undefined,
-                endDate: values.endDate
-                  ? new Date(values.endDate).toISOString()
-                  : undefined,
-                startTime: values.startTime || undefined,
-                type: values.type?.toUpperCase(),
-                lastDateOfRegistration: values.lastDateOfRegistration
-                  ? new Date(values.lastDateOfRegistration).toISOString()
-                  : undefined,
-                isActive: values.isActive,
-                memberEligibility: values.memberEligibility,
-                eligibility: values.eligibility,
-              };
-
-              if (cover) {
-                eventInput.coverImage = cover;
-              }
-
-              updateEvent({
-                variables: {
-                  eventId,
-                  input: eventInput,
-                },
-              });
-            }}
-            onCancel={() => router.back()}
-            cover={cover}
-            setCover={setCover}
-          />
-        )}
-      </EcosystemContainer>
-    </EcosystemWrapper>
+    </div>
   );
 }
 

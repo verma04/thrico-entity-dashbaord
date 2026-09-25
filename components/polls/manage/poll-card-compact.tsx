@@ -52,7 +52,7 @@ export function PollCardCompact({ poll, refetch }: PollCardCompactProps) {
 
   return (
     <div
-      onClick={() => router.push(`/polls/${poll.id}/manage`)}
+      onClick={() => router.push(`/polls/${poll.id}`)}
       className="relative overflow-hidden rounded-xl border border-border/60 bg-card shadow-2xs hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
     >
       {/* Classification-card style top color bar */}

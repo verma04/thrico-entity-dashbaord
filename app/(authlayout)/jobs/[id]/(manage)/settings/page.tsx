@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetJobById, useChangeJobStatus, useUpdateJob } from "@/graphql/actions/jobs";
 import { toast } from "sonner";
@@ -12,10 +12,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Settings2, CheckCircle, PauseCircle, Ban } from "lucide-react";
+import { Loader2, Settings2, CheckCircle, PauseCircle, Ban, Users, Eye } from "lucide-react";
 import { JobCreationForm } from "@/components/jobs/create/job-creation-form";
 import { cn } from "@/lib/utils";
 import { useModuleStore } from "@/store/useModuleStore";
+import { ReusableDangerZone } from "@/components/shared/reusable-danger-zone";
 
 export default function JobSettingsPage() {
   const singularName = useModuleStore((state) => state.jobSingularName);
@@ -259,6 +260,44 @@ export default function JobSettingsPage() {
             onCancel={() => router.back()}
           />
         </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="pt-2">
+        <ReusableDangerZone
+          entityName={singularName}
+          entityTitle={job?.title || "Untitled Job"}
+          impactMetrics={[
+            {
+              label: "Total Applicants",
+              value: job?.numberOfApplicant ?? 0,
+              icon: Users,
+            },
+            {
+              label: "Page Impressions",
+              value: job?.numberOfViews ?? 0,
+              icon: Eye,
+            },
+          ]}
+          onDelete={async () => {
+            await changeStatus({
+              variables: {
+                input: {
+                  jobId: id,
+                  action: "DISABLE",
+                  reason: "Disabled from settings",
+                },
+              },
+            });
+            toast.success(`The ${singularName.toLowerCase()} has been permanently disabled.`);
+            router.push("/jobs/all");
+          }}
+          loading={updatingStatus}
+          deleteButtonLabel={`Hold 2s to Disable ${singularName}`}
+          deleteDoneLabel="Disabled"
+          holdTime={2000}
+          requireTypeMatch={false}
+        />
       </div>
     </div>
   );

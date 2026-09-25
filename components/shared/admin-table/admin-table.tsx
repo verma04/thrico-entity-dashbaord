@@ -60,6 +60,12 @@ export interface AdminTableProps<T = any> {
   enableColumnToggle?: boolean;
   size?: "sm" | "md";
   baseIndex?: number;
+  pagination?: {
+    pageIndex: number;
+    pageSize?: number;
+    pageCount: number;
+    onPageChange: (pageIndex: number) => void;
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -729,19 +735,37 @@ export function AdminTable<T = any>({
   enableColumnToggle = false,
   size = "sm",
   baseIndex,
+  pagination,
 }: AdminTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
     {},
   );
 
-  const totalItems = data?.length ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const safePage = Math.min(currentPage, totalPages);
-  const paginatedData =
-    data?.slice((safePage - 1) * pageSize, safePage * pageSize) ?? [];
+  const isServerPaged = !!pagination;
+  const effectivePageSize = pagination?.pageSize ?? pageSize;
+  const totalItems = isServerPaged
+    ? pagination.pageCount * effectivePageSize
+    : (data?.length ?? 0);
+  const totalPages = isServerPaged
+    ? Math.max(1, pagination.pageCount)
+    : Math.max(1, Math.ceil(totalItems / effectivePageSize));
+  const safePage = isServerPaged
+    ? pagination.pageIndex + 1
+    : Math.min(currentPage, totalPages);
+  const paginatedData = isServerPaged
+    ? (data ?? [])
+    : (data?.slice((safePage - 1) * effectivePageSize, safePage * effectivePageSize) ?? []);
 
-  const absoluteIndexBase = (baseIndex ?? 0) + (safePage - 1) * pageSize;
+  const handlePageChange = (p: number) => {
+    if (isServerPaged) {
+      pagination.onPageChange(p - 1);
+    } else {
+      setCurrentPage(p);
+    }
+  };
+
+  const absoluteIndexBase = (baseIndex ?? 0) + (safePage - 1) * effectivePageSize;
 
   const activeColumns = enableColumnToggle
     ? columns.filter((col) => visibleColumns[col.key] !== false)
@@ -767,8 +791,8 @@ export function AdminTable<T = any>({
           currentPage={safePage}
           totalPages={totalPages}
           totalItems={totalItems}
-          pageSize={pageSize}
-          onPageChange={setCurrentPage}
+          pageSize={effectivePageSize}
+          onPageChange={handlePageChange}
           compact
           extraTopRight={
             enableColumnToggle && (
@@ -880,8 +904,8 @@ export function AdminTable<T = any>({
           currentPage={safePage}
           totalPages={totalPages}
           totalItems={totalItems}
-          pageSize={pageSize}
-          onPageChange={setCurrentPage}
+          pageSize={effectivePageSize}
+          onPageChange={handlePageChange}
         />
       </div>
     </div>
