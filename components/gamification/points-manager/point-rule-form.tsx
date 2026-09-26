@@ -13,6 +13,7 @@ import {
   Crown,
   Check,
   Sparkles,
+  Layers,
   Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -553,6 +554,7 @@ export function PointRuleForm({
               options={currentSourceList.map((item) => ({
                 value: item.id || item.uuid || (item as any).slug,
                 label: item.name,
+                description: item.description,
               }))}
               value={formik.values.module}
               disabled={isEdit}
@@ -576,6 +578,7 @@ export function PointRuleForm({
                 return {
                   value: itemVal,
                   label: label,
+                  description: t.description || undefined,
                   badge: t.type || undefined,
                 };
               })}
@@ -591,6 +594,70 @@ export function PointRuleForm({
               error={formik.touched.action && formik.errors.action ? (formik.errors.action as string) : undefined}
             />
           </div>
+
+          {/* Selected Module and Trigger Live Details */}
+          {(selectedSourceItem || selectedTriggerItem) && (
+            <div className="space-y-2.5 pt-2">
+              {selectedSourceItem && (
+                <div className="rounded-xl border border-blue-200/70 dark:border-blue-900/50 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-transparent dark:from-blue-950/25 dark:via-indigo-950/15 dark:to-transparent p-3.5 transition-all shadow-xs">
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded-lg bg-blue-600/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-200/60 dark:border-blue-800/60">
+                      <Layers className="h-4.5 w-4.5" />
+                    </div>
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-[13px] text-foreground">
+                          {selectedSourceItem.name}
+                        </span>
+                        <span className="text-[9.5px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                          {sourceType === "MODULE" ? "Platform Module" : "Integration"}
+                        </span>
+                        <span className="text-[10.5px] text-muted-foreground bg-white/80 dark:bg-zinc-800/80 px-2 py-0.5 rounded-md border border-border/60">
+                          {filteredTriggers.length} Triggers Available
+                        </span>
+                        <span className="text-[10.5px] font-mono text-muted-foreground/80 bg-white/60 dark:bg-zinc-800/60 px-1.5 py-0.5 rounded border border-border/40 ml-auto">
+                          ID: {selectedSourceItem.slug || selectedSourceItem.id}
+                        </span>
+                      </div>
+                      <p className="text-[12px] text-muted-foreground leading-relaxed">
+                        {selectedSourceItem.description ||
+                          "Core platform module configured for automated gamification rewards and point rules."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedTriggerItem && (
+                <div className="rounded-xl border border-emerald-200/70 dark:border-emerald-900/50 bg-gradient-to-r from-emerald-50/70 via-teal-50/40 to-transparent dark:from-emerald-950/25 dark:via-teal-950/15 dark:to-transparent p-3.5 transition-all shadow-xs">
+                  <div className="flex items-start gap-3">
+                    <div className="h-9 w-9 rounded-lg bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200/60 dark:border-emerald-800/60">
+                      <Sparkles className="h-4.5 w-4.5" />
+                    </div>
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-[13px] text-foreground">
+                          {(selectedTriggerItem.name || selectedTriggerItem.id)?.replace(/_/g, " ")}
+                        </span>
+                        <span className="text-[9.5px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                          {selectedTriggerItem.type || "Action Trigger"}
+                        </span>
+                        {selectedTriggerItem.id && (
+                          <span className="text-[10.5px] font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
+                            {selectedTriggerItem.id}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[12px] text-muted-foreground leading-relaxed">
+                        {selectedTriggerItem.description ||
+                          "Verified system trigger that disburses points upon user action."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Cadence & Description */}
           <div className="space-y-3.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">

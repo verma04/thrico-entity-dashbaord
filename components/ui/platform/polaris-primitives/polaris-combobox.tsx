@@ -151,7 +151,7 @@ export function PolarisCombobox({
               placeholder={searchPlaceholder}
               className="h-9 text-[12.5px]"
             />
-            <CommandList className="max-h-[220px]">
+            <CommandList className="max-h-[280px]">
               <CommandEmpty className="py-2.5 text-center text-[12px] text-[#616161]">
                 No options found.
               </CommandEmpty>
@@ -173,25 +173,34 @@ export function PolarisCombobox({
                   return (
                     <CommandItem
                       key={option.value}
-                      value={`${option.label} ${option.value}`}
+                      value={`${option.label} ${option.value} ${option.description || ""}`}
                       disabled={option.disabled}
                       onSelect={() => {
                         onChange(option.value);
                         setOpen(false);
                       }}
-                      className="flex items-center justify-between text-[12.5px] font-medium py-1.5 px-2 cursor-pointer"
+                      className="flex items-start justify-between text-[12.5px] font-medium py-2 px-2.5 cursor-pointer rounded-md hover:bg-muted/60 transition-colors"
                     >
-                      <div className="flex items-center gap-2 truncate">
-                        {option.icon && <div>{option.icon}</div>}
-                        <span className="truncate">{option.label}</span>
-                        {option.badge && (
-                          <span className="text-[9.5px] text-[#616161] bg-[#f6f6f7] px-1 py-0.2 rounded border border-[#d2d5d9]">
-                            {option.badge}
-                          </span>
-                        )}
+                      <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                        {option.icon && <div className="mt-0.5 shrink-0 text-muted-foreground">{option.icon}</div>}
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="truncate font-medium text-foreground">{option.label}</span>
+                            {option.badge && (
+                              <span className="text-[9.5px] text-[#616161] bg-[#f6f6f7] dark:bg-zinc-800 dark:text-zinc-400 px-1.5 py-0.5 rounded border border-[#d2d5d9] dark:border-zinc-700">
+                                {option.badge}
+                              </span>
+                            )}
+                          </div>
+                          {option.description && (
+                            <span className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5 font-normal leading-tight">
+                              {option.description}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {isSelected && (
-                        <Check className="h-3 w-3 text-[#303030] dark:text-zinc-100 shrink-0" />
+                        <Check className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100 shrink-0 ml-2 mt-0.5" />
                       )}
                     </CommandItem>
                   );
