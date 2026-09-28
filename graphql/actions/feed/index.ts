@@ -24,6 +24,7 @@ import {
   DELETE_FEED,
   PIN_FEED,
   GET_POST_ANALYTICS,
+  GET_FEED_SHARE_STATS,
 } from "../../quries/feed";
 
 export const useAllFeed = (options: any) => useQuery(GET_ALL_FEED, options);
@@ -319,3 +320,45 @@ export const usePostAnalytics = (
       ...options,
     },
   );
+
+export interface FeedSharePlatformStat {
+  platform: string;
+  clicks: number;
+  verified: number;
+  uniqueSharers: number;
+}
+
+export interface FeedShareUser {
+  userId: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  avatar?: string | null;
+  platforms: string[];
+}
+
+export interface FeedShareStats {
+  feedId: string;
+  totalClicks: number;
+  totalVerified: number;
+  totalUniqueSharers: number;
+  conversionRate: number;
+  platformBreakdown: FeedSharePlatformStat[];
+  recentSharers: FeedShareUser[];
+  authorId?: string | null;
+  createdAt?: string | null;
+}
+
+export interface GetFeedShareStatsData {
+  getFeedShareStats: FeedShareStats;
+}
+
+export const useFeedShareStats = (
+  feedId: string,
+  options?: QueryHookOptions<GetFeedShareStatsData, { feedId: string }>,
+) =>
+  useQuery<GetFeedShareStatsData, { feedId: string }>(GET_FEED_SHARE_STATS, {
+    variables: { feedId },
+    skip: !feedId,
+    fetchPolicy: "cache-and-network",
+    ...options,
+  });

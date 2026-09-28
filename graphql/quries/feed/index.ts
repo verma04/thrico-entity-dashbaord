@@ -833,3 +833,30 @@ export const GET_POST_ANALYTICS = gql`
     }
   }
 `;
+
+export const GET_FEED_SHARE_STATS = gql`
+  query GetFeedShareStats($feedId: ID!) {
+    getFeedShareStats(feedId: $feedId) {
+      feedId
+      totalClicks
+      totalVerified
+      totalUniqueSharers
+      conversionRate
+      platformBreakdown {
+        platform
+        clicks
+        verified
+        uniqueSharers
+      }
+      recentSharers {
+        userId
+        firstName
+        lastName
+        avatar
+        platforms
+      }
+      authorId
+      createdAt
+    }
+  }
+`;

@@ -8,9 +8,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePostAnalytics } from "@/graphql/actions/feed";
+import { FeedShareStatsView } from "./feed-share-stats";
 
 const Analytics = ({ feedId }: { feedId?: string }) => {
   const { data, loading } = usePostAnalytics(feedId || "", {
@@ -19,6 +21,7 @@ const Analytics = ({ feedId }: { feedId?: string }) => {
   const analyticsData = data?.getPostAnalytics;
 
   const [analyticsVisible, setAnalyticsVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("engagement");
 
   const getMetricIcon = (name: string) => {
     const lower = name.toLowerCase();
@@ -51,7 +54,7 @@ const Analytics = ({ feedId }: { feedId?: string }) => {
 
       <Dialog open={analyticsVisible} onOpenChange={setAnalyticsVisible}>
         <DialogContent
-          className="sm:max-w-[620px] max-h-[85vh] p-0 overflow-hidden rounded-2xl border border-border shadow-xl flex flex-col bg-background"
+          className="sm:max-w-[760px] max-h-[85vh] p-0 overflow-hidden rounded-2xl border border-border shadow-xl flex flex-col bg-background"
           onClick={(e) => e.stopPropagation()}
         >
           <DialogHeader className="p-5 border-b border-border/80 bg-card/60 shrink-0">
@@ -64,70 +67,101 @@ const Analytics = ({ feedId }: { feedId?: string }) => {
                   Post Performance Analytics
                 </DialogTitle>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Real-time engagement breakdown and ecosystem reach
+                  Real-time engagement breakdown and viral social reach
                 </p>
               </div>
             </div>
           </DialogHeader>
 
-          <div className="p-6 space-y-6 overflow-y-auto">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                <p className="text-xs font-semibold text-muted-foreground">
-                  Analyzing post engagement...
-                </p>
-              </div>
-            ) : !analyticsData || !analyticsData?.engagement || analyticsData.engagement.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border/60 rounded-xl bg-muted/10">
-                <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center mb-2">
-                  <Sparkles className="h-5 w-5 text-muted-foreground/60" />
-                </div>
-                <p className="text-xs font-semibold text-foreground">
-                  No analytics data available yet
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 max-w-[280px]">
-                  Analytics will update as members interact with this post.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                    Engagement Metrics
-                  </span>
-                  <div className="h-px bg-border flex-1" />
-                </div>
+          <div className="p-6 space-y-4 overflow-y-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
+              <TabsList className="grid w-full grid-cols-2 h-10 p-1 bg-muted/60 rounded-xl">
+                <TabsTrigger
+                  value="engagement"
+                  className="flex items-center gap-2 text-xs font-semibold rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-xs"
+                >
+                  <BarChart3 className="h-3.5 w-3.5 text-indigo-500" />
+                  <span>Engagement Metrics</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="shares"
+                  className="flex items-center gap-2 text-xs font-semibold rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-xs"
+                >
+                  <Share2 className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Share Analytics & Sharers</span>
+                </TabsTrigger>
+              </TabsList>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {analyticsData.engagement.map((item, idx) => {
-                    const { icon: MetricIcon, color, bg } = getMetricIcon(item.name);
-                    return (
-                      <Card
-                        key={idx}
-                        className="bg-card border border-border/70 rounded-xl p-4 shadow-xs hover:border-border transition-colors"
-                      >
-                        <CardContent className="p-0 flex flex-col justify-between gap-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-muted-foreground capitalize">
-                              {item.name}
-                            </span>
-                            <div className={`h-7 w-7 rounded-lg ${bg} ${color} flex items-center justify-center`}>
-                              <MetricIcon className="h-3.5 w-3.5" />
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-2xl font-bold tracking-tight text-foreground">
-                              {item.value}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+              <TabsContent value="engagement" className="mt-4 focus-visible:outline-none">
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-3">
+                    <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                    <p className="text-xs font-semibold text-muted-foreground">
+                      Analyzing post engagement...
+                    </p>
+                  </div>
+                ) : !analyticsData || !analyticsData?.engagement || analyticsData.engagement.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border/60 rounded-xl bg-muted/10">
+                    <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center mb-2">
+                      <Sparkles className="h-5 w-5 text-muted-foreground/60" />
+                    </div>
+                    <p className="text-xs font-semibold text-foreground">
+                      No analytics data available yet
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 max-w-[280px]">
+                      Analytics will update as members interact with this post.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                        Engagement Overview
+                      </span>
+                      <div className="h-px bg-border flex-1" />
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {analyticsData.engagement.map((item, idx) => {
+                        const { icon: MetricIcon, color, bg } = getMetricIcon(item.name);
+                        return (
+                          <Card
+                            key={idx}
+                            className="bg-card border border-border/70 rounded-xl p-4 shadow-xs hover:border-border transition-colors"
+                          >
+                            <CardContent className="p-0 flex flex-col justify-between gap-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-medium text-muted-foreground capitalize">
+                                  {item.name}
+                                </span>
+                                <div className={`h-7 w-7 rounded-lg ${bg} ${color} flex items-center justify-center`}>
+                                  <MetricIcon className="h-3.5 w-3.5" />
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-2xl font-bold tracking-tight text-foreground">
+                                  {item.value}
+                                </p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="shares" className="mt-4 focus-visible:outline-none">
+                {feedId ? (
+                  <FeedShareStatsView feedId={feedId} />
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center py-8">
+                    No feed ID provided.
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </DialogContent>
       </Dialog>
@@ -136,4 +170,3 @@ const Analytics = ({ feedId }: { feedId?: string }) => {
 };
 
 export default Analytics;
-

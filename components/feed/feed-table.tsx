@@ -92,6 +92,7 @@ export function FeedTable({
   loading = false,
 }: FeedTableProps) {
   const [selectedFeedForView, setSelectedFeedForView] = useState<FeedProps | null>(null);
+  const [modalDefaultTab, setModalDefaultTab] = useState<"preview" | "shares">("preview");
   const [feedToDelete, setFeedToDelete] = useState<FeedProps | null>(null);
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
@@ -444,10 +445,20 @@ export function FeedTable({
       headerClassName: "text-center",
       className: "text-center",
       cell: (row) => (
-        <AdminTableMetric
-          icon={Share2}
-          value={row.totalReShare || 0}
-        />
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedFeedForView(row);
+            setModalDefaultTab("shares");
+          }}
+          className="inline-flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+          title="Click to view share details & sharers"
+        >
+          <AdminTableMetric
+            icon={Share2}
+            value={row.totalReShare || 0}
+          />
+        </button>
       ),
     },
     {
@@ -492,11 +503,25 @@ export function FeedTable({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44 rounded-xl">
             <DropdownMenuItem
-              onClick={() => setSelectedFeedForView(row)}
+              onClick={() => {
+                setSelectedFeedForView(row);
+                setModalDefaultTab("preview");
+              }}
               className="cursor-pointer gap-2 text-xs font-medium"
             >
               <Eye className="h-3.5 w-3.5" />
               <span>View Post</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedFeedForView(row);
+                setModalDefaultTab("shares");
+              }}
+              className="cursor-pointer gap-2 text-xs font-medium"
+            >
+              <Share2 className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Share Analytics</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem
@@ -557,6 +582,7 @@ export function FeedTable({
       <FeedDetailModal
         feed={selectedFeedForView}
         open={!!selectedFeedForView}
+        defaultTab={modalDefaultTab}
         onOpenChange={(open) => {
           if (!open) setSelectedFeedForView(null);
         }}
