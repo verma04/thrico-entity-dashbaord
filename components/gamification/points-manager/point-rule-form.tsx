@@ -15,7 +15,11 @@ import {
   Sparkles,
   Layers,
   Repeat,
+  Globe,
+  MessageCircle,
+  Link as LinkIcon,
 } from "lucide-react";
+import { Linkedin, Twitter, Facebook, Instagram } from "@/components/ui/brand-icons";
 import { cn } from "@/lib/utils";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { toast } from "sonner";
@@ -79,6 +83,74 @@ interface PointRuleFormProps {
 
 const POINT_PRESETS = [5, 10, 25, 50, 100, 250, 500];
 
+
+function getTriggerChannel(trigger: any): string {
+  const text = `${trigger?.id || ""} ${trigger?.name || ""} ${trigger?.description || ""} ${trigger?.value || ""}`.toLowerCase();
+  if (text.includes("linkedin")) return "linkedin";
+  if (text.includes("whatsapp")) return "whatsapp";
+  if (text.includes("twitter") || text.includes("share_x") || text.includes("twitter / x")) return "twitter";
+  if (text.includes("facebook") || text.includes("fb")) return "facebook";
+  if (text.includes("instagram")) return "instagram";
+  if (
+    text.includes("direct link") ||
+    text.includes("copy link") ||
+    text.includes("share-link") ||
+    text.includes("share-click-link") ||
+    text.includes("share-verified-link") ||
+    text.includes("viral-link") ||
+    text.includes("creator-reach-link")
+  ) {
+    return "link";
+  }
+  return "in_app";
+}
+
+const CHANNEL_METADATA: Record<
+  string,
+  { label: string; description: string; icon: any }
+> = {
+  ALL: {
+    label: "All Channels",
+    description: "All available triggers in this module",
+    icon: Globe,
+  },
+  linkedin: {
+    label: "LinkedIn",
+    description: "Shares, verified posts & viral reach on LinkedIn",
+    icon: Linkedin,
+  },
+  whatsapp: {
+    label: "WhatsApp",
+    description: "Shares, verified posts & viral reach on WhatsApp",
+    icon: MessageCircle,
+  },
+  twitter: {
+    label: "Twitter / X",
+    description: "Shares, verified posts & viral reach on Twitter / X",
+    icon: Twitter,
+  },
+  facebook: {
+    label: "Facebook",
+    description: "Shares, verified posts & viral reach on Facebook",
+    icon: Facebook,
+  },
+  instagram: {
+    label: "Instagram",
+    description: "Shares, verified posts & viral reach on Instagram",
+    icon: Instagram,
+  },
+  link: {
+    label: "Direct Link",
+    description: "Link copies, verified shares & viral reach",
+    icon: LinkIcon,
+  },
+  in_app: {
+    label: "General / In-App",
+    description: "Standard in-app module actions and events",
+    icon: Layers,
+  },
+};
+
 export function PointRuleForm({
   showHeader = true,
   initialValues,
@@ -107,6 +179,21 @@ export function PointRuleForm({
   const [sourceType, setSourceType] = useState<"MODULE" | "INTEGRATION">(
     initialSourceType,
   );
+
+  const initialChannel = React.useMemo(() => {
+    if (!initialValues?.action) return "ALL";
+    return getTriggerChannel({ id: initialValues.action, name: initialValues.action });
+  }, [initialValues]);
+
+  const [selectedChannel, setSelectedChannel] = useState<string>(initialChannel);
+
+  useEffect(() => {
+    if (initialValues?.action) {
+      setSelectedChannel(
+        getTriggerChannel({ id: initialValues.action, name: initialValues.action })
+      );
+    }
+  }, [initialValues]);
 
   useEffect(() => {
     if (initialValues?.module) {
@@ -357,6 +444,63 @@ export function PointRuleForm({
     allSources,
   ]);
 
+  const availableChannels = React.useMemo(() => {
+    const channelCounts = new Map<string, number>();
+    filteredTriggers.forEach((t) => {
+      const ch = getTriggerChannel(t);
+      channelCounts.set(ch, (channelCounts.get(ch) || 0) + 1);
+    });
+    return channelCounts;
+  }, [filteredTriggers]);
+
+  const hasMultipleChannels = React.useMemo(() => {
+    return Array.from(availableChannels.keys()).some((ch) => ch !== "in_app");
+  }, [availableChannels]);
+
+  const channelOptions = React.useMemo(() => {
+    const list = [
+      {
+        id: "ALL",
+        label: "All Channels",
+        description: `Show all ${filteredTriggers.length} triggers`,
+        count: filteredTriggers.length,
+      },
+    ];
+
+    const order = [
+      "linkedin",
+      "whatsapp",
+      "twitter",
+      "facebook",
+      "instagram",
+      "link",
+      "in_app",
+    ];
+    order.forEach((chKey) => {
+      const count = availableChannels.get(chKey);
+      if (count && count > 0) {
+        const meta = CHANNEL_METADATA[chKey];
+        if (meta) {
+          list.push({
+            id: chKey,
+            label: meta.label,
+            description: meta.description,
+            count,
+          });
+        }
+      }
+    });
+
+    return list;
+  }, [availableChannels, filteredTriggers]);
+
+  const displayedTriggers = React.useMemo(() => {
+    if (selectedChannel === "ALL") return filteredTriggers;
+    return filteredTriggers.filter(
+      (t) => getTriggerChannel(t) === selectedChannel
+    );
+  }, [filteredTriggers, selectedChannel]);
+
   const selectedSourceItem = allSources.all.find(
     (s) =>
       s.id?.toLowerCase() === formik.values.module?.toLowerCase() ||
@@ -416,7 +560,11 @@ export function PointRuleForm({
             <div className="space-y-2.5 pt-1">
               <PolarisSummaryRow
                 label="Channel Origin"
-                value={selectedSourceItem?.name || "Unspecified"}
+                value={
+                  selectedChannel !== "ALL" && CHANNEL_METADATA[selectedChannel]
+                    ? `${selectedSourceItem?.name || "Module"} (${CHANNEL_METADATA[selectedChannel].label})`
+                    : selectedSourceItem?.name || "Unspecified"
+                }
               />
               <PolarisSummaryRow
                 label="Target Trigger"
@@ -543,8 +691,11 @@ export function PointRuleForm({
             disabled={isEdit}
           />
 
-          {/* Target Source and Triggering Action Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+          {/* Target Source, Channel Filter & Triggering Action Grid */}
+          <div className={cn(
+            "grid gap-3.5 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800",
+            hasMultipleChannels ? "grid-cols-1 md:grid-cols-3" : "grid-cols-1 md:grid-cols-2"
+          )}>
             {/* Searchable Target Module Combobox */}
             <PolarisCombobox
               id="module"
@@ -561,20 +712,62 @@ export function PointRuleForm({
               onChange={(val) => {
                 formik.setFieldValue("module", val);
                 formik.setFieldValue("action", "");
+                setSelectedChannel("ALL");
               }}
               error={formik.touched.module && formik.errors.module ? (formik.errors.module as string) : undefined}
             />
+
+            {/* Platform / Channel Filter (Active when multi-channel triggers exist) */}
+            {hasMultipleChannels && (
+              <PolarisCombobox
+                id="channel"
+                label="Channel / Platform"
+                placeholder="All Channels"
+                searchPlaceholder="Filter by platform..."
+                options={channelOptions.map((c) => ({
+                  value: c.id,
+                  label: c.label,
+                  description: c.description,
+                  badge: `${c.count} ${c.count === 1 ? "trigger" : "triggers"}`,
+                }))}
+                value={selectedChannel}
+                disabled={!formik.values.module || isEdit}
+                onChange={(val) => {
+                  const nextChannel = val || "ALL";
+                  setSelectedChannel(nextChannel);
+                  if (nextChannel !== "ALL" && formik.values.action) {
+                    const currentTrigger = filteredTriggers.find(
+                      (t) => (t.value || t.name || t.id) === formik.values.action
+                    );
+                    if (
+                      currentTrigger &&
+                      getTriggerChannel(currentTrigger) !== nextChannel
+                    ) {
+                      formik.setFieldValue("action", "");
+                    }
+                  }
+                }}
+              />
+            )}
 
             {/* Searchable Trigger Event Combobox */}
             <PolarisCombobox
               id="action"
               label="Trigger Event"
               required
-              placeholder={formik.values.module ? "Choose trigger action..." : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`}
+              placeholder={
+                formik.values.module
+                  ? displayedTriggers.length === 0
+                    ? "No triggers in channel"
+                    : "Choose trigger action..."
+                  : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`
+              }
               searchPlaceholder="Search trigger event..."
-              options={filteredTriggers.map((t) => {
+              options={displayedTriggers.map((t) => {
                 const itemVal = t.value || t.name || t.id;
-                const label = t.name ? t.name.replace(/_/g, " ") : (t.description || itemVal);
+                const label = t.name
+                  ? t.name.replace(/_/g, " ")
+                  : t.description || itemVal;
                 return {
                   value: itemVal,
                   label: label,
@@ -586,14 +779,89 @@ export function PointRuleForm({
               disabled={!formik.values.module || isEdit}
               onChange={(val) => {
                 formik.setFieldValue("action", val);
-                const found = filteredTriggers.find((t) => (t.value || t.name || t.id) === val);
+                const found = displayedTriggers.find(
+                  (t) => (t.value || t.name || t.id) === val
+                );
                 if (!formik.values.description && found) {
-                  formik.setFieldValue("description", found.description || found.name || "");
+                  formik.setFieldValue(
+                    "description",
+                    found.description || found.name || ""
+                  );
+                }
+                if (found && selectedChannel === "ALL") {
+                  const ch = getTriggerChannel(found);
+                  if (ch !== "in_app" && availableChannels.has(ch)) {
+                    setSelectedChannel(ch);
+                  }
                 }
               }}
-              error={formik.touched.action && formik.errors.action ? (formik.errors.action as string) : undefined}
+              error={
+                formik.touched.action && formik.errors.action
+                  ? (formik.errors.action as string)
+                  : undefined
+              }
             />
           </div>
+
+          {/* Quick Filter Pill Chips */}
+          {hasMultipleChannels && (
+            <div className="flex items-center gap-1.5 flex-wrap pt-1">
+              <span className="text-[11px] font-medium text-muted-foreground mr-1">
+                Filter Channel:
+              </span>
+              {channelOptions.map((ch) => {
+                const isSelected = selectedChannel === ch.id;
+                const MetaIcon = CHANNEL_METADATA[ch.id]?.icon;
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedChannel(ch.id);
+                      if (ch.id !== "ALL" && formik.values.action) {
+                        const currentTrigger = filteredTriggers.find(
+                          (t) =>
+                            (t.value || t.name || t.id) === formik.values.action
+                        );
+                        if (
+                          currentTrigger &&
+                          getTriggerChannel(currentTrigger) !== ch.id
+                        ) {
+                          formik.setFieldValue("action", "");
+                        }
+                      }
+                    }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer border",
+                      isSelected
+                        ? "bg-[#005bd3] text-white border-[#005bd3] shadow-xs dark:bg-blue-600 dark:border-blue-600"
+                        : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+                    )}
+                  >
+                    {MetaIcon && (
+                      <MetaIcon
+                        className={cn(
+                          "h-3 w-3",
+                          isSelected ? "text-white" : "text-muted-foreground"
+                        )}
+                      />
+                    )}
+                    <span>{ch.label}</span>
+                    <span
+                      className={cn(
+                        "text-[9.5px] px-1.5 py-0.2 rounded-full font-mono",
+                        isSelected
+                          ? "bg-white/20 text-white"
+                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+                      )}
+                    >
+                      {ch.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Selected Module and Trigger Live Details */}
           {(selectedSourceItem || selectedTriggerItem) && (
