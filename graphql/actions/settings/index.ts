@@ -88,6 +88,14 @@ export interface EntitySettings {
   aiModerationSurveys?: boolean;
   aiModerationPolls?: boolean;
   aiModerationStories?: boolean;
+  // User Action Toggles
+  allowFeedPost?: boolean;
+  allowComment?: boolean;
+  allowReshare?: boolean;
+  allowStory?: boolean;
+  allowSocialReshare?: boolean;
+  allowFeedReaction?: boolean;
+  allowReactionVisibility?: boolean;
 }
 
 export interface GetEntitySettingsResponse {
@@ -185,6 +193,14 @@ export interface UpdateEntitySettingsInput {
   aiModerationSurveys?: boolean;
   aiModerationPolls?: boolean;
   aiModerationStories?: boolean;
+  // User Action Toggles
+  allowFeedPost?: boolean;
+  allowComment?: boolean;
+  allowReshare?: boolean;
+  allowStory?: boolean;
+  allowSocialReshare?: boolean;
+  allowFeedReaction?: boolean;
+  allowReactionVisibility?: boolean;
 }
 
 export interface UpdateEntitySettingsResponse {

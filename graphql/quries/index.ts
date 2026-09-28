@@ -183,6 +183,13 @@ export const GET_ENTITY_SETTINGS = gql`
       aiModerationSurveys
       aiModerationPolls
       aiModerationStories
+      allowFeedPost
+      allowComment
+      allowReshare
+      allowStory
+      allowSocialReshare
+      allowFeedReaction
+      allowReactionVisibility
     }
   }
 `;
@@ -248,6 +255,13 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       aiModerationSurveys
       aiModerationPolls
       aiModerationStories
+      allowFeedPost
+      allowComment
+      allowReshare
+      allowStory
+      allowSocialReshare
+      allowFeedReaction
+      allowReactionVisibility
     }
   }
 `;

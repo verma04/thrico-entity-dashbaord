@@ -13,6 +13,14 @@ import {
   CheckCircle2,
   Briefcase,
   ShieldCheck,
+  PenLine,
+  MessageCircle,
+  Repeat2,
+  BookOpen,
+  Share2,
+  Heart,
+  Eye,
+  Sliders,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -103,6 +111,13 @@ interface FeedVisibilitySettings {
   feedEntityName: string;
   aiModerationFeed: boolean;
   aiModerationComments: boolean;
+  allowFeedPost: boolean;
+  allowComment: boolean;
+  allowReshare: boolean;
+  allowStory: boolean;
+  allowSocialReshare: boolean;
+  allowFeedReaction: boolean;
+  allowReactionVisibility: boolean;
 }
 
 export default function FeedVisibility() {
@@ -127,6 +142,14 @@ export default function FeedVisibility() {
     feedEntityName: data?.getEntitySettings?.feedEntityName || "",
     aiModerationFeed: data?.getEntitySettings?.aiModerationFeed ?? true,
     aiModerationComments: data?.getEntitySettings?.aiModerationComments ?? true,
+    allowFeedPost: data?.getEntitySettings?.allowFeedPost ?? true,
+    allowComment: data?.getEntitySettings?.allowComment ?? true,
+    allowReshare: data?.getEntitySettings?.allowReshare ?? true,
+    allowStory: data?.getEntitySettings?.allowStory ?? true,
+    allowSocialReshare: data?.getEntitySettings?.allowSocialReshare ?? true,
+    allowFeedReaction: data?.getEntitySettings?.allowFeedReaction ?? true,
+    allowReactionVisibility:
+      data?.getEntitySettings?.allowReactionVisibility ?? true,
   };
 
   const [formData, setFormData] =
@@ -152,6 +175,14 @@ export default function FeedVisibility() {
         aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
         aiModerationComments:
           data.getEntitySettings.aiModerationComments ?? true,
+        allowFeedPost: data.getEntitySettings.allowFeedPost ?? true,
+        allowComment: data.getEntitySettings.allowComment ?? true,
+        allowReshare: data.getEntitySettings.allowReshare ?? true,
+        allowStory: data.getEntitySettings.allowStory ?? true,
+        allowSocialReshare: data.getEntitySettings.allowSocialReshare ?? true,
+        allowFeedReaction: data.getEntitySettings.allowFeedReaction ?? true,
+        allowReactionVisibility:
+          data.getEntitySettings.allowReactionVisibility ?? true,
       };
       setFormData(serverSettings);
       setHasChanged(false);
@@ -194,6 +225,14 @@ export default function FeedVisibility() {
         aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
         aiModerationComments:
           data.getEntitySettings.aiModerationComments ?? true,
+        allowFeedPost: data.getEntitySettings.allowFeedPost ?? true,
+        allowComment: data.getEntitySettings.allowComment ?? true,
+        allowReshare: data.getEntitySettings.allowReshare ?? true,
+        allowStory: data.getEntitySettings.allowStory ?? true,
+        allowSocialReshare: data.getEntitySettings.allowSocialReshare ?? true,
+        allowFeedReaction: data.getEntitySettings.allowFeedReaction ?? true,
+        allowReactionVisibility:
+          data.getEntitySettings.allowReactionVisibility ?? true,
       });
       setHasChanged(false);
     }
@@ -211,6 +250,13 @@ export default function FeedVisibility() {
         allowEntityOpportunitiesInFeed: formData.allowEntityOpportunitiesInFeed,
         aiModerationFeed: formData.aiModerationFeed,
         aiModerationComments: formData.aiModerationComments,
+        allowFeedPost: formData.allowFeedPost,
+        allowComment: formData.allowComment,
+        allowReshare: formData.allowReshare,
+        allowStory: formData.allowStory,
+        allowSocialReshare: formData.allowSocialReshare,
+        allowFeedReaction: formData.allowFeedReaction,
+        allowReactionVisibility: formData.allowReactionVisibility,
       };
 
       const promises = [];
@@ -298,6 +344,65 @@ export default function FeedVisibility() {
     },
   ];
 
+  const userActionPermissions = [
+    {
+      key: "allowFeedPost" as const,
+      label: "Allow Feed Posts",
+      description:
+        "Allow members to create and publish new feed posts in the community.",
+      icon: PenLine,
+      enabled: formData.allowFeedPost,
+    },
+    {
+      key: "allowComment" as const,
+      label: "Allow Comments",
+      description:
+        "Allow members to comment and participate in discussions under feed posts.",
+      icon: MessageCircle,
+      enabled: formData.allowComment,
+    },
+    {
+      key: "allowFeedReaction" as const,
+      label: "Allow Feed Reactions",
+      description:
+        "Allow members to react with emojis and like feed posts and updates.",
+      icon: Heart,
+      enabled: formData.allowFeedReaction,
+    },
+    {
+      key: "allowReactionVisibility" as const,
+      label: "Show Reaction Visibility",
+      description:
+        "Display reaction counts and member reaction lists on feed posts.",
+      icon: Eye,
+      enabled: formData.allowReactionVisibility,
+    },
+    {
+      key: "allowReshare" as const,
+      label: "Allow Feed Reshare",
+      description:
+        "Allow members to reshare feed posts internally within the platform.",
+      icon: Repeat2,
+      enabled: formData.allowReshare,
+    },
+    {
+      key: "allowStory" as const,
+      label: "Allow Stories",
+      description:
+        "Allow members to publish short-lived story cards and ephemeral media.",
+      icon: BookOpen,
+      enabled: formData.allowStory,
+    },
+    {
+      key: "allowSocialReshare" as const,
+      label: "Allow Social Reshare",
+      description:
+        "Allow members to share feed posts externally to third-party social networks.",
+      icon: Share2,
+      enabled: formData.allowSocialReshare,
+    },
+  ];
+
   return (
     <div className="w-full">
       <PolarisFormLayout
@@ -373,6 +478,27 @@ export default function FeedVisibility() {
                   label="AI Comment Sentinel"
                   value={formData.aiModerationComments ? "Active" : "Disabled"}
                   highlight={formData.aiModerationComments}
+                />
+                <PolarisSummaryRow
+                  label="User Action Controls"
+                  value={`${[
+                    formData.allowFeedPost,
+                    formData.allowComment,
+                    formData.allowFeedReaction,
+                    formData.allowReactionVisibility,
+                    formData.allowReshare,
+                    formData.allowStory,
+                    formData.allowSocialReshare,
+                  ].filter(Boolean).length} of 7 Active`}
+                  highlight={[
+                    formData.allowFeedPost,
+                    formData.allowComment,
+                    formData.allowFeedReaction,
+                    formData.allowReactionVisibility,
+                    formData.allowReshare,
+                    formData.allowStory,
+                    formData.allowSocialReshare,
+                  ].filter(Boolean).length > 0}
                   isLast
                 />
               </div>
@@ -507,6 +633,55 @@ export default function FeedVisibility() {
                   onCheckedChange={() => handleToggle("aiModerationComments")}
                 />
               </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 4: User Action Permissions */}
+          <PolarisFormCard
+            step={4}
+            icon={Sliders}
+            title="User Action Permissions"
+            description="Control interactive permissions and engagement capabilities available to members in the feed."
+            badge="Permissions"
+          >
+            <div className="space-y-3">
+              {userActionPermissions.map((action) => (
+                <div
+                  key={action.key}
+                  className={cn(
+                    "flex items-center justify-between p-3.5 rounded-[8px] border transition-all",
+                    action.enabled
+                      ? "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs"
+                      : "border-[#e1e3e5] dark:border-zinc-800/60 bg-[#f6f6f7]/40 dark:bg-zinc-900/30 opacity-75",
+                  )}
+                >
+                  <div className="flex items-start gap-3 min-w-0 pr-2">
+                    <div
+                      className={cn(
+                        "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 border",
+                        action.enabled
+                          ? "bg-[#f6f6f7] dark:bg-zinc-800 border-[#d2d5d9] text-[#303030] dark:text-zinc-100"
+                          : "bg-transparent border-transparent text-[#8c9196]",
+                      )}
+                    >
+                      <action.icon className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <PolarisLabel className="cursor-pointer">
+                        {action.label}
+                      </PolarisLabel>
+                      <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                        {action.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Switch
+                    checked={action.enabled}
+                    onCheckedChange={() => handleToggle(action.key)}
+                  />
+                </div>
+              ))}
             </div>
           </PolarisFormCard>
         </div>
