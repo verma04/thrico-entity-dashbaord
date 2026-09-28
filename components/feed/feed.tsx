@@ -16,12 +16,13 @@ import {
   ShieldCheck,
   Sparkles,
   BarChart2,
+  BarChart3,
   Copy,
   Check,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -64,6 +65,7 @@ import moment from "moment";
 export default function Feed({ feed }: { feed: FeedProps }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
     onCompleted: () => {
@@ -263,6 +265,19 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsAnalyticsOpen(true);
+                      }}
+                      className="cursor-pointer gap-2"
+                    >
+                      <BarChart3 className="h-4 w-4 text-indigo-500" />
+                      <span>Analytics</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
                     {feed.isOwner ? (
                       <>
                         <DropdownMenuItem
@@ -276,11 +291,14 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                             <Pin
                               className={cn(
                                 "h-4 w-4",
-                                feed.isPinned && "fill-amber-500 text-amber-500"
+                                feed.isPinned &&
+                                  "fill-amber-500 text-amber-500",
                               )}
                             />
                           )}
-                          <span>{feed.isPinned ? "Unpin Post" : "Pin to Top"}</span>
+                          <span>
+                            {feed.isPinned ? "Unpin Post" : "Pin to Top"}
+                          </span>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
@@ -328,7 +346,9 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <AlertDialogCancel className="rounded-xl">
+                      Cancel
+                    </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDelete}
                       disabled={isDeleting}
@@ -532,7 +552,9 @@ export default function Feed({ feed }: { feed: FeedProps }) {
               {copied ? (
                 <>
                   <Check className="h-4 w-4 text-emerald-500" />
-                  <span className="text-emerald-600 dark:text-emerald-400">Copied</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    Copied
+                  </span>
                 </>
               ) : (
                 <>
@@ -544,11 +566,15 @@ export default function Feed({ feed }: { feed: FeedProps }) {
           </div>
 
           <div className="flex items-center">
-            <Analytics feedId={feed.id.toString()} />
+            <Analytics
+              feedId={feed.id.toString()}
+              feed={feed}
+              open={isAnalyticsOpen}
+              onOpenChange={setIsAnalyticsOpen}
+            />
           </div>
         </div>
       </Card>
     </div>
   );
 }
-

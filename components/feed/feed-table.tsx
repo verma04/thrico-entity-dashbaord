@@ -22,6 +22,7 @@ import {
   ShoppingBag,
   Play,
   BarChart2,
+  BarChart3,
   Sparkles,
   Globe,
   Lock,
@@ -92,7 +93,7 @@ export function FeedTable({
   loading = false,
 }: FeedTableProps) {
   const [selectedFeedForView, setSelectedFeedForView] = useState<FeedProps | null>(null);
-  const [modalDefaultTab, setModalDefaultTab] = useState<"preview" | "shares">("preview");
+  const [modalDefaultTab, setModalDefaultTab] = useState<"preview" | "shares" | "engagement" | "demographics">("preview");
   const [feedToDelete, setFeedToDelete] = useState<FeedProps | null>(null);
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
@@ -419,11 +420,21 @@ export function FeedTable({
       headerClassName: "text-center",
       className: "text-center",
       cell: (row) => (
-        <AdminTableMetric
-          icon={Heart}
-          value={row.totalReactions || 0}
-          variant="rose"
-        />
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedFeedForView(row);
+            setModalDefaultTab("engagement");
+          }}
+          className="inline-flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+          title="Click to view engagement analytics"
+        >
+          <AdminTableMetric
+            icon={Heart}
+            value={row.totalReactions || 0}
+            variant="rose"
+          />
+        </button>
       ),
     },
     {
@@ -432,11 +443,21 @@ export function FeedTable({
       headerClassName: "text-center",
       className: "text-center",
       cell: (row) => (
-        <AdminTableMetric
-          icon={MessageSquare}
-          value={row.totalComment || 0}
-          variant="indigo"
-        />
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedFeedForView(row);
+            setModalDefaultTab("engagement");
+          }}
+          className="inline-flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+          title="Click to view engagement analytics"
+        >
+          <AdminTableMetric
+            icon={MessageSquare}
+            value={row.totalComment || 0}
+            variant="indigo"
+          />
+        </button>
       ),
     },
     {
@@ -511,6 +532,17 @@ export function FeedTable({
             >
               <Eye className="h-3.5 w-3.5" />
               <span>View Post</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedFeedForView(row);
+                setModalDefaultTab("engagement");
+              }}
+              className="cursor-pointer gap-2 text-xs font-medium"
+            >
+              <BarChart3 className="h-3.5 w-3.5 text-indigo-500" />
+              <span>Post Analytics</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem
