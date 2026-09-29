@@ -26,6 +26,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { getNavIcon } from "./utils";
 import type { ModuleItem } from "./types";
@@ -39,6 +40,8 @@ interface MobileNavigationProps {
   onDragEnd: (result: DropResult) => void;
   toggleNavigation: (id: string) => void;
   moveModule?: (id: string, direction: "up" | "down") => void;
+  hideMenuMobile?: boolean;
+  onToggleHideMenuMobile?: (val: boolean) => void;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -48,6 +51,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   onDragEnd,
   toggleNavigation,
   moveModule,
+  hideMenuMobile,
+  onToggleHideMenuMobile,
 }) => {
   const [activePreviewTab, setActivePreviewTab] = useState<string>("home");
 
@@ -222,19 +227,21 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 ))}
 
                 {/* Fixed: Menu */}
-                <button
-                  type="button"
-                  onClick={() => setActivePreviewTab("menu")}
-                  className={cn(
-                    "flex flex-col items-center gap-1 py-1 px-2 rounded-lg transition-all",
-                    activePreviewTab === "menu"
-                      ? "text-primary font-bold"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <Menu className="h-4 w-4" />
-                  <span className="text-[9px] font-medium leading-none">Menu</span>
-                </button>
+                {!hideMenuMobile && (
+                  <button
+                    type="button"
+                    onClick={() => setActivePreviewTab("menu")}
+                    className={cn(
+                      "flex flex-col items-center gap-1 py-1 px-2 rounded-lg transition-all",
+                      activePreviewTab === "menu"
+                        ? "text-primary font-bold"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Menu className="h-4 w-4" />
+                    <span className="text-[9px] font-medium leading-none">Menu</span>
+                  </button>
+                )}
 
                 {/* Fixed: Profile */}
                 <button
@@ -261,6 +268,31 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
         {/* Right: Drag-to-Reorder & Slot Manager */}
         <div className="lg:col-span-7 space-y-5">
+          {/* Mobile Bottom Bar Menu Visibility Card */}
+          <div className="rounded-xl border border-border/80 bg-card p-4 shadow-xs flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <Menu className="h-4 w-4 text-primary" />
+                <h4 className="text-[14px] font-semibold text-foreground">
+                  Mobile Menu Tab
+                </h4>
+              </div>
+              <p className="text-[12px] text-muted-foreground">
+                Hide the &quot;Menu&quot; tab from the bottom navigation bar on mobile devices.
+              </p>
+            </div>
+            <div className="flex items-center gap-2.5 shrink-0">
+              <span className="text-[12px] font-medium text-muted-foreground">
+                {hideMenuMobile ? "Hidden" : "Visible"}
+              </span>
+              <Switch
+                checked={hideMenuMobile ?? false}
+                onCheckedChange={onToggleHideMenuMobile}
+                aria-label="Hide Menu Tab on Mobile"
+              />
+            </div>
+          </div>
+
           {/* Active Navigation Slots Card */}
           <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
             <div className="px-5 py-3.5 border-b border-border flex items-center justify-between">

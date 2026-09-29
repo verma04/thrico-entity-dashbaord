@@ -96,6 +96,7 @@ export interface EntitySettings {
   allowSocialReshare?: boolean;
   allowFeedReaction?: boolean;
   allowReactionVisibility?: boolean;
+  hideMenuMobile?: boolean;
 }
 
 export interface GetEntitySettingsResponse {
@@ -201,6 +202,7 @@ export interface UpdateEntitySettingsInput {
   allowSocialReshare?: boolean;
   allowFeedReaction?: boolean;
   allowReactionVisibility?: boolean;
+  hideMenuMobile?: boolean;
 }
 
 export interface UpdateEntitySettingsResponse {

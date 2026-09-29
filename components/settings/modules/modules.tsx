@@ -30,6 +30,10 @@ import {
   InputUpdateEntityModule,
   useCheckEntitySubscription,
 } from "@/graphql/actions";
+import {
+  useGetEntitySettings,
+  useUpdateEntitySettings,
+} from "@/graphql/actions/settings";
 
 import type {
   ModuleItem,
@@ -84,6 +88,12 @@ export default function ModuleManagement() {
   const { data, loading, error } = useCheckEntitySubscription();
   const subscription = data?.checkEntitySubscription;
 
+  const { data: settingsData } = useGetEntitySettings();
+  const [updateEntitySettingsMutation] = useUpdateEntitySettings({});
+
+  const [hideMenuMobile, setHideMenuMobile] = useState<boolean>(false);
+  const [originalHideMenuMobile, setOriginalHideMenuMobile] = useState<boolean>(false);
+
   const [modules, setModules] = useState<ModuleItem[]>(moduleData);
   const [originalModules, setOriginalModules] =
     useState<ModuleItem[]>(moduleData);
@@ -100,7 +110,16 @@ export default function ModuleManagement() {
     description?: string;
   } | null>(null);
 
+  React.useEffect(() => {
+    if (settingsData?.getEntitySettings) {
+      const val = settingsData.getEntitySettings.hideMenuMobile ?? false;
+      setHideMenuMobile(val);
+      setOriginalHideMenuMobile(val);
+    }
+  }, [settingsData]);
+
   const hasChanged = React.useMemo(() => {
+    if (hideMenuMobile !== originalHideMenuMobile) return true;
     if (!modulesInitialized) return false;
     if (modules.length !== originalModules.length) return true;
     for (const m of modules) {
@@ -125,10 +144,11 @@ export default function ModuleManagement() {
       }
     }
     return false;
-  }, [modules, originalModules, modulesInitialized]);
+  }, [modules, originalModules, modulesInitialized, hideMenuMobile, originalHideMenuMobile]);
 
   const onReset = () => {
     setModules(originalModules);
+    setHideMenuMobile(originalHideMenuMobile);
     setSaved(false);
   };
 
@@ -407,12 +427,28 @@ export default function ModuleManagement() {
       };
     });
     try {
-      const response = await updateEntityModule({
-        variables: { input },
-        refetchQueries: ["CheckEntitySubscription"],
-      });
+      const promises: Promise<any>[] = [
+        updateEntityModule({
+          variables: { input },
+          refetchQueries: ["CheckEntitySubscription"],
+        }),
+      ];
+      if (hideMenuMobile !== originalHideMenuMobile) {
+        promises.push(
+          updateEntitySettingsMutation({
+            variables: {
+              input: {
+                hideMenuMobile,
+              },
+            },
+            refetchQueries: ["GetEntitySettings"],
+          }),
+        );
+      }
+      const [response] = await Promise.all(promises);
       if (response.data?.updateEntityModule.success) {
         setOriginalModules(modules);
+        setOriginalHideMenuMobile(hideMenuMobile);
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
         setNotification({
@@ -674,6 +710,8 @@ export default function ModuleManagement() {
                   onDragEnd={onDragEnd}
                   moveModule={moveNavigationModule}
                   toggleNavigation={toggleNavigation}
+                  hideMenuMobile={hideMenuMobile}
+                  onToggleHideMenuMobile={setHideMenuMobile}
                 />
               </div>
             )}
