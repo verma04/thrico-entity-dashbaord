@@ -6,7 +6,6 @@ export interface ModuleItem {
   required?: boolean;
   showInMobileNavigation: boolean;
   showInWebNavigation: boolean;
-  hideMenuMobile?: boolean;
   isPopular: boolean;
   showInMobileNavigationSortNumber?: number;
   showInWebNavigationSortNumber?: number;

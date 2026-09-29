@@ -8,8 +8,6 @@ import {
   ChevronLeft,
   Smartphone,
   Monitor,
-  Menu,
-  EyeOff,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -36,7 +34,6 @@ interface ModuleCardProps {
   onTogglePopular: (id: string) => void;
   onToggleNavigation: (id: string) => void;
   onToggleWebNavigation: (id: string) => void;
-  onToggleHideMenuMobile?: (id: string) => void;
   onChangeCustomName: (id: string, value: string) => void;
   onChangeCustomIcon?: (id: string, value: string) => void;
   onChangeSubtitle: (id: string, value: string) => void;
@@ -50,7 +47,6 @@ export default function ModuleCard({
   onTogglePopular,
   onToggleNavigation,
   onToggleWebNavigation,
-  onToggleHideMenuMobile,
   onChangeCustomName,
   onChangeCustomIcon,
   onChangeSubtitle,
@@ -421,43 +417,6 @@ export default function ModuleCard({
 
         {/* Navigation Toggles */}
         <div className="flex items-center gap-1">
-          {/* Hide in Mobile Menu Toggle */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!module.enabled || userRole === "directory") return;
-                    onToggleHideMenuMobile?.(module.id);
-                  }}
-                  disabled={!module.enabled || userRole === "directory"}
-                  className={cn(
-                    "flex items-center gap-1 h-6 px-2 rounded-md text-[10px] font-medium transition-all border",
-                    module.hideMenuMobile
-                      ? "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 shadow-2xs"
-                      : "bg-transparent border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
-                    (!module.enabled || userRole === "directory") && "opacity-40 cursor-not-allowed",
-                  )}
-                >
-                  {module.hideMenuMobile ? (
-                    <EyeOff className="h-3 w-3" />
-                  ) : (
-                    <Menu className="h-3 w-3" />
-                  )}
-                  <span>{module.hideMenuMobile ? "Hidden" : "Menu"}</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {!module.enabled
-                  ? "Enable module first"
-                  : module.hideMenuMobile
-                    ? "Module is hidden from mobile menu drawer (click to show)"
-                    : "Module is visible in mobile menu drawer (click to hide)"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
           {/* Mobile Nav Toggle */}
           <TooltipProvider>
             <Tooltip>
