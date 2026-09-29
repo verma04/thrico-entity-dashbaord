@@ -259,6 +259,7 @@ export interface SubscriptionDetails {
     isPopular: boolean;
     showInWebNavigation: boolean;
     showInMobileNavigation: boolean;
+    hideMenuMobile?: boolean;
     showInMobileNavigationSortNumber?: number;
     showInWebNavigationSortNumber?: number;
     canRename?: boolean;
@@ -302,6 +303,7 @@ export interface InputUpdateEntityModule {
   showInMobileNavigationSortNumber?: number;
   showInWebNavigation: boolean;
   showInWebNavigationSortNumber?: number;
+  hideMenuMobile?: boolean;
   isPopular: boolean;
   customName?: string | null;
   customIcon?: string | null;

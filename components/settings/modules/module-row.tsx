@@ -8,6 +8,8 @@ import {
   ChevronLeft,
   Smartphone,
   Monitor,
+  Menu,
+  EyeOff,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -34,6 +36,7 @@ interface ModuleRowProps {
   onTogglePopular: (id: string) => void;
   onToggleNavigation: (id: string) => void;
   onToggleWebNavigation: (id: string) => void;
+  onToggleHideMenuMobile?: (id: string) => void;
   onChangeCustomName: (id: string, value: string) => void;
   onChangeCustomIcon?: (id: string, value: string) => void;
   onChangeSubtitle: (id: string, value: string) => void;
@@ -47,6 +50,7 @@ export default function ModuleRow({
   onTogglePopular,
   onToggleNavigation,
   onToggleWebNavigation,
+  onToggleHideMenuMobile,
   onChangeCustomName,
   onChangeCustomIcon,
   onChangeSubtitle,
@@ -393,6 +397,45 @@ export default function ModuleRow({
         </TooltipProvider>
 
         <div className="w-px h-6 bg-border mx-1"></div>
+
+        {/* Hide in Mobile Menu Toggle */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!module.enabled || userRole === "directory") return;
+                  onToggleHideMenuMobile?.(module.id);
+                }}
+                disabled={!module.enabled || userRole === "directory"}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-0.5 h-[36px] w-[46px] rounded-md transition-all border",
+                  module.hideMenuMobile
+                    ? "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 shadow-sm"
+                    : "bg-transparent border-transparent text-muted-foreground/50 hover:bg-muted hover:text-foreground",
+                  (!module.enabled || userRole === "directory") && "opacity-40 cursor-not-allowed",
+                )}
+              >
+                {module.hideMenuMobile ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Menu className="h-4 w-4" />
+                )}
+                <span className="text-[9px] font-medium leading-none">
+                  {module.hideMenuMobile ? "Hidden" : "Menu"}
+                </span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {!module.enabled
+                ? "Enable module first"
+                : module.hideMenuMobile
+                  ? "Module is hidden from mobile menu drawer (click to show)"
+                  : "Module is visible in mobile menu drawer (click to hide)"}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         {/* Mobile Nav Toggle */}
         <TooltipProvider>

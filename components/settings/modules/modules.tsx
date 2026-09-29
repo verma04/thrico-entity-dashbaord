@@ -141,6 +141,7 @@ export default function ModuleManagement() {
         required: m.required ?? false,
         showInMobileNavigation: m.showInMobileNavigation ?? false,
         showInWebNavigation: m.showInWebNavigation ?? false,
+        hideMenuMobile: m.hideMenuMobile ?? false,
         icon: m.customIcon || m.icon || null,
         customIcon: m.customIcon ?? null,
         showInMobileNavigationSortNumber:
@@ -199,6 +200,15 @@ export default function ModuleManagement() {
         }
         return m;
       }),
+    );
+  };
+
+  const toggleHideMenuMobile = (id: string) => {
+    if (userRole === "directory") return;
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === id ? { ...m, hideMenuMobile: !m.hideMenuMobile } : m,
+      ),
     );
   };
 
@@ -384,6 +394,7 @@ export default function ModuleManagement() {
         name: m.name ?? null,
         isEnabled: m.enabled ?? null,
         showInMobileNavigation: m.showInMobileNavigation ?? null,
+        hideMenuMobile: m.hideMenuMobile ?? false,
         showInMobileNavigationSortNumber: m.showInMobileNavigation
           ? typeof m.showInMobileNavigationSortNumber === "number"
             ? m.showInMobileNavigationSortNumber
@@ -657,6 +668,7 @@ export default function ModuleManagement() {
                 onTogglePopular={togglePopular}
                 onToggleNavigation={toggleNavigation}
                 onToggleWebNavigation={toggleWebNavigation}
+                onToggleHideMenuMobile={toggleHideMenuMobile}
                 onChangeCustomName={changeCustomName}
                 onChangeCustomIcon={changeCustomIcon}
                 onChangeSubtitle={changeSubtitle}
@@ -723,6 +735,7 @@ export default function ModuleManagement() {
             { header: "Required", getValue: (m) => m.required ? "Yes" : "No" },
             { header: "Web Navigation", getValue: (m) => m.showInWebNavigation ? "Yes" : "No" },
             { header: "Mobile Navigation", getValue: (m) => m.showInMobileNavigation ? "Yes" : "No" },
+            { header: "Mobile Menu", getValue: (m) => m.hideMenuMobile ? "Hidden" : "Visible" },
             { header: "Public Facing", getValue: (m) => m.isPublicFacing ? "Yes" : "No" },
             { header: "Popular", getValue: (m) => m.isPopular ? "Yes" : "No" },
           ]);

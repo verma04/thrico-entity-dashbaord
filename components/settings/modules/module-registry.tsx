@@ -18,6 +18,7 @@ interface ModuleRegistryProps {
   onTogglePopular: (id: string) => void;
   onToggleNavigation: (id: string) => void;
   onToggleWebNavigation: (id: string) => void;
+  onToggleHideMenuMobile?: (id: string) => void;
   onChangeCustomName: (id: string, value: string) => void;
   onChangeCustomIcon?: (id: string, value: string) => void;
   onChangeSubtitle: (id: string, value: string) => void;
@@ -35,6 +36,7 @@ export default function ModuleRegistry({
   onTogglePopular,
   onToggleNavigation,
   onToggleWebNavigation,
+  onToggleHideMenuMobile,
   onChangeCustomName,
   onChangeCustomIcon,
   onChangeSubtitle,
@@ -135,6 +137,7 @@ export default function ModuleRegistry({
               onTogglePopular={onTogglePopular}
               onToggleNavigation={onToggleNavigation}
               onToggleWebNavigation={onToggleWebNavigation}
+              onToggleHideMenuMobile={onToggleHideMenuMobile}
               onChangeCustomName={onChangeCustomName}
               onChangeCustomIcon={onChangeCustomIcon}
               onChangeSubtitle={onChangeSubtitle}
@@ -153,6 +156,7 @@ export default function ModuleRegistry({
               onTogglePopular={onTogglePopular}
               onToggleNavigation={onToggleNavigation}
               onToggleWebNavigation={onToggleWebNavigation}
+              onToggleHideMenuMobile={onToggleHideMenuMobile}
               onChangeCustomName={onChangeCustomName}
               onChangeCustomIcon={onChangeCustomIcon}
               onChangeSubtitle={onChangeSubtitle}

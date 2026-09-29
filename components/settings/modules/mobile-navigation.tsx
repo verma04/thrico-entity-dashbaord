@@ -146,24 +146,50 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                   </p>
                 </div>
 
-                {/* Simulated Content Feed */}
-                <div className="space-y-2 pt-1">
-                  {[1, 2].map((i) => (
-                    <div
-                      key={i}
-                      className="p-3 rounded-xl border border-border/60 bg-card/60 shadow-2xs space-y-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full bg-muted" />
-                        <div className="space-y-1 flex-1">
-                          <div className="h-2.5 w-24 bg-muted rounded" />
-                          <div className="h-2 w-16 bg-muted/60 rounded" />
-                        </div>
-                      </div>
-                      <div className="h-10 bg-muted/40 rounded-lg" />
+                {/* Content Area: Feed or Menu Simulation */}
+                {activePreviewTab === "menu" ? (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+                      <span>Explore Modules</span>
+                      <span>{modules.filter((m) => m.enabled && !m.hideMenuMobile).length} visible</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {modules
+                        .filter((m) => m.enabled && !m.hideMenuMobile)
+                        .map((m) => (
+                          <div
+                            key={m.id}
+                            className="flex flex-col items-center justify-center p-2 rounded-xl bg-card border border-border/60 shadow-2xs text-center"
+                          >
+                            <div className="text-primary mb-1 scale-90">
+                              {getNavIcon(m.customIcon || m.icon, true)}
+                            </div>
+                            <span className="text-[9px] font-medium truncate w-full text-foreground">
+                              {m.customName || m.name}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2 pt-1">
+                    {[1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="p-3 rounded-xl border border-border/60 bg-card/60 shadow-2xs space-y-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-6 rounded-full bg-muted" />
+                          <div className="space-y-1 flex-1">
+                            <div className="h-2.5 w-24 bg-muted rounded" />
+                            <div className="h-2 w-16 bg-muted/60 rounded" />
+                          </div>
+                        </div>
+                        <div className="h-10 bg-muted/40 rounded-lg" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Bottom Navigation Bar */}

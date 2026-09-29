@@ -304,6 +304,7 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
         customIcon
         showInMobileNavigation
         showInWebNavigation
+        hideMenuMobile
         enabled
         isPopular
         showInMobileNavigationSortNumber
