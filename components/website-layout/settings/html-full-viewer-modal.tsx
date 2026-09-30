@@ -19,6 +19,11 @@ import {
   FileCode,
   Layers,
   ChevronDown,
+  ImagePlus,
+  Loader2,
+  Link2,
+  ImageIcon,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -41,6 +46,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { useUploadImage } from "@/graphql/actions";
+
+interface UploadedImage {
+  url: string;
+  name: string;
+  uploadedAt: Date;
+}
 
 interface StarterTemplate {
   name: string;
@@ -78,6 +90,7 @@ export const HtmlFullViewerModal: React.FC<HtmlFullViewerModalProps> = ({
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const cssTextareaRef = useRef<HTMLTextAreaElement>(null);
   const cssLineNumbersRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [activeTab, setActiveTab] = useState<"html" | "css">("html");
   const [viewMode, setViewMode] = useState<"split" | "code" | "preview">("split");
@@ -91,6 +104,79 @@ export const HtmlFullViewerModal: React.FC<HtmlFullViewerModalProps> = ({
     line: 1,
     col: 1,
   });
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [showImagePanel, setShowImagePanel] = useState<boolean>(false);
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+
+  const [uploadImage, { loading: isUploading }] = useUploadImage({
+    onCompleted: (data: any) => {
+      if (data?.uploadImage) {
+        const cdnUrl = `https://cdn.thrico.network/${data.uploadImage}`;
+        const fileName = imageInputRef.current?.files?.[0]?.name || "image";
+        setUploadedImages((prev) => [
+          { url: cdnUrl, name: fileName, uploadedAt: new Date() },
+          ...prev,
+        ]);
+        setShowImagePanel(true);
+        toast({
+          title: "Image uploaded!",
+          description: "CDN URL is ready. Click \"Insert\" to add it to your HTML.",
+        });
+        // Reset file input so same file can be re-uploaded
+        if (imageInputRef.current) imageInputRef.current.value = "";
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Could not upload image.",
+        variant: "destructive",
+      });
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    },
+  });
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    uploadImage({ variables: { file } });
+  };
+
+  const handleInsertImageTag = (imageUrl: string) => {
+    const textarea = textareaRef.current;
+    const altText = imageUrl.split("/").pop()?.split(".")[0] || "image";
+    const imgTag = `<img src="${imageUrl}" alt="${altText}" style="max-width: 100%; height: auto;" />`;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const current = htmlCode;
+      const newText =
+        current.substring(0, start) +
+        (start > 0 && !current.substring(0, start).endsWith("\n") ? "\n" : "") +
+        imgTag +
+        "\n" +
+        current.substring(end);
+      onChangeHtml(newText);
+      setTimeout(() => {
+        textarea.focus();
+        const newPos = start + imgTag.length + 1;
+        textarea.setSelectionRange(newPos, newPos);
+      }, 50);
+    } else {
+      onChangeHtml(htmlCode + (htmlCode ? "\n" : "") + imgTag);
+    }
+    toast({
+      title: "Image tag inserted",
+      description: "<img> tag inserted at cursor position.",
+    });
+  };
+
+  const handleCopyImageUrl = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedUrl(url);
+    toast({ title: "URL copied", description: "Image URL copied to clipboard." });
+    setTimeout(() => setCopiedUrl(null), 2000);
+  };
 
   // Keep line numbers scroll synced with textarea
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>, gutterRef: React.RefObject<HTMLDivElement | null>) => {
@@ -572,6 +658,46 @@ export const HtmlFullViewerModal: React.FC<HtmlFullViewerModalProps> = ({
                       +{snippet.label}
                     </button>
                   ))}
+                  {/* Divider */}
+                  <span className="text-zinc-700 mx-1 shrink-0">|</span>
+                  {/* Image Upload Button */}
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageFileChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="px-2 py-0.5 rounded bg-indigo-900/60 hover:bg-indigo-800/80 border border-indigo-700/50 text-indigo-300 hover:text-indigo-100 text-[11px] font-medium transition-colors shrink-0 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Upload image and get CDN URL"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <ImagePlus className="h-3 w-3" />
+                    )}
+                    {isUploading ? "Uploading..." : "Upload Image"}
+                  </button>
+                  {uploadedImages.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowImagePanel((v) => !v)}
+                      className={cn(
+                        "px-2 py-0.5 rounded text-[11px] font-medium transition-colors shrink-0 flex items-center gap-1 border",
+                        showImagePanel
+                          ? "bg-indigo-800/80 border-indigo-600/60 text-indigo-200"
+                          : "bg-zinc-800 border-zinc-700/50 text-zinc-400 hover:text-zinc-200"
+                      )}
+                      title="Toggle image library"
+                    >
+                      <ImageIcon className="h-3 w-3" />
+                      Images ({uploadedImages.length})
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -609,6 +735,87 @@ export const HtmlFullViewerModal: React.FC<HtmlFullViewerModalProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Image Library Panel */}
+            {showImagePanel && uploadedImages.length > 0 && activeTab === "html" && (
+              <div className="bg-zinc-900 border-b border-zinc-700 px-3 py-2 shrink-0 max-h-48 overflow-y-auto">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-semibold text-indigo-400 flex items-center gap-1.5">
+                    <ImageIcon className="h-3.5 w-3.5" />
+                    Image Library ({uploadedImages.length} {uploadedImages.length === 1 ? "image" : "images"})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowImagePanel(false)}
+                    className="text-zinc-500 hover:text-zinc-300 p-0.5 rounded transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {uploadedImages.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 bg-zinc-800/60 border border-zinc-700/50 rounded-md px-2.5 py-1.5 group"
+                    >
+                      {/* Thumbnail */}
+                      <div className="h-8 w-10 rounded overflow-hidden bg-zinc-700 shrink-0 flex items-center justify-center border border-zinc-600/50">
+                        <img
+                          src={img.url}
+                          alt={img.name}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                      </div>
+                      {/* URL Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-medium text-zinc-300 truncate">{img.name}</p>
+                        <p className="text-[10px] text-zinc-500 font-mono truncate">{img.url}</p>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyImageUrl(img.url)}
+                          className="p-1 rounded text-zinc-500 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
+                          title="Copy URL"
+                        >
+                          {copiedUrl === img.url ? (
+                            <Check className="h-3 w-3 text-emerald-400" />
+                          ) : (
+                            <Link2 className="h-3 w-3" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab("html");
+                            handleInsertImageTag(img.url);
+                          }}
+                          className="px-2 py-0.5 rounded bg-indigo-700/70 hover:bg-indigo-600/80 text-indigo-200 hover:text-white text-[10px] font-semibold transition-colors flex items-center gap-1"
+                          title="Insert <img> tag at cursor"
+                        >
+                          <Code2 className="h-3 w-3" />
+                          Insert
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setUploadedImages((prev) => prev.filter((_, i) => i !== idx))
+                          }
+                          className="p-1 rounded text-zinc-600 hover:text-red-400 hover:bg-red-900/20 transition-colors"
+                          title="Remove from library"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Code Textarea with Line Numbers Gutter */}
             <div className="flex-1 flex overflow-hidden relative font-mono">
