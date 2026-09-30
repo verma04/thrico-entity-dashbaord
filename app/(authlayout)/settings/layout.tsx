@@ -15,6 +15,7 @@ import {
   PaintBucket,
   UserCheck,
   Terminal,
+  SlidersHorizontal,
 } from "lucide-react";
 import SettingsMenuLayout from "@/components/settings/settings-menu-layout";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
@@ -46,6 +47,12 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
       key: "modules",
       label: "Modules",
       icon: <ListTodo />,
+      section: "Platform",
+    },
+    {
+      key: "customization",
+      label: "Customization",
+      icon: <SlidersHorizontal />,
       section: "Platform",
     },
     {

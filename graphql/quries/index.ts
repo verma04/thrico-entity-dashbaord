@@ -191,6 +191,7 @@ export const GET_ENTITY_SETTINGS = gql`
       allowFeedReaction
       allowReactionVisibility
       hideMenuMobile
+      memberOnboardingConfig
     }
   }
 `;
@@ -264,6 +265,7 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       allowFeedReaction
       allowReactionVisibility
       hideMenuMobile
+      memberOnboardingConfig
     }
   }
 `;

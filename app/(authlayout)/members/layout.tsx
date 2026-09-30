@@ -14,6 +14,7 @@ import {
   Wrench,
   LayoutDashboard,
   Zap,
+  SlidersHorizontal,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";

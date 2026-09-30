@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Settings, Users, Zap, MessageCircleQuestion } from "lucide-react";
+import { Settings, Users, Zap, MessageCircleQuestion, SlidersHorizontal } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
 
 const TABS = [
@@ -10,6 +10,12 @@ const TABS = [
     label: "General Settings",
     icon: Settings,
     href: "/members/settings",
+  },
+  {
+    id: "customization",
+    label: "Customization",
+    icon: SlidersHorizontal,
+    href: "/members/settings/customization",
   },
   {
     id: "automation",

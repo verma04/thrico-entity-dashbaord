@@ -174,6 +174,7 @@ export interface EntitySettings {
   allowSocialReshare?: boolean;
   allowFeedReaction?: boolean;
   allowReactionVisibility?: boolean;
+  memberOnboardingConfig?: any;
 }
 
 export interface GetEntitySettingsResponse {
