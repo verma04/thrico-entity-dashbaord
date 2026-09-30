@@ -6,3 +6,4 @@ export * from "./feed-content-mix-chart";
 export * from "./feed-promoted-events";
 export * from "./feed-channels";
 export * from "./feed-recent-posts";
+export * from "./feed-social-reach";

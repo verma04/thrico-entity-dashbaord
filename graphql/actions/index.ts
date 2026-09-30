@@ -415,3 +415,5 @@ export const useGetModuleCustomName = (id: string) =>
 
 export const useHasAnyIntegration = () =>
   useQuery(HAS_ANY_INTEGRATION);
+
+export * from "./social";

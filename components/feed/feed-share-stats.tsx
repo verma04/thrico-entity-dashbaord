@@ -13,6 +13,7 @@ import {
   Search,
   ExternalLink,
   Sparkles,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +36,7 @@ import {
   Instagram,
 } from "@/components/ui/brand-icons";
 import { WhatsAppIcon } from "@/components/icons/whatsapp-icon";
+import { FeedExternalPublications } from "./feed-external-publications";
 
 interface FeedShareStatsViewProps {
   feedId: string;
@@ -105,6 +107,7 @@ export function FeedShareStatsView({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeSection, setActiveSection] = useState<"broadcasts" | "referrals">("broadcasts");
 
   const stats = data?.getFeedShareStats;
 
@@ -137,43 +140,6 @@ export function FeedShareStatsView({
     return name.includes(q) || uid.includes(q) || plats.includes(q);
   });
 
-  if (loading && !stats) {
-    return (
-      <div className={cn("p-6 space-y-6", className)}>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
-          ))}
-        </div>
-        <Skeleton className="h-40 rounded-xl" />
-        <Skeleton className="h-48 rounded-xl" />
-      </div>
-    );
-  }
-
-  if (error && !stats) {
-    return (
-      <div className={cn("p-8 text-center space-y-3", className)}>
-        <div className="h-10 w-10 mx-auto rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
-          <Share2 className="h-5 w-5" />
-        </div>
-        <p className="text-sm font-semibold text-foreground">
-          Failed to load share statistics
-        </p>
-        <p className="text-xs text-muted-foreground">{error.message}</p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          className="mt-2"
-        >
-          <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
   const totalClicks = stats?.totalClicks || 0;
   const totalVerified = stats?.totalVerified || 0;
   const totalUniqueSharers = stats?.totalUniqueSharers || 0;
@@ -181,30 +147,93 @@ export function FeedShareStatsView({
   const platforms: FeedSharePlatformStat[] = stats?.platformBreakdown || [];
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {/* Top Controls / Subheader */}
-      <div className="flex items-center justify-between gap-3 px-1">
-        <div>
-          <h4 className="text-sm font-semibold text-foreground">
-            Viral Distribution & Sharers
-          </h4>
-          <p className="text-xs text-muted-foreground">
-            Real-time track of who shared this post and social platform performance
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="h-8 px-2.5 text-xs rounded-lg gap-1.5"
+    <div className={cn("space-y-5", className)}>
+      {/* Segmented Pill Switcher */}
+      <div className="flex items-center justify-between gap-2 p-1 bg-muted/60 rounded-xl border border-border/50">
+        <button
+          type="button"
+          onClick={() => setActiveSection("broadcasts")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+            activeSection === "broadcasts"
+              ? "bg-background text-foreground shadow-xs border border-border/50"
+              : "text-muted-foreground hover:text-foreground"
+          )}
         >
-          <RefreshCw
-            className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
-          />
-          <span>Refresh</span>
-        </Button>
+          <Radio className="h-3.5 w-3.5 text-indigo-500" />
+          <span>Social Broadcasts (API)</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveSection("referrals")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
+            activeSection === "referrals"
+              ? "bg-background text-foreground shadow-xs border border-border/50"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+          <span>Viral Referral Links</span>
+        </button>
       </div>
+
+      {activeSection === "broadcasts" ? (
+        <FeedExternalPublications feedId={feedId} />
+      ) : loading && !stats ? (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
+          </div>
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-48 rounded-xl" />
+        </div>
+      ) : error && !stats ? (
+        <div className="p-8 text-center space-y-3">
+          <div className="h-10 w-10 mx-auto rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+            <Share2 className="h-5 w-5" />
+          </div>
+          <p className="text-sm font-semibold text-foreground">
+            Failed to load share statistics
+          </p>
+          <p className="text-xs text-muted-foreground">{error.message}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            className="mt-2"
+          >
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            Retry
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Top Controls / Subheader */}
+          <div className="flex items-center justify-between gap-3 px-1">
+            <div>
+              <h4 className="text-sm font-semibold text-foreground">
+                Viral Distribution & Sharers
+              </h4>
+              <p className="text-xs text-muted-foreground">
+                Real-time track of who shared this post and social platform performance
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="h-8 px-2.5 text-xs rounded-lg gap-1.5"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
+              />
+              <span>Refresh</span>
+            </Button>
+          </div>
 
       {/* KPI Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -509,6 +538,8 @@ export function FeedShareStatsView({
           </div>
         )}
       </div>
+        </div>
+      )}
     </div>
   );
 }

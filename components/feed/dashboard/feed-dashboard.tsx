@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Radio, RotateCcw } from "lucide-react";
+import { Radio, RotateCcw, LayoutDashboard } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -30,6 +30,7 @@ import { FeedContentMixChart } from "./feed-content-mix-chart";
 import { FeedPromotedEvents } from "./feed-promoted-events";
 import { FeedChannels } from "./feed-channels";
 import { FeedRecentPosts } from "./feed-recent-posts";
+import { FeedSocialReach } from "./feed-social-reach";
 
 const timeRangeMap: Record<string, TimeRange> = {
   "24h": TimeRange.LAST_24_HOURS,
@@ -41,6 +42,7 @@ const timeRangeMap: Record<string, TimeRange> = {
 export default function FeedDashboard() {
   const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeView, setActiveView] = useState<"overview" | "social">("overview");
 
   // Dedicated chart time filter
   const [chartFilterKey, setChartFilterKey] = useState("30d");
@@ -150,80 +152,129 @@ export default function FeedDashboard() {
   return (
     <EcosystemWrapper className="m-2">
       <EcosystemHeader
-        title="Feed & Engagement Overview"
-        description="Real-time pulse of conversations, content distribution, and activity across the ecosystem."
+        title={
+          activeView === "social"
+            ? "Cross-Platform Social Reach"
+            : "Feed & Engagement Overview"
+        }
+        description={
+          activeView === "social"
+            ? "Real-time engagement, impressions, and viral reach tracked directly from connected LinkedIn, Instagram, and Facebook channels."
+            : "Real-time pulse of conversations, content distribution, and activity across the ecosystem."
+        }
         icon={Radio}
         actions={
-          <div className="flex items-center gap-2">
-            <DateRangePicker
-              date={dateRange}
-              onDateChange={handleDateChange}
-              defaultValue="LAST_7_DAYS"
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
-              onClick={handleRefresh}
-              disabled={loading}
-            >
-              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
-            </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* View Switcher: Feed Overview vs Social Reach */}
+            <div className="flex items-center gap-1 p-1 bg-muted/60 rounded-xl border border-border/50 text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveView("overview")}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5",
+                  activeView === "overview"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" />
+                <span>Feed Overview</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveView("social")}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5",
+                  activeView === "social"
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Radio className="h-3.5 w-3.5 text-indigo-500" />
+                <span>Social Reach</span>
+              </button>
+            </div>
+
+            {activeView === "overview" && (
+              <>
+                <DateRangePicker
+                  date={dateRange}
+                  onDateChange={handleDateChange}
+                  defaultValue="LAST_7_DAYS"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                  title="Refresh metrics"
+                >
+                  <RotateCcw size={14} className={cn(loading && "animate-spin")} />
+                </Button>
+              </>
+            )}
           </div>
         }
       />
 
       <EcosystemContainer className="p-5 space-y-5">
-        {/* Subscription Limit Warning Banner */}
-        <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
+        {activeView === "social" ? (
+          <FeedSocialReach />
+        ) : (
+          <>
+            {/* Subscription Limit Warning Banner */}
+            <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
 
-        {/* 1. Core Feed KPIs */}
-        <FeedKpiOverview
-          loading={loadingKpi}
-          kpiData={kpis}
-          timelineData={timelineData}
-        />
-
-        {/* 2. Engagement Velocity & Content Mix Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-8">
-            <FeedVelocityChart
-              loading={loadingYield}
-              timelineData={timelineData}
-              filterKey={chartFilterKey}
-              onFilterChange={(key, val) => {
-                setChartFilterKey(key);
-                setChartFilterValue(val);
-              }}
-              growthPercentage={kpis?.interactionsChange ?? 12.4}
+            {/* 1. Core Feed KPIs */}
+            <FeedKpiOverview
+              loading={loadingKpi}
+              kpiData={kpis as any}
+              timelineData={timelineData as any}
             />
-          </div>
 
-          <div className="lg:col-span-4">
-            <FeedContentMixChart
-              loading={loadingInterest}
-              data={contentDistribution}
-            />
-          </div>
-        </div>
+            {/* 2. Engagement Velocity & Content Mix Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              <div className="lg:col-span-8">
+                <FeedVelocityChart
+                  loading={loadingYield}
+                  timelineData={timelineData as any}
+                  filterKey={chartFilterKey}
+                  onFilterChange={(key, val) => {
+                    setChartFilterKey(key);
+                    setChartFilterValue(val);
+                  }}
+                  growthPercentage={(kpis as any)?.interactionsChange ?? 12.4}
+                />
+              </div>
 
-        {/* 3. Promoted Events & Feed Channels Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-8 space-y-4">
-            <FeedPromotedEvents
-              loading={loadingEvents}
-              events={promotedEvents}
-            />
-            <FeedRecentPosts
-              loading={loadingFeed}
-              posts={recentPosts}
-            />
-          </div>
+              <div className="lg:col-span-4">
+                <FeedContentMixChart
+                  loading={loadingInterest}
+                  data={contentDistribution}
+                />
+              </div>
+            </div>
 
-          <div className="lg:col-span-4">
-            <FeedChannels />
-          </div>
-        </div>
+            {/* 3. Promoted Events & Feed Channels Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              <div className="lg:col-span-8 space-y-4">
+                <FeedPromotedEvents
+                  loading={loadingEvents}
+                  events={promotedEvents}
+                />
+                <FeedRecentPosts
+                  loading={loadingFeed}
+                  posts={recentPosts}
+                />
+              </div>
+
+              <div className="lg:col-span-4">
+                <FeedChannels />
+              </div>
+            </div>
+          </>
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );
