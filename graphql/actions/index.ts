@@ -144,11 +144,22 @@ export interface EntitySettings {
   allowEntityFeedInFeed?: boolean;
   allowEntityMomentsInFeed?: boolean;
   allowEntityOpportunitiesInFeed?: boolean;
+  allowEntityMediaGalleryInFeed?: boolean;
+  allowEntityDiscoverInFeed?: boolean;
+  discoverFeedName?: string | null;
+  feedTabNames?: Record<string, string>;
+  mediaGalleryFeedAlbumId?: string | null;
+  mediaGalleryFeedName?: string | null;
+  mediaGalleryFeedLinks?: any;
   feedOrder?: any;
   feedEntityName?: string;
 
   // Media Gallery
   allowMediaGalleryComments?: boolean;
+  allowMediaGalleryShareToFeed?: boolean;
+  allowMediaGalleryShareToLinkedin?: boolean;
+  allowMediaGalleryShareToInstagram?: boolean;
+  allowMediaGallerySocialShare?: boolean;
 
   // AI Moderation Settings
   aiModerationFeed?: boolean;

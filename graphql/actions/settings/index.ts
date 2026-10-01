@@ -66,11 +66,22 @@ export interface EntitySettings {
   allowEntityFeedInFeed: boolean;
   allowEntityMomentsInFeed: boolean;
   allowEntityOpportunitiesInFeed?: boolean;
+  allowEntityMediaGalleryInFeed?: boolean;
+  allowEntityDiscoverInFeed?: boolean;
+  discoverFeedName?: string | null;
+  feedTabNames?: Record<string, string>;
+  mediaGalleryFeedAlbumId?: string | null;
+  mediaGalleryFeedName?: string | null;
+  mediaGalleryFeedLinks?: any;
   feedOrder: string[];
   feedEntityName: string;
 
   // Media Gallery
   allowMediaGalleryComments: boolean;
+  allowMediaGalleryShareToFeed?: boolean;
+  allowMediaGalleryShareToLinkedin?: boolean;
+  allowMediaGalleryShareToInstagram?: boolean;
+  allowMediaGallerySocialShare?: boolean;
 
   // AI Moderation Settings
   aiModerationFeed?: boolean;
@@ -177,6 +188,17 @@ export interface UpdateEntitySettingsInput {
 
   // Media Gallery
   allowMediaGalleryComments?: boolean;
+  allowEntityMediaGalleryInFeed?: boolean;
+  allowEntityDiscoverInFeed?: boolean;
+  discoverFeedName?: string | null;
+  feedTabNames?: Record<string, string>;
+  mediaGalleryFeedAlbumId?: string | null;
+  mediaGalleryFeedName?: string | null;
+  mediaGalleryFeedLinks?: any;
+  allowMediaGalleryShareToFeed?: boolean;
+  allowMediaGalleryShareToLinkedin?: boolean;
+  allowMediaGalleryShareToInstagram?: boolean;
+  allowMediaGallerySocialShare?: boolean;
 
   // AI Moderation Settings
   aiModerationFeed?: boolean;

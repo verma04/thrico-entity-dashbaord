@@ -165,9 +165,20 @@ export const GET_ENTITY_SETTINGS = gql`
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
       allowEntityOpportunitiesInFeed
+      allowEntityMediaGalleryInFeed
+      allowEntityDiscoverInFeed
+      discoverFeedName
+      feedTabNames
+      mediaGalleryFeedAlbumId
+      mediaGalleryFeedName
+      mediaGalleryFeedLinks
       feedOrder
       feedEntityName
       allowMediaGalleryComments
+      allowMediaGalleryShareToFeed
+      allowMediaGalleryShareToLinkedin
+      allowMediaGalleryShareToInstagram
+      allowMediaGallerySocialShare
       aiModerationFeed
       aiModerationComments
       aiModerationEvents
@@ -239,9 +250,20 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
       allowEntityOpportunitiesInFeed
+      allowEntityMediaGalleryInFeed
+      allowEntityDiscoverInFeed
+      discoverFeedName
+      feedTabNames
+      mediaGalleryFeedAlbumId
+      mediaGalleryFeedName
+      mediaGalleryFeedLinks
       feedOrder
       feedEntityName
       allowMediaGalleryComments
+      allowMediaGalleryShareToFeed
+      allowMediaGalleryShareToLinkedin
+      allowMediaGalleryShareToInstagram
+      allowMediaGallerySocialShare
       aiModerationFeed
       aiModerationComments
       aiModerationEvents

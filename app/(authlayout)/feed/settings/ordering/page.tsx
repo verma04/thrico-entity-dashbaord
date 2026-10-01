@@ -25,7 +25,22 @@ const FeedOrderingPage = () => {
     );
   }
 
-  const feedOrder = (data.getEntitySettings as any).feedOrder || [];
+  const entitySettings = (data.getEntitySettings as any) || {};
+  const feedOrder = entitySettings.feedOrder || [];
+  const feedTabNames = entitySettings.feedTabNames || {};
+
+  const getSourceLabel = (f: any) => {
+    if (feedTabNames[f.key]) {
+      return `Show ${feedTabNames[f.key]} in Feed`;
+    }
+    if (f.key === "allowEntityDiscoverInFeed" && entitySettings.discoverFeedName) {
+      return `Show ${entitySettings.discoverFeedName} in Feed`;
+    }
+    if (f.key === "allowEntityMediaGalleryInFeed" && entitySettings.mediaGalleryFeedName) {
+      return `Show ${entitySettings.mediaGalleryFeedName} in Feed`;
+    }
+    return f.label;
+  };
 
   const sources = [...FEED_FIELDS]
     .filter((f) => f.type === "switch" || !f.type)
@@ -39,10 +54,10 @@ const FeedOrderingPage = () => {
     })
     .map((f) => ({
       id: f.key,
-      label: f.label,
+      label: getSourceLabel(f),
       description: f.description,
       icon: f.icon || Rss,
-      enabled: !!(data.getEntitySettings as any)[f.key],
+      enabled: !!entitySettings[f.key],
     }));
 
   return <FeedSourceOrdering initialSources={sources} />;

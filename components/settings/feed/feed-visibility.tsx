@@ -2,6 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  Images,
+  Wand2,
+  Plus,
+  Trash2,
+  GripVertical,
   Rss,
   MessageSquare,
   BarChart2,
@@ -39,8 +44,42 @@ import {
   useUpdateEntitySettings,
   useUpdateFeedEntityName,
 } from "@/graphql/actions";
+import { useGetMediaGalleryAlbums } from "@/graphql/actions/mediaGallery";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+export interface MediaGalleryFeedLink {
+  id: string;
+  albumId: string;
+  name: string;
+}
 
 export interface FeedField {
   key: string;
@@ -51,6 +90,14 @@ export interface FeedField {
 }
 
 export const FEED_FIELDS: FeedField[] = [
+  {
+    key: "allowEntityDiscoverInFeed",
+    label: "Show Discover Feed",
+    description:
+      "Main community stream showcasing personalized updates, trending posts, and curated activities.",
+    icon: Wand2,
+    type: "switch",
+  },
   {
     key: "allowEntityMomentsInFeed",
     label: "Show Video Moments in Feed",
@@ -92,6 +139,14 @@ export const FEED_FIELDS: FeedField[] = [
     type: "switch",
   },
   {
+    key: "allowEntityMediaGalleryInFeed",
+    label: "Show Media Gallery in Feed",
+    description:
+      "Surface photo albums and curated visual media collections directly in member feed tabs.",
+    icon: Images,
+    type: "switch",
+  },
+  {
     key: "allowEntityOpportunitiesInFeed",
     label: "Show Opportunities in Feed",
     description:
@@ -102,12 +157,20 @@ export const FEED_FIELDS: FeedField[] = [
 ];
 
 interface FeedVisibilitySettings {
+  allowEntityDiscoverInFeed: boolean;
+  discoverFeedName: string;
+  feedTabNames: Record<string, string>;
   allowEntityCommunityInFeed: boolean;
   allowEntityDiscussionForumInFeed: boolean;
   allowEntityPollsInFeed: boolean;
   allowEntityMomentsInFeed: boolean;
   allowEntityFeedInFeed: boolean;
   allowEntityOpportunitiesInFeed: boolean;
+  allowEntityMediaGalleryInFeed: boolean;
+  mediaGalleryFeedAlbumId: string;
+  mediaGalleryFeedName: string;
+  mediaGalleryFeedLinks: MediaGalleryFeedLink[];
+  allowMediaGalleryShareToFeed: boolean;
   feedEntityName: string;
   aiModerationFeed: boolean;
   aiModerationComments: boolean;
@@ -120,13 +183,213 @@ interface FeedVisibilitySettings {
   allowReactionVisibility: boolean;
 }
 
+interface SortableMediaLinkRowProps {
+  link: MediaGalleryFeedLink;
+  index: number;
+  albums: any[];
+  onUpdate: (index: number, field: "name" | "albumId", value: string) => void;
+  onRemoveRequest: (index: number, name: string) => void;
+}
+
+function SortableMediaLinkRow({
+  link,
+  index,
+  albums,
+  onUpdate,
+  onRemoveRequest,
+}: SortableMediaLinkRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.7 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2.5 rounded-[8px] border transition-all",
+        isDragging
+          ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 shadow-md ring-1 ring-blue-500"
+          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs hover:border-[#b4b7bb]",
+      )}
+    >
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 text-[#8c9196] hover:text-[#303030] dark:hover:text-zinc-200 transition-colors"
+          title="Drag to reorder tab"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <span className="text-[11px] font-semibold text-[#8c9196] dark:text-zinc-500 min-w-[20px]">
+          #{index + 1}
+        </span>
+      </div>
+
+      <div className="w-full sm:w-[200px]">
+        <input
+          type="text"
+          placeholder="Tab Display Name"
+          value={link.name}
+          onChange={(e) => onUpdate(index, "name", e.target.value)}
+          className="w-full text-[12px] h-8 px-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      <div className="flex-1 min-w-[200px]">
+        <select
+          value={link.albumId}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            const selectedAlbum = albums.find((a: any) => a.id === selectedId);
+            onUpdate(index, "albumId", selectedId);
+            if (
+              selectedAlbum &&
+              (!link.name ||
+                link.name === "Gallery" ||
+                link.name === "Media Gallery" ||
+                link.name.trim() === "")
+            ) {
+              onUpdate(index, "name", selectedAlbum.title);
+            }
+          }}
+          className="w-full text-[12px] h-8 px-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="">All Albums (Default Stream)</option>
+          {albums.map((a: any) => (
+            <option key={a.id} value={a.id}>
+              {a.title}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onRemoveRequest(index, link.name || "Media Tab")}
+        className="p-1.5 text-[#8c9196] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-[6px] transition-colors self-end sm:self-center cursor-pointer"
+        title="Remove tab"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 export default function FeedVisibility() {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
-  const [updateFeedName, { loading: loadingName }] =
-    useUpdateFeedEntityName({});
+  const [updateFeedName, { loading: loadingName }] = useUpdateFeedEntityName(
+    {},
+  );
+  const { data: albumsData } = useGetMediaGalleryAlbums();
+  const albums = albumsData?.getMediaGalleryAlbums || [];
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setFormData((prev) => {
+        const oldIndex = prev.mediaGalleryFeedLinks.findIndex(
+          (i) => i.id === active.id,
+        );
+        const newIndex = prev.mediaGalleryFeedLinks.findIndex(
+          (i) => i.id === over.id,
+        );
+        if (oldIndex === -1 || newIndex === -1) return prev;
+        const newLinks = arrayMove(
+          prev.mediaGalleryFeedLinks,
+          oldIndex,
+          newIndex,
+        );
+        return {
+          ...prev,
+          mediaGalleryFeedLinks: newLinks,
+        };
+      });
+      setHasChanged(true);
+    }
+  };
+
+  const handleTabNameChange = (key: string, name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      feedTabNames: {
+        ...prev.feedTabNames,
+        [key]: name,
+      },
+    }));
+    setHasChanged(true);
+  };
+
+  const handleAddMediaLink = () => {
+    const defaultAlbum = albums[0];
+    setFormData((prev) => ({
+      ...prev,
+      mediaGalleryFeedLinks: [
+        ...prev.mediaGalleryFeedLinks,
+        {
+          id: `link-${Date.now()}`,
+          albumId: defaultAlbum?.id || "",
+          name: defaultAlbum?.title || "Media Gallery",
+        },
+      ],
+    }));
+    setHasChanged(true);
+  };
+
+  const handleUpdateMediaLink = (
+    index: number,
+    field: "name" | "albumId",
+    value: string,
+  ) => {
+    setFormData((prev) => {
+      const nextLinks = [...prev.mediaGalleryFeedLinks];
+      nextLinks[index] = { ...nextLinks[index], [field]: value };
+      return { ...prev, mediaGalleryFeedLinks: nextLinks };
+    });
+    setHasChanged(true);
+  };
+
+  const handleRemoveMediaLink = (index: number) => {
+    setFormData((prev) => {
+      const nextLinks = prev.mediaGalleryFeedLinks.filter(
+        (_, i) => i !== index,
+      );
+      return { ...prev, mediaGalleryFeedLinks: nextLinks };
+    });
+    setHasChanged(true);
+  };
 
   const initialSettings: FeedVisibilitySettings = {
+    allowEntityDiscoverInFeed:
+      data?.getEntitySettings?.allowEntityDiscoverInFeed ?? true,
+    discoverFeedName: data?.getEntitySettings?.discoverFeedName || "",
+    feedTabNames: (data?.getEntitySettings?.feedTabNames as any) || {},
     allowEntityCommunityInFeed:
       data?.getEntitySettings?.allowEntityCommunityInFeed ?? true,
     allowEntityDiscussionForumInFeed:
@@ -139,6 +402,27 @@ export default function FeedVisibility() {
       data?.getEntitySettings?.allowEntityFeedInFeed ?? true,
     allowEntityOpportunitiesInFeed:
       data?.getEntitySettings?.allowEntityOpportunitiesInFeed ?? true,
+    allowEntityMediaGalleryInFeed:
+      data?.getEntitySettings?.allowEntityMediaGalleryInFeed ?? true,
+    mediaGalleryFeedAlbumId:
+      data?.getEntitySettings?.mediaGalleryFeedAlbumId || "",
+    mediaGalleryFeedName: data?.getEntitySettings?.mediaGalleryFeedName || "",
+    mediaGalleryFeedLinks:
+      data?.getEntitySettings?.mediaGalleryFeedLinks &&
+      Array.isArray(data.getEntitySettings.mediaGalleryFeedLinks) &&
+      data.getEntitySettings.mediaGalleryFeedLinks.length > 0
+        ? data.getEntitySettings.mediaGalleryFeedLinks
+        : [
+            {
+              id: "link-default",
+              name:
+                data?.getEntitySettings?.mediaGalleryFeedName ||
+                "Media Gallery",
+              albumId: data?.getEntitySettings?.mediaGalleryFeedAlbumId || "",
+            },
+          ],
+    allowMediaGalleryShareToFeed:
+      data?.getEntitySettings?.allowMediaGalleryShareToFeed ?? true,
     feedEntityName: data?.getEntitySettings?.feedEntityName || "",
     aiModerationFeed: data?.getEntitySettings?.aiModerationFeed ?? true,
     aiModerationComments: data?.getEntitySettings?.aiModerationComments ?? true,
@@ -155,10 +439,18 @@ export default function FeedVisibility() {
   const [formData, setFormData] =
     useState<FeedVisibilitySettings>(initialSettings);
   const [hasChanged, setHasChanged] = useState(false);
+  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
+    index: number;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     if (data?.getEntitySettings) {
       const serverSettings: FeedVisibilitySettings = {
+        allowEntityDiscoverInFeed:
+          data.getEntitySettings.allowEntityDiscoverInFeed ?? true,
+        discoverFeedName: data.getEntitySettings.discoverFeedName || "",
+        feedTabNames: (data.getEntitySettings.feedTabNames as any) || {},
         allowEntityCommunityInFeed:
           data.getEntitySettings.allowEntityCommunityInFeed ?? true,
         allowEntityDiscussionForumInFeed:
@@ -171,6 +463,27 @@ export default function FeedVisibility() {
           data.getEntitySettings.allowEntityFeedInFeed ?? true,
         allowEntityOpportunitiesInFeed:
           data.getEntitySettings.allowEntityOpportunitiesInFeed ?? true,
+        allowEntityMediaGalleryInFeed:
+          data.getEntitySettings.allowEntityMediaGalleryInFeed ?? true,
+        mediaGalleryFeedAlbumId:
+          data.getEntitySettings.mediaGalleryFeedAlbumId || "",
+        mediaGalleryFeedName: data.getEntitySettings.mediaGalleryFeedName || "",
+        mediaGalleryFeedLinks:
+          data.getEntitySettings.mediaGalleryFeedLinks &&
+          Array.isArray(data.getEntitySettings.mediaGalleryFeedLinks) &&
+          data.getEntitySettings.mediaGalleryFeedLinks.length > 0
+            ? data.getEntitySettings.mediaGalleryFeedLinks
+            : [
+                {
+                  id: "link-default",
+                  name:
+                    data.getEntitySettings.mediaGalleryFeedName ||
+                    "Media Gallery",
+                  albumId: data.getEntitySettings.mediaGalleryFeedAlbumId || "",
+                },
+              ],
+        allowMediaGalleryShareToFeed:
+          data.getEntitySettings.allowMediaGalleryShareToFeed ?? true,
         feedEntityName: data.getEntitySettings.feedEntityName || "",
         aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
         aiModerationComments:
@@ -209,6 +522,10 @@ export default function FeedVisibility() {
   const handleReset = () => {
     if (data?.getEntitySettings) {
       setFormData({
+        allowEntityDiscoverInFeed:
+          data.getEntitySettings.allowEntityDiscoverInFeed ?? true,
+        discoverFeedName: data.getEntitySettings.discoverFeedName || "",
+        feedTabNames: (data.getEntitySettings.feedTabNames as any) || {},
         allowEntityCommunityInFeed:
           data.getEntitySettings.allowEntityCommunityInFeed ?? true,
         allowEntityDiscussionForumInFeed:
@@ -221,6 +538,27 @@ export default function FeedVisibility() {
           data.getEntitySettings.allowEntityFeedInFeed ?? true,
         allowEntityOpportunitiesInFeed:
           data.getEntitySettings.allowEntityOpportunitiesInFeed ?? true,
+        allowEntityMediaGalleryInFeed:
+          data.getEntitySettings.allowEntityMediaGalleryInFeed ?? true,
+        mediaGalleryFeedAlbumId:
+          data.getEntitySettings.mediaGalleryFeedAlbumId || "",
+        mediaGalleryFeedName: data.getEntitySettings.mediaGalleryFeedName || "",
+        mediaGalleryFeedLinks:
+          data.getEntitySettings.mediaGalleryFeedLinks &&
+          Array.isArray(data.getEntitySettings.mediaGalleryFeedLinks) &&
+          data.getEntitySettings.mediaGalleryFeedLinks.length > 0
+            ? data.getEntitySettings.mediaGalleryFeedLinks
+            : [
+                {
+                  id: "link-default",
+                  name:
+                    data.getEntitySettings.mediaGalleryFeedName ||
+                    "Media Gallery",
+                  albumId: data.getEntitySettings.mediaGalleryFeedAlbumId || "",
+                },
+              ],
+        allowMediaGalleryShareToFeed:
+          data.getEntitySettings.allowMediaGalleryShareToFeed ?? true,
         feedEntityName: data.getEntitySettings.feedEntityName || "",
         aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
         aiModerationComments:
@@ -241,6 +579,12 @@ export default function FeedVisibility() {
   const handleSave = async () => {
     try {
       const cleanSettings = {
+        allowEntityDiscoverInFeed: formData.allowEntityDiscoverInFeed,
+        discoverFeedName:
+          formData.feedTabNames["allowEntityDiscoverInFeed"] ||
+          formData.discoverFeedName ||
+          null,
+        feedTabNames: formData.feedTabNames || {},
         allowEntityCommunityInFeed: formData.allowEntityCommunityInFeed,
         allowEntityDiscussionForumInFeed:
           formData.allowEntityDiscussionForumInFeed,
@@ -248,6 +592,12 @@ export default function FeedVisibility() {
         allowEntityMomentsInFeed: formData.allowEntityMomentsInFeed,
         allowEntityFeedInFeed: formData.allowEntityFeedInFeed,
         allowEntityOpportunitiesInFeed: formData.allowEntityOpportunitiesInFeed,
+        allowEntityMediaGalleryInFeed: formData.allowEntityMediaGalleryInFeed,
+        mediaGalleryFeedAlbumId:
+          formData.mediaGalleryFeedLinks[0]?.albumId || null,
+        mediaGalleryFeedName: formData.mediaGalleryFeedLinks[0]?.name || null,
+        mediaGalleryFeedLinks: formData.mediaGalleryFeedLinks || [],
+        allowMediaGalleryShareToFeed: formData.allowMediaGalleryShareToFeed,
         aiModerationFeed: formData.aiModerationFeed,
         aiModerationComments: formData.aiModerationComments,
         allowFeedPost: formData.allowFeedPost,
@@ -291,12 +641,32 @@ export default function FeedVisibility() {
     formData.allowEntityMomentsInFeed,
     formData.allowEntityFeedInFeed,
     formData.allowEntityOpportunitiesInFeed,
+    formData.allowEntityMediaGalleryInFeed,
   ].filter(Boolean).length;
 
   const contentSources = [
     {
+      key: "allowEntityDiscoverInFeed" as const,
+      label: "Show Discover Feed",
+      defaultName: "Discover",
+      description:
+        "Main community stream showcasing personalized updates, trending posts, and curated activities.",
+      icon: Wand2,
+      enabled: formData.allowEntityDiscoverInFeed,
+    },
+    {
+      key: "allowEntityFeedInFeed" as const,
+      label: `Show ${formData.feedTabNames["allowEntityFeedInFeed"] || formData.feedEntityName || "Admin"} Announcements`,
+      defaultName: "By Admin",
+      description:
+        "Surface official administrative broadcasts, alerts, and pinned entity updates.",
+      icon: ShieldAlert,
+      enabled: formData.allowEntityFeedInFeed,
+    },
+    {
       key: "allowEntityCommunityInFeed" as const,
       label: "Show Communities in Feed",
+      defaultName: "Communities",
       description:
         "Surface community group activities and member announcements in the main feed stream.",
       icon: Users2,
@@ -305,6 +675,7 @@ export default function FeedVisibility() {
     {
       key: "allowEntityDiscussionForumInFeed" as const,
       label: "Show Forum Posts in Feed",
+      defaultName: "Discussions",
       description:
         "Allow structured discussion forum topics and questions to appear in the stream.",
       icon: MessageSquare,
@@ -313,6 +684,7 @@ export default function FeedVisibility() {
     {
       key: "allowEntityPollsInFeed" as const,
       label: "Show Polls & Votes in Feed",
+      defaultName: "Polls",
       description:
         "Allow interactive community voting polls and opinion cards directly in member feeds.",
       icon: BarChart2,
@@ -321,26 +693,29 @@ export default function FeedVisibility() {
     {
       key: "allowEntityMomentsInFeed" as const,
       label: "Show Video Moments in Feed",
+      defaultName: "Moments",
       description:
         "Surface short-form vertical video clips and milestone moments in feed cards.",
       icon: Film,
       enabled: formData.allowEntityMomentsInFeed,
     },
     {
-      key: "allowEntityFeedInFeed" as const,
-      label: `Show ${formData.feedEntityName || "Admin"} Announcements`,
-      description:
-        "Surface official administrative broadcasts, alerts, and pinned entity updates.",
-      icon: ShieldAlert,
-      enabled: formData.allowEntityFeedInFeed,
-    },
-    {
       key: "allowEntityOpportunitiesInFeed" as const,
       label: "Show Opportunities in Feed",
+      defaultName: "Opportunities",
       description:
         "Surface job openings, grants, internships, and partnerships directly in member feed streams.",
       icon: Briefcase,
       enabled: formData.allowEntityOpportunitiesInFeed,
+    },
+    {
+      key: "allowEntityMediaGalleryInFeed" as const,
+      label: "Show Media Gallery in Feed",
+      defaultName: "Media Gallery",
+      description:
+        "Surface photo albums and curated visual media collections directly in member feed tabs.",
+      icon: Images,
+      enabled: formData.allowEntityMediaGalleryInFeed,
     },
   ];
 
@@ -401,6 +776,14 @@ export default function FeedVisibility() {
       icon: Share2,
       enabled: formData.allowSocialReshare,
     },
+    {
+      key: "allowMediaGalleryShareToFeed" as const,
+      label: "Allow Media Gallery Share to Feed",
+      description:
+        "Allow members to repost photos and albums from the media gallery directly into the community feed.",
+      icon: Images,
+      enabled: formData.allowMediaGalleryShareToFeed,
+    },
   ];
 
   return (
@@ -436,7 +819,8 @@ export default function FeedVisibility() {
                 {/* Enabled Content Types Pill Cloud */}
                 <div className="space-y-1.5">
                   <span className="text-[11px] font-medium text-[#616161] dark:text-zinc-400">
-                    Active Stream Sources ({activeSourcesCount}/6):
+                    Active Stream Sources ({activeSourcesCount}/
+                    {contentSources.length}):
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {contentSources.map((source) => (
@@ -457,7 +841,6 @@ export default function FeedVisibility() {
                   </div>
                 </div>
               </div>
-
               {/* Configuration Breakdown */}
               <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
@@ -466,7 +849,7 @@ export default function FeedVisibility() {
                 />
                 <PolarisSummaryRow
                   label="Enabled Protocols"
-                  value={`${activeSourcesCount} of 6 Active`}
+                  value={`${activeSourcesCount} of ${contentSources.length} Active`}
                   highlight={activeSourcesCount >= 4}
                 />
                 <PolarisSummaryRow
@@ -481,24 +864,8 @@ export default function FeedVisibility() {
                 />
                 <PolarisSummaryRow
                   label="User Action Controls"
-                  value={`${[
-                    formData.allowFeedPost,
-                    formData.allowComment,
-                    formData.allowFeedReaction,
-                    formData.allowReactionVisibility,
-                    formData.allowReshare,
-                    formData.allowStory,
-                    formData.allowSocialReshare,
-                  ].filter(Boolean).length} of 7 Active`}
-                  highlight={[
-                    formData.allowFeedPost,
-                    formData.allowComment,
-                    formData.allowFeedReaction,
-                    formData.allowReactionVisibility,
-                    formData.allowReshare,
-                    formData.allowStory,
-                    formData.allowSocialReshare,
-                  ].filter(Boolean).length > 0}
+                  value={`${userActionPermissions.filter((a) => a.enabled).length} of ${userActionPermissions.length} Active`}
+                  highlight={userActionPermissions.some((a) => a.enabled)}
                   isLast
                 />
               </div>
@@ -507,8 +874,9 @@ export default function FeedVisibility() {
             {/* Engagement Strategy Tip */}
             <PolarisTipCard title="Feed Optimization Tip">
               Enabling interactive sources like community polls and moments
-              increases member return rates. Keep AI Moderation active to automatically
-              filter toxicity and maintain clean community discussions.
+              increases member return rates. Keep AI Moderation active to
+              automatically filter toxicity and maintain clean community
+              discussions.
             </PolarisTipCard>
           </div>
         }
@@ -549,37 +917,125 @@ export default function FeedVisibility() {
                 <div
                   key={source.key}
                   className={cn(
-                    "flex items-center justify-between p-3.5 rounded-[8px] border transition-all",
+                    "p-3.5 rounded-[8px] border transition-all",
                     source.enabled
                       ? "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs"
                       : "border-[#e1e3e5] dark:border-zinc-800/60 bg-[#f6f6f7]/40 dark:bg-zinc-900/30 opacity-75",
                   )}
                 >
-                  <div className="flex items-start gap-3 min-w-0 pr-2">
-                    <div
-                      className={cn(
-                        "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 border",
-                        source.enabled
-                          ? "bg-[#f6f6f7] dark:bg-zinc-800 border-[#d2d5d9] text-[#303030] dark:text-zinc-100"
-                          : "bg-transparent border-transparent text-[#8c9196]",
-                      )}
-                    >
-                      <source.icon className="h-4 w-4" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-3 min-w-0 pr-2">
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 border",
+                          source.enabled
+                            ? "bg-[#f6f6f7] dark:bg-zinc-800 border-[#d2d5d9] text-[#303030] dark:text-zinc-100"
+                            : "bg-transparent border-transparent text-[#8c9196]",
+                        )}
+                      >
+                        <source.icon className="h-4 w-4" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <PolarisLabel className="cursor-pointer">
+                          {source.label}
+                        </PolarisLabel>
+                        <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
+                          {source.description}
+                        </p>
+                      </div>
                     </div>
-                    <div className="space-y-0.5">
-                      <PolarisLabel className="cursor-pointer">
-                        {source.label}
-                      </PolarisLabel>
-                      <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
-                        {source.description}
-                      </p>
-                    </div>
+
+                    <Switch
+                      checked={source.enabled}
+                      onCheckedChange={() => handleToggle(source.key)}
+                    />
                   </div>
 
-                  <Switch
-                    checked={source.enabled}
-                    onCheckedChange={() => handleToggle(source.key)}
-                  />
+                  {source.key !== "allowEntityMediaGalleryInFeed" &&
+                    source.enabled && (
+                      <div className="mt-2.5 pt-2.5 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
+                          <span>Tab Display Name:</span>
+                          <span className="text-[10px] text-[#8c9196]">
+                            (Default: &quot;{source.defaultName}&quot;)
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder={source.defaultName}
+                          value={formData.feedTabNames[source.key] || ""}
+                          onChange={(e) =>
+                            handleTabNameChange(source.key, e.target.value)
+                          }
+                          className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full sm:w-[220px] focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
+
+                  {source.key === "allowEntityMediaGalleryInFeed" &&
+                    source.enabled && (
+                      <div className="mt-3.5 pt-3.5 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-3.5">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100 flex items-center gap-1.5">
+                              <Images className="h-3.5 w-3.5 text-blue-600" />
+                              Media Gallery Feed Tabs
+                            </h4>
+                            <p className="text-[11px] text-[#616161] dark:text-zinc-400">
+                              Configure media album tabs linked into the
+                              community feed. Drag items to reorder the tabs.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleAddMediaLink}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-[6px] bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-zinc-900 transition-colors shadow-xs cursor-pointer"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Add Media Link
+                          </button>
+                        </div>
+
+                        {formData.mediaGalleryFeedLinks.length === 0 ? (
+                          <div className="p-4 text-center rounded-[6px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
+                            <p className="text-[12px] text-[#616161] dark:text-zinc-400">
+                              No media tabs configured. Click &quot;Add Media
+                              Link&quot; to add a media tab to the feed.
+                            </p>
+                          </div>
+                        ) : (
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                          >
+                            <SortableContext
+                              items={formData.mediaGalleryFeedLinks.map(
+                                (l) => l.id,
+                              )}
+                              strategy={verticalListSortingStrategy}
+                            >
+                              <div className="space-y-2">
+                                {formData.mediaGalleryFeedLinks.map(
+                                  (link, idx) => (
+                                    <SortableMediaLinkRow
+                                      key={link.id}
+                                      link={link}
+                                      index={idx}
+                                      albums={albums}
+                                      onUpdate={handleUpdateMediaLink}
+                                      onRemoveRequest={(index, name) =>
+                                        setDeleteConfirmTarget({ index, name })
+                                      }
+                                    />
+                                  ),
+                                )}
+                              </div>
+                            </SortableContext>
+                          </DndContext>
+                        )}
+                      </div>
+                    )}
                 </div>
               ))}
             </div>
@@ -604,7 +1060,8 @@ export default function FeedVisibility() {
                       AI Feed Post Moderation
                     </PolarisLabel>
                     <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
-                      Inspect all feed publications, links, and captions using AI safety checks in real time.
+                      Inspect all feed publications, links, and captions using
+                      AI safety checks in real time.
                     </p>
                   </div>
                 </div>
@@ -624,7 +1081,8 @@ export default function FeedVisibility() {
                       AI Feed Comments Moderation
                     </PolarisLabel>
                     <p className="text-[12px] text-[#616161] dark:text-zinc-400 leading-[16px]">
-                      Automatically analyze and block spam, abusive remarks, or toxic replies under feed items.
+                      Automatically analyze and block spam, abusive remarks, or
+                      toxic replies under feed items.
                     </p>
                   </div>
                 </div>
@@ -698,6 +1156,43 @@ export default function FeedVisibility() {
         description="You have modified content aggregation parameters."
         buttonText="Save Protocols"
       />
+
+      {/* Delete Media Tab Confirmation Dialog */}
+      <AlertDialog
+        open={deleteConfirmTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmTarget(null);
+        }}
+      >
+        <AlertDialogContent className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[14px] font-bold text-[#303030] dark:text-zinc-100">
+              Remove Media Tab?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[12px] text-[#616161] dark:text-zinc-400">
+              Are you sure you want to remove &quot;{deleteConfirmTarget?.name}
+              &quot; from the community feed? This action will remove the tab
+              from member feed navigation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-8 text-[12px] font-medium rounded-[6px]">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteConfirmTarget !== null) {
+                  handleRemoveMediaLink(deleteConfirmTarget.index);
+                  setDeleteConfirmTarget(null);
+                }
+              }}
+              className="h-8 text-[12px] font-medium rounded-[6px] bg-red-600 hover:bg-red-700 text-white"
+            >
+              Remove Tab
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
