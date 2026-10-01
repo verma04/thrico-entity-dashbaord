@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useRef } from "react";
-import { ModuleData } from "@/store/useWebsiteBuilderStore";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { ModuleData, useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
-import { Code, FileCode2 } from "lucide-react";
+import { Code, FileCode2, Maximize2 } from "lucide-react";
 import { ModuleHeader } from "./module-header";
 import { IsolatedHtmlRenderer } from "./isolated-html-renderer";
+import { HtmlFullViewerModal } from "../settings/html-full-viewer-modal";
 
 interface HtmlModuleProps {
   module: ModuleData;
@@ -17,6 +18,7 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
   previewDevice = "desktop",
 }) => {
   const { content, layout } = module;
+  const updateModuleContent = useWebsiteBuilderStore((s) => s.updateModuleContent);
   const htmlCode = content?.htmlCode || content?.embedCode || "";
   // Support layout string values
   let renderMode =
@@ -33,12 +35,29 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
   const minHeight = content?.minHeight ? Number(content.minHeight) : 0;
   const customCss = content?.customCss || "";
   const backgroundColor = content?.backgroundColor || "transparent";
+  const fileName = content?.fileName || "index.html";
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeHeight, setIframeHeight] = useState<number>(0);
+  const [isFullViewerOpen, setIsFullViewerOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const moduleId = module.id || "html-mod";
 
   const hasContent = htmlCode.trim().length > 0;
+
+  // Store update callbacks for the VS Code Studio modal
+  const handleChangeHtml = useCallback(
+    (newCode: string) => updateModuleContent(module.id, { htmlCode: newCode }),
+    [module.id, updateModuleContent]
+  );
+  const handleChangeCss = useCallback(
+    (newCss: string) => updateModuleContent(module.id, { customCss: newCss }),
+    [module.id, updateModuleContent]
+  );
+  const handleChangeRenderMode = useCallback(
+    (mode: "direct" | "iframe") => updateModuleContent(module.id, { renderMode: mode }),
+    [module.id, updateModuleContent]
+  );
 
   // Auto-resize iframe so it never shows internal scrollbars
   const updateHeightFromIframe = () => {
@@ -266,99 +285,138 @@ export const HtmlModule: React.FC<HtmlModuleProps> = ({
   const effectiveHeight = Math.max(iframeHeight, minHeight);
 
   return (
-    <section
-      className={cn(
-        "relative w-full transition-all duration-300 overflow-visible",
-        paddingClasses,
-      )}
-      style={{ backgroundColor }}
-    >
-      <div className={cn(widthClasses)}>
-        {/* Optional Section Header */}
-        <ModuleHeader
-          title={content?.title}
-          description={content?.description}
-          alignment="center"
-          titleClassName="text-2xl sm:text-3xl font-bold mb-3 tracking-tight"
-          descriptionClassName="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto"
-          titleColor={content?.titleColor}
-          descriptionColor={content?.descriptionColor}
-          hideTitle={
-            content?.hideTitle !== undefined ? content.hideTitle : true
-          }
-          hideDescription={
-            content?.hideDescription !== undefined
-              ? content.hideDescription
-              : true
-          }
-        />
+    <>
+      <section
+        className={cn(
+          "relative w-full transition-all duration-300 overflow-visible group/html-module",
+          paddingClasses,
+        )}
+        style={{ backgroundColor }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className={cn(widthClasses)}>
+          {/* Optional Section Header */}
+          <ModuleHeader
+            title={content?.title}
+            description={content?.description}
+            alignment="center"
+            titleClassName="text-2xl sm:text-3xl font-bold mb-3 tracking-tight"
+            descriptionClassName="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto"
+            titleColor={content?.titleColor}
+            descriptionColor={content?.descriptionColor}
+            hideTitle={
+              content?.hideTitle !== undefined ? content.hideTitle : true
+            }
+            hideDescription={
+              content?.hideDescription !== undefined
+                ? content.hideDescription
+                : true
+            }
+          />
 
-        {/* Content Container */}
-        {hasContent ? (
-          <div className="w-full relative overflow-visible">
-            {renderMode === "iframe" ? (
-              <div
-                className="w-full transition-all overflow-hidden rounded-lg bg-transparent"
-                style={{
-                  height: effectiveHeight > 0 ? `${effectiveHeight}px` : "auto",
-                  minHeight: minHeight > 0 ? `${minHeight}px` : undefined,
-                }}
-              >
-                <iframe
-                  ref={iframeRef}
-                  srcDoc={iframeSrcDoc}
-                  title={content?.title || "Custom HTML"}
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation allow-top-navigation-by-user-activation"
-                  scrolling="no"
-                  onLoad={updateHeightFromIframe}
-                  className="w-full border-0 block overflow-hidden"
+          {/* Content Container */}
+          {hasContent ? (
+            <div className="w-full relative overflow-visible">
+              {renderMode === "iframe" ? (
+                <div
+                  className="w-full transition-all overflow-hidden rounded-lg bg-transparent"
                   style={{
-                    height:
-                      effectiveHeight > 0 ? `${effectiveHeight}px` : "100%",
+                    height: effectiveHeight > 0 ? `${effectiveHeight}px` : "auto",
                     minHeight: minHeight > 0 ? `${minHeight}px` : undefined,
                   }}
-                />
-              </div>
-            ) : (
+                >
+                  <iframe
+                    ref={iframeRef}
+                    srcDoc={iframeSrcDoc}
+                    title={content?.title || "Custom HTML"}
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation allow-top-navigation-by-user-activation"
+                    scrolling="no"
+                    onLoad={updateHeightFromIframe}
+                    className="w-full border-0 block overflow-hidden"
+                    style={{
+                      height:
+                        effectiveHeight > 0 ? `${effectiveHeight}px` : "100%",
+                      minHeight: minHeight > 0 ? `${minHeight}px` : undefined,
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="w-full relative overflow-visible"
+                  style={{
+                    minHeight: minHeight > 0 ? `${minHeight}px` : undefined,
+                  }}
+                >
+                  {/* Isolated Shadow DOM HTML Renderer - prevents any CSS leakage to parent page */}
+                  <IsolatedHtmlRenderer
+                    html={htmlCode}
+                    css={customCss}
+                    minHeight={minHeight}
+                    className="custom-html-wrapper w-full overflow-visible"
+                  />
+                </div>
+              )}
+
+              {/* Floating "Open in VS Code Studio" button on hover */}
               <div
-                className="w-full relative overflow-visible"
-                style={{
-                  minHeight: minHeight > 0 ? `${minHeight}px` : undefined,
-                }}
+                className={cn(
+                  "absolute top-3 right-3 z-10 transition-all duration-200",
+                  isHovered
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 -translate-y-1 pointer-events-none"
+                )}
               >
-                {/* Isolated Shadow DOM HTML Renderer - prevents any CSS leakage to parent page */}
-                <IsolatedHtmlRenderer
-                  html={htmlCode}
-                  css={customCss}
-                  minHeight={minHeight}
-                  className="custom-html-wrapper w-full overflow-visible"
-                />
+                <button
+                  onClick={() => setIsFullViewerOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold
+                    bg-[#1e1e1e]/90 text-[#cccccc] border border-[#3c3c3c] backdrop-blur-md
+                    shadow-lg shadow-black/30
+                    hover:bg-[#2d2d2d] hover:border-[#007acc] hover:text-white
+                    active:scale-95 transition-all duration-150 cursor-pointer"
+                >
+                  <Maximize2 className="h-3 w-3" />
+                  <span>Open in VS Code Studio</span>
+                </button>
               </div>
-            )}
-          </div>
-        ) : (
-          /* Empty State */
-          <div className="w-full rounded-2xl border-2 border-dashed border-border/70 p-8 sm:p-14 text-center bg-card/40 backdrop-blur-sm transition-all hover:border-primary/40">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4 text-primary shadow-sm">
-              <Code className="h-7 w-7" />
             </div>
-            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1.5 flex items-center justify-center gap-2">
-              <span>HTML Section</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
-                Ready
-              </span>
-            </h3>
-            <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto mb-5 leading-relaxed">
-              Upload an HTML file or write custom HTML/CSS code in the settings
-              panel to render custom components, forms, animations, or embeds.
-            </p>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 border text-[11px] font-medium text-muted-foreground">
-              <FileCode2 className="h-3.5 w-3.5 text-primary" />
-              <span>Supports .html files, inline styles &amp; custom CSS</span>
+          ) : (
+            /* Empty State */
+            <div className="w-full rounded-2xl border-2 border-dashed border-border/70 p-8 sm:p-14 text-center bg-card/40 backdrop-blur-sm transition-all hover:border-primary/40">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4 text-primary shadow-sm">
+                <Code className="h-7 w-7" />
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1.5 flex items-center justify-center gap-2">
+                <span>HTML Section</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
+                  Ready
+                </span>
+              </h3>
+              <p className="text-muted-foreground text-xs sm:text-sm max-w-md mx-auto mb-5 leading-relaxed">
+                Upload an HTML file or write custom HTML/CSS code in the settings
+                panel to render custom components, forms, animations, or embeds.
+              </p>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 border text-[11px] font-medium text-muted-foreground">
+                <FileCode2 className="h-3.5 w-3.5 text-primary" />
+                <span>Supports .html files, inline styles &amp; custom CSS</span>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </section>
+          )}
+        </div>
+      </section>
+
+      {/* VS Code Studio Full Viewer Modal */}
+      <HtmlFullViewerModal
+        isOpen={isFullViewerOpen}
+        onClose={() => setIsFullViewerOpen(false)}
+        htmlCode={htmlCode}
+        onChangeHtml={handleChangeHtml}
+        customCss={customCss}
+        onChangeCss={handleChangeCss}
+        renderMode={renderMode as "direct" | "iframe"}
+        onChangeRenderMode={handleChangeRenderMode}
+        fileName={fileName}
+      />
+    </>
   );
 };
