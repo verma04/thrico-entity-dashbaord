@@ -64,6 +64,8 @@ import { CheckSquare, XSquare } from "lucide-react";
 import { CommentsPanel } from "@/components/media-gallery/comments-panel";
 import { SortableImageCard } from "@/components/media-gallery/sortable-image-card";
 import { UploadZone } from "@/components/media-gallery/upload-zone";
+import { VideoUploadDialog } from "@/components/media-gallery/video-upload-dialog";
+import { Video as VideoIcon } from "lucide-react";
 import { CaptionDialog } from "@/components/media-gallery/caption-dialog";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +119,7 @@ export default function AlbumDetailPage() {
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const [isDeletingSingle, setIsDeletingSingle] = useState(false);
+  const [showVideoUploadModal, setShowVideoUploadModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -335,7 +338,18 @@ export default function AlbumDetailPage() {
           )}
         </EcosystemActionBar.Group>
 
-        <EcosystemActionBar.Group align="right">
+        <EcosystemActionBar.Item>
+            <Button
+              variant="default"
+              size="sm"
+              className="h-8 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5"
+              onClick={() => setShowVideoUploadModal(true)}
+            >
+              <VideoIcon className="w-3.5 h-3.5" />
+              Upload Video
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={filteredImages.length > 0}>
             Showing {filteredImages.length} of {images.length} Media
           </EcosystemActionBar.Status>
@@ -478,6 +492,13 @@ export default function AlbumDetailPage() {
       />
         </div>
       </EcosystemContainer>
+          <VideoUploadDialog
+        open={showVideoUploadModal}
+        onOpenChange={setShowVideoUploadModal}
+        albumId={albumId}
+        currentCount={images.length}
+        onUploaded={refetch}
+      />
     </EcosystemWrapper>
   );
 }

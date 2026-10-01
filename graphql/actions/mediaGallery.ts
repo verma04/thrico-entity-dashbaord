@@ -1,4 +1,4 @@
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useQuery, useMutation, useLazyQuery } from "@apollo/client";
 
 const ALBUM_FIELDS = `
   id
@@ -20,6 +20,12 @@ const IMAGE_FIELDS = `
   url
   caption
   order
+  type
+  status
+  thumbnailUrl
+  duration
+  optimizedUrl
+  errorMessage
   commentCount
   createdAt
   updatedAt
@@ -57,6 +63,17 @@ export const GET_MEDIA_GALLERY_ALBUM = gql`
       images {
         ${IMAGE_FIELDS}
       }
+    }
+  }
+`;
+
+export const GET_MEDIA_GALLERY_UPLOAD_URL = gql`
+  query GetMediaGalleryUploadUrl($input: GetMediaGalleryUploadUrlInput!) {
+    getMediaGalleryUploadUrl(input: $input) {
+      uploadUrl
+      fileUrl
+      key
+      expiresIn
     }
   }
 `;
@@ -107,6 +124,14 @@ export const DELETE_MEDIA_GALLERY_ALBUM = gql`
 export const REORDER_MEDIA_GALLERY_ALBUMS = gql`
   mutation ReorderMediaGalleryAlbums($input: [ReorderMediaGalleryAlbumsInput!]!) {
     reorderMediaGalleryAlbums(input: $input)
+  }
+`;
+
+export const ADD_MEDIA_GALLERY_VIDEO = gql`
+  mutation AddMediaGalleryVideo($input: AddMediaGalleryVideoInput!) {
+    addMediaGalleryVideo(input: $input) {
+      ${IMAGE_FIELDS}
+    }
   }
 `;
 
@@ -212,3 +237,13 @@ export const useReorderMediaGalleryImages = () =>
 
 export const useDeleteMediaGalleryCommentAdmin = () =>
   useMutation(DELETE_MEDIA_GALLERY_COMMENT_ADMIN);
+
+export const useGetMediaGalleryUploadUrl = () =>
+  useLazyQuery(GET_MEDIA_GALLERY_UPLOAD_URL, { fetchPolicy: "network-only" });
+
+export const useAddMediaGalleryVideo = (albumId: string) =>
+  useMutation(ADD_MEDIA_GALLERY_VIDEO, {
+    refetchQueries: [
+      { query: GET_MEDIA_GALLERY_ALBUM, variables: { id: albumId } },
+    ],
+  });

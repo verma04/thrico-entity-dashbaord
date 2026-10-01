@@ -73,8 +73,6 @@ const MediaGallerySettings = () => {
           data.getEntitySettings.allowMediaGalleryShareToLinkedin ?? true,
         allowMediaGalleryShareToInstagram:
           data.getEntitySettings.allowMediaGalleryShareToInstagram ?? true,
-        allowMediaGalleryShareToInstagram:
-          data.getEntitySettings.allowMediaGalleryShareToInstagram ?? true,
         allowMediaGallerySocialShare:
           data.getEntitySettings.allowMediaGallerySocialShare ?? true,
       });
@@ -101,6 +99,8 @@ const MediaGallerySettings = () => {
           data.getEntitySettings.allowMediaGalleryShareToFeed ?? true,
         allowMediaGalleryShareToLinkedin:
           data.getEntitySettings.allowMediaGalleryShareToLinkedin ?? true,
+        allowMediaGalleryShareToInstagram:
+          data.getEntitySettings.allowMediaGalleryShareToInstagram ?? true,
         allowMediaGallerySocialShare:
           data.getEntitySettings.allowMediaGallerySocialShare ?? true,
       });
