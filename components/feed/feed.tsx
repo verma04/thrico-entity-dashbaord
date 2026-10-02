@@ -58,7 +58,12 @@ import {
   usePinFeed,
   useDeleteCommunityFeed,
 } from "@/graphql/actions/feed";
-import { GET_PINNED_FEED, GET_COMMUNITY_FEED } from "@/graphql/quries/feed";
+import {
+  GET_PINNED_FEED,
+  GET_COMMUNITY_FEED,
+  GET_ALL_FEED,
+  NUMBER_OF_FEED,
+} from "@/graphql/quries/feed";
 import { toast } from "sonner";
 import moment from "moment";
 
@@ -68,6 +73,11 @@ export default function Feed({ feed }: { feed: FeedProps }) {
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
+    refetchQueries: [{ query: GET_ALL_FEED }, { query: NUMBER_OF_FEED }],
+    update(cache: any) {
+      cache.evict({ id: cache.identify({ __typename: "Feed", id: feed.id }) });
+      cache.gc();
+    },
     onCompleted: () => {
       setIsDeleteDialogOpen(false);
       toast.success("Post deleted successfully", {
@@ -76,6 +86,13 @@ export default function Feed({ feed }: { feed: FeedProps }) {
       });
     },
     onError: (error: any) => {
+      if (error.message?.toLowerCase().includes("not found")) {
+        setIsDeleteDialogOpen(false);
+        toast.info("Post already removed", {
+          description: "This post no longer exists and has been removed from the feed.",
+        });
+        return;
+      }
       toast.error("Failed to delete post", {
         description:
           error.message || "Something went wrong while deleting this post.",
@@ -85,6 +102,15 @@ export default function Feed({ feed }: { feed: FeedProps }) {
 
   const [deleteFeedCommunity, { loading: isDeletingCommunity }] =
     useDeleteCommunityFeed({
+      refetchQueries: [
+        { query: GET_COMMUNITY_FEED },
+        { query: GET_ALL_FEED },
+        { query: NUMBER_OF_FEED },
+      ],
+      update(cache: any) {
+        cache.evict({ id: cache.identify({ __typename: "Feed", id: feed.id }) });
+        cache.gc();
+      },
       onCompleted: () => {
         setIsDeleteDialogOpen(false);
         toast.success("Community post deleted successfully", {
@@ -94,12 +120,18 @@ export default function Feed({ feed }: { feed: FeedProps }) {
         });
       },
       onError: (error: any) => {
+        if (error.message?.toLowerCase().includes("not found")) {
+          setIsDeleteDialogOpen(false);
+          toast.info("Post already removed", {
+            description: "This post no longer exists and has been removed from the feed.",
+          });
+          return;
+        }
         toast.error("Failed to delete community post", {
           description:
             error.message || "Something went wrong while deleting this post.",
         });
       },
-      refetchQueries: [GET_COMMUNITY_FEED],
     });
 
   const isDeleting = feed.isCommunityFeed

@@ -60,7 +60,12 @@ import {
   usePinFeed,
   useDeleteCommunityFeed,
 } from "@/graphql/actions/feed";
-import { GET_PINNED_FEED, GET_COMMUNITY_FEED } from "@/graphql/quries/feed";
+import {
+  GET_PINNED_FEED,
+  GET_COMMUNITY_FEED,
+  GET_ALL_FEED,
+  NUMBER_OF_FEED,
+} from "@/graphql/quries/feed";
 import type { FeedProps } from "./types";
 import { FeedDetailModal } from "./feed-detail-modal";
 
@@ -97,6 +102,13 @@ export function FeedTable({
   const [feedToDelete, setFeedToDelete] = useState<FeedProps | null>(null);
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
+    refetchQueries: [{ query: GET_ALL_FEED }, { query: NUMBER_OF_FEED }],
+    update(cache: any) {
+      if (feedToDelete) {
+        cache.evict({ id: cache.identify({ __typename: "Feed", id: feedToDelete.id }) });
+        cache.gc();
+      }
+    },
     onCompleted: () => {
       setFeedToDelete(null);
       toast.success("Post deleted successfully", {
@@ -105,6 +117,13 @@ export function FeedTable({
       });
     },
     onError: (error: any) => {
+      if (error.message?.toLowerCase().includes("not found")) {
+        setFeedToDelete(null);
+        toast.info("Post already removed", {
+          description: "This post no longer exists and has been removed from the view.",
+        });
+        return;
+      }
       toast.error("Failed to delete post", {
         description: error.message || "Something went wrong while deleting this post.",
       });
@@ -113,6 +132,17 @@ export function FeedTable({
 
   const [deleteFeedCommunity, { loading: isDeletingCommunity }] =
     useDeleteCommunityFeed({
+      refetchQueries: [
+        { query: GET_COMMUNITY_FEED },
+        { query: GET_ALL_FEED },
+        { query: NUMBER_OF_FEED },
+      ],
+      update(cache: any) {
+        if (feedToDelete) {
+          cache.evict({ id: cache.identify({ __typename: "Feed", id: feedToDelete.id }) });
+          cache.gc();
+        }
+      },
       onCompleted: () => {
         setFeedToDelete(null);
         toast.success("Community post deleted successfully", {
@@ -121,11 +151,17 @@ export function FeedTable({
         });
       },
       onError: (error: any) => {
+        if (error.message?.toLowerCase().includes("not found")) {
+          setFeedToDelete(null);
+          toast.info("Post already removed", {
+            description: "This post no longer exists and has been removed from the view.",
+          });
+          return;
+        }
         toast.error("Failed to delete community post", {
           description: error.message || "Something went wrong while deleting this post.",
         });
       },
-      refetchQueries: [GET_COMMUNITY_FEED],
     });
 
   const [pinFeed, { loading: isPinning }] = usePinFeed({
