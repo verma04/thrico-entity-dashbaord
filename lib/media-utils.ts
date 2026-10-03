@@ -2,8 +2,8 @@
  * Media URL utility for handling CDN migration and fallback.
  */
 
-const CLOUDFRONT_URL = "https://d588lezzxe2zm.cloudfront.net/";
-const S3_URL = "https://thrico-storage.s3.ap-south-1.amazonaws.com";
+const CLOUDFRONT_URL = "https://d10gqlhtjp1ymy.cloudfront.net/";
+const S3_URL = "https://thrico-prod-storage.s3.ap-south-1.amazonaws.com";
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "https://cdn.thrico.network/";
 
 /**

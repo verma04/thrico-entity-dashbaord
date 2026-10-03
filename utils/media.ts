@@ -2,8 +2,8 @@
  * Media URL utility for handling CDN migration and fallback.
  */
 
-const CLOUDFRONT_URL = 'https://d588lezzxe2zm.cloudfront.net/'
-const S3_URL = 'https://thrico-storage.s3.ap-south-1.amazonaws.com/'
+const CLOUDFRONT_URL = 'https://d10gqlhtjp1ymy.cloudfront.net/'
+const S3_URL = 'https://thrico-prod-storage.s3.ap-south-1.amazonaws.com/'
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.thrico.network'
 
 /**
@@ -52,11 +52,11 @@ export const getMediaUrls = (path: string | null | undefined): string[] => {
 }
 
 export const PLACEHOLDER_AVATAR =
-  'https://thrico-storage.s3.ap-south-1.amazonaws.com/adaptive-icon.png'
+  'https://thrico-prod-storage.s3.ap-south-1.amazonaws.com/adaptive-icon.png'
 export const PLACEHOLDER_COVER =
-  'https://thrico-storage.s3.ap-south-1.amazonaws.com/adaptive-icon.png'
+  'https://thrico-prod-storage.s3.ap-south-1.amazonaws.com/adaptive-icon.png'
 export const PLACEHOLDER_IMAGE =
-  'https://thrico-storage.s3.ap-south-1.amazonaws.com/adaptive-icon.png'
+  'https://thrico-prod-storage.s3.ap-south-1.amazonaws.com/adaptive-icon.png'
 
 /**
  * Returns a single preferred CDN URL for components that don't support multiple sources.

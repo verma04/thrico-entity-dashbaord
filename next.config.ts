@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "thrico.blr1.digitaloceanspaces.com",
       },
+      {
+        protocol: "https",
+        hostname: "d10gqlhtjp1ymy.cloudfront.net",
+      },
+      {
+        protocol: "https",
+        hostname: "thrico-prod-storage.s3.ap-south-1.amazonaws.com",
+      },
     ],
   },
   output: "standalone",
