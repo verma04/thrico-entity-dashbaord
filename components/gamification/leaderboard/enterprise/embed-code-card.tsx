@@ -518,7 +518,7 @@ if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
   echo "Failed to get access token!"
   exit 1
 fi
-echo "✓ Token obtained successfully! (${TOKEN:0:30}...)"
+echo "✓ Token obtained successfully! (\${TOKEN:0:30}...)"
 
 # 2. Fetch Top 3 Podium
 echo -e "\n[2/6] Fetching Top 3 Champions Podium..."
