@@ -83,6 +83,26 @@ export function EmbedCodeCard({
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination Controls Bar -->
+    <div class="t-lb-pagination">
+      <div class="t-lb-page-summary">
+        <span id="t-lb-entries-count">Showing 0 of 0</span>
+        <select id="t-lb-page-size" class="t-lb-select">
+          <option value="10">10 / page</option>
+          <option value="20" selected>20 / page</option>
+          <option value="50">50 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+      </div>
+      <div class="t-lb-page-nav">
+        <button id="t-lb-first" class="t-lb-page-btn" title="First Page" disabled>« First</button>
+        <button id="t-lb-prev" class="t-lb-page-btn" disabled>‹ Prev</button>
+        <span id="t-lb-page-info" class="t-lb-page-info">Page 1 of 1</span>
+        <button id="t-lb-next" class="t-lb-page-btn" disabled>Next ›</button>
+        <button id="t-lb-last" class="t-lb-page-btn" title="Last Page" disabled>Last »</button>
+      </div>
+    </div>
   </div>
 
   <!-- Sticky / Bottom Current User Rank Bar (Optional) -->
@@ -237,6 +257,63 @@ export function EmbedCodeCard({
   .t-lb-my-badge { font-size: 11px; font-weight: 700; color: #1d4ed8; text-transform: uppercase; }
   .t-lb-my-pos { font-size: 15px; font-weight: 800; color: #1e3a8a; margin-left: 8px; }
   .t-lb-my-pts { font-size: 14px; font-weight: 700; color: #1d4ed8; font-mono: monospace; }
+  .t-lb-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid #f1f5f9;
+    background: #f8fafc;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .t-lb-page-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 12px;
+  }
+  .t-lb-select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 12px;
+    color: #334155;
+    cursor: pointer;
+    outline: none;
+  }
+  .t-lb-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .t-lb-page-btn {
+    padding: 5px 11px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #1e293b;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .t-lb-page-btn:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+  .t-lb-page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .t-lb-page-info {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    padding: 0 6px;
+  }
 </style>
 
 <!-- ======================================================== -->
@@ -289,40 +366,92 @@ export function EmbedCodeCard({
       if (el) el.style.display = 'none';
     });
 
-    // 3. Fetch and Render Paginated Standings
-    leaderboard.getEntries(CODE, { page: 1, limit: 20 }).then(res => {
-      const entries = res.entries || [];
-      const tbody = document.getElementById("t-lb-entries");
-      if (!entries.length) {
-        tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">No entries found</td></tr>';
-        return;
-      }
-      tbody.innerHTML = entries.map(entry => {
-        const name = entry.user?.displayName || 'Member';
-        const avatar = entry.user?.avatarUrl || 'https://assets.thrico.network/avatar-placeholder.png';
-        const badgeHtml = entry.user?.badges?.[0]?.name
-          ? '<span style="color:#64748b; font-size:11px; margin-left:6px;">• ' + entry.user.badges[0].name + '</span>'
-          : '';
+    // 3. Paginated Standings with Full Interactive Controls
+    var currentPage = 1;
+    var pageSize = 20;
+    var totalPages = 1;
 
-        let deltaHtml = '<span class="t-lb-delta-same">— 0</span>';
-        if (entry.movement > 0) deltaHtml = '<span class="t-lb-delta-up">▲ +' + entry.movement + '</span>';
-        else if (entry.movement < 0) deltaHtml = '<span class="t-lb-delta-down">▼ ' + entry.movement + '</span>';
+    function renderPaginationUI(pagination) {
+      var total = pagination.total || 0;
+      totalPages = Math.max(1, Math.ceil(total / pageSize));
+      var start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+      var end = Math.min(currentPage * pageSize, total);
 
-        return '<tr>' +
-                 '<td class="t-lb-rank">#' + entry.rank + '</td>' +
-                 '<td><div class="t-lb-user-cell">' +
-                   '<img class="t-lb-table-avatar" src="' + avatar + '" alt="' + name + '" onerror="this.src=\\'https://assets.thrico.network/avatar-placeholder.png\\'" />' +
-                   '<div><span style="font-weight:600;">' + name + '</span>' + badgeHtml + '</div>' +
-                 '</div></td>' +
-                 '<td>' + deltaHtml + '</td>' +
-                 '<td class="t-lb-pts-cell">' + Number(entry.points).toLocaleString() + ' pts</td>' +
-               '</tr>';
-      }).join('');
-    }).catch(err => {
-      console.error("Entries load error:", err);
-      const tbody = document.getElementById("t-lb-entries");
-      if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">Failed to load standings</td></tr>';
-    });
+      var countEl = document.getElementById("t-lb-entries-count");
+      if (countEl) countEl.innerText = 'Showing ' + start + '–' + end + ' of ' + total.toLocaleString();
+
+      var pageInfo = document.getElementById("t-lb-page-info");
+      if (pageInfo) pageInfo.innerText = 'Page ' + currentPage + ' of ' + totalPages;
+
+      var firstBtn = document.getElementById("t-lb-first");
+      var prevBtn = document.getElementById("t-lb-prev");
+      var nextBtn = document.getElementById("t-lb-next");
+      var lastBtn = document.getElementById("t-lb-last");
+
+      if (firstBtn) firstBtn.disabled = currentPage <= 1;
+      if (prevBtn) prevBtn.disabled = !pagination.hasPrev && currentPage <= 1;
+      if (nextBtn) nextBtn.disabled = !pagination.hasNext && currentPage >= totalPages;
+      if (lastBtn) lastBtn.disabled = currentPage >= totalPages;
+    }
+
+    function loadEntries(page, limit) {
+      currentPage = page;
+      pageSize = limit;
+      var tbody = document.getElementById("t-lb-entries");
+      if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">Loading standings...</td></tr>';
+
+      leaderboard.getEntries(CODE, { page: currentPage, limit: pageSize }).then(function(res) {
+        var entries = res.entries || [];
+        if (!entries.length) {
+          tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">No entries found</td></tr>';
+          renderPaginationUI({ total: 0, hasPrev: false, hasNext: false });
+          return;
+        }
+
+        tbody.innerHTML = entries.map(function(entry) {
+          var name = entry.user?.displayName || 'Member';
+          var avatar = entry.user?.avatarUrl || 'https://assets.thrico.network/avatar-placeholder.png';
+          var badgeHtml = entry.user?.badges && entry.user.badges.length > 0
+            ? '<span style="color:#64748b; font-size:11px; margin-left:6px;">• ' + entry.user.badges[0].name + '</span>'
+            : '';
+
+          var deltaHtml = '<span class="t-lb-delta-same">— 0</span>';
+          if (entry.movement > 0) deltaHtml = '<span class="t-lb-delta-up">▲ +' + entry.movement + '</span>';
+          else if (entry.movement < 0) deltaHtml = '<span class="t-lb-delta-down">▼ ' + entry.movement + '</span>';
+
+          return '<tr>' +
+                   '<td class="t-lb-rank">#' + entry.rank + '</td>' +
+                   '<td><div class="t-lb-user-cell">' +
+                     '<img class="t-lb-table-avatar" src="' + avatar + '" alt="' + name + '" onerror="this.src=\\'https://assets.thrico.network/avatar-placeholder.png\\'" />' +
+                     '<div><span style="font-weight:600;">' + name + '</span>' + badgeHtml + '</div>' +
+                   '</div></td>' +
+                   '<td>' + deltaHtml + '</td>' +
+                   '<td class="t-lb-pts-cell">' + Number(entry.points).toLocaleString() + ' pts</td>' +
+                 '</tr>';
+        }).join('');
+
+        renderPaginationUI(res.pagination || { total: entries.length, hasPrev: currentPage > 1, hasNext: false });
+      }).catch(function(err) {
+        console.error("Entries load error:", err);
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">Failed to load standings</td></tr>';
+      });
+    }
+
+    // Attach Pagination Event Listeners
+    var firstBtn = document.getElementById("t-lb-first");
+    var prevBtn = document.getElementById("t-lb-prev");
+    var nextBtn = document.getElementById("t-lb-next");
+    var lastBtn = document.getElementById("t-lb-last");
+    var pageSizeSelect = document.getElementById("t-lb-page-size");
+
+    if (firstBtn) firstBtn.addEventListener("click", function() { if (currentPage > 1) loadEntries(1, pageSize); });
+    if (prevBtn) prevBtn.addEventListener("click", function() { if (currentPage > 1) loadEntries(currentPage - 1, pageSize); });
+    if (nextBtn) nextBtn.addEventListener("click", function() { if (currentPage < totalPages) loadEntries(currentPage + 1, pageSize); });
+    if (lastBtn) lastBtn.addEventListener("click", function() { if (currentPage < totalPages) loadEntries(totalPages, pageSize); });
+    if (pageSizeSelect) pageSizeSelect.addEventListener("change", function(e) { loadEntries(1, parseInt(e.target.value, 10) || 20); });
+
+    // Initial load
+    loadEntries(1, pageSize);
   })();
 </script>`;
 
