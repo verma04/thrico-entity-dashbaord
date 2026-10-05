@@ -241,13 +241,12 @@ export function EmbedCodeCard({
 <!-- ======================================================== -->
 <!-- THRICO LEADERBOARD SDK & DATA RENDERING SCRIPT             -->
 <!-- ======================================================== -->
-<script src="https://assets.thrico.network/leaderboard/v1/leaderboard.min.js"></script>
+<script src="https://sdk.thrico.network/leaderboard/v1/leaderboard.min.js"></script>
 <script>
   (function() {
     // 1. Initialize Leaderboard Client
     const leaderboard = ThricoLeaderboard.init({
-      clientId: "${clientId}",
-      endpoint: "https://sdk.thrico.network"
+      clientId: "${clientId}"
     });
 
     const CODE = "${lbCode}";
@@ -328,13 +327,12 @@ export function EmbedCodeCard({
 
   // 2. Headless CDN Script Code
   const cdnSnippet = `<!-- 1. Include Thrico CDN SDK -->
-<script src="https://assets.thrico.network/leaderboard/v1/leaderboard.min.js"></script>
+<script src="https://sdk.thrico.network/leaderboard/v1/leaderboard.min.js"></script>
 
 <!-- 2. Initialize & Query Leaderboard -->
 <script>
   const leaderboard = ThricoLeaderboard.init({
-    clientId: "${clientId}",
-    endpoint: "https://sdk.thrico.network"
+    clientId: "${clientId}"
   });
 
   // Fetch Top 3 Podium
@@ -368,7 +366,6 @@ import { ThricoLeaderboard } from "@thrico/leaderboard-sdk";
 // 2. Initialize client singleton
 const leaderboard = ThricoLeaderboard.init({
   clientId: "${clientId}",
-  endpoint: "https://sdk.thrico.network",
 });
 
 // 3. Query Top 3 Podium
