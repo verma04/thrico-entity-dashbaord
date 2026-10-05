@@ -554,6 +554,30 @@ echo -e "\n=================================================="
 echo "✓ All 6 API operations completed successfully!"
 echo "=================================================="`;
 
+  const handleDownloadHtml = () => {
+    const fullHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${currentLeaderboard?.name || "Leaderboard"} - Thrico Leaderboard</title>
+</head>
+<body style="margin: 0; padding: 32px 16px; background: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; min-height: 100vh;">
+${htmlSnippet}
+</body>
+</html>`;
+    const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leaderboard-${lbCode}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Downloaded leaderboard-${lbCode}.html`);
+  };
+
   const handleDownloadScript = () => {
     const blob = new Blob([shSnippet], { type: "text/x-sh" });
     const url = URL.createObjectURL(blob);
@@ -658,23 +682,36 @@ curl -X PATCH "https://thrico-tracking.thrico.app/v1/sdk/settings" \\
 
         {/* Selected Config Info Pill */}
         {currentLeaderboard && (
-          <div className="flex flex-wrap items-center gap-3 p-3 rounded-lg border border-border/80 bg-muted/20 text-xs">
-            <div className="flex items-center gap-1.5 font-medium text-foreground">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span>{currentLeaderboard.name}</span>
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg border border-border/80 bg-muted/20 text-xs">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5 font-medium text-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <span>{currentLeaderboard.name}</span>
+              </div>
+              <span className="text-muted-foreground">•</span>
+              <span className="font-mono text-primary text-[11px]">
+                code: {currentLeaderboard.code}
+              </span>
+              <span className="text-muted-foreground">•</span>
+              <Badge variant="secondary" className="text-[10px] py-0">
+                {currentLeaderboard.periodType}
+              </Badge>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-muted-foreground text-[11px]">
+                Page Size: {currentLeaderboard.defaultPageSize} (Max: {currentLeaderboard.maxPageSize})
+              </span>
             </div>
-            <span className="text-muted-foreground">•</span>
-            <span className="font-mono text-primary text-[11px]">
-              code: {currentLeaderboard.code}
-            </span>
-            <span className="text-muted-foreground">•</span>
-            <Badge variant="secondary" className="text-[10px] py-0">
-              {currentLeaderboard.periodType}
-            </Badge>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-muted-foreground text-[11px]">
-              Page Size: {currentLeaderboard.defaultPageSize} (Max: {currentLeaderboard.maxPageSize})
-            </span>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleDownloadHtml}
+              className="h-7 text-xs gap-1.5 bg-background hover:bg-muted font-medium ml-auto sm:ml-0"
+              title="Download standalone HTML file ready to open in any browser"
+            >
+              <Download className="h-3.5 w-3.5 text-amber-500" />
+              Download HTML
+            </Button>
           </div>
         )}
       </div>
@@ -719,24 +756,36 @@ curl -X PATCH "https://thrico-tracking.thrico.app/v1/sdk/settings" \\
               <pre className="p-4 overflow-x-auto text-xs font-mono bg-zinc-950 text-zinc-100 leading-relaxed max-h-[420px]">
                 <code>{htmlSnippet}</code>
               </pre>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => handleCopy(htmlSnippet, "html")}
-                className="absolute top-12 right-3 h-8 gap-1.5 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 shadow-md"
-              >
-                {copiedTab === "html" ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    Copy HTML Widget
-                  </>
-                )}
-              </Button>
+              <div className="absolute top-12 right-3 flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleDownloadHtml}
+                  className="h-8 gap-1.5 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 shadow-md"
+                  title="Download self-contained leaderboard.html file"
+                >
+                  <Download className="h-3.5 w-3.5 text-amber-400" />
+                  Download .html
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => handleCopy(htmlSnippet, "html")}
+                  className="h-8 gap-1.5 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 shadow-md"
+                >
+                  {copiedTab === "html" ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3.5 w-3.5" />
+                      Copy HTML Widget
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </TabsContent>
 
