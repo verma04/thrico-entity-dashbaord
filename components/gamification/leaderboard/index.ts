@@ -5,3 +5,4 @@ export * from "./leaderboard-card-compact";
 export * from "./leaderboard-grid";
 export * from "./export-leaderboard-modal";
 export * from "./leaderboard-table";
+export * from "./enterprise";

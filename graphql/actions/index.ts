@@ -23,6 +23,7 @@ import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 export * from "./membership/membership-queries";
 export * from "./membership/membership-mutations";
 export * from "./export";
+export * from "./enterprise-leaderboard";
 export {
   useGetUserStatusTimeline,
   useLazyGetUserStatusTimeline,
