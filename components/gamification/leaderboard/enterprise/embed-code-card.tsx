@@ -358,25 +358,42 @@ export function EmbedCodeCard({
 
   // 3. Raw REST Endpoints
   const restSnippet = `# 1. Request Short-Lived JWT Token (Bearer)
-POST https://sdk.thrico.network/v1/enterprise/auth/token
-Header: Origin: https://yourdomain.com
-Body:
-{
-  "clientId": "${clientId}"
-}
+curl -X POST "https://thrico-tracking.thrico.app/v1/sdk/auth/token" \\
+  -H "Content-Type: application/json" \\
+  -H "Origin: https://yourdomain.com" \\
+  -d '{"clientId": "${clientId}"}'
 
 # 2. Fetch Top 3 Podium
-GET https://sdk.thrico.network/v1/enterprise/leaderboards/${lbCode}/top?limit=3
-Authorization: Bearer <TOKEN>
+curl -X GET "https://thrico-tracking.thrico.app/v1/sdk/leaderboards/${lbCode}/top?limit=3" \\
+  -H "Authorization: Bearer <TOKEN>"
 
 # 3. Fetch Paginated Entries
-GET https://sdk.thrico.network/v1/enterprise/leaderboards/${lbCode}/entries?page=1&limit=20
-Authorization: Bearer <TOKEN>
+curl -X GET "https://thrico-tracking.thrico.app/v1/sdk/leaderboards/${lbCode}/entries?page=1&limit=20" \\
+  -H "Authorization: Bearer <TOKEN>"
 
 # 4. Fetch Current User Rank
-GET https://sdk.thrico.network/v1/enterprise/leaderboards/${lbCode}/me
-Authorization: Bearer <TOKEN>
-X-User-Id: <USER_ID>`;
+curl -X GET "https://thrico-tracking.thrico.app/v1/sdk/leaderboards/${lbCode}/me" \\
+  -H "Authorization: Bearer <TOKEN>" \\
+  -H "X-User-Id: <USER_ID>"
+
+# 5. Update Leaderboard Configuration
+curl -X PATCH "https://thrico-tracking.thrico.app/v1/sdk/leaderboards/${lbCode}" \\
+  -H "Authorization: Bearer <TOKEN>" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "${currentLeaderboard?.name || "Updated Name"}",
+    "status": "ACTIVE",
+    "badgeVisibility": true
+  }'
+
+# 6. Update Allowed Domains & Rate Limit Settings
+curl -X PATCH "https://thrico-tracking.thrico.app/v1/sdk/settings" \\
+  -H "Authorization: Bearer <TOKEN>" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "allowedDomains": ["http://localhost:3000", "https://yourdomain.com"],
+    "rateLimitPerMinute": 3000
+  }'`;
 
   const handleCopy = (text: string, tabKey: string) => {
     navigator.clipboard.writeText(text);
