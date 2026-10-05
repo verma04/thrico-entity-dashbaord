@@ -51,10 +51,11 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-interface CreateLeaderboardDialogProps {
+export interface CreateLeaderboardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  initialBlueprintId?: string | null;
 }
 
 const PERIOD_OPTIONS: { value: EnterprisePeriodType; label: string; desc: string }[] = [
@@ -82,7 +83,7 @@ const TIE_BREAKER_OPTIONS = [
   },
 ];
 
-interface BlueprintPreset {
+export interface BlueprintPreset {
   id: string;
   name: string;
   badge: string;
@@ -103,7 +104,7 @@ interface BlueprintPreset {
   tagline: string;
 }
 
-const BLUEPRINT_PRESETS: BlueprintPreset[] = [
+export const BLUEPRINT_PRESETS: BlueprintPreset[] = [
   {
     id: "weekly_sprint",
     name: "Weekly Sprint",
@@ -368,6 +369,7 @@ export function CreateLeaderboardDialog({
   open,
   onOpenChange,
   onSuccess,
+  initialBlueprintId,
 }: CreateLeaderboardDialogProps) {
   // Suggestions & Blueprint States
   const [activeBlueprintId, setActiveBlueprintId] = useState<string | null>(null);
@@ -478,6 +480,17 @@ export function CreateLeaderboardDialog({
 
     toast.info(`Applied "${preset.name}" blueprint`);
   };
+
+  React.useEffect(() => {
+    if (open && initialBlueprintId) {
+      const found = BLUEPRINT_PRESETS.find((p) => p.id === initialBlueprintId);
+      if (found) {
+        applyBlueprint(found);
+      }
+    } else if (!open) {
+      setActiveBlueprintId(null);
+    }
+  }, [open, initialBlueprintId]);
 
   const applyNameSuggestion = (suggestion: { label: string; desc: string }) => {
     const newName = suggestion.label;
