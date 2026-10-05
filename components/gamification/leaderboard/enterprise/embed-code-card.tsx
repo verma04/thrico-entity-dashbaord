@@ -22,7 +22,6 @@ import {
   Check,
   Globe,
   Terminal,
-  FileCode,
   Flame,
   Award,
   Crown,
@@ -357,33 +356,7 @@ export function EmbedCodeCard({
     });
 </script>`;
 
-  // 3. Modern NPM / TypeScript Code
-  const npmSnippet = `// 1. Install headless SDK
-// npm install @thrico/leaderboard-sdk
-
-import { ThricoLeaderboard } from "@thrico/leaderboard-sdk";
-
-// 2. Initialize client singleton
-const leaderboard = ThricoLeaderboard.init({
-  clientId: "${clientId}",
-});
-
-// 3. Query Top 3 Podium
-export async function getTopPodium() {
-  const { top } = await leaderboard.getTopUsers("${lbCode}", { limit: 3 });
-  return top;
-}
-
-// 4. Query Paginated Standings
-export async function getLeaderboardPage(page = 1, limit = 20) {
-  const response = await leaderboard.getEntries("${lbCode}", {
-    page,
-    limit,
-  });
-  return response; // { entries, pagination: { total, totalPages, page } }
-}`;
-
-  // 4. Raw REST Endpoints
+  // 3. Raw REST Endpoints
   const restSnippet = `# 1. Request Short-Lived JWT Token (Bearer)
 POST https://sdk.thrico.network/v1/enterprise/auth/token
 Header: Origin: https://yourdomain.com
@@ -491,10 +464,6 @@ X-User-Id: <USER_ID>`;
                 <Globe className="h-3.5 w-3.5" />
                 Headless JS (CDN)
               </TabsTrigger>
-              <TabsTrigger value="npm" className="text-xs h-7 px-3 gap-1.5 font-medium">
-                <FileCode className="h-3.5 w-3.5" />
-                NPM / TypeScript
-              </TabsTrigger>
               <TabsTrigger value="rest" className="text-xs h-7 px-3 gap-1.5 font-medium">
                 <Terminal className="h-3.5 w-3.5" />
                 REST API (Curl)
@@ -560,33 +529,6 @@ X-User-Id: <USER_ID>`;
                   <>
                     <Copy className="h-3.5 w-3.5" />
                     Copy Headless JS
-                  </>
-                )}
-              </Button>
-            </div>
-          </TabsContent>
-
-          {/* NPM Tab Content */}
-          <TabsContent value="npm" className="p-0 m-0">
-            <div className="relative group">
-              <pre className="p-4 overflow-x-auto text-xs font-mono bg-zinc-950 text-zinc-100 leading-relaxed max-h-[380px]">
-                <code>{npmSnippet}</code>
-              </pre>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => handleCopy(npmSnippet, "npm")}
-                className="absolute top-3 right-3 h-8 gap-1.5 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 shadow-md"
-              >
-                {copiedTab === "npm" ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    Copy Code
                   </>
                 )}
               </Button>
