@@ -28,6 +28,8 @@ import {
   TrendingUp,
   Sparkles,
   Layout,
+  FileCode2,
+  Download,
 } from "lucide-react";
 
 interface EmbedCodeCardProps {
@@ -356,6 +358,86 @@ export function EmbedCodeCard({
     });
 </script>`;
 
+  // 4. Standalone Executable Test Script (.sh)
+  const shSnippet = `#!/usr/bin/env bash
+# ==============================================================================
+# Thrico Headless Leaderboard Automated REST API Test Script
+# Pre-configured for: ${lbCode}
+# ==============================================================================
+set -e
+
+API_BASE="https://thrico-tracking.thrico.app/v1/sdk"
+CLIENT_ID="${clientId}"
+ORIGIN="http://localhost:5173"
+LB_CODE="${lbCode}"
+TEST_USER_ID="4fe5617f-22f4-42cb-8093-26bf64964cd1"
+
+echo "=================================================="
+echo " Testing Thrico Leaderboard SDK REST Endpoints"
+echo " Board Code: $LB_CODE"
+echo " Endpoint:   $API_BASE"
+echo "=================================================="
+
+# 1. Request Short-Lived JWT Token (Bearer)
+echo -e "\n[1/6] Requesting Access Token..."
+TOKEN=$(curl -s -X POST "$API_BASE/auth/token" \\
+  -H "Content-Type: application/json" \\
+  -H "Origin: $ORIGIN" \\
+  -d "{\\"clientId\\": \\"$CLIENT_ID\\"}" | jq -r '.data.accessToken')
+
+if [ -z "$TOKEN" ] || [ "$TOKEN" == "null" ]; then
+  echo "Failed to get access token!"
+  exit 1
+fi
+echo "✓ Token obtained successfully! (${TOKEN:0:30}...)"
+
+# 2. Fetch Top 3 Podium
+echo -e "\n[2/6] Fetching Top 3 Champions Podium..."
+curl -s -X GET "$API_BASE/leaderboards/$LB_CODE/top?limit=3" \\
+  -H "Authorization: Bearer $TOKEN" | jq '{ leaderboard: .data.leaderboard, champions: [.data.top[] | { rank: .rank, name: .user.displayName, points: .points }] }'
+
+# 3. Fetch Paginated Entries
+echo -e "\n[3/6] Fetching Standings (Page 1)..."
+curl -s -X GET "$API_BASE/leaderboards/$LB_CODE/entries?page=1&limit=5" \\
+  -H "Authorization: Bearer $TOKEN" | jq '{ total: .pagination.total, page: .pagination.page, entries: [.data.entries[] | { rank: .rank, name: .user.displayName, points: .points }] }'
+
+# 4. Fetch Current User Rank
+echo -e "\n[4/6] Fetching Specific User Rank (ID: $TEST_USER_ID)..."
+curl -s -X GET "$API_BASE/leaderboards/$LB_CODE/me" \\
+  -H "Authorization: Bearer $TOKEN" \\
+  -H "X-User-Id: $TEST_USER_ID" | jq '{ rank: .data.rank, points: .data.points, name: .data.user.displayName }'
+
+# 5. Update Leaderboard Configuration
+echo -e "\n[5/6] Updating Leaderboard Configuration..."
+curl -s -X PATCH "$API_BASE/leaderboards/$LB_CODE" \\
+  -H "Authorization: Bearer $TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{"name": "${currentLeaderboard?.name || "Champions"}", "status": "ACTIVE", "badgeVisibility": true}' | jq '{ message: .message, code: .data.code, name: .data.name, status: .data.status }'
+
+# 6. Update Allowed Domains & Rate Limit Settings
+echo -e "\n[6/6] Updating Allowed Domains Whitelist & Rate Limits..."
+curl -s -X PATCH "$API_BASE/settings" \\
+  -H "Authorization: Bearer $TOKEN" \\
+  -H "Content-Type: application/json" \\
+  -d '{"allowedDomains": ["http://localhost:3000", "http://localhost:5173", "https://yourdomain.com"], "rateLimitPerMinute": 3000}' | jq '{ message: .message, allowed_domains: .data.allowedDomains, rate_limit: .data.rateLimitPerMinute }'
+
+echo -e "\n=================================================="
+echo "✓ All 6 API operations completed successfully!"
+echo "=================================================="`;
+
+  const handleDownloadScript = () => {
+    const blob = new Blob([shSnippet], { type: "text/x-sh" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `test-leaderboard-${lbCode}.sh`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`Downloaded test-leaderboard-${lbCode}.sh`);
+  };
+
   // 3. Raw REST Endpoints
   const restSnippet = `# 1. Request Short-Lived JWT Token (Bearer)
 curl -X POST "https://thrico-tracking.thrico.app/v1/sdk/auth/token" \\
@@ -485,6 +567,10 @@ curl -X PATCH "https://thrico-tracking.thrico.app/v1/sdk/settings" \\
                 <Terminal className="h-3.5 w-3.5" />
                 REST API (Curl)
               </TabsTrigger>
+              <TabsTrigger value="sh" className="text-xs h-7 px-3 gap-1.5 font-medium">
+                <FileCode2 className="h-3.5 w-3.5 text-emerald-500" />
+                Automated Test Script (.sh)
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-2">
@@ -576,6 +662,48 @@ curl -X PATCH "https://thrico-tracking.thrico.app/v1/sdk/settings" \\
                   </>
                 )}
               </Button>
+            </div>
+          </TabsContent>
+
+          {/* Automated Bash Script Tab Content */}
+          <TabsContent value="sh" className="p-0 m-0">
+            <div className="relative group">
+              <div className="p-2.5 bg-muted/50 border-b border-border text-[11px] text-muted-foreground flex items-center justify-between">
+                <span>Run this complete script in your terminal to test token issuance, queries, and configuration updates against the live API.</span>
+                <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Ready to run (bash)</span>
+              </div>
+              <pre className="p-4 overflow-x-auto text-xs font-mono bg-zinc-950 text-zinc-100 leading-relaxed max-h-[420px]">
+                <code>{shSnippet}</code>
+              </pre>
+              <div className="absolute top-12 right-3 flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={handleDownloadScript}
+                  className="h-8 gap-1.5 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 shadow-md"
+                >
+                  <Download className="h-3.5 w-3.5 text-primary" />
+                  Download .sh
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => handleCopy(shSnippet, "sh")}
+                  className="h-8 gap-1.5 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 shadow-md"
+                >
+                  {copiedTab === "sh" ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3.5 w-3.5" />
+                      Copy Script
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
