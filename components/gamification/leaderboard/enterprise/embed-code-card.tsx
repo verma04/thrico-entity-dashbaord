@@ -371,40 +371,110 @@ export function EmbedCodeCard({
     var pageSize = 20;
     var totalPages = 1;
 
-    function renderPaginationUI(pagination) {
-      var total = pagination.total || 0;
-      totalPages = Math.max(1, Math.ceil(total / pageSize));
-      var start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-      var end = Math.min(currentPage * pageSize, total);
+    function renderPaginationUI(pagination, currentCount) {
+      pagination = pagination || {};
+      
+      var total = null;
+      if (typeof pagination.total === 'number') total = pagination.total;
+      else if (typeof pagination.totalEntries === 'number') total = pagination.totalEntries;
+      else if (typeof pagination.count === 'number') total = pagination.count;
+
+      if (typeof pagination.totalPages === 'number' && pagination.totalPages > 0) {
+        totalPages = pagination.totalPages;
+      } else if (total !== null) {
+        totalPages = Math.max(1, Math.ceil(total / pageSize));
+      } else {
+        if (currentCount >= pageSize) {
+          totalPages = Math.max(totalPages, currentPage + 1);
+        } else {
+          totalPages = Math.max(1, currentPage);
+        }
+      }
+
+      var hasPrev = typeof pagination.hasPrev === 'boolean'
+        ? pagination.hasPrev
+        : typeof pagination.hasPreviousPage === 'boolean'
+          ? pagination.hasPreviousPage
+          : currentPage > 1;
+
+      var hasNext = typeof pagination.hasNext === 'boolean'
+        ? pagination.hasNext
+        : typeof pagination.hasNextPage === 'boolean'
+          ? pagination.hasNextPage
+          : (total !== null ? currentPage < totalPages : currentCount >= pageSize);
+
+      var start = (currentCount === 0) ? 0 : (currentPage - 1) * pageSize + 1;
+      var end = (total !== null)
+        ? Math.min(currentPage * pageSize, total)
+        : (currentCount === 0 ? 0 : (currentPage - 1) * pageSize + currentCount);
 
       var countEl = document.getElementById("t-lb-entries-count");
-      if (countEl) countEl.innerText = 'Showing ' + start + '–' + end + ' of ' + total.toLocaleString();
+      if (countEl) {
+        if (total !== null) {
+          countEl.innerText = 'Showing ' + start + '–' + end + ' of ' + total.toLocaleString();
+        } else {
+          countEl.innerText = 'Showing ' + start + '–' + end + (hasNext ? '+' : '');
+        }
+      }
 
       var pageInfo = document.getElementById("t-lb-page-info");
-      if (pageInfo) pageInfo.innerText = 'Page ' + currentPage + ' of ' + totalPages;
+      if (pageInfo) pageInfo.innerText = 'Page ' + currentPage + (totalPages > 1 ? (' of ' + totalPages) : '');
 
       var firstBtn = document.getElementById("t-lb-first");
       var prevBtn = document.getElementById("t-lb-prev");
       var nextBtn = document.getElementById("t-lb-next");
       var lastBtn = document.getElementById("t-lb-last");
 
-      if (firstBtn) firstBtn.disabled = currentPage <= 1;
-      if (prevBtn) prevBtn.disabled = !pagination.hasPrev && currentPage <= 1;
-      if (nextBtn) nextBtn.disabled = !pagination.hasNext && currentPage >= totalPages;
-      if (lastBtn) lastBtn.disabled = currentPage >= totalPages;
+      if (firstBtn) firstBtn.disabled = !hasPrev || currentPage <= 1;
+      if (prevBtn) prevBtn.disabled = !hasPrev || currentPage <= 1;
+      if (nextBtn) nextBtn.disabled = !hasNext || (total !== null && currentPage >= totalPages);
+      if (lastBtn) lastBtn.disabled = !hasNext || currentPage >= totalPages || total === null;
+    }
+
+    // Helper to query entries with full root pagination metadata preservation
+    async function fetchEntriesWithPagination(page, limit) {
+      try {
+        if (leaderboard && leaderboard.tokenManager && typeof leaderboard.tokenManager.getValidToken === 'function') {
+          var token = await leaderboard.tokenManager.getValidToken();
+          var baseUrl = leaderboard.endpoint || 'https://thrico-tracking.thrico.app';
+          var apiUrl = baseUrl + '/v1/sdk/leaderboards/' + encodeURIComponent(CODE) + '/entries?page=' + page + '&limit=' + limit;
+          var resp = await fetch(apiUrl, {
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token,
+              'X-Thrico-Client-Id': leaderboard.clientId
+            }
+          });
+          if (resp.ok) {
+            var json = await resp.json();
+            return {
+              entries: json.data?.entries || [],
+              pagination: json.pagination || json.data?.pagination || null
+            };
+          }
+        }
+      } catch (e) {
+        console.warn('Direct pagination fetch fallback:', e);
+      }
+
+      var sdkRes = await leaderboard.getEntries(CODE, { page: page, limit: limit });
+      return {
+        entries: sdkRes.entries || [],
+        pagination: sdkRes.pagination || null
+      };
     }
 
     function loadEntries(page, limit) {
-      currentPage = page;
+      currentPage = Math.max(1, page);
       pageSize = limit;
       var tbody = document.getElementById("t-lb-entries");
       if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">Loading standings...</td></tr>';
 
-      leaderboard.getEntries(CODE, { page: currentPage, limit: pageSize }).then(function(res) {
+      fetchEntriesWithPagination(currentPage, pageSize).then(function(res) {
         var entries = res.entries || [];
         if (!entries.length) {
           tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">No entries found</td></tr>';
-          renderPaginationUI({ total: 0, hasPrev: false, hasNext: false });
+          renderPaginationUI({ total: 0, hasPrev: false, hasNext: false }, 0);
           return;
         }
 
@@ -430,7 +500,7 @@ export function EmbedCodeCard({
                  '</tr>';
         }).join('');
 
-        renderPaginationUI(res.pagination || { total: entries.length, hasPrev: currentPage > 1, hasNext: false });
+        renderPaginationUI(res.pagination, entries.length);
       }).catch(function(err) {
         console.error("Entries load error:", err);
         if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="t-lb-loading">Failed to load standings</td></tr>';
@@ -444,11 +514,23 @@ export function EmbedCodeCard({
     var lastBtn = document.getElementById("t-lb-last");
     var pageSizeSelect = document.getElementById("t-lb-page-size");
 
-    if (firstBtn) firstBtn.addEventListener("click", function() { if (currentPage > 1) loadEntries(1, pageSize); });
-    if (prevBtn) prevBtn.addEventListener("click", function() { if (currentPage > 1) loadEntries(currentPage - 1, pageSize); });
-    if (nextBtn) nextBtn.addEventListener("click", function() { if (currentPage < totalPages) loadEntries(currentPage + 1, pageSize); });
-    if (lastBtn) lastBtn.addEventListener("click", function() { if (currentPage < totalPages) loadEntries(totalPages, pageSize); });
-    if (pageSizeSelect) pageSizeSelect.addEventListener("change", function(e) { loadEntries(1, parseInt(e.target.value, 10) || 20); });
+    if (firstBtn) firstBtn.addEventListener("click", function() {
+      if (currentPage > 1) loadEntries(1, pageSize);
+    });
+    if (prevBtn) prevBtn.addEventListener("click", function() {
+      if (currentPage > 1) loadEntries(currentPage - 1, pageSize);
+    });
+    if (nextBtn) nextBtn.addEventListener("click", function() {
+      loadEntries(currentPage + 1, pageSize);
+    });
+    if (lastBtn) lastBtn.addEventListener("click", function() {
+      if (totalPages > 1 && currentPage < totalPages) {
+        loadEntries(totalPages, pageSize);
+      }
+    });
+    if (pageSizeSelect) pageSizeSelect.addEventListener("change", function(e) {
+      loadEntries(1, parseInt(e.target.value, 10) || 20);
+    });
 
     // Initial load
     loadEntries(1, pageSize);
