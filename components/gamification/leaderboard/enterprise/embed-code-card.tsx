@@ -344,13 +344,13 @@ export function EmbedCodeCard({
       const renderPodiumCol = (p, rankClass, medalLabel) => {
         if (!p) return '';
         const name = p.user?.displayName || 'Member';
-        const avatar = p.user?.avatarUrl || 'https://assets.thrico.network/avatar-placeholder.png';
+        const avatar = p.user?.avatarUrl || 'https://cdn.thrico.network/avatar-placeholder.png';
         const badgeHtml = p.user?.badges?.[0]?.name
           ? '<div class="t-lb-badge">🎖️ ' + p.user.badges[0].name + '</div>'
           : '';
         return '<div class="t-lb-podium-col ' + rankClass + '">' +
                  '<span class="t-lb-medal ' + rankClass + '">' + medalLabel + '</span>' +
-                 '<img class="t-lb-avatar" src="' + avatar + '" alt="' + name + '" onerror="this.src=\\'https://assets.thrico.network/avatar-placeholder.png\\'" />' +
+                 '<img class="t-lb-avatar" src="' + avatar + '" alt="' + name + '" onerror="this.src=\\'https://cdn.thrico.network/avatar-placeholder.png\\'" />' +
                  '<div class="t-lb-name">' + name + '</div>' +
                  badgeHtml +
                  '<div class="t-lb-points">' + Number(p.points).toLocaleString() + ' pts</div>' +
@@ -480,7 +480,7 @@ export function EmbedCodeCard({
 
         tbody.innerHTML = entries.map(function(entry) {
           var name = entry.user?.displayName || 'Member';
-          var avatar = entry.user?.avatarUrl || 'https://assets.thrico.network/avatar-placeholder.png';
+          var avatar = entry.user?.avatarUrl || 'https://cdn.thrico.network/avatar-placeholder.png';
           var badgeHtml = entry.user?.badges && entry.user.badges.length > 0
             ? '<span style="color:#64748b; font-size:11px; margin-left:6px;">• ' + entry.user.badges[0].name + '</span>'
             : '';
@@ -492,7 +492,7 @@ export function EmbedCodeCard({
           return '<tr>' +
                    '<td class="t-lb-rank">#' + entry.rank + '</td>' +
                    '<td><div class="t-lb-user-cell">' +
-                     '<img class="t-lb-table-avatar" src="' + avatar + '" alt="' + name + '" onerror="this.src=\\'https://assets.thrico.network/avatar-placeholder.png\\'" />' +
+                     '<img class="t-lb-table-avatar" src="' + avatar + '" alt="' + name + '" onerror="this.src=\\'https://cdn.thrico.network/avatar-placeholder.png\\'" />' +
                      '<div><span style="font-weight:600;">' + name + '</span>' + badgeHtml + '</div>' +
                    '</div></td>' +
                    '<td>' + deltaHtml + '</td>' +

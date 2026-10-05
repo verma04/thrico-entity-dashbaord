@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -95,8 +98,8 @@ interface BlueprintPreset {
   showRankMovement: boolean;
   maskUserName: boolean;
   badgeVisibility: boolean;
-  defaultPageSize: string;
-  maxPageSize: string;
+  defaultPageSize: number;
+  maxPageSize: number;
   tagline: string;
 }
 
@@ -117,8 +120,8 @@ const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     showRankMovement: true,
     maskUserName: false,
     badgeVisibility: true,
-    defaultPageSize: "10",
-    maxPageSize: "50",
+    defaultPageSize: 10,
+    maxPageSize: 50,
     tagline: "Resets Mondays • Fast paced • Top 10 focus",
   },
   {
@@ -137,8 +140,8 @@ const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     showRankMovement: true,
     maskUserName: false,
     badgeVisibility: true,
-    defaultPageSize: "20",
-    maxPageSize: "100",
+    defaultPageSize: 20,
+    maxPageSize: 100,
     tagline: "Resets 1st of month • Activity weighted • Quota friendly",
   },
   {
@@ -157,8 +160,8 @@ const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     showRankMovement: true,
     maskUserName: false,
     badgeVisibility: true,
-    defaultPageSize: "10",
-    maxPageSize: "25",
+    defaultPageSize: 10,
+    maxPageSize: 25,
     tagline: "24-hour cycle • Speed tie-breaker • Daily active streaks",
   },
   {
@@ -177,8 +180,8 @@ const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     showRankMovement: true,
     maskUserName: false,
     badgeVisibility: true,
-    defaultPageSize: "25",
-    maxPageSize: "100",
+    defaultPageSize: 25,
+    maxPageSize: 100,
     tagline: "Cumulative lifetime • Permanent rank • VIP status",
   },
   {
@@ -197,8 +200,8 @@ const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     showRankMovement: true,
     maskUserName: true,
     badgeVisibility: true,
-    defaultPageSize: "10",
-    maxPageSize: "50",
+    defaultPageSize: 10,
+    maxPageSize: 50,
     tagline: "Masked names • Safe for public iframe / web embeds",
   },
   {
@@ -217,8 +220,8 @@ const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     showRankMovement: true,
     maskUserName: false,
     badgeVisibility: true,
-    defaultPageSize: "20",
-    maxPageSize: "100",
+    defaultPageSize: 20,
+    maxPageSize: 100,
     tagline: "90-day cycle • Target focused • Corporate quarterly",
   },
 ];
@@ -238,25 +241,25 @@ const NAME_SUGGESTIONS_BY_CATEGORY: Record<NameCategory, { label: string; desc: 
     { label: "Bug Squashers & Builders", desc: "Engineering velocity and code quality leaderboard" },
   ],
   Sales: [
-    { label: "Revenue Titans Club", desc: "Top sales closers and revenue generators" },
-    { label: "President's Circle", desc: "Annualized elite club for the top 5% performers" },
-    { label: "Deal Velocity Champions", desc: "Fastest pipeline conversion and closed deals" },
-    { label: "Pipeline Pioneers", desc: "New business development and outreach leaders" },
-    { label: "Golden Quota Achievers", desc: "Monthly quota over-attainment scoreboard" },
+    { label: "Revenue Titans Club", desc: "Top monthly revenue drivers and sales quota achievers" },
+    { label: "Deal Closers Board", desc: "Fastest closed-won deal turnaround scoreboard" },
+    { label: "Pipeline Masters League", desc: "Qualified inbound and outbound opportunities generated" },
+    { label: "Presidents Club Race", desc: "Annual high-tier benchmark for elite revenue milestones" },
+    { label: "Outbound Velocity Stars", desc: "High-volume prospect outreach and engagement points" },
   ],
   Engineering: [
-    { label: "Code Maestros", desc: "Top engineering velocity and pull request contributions" },
-    { label: "Bug Squashers & Builders", desc: "Most QA resolutions and verified defect fixes" },
-    { label: "Ship-It Velocity Sprint", desc: "Fastest feature delivery and sprint completion" },
-    { label: "Architecture All-Stars", desc: "Core system resilience and architectural upgrades" },
-    { label: "Hackathon Innovators", desc: "Innovation sprint and prototype competition" },
+    { label: "Bug Squashers & Builders", desc: "Highest resolution of quality issues and fixes" },
+    { label: "Code Review Champions", desc: "Most thorough peer code reviews and velocity feedback" },
+    { label: "Sprint Velocity Heroes", desc: "Story points completed and continuous integration velocity" },
+    { label: "Refactor Maestros", desc: "Technical debt reduction and codebase health contributors" },
+    { label: "Architecture Innovators", desc: "RFC submissions and cross-platform infrastructure improvements" },
   ],
   Community: [
-    { label: "Community Advocates", desc: "Top community forum contributors and discussion leaders" },
-    { label: "Superfans & Champions", desc: "Most enthusiastic brand and community ambassadors" },
-    { label: "Impact Trailblazers", desc: "Highest peer appreciation and helpful responses" },
-    { label: "Hall of Fame VIPs", desc: "Long-standing veteran members and mentors" },
-    { label: "Rising Voices Guild", desc: "Breakout active newcomers in community channels" },
+    { label: "Top Solution Guides", desc: "Most helpful answers accepted by community members" },
+    { label: "Discussion Sparkers", desc: "Leading discussions with high peer participation" },
+    { label: "Rising Star Contributors", desc: "Breakthrough newcomers with rapid week-1 engagement" },
+    { label: "Community Beacon Award", desc: "Consistent top-voted comments and mentorship activities" },
+    { label: "VIP Advocates Guild", desc: "Active community leaders driving peer refer-a-friend loops" },
   ],
   Retention: [
     { label: "7-Day Streak Masters", desc: "Unbroken consecutive daily activity champions" },
@@ -267,35 +270,105 @@ const NAME_SUGGESTIONS_BY_CATEGORY: Record<NameCategory, { label: string; desc: 
   ],
 };
 
+interface LeaderboardFormValues {
+  name: string;
+  code: string;
+  autoCode: boolean;
+  description: string;
+  periodType: EnterprisePeriodType;
+  startDate: string;
+  endDate: string;
+  tieBreaker: string;
+  showName: boolean;
+  showAvatar: boolean;
+  showBadges: boolean;
+  showRankMovement: boolean;
+  maskUserName: boolean;
+  badgeVisibility: boolean;
+  defaultPageSize: number;
+  maxPageSize: number;
+}
+
+const validationSchema = Yup.object().shape({
+  name: Yup.string()
+    .trim()
+    .required("Please enter a leaderboard name")
+    .max(100, "Leaderboard name cannot exceed 100 characters"),
+  code: Yup.string()
+    .trim()
+    .required("Please enter a unique leaderboard code slug")
+    .matches(
+      /^[a-z0-9_-]+$/,
+      "Code can only contain lowercase letters, numbers, hyphens, and underscores"
+    )
+    .max(64, "Code slug cannot exceed 64 characters"),
+  description: Yup.string().max(500, "Description cannot exceed 500 characters"),
+  periodType: Yup.string()
+    .oneOf([
+      "DAILY",
+      "WEEKLY",
+      "MONTHLY",
+      "QUARTERLY",
+      "YEARLY",
+      "ALL_TIME",
+      "CUSTOM",
+    ])
+    .required("Calculation period is required"),
+  startDate: Yup.string().when("periodType", {
+    is: "CUSTOM",
+    then: (schema) => schema.required("Start date is required for custom period"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  endDate: Yup.string().when("periodType", {
+    is: "CUSTOM",
+    then: (schema) =>
+      schema
+        .required("End date is required for custom period")
+        .test(
+          "is-after-start",
+          "End date must be after start date",
+          function (value) {
+            const { startDate } = this.parent;
+            if (!startDate || !value) return true;
+            return new Date(value) > new Date(startDate);
+          }
+        ),
+    otherwise: (schema) => schema.optional(),
+  }),
+  tieBreaker: Yup.string().required("Tie-breaker rule is required"),
+  showName: Yup.boolean(),
+  showAvatar: Yup.boolean(),
+  showBadges: Yup.boolean(),
+  showRankMovement: Yup.boolean(),
+  maskUserName: Yup.boolean(),
+  badgeVisibility: Yup.boolean(),
+  defaultPageSize: Yup.number()
+    .typeError("Default page size must be a number")
+    .min(5, "Minimum default page size is 5")
+    .max(50, "Maximum default page size is 50")
+    .required("Default page size is required"),
+  maxPageSize: Yup.number()
+    .typeError("Max page size must be a number")
+    .min(10, "Minimum max page size is 10")
+    .max(100, "Maximum max page size is 100")
+    .test(
+      "gte-default",
+      "Max page size must be greater than or equal to default page size",
+      function (value) {
+        const { defaultPageSize } = this.parent;
+        if (typeof value !== "number" || typeof defaultPageSize !== "number")
+          return true;
+        return value >= defaultPageSize;
+      }
+    )
+    .required("Max page size is required"),
+});
+
 export function CreateLeaderboardDialog({
   open,
   onOpenChange,
   onSuccess,
 }: CreateLeaderboardDialogProps) {
-  // Form State
-  const [code, setCode] = useState("");
-  const [autoCode, setAutoCode] = useState(true);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [periodType, setPeriodType] = useState<EnterprisePeriodType>("MONTHLY");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-
-  // Ranking Rules
-  const [tieBreaker, setTieBreaker] = useState("EARLIEST_ACHIEVED");
-
-  // Visibility Settings
-  const [showName, setShowName] = useState(true);
-  const [showAvatar, setShowAvatar] = useState(true);
-  const [showBadges, setShowBadges] = useState(true);
-  const [showRankMovement, setShowRankMovement] = useState(true);
-  const [maskUserName, setMaskUserName] = useState(false);
-  const [badgeVisibility, setBadgeVisibility] = useState(true);
-
-  // Pagination
-  const [defaultPageSize, setDefaultPageSize] = useState("20");
-  const [maxPageSize, setMaxPageSize] = useState("100");
-
   // Suggestions & Blueprint States
   const [activeBlueprintId, setActiveBlueprintId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<NameCategory>("All");
@@ -322,42 +395,109 @@ export function CreateLeaderboardDialog({
       .replace(/^_|_$/g, "");
   };
 
+  const formik = useFormik<LeaderboardFormValues>({
+    initialValues: {
+      name: "",
+      code: "",
+      autoCode: true,
+      description: "",
+      periodType: "MONTHLY",
+      startDate: "",
+      endDate: "",
+      tieBreaker: "EARLIEST_ACHIEVED",
+      showName: true,
+      showAvatar: true,
+      showBadges: true,
+      showRankMovement: true,
+      maskUserName: false,
+      badgeVisibility: true,
+      defaultPageSize: 20,
+      maxPageSize: 100,
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      const cleanCode = values.code.trim().toLowerCase();
+      const cleanName = values.name.trim();
+
+      createLeaderboard({
+        variables: {
+          input: {
+            code: cleanCode,
+            name: cleanName,
+            description: values.description.trim() || undefined,
+            periodType: values.periodType,
+            startDate: values.periodType === "CUSTOM" ? values.startDate : undefined,
+            endDate: values.periodType === "CUSTOM" ? values.endDate : undefined,
+            rankingRules: {
+              tieBreaker: values.tieBreaker,
+              excludedUserIds: [],
+            },
+            visibleFields: {
+              showName: values.showName,
+              showAvatar: values.showAvatar,
+              showBadges: values.showBadges,
+              showRankMovement: values.showRankMovement,
+              maskUserName: values.maskUserName,
+            },
+            badgeVisibility: values.badgeVisibility,
+            defaultPageSize: Number(values.defaultPageSize) || 20,
+            maxPageSize: Number(values.maxPageSize) || 100,
+          },
+        },
+      });
+    },
+  });
+
   const handleNameChange = (val: string) => {
-    setName(val);
     setActiveBlueprintId(null);
-    if (autoCode) {
-      setCode(slugify(val));
+    formik.setFieldValue("name", val);
+    if (formik.values.autoCode) {
+      formik.setFieldValue("code", slugify(val));
     }
   };
 
   const applyBlueprint = (preset: BlueprintPreset) => {
     setActiveBlueprintId(preset.id);
-    setName(preset.defaultName);
-    setCode(preset.codeSlug);
-    setAutoCode(false);
-    setDescription(preset.description);
-    setPeriodType(preset.periodType);
-    setTieBreaker(preset.tieBreaker);
-    setShowName(preset.showName);
-    setShowAvatar(preset.showAvatar);
-    setShowBadges(preset.showBadges);
-    setShowRankMovement(preset.showRankMovement);
-    setMaskUserName(preset.maskUserName);
-    setBadgeVisibility(preset.badgeVisibility);
-    setDefaultPageSize(preset.defaultPageSize);
-    setMaxPageSize(preset.maxPageSize);
+    formik.setValues({
+      ...formik.values,
+      name: preset.defaultName,
+      code: preset.codeSlug,
+      autoCode: false,
+      description: preset.description,
+      periodType: preset.periodType,
+      tieBreaker: preset.tieBreaker,
+      showName: preset.showName,
+      showAvatar: preset.showAvatar,
+      showBadges: preset.showBadges,
+      showRankMovement: preset.showRankMovement,
+      maskUserName: preset.maskUserName,
+      badgeVisibility: preset.badgeVisibility,
+      defaultPageSize: preset.defaultPageSize,
+      maxPageSize: preset.maxPageSize,
+    });
 
     toast.info(`Applied "${preset.name}" blueprint`);
   };
 
   const applyNameSuggestion = (suggestion: { label: string; desc: string }) => {
-    setName(suggestion.label);
-    if (autoCode) {
-      setCode(slugify(suggestion.label));
-    }
-    if (!description.trim() || description.startsWith("Dynamic") || description.startsWith("Core") || description.startsWith("Flagship")) {
-      setDescription(suggestion.desc);
-    }
+    const newName = suggestion.label;
+    const curDesc = formik.values.description;
+    const shouldUpdateDesc =
+      !curDesc.trim() ||
+      curDesc.startsWith("Dynamic") ||
+      curDesc.startsWith("Core") ||
+      curDesc.startsWith("Flagship") ||
+      curDesc.startsWith("24-hour") ||
+      curDesc.startsWith("Cumulative") ||
+      curDesc.startsWith("Privacy-first") ||
+      curDesc.startsWith("Strategic");
+
+    formik.setValues({
+      ...formik.values,
+      name: newName,
+      code: formik.values.autoCode ? slugify(newName) : formik.values.code,
+      description: shouldUpdateDesc ? suggestion.desc : curDesc,
+    });
     toast.info(`Applied suggestion: "${suggestion.label}"`);
   };
 
@@ -366,7 +506,7 @@ export function CreateLeaderboardDialog({
   };
 
   const handleCopySdk = () => {
-    const slug = code.trim().toLowerCase() || "leaderboard_code";
+    const slug = formik.values.code.trim().toLowerCase() || "leaderboard_code";
     navigator.clipboard.writeText(`thrico.leaderboard.getEntries("${slug}")`);
     setCopiedSdk(true);
     toast.success("SDK query snippet copied!");
@@ -374,83 +514,8 @@ export function CreateLeaderboardDialog({
   };
 
   const resetForm = () => {
-    setCode("");
-    setAutoCode(true);
-    setName("");
-    setDescription("");
-    setPeriodType("MONTHLY");
-    setStartDate("");
-    setEndDate("");
-    setTieBreaker("EARLIEST_ACHIEVED");
-    setShowName(true);
-    setShowAvatar(true);
-    setShowBadges(true);
-    setShowRankMovement(true);
-    setMaskUserName(false);
-    setBadgeVisibility(true);
-    setDefaultPageSize("20");
-    setMaxPageSize("100");
+    formik.resetForm();
     setActiveBlueprintId(null);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const cleanCode = code.trim().toLowerCase();
-    const cleanName = name.trim();
-
-    if (!cleanName) {
-      toast.error("Please enter a leaderboard name");
-      return;
-    }
-
-    if (!cleanCode) {
-      toast.error("Please enter a unique leaderboard code slug");
-      return;
-    }
-
-    if (!/^[a-z0-9_-]+$/.test(cleanCode)) {
-      toast.error("Code can only contain lowercase letters, numbers, hyphens, and underscores");
-      return;
-    }
-
-    if (periodType === "CUSTOM") {
-      if (!startDate || !endDate) {
-        toast.error("Custom period requires both Start Date and End Date");
-        return;
-      }
-      if (new Date(startDate) >= new Date(endDate)) {
-        toast.error("End Date must be after Start Date");
-        return;
-      }
-    }
-
-    createLeaderboard({
-      variables: {
-        input: {
-          code: cleanCode,
-          name: cleanName,
-          description: description.trim() || undefined,
-          periodType,
-          startDate: periodType === "CUSTOM" ? startDate : undefined,
-          endDate: periodType === "CUSTOM" ? endDate : undefined,
-          rankingRules: {
-            tieBreaker,
-            excludedUserIds: [],
-          },
-          visibleFields: {
-            showName,
-            showAvatar,
-            showBadges,
-            showRankMovement,
-            maskUserName,
-          },
-          badgeVisibility,
-          defaultPageSize: parseInt(defaultPageSize, 10) || 20,
-          maxPageSize: parseInt(maxPageSize, 10) || 100,
-        },
-      },
-    });
   };
 
   // Visible suggestions computed with shuffle offset
@@ -462,7 +527,15 @@ export function CreateLeaderboardDialog({
   ].slice(0, 5);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          resetForm();
+        }
+        onOpenChange(nextOpen);
+      }}
+    >
       <SheetContent
         side="right"
         className="sm:max-w-[620px] w-full p-0 flex flex-col gap-0 border-l border-border bg-card overflow-hidden"
@@ -499,7 +572,7 @@ export function CreateLeaderboardDialog({
           </div>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+        <form onSubmit={formik.handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
             {/* ── Suggested Starter Blueprints ─────────────────────────────────── */}
@@ -609,7 +682,7 @@ export function CreateLeaderboardDialog({
                     type="button"
                     onClick={() => applyNameSuggestion(item)}
                     className={`text-[11px] px-2 py-1 rounded-md border text-left transition-all cursor-pointer ${
-                      name === item.label
+                      formik.values.name === item.label
                         ? "border-primary bg-primary/10 text-primary font-medium shadow-2xs"
                         : "border-border/70 bg-muted/20 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-muted/40"
                     }`}
@@ -627,12 +700,19 @@ export function CreateLeaderboardDialog({
                     Leaderboard Name <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    value={name}
+                    name="name"
+                    value={formik.values.name}
                     onChange={(e) => handleNameChange(e.target.value)}
+                    onBlur={formik.handleBlur}
                     placeholder="e.g. SmartEarn Champions"
-                    className="h-8 text-xs bg-background"
-                    required
+                    className={cn(
+                      "h-8 text-xs bg-background",
+                      formik.touched.name && formik.errors.name && "border-destructive focus-visible:ring-destructive"
+                    )}
                   />
+                  {formik.touched.name && formik.errors.name && (
+                    <p className="text-[10px] text-destructive font-medium">{formik.errors.name}</p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -642,25 +722,33 @@ export function CreateLeaderboardDialog({
                     </Label>
                     <button
                       type="button"
-                      onClick={() => setAutoCode(!autoCode)}
+                      onClick={() => formik.setFieldValue("autoCode", !formik.values.autoCode)}
                       className="text-[10px] text-muted-foreground hover:text-primary transition-colors cursor-pointer"
                     >
-                      {autoCode ? "Manual Slug" : "Auto Slug"}
+                      {formik.values.autoCode ? "Manual Slug" : "Auto Slug"}
                     </button>
                   </div>
                   <Input
-                    value={code}
+                    name="code"
+                    value={formik.values.code}
                     onChange={(e) => {
-                      setAutoCode(false);
-                      setCode(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "_"));
+                      formik.setFieldValue("autoCode", false);
+                      formik.setFieldValue("code", e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "_"));
                     }}
+                    onBlur={formik.handleBlur}
                     placeholder="e.g. smartearn_champions"
-                    className="h-8 text-xs font-mono bg-background"
-                    required
+                    className={cn(
+                      "h-8 text-xs font-mono bg-background",
+                      formik.touched.code && formik.errors.code && "border-destructive focus-visible:ring-destructive"
+                    )}
                   />
-                  <p className="text-[10px] text-muted-foreground">
-                    Used in SDK: <code className="font-mono text-primary font-semibold">getEntries("{code || "slug"}")</code>
-                  </p>
+                  {formik.touched.code && formik.errors.code ? (
+                    <p className="text-[10px] text-destructive font-medium">{formik.errors.code}</p>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground">
+                      Used in SDK: <code className="font-mono text-primary font-semibold">getEntries("{formik.values.code || "slug"}")</code>
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -669,12 +757,20 @@ export function CreateLeaderboardDialog({
                   Description (Optional)
                 </Label>
                 <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  name="description"
+                  value={formik.values.description}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   placeholder="Brief description for public leaderboard header or internal tracking"
-                  className="text-xs bg-background min-h-[58px]"
+                  className={cn(
+                    "text-xs bg-background min-h-[58px]",
+                    formik.touched.description && formik.errors.description && "border-destructive"
+                  )}
                   rows={2}
                 />
+                {formik.touched.description && formik.errors.description && (
+                  <p className="text-[10px] text-destructive font-medium">{formik.errors.description}</p>
+                )}
               </div>
             </div>
 
@@ -695,9 +791,9 @@ export function CreateLeaderboardDialog({
                   Calculation Period
                 </Label>
                 <Select
-                  value={periodType}
+                  value={formik.values.periodType}
                   onValueChange={(v) => {
-                    setPeriodType(v as EnterprisePeriodType);
+                    formik.setFieldValue("periodType", v as EnterprisePeriodType);
                     setActiveBlueprintId(null);
                   }}
                 >
@@ -717,7 +813,7 @@ export function CreateLeaderboardDialog({
                 </Select>
               </div>
 
-              {periodType === "CUSTOM" && (
+              {formik.values.periodType === "CUSTOM" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg border border-border/80 bg-muted/20">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-foreground">
@@ -725,11 +821,18 @@ export function CreateLeaderboardDialog({
                     </Label>
                     <Input
                       type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="h-8 text-xs bg-background"
-                      required
+                      name="startDate"
+                      value={formik.values.startDate}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "h-8 text-xs bg-background",
+                        formik.touched.startDate && formik.errors.startDate && "border-destructive"
+                      )}
                     />
+                    {formik.touched.startDate && formik.errors.startDate && (
+                      <p className="text-[10px] text-destructive font-medium">{formik.errors.startDate}</p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-foreground">
@@ -737,11 +840,18 @@ export function CreateLeaderboardDialog({
                     </Label>
                     <Input
                       type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="h-8 text-xs bg-background"
-                      required
+                      name="endDate"
+                      value={formik.values.endDate}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "h-8 text-xs bg-background",
+                        formik.touched.endDate && formik.errors.endDate && "border-destructive"
+                      )}
                     />
+                    {formik.touched.endDate && formik.errors.endDate && (
+                      <p className="text-[10px] text-destructive font-medium">{formik.errors.endDate}</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -759,9 +869,9 @@ export function CreateLeaderboardDialog({
                   Tie-Breaker Rule
                 </Label>
                 <Select
-                  value={tieBreaker}
+                  value={formik.values.tieBreaker}
                   onValueChange={(val) => {
-                    setTieBreaker(val);
+                    formik.setFieldValue("tieBreaker", val);
                     setActiveBlueprintId(null);
                   }}
                 >
@@ -789,7 +899,7 @@ export function CreateLeaderboardDialog({
                   <Eye className="h-3.5 w-3.5 text-primary" />
                   Public SDK Field Visibility & Privacy
                 </div>
-                {maskUserName && (
+                {formik.values.maskUserName && (
                   <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                     GDPR Privacy Mode
                   </Badge>
@@ -799,22 +909,34 @@ export function CreateLeaderboardDialog({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/70 bg-muted/20">
                   <span className="text-xs font-medium text-foreground">Show Member Name</span>
-                  <Switch checked={showName} onCheckedChange={setShowName} />
+                  <Switch
+                    checked={formik.values.showName}
+                    onCheckedChange={(val) => formik.setFieldValue("showName", val)}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/70 bg-muted/20">
                   <span className="text-xs font-medium text-foreground">Show Avatar Image</span>
-                  <Switch checked={showAvatar} onCheckedChange={setShowAvatar} />
+                  <Switch
+                    checked={formik.values.showAvatar}
+                    onCheckedChange={(val) => formik.setFieldValue("showAvatar", val)}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/70 bg-muted/20">
                   <span className="text-xs font-medium text-foreground">Show Badges</span>
-                  <Switch checked={showBadges} onCheckedChange={setShowBadges} />
+                  <Switch
+                    checked={formik.values.showBadges}
+                    onCheckedChange={(val) => formik.setFieldValue("showBadges", val)}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/70 bg-muted/20">
                   <span className="text-xs font-medium text-foreground">Rank Movement (+/-)</span>
-                  <Switch checked={showRankMovement} onCheckedChange={setShowRankMovement} />
+                  <Switch
+                    checked={formik.values.showRankMovement}
+                    onCheckedChange={(val) => formik.setFieldValue("showRankMovement", val)}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/70 bg-muted/20 sm:col-span-2">
@@ -824,7 +946,10 @@ export function CreateLeaderboardDialog({
                       Anonymize names for privacy (e.g. "R****l S.") for external web embeds
                     </p>
                   </div>
-                  <Switch checked={maskUserName} onCheckedChange={setMaskUserName} />
+                  <Switch
+                    checked={formik.values.maskUserName}
+                    onCheckedChange={(val) => formik.setFieldValue("maskUserName", val)}
+                  />
                 </div>
               </div>
             </div>
@@ -843,12 +968,20 @@ export function CreateLeaderboardDialog({
                   </Label>
                   <Input
                     type="number"
-                    value={defaultPageSize}
-                    onChange={(e) => setDefaultPageSize(e.target.value)}
+                    name="defaultPageSize"
+                    value={formik.values.defaultPageSize}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     min={5}
                     max={50}
-                    className="h-8 text-xs bg-background"
+                    className={cn(
+                      "h-8 text-xs bg-background",
+                      formik.touched.defaultPageSize && formik.errors.defaultPageSize && "border-destructive focus-visible:ring-destructive"
+                    )}
                   />
+                  {formik.touched.defaultPageSize && formik.errors.defaultPageSize && (
+                    <p className="text-[10px] text-destructive font-medium">{formik.errors.defaultPageSize}</p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -857,12 +990,20 @@ export function CreateLeaderboardDialog({
                   </Label>
                   <Input
                     type="number"
-                    value={maxPageSize}
-                    onChange={(e) => setMaxPageSize(e.target.value)}
+                    name="maxPageSize"
+                    value={formik.values.maxPageSize}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     min={10}
                     max={100}
-                    className="h-8 text-xs bg-background"
+                    className={cn(
+                      "h-8 text-xs bg-background",
+                      formik.touched.maxPageSize && formik.errors.maxPageSize && "border-destructive focus-visible:ring-destructive"
+                    )}
                   />
+                  {formik.touched.maxPageSize && formik.errors.maxPageSize && (
+                    <p className="text-[10px] text-destructive font-medium">{formik.errors.maxPageSize}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -894,37 +1035,37 @@ export function CreateLeaderboardDialog({
               </div>
 
               <div className="text-[11px] text-muted-foreground space-y-1 leading-relaxed">
-                {periodType === "DAILY" && (
+                {formik.values.periodType === "DAILY" && (
                   <p>
                     ⚡ <strong className="text-foreground">Daily Sprint:</strong> Best paired with 10–20 page size and "Earliest Timestamp" tie-breaker to incentivize rapid daily engagement.
                   </p>
                 )}
-                {periodType === "WEEKLY" && (
+                {formik.values.periodType === "WEEKLY" && (
                   <p>
                     📅 <strong className="text-foreground">Weekly Sprint:</strong> Resets every Monday at 00:00 UTC. Ideal for weekly team retrospectives, sales sprints, and active customer loops.
                   </p>
                 )}
-                {periodType === "MONTHLY" && (
+                {formik.values.periodType === "MONTHLY" && (
                   <p>
                     🏆 <strong className="text-foreground">Monthly League:</strong> Resets on the 1st of each month. Standard for sales quotas, active user programs, and monthly rewards.
                   </p>
                 )}
-                {periodType === "QUARTERLY" && (
+                {formik.values.periodType === "QUARTERLY" && (
                   <p>
                     🎯 <strong className="text-foreground">Quarterly OKRs:</strong> Resets every 3 calendar months. Ideal for corporate targets and sustained seasonal milestones.
                   </p>
                 )}
-                {periodType === "ALL_TIME" && (
+                {formik.values.periodType === "ALL_TIME" && (
                   <p>
                     👑 <strong className="text-foreground">Hall of Fame:</strong> Lifetime cumulative score. Avatar and Badge visibility recommended to showcase VIP status.
                   </p>
                 )}
-                {periodType === "CUSTOM" && (
+                {formik.values.periodType === "CUSTOM" && (
                   <p>
                     📆 <strong className="text-foreground">Custom Campaign:</strong> Perfect for time-boxed hackathons, product launch events, and seasonal holiday sprints.
                   </p>
                 )}
-                {maskUserName && (
+                {formik.values.maskUserName && (
                   <p className="text-amber-600 dark:text-amber-400">
                     🔒 <strong className="text-foreground">Privacy Protection:</strong> Names are anonymized (e.g. "J*** D.") for public website embeds to safeguard user PII.
                   </p>
@@ -935,7 +1076,7 @@ export function CreateLeaderboardDialog({
               <div className="flex items-center justify-between px-2.5 py-1.5 rounded-md bg-background/80 border border-border/60 text-[10px] font-mono text-muted-foreground">
                 <span className="truncate">
                   <span className="text-primary font-semibold">thrico</span>.leaderboard.getEntries("
-                  <span className="text-foreground font-semibold">{code.trim() || "slug"}</span>")
+                  <span className="text-foreground font-semibold">{formik.values.code.trim() || "slug"}</span>")
                 </span>
                 <Code2 className="h-3 w-3 shrink-0 text-muted-foreground ml-2" />
               </div>
