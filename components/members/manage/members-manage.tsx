@@ -52,6 +52,9 @@ import {
 } from "./members-manage-ui";
 import { ExportMembersModal } from "./export-members-modal";
 import { useMembersColumnsStore } from "@/store/members-columns-store";
+import { useEntitySettings, UserDetail } from "@/graphql/actions";
+import { AdminTableColumn, AdminTableTag } from "@/components/shared/admin-table/admin-table";
+import { CustomFieldItem } from "../customization/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main User component
@@ -159,6 +162,28 @@ const User = ({
   const setSelectedSkills = (v: string[]) =>
     updateParams({ skills: v.length ? v.join(",") : null, page: null });
 
+  // Custom fields filter (stored as JSON string in URL if filtered)
+  const selectedCustomFields = React.useMemo<Record<string, unknown> | null>(() => {
+    const raw = searchParams.get("customFields");
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      return typeof parsed === "object" && parsed !== null && Object.keys(parsed).length > 0
+        ? (parsed as Record<string, unknown>)
+        : null;
+    } catch {
+      return null;
+    }
+  }, [searchParams]);
+
+  const setSelectedCustomFields = (cf: Record<string, unknown> | null) => {
+    if (!cf || Object.keys(cf).length === 0) {
+      updateParams({ customFields: null, page: null });
+    } else {
+      updateParams({ customFields: JSON.stringify(cf), page: null });
+    }
+  };
+
   const { data: industryData } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
 
@@ -178,9 +203,106 @@ const User = ({
     functionTitle: selectedFunctions.length > 0 ? selectedFunctions : null,
     interestTitle: selectedInterests.length > 0 ? selectedInterests : null,
     skillName: selectedSkills.length > 0 ? selectedSkills : null,
+    customFields: selectedCustomFields,
   });
 
-  const rawUsersList = data?.getAllUser?.data || [];
+  const rawUsersList = React.useMemo(
+    () => data?.getAllUser?.data || [],
+    [data?.getAllUser?.data],
+  );
+
+  // Fetch configured custom fields from entity settings
+  const { data: entitySettingsData } = useEntitySettings();
+  const customFieldConfigs = React.useMemo<CustomFieldItem[]>(() => {
+    const raw = entitySettingsData?.getEntitySettings?.memberOnboardingConfig;
+    if (!raw) return [];
+    try {
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      return Array.isArray(parsed?.customFields) ? parsed.customFields : [];
+    } catch {
+      return [];
+    }
+  }, [entitySettingsData]);
+
+  // Discovered custom field keys present in members data
+  const discoveredCustomKeys = React.useMemo(() => {
+    const configuredKeys = new Set(customFieldConfigs.map((f) => f.key));
+    const extra = new Set<string>();
+    rawUsersList.forEach((u) => {
+      if (u.customFields && typeof u.customFields === "object") {
+        Object.keys(u.customFields).forEach((k) => {
+          if (!configuredKeys.has(k)) {
+            extra.add(k);
+          }
+        });
+      }
+    });
+    return Array.from(extra);
+  }, [customFieldConfigs, rawUsersList]);
+
+  // Dynamic columns for custom fields
+  const dynamicCustomColumns: AdminTableColumn<UserDetail>[] = React.useMemo(() => {
+    const cols: AdminTableColumn<UserDetail>[] = [];
+
+    customFieldConfigs.forEach((field) => {
+      cols.push({
+        key: `custom_${field.key}`,
+        header: field.label || field.key,
+        cell: (row) => {
+          const val = row.customFields?.[field.key];
+          if (val === undefined || val === null || val === "") {
+            return <span className="text-[10px] text-muted-foreground/50">—</span>;
+          }
+          if (typeof val === "boolean") {
+            return (
+              <AdminTableTag variant={val ? "emerald" : "zinc"}>
+                {val ? "Yes" : "No"}
+              </AdminTableTag>
+            );
+          }
+          if (Array.isArray(val)) {
+            return (
+              <span className="text-[11px] font-medium text-foreground">
+                {val.join(", ")}
+              </span>
+            );
+          }
+          return (
+            <span className="text-[11px] font-medium text-foreground truncate max-w-[150px] inline-block">
+              {String(val)}
+            </span>
+          );
+        },
+      });
+    });
+
+    discoveredCustomKeys.forEach((key) => {
+      cols.push({
+        key: `custom_${key}`,
+        header: key
+          .replace(/([A-Z])/g, " $1")
+          .replace(/_/g, " ")
+          .replace(/^./, (s) => s.toUpperCase()),
+        cell: (row) => {
+          const val = row.customFields?.[key];
+          if (val === undefined || val === null || val === "") {
+            return <span className="text-[10px] text-muted-foreground/50">—</span>;
+          }
+          return (
+            <span className="text-[11px] font-medium text-foreground truncate max-w-[150px] inline-block">
+              {String(val)}
+            </span>
+          );
+        },
+      });
+    });
+
+    return cols;
+  }, [customFieldConfigs, discoveredCustomKeys]);
+
+  const allColumns = React.useMemo(() => {
+    return [...userTableColumns, ...dynamicCustomColumns];
+  }, [dynamicCustomColumns]);
 
   const totalCount = data?.getAllUser?.totalCount || 0;
   const isLoading = loading;
@@ -192,7 +314,8 @@ const User = ({
     selectedColleges.length > 0 ||
     selectedFunctions.length > 0 ||
     selectedInterests.length > 0 ||
-    selectedSkills.length > 0;
+    selectedSkills.length > 0 ||
+    Boolean(selectedCustomFields && Object.keys(selectedCustomFields).length > 0);
 
   const clearAllFilters = () => {
     setSelectedIndustry("ALL");
@@ -202,6 +325,7 @@ const User = ({
     setSelectedFunctions([]);
     setSelectedInterests([]);
     setSelectedSkills([]);
+    setSelectedCustomFields(null);
   };
 
   const effectiveTotalCount = subscriptionInfo?.maxUsersAllowed
@@ -384,7 +508,7 @@ const User = ({
                 </div>
                 <DropdownMenuSeparator />
                 <div className="max-h-[300px] overflow-y-auto">
-                  {userTableColumns
+                  {allColumns
                     .filter((c) => c.key !== "actions")
                     .map((col) => (
                       <DropdownMenuCheckboxItem
@@ -468,6 +592,7 @@ const User = ({
           users={rawUsersList}
           visibleColumns={visibleColumns}
           offset={offset}
+          extraColumns={dynamicCustomColumns}
         />
 
         {/* Pagination Controls */}

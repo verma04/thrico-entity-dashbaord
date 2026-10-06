@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { PolarisSidebarCard } from "@/components/gamification/shared/polaris-form-ui";
-import { Sparkles, ChevronDown, Mail, ShieldCheck, Database, Regex } from "lucide-react";
+import { Sparkles, ChevronDown, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { MemberOnboardingConfig } from "./types";
@@ -110,11 +110,20 @@ export function LiveSignupPreview({
             {/* Header */}
             <div>
               <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-                {activeTab === "signup" ? "JOIN COMMUNITY" : "WELCOME BACK"}
+                {activeTab === "signup"
+                  ? (config.authTexts?.signupTagline || "GET STARTED")
+                  : (config.authTexts?.loginTagline || "WELCOME BACK")}
               </span>
               <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-0.5">
-                {activeTab === "signup" ? `Register to ${entityName}` : `Sign In to ${entityName}`}
+                {activeTab === "signup"
+                  ? (config.authTexts?.signupTitle || `Register to ${entityName}`)
+                  : (config.authTexts?.loginTitle || `Sign In to ${entityName}`)}
               </h4>
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2">
+                {activeTab === "signup"
+                  ? (config.authTexts?.signupDescription || "Sign up to unlock exclusive features.")
+                  : (config.authTexts?.loginDescription || "Log in to access your community.")}
+              </p>
             </div>
 
             {/* Google OAuth Button */}
@@ -329,8 +338,28 @@ export function LiveSignupPreview({
               type="button"
               className="w-full py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors mt-2"
             >
-              {activeTab === "signup" ? "Create Account & Join" : "Log In with Code"}
+              {activeTab === "signup"
+                ? (config.authTexts?.signupButtonText || "Create Account & Join")
+                : (config.authTexts?.loginButtonText || "Login to Community")}
             </button>
+
+            {/* Footer switcher */}
+            <div className="text-center text-[10px] text-zinc-500 pt-1">
+              <span>
+                {activeTab === "signup"
+                  ? (config.authTexts?.signupFooterText || "Already have an account?")
+                  : (config.authTexts?.loginFooterText || "Don't have an account?")}
+              </span>{" "}
+              <button
+                type="button"
+                onClick={() => setActiveTab(activeTab === "signup" ? "login" : "signup")}
+                className="text-blue-600 dark:text-blue-400 font-medium hover:underline cursor-pointer"
+              >
+                {activeTab === "signup"
+                  ? (config.authTexts?.signupFooterLink || "Log in here")
+                  : (config.authTexts?.loginFooterLink || "Register")}
+              </button>
+            </div>
           </div>
         </div>
 

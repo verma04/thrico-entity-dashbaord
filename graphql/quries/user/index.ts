@@ -153,6 +153,7 @@ const details = `
         rankPosition
       }
       impactScore
+      customFields
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {

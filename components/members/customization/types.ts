@@ -31,6 +31,36 @@ export interface CustomFieldItem {
   preventDuplicate?: boolean;
 }
 
+export interface AuthPageTexts {
+  loginTagline: string;
+  loginTitle: string;
+  loginDescription: string;
+  loginFooterText: string;
+  loginFooterLink: string;
+  loginButtonText: string;
+  signupTagline: string;
+  signupTitle: string;
+  signupDescription: string;
+  signupFooterText: string;
+  signupFooterLink: string;
+  signupButtonText: string;
+}
+
+export const DEFAULT_AUTH_TEXTS: AuthPageTexts = {
+  loginTagline: "WELCOME BACK",
+  loginTitle: "Community Login",
+  loginDescription: "Log in to access your community and exclusive features.",
+  loginFooterText: "Don't have an account?",
+  loginFooterLink: "Register",
+  loginButtonText: "Login to Community",
+  signupTagline: "GET STARTED",
+  signupTitle: "Create your account",
+  signupDescription: "Sign up to unlock exclusive features and connect with your community.",
+  signupFooterText: "Already have an account?",
+  signupFooterLink: "Log in here",
+  signupButtonText: "Join Community",
+};
+
 export interface MemberOnboardingConfig {
   authMethod: AuthMethod;
   enableGoogleLogin: boolean;
@@ -41,6 +71,7 @@ export interface MemberOnboardingConfig {
     helperText?: string;
   };
   customFields: CustomFieldItem[];
+  authTexts: AuthPageTexts;
 }
 
 export const DEFAULT_ONBOARDING_CONFIG: MemberOnboardingConfig = {
@@ -53,6 +84,7 @@ export const DEFAULT_ONBOARDING_CONFIG: MemberOnboardingConfig = {
     helperText: "Have a referral code? Enter it below.",
   },
   customFields: [],
+  authTexts: DEFAULT_AUTH_TEXTS,
 };
 
 export const FIELD_TYPE_LABELS: Record<CustomFieldType, { label: string; iconName: string }> = {

@@ -289,10 +289,12 @@ export function UserList({
   users,
   visibleColumns,
   offset = 0,
+  extraColumns,
 }: {
   users: UserDetail[];
   visibleColumns?: Record<string, boolean>;
   offset?: number;
+  extraColumns?: AdminTableColumn<UserDetail>[];
 }) {
   const [rowSelection, setRowSelection] = React.useState<
     Record<string, boolean>
@@ -326,10 +328,14 @@ export function UserList({
 
   const storeVisibleColumns = useMembersColumnsStore((s) => s.visibleColumns);
 
+  const allAvailableColumns = React.useMemo(() => {
+    return extraColumns ? [...columns, ...extraColumns] : columns;
+  }, [extraColumns]);
+
   const activeColumns = React.useMemo(() => {
     const current = visibleColumns ?? storeVisibleColumns;
-    return columns.filter((col) => current[col.key] !== false);
-  }, [visibleColumns, storeVisibleColumns]);
+    return allAvailableColumns.filter((col) => current[col.key] !== false);
+  }, [allAvailableColumns, visibleColumns, storeVisibleColumns]);
 
   return (
     <div className="space-y-3">

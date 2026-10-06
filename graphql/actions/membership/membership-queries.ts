@@ -140,6 +140,7 @@ export interface UserDetail {
     rankPosition: string | number;
   };
   impactScore?: number;
+  customFields?: Record<string, unknown>;
 }
 
 export interface GetAllUserResponse {
@@ -273,6 +274,7 @@ type AllUserInput = {
   functionTitle?: string[] | null;
   interestTitle?: string[] | null;
   skillName?: string[] | null;
+  customFields?: Record<string, unknown> | null;
 };
 
 const buildAllUserVariables = (input?: AllUserInput) => ({
@@ -289,6 +291,7 @@ const buildAllUserVariables = (input?: AllUserInput) => ({
     functionTitle: input?.functionTitle ?? null,
     interestTitle: input?.interestTitle ?? null,
     skillName: input?.skillName ?? null,
+    customFields: input?.customFields ?? null,
   },
 });
 

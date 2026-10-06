@@ -18,9 +18,11 @@ import { LiveSignupPreview } from "./live-signup-preview";
 import { MemberCustomizationKpis } from "./member-customization-kpi";
 import { CustomFieldDrawer } from "./custom-field-drawer";
 import { CustomizationStartersDrawer } from "./customization-starters-drawer";
+import { AuthTextCard } from "./auth-text-card";
 import {
   MemberOnboardingConfig,
   DEFAULT_ONBOARDING_CONFIG,
+  DEFAULT_AUTH_TEXTS,
   AuthMethod,
   CustomFieldItem,
 } from "./types";
@@ -34,7 +36,7 @@ import {
   RotateCcw,
   Plus,
   Eye,
-  CheckCircle2,
+  Type,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +72,20 @@ const memberOnboardingValidationSchema = Yup.object().shape({
       })
     )
     .default([]),
+  authTexts: Yup.object().shape({
+    loginTagline: Yup.string().optional(),
+    loginTitle: Yup.string().optional(),
+    loginDescription: Yup.string().optional(),
+    loginFooterText: Yup.string().optional(),
+    loginFooterLink: Yup.string().optional(),
+    loginButtonText: Yup.string().optional(),
+    signupTagline: Yup.string().optional(),
+    signupTitle: Yup.string().optional(),
+    signupDescription: Yup.string().optional(),
+    signupFooterText: Yup.string().optional(),
+    signupFooterLink: Yup.string().optional(),
+    signupButtonText: Yup.string().optional(),
+  }).optional(),
 });
 
 interface FormProps {
@@ -87,7 +103,7 @@ function MemberCustomizationForm({
   onSave,
   onRefresh,
 }: FormProps) {
-  const [activeTab, setActiveTab] = useState<"fields" | "auth" | "referral" | "preview">("fields");
+  const [activeTab, setActiveTab] = useState<"fields" | "auth" | "text" | "referral" | "preview">("fields");
   const [isSaved, setIsSaved] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [startersDrawerOpen, setStartersDrawerOpen] = useState(false);
@@ -264,6 +280,21 @@ function MemberCustomizationForm({
           </Badge>
         </button>
 
+        {/* Tab 2.5: Auth Page Text */}
+        <button
+          type="button"
+          onClick={() => setActiveTab("text")}
+          className={cn(
+            "flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer shrink-0",
+            activeTab === "text"
+              ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/60 font-semibold"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          )}
+        >
+          <Type className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>Login / Signup Text</span>
+        </button>
+
         {/* Tab 3: Referral & Invites */}
         <button
           type="button"
@@ -337,6 +368,38 @@ function MemberCustomizationForm({
             <AuthProtocolCard
               authMethod={formik.values.authMethod}
               onChange={handleAuthMethodChange}
+            />
+          </div>
+        </PolarisFormLayout>
+      )}
+
+      {activeTab === "text" && (
+        <PolarisFormLayout
+          sidebar={
+            <div className="space-y-4">
+              <LiveSignupPreview config={formik.values} entityName={entityName} />
+              <PolarisTipCard title="Copywriting & Brand Voice">
+                <div className="space-y-2 text-xs text-zinc-600 dark:text-zinc-400">
+                  <p>
+                    • <strong>Distinct Identity:</strong> Customize your login and signup headers to match your community tone and brand.
+                  </p>
+                  <p>
+                    • <strong>Clear Value Proposition:</strong> Keep descriptions concise so new visitors immediately understand the community value.
+                  </p>
+                </div>
+              </PolarisTipCard>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <AuthTextCard
+              authTexts={formik.values.authTexts}
+              onChange={(updates) =>
+                formik.setFieldValue("authTexts", {
+                  ...formik.values.authTexts,
+                  ...updates,
+                })
+              }
             />
           </div>
         </PolarisFormLayout>
@@ -469,6 +532,20 @@ export default function MemberCustomizationSettings() {
             helperText: parsed.referral?.helperText || "Have a referral code?",
           },
           customFields: Array.isArray(parsed.customFields) ? parsed.customFields : [],
+          authTexts: {
+            loginTagline: parsed.authTexts?.loginTagline || DEFAULT_AUTH_TEXTS.loginTagline,
+            loginTitle: parsed.authTexts?.loginTitle || DEFAULT_AUTH_TEXTS.loginTitle,
+            loginDescription: parsed.authTexts?.loginDescription || DEFAULT_AUTH_TEXTS.loginDescription,
+            loginFooterText: parsed.authTexts?.loginFooterText || DEFAULT_AUTH_TEXTS.loginFooterText,
+            loginFooterLink: parsed.authTexts?.loginFooterLink || DEFAULT_AUTH_TEXTS.loginFooterLink,
+            loginButtonText: parsed.authTexts?.loginButtonText || DEFAULT_AUTH_TEXTS.loginButtonText,
+            signupTagline: parsed.authTexts?.signupTagline || DEFAULT_AUTH_TEXTS.signupTagline,
+            signupTitle: parsed.authTexts?.signupTitle || DEFAULT_AUTH_TEXTS.signupTitle,
+            signupDescription: parsed.authTexts?.signupDescription || DEFAULT_AUTH_TEXTS.signupDescription,
+            signupFooterText: parsed.authTexts?.signupFooterText || DEFAULT_AUTH_TEXTS.signupFooterText,
+            signupFooterLink: parsed.authTexts?.signupFooterLink || DEFAULT_AUTH_TEXTS.signupFooterLink,
+            signupButtonText: parsed.authTexts?.signupButtonText || DEFAULT_AUTH_TEXTS.signupButtonText,
+          },
         };
       } catch {
         return DEFAULT_ONBOARDING_CONFIG;

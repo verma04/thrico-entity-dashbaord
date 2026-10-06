@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { MemberGrid } from "./member-grid";
 import { UserList } from "./user-list";
+import { AdminTableColumn } from "@/components/shared/admin-table/admin-table";
+import { UserDetail } from "@/graphql/actions";
 
 export const STATUS_TABS = [
   {
@@ -142,12 +144,14 @@ export function ContentArea({
   users,
   visibleColumns,
   offset = 0,
+  extraColumns,
 }: {
   view: "grid" | "list";
   loading: boolean;
-  users: any[];
+  users: UserDetail[];
   visibleColumns?: Record<string, boolean>;
   offset?: number;
+  extraColumns?: AdminTableColumn<UserDetail>[];
 }) {
   return (
     <AnimatePresence mode="wait">
@@ -225,7 +229,12 @@ export function ContentArea({
           {view === "grid" ? (
             <MemberGrid users={users} />
           ) : (
-            <UserList users={users} visibleColumns={visibleColumns} offset={offset} />
+            <UserList
+              users={users}
+              visibleColumns={visibleColumns}
+              offset={offset}
+              extraColumns={extraColumns}
+            />
           )}
         </motion.div>
       )}
