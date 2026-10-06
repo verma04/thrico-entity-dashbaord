@@ -4,12 +4,11 @@ import User from "@/components/members/manage/members-manage";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 
-const page = () => {
-  const { data: subData, loading: subLoading } = useCheckMemberSubscription();
+const Page = () => {
+  const { data: subData } = useCheckMemberSubscription();
   const subscriptionInfo = subData?.checkMemberSubscription;
-  const hasReachedLimit = subscriptionInfo?.hasReachedLimit;
 
   return <User status={"ALL"} subscriptionInfo={subscriptionInfo} />;
 };
 
-export default withModulePermission(page, "MEMBERS_ALL", "canRead");
+export default withModulePermission(Page, "MEMBERS_ALL", "canRead");

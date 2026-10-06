@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import UserActions from "./user-actions";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
@@ -11,7 +10,6 @@ import {
   MapPin,
   Smartphone,
   Users,
-  SlidersHorizontal,
   Trophy,
   Award,
   Heart,
@@ -19,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
+import { useMembersColumnsStore } from "@/store/members-columns-store";
 import {
   AdminTable,
   AdminStatusBadge,
@@ -325,10 +324,12 @@ export function UserList({
     }
   };
 
+  const storeVisibleColumns = useMembersColumnsStore((s) => s.visibleColumns);
+
   const activeColumns = React.useMemo(() => {
-    if (!visibleColumns) return columns;
-    return columns.filter((col) => visibleColumns[col.key] !== false);
-  }, [visibleColumns]);
+    const current = visibleColumns ?? storeVisibleColumns;
+    return columns.filter((col) => current[col.key] !== false);
+  }, [visibleColumns, storeVisibleColumns]);
 
   return (
     <div className="space-y-3">

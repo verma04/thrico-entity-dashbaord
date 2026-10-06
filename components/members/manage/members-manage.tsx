@@ -41,6 +41,7 @@ import {
   SubscriptionLimitBanner,
   SubscriptionFallbackMessage,
   SubscriptionUpgradeBlock,
+  SubscriptionInfo,
 } from "./subscription-alerts";
 import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import {
@@ -50,6 +51,7 @@ import {
   ContentArea,
 } from "./members-manage-ui";
 import { ExportMembersModal } from "./export-members-modal";
+import { useMembersColumnsStore } from "@/store/members-columns-store";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main User component
@@ -62,7 +64,7 @@ const User = ({
   subscriptionInfo,
 }: {
   status?: string;
-  subscriptionInfo?: any;
+  subscriptionInfo?: SubscriptionInfo;
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -131,35 +133,8 @@ const User = ({
   const [showFilters, setShowFilters] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
-    {
-      serial: true,
-      member: true,
-      contact: true,
-      location: true,
-      industries: true,
-      membershipTier: true,
-      wallet: true,
-      points: true,
-      rank: true,
-      badges: true,
-      impact: true,
-      status: true,
-      verification: true,
-      joined: true,
-      source: true,
-      referrer: true,
-      lastSession: true,
-      actions: true,
-    },
-  );
-
-  const toggleColumn = (key: string) => {
-    setVisibleColumns((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
+  const { visibleColumns, toggleColumn, resetColumns } =
+    useMembersColumnsStore();
 
   // ── Setters that write to URL params ───────────────────────────────────
   const setStatus = (v: StatusValue) => updateParams({ status: v, page: null });
@@ -329,7 +304,7 @@ const User = ({
                 >
                   All Tiers
                 </SelectItem>
-                {tiers.map((tier: any) => (
+                {tiers.map((tier: { id: string; name: string; badgeIcon?: string }) => (
                   <SelectItem
                     key={tier.id}
                     value={tier.id}
@@ -391,23 +366,38 @@ const User = ({
                   Columns
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
-                <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
-                  Toggle Columns
-                </DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-[190px]">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider p-0">
+                    Toggle Columns
+                  </DropdownMenuLabel>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      resetColumns();
+                    }}
+                    className="text-[10px] font-medium text-primary hover:underline cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                </div>
                 <DropdownMenuSeparator />
-                {userTableColumns
-                  .filter((c) => c.key !== "actions")
-                  .map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.key}
-                      checked={visibleColumns[col.key] !== false}
-                      onCheckedChange={() => toggleColumn(col.key)}
-                      className="text-xs font-medium cursor-pointer"
-                    >
-                      {col.header || col.key}
-                    </DropdownMenuCheckboxItem>
-                  ))}
+                <div className="max-h-[300px] overflow-y-auto">
+                  {userTableColumns
+                    .filter((c) => c.key !== "actions")
+                    .map((col) => (
+                      <DropdownMenuCheckboxItem
+                        key={col.key}
+                        checked={visibleColumns[col.key] !== false}
+                        onCheckedChange={() => toggleColumn(col.key)}
+                        onSelect={(e) => e.preventDefault()}
+                        className="text-xs font-medium cursor-pointer"
+                      >
+                        {col.header || col.key}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

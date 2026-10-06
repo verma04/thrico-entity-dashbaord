@@ -9,16 +9,16 @@ import { InlineAlert } from "@/components/ui/inline-alert";
 
 export interface SubscriptionInfo {
   hasReachedLimit?: boolean;
-  message?: string;
+  message?: string | null;
   currentCount?: number;
-  maxUsersAllowed?: number;
+  maxUsersAllowed?: number | null;
 }
 
 export function SubscriptionLimitBanner({
   subscriptionInfo,
   isAiMode,
 }: {
-  subscriptionInfo?: SubscriptionInfo | any;
+  subscriptionInfo?: SubscriptionInfo;
   isAiMode?: boolean;
 }) {
   if (!subscriptionInfo?.hasReachedLimit || isAiMode) {
@@ -59,7 +59,7 @@ export function SubscriptionFallbackMessage({
   message,
   isAiMode = false,
 }: {
-  subscriptionInfo?: SubscriptionInfo | any;
+  subscriptionInfo?: SubscriptionInfo;
   message?: string;
   isAiMode?: boolean;
 }) {
@@ -75,7 +75,7 @@ export function SubscriptionUpgradeBlock({
   totalCount,
   isLoading,
 }: {
-  subscriptionInfo?: SubscriptionInfo | any;
+  subscriptionInfo?: SubscriptionInfo;
   totalCount: number;
   isLoading: boolean;
 }) {
