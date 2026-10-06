@@ -329,12 +329,23 @@ export function UserList({
   const storeVisibleColumns = useMembersColumnsStore((s) => s.visibleColumns);
 
   const allAvailableColumns = React.useMemo(() => {
-    return extraColumns ? [...columns, ...extraColumns] : columns;
+    if (!extraColumns || extraColumns.length === 0) return columns;
+    const locIdx = columns.findIndex((c) => c.key === "location");
+    if (locIdx !== -1) {
+      const copy = [...columns];
+      copy.splice(locIdx + 1, 0, ...extraColumns);
+      return copy;
+    }
+    return [...columns, ...extraColumns];
   }, [extraColumns]);
 
   const activeColumns = React.useMemo(() => {
     const current = visibleColumns ?? storeVisibleColumns;
-    return allAvailableColumns.filter((col) => current[col.key] !== false);
+    return allAvailableColumns.filter((col) => {
+      if (current[col.key] === false) return false;
+      if (current[`custom_${col.key}`] === false) return false;
+      return true;
+    });
   }, [allAvailableColumns, visibleColumns, storeVisibleColumns]);
 
   return (

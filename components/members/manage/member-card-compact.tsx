@@ -23,6 +23,7 @@ import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-car
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { safeFormat, safeFormatDistanceToNow } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
+import { extractCustomFields, formatFieldHeader } from "./custom-fields-utils";
 
 interface MemberCardCompactProps {
   member: UserDetail;
@@ -122,6 +123,11 @@ export function MemberCardCompact({ member }: MemberCardCompactProps) {
   const rankPosition = member.gamificationSummary?.rankPosition;
   const totalBadges = member.gamificationSummary?.totalBadgesEarned;
   const impactScore = member.impactScore;
+
+  const customFieldsMap = extractCustomFields(member);
+  const customFieldEntries = Object.entries(customFieldsMap).filter(
+    ([, val]) => val !== undefined && val !== null && val !== ""
+  );
 
   const hasMetrics =
     totalPoints !== undefined ||
@@ -317,6 +323,27 @@ export function MemberCardCompact({ member }: MemberCardCompactProps) {
               {(member as any).industries.length > 2 && (
                 <span className="px-1 py-0.5 rounded text-[9px] font-bold text-muted-foreground bg-muted/60">
                   +{(member as any).industries.length - 2}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Custom Fields (e.g. employee_id) */}
+          {customFieldEntries.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-0.5">
+              {customFieldEntries.slice(0, 2).map(([k, v]) => (
+                <span
+                  key={k}
+                  className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-muted/60 text-foreground border border-border/60 truncate max-w-[130px]"
+                  title={`${formatFieldHeader(k)}: ${String(v)}`}
+                >
+                  <span className="text-muted-foreground font-normal">{formatFieldHeader(k)}: </span>
+                  {String(v)}
+                </span>
+              ))}
+              {customFieldEntries.length > 2 && (
+                <span className="px-1 py-0.5 rounded text-[9px] font-bold text-muted-foreground bg-muted/60">
+                  +{customFieldEntries.length - 2}
                 </span>
               )}
             </div>

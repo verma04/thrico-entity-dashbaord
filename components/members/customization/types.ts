@@ -61,6 +61,27 @@ export const DEFAULT_AUTH_TEXTS: AuthPageTexts = {
   signupButtonText: "Join Community",
 };
 
+export interface TermsAndConditionsConfig {
+  enabled: boolean;
+  required: boolean;
+  checkboxLabel: string;
+  linkText: string;
+  contentHtml: string;
+}
+
+export const DEFAULT_TERMS_CONFIG: TermsAndConditionsConfig = {
+  enabled: true,
+  required: true,
+  checkboxLabel: "I have read and agree to the",
+  linkText: "Terms & Conditions",
+  contentHtml: `<h3>Terms & Conditions</h3>
+<p>Welcome to our community. By registering an account, you agree to comply with our community terms and guidelines.</p>
+<h4>1. Member Conduct</h4>
+<p>Members agree to engage respectfully and uphold the safety, confidentiality, and integrity of all members.</p>
+<h4>2. Privacy & Data Standards</h4>
+<p>Your member profile information is safeguarded and processed strictly according to our community privacy policies.</p>`,
+};
+
 export interface MemberOnboardingConfig {
   authMethod: AuthMethod;
   enableGoogleLogin: boolean;
@@ -72,6 +93,7 @@ export interface MemberOnboardingConfig {
   };
   customFields: CustomFieldItem[];
   authTexts: AuthPageTexts;
+  termsAndConditions: TermsAndConditionsConfig;
 }
 
 export const DEFAULT_ONBOARDING_CONFIG: MemberOnboardingConfig = {
@@ -85,6 +107,7 @@ export const DEFAULT_ONBOARDING_CONFIG: MemberOnboardingConfig = {
   },
   customFields: [],
   authTexts: DEFAULT_AUTH_TEXTS,
+  termsAndConditions: DEFAULT_TERMS_CONFIG,
 };
 
 export const FIELD_TYPE_LABELS: Record<CustomFieldType, { label: string; iconName: string }> = {

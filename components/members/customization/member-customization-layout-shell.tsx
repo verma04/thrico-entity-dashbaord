@@ -17,6 +17,7 @@ import {
   Type,
   Gift,
   Eye,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -178,6 +179,30 @@ export function MemberCustomizationLayoutShell({
             {!formik.values.referral.enabled
               ? "Off"
               : formik.values.referral.required
+              ? "Mandatory"
+              : "Optional"}
+          </Badge>
+        </Link>
+
+        {/* Tab: Terms & Conditions Agreement */}
+        <Link
+          href="/members/settings/customization/terms"
+          className={cn(
+            "flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer shrink-0",
+            isTabActive("/members/settings/customization/terms")
+              ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/60 font-semibold"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          )}
+        >
+          <FileText className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
+          <span>Terms & Legal</span>
+          <Badge
+            variant="secondary"
+            className="text-[10px] px-1.5 py-0 font-normal bg-muted text-muted-foreground rounded-full ml-0.5 hidden sm:inline-flex"
+          >
+            {!formik.values.termsAndConditions?.enabled
+              ? "Off"
+              : formik.values.termsAndConditions?.required
               ? "Mandatory"
               : "Optional"}
           </Badge>

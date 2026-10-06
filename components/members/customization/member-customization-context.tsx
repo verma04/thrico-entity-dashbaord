@@ -9,6 +9,8 @@ import {
   MemberOnboardingConfig,
   DEFAULT_ONBOARDING_CONFIG,
   DEFAULT_AUTH_TEXTS,
+  DEFAULT_TERMS_CONFIG,
+  TermsAndConditionsConfig,
   AuthMethod,
   CustomFieldItem,
 } from "./types";
@@ -47,6 +49,13 @@ export const memberOnboardingValidationSchema = Yup.object().shape({
       })
     )
     .default([]),
+  termsAndConditions: Yup.object().shape({
+    enabled: Yup.boolean().required(),
+    required: Yup.boolean().required(),
+    checkboxLabel: Yup.string().optional(),
+    linkText: Yup.string().optional(),
+    contentHtml: Yup.string().optional(),
+  }).optional(),
   authTexts: Yup.object().shape({
     loginTagline: Yup.string().optional(),
     loginTitle: Yup.string().optional(),
@@ -83,6 +92,7 @@ export interface MemberCustomizationContextType {
   }) => void;
   handleCustomFieldsChange: (customFields: CustomFieldItem[]) => void;
   handleSelectRecipe: (recipeField: Omit<CustomFieldItem, "id" | "order">) => void;
+  handleTermsUpdate: (updates: Partial<TermsAndConditionsConfig>) => void;
 }
 
 const MemberCustomizationContext = createContext<MemberCustomizationContextType | null>(null);
@@ -143,6 +153,13 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
             signupFooterLink: parsed.authTexts?.signupFooterLink || DEFAULT_AUTH_TEXTS.signupFooterLink,
             signupButtonText: parsed.authTexts?.signupButtonText || DEFAULT_AUTH_TEXTS.signupButtonText,
           },
+          termsAndConditions: {
+            enabled: parsed.termsAndConditions?.enabled ?? DEFAULT_TERMS_CONFIG.enabled,
+            required: parsed.termsAndConditions?.required ?? DEFAULT_TERMS_CONFIG.required,
+            checkboxLabel: parsed.termsAndConditions?.checkboxLabel || DEFAULT_TERMS_CONFIG.checkboxLabel,
+            linkText: parsed.termsAndConditions?.linkText || DEFAULT_TERMS_CONFIG.linkText,
+            contentHtml: parsed.termsAndConditions?.contentHtml || DEFAULT_TERMS_CONFIG.contentHtml,
+          },
         };
       } catch {
         return DEFAULT_ONBOARDING_CONFIG;
@@ -196,6 +213,13 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     formik.setFieldValue("authMethod", authMethod);
     formik.setFieldValue("enableEmailLogin", authMethod === "BOTH" || authMethod === "EMAIL_ONLY");
     formik.setFieldValue("enableGoogleLogin", authMethod === "BOTH" || authMethod === "GOOGLE_ONLY");
+  };
+
+  const handleTermsUpdate = (updates: Partial<TermsAndConditionsConfig>) => {
+    formik.setFieldValue("termsAndConditions", {
+      ...formik.values.termsAndConditions,
+      ...updates,
+    });
   };
 
   const handleReferralUpdate = (updates: {
@@ -258,6 +282,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     handleReferralUpdate,
     handleCustomFieldsChange,
     handleSelectRecipe,
+    handleTermsUpdate,
   };
 
   return (

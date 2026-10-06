@@ -55,6 +55,7 @@ import { useMembersColumnsStore } from "@/store/members-columns-store";
 import { useEntitySettings, UserDetail } from "@/graphql/actions";
 import { AdminTableColumn, AdminTableTag } from "@/components/shared/admin-table/admin-table";
 import { CustomFieldItem } from "../customization/types";
+import { extractCustomFields, formatFieldHeader } from "./custom-fields-utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main User component
@@ -229,13 +230,12 @@ const User = ({
     const configuredKeys = new Set(customFieldConfigs.map((f) => f.key));
     const extra = new Set<string>();
     rawUsersList.forEach((u) => {
-      if (u.customFields && typeof u.customFields === "object") {
-        Object.keys(u.customFields).forEach((k) => {
-          if (!configuredKeys.has(k)) {
-            extra.add(k);
-          }
-        });
-      }
+      const cf = extractCustomFields(u);
+      Object.keys(cf).forEach((k) => {
+        if (!configuredKeys.has(k)) {
+          extra.add(k);
+        }
+      });
     });
     return Array.from(extra);
   }, [customFieldConfigs, rawUsersList]);
@@ -244,55 +244,51 @@ const User = ({
   const dynamicCustomColumns: AdminTableColumn<UserDetail>[] = React.useMemo(() => {
     const cols: AdminTableColumn<UserDetail>[] = [];
 
+    const renderCustomValue = (val: unknown) => {
+      if (val === undefined || val === null || val === "") {
+        return <span className="text-[10px] text-muted-foreground/50">—</span>;
+      }
+      if (typeof val === "boolean") {
+        return (
+          <AdminTableTag variant={val ? "emerald" : "default"}>
+            {val ? "Yes" : "No"}
+          </AdminTableTag>
+        );
+      }
+      if (Array.isArray(val)) {
+        return (
+          <span className="text-[11px] font-medium text-foreground">
+            {val.join(", ")}
+          </span>
+        );
+      }
+      return (
+        <span className="text-[11px] font-medium text-foreground truncate max-w-[150px] inline-block">
+          {String(val)}
+        </span>
+      );
+    };
+
     customFieldConfigs.forEach((field) => {
       cols.push({
-        key: `custom_${field.key}`,
-        header: field.label || field.key,
+        key: field.key,
+        header: field.label || formatFieldHeader(field.key),
         cell: (row) => {
-          const val = row.customFields?.[field.key];
-          if (val === undefined || val === null || val === "") {
-            return <span className="text-[10px] text-muted-foreground/50">—</span>;
-          }
-          if (typeof val === "boolean") {
-            return (
-              <AdminTableTag variant={val ? "emerald" : "zinc"}>
-                {val ? "Yes" : "No"}
-              </AdminTableTag>
-            );
-          }
-          if (Array.isArray(val)) {
-            return (
-              <span className="text-[11px] font-medium text-foreground">
-                {val.join(", ")}
-              </span>
-            );
-          }
-          return (
-            <span className="text-[11px] font-medium text-foreground truncate max-w-[150px] inline-block">
-              {String(val)}
-            </span>
-          );
+          const cf = extractCustomFields(row);
+          const val = cf[field.key];
+          return renderCustomValue(val);
         },
       });
     });
 
     discoveredCustomKeys.forEach((key) => {
       cols.push({
-        key: `custom_${key}`,
-        header: key
-          .replace(/([A-Z])/g, " $1")
-          .replace(/_/g, " ")
-          .replace(/^./, (s) => s.toUpperCase()),
+        key: key,
+        header: formatFieldHeader(key),
         cell: (row) => {
-          const val = row.customFields?.[key];
-          if (val === undefined || val === null || val === "") {
-            return <span className="text-[10px] text-muted-foreground/50">—</span>;
-          }
-          return (
-            <span className="text-[11px] font-medium text-foreground truncate max-w-[150px] inline-block">
-              {String(val)}
-            </span>
-          );
+          const cf = extractCustomFields(row);
+          const val = cf[key];
+          return renderCustomValue(val);
         },
       });
     });
@@ -301,6 +297,13 @@ const User = ({
   }, [customFieldConfigs, discoveredCustomKeys]);
 
   const allColumns = React.useMemo(() => {
+    if (!dynamicCustomColumns.length) return userTableColumns;
+    const locIdx = userTableColumns.findIndex((c) => c.key === "location");
+    if (locIdx !== -1) {
+      const copy = [...userTableColumns];
+      copy.splice(locIdx + 1, 0, ...dynamicCustomColumns);
+      return copy;
+    }
     return [...userTableColumns, ...dynamicCustomColumns];
   }, [dynamicCustomColumns]);
 
@@ -513,7 +516,10 @@ const User = ({
                     .map((col) => (
                       <DropdownMenuCheckboxItem
                         key={col.key}
-                        checked={visibleColumns[col.key] !== false}
+                        checked={
+                          visibleColumns[col.key] !== false &&
+                          visibleColumns[`custom_${col.key}`] !== false
+                        }
                         onCheckedChange={() => toggleColumn(col.key)}
                         onSelect={(e) => e.preventDefault()}
                         className="text-xs font-medium cursor-pointer"

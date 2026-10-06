@@ -6,6 +6,16 @@ import { Sparkles, ChevronDown, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { MemberOnboardingConfig } from "./types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Scale } from "lucide-react";
 
 // Google Icon SVG
 function GoogleSvg({ className }: { className?: string }) {
@@ -41,6 +51,7 @@ export function LiveSignupPreview({
   entityName = "Thrico Community",
 }: LiveSignupPreviewProps) {
   const [activeTab, setActiveTab] = useState<"signup" | "login">("signup");
+  const [previewTermsModalOpen, setPreviewTermsModalOpen] = useState(false);
 
   const showGoogle = config.authMethod === "BOTH" || config.authMethod === "GOOGLE_ONLY";
   const showEmail = config.authMethod === "BOTH" || config.authMethod === "EMAIL_ONLY";
@@ -333,6 +344,31 @@ export function LiveSignupPreview({
               </div>
             )}
 
+            {/* Simulated Terms Checkbox */}
+            {activeTab === "signup" && config.termsAndConditions?.enabled && (
+              <div className="flex items-start gap-2 pt-1 pb-1">
+                <input
+                  type="checkbox"
+                  id="simulatedTerms"
+                  defaultChecked={true}
+                  className="rounded border-zinc-300 dark:border-zinc-700 text-blue-600 w-3.5 h-3.5 mt-0.5 cursor-pointer"
+                />
+                <label htmlFor="simulatedTerms" className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-tight">
+                  {config.termsAndConditions.checkboxLabel || "I have read and agree to the"}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setPreviewTermsModalOpen(true)}
+                    className="text-blue-600 dark:text-blue-400 underline font-medium hover:text-blue-700 cursor-pointer"
+                  >
+                    {config.termsAndConditions.linkText || "Terms & Conditions"}
+                  </button>
+                  {config.termsAndConditions.required && (
+                    <span className="text-red-500 font-semibold ml-0.5">*</span>
+                  )}
+                </label>
+              </div>
+            )}
+
             {/* Action Submit Button */}
             <button
               type="button"
@@ -382,6 +418,16 @@ export function LiveSignupPreview({
             </span>
           </div>
           <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+            <span>Terms & Legal:</span>
+            <span className="font-semibold text-rose-600 dark:text-rose-400">
+              {!config.termsAndConditions?.enabled
+                ? "Disabled"
+                : config.termsAndConditions?.required
+                ? "Mandatory Check"
+                : "Optional Agreement"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
             <span>Total Custom Fields:</span>
             <span className="font-semibold text-zinc-800 dark:text-zinc-200">
               {config.customFields.length} total ({config.customFields.filter((f) => f.required).length} required)
@@ -389,6 +435,44 @@ export function LiveSignupPreview({
           </div>
         </div>
       </div>
+    
+      {/* Simulator Terms Reader Dialog */}
+      <Dialog open={previewTermsModalOpen} onOpenChange={setPreviewTermsModalOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-2 border-b">
+            <div className="flex items-center gap-2">
+              <Scale className="h-4 w-4 text-rose-600" />
+              <DialogTitle className="text-sm font-bold">
+                {config.termsAndConditions?.linkText || "Terms & Conditions"}
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Official community terms for {entityName}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto p-4 text-xs text-foreground leading-relaxed">
+            <div
+              className="prose dark:prose-invert max-w-none text-xs"
+              dangerouslySetInnerHTML={{
+                __html:
+                  config.termsAndConditions?.contentHtml ||
+                  "<p>Terms & conditions agreement.</p>",
+              }}
+            />
+          </div>
+          <DialogFooter className="p-3 border-t bg-muted/20 flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="text-xs h-7"
+              onClick={() => setPreviewTermsModalOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PolarisSidebarCard>
   );
 }

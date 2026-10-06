@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { safeFormat } from "@/lib/date-utils";
 import { useExportMembers } from "@/graphql/actions/export";
 import { Mail } from "lucide-react";
+import { extractCustomFields, formatFieldHeader } from "./custom-fields-utils";
 
 export interface MemberFilters {
   status?: string;
@@ -53,6 +54,21 @@ export function ExportMembersModal({
       return;
     }
 
+    const discoveredCustomKeys = Array.from(
+      new Set(
+        rows.flatMap((r: unknown) => Object.keys(extractCustomFields(r)))
+      )
+    );
+
+    const customCsvCols = discoveredCustomKeys.map((k) => ({
+      header: formatFieldHeader(k),
+      getValue: (r: unknown) => {
+        const cf = extractCustomFields(r);
+        const val = cf[k];
+        return val !== undefined && val !== null ? String(val) : "";
+      },
+    }));
+
     const csv = buildCsv(rows, [
       {
         header: "First Name",
@@ -70,6 +86,11 @@ export function ExportMembersModal({
             ? `+${r.user.profile.phone.countryCode || ""}-${r.user.profile.phone.phoneNumber}`
             : "",
       },
+      {
+        header: "Location",
+        getValue: (r: any) => r.user?.location?.name || "",
+      },
+      ...customCsvCols,
       { header: "Status", getValue: (r: any) => r.status || "" },
       {
         header: "Tier",
@@ -96,10 +117,6 @@ export function ExportMembersModal({
       {
         header: "Impact Score",
         getValue: (r: any) => r.impactScore ?? 0,
-      },
-      {
-        header: "Location",
-        getValue: (r: any) => r.user?.location?.name || "",
       },
       {
         header: "Industries",

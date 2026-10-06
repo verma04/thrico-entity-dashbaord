@@ -10,12 +10,14 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
+  Layers,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { EmptyContentSection } from "./detail-states";
 import { safeLocaleDateString } from "@/lib/date-utils";
+import { extractCustomFields, formatFieldHeader } from "../manage/custom-fields-utils";
 
 /* ── Section Header ──────────────────────────────────────────────────────── */
 
@@ -32,6 +34,11 @@ function SectionTitle({ icon: Icon, children }: { icon: React.ElementType; child
 export function ProfileTab({ member }: { member: any }) {
   const user = member?.user;
   if (!user) return null;
+
+  const customFieldsMap = extractCustomFields(member);
+  const customFieldEntries = Object.entries(customFieldsMap).filter(
+    ([, val]) => val !== undefined && val !== null && val !== ""
+  );
 
   return (
     <div className="space-y-6">
@@ -215,6 +222,36 @@ export function ProfileTab({ member }: { member: any }) {
                   {safeLocaleDateString(member.verification.isVerifiedAt)}
                 </span>
               )}
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {/* Custom Fields / Attributes */}
+      {customFieldEntries.length > 0 && (
+        <section>
+          <SectionTitle icon={Layers}>Custom Attributes</SectionTitle>
+          <Card className="border-border">
+            <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {customFieldEntries.map(([k, v]) => (
+                <div
+                  key={k}
+                  className="p-3 rounded-lg border border-border/60 bg-muted/20 space-y-1"
+                >
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    {formatFieldHeader(k)}
+                  </p>
+                  <p className="text-sm font-medium text-foreground break-all">
+                    {typeof v === "boolean"
+                      ? v
+                        ? "Yes"
+                        : "No"
+                      : Array.isArray(v)
+                      ? v.join(", ")
+                      : String(v)}
+                  </p>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </section>
