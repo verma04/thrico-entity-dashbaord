@@ -11,6 +11,8 @@ export type CustomFieldType =
   | "url"
   | "checkbox";
 
+export type ValidationMode = "NONE" | "REGEX" | "CSV_ROSTER" | "BOTH";
+
 export interface CustomFieldItem {
   id: string;
   key: string;
@@ -21,6 +23,12 @@ export interface CustomFieldItem {
   required: boolean;
   options?: string[]; // for select dropdown
   order: number;
+  // Custom Validation & Gatekeeping
+  validationMode?: ValidationMode;
+  validationRegex?: string;
+  validationErrorMessage?: string;
+  blockIfNotExists?: boolean;
+  preventDuplicate?: boolean;
 }
 
 export interface MemberOnboardingConfig {

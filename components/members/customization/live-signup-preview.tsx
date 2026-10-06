@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import { PolarisSidebarCard } from "@/components/gamification/shared/polaris-form-ui";
-import { Sparkles, ChevronDown, Mail } from "lucide-react";
+import { Sparkles, ChevronDown, Mail, ShieldCheck, Database, Regex } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { MemberOnboardingConfig } from "./types";
 
 // Google Icon SVG
 function GoogleSvg({ className }: { className?: string }) {
@@ -44,6 +45,23 @@ export function LiveSignupPreview({
   const showGoogle = config.authMethod === "BOTH" || config.authMethod === "GOOGLE_ONLY";
   const showEmail = config.authMethod === "BOTH" || config.authMethod === "EMAIL_ONLY";
 
+  // Gatekeeping fields relevant on login
+  const gatekeeperFields = config.customFields.filter(
+    (f) =>
+      f.blockIfNotExists ||
+      f.validationMode === "CSV_ROSTER" ||
+      f.validationMode === "BOTH" ||
+      f.validationMode === "REGEX"
+  );
+
+  const [authChoice, setAuthChoice] = useState<"google" | "email">(
+    config.authMethod === "GOOGLE_ONLY" ? "google" : "email"
+  );
+
+  const isGoogleActive =
+    config.authMethod === "GOOGLE_ONLY" ||
+    (config.authMethod === "BOTH" && authChoice === "google");
+
   return (
     <PolarisSidebarCard
       title="Live Experience Preview"
@@ -53,7 +71,7 @@ export function LiveSignupPreview({
       <div className="space-y-3">
         {/* Subtitle / Mode info */}
         <div className="flex items-center justify-between text-[11px] text-zinc-400">
-          <span>Member Registration Flow</span>
+          <span>Member Registration & Gatekeeping</span>
           <span className="font-mono text-[10px]">interactive</span>
         </div>
 
@@ -103,7 +121,13 @@ export function LiveSignupPreview({
             {showGoogle && (
               <button
                 type="button"
-                className="w-full py-1.5 px-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200 text-[11px] font-medium flex items-center justify-center gap-2 shadow-2xs transition-colors"
+                onClick={() => setAuthChoice("google")}
+                className={cn(
+                  "w-full py-1.5 px-2.5 rounded-lg border text-[11px] font-medium flex items-center justify-center gap-2 shadow-2xs transition-colors cursor-pointer",
+                  isGoogleActive && activeTab === "signup"
+                    ? "border-blue-500/80 bg-blue-50/40 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 ring-1 ring-blue-500/50"
+                    : "border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200"
+                )}
               >
                 <GoogleSvg className="w-3.5 h-3.5" />
                 <span>Continue with Google</span>
@@ -116,14 +140,18 @@ export function LiveSignupPreview({
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-zinc-200 dark:border-zinc-800" />
                 </div>
-                <span className="relative bg-white dark:bg-zinc-900 px-2 text-[9px] uppercase tracking-wider text-zinc-400">
+                <button
+                  type="button"
+                  onClick={() => setAuthChoice(isGoogleActive ? "email" : "google")}
+                  className="relative bg-white dark:bg-zinc-900 px-2 text-[9px] uppercase tracking-wider text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+                >
                   or with email
-                </span>
+                </button>
               </div>
             )}
 
-            {/* Email field if email allowed */}
-            {showEmail && (
+            {/* Email field if email allowed and either email mode selected or EMAIL_ONLY */}
+            {showEmail && (!isGoogleActive || config.authMethod === "EMAIL_ONLY") && (
               <div className="space-y-1">
                 <label className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 block">
                   Email Address *
@@ -140,8 +168,20 @@ export function LiveSignupPreview({
               </div>
             )}
 
-            {/* Standard name inputs (shown on signup) */}
-            {activeTab === "signup" && (
+            {/* Google Profile Auto-Sync Banner when Google SSO is active */}
+            {activeTab === "signup" && isGoogleActive && (
+              <div className="flex items-center gap-2 p-2 rounded-md bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 text-[10.5px] text-blue-700 dark:text-blue-300">
+                <GoogleSvg className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  First Name & Last Name auto-synced from Google profile. No manual input needed.
+                </span>
+              </div>
+            )}
+
+            
+
+            {/* Standard name inputs (shown ONLY on email signup when Google SSO is not selected) */}
+            {activeTab === "signup" && !isGoogleActive && (
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <label className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 block">
@@ -202,13 +242,13 @@ export function LiveSignupPreview({
             {activeTab === "signup" && config.customFields.length > 0 && (
               <div className="space-y-2 pt-1 border-t border-zinc-100 dark:border-zinc-800">
                 <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
-                  Additional Details
+                  Additional Details & Gatekeeping
                 </span>
 
                 {config.customFields.map((field) => (
                   <div key={field.id} className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300 block truncate max-w-[180px]">
+                      <label className="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300 block truncate max-w-[170px]">
                         {field.label}{" "}
                         {field.required ? (
                           <span className="text-red-500 font-bold">*</span>
@@ -216,6 +256,23 @@ export function LiveSignupPreview({
                           <span className="text-zinc-400 font-normal">(Optional)</span>
                         )}
                       </label>
+
+                      {/* Validation Badges */}
+                      {field.validationMode === "CSV_ROSTER" && (
+                        <Badge variant="outline" className="text-[8px] px-1 py-0 bg-purple-50 text-purple-700 border-purple-200">
+                          Roster
+                        </Badge>
+                      )}
+                      {field.validationMode === "REGEX" && (
+                        <Badge variant="outline" className="text-[8px] px-1 py-0 bg-blue-50 text-blue-700 border-blue-200">
+                          Regex
+                        </Badge>
+                      )}
+                      {field.validationMode === "BOTH" && (
+                        <Badge variant="outline" className="text-[8px] px-1 py-0 bg-indigo-50 text-indigo-700 border-indigo-200">
+                          Dual
+                        </Badge>
+                      )}
                     </div>
 
                     {field.type === "select" ? (
@@ -254,7 +311,12 @@ export function LiveSignupPreview({
                         type={field.type === "number" ? "number" : "text"}
                         readOnly
                         placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                        className="w-full px-2 py-1 text-[11px] rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-50/50 dark:bg-zinc-800/50 text-zinc-400 cursor-default focus:outline-hidden"
+                        className={cn(
+                          "w-full px-2 py-1 text-[11px] rounded border bg-zinc-50/50 dark:bg-zinc-800/50 text-zinc-400 cursor-default focus:outline-hidden",
+                          field.validationMode === "CSV_ROSTER" || field.validationMode === "BOTH"
+                            ? "border-purple-200 dark:border-purple-900/60 font-mono"
+                            : "border-zinc-200 dark:border-zinc-700"
+                        )}
                       />
                     )}
                   </div>
@@ -285,26 +347,13 @@ export function LiveSignupPreview({
             </span>
           </div>
           <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-            <span>Referral Requirement:</span>
-            <span
-              className={cn(
-                "font-semibold",
-                !config.referral.enabled
-                  ? "text-zinc-400"
-                  : config.referral.required
-                  ? "text-purple-600 dark:text-purple-400"
-                  : "text-blue-600 dark:text-blue-400"
-              )}
-            >
-              {!config.referral.enabled
-                ? "Disabled"
-                : config.referral.required
-                ? "Mandatory"
-                : "Optional"}
+            <span>Gatekeeping Fields:</span>
+            <span className="font-semibold text-purple-600 dark:text-purple-400">
+              {gatekeeperFields.length} active roster / regex filters
             </span>
           </div>
           <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-            <span>Custom Fields:</span>
+            <span>Total Custom Fields:</span>
             <span className="font-semibold text-zinc-800 dark:text-zinc-200">
               {config.customFields.length} total ({config.customFields.filter((f) => f.required).length} required)
             </span>

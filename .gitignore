@@ -45,3 +45,6 @@ logs/
 *.log
 
 certificates
+
+# editor
+.vscode/

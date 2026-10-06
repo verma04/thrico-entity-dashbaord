@@ -73,7 +73,7 @@ export function AuthProtocolCard({ authMethod, onChange }: AuthProtocolCardProps
     {
       id: "GOOGLE_ONLY",
       title: "Google SSO Only",
-      description: "Fast 1-click login using Google Workspace or Gmail account.",
+      description: "Fast 1-click login. Member name is auto-synced from Google profile (no need for manual first/last name).",
       icon: (
         <div className="w-5 h-5 rounded-md bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shadow-2xs shrink-0">
           <GoogleSvg className="w-3 h-3" />
