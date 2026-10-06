@@ -2,10 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { PolarisFormCard } from "@/components/gamification/shared/polaris-form-ui";
-import { CustomFieldItem, ValidationMode } from "./types";
+import { CustomFieldItem } from "./types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -17,10 +15,8 @@ import {
   Plus,
   Sparkles,
   Layers,
-  Database,
   LayoutGrid,
   List as ListIcon,
-  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CustomFieldDrawer } from "./custom-field-drawer";

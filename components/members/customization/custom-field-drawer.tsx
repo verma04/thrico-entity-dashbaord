@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   Sheet,
   SheetContent,
@@ -40,12 +42,10 @@ import {
   CheckSquare,
   ShieldCheck,
   Database,
-  FileCheck2,
   Check,
   AlertCircle,
   Regex,
   Plus,
-  Trash2,
   X,
   Code2,
 } from "lucide-react";
@@ -80,6 +80,65 @@ const SAMPLE_REGEX_PATTERNS = [
   { label: "Phone (10 digits)", pattern: "^[0-9]{10}$", sample: "9876543210" },
 ];
 
+interface CustomFieldFormValues {
+  label: string;
+  key: string;
+  type: CustomFieldType;
+  placeholder: string;
+  helperText: string;
+  required: boolean;
+  options: string[];
+  validationMode: ValidationMode;
+  validationRegex: string;
+  validationErrorMessage: string;
+  blockIfNotExists: boolean;
+  preventDuplicate: boolean;
+}
+
+// Yup schema for custom field definition
+const customFieldValidationSchema = Yup.object().shape({
+  label: Yup.string().trim().required("Field label is required"),
+  key: Yup.string()
+    .trim()
+    .required("Field key is required")
+    .matches(
+      /^[a-z0-9_]+$/,
+      "Field key can only contain lowercase letters, numbers, and underscores"
+    ),
+  type: Yup.string().required("Input type is required"),
+  placeholder: Yup.string(),
+  helperText: Yup.string(),
+  required: Yup.boolean().default(false),
+  options: Yup.array().of(Yup.string().required()).when("type", {
+    is: "select",
+    then: (schema) => schema.min(1, "Dropdown select fields must have at least one option"),
+    otherwise: (schema) => schema.optional(),
+  }),
+  validationMode: Yup.string()
+    .oneOf(["NONE", "REGEX", "CSV_ROSTER", "BOTH"])
+    .default("NONE"),
+  validationRegex: Yup.string().when("validationMode", {
+    is: (mode: string) => mode === "REGEX" || mode === "BOTH",
+    then: (schema) =>
+      schema
+        .trim()
+        .required("Regex validation pattern is required")
+        .test("is-valid-regex", "Invalid regular expression pattern syntax", (val) => {
+          if (!val) return false;
+          try {
+            new RegExp(val);
+            return true;
+          } catch {
+            return false;
+          }
+        }),
+    otherwise: (schema) => schema.optional(),
+  }),
+  validationErrorMessage: Yup.string().optional(),
+  blockIfNotExists: Yup.boolean().default(true),
+  preventDuplicate: Yup.boolean().default(true),
+});
+
 export function CustomFieldDrawer({
   open,
   onOpenChange,
@@ -87,162 +146,114 @@ export function CustomFieldDrawer({
   onSave,
   onOpenRosterManager,
 }: CustomFieldDrawerProps) {
-  const [label, setLabel] = useState("");
-  const [key, setKey] = useState("");
-  const [type, setType] = useState<CustomFieldType>("text");
-  const [placeholder, setPlaceholder] = useState("");
-  const [helperText, setHelperText] = useState("");
-  const [required, setRequired] = useState(false);
-  const [options, setOptions] = useState<string[]>([]);
   const [newOptionInput, setNewOptionInput] = useState("");
-
-  // Gatekeeping & Validation
-  const [validationMode, setValidationMode] = useState<ValidationMode>("NONE");
-  const [validationRegex, setValidationRegex] = useState("");
-  const [validationErrorMessage, setValidationErrorMessage] = useState("");
-  const [blockIfNotExists, setBlockIfNotExists] = useState(true);
-  const [preventDuplicate, setPreventDuplicate] = useState(true);
   const [regexTestInput, setRegexTestInput] = useState("");
 
-  // Sync state when editing field changes or drawer opens
-  useEffect(() => {
-    if (fieldToEdit) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLabel(fieldToEdit.label);
-      setKey(fieldToEdit.key);
-      setType(fieldToEdit.type);
-      setPlaceholder(fieldToEdit.placeholder || "");
-      setHelperText(fieldToEdit.helperText || "");
-      setRequired(fieldToEdit.required);
-      setOptions(fieldToEdit.options ? [...fieldToEdit.options] : []);
-      setNewOptionInput("");
-      setValidationMode(fieldToEdit.validationMode || "NONE");
-      setValidationRegex(fieldToEdit.validationRegex || "");
-      setValidationErrorMessage(fieldToEdit.validationErrorMessage || "");
-      setBlockIfNotExists(fieldToEdit.blockIfNotExists ?? true);
-      setPreventDuplicate(fieldToEdit.preventDuplicate ?? true);
-      setRegexTestInput("");
-    } else {
-      setLabel("");
-      setKey("");
-      setType("text");
-      setPlaceholder("");
-      setHelperText("");
-      setRequired(false);
-      setOptions([]);
-      setNewOptionInput("");
-      setValidationMode("NONE");
-      setValidationRegex("");
-      setValidationErrorMessage("");
-      setBlockIfNotExists(true);
-      setPreventDuplicate(true);
-      setRegexTestInput("");
-    }
-  }, [fieldToEdit, open]);
+  const formik = useFormik<CustomFieldFormValues>({
+    initialValues: {
+      label: fieldToEdit?.label || "",
+      key: fieldToEdit?.key || "",
+      type: fieldToEdit?.type || "text",
+      placeholder: fieldToEdit?.placeholder || "",
+      helperText: fieldToEdit?.helperText || "",
+      required: fieldToEdit?.required ?? false,
+      options: fieldToEdit?.options ? [...fieldToEdit.options] : [],
+      validationMode: fieldToEdit?.validationMode || "NONE",
+      validationRegex: fieldToEdit?.validationRegex || "",
+      validationErrorMessage: fieldToEdit?.validationErrorMessage || "",
+      blockIfNotExists: fieldToEdit?.blockIfNotExists ?? true,
+      preventDuplicate: fieldToEdit?.preventDuplicate ?? true,
+    },
+    validationSchema: customFieldValidationSchema,
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      const sanitizedKey = values.key.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_");
+
+      const newField: CustomFieldItem = {
+        id: fieldToEdit?.id || `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        key: sanitizedKey,
+        label: values.label.trim(),
+        type: values.type,
+        placeholder: values.placeholder.trim() || undefined,
+        helperText: values.helperText.trim() || undefined,
+        required: values.required,
+        options: values.type === "select" ? values.options : undefined,
+        order: fieldToEdit?.order ?? 0,
+        validationMode: values.validationMode,
+        validationRegex:
+          values.validationMode === "REGEX" || values.validationMode === "BOTH"
+            ? values.validationRegex.trim()
+            : undefined,
+        validationErrorMessage:
+          values.validationErrorMessage.trim() ||
+          (values.validationMode === "CSV_ROSTER"
+            ? "This ID is not on the organization's approved roster."
+            : values.validationMode === "BOTH"
+            ? "Invalid ID format or ID not found in approved roster."
+            : values.validationMode === "REGEX"
+            ? "Input format does not match the required pattern."
+            : undefined),
+        blockIfNotExists:
+          values.validationMode === "CSV_ROSTER" || values.validationMode === "BOTH"
+            ? values.blockIfNotExists
+            : false,
+        preventDuplicate:
+          values.validationMode !== "NONE" ? values.preventDuplicate : false,
+      };
+
+      onSave(newField);
+      onOpenChange(false);
+    },
+  });
 
   const handleLabelChange = (val: string) => {
-    setLabel(val);
-    if (!fieldToEdit) {
+    formik.setFieldValue("label", val);
+    if (!fieldToEdit && !formik.touched.key) {
       const slug = val
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "_")
         .replace(/^_+|_+$/g, "");
-      setKey(slug);
+      formik.setFieldValue("key", slug);
     }
   };
 
   const handleAddOption = () => {
     const trimmed = newOptionInput.trim();
     if (!trimmed) return;
-    if (options.includes(trimmed)) {
+    if (formik.values.options.includes(trimmed)) {
       toast.error("Option already exists.");
       return;
     }
-    setOptions([...options, trimmed]);
+    formik.setFieldValue("options", [...formik.values.options, trimmed]);
     setNewOptionInput("");
   };
 
   const handleRemoveOption = (index: number) => {
-    setOptions(options.filter((_, i) => i !== index));
+    formik.setFieldValue(
+      "options",
+      formik.values.options.filter((_, i) => i !== index)
+    );
   };
 
   // Live Regex Test result
   const regexTestResult = useMemo(() => {
-    if (!regexTestInput || !validationRegex) return null;
+    if (!regexTestInput || !formik.values.validationRegex) return null;
     try {
-      const re = new RegExp(validationRegex);
+      const re = new RegExp(formik.values.validationRegex);
       return re.test(regexTestInput);
     } catch {
       return "INVALID_PATTERN";
     }
-  }, [regexTestInput, validationRegex]);
+  }, [regexTestInput, formik.values.validationRegex]);
 
-  const handleSaveField = () => {
-    if (!label.trim()) {
-      toast.error("Please enter a field label.");
-      return;
-    }
-    const sanitizedKey = key.trim()
-      ? key.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_")
-      : label.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_");
-
-    if (!sanitizedKey) {
-      toast.error("Field key is required.");
-      return;
-    }
-
-    if (type === "select" && options.length === 0) {
-      toast.error("Dropdown select fields must have at least one option.");
-      return;
-    }
-
-    if (validationMode === "REGEX" || validationMode === "BOTH") {
-      if (!validationRegex.trim()) {
-        toast.error("Regex validation mode requires a valid regular expression pattern.");
-        return;
-      }
-      try {
-        new RegExp(validationRegex.trim());
-      } catch {
-        toast.error("Invalid regular expression syntax. Please verify your pattern.");
-        return;
+  const handleSubmitClick = () => {
+    formik.handleSubmit();
+    if (!formik.isValid && Object.keys(formik.errors).length > 0) {
+      const firstError = Object.values(formik.errors)[0];
+      if (typeof firstError === "string") {
+        toast.error(firstError);
       }
     }
-
-    const newField: CustomFieldItem = {
-      id: fieldToEdit?.id || `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      key: sanitizedKey,
-      label: label.trim(),
-      type,
-      placeholder: placeholder.trim() || undefined,
-      helperText: helperText.trim() || undefined,
-      required,
-      options: type === "select" ? options : undefined,
-      order: fieldToEdit?.order ?? 0,
-      validationMode,
-      validationRegex:
-        validationMode === "REGEX" || validationMode === "BOTH"
-          ? validationRegex.trim()
-          : undefined,
-      validationErrorMessage:
-        validationErrorMessage.trim() ||
-        (validationMode === "CSV_ROSTER"
-          ? "This ID is not on the organization's approved roster."
-          : validationMode === "BOTH"
-          ? "Invalid ID format or ID not found in approved roster."
-          : validationMode === "REGEX"
-          ? "Input format does not match the required pattern."
-          : undefined),
-      blockIfNotExists:
-        validationMode === "CSV_ROSTER" || validationMode === "BOTH" ? blockIfNotExists : false,
-      preventDuplicate:
-        validationMode === "CSV_ROSTER" || validationMode === "BOTH" || validationMode === "REGEX"
-          ? preventDuplicate
-          : false,
-    };
-
-    onSave(newField);
-    onOpenChange(false);
   };
 
   return (
@@ -268,7 +279,7 @@ export function CustomFieldDrawer({
         </SheetHeader>
 
         {/* Scrollable Form Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <form onSubmit={formik.handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* ── STEP 1: FIELD IDENTITY ── */}
           <div className="space-y-4 rounded-xl border border-border/70 p-4 bg-card shadow-2xs">
             <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
@@ -281,7 +292,7 @@ export function CustomFieldDrawer({
                 </span>
               </div>
               <Badge variant="outline" className="text-[10px] font-mono">
-                key: {key || "field_key"}
+                key: {formik.values.key || "field_key"}
               </Badge>
             </div>
 
@@ -290,12 +301,22 @@ export function CustomFieldDrawer({
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Field Label *</Label>
                 <Input
+                  name="label"
                   placeholder="e.g. Student Roll Number, Employee ID"
-                  value={label}
+                  value={formik.values.label}
                   onChange={(e) => handleLabelChange(e.target.value)}
-                  className="h-9 text-xs"
+                  onBlur={formik.handleBlur}
+                  className={cn(
+                    "h-9 text-xs",
+                    formik.touched.label && formik.errors.label && "border-destructive focus-visible:ring-destructive"
+                  )}
                   autoFocus
                 />
+                {formik.touched.label && formik.errors.label && (
+                  <p className="text-[11px] text-destructive font-medium">
+                    {formik.errors.label}
+                  </p>
+                )}
               </div>
 
               {/* Field Key */}
@@ -305,18 +326,31 @@ export function CustomFieldDrawer({
                   <span className="text-[10px] text-muted-foreground font-mono">JSON property</span>
                 </div>
                 <Input
+                  name="key"
                   placeholder="e.g. student_id, employee_code"
-                  value={key}
-                  onChange={(e) => setKey(e.target.value)}
-                  className="h-9 text-xs font-mono"
+                  value={formik.values.key}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={cn(
+                    "h-9 text-xs font-mono",
+                    formik.touched.key && formik.errors.key && "border-destructive focus-visible:ring-destructive"
+                  )}
                 />
+                {formik.touched.key && formik.errors.key && (
+                  <p className="text-[11px] text-destructive font-medium">
+                    {formik.errors.key}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Field Type */}
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Input Type</Label>
-              <Select value={type} onValueChange={(val: string) => setType(val as CustomFieldType)}>
+              <Select
+                value={formik.values.type}
+                onValueChange={(val: string) => formik.setFieldValue("type", val as CustomFieldType)}
+              >
                 <SelectTrigger className="h-9 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -334,7 +368,7 @@ export function CustomFieldDrawer({
             </div>
 
             {/* Select Options Manager */}
-            {type === "select" && (
+            {formik.values.type === "select" && (
               <div className="space-y-2 pt-2 border-t border-border/50">
                 <Label className="text-xs font-semibold">Dropdown Options *</Label>
                 <div className="flex gap-2">
@@ -360,9 +394,14 @@ export function CustomFieldDrawer({
                     Add
                   </Button>
                 </div>
-                {options.length > 0 && (
+                {formik.errors.options && typeof formik.errors.options === "string" && (
+                  <p className="text-[11px] text-destructive font-medium">
+                    {formik.errors.options}
+                  </p>
+                )}
+                {formik.values.options.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {options.map((opt, idx) => (
+                    {formik.values.options.map((opt, idx) => (
                       <Badge
                         key={idx}
                         variant="secondary"
@@ -385,18 +424,20 @@ export function CustomFieldDrawer({
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Placeholder Text</Label>
                 <Input
+                  name="placeholder"
                   placeholder="e.g. STU-2026-1042"
-                  value={placeholder}
-                  onChange={(e) => setPlaceholder(e.target.value)}
+                  value={formik.values.placeholder}
+                  onChange={formik.handleChange}
                   className="h-8 text-xs"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Helper / Subtitle</Label>
                 <Input
+                  name="helperText"
                   placeholder="e.g. Enter your university ID"
-                  value={helperText}
-                  onChange={(e) => setHelperText(e.target.value)}
+                  value={formik.values.helperText}
+                  onChange={formik.handleChange}
                   className="h-8 text-xs"
                 />
               </div>
@@ -418,18 +459,18 @@ export function CustomFieldDrawer({
                 variant="outline"
                 className={cn(
                   "text-[10px] font-semibold",
-                  validationMode === "CSV_ROSTER" || validationMode === "BOTH"
+                  formik.values.validationMode === "CSV_ROSTER" || formik.values.validationMode === "BOTH"
                     ? "border-purple-300 text-purple-700 bg-purple-50 dark:bg-purple-950/40"
-                    : validationMode === "REGEX"
+                    : formik.values.validationMode === "REGEX"
                     ? "border-blue-300 text-blue-700 bg-blue-50 dark:bg-blue-950/40"
                     : "border-border text-muted-foreground"
                 )}
               >
-                {validationMode === "BOTH"
+                {formik.values.validationMode === "BOTH"
                   ? "Dual Verification"
-                  : validationMode === "CSV_ROSTER"
+                  : formik.values.validationMode === "CSV_ROSTER"
                   ? "CSV Whitelist"
-                  : validationMode === "REGEX"
+                  : formik.values.validationMode === "REGEX"
                   ? "Regex Pattern"
                   : "Standard Input"}
               </Badge>
@@ -440,10 +481,10 @@ export function CustomFieldDrawer({
               {/* Option 1: None */}
               <button
                 type="button"
-                onClick={() => setValidationMode("NONE")}
+                onClick={() => formik.setFieldValue("validationMode", "NONE")}
                 className={cn(
                   "p-3 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5",
-                  validationMode === "NONE"
+                  formik.values.validationMode === "NONE"
                     ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/30 ring-1 ring-indigo-600"
                     : "border-border bg-muted/10 hover:border-border/80"
                 )}
@@ -464,10 +505,10 @@ export function CustomFieldDrawer({
               {/* Option 2: Regex */}
               <button
                 type="button"
-                onClick={() => setValidationMode("REGEX")}
+                onClick={() => formik.setFieldValue("validationMode", "REGEX")}
                 className={cn(
                   "p-3 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5",
-                  validationMode === "REGEX"
+                  formik.values.validationMode === "REGEX"
                     ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/30 ring-1 ring-blue-600"
                     : "border-border bg-muted/10 hover:border-border/80"
                 )}
@@ -488,10 +529,10 @@ export function CustomFieldDrawer({
               {/* Option 3: CSV Roster */}
               <button
                 type="button"
-                onClick={() => setValidationMode("CSV_ROSTER")}
+                onClick={() => formik.setFieldValue("validationMode", "CSV_ROSTER")}
                 className={cn(
                   "p-3 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5",
-                  validationMode === "CSV_ROSTER"
+                  formik.values.validationMode === "CSV_ROSTER"
                     ? "border-purple-600 bg-purple-50/50 dark:bg-purple-950/30 ring-1 ring-purple-600"
                     : "border-border bg-muted/10 hover:border-border/80"
                 )}
@@ -512,10 +553,10 @@ export function CustomFieldDrawer({
               {/* Option 4: Both */}
               <button
                 type="button"
-                onClick={() => setValidationMode("BOTH")}
+                onClick={() => formik.setFieldValue("validationMode", "BOTH")}
                 className={cn(
                   "p-3 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5",
-                  validationMode === "BOTH"
+                  formik.values.validationMode === "BOTH"
                     ? "border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 ring-1 ring-emerald-600"
                     : "border-border bg-muted/10 hover:border-border/80"
                 )}
@@ -535,7 +576,7 @@ export function CustomFieldDrawer({
             </div>
 
             {/* REGEX SETTINGS */}
-            {(validationMode === "REGEX" || validationMode === "BOTH") && (
+            {(formik.values.validationMode === "REGEX" || formik.values.validationMode === "BOTH") && (
               <div className="space-y-3 pt-3 border-t border-border/50">
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -543,11 +584,23 @@ export function CustomFieldDrawer({
                     <span className="text-[10px] text-muted-foreground font-mono">JavaScript RegExp</span>
                   </div>
                   <Input
+                    name="validationRegex"
                     placeholder="e.g. ^EMP-[0-9]{4,6}$"
-                    value={validationRegex}
-                    onChange={(e) => setValidationRegex(e.target.value)}
-                    className="h-9 text-xs font-mono"
+                    value={formik.values.validationRegex}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={cn(
+                      "h-9 text-xs font-mono",
+                      formik.touched.validationRegex &&
+                        formik.errors.validationRegex &&
+                        "border-destructive focus-visible:ring-destructive"
+                    )}
                   />
+                  {formik.touched.validationRegex && formik.errors.validationRegex && (
+                    <p className="text-[11px] text-destructive font-medium">
+                      {formik.errors.validationRegex}
+                    </p>
+                  )}
                   {/* Quick sample chips */}
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {SAMPLE_REGEX_PATTERNS.map((p, idx) => (
@@ -555,7 +608,7 @@ export function CustomFieldDrawer({
                         key={idx}
                         type="button"
                         onClick={() => {
-                          setValidationRegex(p.pattern);
+                          formik.setFieldValue("validationRegex", p.pattern);
                           setRegexTestInput(p.sample);
                         }}
                         className="text-[10px] font-mono px-2 py-0.5 rounded border border-border/80 bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
@@ -604,7 +657,7 @@ export function CustomFieldDrawer({
             )}
 
             {/* CSV ROSTER SETTINGS & ACTIONS */}
-            {(validationMode === "CSV_ROSTER" || validationMode === "BOTH") && (
+            {(formik.values.validationMode === "CSV_ROSTER" || formik.values.validationMode === "BOTH") && (
               <div className="space-y-3 pt-3 border-t border-border/50">
                 <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50/60 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/40">
                   <div className="space-y-0.5">
@@ -620,7 +673,12 @@ export function CustomFieldDrawer({
                     <Button
                       type="button"
                       size="sm"
-                      onClick={() => onOpenRosterManager(key || "field", label || "Field")}
+                      onClick={() =>
+                        onOpenRosterManager(
+                          formik.values.key || "field",
+                          formik.values.label || "Field"
+                        )
+                      }
                       className="text-xs h-8 gap-1.5 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer shadow-2xs"
                     >
                       <Database className="w-3 h-3" />
@@ -640,8 +698,8 @@ export function CustomFieldDrawer({
                     </p>
                   </div>
                   <Switch
-                    checked={blockIfNotExists}
-                    onCheckedChange={setBlockIfNotExists}
+                    checked={formik.values.blockIfNotExists}
+                    onCheckedChange={(val) => formik.setFieldValue("blockIfNotExists", val)}
                     className="data-[state=checked]:bg-purple-600"
                   />
                 </div>
@@ -649,7 +707,7 @@ export function CustomFieldDrawer({
             )}
 
             {/* DUPLICATE PREVENTION (1:1 CLAIM) */}
-            {validationMode !== "NONE" && (
+            {formik.values.validationMode !== "NONE" && (
               <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/60">
                 <div className="space-y-0.5 pr-4">
                   <span className="text-xs font-semibold text-foreground block">
@@ -660,21 +718,22 @@ export function CustomFieldDrawer({
                   </p>
                 </div>
                 <Switch
-                  checked={preventDuplicate}
-                  onCheckedChange={setPreventDuplicate}
+                  checked={formik.values.preventDuplicate}
+                  onCheckedChange={(val) => formik.setFieldValue("preventDuplicate", val)}
                   className="data-[state=checked]:bg-indigo-600"
                 />
               </div>
             )}
 
             {/* CUSTOM ERROR MESSAGE */}
-            {validationMode !== "NONE" && (
+            {formik.values.validationMode !== "NONE" && (
               <div className="space-y-1.5 pt-2">
                 <Label className="text-xs font-semibold">Custom Validation Error Message</Label>
                 <Input
+                  name="validationErrorMessage"
                   placeholder="e.g. Invalid Roll Number or ID not found on university roster."
-                  value={validationErrorMessage}
-                  onChange={(e) => setValidationErrorMessage(e.target.value)}
+                  value={formik.values.validationErrorMessage}
+                  onChange={formik.handleChange}
                   className="h-8 text-xs"
                 />
               </div>
@@ -693,13 +752,13 @@ export function CustomFieldDrawer({
                 </p>
               </div>
               <Switch
-                checked={required}
-                onCheckedChange={setRequired}
+                checked={formik.values.required}
+                onCheckedChange={(val) => formik.setFieldValue("required", val)}
                 className="data-[state=checked]:bg-indigo-600"
               />
             </div>
           </div>
-        </div>
+        </form>
 
         {/* Sticky Footer */}
         <SheetFooter className="p-4 border-t border-border/60 bg-muted/10 flex sm:flex-row gap-2 justify-end">
@@ -715,7 +774,8 @@ export function CustomFieldDrawer({
           <Button
             type="button"
             size="sm"
-            onClick={handleSaveField}
+            onClick={handleSubmitClick}
+            disabled={formik.isSubmitting}
             className="text-xs h-9 bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer shadow-2xs"
           >
             {fieldToEdit ? "Save Changes" : "Add Custom Field"}
