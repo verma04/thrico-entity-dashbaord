@@ -1,4 +1,11 @@
-import { gql, useQuery, useMutation, useLazyQuery } from "@apollo/client";
+import {
+  gql,
+  useQuery,
+  useMutation,
+  useLazyQuery,
+  QueryHookOptions,
+  MutationHookOptions,
+} from "@apollo/client";
 
 const ALBUM_FIELDS = `
   id
@@ -27,6 +34,10 @@ const IMAGE_FIELDS = `
   optimizedUrl
   errorMessage
   commentCount
+  source
+  externalUploaderName
+  externalUploaderEmail
+  externalUserId
   createdAt
   updatedAt
 `;
@@ -246,4 +257,132 @@ export const useAddMediaGalleryVideo = (albumId: string) =>
     refetchQueries: [
       { query: GET_MEDIA_GALLERY_ALBUM, variables: { id: albumId } },
     ],
+  });
+
+
+export const GET_MEDIA_GALLERY_SDK_SETTINGS = gql`
+  query GetMediaGallerySdkSettings {
+    getMediaGallerySdkSettings {
+      id
+      entityId
+      allowThirdPartyUploads
+      requireModeration
+      defaultAlbumId
+      defaultAlbum {
+        id
+        title
+      }
+      allowedAlbumIds
+      allowUserSelectAlbum
+      allowedMediaTypes
+      maxImageSizeMb
+      maxVideoSizeMb
+      maxVideoDurationSeconds
+      maxDailyUploadsPerUploader
+      maxDailyUploadsTotal
+      requireUploaderInfo
+      requireCaption
+      webhookUrl
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_MEDIA_GALLERY_SDK_SETTINGS = gql`
+  mutation UpdateMediaGallerySdkSettings($input: UpdateMediaGallerySdkSettingsInput!) {
+    updateMediaGallerySdkSettings(input: $input) {
+      id
+      entityId
+      allowThirdPartyUploads
+      requireModeration
+      defaultAlbumId
+      defaultAlbum {
+        id
+        title
+      }
+      allowedAlbumIds
+      allowUserSelectAlbum
+      allowedMediaTypes
+      maxImageSizeMb
+      maxVideoSizeMb
+      maxVideoDurationSeconds
+      maxDailyUploadsPerUploader
+      maxDailyUploadsTotal
+      requireUploaderInfo
+      requireCaption
+      webhookUrl
+      updatedAt
+    }
+  }
+`;
+
+export const GET_MEDIA_GALLERY_SUBMISSIONS = gql`
+  query GetMediaGallerySubmissions($input: GetMediaGallerySubmissionsInput) {
+    getMediaGallerySubmissions(input: $input) {
+      items {
+        ${IMAGE_FIELDS}
+      }
+      totalCount
+      pendingCount
+    }
+  }
+`;
+
+export const APPROVE_MEDIA_GALLERY_SUBMISSION = gql`
+  mutation ApproveMediaGallerySubmission($id: ID!) {
+    approveMediaGallerySubmission(id: $id) {
+      ${IMAGE_FIELDS}
+    }
+  }
+`;
+
+export const REJECT_MEDIA_GALLERY_SUBMISSION = gql`
+  mutation RejectMediaGallerySubmission($id: ID!, $reason: String) {
+    rejectMediaGallerySubmission(id: $id, reason: $reason) {
+      ${IMAGE_FIELDS}
+    }
+  }
+`;
+
+export const useGetMediaGallerySdkSettings = (
+  options?: QueryHookOptions
+) =>
+  useQuery(GET_MEDIA_GALLERY_SDK_SETTINGS, {
+    fetchPolicy: "network-only",
+    ...options,
+  });
+
+export const useUpdateMediaGallerySdkSettings = (
+  options?: MutationHookOptions
+) =>
+  useMutation(UPDATE_MEDIA_GALLERY_SDK_SETTINGS, {
+    refetchQueries: [{ query: GET_MEDIA_GALLERY_SDK_SETTINGS }],
+    ...options,
+  });
+
+export const useGetMediaGallerySubmissions = (
+  input?: Record<string, unknown>,
+  options?: QueryHookOptions
+) =>
+  useQuery(GET_MEDIA_GALLERY_SUBMISSIONS, {
+    variables: { input },
+    fetchPolicy: "network-only",
+    ...options,
+  });
+
+export const useApproveMediaGallerySubmission = (
+  options?: MutationHookOptions
+) =>
+  useMutation(APPROVE_MEDIA_GALLERY_SUBMISSION, {
+    refetchQueries: [{ query: GET_MEDIA_GALLERY_SUBMISSIONS }],
+    ...options,
+  });
+
+export const useRejectMediaGallerySubmission = (
+  options?: MutationHookOptions
+) =>
+  useMutation(REJECT_MEDIA_GALLERY_SUBMISSION, {
+    refetchQueries: [{ query: GET_MEDIA_GALLERY_SUBMISSIONS }],
+    ...options,
   });

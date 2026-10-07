@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thrico Media Gallery — Minimal Button & Raw Upload Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        p {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 50px;
+            border: none;
+            background-color: #0DA4A3;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #008782;
+        }
+
+        .status {
+            margin-top: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #0284c7;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Thrico Media Gallery SDK Test</h1>
+
+    <!-- Demo 1: Attach to custom button -->
+    <div class="card">
+        <h2>1. Attach to Custom Button</h2>
+        <p>Clicking this button triggers the native file picker and uploads directly.</p>
+        <button id="customUploadBtn" class="btn">
+            Upload Photo / Video
+        </button>
+        <div id="btnStatus" class="status"></div>
+    </div>
+
+    <!-- Demo 2: Pass raw image from file input -->
+    <div class="card">
+        <h2>2. Raw File Input (Zero UI)</h2>
+        <p>Select any raw image or video. Uploads directly without extra forms.</p>
+        <input type="file" id="rawFileInput" accept="image/*,video/*" />
+        <div id="rawStatus" class="status"></div>
+    </div>
+
+    <!-- Demo 3: Turnkey Minimal Button Container -->
+    <div class="card">
+        <h2>3. Turnkey Minimal Button</h2>
+        <p>Rendered automatically by the SDK.</p>
+        <div id="thrico-gallery-uploader" data-client-id="thrico_client_6120131889388ecaeb261ea18598cbc3"
+            data-album-id="9e2a0781-9a65-4f7a-a6c2-60203f3a51a1" data-button-text="Add Memories">
+        </div>
+    </div>
+
+    <!-- Thrico Media Gallery CDN Script -->
+    <script src="https://sdk.thrico.network/gallery-uploader.min.js"></script>
+
+    <script>
+        const CLIENT_ID = "thrico_client_6120131889388ecaeb261ea18598cbc3";
+        const ALBUM_ID = "9e2a0781-9a65-4f7a-a6c2-60203f3a51a1";
+
+        // 1. Attach to custom button
+        ThricoGallery.attachButton("#customUploadBtn", {
+            clientId: CLIENT_ID,
+            albumId: ALBUM_ID,
+            onStart: (file) => {
+                document.getElementById("btnStatus").innerText = "Uploading " + file.name + "...";
+            },
+            onProgress: (p) => {
+                document.getElementById("btnStatus").innerText = "Uploading: " + p + "%";
+            },
+            onSuccess: (item) => {
+                document.getElementById("btnStatus").innerText = "Uploaded! URL: " + item.url;
+            },
+            onError: (err) => {
+                document.getElementById("btnStatus").innerText = "Error: " + err.message;
+            }
+        });
+
+        // 2. Direct raw file upload
+        ThricoGallery.init({ clientId: CLIENT_ID, albumId: ALBUM_ID });
+        document.getElementById("rawFileInput").addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById("rawStatus");
+            statusEl.innerText = "Uploading raw file...";
+            try {
+                const item = await ThricoGallery.upload(file, {
+                    onProgress: (p) => { statusEl.innerText = "Uploading: " + p + "%"; }
+                });
+                statusEl.innerText = "Uploaded successfully: " + item.url;
+            } catch (err) {
+                statusEl.innerText = "Failed: " + err.message;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import { Images, Settings } from "lucide-react";
+import { Images, Settings, Code2 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 import { withModulePermission } from "@/components/hoc/with-module-permission";
@@ -13,6 +13,11 @@ function MediaGalleryLayout({ children }: { children: React.ReactNode }) {
         key: "", // maps to /media-gallery
         label: `Albums`,
         icon: <Images size={18} />,
+      },
+      {
+        key: "developer", // maps to /media-gallery/developer
+        label: "Developer & SDK",
+        icon: <Code2 size={18} />,
       },
       {
         key: "settings", // maps to /media-gallery/settings
