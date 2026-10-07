@@ -292,7 +292,7 @@ export interface PolarisCapInputProps {
   id: string;
   label: string;
   periodSuffix: string;
-  value: any;
+  value: string | number | null | undefined;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClear: () => void;
@@ -499,7 +499,7 @@ export function PolarisFormLayout({
   return (
     <div
       className={cn(
-        "max-w-[1280px] mx-auto w-full px-0 sm:px-0 py-2 space-y-3.5 pb-28",
+        "max-w-[1280px] mx-auto w-full px-4 sm:px-6 py-5 space-y-3.5 pb-28",
         className,
       )}
     >

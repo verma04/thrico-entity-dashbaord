@@ -3,17 +3,18 @@
 import React, { useState, useEffect } from "react";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
-import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import {
-  Film,
+  EntitySettings,
+  useEntitySettings,
+  useUpdateEntitySettings,
+} from "@/graphql/actions";
+import {
   Globe,
   Video,
   Bell,
   Shield,
   ShieldCheck,
-  Sparkles,
   PlaySquare,
-  CheckCircle2,
   Rss,
   Compass,
   Users,
@@ -23,7 +24,6 @@ import {
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   PolarisFormLayout,
   PolarisFormCard,
@@ -61,7 +61,7 @@ const DEFAULT_SETTINGS: MomentsSettingsState = {
 const createDefaultTabs = (
   moduleName: string,
   singularName: string,
-  entitySettings?: any
+  entitySettings?: EntitySettings
 ): ModuleTabItem[] => {
   const tabNames = (entitySettings?.momentsTabNames as Record<string, string>) || {};
   const tabOrder = (entitySettings?.momentsTabOrder as string[]) || [
@@ -122,7 +122,7 @@ function MomentsSettingsPage() {
   const moduleName = useModuleStore((state) => state.momentModuleName);
   const singularName = useModuleStore((state) => state.momentSingularName);
 
-  const { data, loading, refetch } = useEntitySettings();
+  const { data, refetch } = useEntitySettings();
   const [update, { loading: isSaving }] = useUpdateEntitySettings({});
 
   const [formData, setFormData] = useState<MomentsSettingsState>(() => ({
@@ -143,6 +143,7 @@ function MomentsSettingsPage() {
 
   useEffect(() => {
     if (data?.getEntitySettings) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData((prev) => ({
         ...prev,
         allowEntityMomentsInFeed:
@@ -212,9 +213,9 @@ function MomentsSettingsPage() {
       toast.success(`${moduleName} settings synchronized successfully.`);
       setHasChanged(false);
       refetch?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(
-        error.message || `Failed to update ${moduleName.toLowerCase()} settings.`
+        (error as Error).message || `Failed to update ${moduleName.toLowerCase()} settings.`
       );
     }
   };
@@ -361,7 +362,7 @@ function MomentsSettingsPage() {
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70">
                   <span className="text-[11px] text-[#616161] dark:text-zinc-400">
-                    Button Text: <span className="text-[10px] text-[#8c9196]">(Default: &quot;Create ${singularName}&quot;)</span>
+                    Button Text: <span className="text-[10px] text-[#8c9196]">(Default: &quot;Create {singularName}&quot;)</span>
                   </span>
                   <input
                     type="text"
