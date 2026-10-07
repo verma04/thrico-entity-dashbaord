@@ -155,6 +155,14 @@ export interface EntitySettings {
   feedOrder?: any;
   feedEntityName?: string;
 
+  // Moments Tab Settings
+  allowMomentsDiscoverTab?: boolean;
+  allowMomentsConnectionsTab?: boolean;
+  allowMomentsMyMomentsTab?: boolean;
+  momentsTabNames?: Record<string, string>;
+  momentsTabOrder?: string[];
+  momentsCtaName?: string | null;
+
   // Media Gallery
   allowMediaGalleryComments?: boolean;
   allowMediaGalleryShareToFeed?: boolean;

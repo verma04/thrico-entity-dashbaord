@@ -172,6 +172,12 @@ export const GET_ENTITY_SETTINGS = gql`
       mediaGalleryFeedAlbumId
       mediaGalleryFeedName
       mediaGalleryFeedLinks
+      allowMomentsDiscoverTab
+      allowMomentsConnectionsTab
+      allowMomentsMyMomentsTab
+      momentsTabNames
+      momentsTabOrder
+      momentsCtaName
       feedOrder
       feedEntityName
       allowMediaGalleryComments
@@ -257,6 +263,12 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       mediaGalleryFeedAlbumId
       mediaGalleryFeedName
       mediaGalleryFeedLinks
+      allowMomentsDiscoverTab
+      allowMomentsConnectionsTab
+      allowMomentsMyMomentsTab
+      momentsTabNames
+      momentsTabOrder
+      momentsCtaName
       feedOrder
       feedEntityName
       allowMediaGalleryComments

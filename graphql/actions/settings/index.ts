@@ -76,6 +76,14 @@ export interface EntitySettings {
   feedOrder: string[];
   feedEntityName: string;
 
+  // Moments Tab Settings
+  allowMomentsDiscoverTab?: boolean;
+  allowMomentsConnectionsTab?: boolean;
+  allowMomentsMyMomentsTab?: boolean;
+  momentsTabNames?: Record<string, string>;
+  momentsTabOrder?: string[];
+  momentsCtaName?: string | null;
+
   // Media Gallery
   allowMediaGalleryComments: boolean;
   allowMediaGalleryShareToFeed?: boolean;
@@ -167,6 +175,14 @@ export interface UpdateEntitySettingsInput {
   allowEntityOpportunitiesInFeed?: boolean;
   feedOrder?: string[];
   feedEntityName?: string;
+
+  // Moments Tab Settings
+  allowMomentsDiscoverTab?: boolean;
+  allowMomentsConnectionsTab?: boolean;
+  allowMomentsMyMomentsTab?: boolean;
+  momentsTabNames?: Record<string, string>;
+  momentsTabOrder?: string[];
+  momentsCtaName?: string | null;
 
   // FAQ & Terms Fields
   termAndConditionsEvents?: string | null;

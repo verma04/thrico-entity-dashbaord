@@ -5,7 +5,7 @@ import { Video, Settings, List, PlayCircle } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
-import { useGetModuleCustomName } from "@/graphql/actions";
+import { useGetModuleCustomName, useEntitySettings } from "@/graphql/actions";
 import { useModuleStore } from "@/store/useModuleStore";
 
 function MomentsLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +15,9 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
 
   const { data: customNameData } = useGetModuleCustomName("moments");
   const fetchedName = customNameData?.getModuleCustomName;
+
+  const { data: settingsData } = useEntitySettings();
+  const customCta = settingsData?.getEntitySettings?.momentsCtaName;
 
   React.useEffect(() => {
     if (fetchedName) {
@@ -30,13 +33,13 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "create",
-      label: `Create ${singularName}`,
+      label: customCta || `Create ${singularName}`,
       icon: <PlayCircle className="h-4 w-4" />,
     },
   ];
 
   return (
-    <MenuItemsLayout active="moments" items={items}>
+    <MenuItemsLayout active="moments" items={items} showAdminTabs>
       {children}
     </MenuItemsLayout>
   );
