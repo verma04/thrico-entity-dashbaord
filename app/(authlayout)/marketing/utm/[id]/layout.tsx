@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   ADMIN_GET_UTM_CAMPAIGN_BY_ID,
@@ -81,13 +82,11 @@ function CampaignNavTab({
   icon: React.ElementType;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const isActive = pathname === href || (href.endsWith("/") && pathname.startsWith(href));
 
   return (
-    <button
-      type="button"
-      onClick={() => router.push(href)}
+    <Link
+      href={href}
       className={cn(
         "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
         isActive
@@ -97,7 +96,7 @@ function CampaignNavTab({
     >
       <Icon className="h-3.5 w-3.5" />
       {label}
-    </button>
+    </Link>
   );
 }
 
@@ -111,7 +110,7 @@ export default function CampaignDetailLayout({
   const router = useRouter();
   const id = params.id as string;
 
-  const { data, loading, error } = useQuery(ADMIN_GET_UTM_CAMPAIGN_BY_ID, {
+  const { data, loading } = useQuery(ADMIN_GET_UTM_CAMPAIGN_BY_ID, {
     variables: { id },
     skip: !id,
     fetchPolicy: "cache-and-network",
@@ -141,9 +140,9 @@ export default function CampaignDetailLayout({
       toast.success("Campaign deleted successfully");
       setShowDeleteDialog(false);
       router.push("/marketing/utm");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting campaign:", err);
-      toast.error(err.message || "Failed to delete campaign");
+      toast.error((err as Error).message || "Failed to delete campaign");
     }
   };
 

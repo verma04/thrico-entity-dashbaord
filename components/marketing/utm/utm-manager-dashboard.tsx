@@ -61,6 +61,7 @@ export function UtmManagerDashboard() {
   // URL state sync
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
+      if (pathname !== "/marketing/utm") return;
       const params = new URLSearchParams(searchParams.toString());
       for (const [key, value] of Object.entries(updates)) {
         if (value === null || value === "" || value === "ALL") {
@@ -69,7 +70,8 @@ export function UtmManagerDashboard() {
           params.set(key, value);
         }
       }
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
     [searchParams, pathname, router]
   );
@@ -123,13 +125,20 @@ export function UtmManagerDashboard() {
     }
   }, [data]);
 
+  const isFirstMount = React.useRef(true);
+
   // Handle Search URL Sync
   useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    if (pathname !== "/marketing/utm") return;
     const currentQ = searchParams.get("q") || "";
     if (debouncedSearch.trim() !== currentQ) {
       updateParams({ q: debouncedSearch.trim() || null });
     }
-  }, [debouncedSearch, searchParams, updateParams]);
+  }, [debouncedSearch, pathname, searchParams, updateParams]);
 
   // Refresh handler
   const handleRefresh = async () => {
@@ -409,38 +418,42 @@ export function UtmManagerDashboard() {
         />
 
         {/* Create Tracking Link Drawer (Formik & Yup) */}
-        <CreateUtmModal
-          open={showCreateDrawer}
-          onOpenChange={(open) => {
-            setShowCreateDrawer(open);
-            if (!open) {
-              setSelectedStarter(null);
+        {showCreateDrawer && (
+          <CreateUtmModal
+            open={showCreateDrawer}
+            onOpenChange={(open) => {
+              setShowCreateDrawer(open);
+              if (!open) {
+                setSelectedStarter(null);
+              }
+            }}
+            initialValues={
+              selectedStarter
+                ? {
+                    name: selectedStarter.title,
+                    destinationType: selectedStarter.destinationType,
+                    utmSource: selectedStarter.source,
+                    utmMedium: selectedStarter.medium,
+                    utmCampaign: selectedStarter.campaign,
+                    utmTerm: selectedStarter.recommendedTerm || "",
+                    utmContent: selectedStarter.recommendedContent || "",
+                  }
+                : null
             }
-          }}
-          initialValues={
-            selectedStarter
-              ? {
-                  name: selectedStarter.title,
-                  destinationType: selectedStarter.destinationType,
-                  utmSource: selectedStarter.source,
-                  utmMedium: selectedStarter.medium,
-                  utmCampaign: selectedStarter.campaign,
-                  utmTerm: selectedStarter.recommendedTerm || "",
-                  utmContent: selectedStarter.recommendedContent || "",
-                }
-              : null
-          }
-          onCreated={(newCampaign) => {
-            setLocalCampaigns((prev) => [newCampaign, ...prev]);
-            refetch();
-          }}
-        />
+            onCreated={(newCampaign) => {
+              setLocalCampaigns((prev) => [newCampaign, ...prev]);
+              refetch();
+            }}
+          />
+        )}
 
-        <ExportUtmModal
-          open={showExportModal}
-          onOpenChange={setShowExportModal}
-          campaigns={filteredCampaigns}
-        />
+        {showExportModal && (
+          <ExportUtmModal
+            open={showExportModal}
+            onOpenChange={setShowExportModal}
+            campaigns={filteredCampaigns}
+          />
+        )}
 
         <QrCodeModal
           campaign={selectedForQr}

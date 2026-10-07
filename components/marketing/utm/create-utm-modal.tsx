@@ -95,7 +95,7 @@ const COMMON_MEDIUMS = [
   "organic",
 ];
 
-export function CreateUtmModal({
+function CreateUtmModalInner({
   open,
   onOpenChange,
   onCreated,
@@ -179,15 +179,19 @@ export function CreateUtmModal({
     },
   });
 
+  const { setFieldValue } = formik;
+  const destinationType = formik.values.destinationType;
+  const destinationUrl = formik.values.destinationUrl;
+
   // Sync destinationUrl with dynamic domain if not manually set to custom
   useEffect(() => {
-    if (primaryUrl && formik.values.destinationType !== "CUSTOM") {
-      const currentUrl = formik.values.destinationUrl;
-      if (!currentUrl || currentUrl.includes("thrico.app") || currentUrl.includes("thrico.community")) {
-        formik.setFieldValue("destinationUrl", getDestinationUrl(formik.values.destinationType));
+    if (primaryUrl && destinationType !== "CUSTOM") {
+      const expectedUrl = getDestinationUrl(destinationType);
+      if (destinationUrl !== expectedUrl) {
+        setFieldValue("destinationUrl", expectedUrl);
       }
     }
-  }, [primaryUrl, formik.values.destinationType, formik.values.destinationUrl, getDestinationUrl, formik]);
+  }, [primaryUrl, destinationType, destinationUrl, getDestinationUrl, setFieldValue]);
 
   // Reset or fill form when open state changes
   useEffect(() => {
@@ -616,4 +620,9 @@ export function CreateUtmModal({
       </SheetContent>
     </Sheet>
   );
+}
+
+export function CreateUtmModal(props: CreateUtmModalProps) {
+  if (!props.open) return null;
+  return <CreateUtmModalInner {...props} />;
 }

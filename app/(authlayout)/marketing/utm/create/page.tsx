@@ -232,7 +232,6 @@ function QuickChip({
 
 // ── Destination Tile ───────────────────────────────────────────────────────
 function DestinationTile({
-  value,
   label,
   description,
   icon: Icon,
@@ -320,8 +319,11 @@ export default function CreateUtmCampaignPage() {
 
   // Sync destinationUrl once primaryUrl is resolved from GraphQL
   React.useEffect(() => {
-    if (primaryUrl && (!destinationUrl || destinationUrl.includes("thrico.app") || destinationUrl.includes("thrico.community"))) {
-      setDestinationUrl(getDestinationUrl(destinationType, activeBaseUrl));
+    if (primaryUrl && destinationType !== "CUSTOM") {
+      const expectedUrl = getDestinationUrl(destinationType, activeBaseUrl);
+      if (destinationUrl !== expectedUrl) {
+        setDestinationUrl(expectedUrl);
+      }
     }
   }, [primaryUrl, activeBaseUrl, destinationType, destinationUrl, getDestinationUrl]);
 

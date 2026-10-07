@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   X,
   Lock,
-  GripVertical,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import {
@@ -27,6 +26,7 @@ type MenuItem = {
   icon: React.ReactNode;
   section?: string;
   locked?: boolean;
+  href?: string;
 };
 
 type MenuItemsLayoutProps = {
@@ -128,7 +128,7 @@ function MenuTabs({
       process.env.NODE_ENV === "development"
     ) {
       const originalWarn = console.warn;
-      console.warn = (...args: any[]) => {
+      console.warn = (...args: unknown[]) => {
         if (
           typeof args[0] === "string" &&
           args[0].includes("unsupported nested scroll container detected")
@@ -167,9 +167,10 @@ function MenuTabs({
             item.key || `tab-${sectionName}-${idx}-${currentIndex}`,
           );
           const href =
-            item.key === "dashboard" || item.key === ""
+            item.href ||
+            (item.key === "dashboard" || item.key === ""
               ? `/${activeBase}`
-              : `/${activeBase}/${item.key}`;
+              : `/${activeBase}/${item.key}`);
 
           const tabButton = (
             <TabButton
