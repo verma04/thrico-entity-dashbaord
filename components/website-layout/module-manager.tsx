@@ -1,28 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useWebsiteBuilderStore,
   ModuleData,
-  ModuleType,
 } from "@/store/useWebsiteBuilderStore";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+  DraggableProvided,
+  DraggableStateSnapshot,
+} from "@hello-pangea/dnd";
 import { GripVertical, Eye, EyeOff, Settings, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/pages/confirm-dialog";
 import { NavigationManager } from "./navigation-manager";
 import { FooterManager } from "./footer-manager";
-
 import { AddModuleDialog } from "./modules/management/add-module-dialog";
 import {
   useReorderModules,
@@ -32,16 +27,16 @@ import {
 
 const ModuleCard = ({
   module,
-  index,
   isDraggable,
   provided,
+  snapshot,
   onDelete,
   onToggle,
 }: {
   module: ModuleData;
-  index?: number;
   isDraggable: boolean;
-  provided?: any;
+  provided?: DraggableProvided;
+  snapshot?: DraggableStateSnapshot;
   onDelete: (moduleId: string) => void;
   onToggle: (moduleId: string, isEnabled: boolean) => void;
 }) => {
@@ -55,143 +50,147 @@ const ModuleCard = ({
     setIsDeleteOpen(false);
   };
 
+  const isSelected = selectedModuleId === module.id;
+
   return (
-    <div
-      ref={provided?.innerRef}
-      {...provided?.draggableProps}
-      className={cn(
-        "group flex items-center gap-2 p-2 rounded-lg border bg-card text-card-foreground transition-all",
-        provided?.snapshot?.isDragging
-          ? "shadow-lg scale-[1.02] border-primary z-50"
-          : "hover:border-border/80",
-        !isDraggable && "border-dashed bg-muted/20 opacity-90",
-        !module.isEnabled && "opacity-50 bg-muted/40 grayscale",
-        selectedModuleId === module.id && "border-primary/60 bg-primary/5",
-      )}
-    >
-      {/* Drag Handle */}
+    <>
       <div
-        {...provided?.dragHandleProps}
+        ref={provided?.innerRef}
+        {...provided?.draggableProps}
         className={cn(
-          "text-muted-foreground/40",
-          isDraggable
-            ? "cursor-move hover:text-foreground"
-            : "cursor-default opacity-20",
+          "group flex items-center gap-2 p-2 rounded-[6px] border transition-all select-none",
+          snapshot?.isDragging
+            ? "shadow-lg scale-[1.02] border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 z-50"
+            : isSelected
+              ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-2xs"
+              : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
+          !isDraggable && "border-dashed bg-[#f6f6f7]/60 dark:bg-zinc-900/60 opacity-90",
+          !module.isEnabled && "opacity-50 grayscale",
         )}
       >
-        <GripVertical className="h-3.5 w-3.5" />
-      </div>
-
-      {/* Content */}
-      <div
-        className="flex-1 cursor-pointer min-w-0"
-        onClick={() => selectModule(module.id)}
-      >
-        <div className="flex items-center gap-1.5">
-          <span className="font-medium text-xs truncate">{module.name}</span>
-          {module.isCustomized && (
-            <span className="px-1 py-px rounded text-[9px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 shrink-0">
-              Edited
-            </span>
+        {/* Drag Handle */}
+        <div
+          {...provided?.dragHandleProps}
+          className={cn(
+            "text-[#616161] dark:text-zinc-400",
+            isDraggable
+              ? "cursor-grab active:cursor-grabbing hover:text-[#303030] dark:hover:text-zinc-100"
+              : "cursor-default opacity-20",
           )}
-          {!isDraggable && (
-            <span className="px-1 py-px rounded text-[9px] uppercase font-semibold bg-muted text-muted-foreground shrink-0">
-              Fixed
+        >
+          <GripVertical className="h-3.5 w-3.5" />
+        </div>
+
+        {/* Content */}
+        <div
+          className="flex-1 cursor-pointer min-w-0"
+          onClick={() => selectModule(module.id)}
+        >
+          <div className="flex items-center gap-1.5">
+            <span
+              className={cn(
+                "font-medium text-xs truncate",
+                isSelected
+                  ? "text-[#303030] dark:text-zinc-100 font-semibold"
+                  : "text-[#303030] dark:text-zinc-200",
+              )}
+            >
+              {module.name}
             </span>
+            {module.isCustomized && (
+              <span className="px-1 py-0.2 rounded-[3px] text-[9px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shrink-0">
+                Edited
+              </span>
+            )}
+            {!isDraggable && (
+              <span className="px-1 py-0.2 rounded-[3px] text-[9px] uppercase font-semibold bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border border-[#d2d5d9] dark:border-zinc-700 shrink-0">
+                Fixed
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const newEnabledState = !module.isEnabled;
+              toggleModule(module.id);
+              onToggle(module.id, newEnabledState);
+            }}
+            className="p-1 rounded-[4px] text-[#616161] hover:text-[#303030] dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            title={module.isEnabled ? "Hide section" : "Show section"}
+          >
+            {module.isEnabled ? (
+              <Eye className="h-3 w-3" />
+            ) : (
+              <EyeOff className="h-3 w-3" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              selectModule(module.id);
+            }}
+            className={cn(
+              "p-1 rounded-[4px] transition-colors cursor-pointer",
+              isSelected
+                ? "bg-[#303030] text-white dark:bg-zinc-100 dark:text-zinc-900"
+                : "text-[#616161] hover:text-[#303030] dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800",
+            )}
+            title="Configure settings"
+          >
+            <Settings className="h-3 w-3" />
+          </button>
+
+          {/* Delete Button */}
+          {isDraggable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDeleteOpen(true);
+              }}
+              className="p-1 rounded-[4px] transition-colors text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+              title="Delete section"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
           )}
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            const newEnabledState = !module.isEnabled;
-            toggleModule(module.id);
-            onToggle(module.id, newEnabledState);
-          }}
-          className={cn(
-            "p-1 rounded-md transition-colors",
-            "text-muted-foreground/50 hover:bg-muted hover:text-foreground",
-          )}
-          title={module.isEnabled ? "Hide" : "Show"}
-        >
-          {module.isEnabled ? (
-            <Eye className="h-3 w-3" />
-          ) : (
-            <EyeOff className="h-3 w-3" />
-          )}
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            selectModule(module.id);
-          }}
-          className={cn(
-            "p-1 rounded-md transition-colors",
-            selectedModuleId === module.id
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground/50 hover:bg-muted hover:text-foreground",
-          )}
-          title="Settings"
-        >
-          <Settings className="h-3 w-3" />
-        </button>
-
-        {/* Delete Button - Only show for draggable modules (not header/footer) */}
-        {isDraggable && (
-          <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-            <DialogTrigger asChild>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                className="p-1 rounded-md transition-colors text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive"
-                title="Delete"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </DialogTrigger>
-            <DialogContent className="z-[2000]">
-              <DialogHeader>
-                <DialogTitle>Delete Module</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to delete {module.name}? This action
-                  cannot be undone.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDeleteOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button variant="default" onClick={handleDelete}>
-                  Delete
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-    </div>
+      {isDraggable && (
+        <ConfirmDialog
+          open={isDeleteOpen}
+          onOpenChange={setIsDeleteOpen}
+          title="Delete Section?"
+          description={`Are you sure you want to delete '${module.name}'? All custom content configured for this section will be removed.`}
+          confirmText="Delete Section"
+          confirmVariant="destructive"
+          onConfirm={handleDelete}
+        />
+      )}
+    </>
   );
 };
 
 const ModuleManager = () => {
   const { pages, currentPageId, setModules } = useWebsiteBuilderStore();
-  const [isMounted, setIsMounted] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [reorderModules] = useReorderModules();
   const [deleteModuleMutation] = useDeleteModule();
   const [toggleModuleMutation] = useToggleModule();
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   if (!isMounted) return null;
 
@@ -216,7 +215,7 @@ const ModuleManager = () => {
     });
   };
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const sourceIndex = result.source.index;
@@ -238,10 +237,6 @@ const ModuleManager = () => {
 
     // Call API to persist reordering
     if (currentPageId) {
-      console.log({
-        pageId: currentPageId,
-        moduleIds: modulesWithSort.map((m) => m.id),
-      });
       reorderModules({
         variables: {
           pageId: currentPageId,
@@ -254,8 +249,8 @@ const ModuleManager = () => {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
-          Modules
+        <h3 className="text-[10.5px] font-bold text-[#616161] dark:text-zinc-400 uppercase tracking-wider">
+          Layout Sections
         </h3>
 
         <AddModuleDialog open={isAddOpen} onOpenChange={setIsAddOpen} />
@@ -271,7 +266,7 @@ const ModuleManager = () => {
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="space-y-1 py-0.5"
+                className="space-y-1.5 py-0.5"
               >
                 {bodyModules.map((module, index) => (
                   <Draggable
@@ -279,12 +274,12 @@ const ModuleManager = () => {
                     draggableId={module.id}
                     index={index}
                   >
-                    {(provided, snapshot) => (
+                    {(draggableProvided, snapshot) => (
                       <ModuleCard
                         module={module}
                         isDraggable={true}
-                        index={index}
-                        provided={{ ...provided, snapshot }}
+                        provided={draggableProvided}
+                        snapshot={snapshot}
                         onDelete={handleDeleteModule}
                         onToggle={handleToggleModule}
                       />

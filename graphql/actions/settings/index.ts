@@ -84,6 +84,40 @@ export interface EntitySettings {
   momentsTabOrder?: string[];
   momentsCtaName?: string | null;
 
+  // Communities Tab Settings
+  allowCommunitiesDiscoverTab?: boolean;
+  allowCommunitiesMyCommunitiesTab?: boolean;
+  allowCommunitiesJoinedTab?: boolean;
+  allowCommunitiesFeedTab?: boolean;
+  communitiesTabNames?: Record<string, string>;
+  communitiesTabOrder?: string[];
+  communitiesCtaName?: string | null;
+
+  // Events Tab Settings
+  allowEventsDiscoverTab?: boolean;
+  allowEventsMyEventsTab?: boolean;
+  allowEventsAttendingTab?: boolean;
+  allowEventsCalendarTab?: boolean;
+  eventsTabNames?: Record<string, string>;
+  eventsTabOrder?: string[];
+  eventsCtaName?: string | null;
+
+  // Jobs Tab Settings
+  allowJobsDiscoverTab?: boolean;
+  allowJobsMyJobsTab?: boolean;
+  allowJobsAppliedTab?: boolean;
+  jobsTabNames?: Record<string, string>;
+  jobsTabOrder?: string[];
+  jobsCtaName?: string | null;
+
+  // Listing Tab Settings
+  allowListingDiscoverTab?: boolean;
+  allowListingMyListingsTab?: boolean;
+  allowListingEnquiryTab?: boolean;
+  listingTabNames?: Record<string, string>;
+  listingTabOrder?: string[];
+  listingCtaName?: string | null;
+
   // Media Gallery
   allowMediaGalleryComments: boolean;
   allowMediaGalleryShareToFeed?: boolean;
@@ -183,6 +217,40 @@ export interface UpdateEntitySettingsInput {
   momentsTabNames?: Record<string, string>;
   momentsTabOrder?: string[];
   momentsCtaName?: string | null;
+
+  // Communities Tab Settings
+  allowCommunitiesDiscoverTab?: boolean;
+  allowCommunitiesMyCommunitiesTab?: boolean;
+  allowCommunitiesJoinedTab?: boolean;
+  allowCommunitiesFeedTab?: boolean;
+  communitiesTabNames?: Record<string, string>;
+  communitiesTabOrder?: string[];
+  communitiesCtaName?: string | null;
+
+  // Events Tab Settings
+  allowEventsDiscoverTab?: boolean;
+  allowEventsMyEventsTab?: boolean;
+  allowEventsAttendingTab?: boolean;
+  allowEventsCalendarTab?: boolean;
+  eventsTabNames?: Record<string, string>;
+  eventsTabOrder?: string[];
+  eventsCtaName?: string | null;
+
+  // Jobs Tab Settings
+  allowJobsDiscoverTab?: boolean;
+  allowJobsMyJobsTab?: boolean;
+  allowJobsAppliedTab?: boolean;
+  jobsTabNames?: Record<string, string>;
+  jobsTabOrder?: string[];
+  jobsCtaName?: string | null;
+
+  // Listing Tab Settings
+  allowListingDiscoverTab?: boolean;
+  allowListingMyListingsTab?: boolean;
+  allowListingEnquiryTab?: boolean;
+  listingTabNames?: Record<string, string>;
+  listingTabOrder?: string[];
+  listingCtaName?: string | null;
 
   // FAQ & Terms Fields
   termAndConditionsEvents?: string | null;

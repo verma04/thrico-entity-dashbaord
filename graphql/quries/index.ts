@@ -178,6 +178,32 @@ export const GET_ENTITY_SETTINGS = gql`
       momentsTabNames
       momentsTabOrder
       momentsCtaName
+      allowCommunitiesDiscoverTab
+      allowCommunitiesMyCommunitiesTab
+      allowCommunitiesJoinedTab
+      allowCommunitiesFeedTab
+      communitiesTabNames
+      communitiesTabOrder
+      communitiesCtaName
+      allowEventsDiscoverTab
+      allowEventsMyEventsTab
+      allowEventsAttendingTab
+      allowEventsCalendarTab
+      eventsTabNames
+      eventsTabOrder
+      eventsCtaName
+      allowJobsDiscoverTab
+      allowJobsMyJobsTab
+      allowJobsAppliedTab
+      jobsTabNames
+      jobsTabOrder
+      jobsCtaName
+      allowListingDiscoverTab
+      allowListingMyListingsTab
+      allowListingEnquiryTab
+      listingTabNames
+      listingTabOrder
+      listingCtaName
       feedOrder
       feedEntityName
       allowMediaGalleryComments
@@ -269,6 +295,32 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       momentsTabNames
       momentsTabOrder
       momentsCtaName
+      allowCommunitiesDiscoverTab
+      allowCommunitiesMyCommunitiesTab
+      allowCommunitiesJoinedTab
+      allowCommunitiesFeedTab
+      communitiesTabNames
+      communitiesTabOrder
+      communitiesCtaName
+      allowEventsDiscoverTab
+      allowEventsMyEventsTab
+      allowEventsAttendingTab
+      allowEventsCalendarTab
+      eventsTabNames
+      eventsTabOrder
+      eventsCtaName
+      allowJobsDiscoverTab
+      allowJobsMyJobsTab
+      allowJobsAppliedTab
+      jobsTabNames
+      jobsTabOrder
+      jobsCtaName
+      allowListingDiscoverTab
+      allowListingMyListingsTab
+      allowListingEnquiryTab
+      listingTabNames
+      listingTabOrder
+      listingCtaName
       feedOrder
       feedEntityName
       allowMediaGalleryComments

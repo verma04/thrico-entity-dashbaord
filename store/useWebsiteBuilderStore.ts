@@ -320,6 +320,21 @@ export type LayoutType =
   | "video-player"
   | "video-dialog" // Video layouts
   | "hero-video-dialog"
+  | "inline-banner"
+  | "flip-card"
+  | "split-banner"
+  | "minimal-timer"
+  | "standard-table"
+  | "event-card"
+  | "circular-progress"
+  | "compact-banner"
+  | "milestone-counter"
+  | "vertical-milestones"
+  | "horizontal-milestones"
+  | "card-milestones"
+  | "roadmap-milestones"
+  | "list-milestones"
+  | "results-dashboard"
   | "footer"
   | "default";
 
@@ -400,6 +415,90 @@ export interface MenuItem {
   icon?: string; // Lucide icon name
   target?: "_self" | "_blank"; // Internal vs External
   children?: MenuItem[];
+}
+
+export interface NavbarContentConfig {
+  logoType?: "text" | "image";
+  logoText?: string;
+  logoImage?: string;
+  logoHeight?: number;
+  logoTextColor?: string;
+  isSticky?: boolean;
+  height?: "compact" | "default" | "tall";
+  maxWidth?: "container" | "full";
+  backgroundType?: "solid" | "glass" | "transparent" | "gradient";
+  backgroundColor?: string;
+  scrolledBackground?: string;
+  backgroundBlur?: "none" | "sm" | "md" | "lg";
+  textColor?: string;
+  linkHoverColor?: string;
+  borderColor?: string;
+  borderStyle?: "none" | "bottom" | "subtle";
+  shadow?: "none" | "sm" | "md" | "lg";
+  showCtaButton?: boolean;
+  ctaButtonText?: string;
+  ctaButtonLink?: string;
+  ctaButtonBg?: string;
+  ctaButtonTextColor?: string;
+  ctaButtonSize?: "sm" | "md" | "lg";
+  ctaButtonRadius?: "full" | "md" | "none";
+  ctaButtonVariant?: "solid" | "outline" | "ghost";
+  showSecondaryButton?: boolean;
+  secondaryButtonText?: string;
+  secondaryButtonLink?: string;
+  secondaryButtonTextColor?: string;
+  menuItems?: MenuItem[];
+  containerSettings?: {
+    background?: string;
+    textColor?: string;
+    fullWidth?: boolean;
+  };
+}
+export interface FooterContentConfig {
+  logoType?: "text" | "image";
+  logoText?: string;
+  logoImage?: string;
+  logoHeight?: number;
+  logoTextColor?: string;
+  description?: string;
+  copyrightText?: string;
+  backgroundType?: "solid" | "glass" | "gradient";
+  backgroundColor?: string;
+  textColor?: string;
+  linkHoverColor?: string;
+  borderColor?: string;
+  borderStyle?: "none" | "top" | "subtle";
+  buttonBg?: string;
+  buttonTextColor?: string;
+  buttonSize?: "sm" | "md" | "lg";
+  buttonRadius?: "full" | "md" | "none";
+  buttonVariant?: "solid" | "outline";
+  newsletterTitle?: string;
+  newsletterDescription?: string;
+  newsletterPlaceholder?: string;
+  newsletterButtonText?: string;
+  newsletterDisclaimer?: string;
+  showNewsletterSnippet?: boolean;
+  companyName?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  registrationNumber?: string;
+  showStatusIndicator?: boolean;
+  statusText?: string;
+  badgeText?: string;
+  htmlCode?: string;
+  customCss?: string;
+  fileName?: string;
+  renderMode?: "direct" | "iframe" | string;
+  menuItems?: MenuItem[];
+  socialLinks?: Array<{ platform: string; url: string }>;
+  containerSettings?: {
+    background?: string;
+    textColor?: string;
+    fullWidth?: boolean;
+  };
+  [key: string]: unknown;
 }
 
 export interface ModuleData {
@@ -492,7 +591,7 @@ export interface WebsiteBuilderState {
   updateModuleName: (id: string, name: string) => void;
   updateModuleVisibility: (
     id: string,
-    visibility: "public" | "members" | "admin"
+    visibility: "public" | "members" | "admin",
   ) => void;
   setPreviewDevice: (device: "desktop" | "tablet" | "mobile") => void;
   setZoomLevel: (zoom: number) => void;
@@ -1302,7 +1401,8 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
     siteSettings: {
       googleAnalyticsId: "",
       googleSearchConsoleId: "",
-      robotsTxt: "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\n\nSitemap: https://yourdomain.com/sitemap.xml",
+      robotsTxt:
+        "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api\n\nSitemap: https://yourdomain.com/sitemap.xml",
       favicon: "",
       socialLinks: { twitter: "", linkedin: "", github: "", instagram: "" },
     },
@@ -1429,10 +1529,10 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
               ? {
                   ...page,
                   modules: page.modules.map((m) =>
-                    m.id === id ? { ...m, isEnabled: !m.isEnabled } : m
+                    m.id === id ? { ...m, isEnabled: !m.isEnabled } : m,
                   ),
                 }
-              : page
+              : page,
           ),
         };
       }),
@@ -1480,10 +1580,10 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
               ? {
                   ...page,
                   modules: page.modules.map((m) =>
-                    m.id === id ? { ...m, layout, isCustomized: true } : m
+                    m.id === id ? { ...m, layout, isCustomized: true } : m,
                   ),
                 }
-              : page
+              : page,
           ),
         };
       }),
@@ -1505,7 +1605,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
           pages: state.pages.map((page) => ({
             ...page,
             modules: page.modules.map((module) =>
-              module.id === id ? { ...module, name } : module
+              module.id === id ? { ...module, name } : module,
             ),
           })),
         };
@@ -1539,10 +1639,10 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
                   modules: page.modules.map((m) =>
                     m.id === id
                       ? { ...m, content: { ...m.content, ...content } }
-                      : m
+                      : m,
                   ),
                 }
-              : page
+              : page,
           ),
         };
       }),
@@ -1562,10 +1662,10 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
               ? {
                   ...page,
                   modules: page.modules.map((m) =>
-                    m.id === id ? { ...m, visibility } : m
+                    m.id === id ? { ...m, visibility } : m,
                   ),
                 }
-              : page
+              : page,
           ),
         };
       }),
@@ -1576,7 +1676,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
     setModules: (modules) =>
       set((state) => ({
         pages: state.pages.map((page) =>
-          page.id === state.currentPageId ? { ...page, modules } : page
+          page.id === state.currentPageId ? { ...page, modules } : page,
         ),
       })),
 
@@ -1585,7 +1685,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         pages: state.pages.map((page) =>
           page.id === pageId
             ? { ...page, modules: [...page.modules, module] }
-            : page
+            : page,
         ),
       })),
 
@@ -1681,7 +1781,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         pages: state.pages.map((page) =>
           page.id === id
             ? { ...page, seo: { ...page.seo, ...seo } as any }
-            : page
+            : page,
         ),
       })),
 
@@ -1699,7 +1799,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         pages: state.pages.map((page) =>
           page.id === id
             ? { ...page, includeInSitemap: !page.includeInSitemap }
-            : page
+            : page,
         ),
       })),
 
@@ -1707,7 +1807,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
       set((state) => {
         const isDifferent = Object.entries(settings).some(
           ([key, value]) =>
-            state.siteSettings[key as keyof SiteSettings] !== value
+            state.siteSettings[key as keyof SiteSettings] !== value,
         );
         if (!isDifferent) return state;
         return {
@@ -1729,12 +1829,15 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         pages: websiteData.pages || [],
         // Accept globalHeader/globalFooter (enriched with id/type/name) if provided,
         // otherwise fall back to raw navbar/footer fields
-        globalHeader: websiteData.globalHeader || websiteData.navbar || get().globalHeader,
-        globalFooter: websiteData.globalFooter || websiteData.footer || get().globalFooter,
+        globalHeader:
+          websiteData.globalHeader || websiteData.navbar || get().globalHeader,
+        globalFooter:
+          websiteData.globalFooter || websiteData.footer || get().globalFooter,
         ...(websiteData.siteSettings && {
           siteSettings: {
             googleAnalyticsId: websiteData.siteSettings.googleAnalyticsId || "",
-            googleSearchConsoleId: websiteData.siteSettings.googleSearchConsoleId || "",
+            googleSearchConsoleId:
+              websiteData.siteSettings.googleSearchConsoleId || "",
             robotsTxt: websiteData.siteSettings.robotsTxt || "",
             favicon: "",
             socialLinks: {
@@ -1748,5 +1851,5 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
       }));
     },
     resetInitialized: () => set(() => ({ isInitialized: false })),
-  })
+  }),
 );

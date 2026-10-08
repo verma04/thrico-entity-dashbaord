@@ -2,16 +2,12 @@
 
 import React from "react";
 import {
-  Zap,
   Layers,
   Boxes,
   ShoppingBag,
-  ShieldCheck,
   Calendar,
   MessageSquare,
   Users,
-  TrendingUp,
-  Sparkles,
   Info,
   type LucideIcon,
 } from "lucide-react";
@@ -26,7 +22,7 @@ interface PolarisFormCardProps {
   title: string;
   description?: string;
   badge?: string;
-  badgeVariant?: "default" | "outline" | "emerald";
+  badgeVariant?: "default" | "outline" | "emerald" | "indigo";
   children: React.ReactNode;
   className?: string;
 }
@@ -51,6 +47,11 @@ export function PolarisFormCard({
       <div className="mb-2.5">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
+            {step !== undefined && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shrink-0">
+                {step}
+              </span>
+            )}
             {Icon && (
               <Icon className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400 shrink-0" />
             )}
@@ -60,7 +61,14 @@ export function PolarisFormCard({
             {badge && (
               <Badge
                 variant="outline"
-                className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[10.5px] font-medium px-1.5 py-0.2 rounded-[4px]"
+                className={cn(
+                  "text-[10.5px] font-medium px-1.5 py-0.2 rounded-[4px]",
+                  badgeVariant === "indigo"
+                    ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                    : badgeVariant === "emerald"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                      : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700",
+                )}
               >
                 {badge}
               </Badge>
@@ -85,6 +93,7 @@ interface PolarisInfoBannerProps {
   icon?: LucideIcon;
   variant?: "default" | "warning" | "success" | "info";
   tips?: string[];
+  action?: React.ReactNode;
   className?: string;
 }
 
@@ -94,32 +103,42 @@ export function PolarisInfoBanner({
   icon: Icon = Info,
   variant = "default",
   tips,
+  action,
   className,
 }: PolarisInfoBannerProps) {
+  const variantStyles =
+    variant === "warning"
+      ? "bg-amber-50/70 dark:bg-amber-950/30 border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200"
+      : variant === "success"
+        ? "bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200/80 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200"
+        : variant === "info"
+          ? "bg-indigo-50/70 dark:bg-indigo-950/30 border-indigo-200/80 dark:border-indigo-800/60 text-indigo-950 dark:text-indigo-200"
+          : "bg-[#f6f6f7] dark:bg-zinc-800/50 border-[#d2d5d9] dark:border-zinc-700 text-[#616161] dark:text-zinc-300";
+
   return (
     <div
       className={cn(
-        "flex items-start gap-2 p-2.5 rounded-[6px] bg-[#f6f6f7] dark:bg-zinc-800/50 border border-[#d2d5d9] dark:border-zinc-700 text-[11.5px] text-[#616161] dark:text-zinc-300",
+        "flex items-start gap-2.5 p-2.5 rounded-lg border text-[11.5px]",
+        variantStyles,
         className,
       )}
     >
-      <Icon className="h-3.5 w-3.5 text-[#616161] dark:text-zinc-400 mt-0.5 shrink-0" />
-      <div className="space-y-0.5 leading-[16px]">
+      <Icon className="h-3.5 w-3.5 mt-0.5 shrink-0 text-current opacity-80" />
+      <div className="flex-1 min-w-0 space-y-0.5 leading-[16px]">
         {title && (
-          <p className="font-semibold text-[#303030] dark:text-zinc-100 text-[12px]">
+          <p className="font-semibold text-[12px] leading-tight mb-0.5">
             {title}
           </p>
         )}
-        <p className="text-[11.5px] text-[#616161] dark:text-zinc-400">
-          {description}
-        </p>
+        <p className="text-[11.5px] leading-relaxed opacity-90">{description}</p>
         {tips && tips.length > 0 && (
-          <ul className="list-disc pl-3.5 space-y-0.5 mt-1 text-[11px] text-[#616161] dark:text-zinc-400">
+          <ul className="list-disc pl-3.5 space-y-0.5 mt-1 text-[11px] opacity-80">
             {tips.map((t, idx) => (
               <li key={idx}>{t}</li>
             ))}
           </ul>
         )}
+        {action && <div className="mt-2">{action}</div>}
       </div>
     </div>
   );
@@ -354,7 +373,7 @@ export function PolarisCapInput({
 interface PolarisSidebarCardProps {
   title: string;
   badge?: string;
-  badgeVariant?: "default" | "outline" | "emerald";
+  badgeVariant?: "default" | "outline" | "emerald" | "indigo";
   icon?: LucideIcon;
   children: React.ReactNode;
   className?: string;
@@ -387,7 +406,14 @@ export function PolarisSidebarCard({
         {badge && (
           <Badge
             variant="outline"
-            className="bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700 text-[10px] font-semibold px-1.5 py-0.2 rounded-[4px]"
+            className={cn(
+              "text-[10px] font-semibold px-1.5 py-0.2 rounded-[4px]",
+              badgeVariant === "indigo"
+                ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                : badgeVariant === "emerald"
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                  : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700",
+            )}
           >
             {badge}
           </Badge>
@@ -395,6 +421,97 @@ export function PolarisSidebarCard({
       </div>
       <div className="space-y-2">{children}</div>
     </div>
+  );
+}
+
+/* ─── PolarisModeTile ─── */
+export function PolarisModeTile({
+  label,
+  description,
+  badge,
+  icon: Icon,
+  selected,
+  onClick,
+  className,
+}: {
+  label: string;
+  description: string;
+  badge?: string;
+  icon: React.ElementType;
+  selected: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "relative flex items-start gap-2.5 p-2.5 rounded-[6px] border text-left transition-all cursor-pointer w-full",
+        selected
+          ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-2xs"
+          : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors",
+          selected
+            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+            : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
+        )}
+      >
+        <Icon className="h-3.5 w-3.5" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100 block truncate">
+            {label}
+          </span>
+          {badge && (
+            <Badge
+              variant="outline"
+              className="text-[9px] px-1 py-0 font-mono border-border/80 text-muted-foreground shrink-0"
+            >
+              {badge}
+            </Badge>
+          )}
+        </div>
+        <p className="text-[10.5px] text-[#616161] dark:text-zinc-400 mt-0.5 leading-[14px]">
+          {description}
+        </p>
+      </div>
+    </button>
+  );
+}
+
+/* ─── PolarisQuickChip ─── */
+export function PolarisQuickChip({
+  label,
+  active,
+  onClick,
+  className,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "text-[10.5px] px-2.5 py-1 rounded-md border transition-all cursor-pointer font-medium",
+        active
+          ? "bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-950/60 dark:border-indigo-700 dark:text-indigo-300 font-semibold shadow-2xs"
+          : "border-[#d2d5d9] dark:border-zinc-700 text-[#616161] dark:text-zinc-400 hover:border-[#aeb4b9] dark:hover:border-zinc-500 hover:text-[#303030] dark:hover:text-zinc-200 bg-white dark:bg-zinc-900",
+        className,
+      )}
+    >
+      {label}
+    </button>
   );
 }
 

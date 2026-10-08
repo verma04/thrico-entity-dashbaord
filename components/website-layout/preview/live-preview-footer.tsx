@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { LogoRenderer } from "./logo-renderer";
 import { DynamicIcon } from "./dynamic-icon";
-import { MenuItem } from "@/store/useWebsiteBuilderStore";
+import { MenuItem, FooterContentConfig } from "@/store/useWebsiteBuilderStore";
 import { IsolatedHtmlRenderer } from "../modules/isolated-html-renderer";
 import {
   Mail,
@@ -11,18 +11,22 @@ import {
   MapPin,
   Phone,
   Building,
-  CheckCircle2,
-  ExternalLink,
   ChevronRight,
   Globe,
   Code2,
 } from "lucide-react";
 
+interface FooterSocialLinkItem {
+  platform: string;
+  url?: string;
+}
+
 interface LivePreviewFooterProps {
-  content: Record<string, any>;
+  content?: FooterContentConfig;
   layout: string;
   previewDevice?: "mobile" | "desktop";
 }
+
 
 const DEFAULT_MENU_COLUMNS: MenuItem[] = [
   {
@@ -98,7 +102,7 @@ const CustomHtmlFooterPreview: React.FC<CustomHtmlFooterPreviewProps> = ({
             setIframeHeight(h);
           }
         }
-      } catch (e) {
+      } catch {
         // Fallback handled by postMessage
       }
     }
@@ -321,31 +325,66 @@ const CustomHtmlFooterPreview: React.FC<CustomHtmlFooterPreviewProps> = ({
 };
 
 export const LivePreviewFooter = ({
-  content,
+  content = {},
   layout,
   previewDevice = "desktop",
 }: LivePreviewFooterProps) => {
   const currentYear = new Date().getFullYear();
 
-  const customBg = content?.containerSettings?.background;
-  const customText = content?.containerSettings?.textColor;
+  const customBg = content.backgroundColor || content.containerSettings?.background;
+  const customText = content.textColor || content.containerSettings?.textColor;
+  const borderColor = content.borderColor;
+  const borderStyle = content.borderStyle || "top";
+  const buttonBg = content.buttonBg;
+  const buttonTextColor = content.buttonTextColor;
+  const buttonSize = content.buttonSize || "md";
+  const buttonRadius = content.buttonRadius || "md";
+  const buttonVariant = content.buttonVariant || "solid";
+
+  const btnSizeClasses = {
+    sm: "h-8 px-4 text-xs",
+    md: "h-10 px-6 text-xs sm:text-sm",
+    lg: "h-12 px-8 text-sm",
+  }[buttonSize as "sm" | "md" | "lg"] || "h-10 px-6 text-xs sm:text-sm";
+
+  const btnRadiusClasses = {
+    full: "rounded-full",
+    md: "rounded-xl",
+    none: "rounded-none",
+  }[buttonRadius as "full" | "md" | "none"] || "rounded-xl";
+
+  const newsletterBtnStyle: React.CSSProperties = {};
+  if (buttonVariant === "solid") {
+    if (buttonBg) newsletterBtnStyle.backgroundColor = buttonBg;
+    if (buttonTextColor) newsletterBtnStyle.color = buttonTextColor;
+  } else if (buttonVariant === "outline") {
+    newsletterBtnStyle.backgroundColor = "transparent";
+    if (buttonBg) {
+      newsletterBtnStyle.borderColor = buttonBg;
+      newsletterBtnStyle.color = buttonBg;
+    }
+    if (buttonTextColor) newsletterBtnStyle.color = buttonTextColor;
+  }
 
   const isMobile = previewDevice === "mobile";
 
   // Menu items resolution
-  const hasMenuItems = content.menuItems && content.menuItems.length > 0;
-  const menuColumns = hasMenuItems ? content.menuItems : DEFAULT_MENU_COLUMNS;
+  const menuColumns: MenuItem[] =
+    content.menuItems && content.menuItems.length > 0
+      ? content.menuItems
+      : DEFAULT_MENU_COLUMNS;
 
   // Flattened links for simple/minimal layouts
-  const flatLinks: MenuItem[] = hasMenuItems
-    ? content.menuItems.flatMap((item: MenuItem) =>
-        item.children && item.children.length > 0 ? item.children : [item]
-      )
-    : DEFAULT_FLAT_LINKS;
+  const flatLinks: MenuItem[] =
+    content.menuItems && content.menuItems.length > 0
+      ? content.menuItems.flatMap((item: MenuItem) =>
+          item.children && item.children.length > 0 ? item.children : [item]
+        )
+      : DEFAULT_FLAT_LINKS;
 
   const socialLinks =
     content.socialLinks && content.socialLinks.length > 0
-      ? content.socialLinks.filter((l: any) => l.platform || l.url)
+      ? content.socialLinks.filter((l) => l.platform || l.url)
       : [
           { platform: "twitter", url: "#" },
           { platform: "linkedin", url: "#" },
@@ -362,6 +401,9 @@ export const LivePreviewFooter = ({
     <footer
       className={cn(
         "w-full transition-colors relative overflow-hidden",
+        borderStyle === "top" && "border-t border-border/40",
+        borderStyle === "subtle" && "border-t border-border/20",
+        borderStyle === "none" && "border-t-0",
         !customBg && "bg-slate-900",
         !customText && "text-white",
         layout === "columns" && (isMobile ? "py-10 px-4" : "py-16 px-8"),
@@ -378,8 +420,10 @@ export const LivePreviewFooter = ({
       style={{
         ...(customBg ? { background: customBg } : {}),
         ...(customText ? { color: customText } : {}),
+        ...(borderColor ? { borderColor } : {}),
       }}
     >
+
       {/* ─────────────────────────────────────────────────────────────
           1. COLUMNS: Classic Multi-Column Grid
          ───────────────────────────────────────────────────────────── */}
@@ -416,7 +460,7 @@ export const LivePreviewFooter = ({
               {/* Social Links */}
               {socialLinks.length > 0 && (
                 <div className="flex items-center gap-2 pt-1 flex-wrap">
-                  {socialLinks.map((link: any, i: number) => (
+                  {socialLinks.map((link: FooterSocialLinkItem, i: number) => (
                     <a
                       key={i}
                       href={link.url || "#"}
@@ -449,10 +493,17 @@ export const LivePreviewFooter = ({
                     />
                     <button
                       type="button"
-                      className="px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex items-center gap-1 shrink-0"
+                      className={cn(
+                        "px-3 py-1.5 text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1 shrink-0 cursor-pointer",
+                        btnRadiusClasses === "rounded-xl" ? "rounded-md" : btnRadiusClasses,
+                        buttonVariant === "outline" && "border",
+                        !buttonBg && "bg-primary text-primary-foreground"
+                      )}
+                      style={newsletterBtnStyle}
                     >
                       <ArrowRight className="h-3 w-3" />
                     </button>
+
                   </div>
                 </div>
               )}
@@ -539,7 +590,7 @@ export const LivePreviewFooter = ({
               <LogoRenderer content={content} />
             </div>
 
-            {content.description !== false && (
+            {content.description !== "" && (
               <p className="text-xs sm:text-sm opacity-70 max-w-lg leading-relaxed">
                 {content.description ||
                   "A minimalist, beautifully engineered experience designed to keep you connected with the community."}
@@ -561,7 +612,7 @@ export const LivePreviewFooter = ({
             {/* Social Links Pills */}
             {socialLinks.length > 0 && (
               <div className="flex gap-2.5 opacity-80 pt-1">
-                {socialLinks.map((link: any, i: number) => (
+                {socialLinks.map((link: FooterSocialLinkItem, i: number) => (
                   <a
                     key={i}
                     href={link.url || "#"}
@@ -630,7 +681,7 @@ export const LivePreviewFooter = ({
 
               {socialLinks.length > 0 && (
                 <div className="flex items-center gap-2">
-                  {socialLinks.slice(0, 4).map((link: any, i: number) => (
+                  {socialLinks.slice(0, 4).map((link: FooterSocialLinkItem, i: number) => (
                     <a
                       key={i}
                       href={link.url || "#"}
@@ -759,7 +810,7 @@ export const LivePreviewFooter = ({
 
             {socialLinks.length > 0 && (
               <div className="flex items-center gap-3">
-                {socialLinks.map((link: any, i: number) => (
+                {socialLinks.map((link: FooterSocialLinkItem, i: number) => (
                   <a
                     key={i}
                     href={link.url || "#"}
@@ -831,11 +882,19 @@ export const LivePreviewFooter = ({
               </div>
               <button
                 type="button"
-                className="px-6 py-2.5 bg-primary text-primary-foreground text-xs sm:text-sm font-semibold rounded-xl hover:opacity-90 transition-all shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+                className={cn(
+                  "font-semibold hover:opacity-90 transition-all shadow-sm flex items-center justify-center gap-1.5 shrink-0 cursor-pointer",
+                  btnSizeClasses,
+                  btnRadiusClasses,
+                  buttonVariant === "outline" && "border",
+                  !buttonBg && "bg-primary text-primary-foreground"
+                )}
+                style={newsletterBtnStyle}
               >
                 <span>{content.newsletterButtonText || "Subscribe"}</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
+
             </div>
 
             {/* Disclaimer reassurance */}
@@ -867,7 +926,7 @@ export const LivePreviewFooter = ({
 
             {socialLinks.length > 0 && (
               <div className="flex items-center gap-2.5 opacity-80">
-                {socialLinks.map((link: any, i: number) => (
+                {socialLinks.map((link: FooterSocialLinkItem, i: number) => (
                   <a
                     key={i}
                     href={link.url || "#"}
@@ -936,7 +995,7 @@ export const LivePreviewFooter = ({
             </nav>
             {socialLinks.length > 0 && (
               <div className="flex gap-3 opacity-60">
-                {socialLinks.map((link: any, i: number) => (
+                {socialLinks.map((link: FooterSocialLinkItem, i: number) => (
                   <a
                     key={i}
                     href={link.url || "#"}

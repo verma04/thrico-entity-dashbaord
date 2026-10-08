@@ -2,14 +2,20 @@
 
 import React, { useState, useEffect } from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
+import { EntitySettings } from "@/graphql/actions/settings";
 import {
   Globe,
   Zap,
   Sparkles,
   Users2,
-  CheckCircle2,
+  UserCheck,
+  MessageSquare,
   ShieldCheck,
   PlusCircle,
+  Sliders,
+  Layers,
+  Plus,
+  Compass,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +27,10 @@ import {
   PolarisTipCard,
 } from "@/components/gamification/shared/polaris-form-ui";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import {
+  ModuleTabManager,
+  ModuleTabItem,
+} from "@/components/settings/shared/module-tab-manager";
 import { toast } from "sonner";
 import { useModuleStore } from "@/store/useModuleStore";
 import { cn } from "@/lib/utils";
@@ -32,38 +42,122 @@ interface CommunitySettingsState {
   aiModerationCommunities: boolean;
 }
 
+const DEFAULT_SETTINGS: CommunitySettingsState = {
+  allowCommunity: true,
+  autoApproveCommunity: false,
+  autoApproveGroup: true,
+  aiModerationCommunities: true,
+};
+
+const createDefaultTabs = (
+  moduleName: string,
+  singularName: string,
+  entitySettings?: EntitySettings
+): ModuleTabItem[] => {
+  const tabNames = (entitySettings?.communitiesTabNames as Record<string, string>) || {};
+  const tabOrder = (entitySettings?.communitiesTabOrder as string[]) || [
+    "discover",
+    "myCommunities",
+    "joined",
+    "feed",
+  ];
+  const allowMyCommunities = entitySettings?.allowCommunitiesMyCommunitiesTab ?? true;
+  const allowJoined = entitySettings?.allowCommunitiesJoinedTab ?? true;
+  const allowFeed = entitySettings?.allowCommunitiesFeedTab ?? true;
+
+  const baseMap: Record<string, ModuleTabItem> = {
+    discover: {
+      id: "discover",
+      key: "allowCommunitiesDiscoverTab",
+      defaultName: "Discover",
+      label: tabNames["discover"] || "",
+      description: `Public directory, featured, and recommended ${moduleName.toLowerCase()}.`,
+      icon: Compass,
+      canHide: false, // Discover tab CANNOT be hidden
+      enabled: true,
+    },
+    myCommunities: {
+      id: "myCommunities",
+      key: "allowCommunitiesMyCommunitiesTab",
+      defaultName: `My ${moduleName}`,
+      label: tabNames["myCommunities"] || "",
+      description: `Personal management portal for ${moduleName.toLowerCase()} owned or led by the member.`,
+      icon: Users2,
+      canHide: true,
+      enabled: allowMyCommunities,
+    },
+    joined: {
+      id: "joined",
+      key: "allowCommunitiesJoinedTab",
+      defaultName: "Joined",
+      label: tabNames["joined"] || "",
+      description: `Quick access to all ${moduleName.toLowerCase()} the member has joined.`,
+      icon: UserCheck,
+      canHide: true,
+      enabled: allowJoined,
+    },
+    feed: {
+      id: "feed",
+      key: "allowCommunitiesFeedTab",
+      defaultName: `${moduleName} Feed`,
+      label: tabNames["feed"] || "",
+      description: `Aggregated activity feed and updates from all joined ${moduleName.toLowerCase()}.`,
+      icon: MessageSquare,
+      canHide: true,
+      enabled: allowFeed,
+    },
+  };
+
+  const ordered: ModuleTabItem[] = [];
+  tabOrder.forEach((id) => {
+    if (baseMap[id]) ordered.push(baseMap[id]);
+  });
+  Object.keys(baseMap).forEach((id) => {
+    if (!ordered.find((t) => t.id === id)) {
+      ordered.push(baseMap[id]);
+    }
+  });
+
+  return ordered;
+};
+
 export default function CommunitySettings() {
   const moduleName = useModuleStore((state) => state.communityModuleName);
   const singularName = useModuleStore((state) => state.communitySingularName);
 
-  const { data, loading } = useEntitySettings();
+  const { data, loading, refetch } = useEntitySettings();
   const [update, { loading: isSaving }] = useUpdateEntitySettings({});
 
-  const initialSettings: CommunitySettingsState = {
+  const [formData, setFormData] = useState<CommunitySettingsState>(() => ({
     allowCommunity: data?.getEntitySettings?.allowCommunity ?? true,
     autoApproveCommunity: data?.getEntitySettings?.autoApproveCommunity ?? false,
     autoApproveGroup: data?.getEntitySettings?.autoApproveGroup ?? true,
-    aiModerationCommunities:
-      data?.getEntitySettings?.aiModerationCommunities ?? true,
-  };
+    aiModerationCommunities: data?.getEntitySettings?.aiModerationCommunities ?? true,
+  }));
 
-  const [formData, setFormData] =
-    useState<CommunitySettingsState>(initialSettings);
+  const [tabs, setTabs] = useState<ModuleTabItem[]>(() =>
+    createDefaultTabs(moduleName, singularName, data?.getEntitySettings)
+  );
+
+  const [ctaName, setCtaName] = useState<string>(
+    data?.getEntitySettings?.communitiesCtaName || ""
+  );
+
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {
     if (data?.getEntitySettings) {
       setFormData({
         allowCommunity: data.getEntitySettings.allowCommunity ?? true,
-        autoApproveCommunity:
-          data.getEntitySettings.autoApproveCommunity ?? false,
+        autoApproveCommunity: data.getEntitySettings.autoApproveCommunity ?? false,
         autoApproveGroup: data.getEntitySettings.autoApproveGroup ?? true,
-        aiModerationCommunities:
-          data.getEntitySettings.aiModerationCommunities ?? true,
+        aiModerationCommunities: data.getEntitySettings.aiModerationCommunities ?? true,
       });
+      setTabs(createDefaultTabs(moduleName, singularName, data.getEntitySettings));
+      setCtaName(data.getEntitySettings.communitiesCtaName || "");
       setHasChanged(false);
     }
-  }, [data]);
+  }, [data, moduleName, singularName]);
 
   const handleToggle = (key: keyof CommunitySettingsState) => {
     setFormData((prev) => {
@@ -73,44 +167,160 @@ export default function CommunitySettings() {
     });
   };
 
+  const handleTabsChange = (updatedTabs: ModuleTabItem[]) => {
+    setTabs(updatedTabs);
+    setHasChanged(true);
+  };
+
+  const handleCtaNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCtaName(e.target.value);
+    setHasChanged(true);
+  };
+
   const handleReset = () => {
     if (data?.getEntitySettings) {
       setFormData({
         allowCommunity: data.getEntitySettings.allowCommunity ?? true,
-        autoApproveCommunity:
-          data.getEntitySettings.autoApproveCommunity ?? false,
+        autoApproveCommunity: data.getEntitySettings.autoApproveCommunity ?? false,
         autoApproveGroup: data.getEntitySettings.autoApproveGroup ?? true,
-        aiModerationCommunities:
-          data.getEntitySettings.aiModerationCommunities ?? true,
+        aiModerationCommunities: data.getEntitySettings.aiModerationCommunities ?? true,
       });
+      setTabs(createDefaultTabs(moduleName, singularName, data.getEntitySettings));
+      setCtaName(data.getEntitySettings.communitiesCtaName || "");
       setHasChanged(false);
     }
   };
 
   const handleSave = async () => {
     try {
-      await update({
-        variables: {
-          input: {
-            allowCommunity: formData.allowCommunity,
-            autoApproveCommunity: formData.autoApproveCommunity,
-            autoApproveGroup: formData.autoApproveGroup,
-            aiModerationCommunities: formData.aiModerationCommunities,
+      if (data?.getEntitySettings) {
+        const communitiesTabNames: Record<string, string> = {};
+        tabs.forEach((t) => {
+          if (t.label && t.label.trim()) {
+            communitiesTabNames[t.id] = t.label.trim();
+          }
+        });
+
+        const myCommunitiesTab = tabs.find((t) => t.id === "myCommunities");
+        const joinedTab = tabs.find((t) => t.id === "joined");
+        const feedTab = tabs.find((t) => t.id === "feed");
+
+        await update({
+          variables: {
+            input: {
+              allowCommunity: formData.allowCommunity,
+              autoApproveCommunity: formData.autoApproveCommunity,
+              autoApproveGroup: formData.autoApproveGroup,
+              aiModerationCommunities: formData.aiModerationCommunities,
+              allowCommunitiesDiscoverTab: true,
+              allowCommunitiesMyCommunitiesTab: myCommunitiesTab ? myCommunitiesTab.enabled : true,
+              allowCommunitiesJoinedTab: joinedTab ? joinedTab.enabled : true,
+              allowCommunitiesFeedTab: feedTab ? feedTab.enabled : true,
+              communitiesTabNames,
+              communitiesTabOrder: tabs.map((t) => t.id),
+              communitiesCtaName: ctaName.trim() || null,
+            },
           },
-        },
-      });
+        });
+      }
       toast.success(`${singularName} settings synchronized successfully.`);
       setHasChanged(false);
+      refetch?.();
     } catch (error: any) {
       toast.error(error.message || `Failed to update ${singularName.toLowerCase()} settings.`);
     }
   };
+
+  const activeTabs = tabs.filter((t) => t.enabled);
 
   return (
     <div className="w-full">
       <PolarisFormLayout
         sidebar={
           <div className="space-y-4">
+            {/* Live Navigation Tabs Preview */}
+            <PolarisSidebarCard
+              title="Navigation Bar Preview"
+              badge="Live View"
+              icon={Sliders}
+            >
+              <div className="rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 p-3 space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between pb-2 border-b border-[#e1e3e5] dark:border-zinc-800">
+                  <div className="flex items-center gap-1.5">
+                    <Layers className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
+                      Member Tab Strip
+                    </span>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="text-[9px] font-bold px-1.5 py-0 rounded-[3px] bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
+                  >
+                    {activeTabs.length} of {tabs.length} Visible
+                  </Badge>
+                </div>
+
+                {/* Tabs Preview Pills */}
+                <div className="space-y-1.5">
+                  {activeTabs.map((tab, idx) => {
+                    const TabIcon = tab.icon;
+                    return (
+                      <div
+                        key={tab.id}
+                        className={cn(
+                          "flex items-center justify-between px-2.5 py-1.5 rounded-[4px] border text-[11.5px] transition-all",
+                          idx === 0
+                            ? "bg-white dark:bg-zinc-800 border-indigo-300 dark:border-indigo-700 font-semibold text-indigo-700 dark:text-indigo-300 shadow-2xs"
+                            : "bg-white/60 dark:bg-zinc-800/60 border-zinc-200 dark:border-zinc-700/60 text-[#616161] dark:text-zinc-300"
+                        )}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <TabIcon className="h-3 w-3 shrink-0" />
+                          <span className="truncate">
+                            {tab.label || tab.defaultName}
+                          </span>
+                        </div>
+                        {idx === 0 && (
+                          <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-500 shrink-0 ml-1">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Primary CTA Button Preview */}
+                <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-between">
+                  <span className="text-[11px] text-[#616161] dark:text-zinc-400">
+                    Action Button:
+                  </span>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded-[4px] bg-indigo-600 text-white text-[10.5px] font-medium shadow-2xs">
+                    <Plus className="h-3 w-3 stroke-[2.5px]" />
+                    <span>{ctaName || `Create ${singularName}`}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Rows */}
+              <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <PolarisSummaryRow
+                  label="Discover Tab"
+                  value="Always Active"
+                  highlight
+                />
+                <PolarisSummaryRow
+                  label="Joined Tab"
+                  value={tabs.find((t) => t.id === "joined")?.enabled ? "Visible" : "Hidden"}
+                />
+                <PolarisSummaryRow
+                  label="Feed Tab"
+                  value={tabs.find((t) => t.id === "feed")?.enabled ? "Visible" : "Hidden"}
+                  isLast
+                />
+              </div>
+            </PolarisSidebarCard>
+
             {/* Live Governance Preview Card */}
             <PolarisSidebarCard
               title={`${singularName} Protocol`}
@@ -140,7 +350,6 @@ export default function CommunitySettings() {
                   </Badge>
                 </div>
 
-                {/* Status breakdown */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[11px] text-[#616161]">
                     <span>Member Creation:</span>
@@ -169,7 +378,6 @@ export default function CommunitySettings() {
                 </div>
               </div>
 
-              {/* Summary Rows */}
               <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
                   label="Node Creation"
@@ -190,18 +398,66 @@ export default function CommunitySettings() {
             </PolarisSidebarCard>
 
             {/* Tip Card */}
-            <PolarisTipCard title={`${singularName} Strategy Tip`}>
-              Enabling member-initiated {moduleName.toLowerCase()} accelerates organic
-              growth. With AI moderation enabled, user submissions are vetted in real-time
-              for community guidelines and brand safety.
+            <PolarisTipCard title="Navigation & Governance Tip">
+              The <strong>Discover</strong> tab cannot be hidden, ensuring visitors always find active {moduleName.toLowerCase()}. Use custom labels and order to fit your organization taxonomy.
             </PolarisTipCard>
           </div>
         }
       >
         <div className="space-y-3.5">
-          {/* Section 1: Creation & Access Gateway */}
+          {/* Section 1: Navigation Tabs & CTA Configuration */}
           <PolarisFormCard
             step={1}
+            title="Navigation Tabs & CTA Customization"
+            description={`Configure member navigation tabs (Discover is locked on; My ${moduleName}, Joined, and Feed can be hidden). Reorder and rename tabs to match your taxonomy.`}
+            badge="Navigation"
+            badgeVariant="emerald"
+            icon={Sliders}
+          >
+            <div className="space-y-4">
+              {/* Reusable Tab Manager Component */}
+              <ModuleTabManager tabs={tabs} onChange={handleTabsChange} />
+
+              {/* Primary CTA Button Label Customization */}
+              <div className="p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-[4px] bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                      <Plus className="h-3.5 w-3.5 stroke-[2.5px]" />
+                    </div>
+                    <div>
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                        Primary CTA Button Name
+                      </span>
+                      <p className="text-[11px] text-[#616161] dark:text-zinc-400">
+                        Customize the button label used across the member header to launch community creation.
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[9.5px] font-bold">
+                    Header Action
+                  </Badge>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70">
+                  <span className="text-[11px] text-[#616161] dark:text-zinc-400">
+                    Button Text: <span className="text-[10px] text-[#8c9196]">(Default: &quot;Create {singularName}&quot;)</span>
+                  </span>
+                  <input
+                    type="text"
+                    placeholder={`Create ${singularName}`}
+                    value={ctaName}
+                    onChange={handleCtaNameChange}
+                    className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full sm:w-[240px] focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 2: Creation & Access Gateway */}
+          <PolarisFormCard
+            step={2}
             title="Creation & Governance Policy"
             description={`Configure permissions for member-initiated ${moduleName.toLowerCase()} creation.`}
             badge="Access"
@@ -248,9 +504,9 @@ export default function CommunitySettings() {
             </div>
           </PolarisFormCard>
 
-          {/* Section 2: Automation Protocols */}
+          {/* Section 3: Automation Protocols */}
           <PolarisFormCard
-            step={2}
+            step={3}
             title="Automation & Verification Protocols"
             description={`Determine whether new ${moduleName.toLowerCase()} and sub-groups require admin review before going live.`}
             badge="Automation"
@@ -339,9 +595,9 @@ export default function CommunitySettings() {
             </div>
           </PolarisFormCard>
 
-          {/* Section 3: AI Safety Sentinel */}
+          {/* Section 4: AI Safety Sentinel */}
           <PolarisFormCard
-            step={3}
+            step={4}
             title="AI Moderation Sentinel"
             description={`Autonomous real-time safety inspection for ${moduleName.toLowerCase()} descriptions and member discussions.`}
             badge="AI Safety"

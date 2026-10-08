@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { Layout, Globe, ArrowLeft } from "lucide-react";
+import { Layout, Globe, ArrowLeft, Sparkles, FileText, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useToast } from "@/hooks/use-toast";
 import { useCreatePage, useGetWebsite } from "@/graphql/actions/website";
@@ -18,11 +20,13 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import {
   PolarisFormLayout,
   PolarisFormCard,
+  PolarisModeTile,
   PolarisSidebarCard,
   PolarisSummaryRow,
   PolarisTipCard,
   PolarisInfoBanner,
 } from "@/components/gamification/shared/polaris-form-ui";
+import { cn } from "@/lib/utils";
 
 const createPageSchema = Yup.object().shape({
   name: Yup.string()
@@ -30,7 +34,14 @@ const createPageSchema = Yup.object().shape({
     .required("Give your new page a recognizable name")
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must be under 50 characters"),
-  slug: Yup.string().trim(),
+  slug: Yup.string()
+    .trim()
+    .required("URL slug path is required")
+    .matches(
+      /^[a-z0-9-]+$/,
+      "Slug can only contain lowercase letters, numbers, and hyphens",
+    ),
+  archetype: Yup.string().oneOf(["standard", "landing", "resources"]).required(),
 });
 
 export function CreatePageManager() {
@@ -39,7 +50,7 @@ export function CreatePageManager() {
   const { addPage } = useWebsiteBuilderStore();
   const [saved, setSaved] = useState(false);
 
-  const { data: websiteData, loading: websiteLoading } = useGetWebsite({});
+  const { data: websiteData } = useGetWebsite({});
   const websiteId = websiteData?.getWebsite?.id;
 
   const [createPageMutation, { loading: isCreating }] = useCreatePage({
@@ -72,8 +83,10 @@ export function CreatePageManager() {
     initialValues: {
       name: "",
       slug: "",
+      archetype: "standard",
     },
     validationSchema: createPageSchema,
+    enableReinitialize: true,
     onSubmit: async (values) => {
       if (!websiteId) {
         toast({
@@ -84,11 +97,10 @@ export function CreatePageManager() {
         return;
       }
 
-      const cleanSlug = (values.slug || values.name || "")
+      const cleanSlug = values.slug
         .toLowerCase()
         .trim()
         .replace(/[^a-z0-9-]/g, "")
-        .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         .replace(/^-+|-+$/g, "");
 
@@ -109,8 +121,8 @@ export function CreatePageManager() {
             slug: cleanSlug,
           },
         });
-      } catch (err) {
-        // Handled in onError callback
+      } catch (err: unknown) {
+        console.error("Page creation error:", err);
       }
     },
   });
@@ -118,15 +130,16 @@ export function CreatePageManager() {
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const errors = await formik.validateForm();
-    if (Object.keys(errors).length > 0) {
+    const errorKeys = Object.keys(errors) as Array<keyof typeof errors>;
+    if (errorKeys.length > 0) {
       formik.setTouched(
-        Object.keys(errors).reduce(
+        errorKeys.reduce(
           (acc, key) => ({ ...acc, [key]: true }),
           {},
         ),
       );
-      const firstKey = Object.keys(errors)[0];
-      const firstError = (errors as any)[firstKey];
+      const firstKey = errorKeys[0];
+      const firstError = errors[firstKey];
       toast({
         title: "Validation Error",
         description:
@@ -148,14 +161,15 @@ export function CreatePageManager() {
     const val = e.target.value;
     formik.setFieldValue("name", val);
 
-    const generatedSlug = val
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-
-    formik.setFieldValue("slug", generatedSlug);
+    if (!formik.touched.slug) {
+      const generatedSlug = val
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+      formik.setFieldValue("slug", generatedSlug);
+    }
   };
 
   const currentSlug = formik.values.slug || "new-page";
@@ -165,7 +179,7 @@ export function CreatePageManager() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Create Page"
-        description="Configure the title, URL slug, and routing for your website page."
+        description="Configure the title, URL slug, and layout archetype for your website page."
         icon={Layout}
         badgeText="Website Studio"
         breadcrumbs={[
@@ -179,7 +193,7 @@ export function CreatePageManager() {
             variant="outline"
             size="sm"
             onClick={() => router.push("/app-layout")}
-            className="h-8 px-3 text-xs gap-1.5"
+            className="h-8 px-3 text-xs gap-1.5 border-[#d2d5d9] dark:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 cursor-pointer shadow-2xs text-[#303030] dark:text-zinc-200"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Cancel
@@ -199,13 +213,13 @@ export function CreatePageManager() {
               >
                 <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xs overflow-hidden flex flex-col">
                   {/* Browser Address Bar */}
-                  <div className="h-9 border-b border-[#d2d5d9] dark:border-zinc-800 flex items-center px-3 bg-[#f6f6f7] dark:bg-zinc-900/80 gap-2">
+                  <div className="h-8 border-b border-[#d2d5d9] dark:border-zinc-800 flex items-center px-3 bg-[#f6f6f7] dark:bg-zinc-900/80 gap-2">
                     <div className="flex gap-1.5 shrink-0">
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#d2d5d9] dark:bg-zinc-700" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#d2d5d9] dark:bg-zinc-700" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#d2d5d9] dark:bg-zinc-700" />
+                      <div className="w-2 h-2 rounded-full bg-[#d2d5d9] dark:bg-zinc-700" />
+                      <div className="w-2 h-2 rounded-full bg-[#d2d5d9] dark:bg-zinc-700" />
+                      <div className="w-2 h-2 rounded-full bg-[#d2d5d9] dark:bg-zinc-700" />
                     </div>
-                    <div className="flex-1 mx-1 bg-white dark:bg-zinc-950 border border-[#d2d5d9] dark:border-zinc-800 rounded-[4px] h-6 flex items-center px-2 justify-center overflow-hidden">
+                    <div className="flex-1 mx-1 bg-white dark:bg-zinc-950 border border-[#d2d5d9] dark:border-zinc-800 rounded-[4px] h-5.5 flex items-center px-2 justify-center overflow-hidden">
                       <span className="text-[10px] text-[#616161] font-mono flex items-center gap-1 truncate">
                         <Globe className="h-3 w-3 shrink-0 text-[#8c9196]" />
                         thrico.community/{currentSlug}
@@ -214,31 +228,38 @@ export function CreatePageManager() {
                   </div>
 
                   {/* Browser Canvas */}
-                  <div className="p-5 flex flex-col items-center justify-center text-center space-y-2.5">
-                    <div className="w-12 h-12 rounded-[8px] bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 flex items-center justify-center border border-[#d2d5d9] dark:border-zinc-700">
-                      <Layout className="h-6 w-6" />
+                  <div className="p-4 flex flex-col items-center justify-center text-center space-y-2">
+                    <div className="w-10 h-10 rounded-[8px] bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40">
+                      <Layout className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-[14px] font-semibold text-[#303030] dark:text-zinc-100">
+                      <h4 className="text-xs font-bold text-[#303030] dark:text-zinc-100 truncate max-w-[200px]">
                         {currentPageName}
                       </h4>
-                      <p className="text-[11.5px] text-[#616161] dark:text-zinc-400 mt-0.5 max-w-[180px] mx-auto leading-[15px]">
-                        After saving, you can customize sections and design
-                        blocks.
+                      <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 max-w-[200px] mx-auto leading-tight">
+                        After saving, you can customize layout sections and visual design blocks.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Summary Metadata */}
-                <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+                <div className="space-y-1 pt-2 border-t border-[#e1e3e5]/60 dark:border-zinc-800/80">
                   <PolarisSummaryRow
-                    label="Access URL"
+                    label="Access Route"
                     value={`/${currentSlug}`}
                   />
                   <PolarisSummaryRow
-                    label="Page Status"
-                    value="Unpublished Draft"
+                    label="Archetype"
+                    value={
+                      <Badge variant="outline" className="text-[9.5px] uppercase font-mono px-1 py-0">
+                        {formik.values.archetype}
+                      </Badge>
+                    }
+                  />
+                  <PolarisSummaryRow
+                    label="Publication State"
+                    value="Draft (Unpublished)"
                     isLast
                   />
                 </div>
@@ -255,6 +276,7 @@ export function CreatePageManager() {
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <PolarisInfoBanner
+              variant="info"
               title="Publishing Workflow"
               description="Create the page container first, then use the visual page builder studio to drag and drop interactive modules, banners, and layout grids."
             />
@@ -266,15 +288,15 @@ export function CreatePageManager() {
               description="Enter the public title and URL slug path for this page."
               badge="Core Setup"
             >
-              <div className="space-y-4">
+              <div className="space-y-3.5">
                 {/* Page Name */}
                 <div className="space-y-1.5">
-                  <label
+                  <Label
                     htmlFor="name"
-                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                    className="text-xs font-semibold text-[#303030] dark:text-zinc-100 select-none block"
                   >
-                    Page Name <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
+                    Page Name <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="name"
                     name="name"
@@ -282,27 +304,31 @@ export function CreatePageManager() {
                     value={formik.values.name}
                     onChange={handleNameChange}
                     onBlur={formik.handleBlur}
-                    className="h-[40px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[14px] text-[#303030] dark:text-zinc-100 rounded-[8px]"
+                    className={cn(
+                      "h-9 text-xs bg-white dark:bg-zinc-900 border-[#d2d5d9] dark:border-zinc-800 text-[#303030] dark:text-zinc-100 rounded-[6px]",
+                      (formik.touched.name || formik.submitCount > 0) &&
+                        formik.errors.name &&
+                        "border-destructive focus-visible:ring-destructive",
+                    )}
                   />
                   {(formik.touched.name || formik.submitCount > 0) &&
                     formik.errors.name && (
-                      <p className="text-[12.5px] font-normal text-[#d72c0d] leading-[18px]">
-                        {formik.errors.name as string}
+                      <p className="text-[11px] font-medium text-destructive">
+                        {formik.errors.name}
                       </p>
                     )}
                 </div>
 
                 {/* Slug Path */}
                 <div className="space-y-1.5">
-                  <label
+                  <Label
                     htmlFor="slug"
-                    className="text-[13.5px] font-medium text-[#303030] dark:text-zinc-200 leading-[20px] select-none block"
+                    className="text-xs font-semibold text-[#303030] dark:text-zinc-100 select-none block"
                   >
-                    URL Slug Path{" "}
-                    <span className="text-[#d72c0d] ml-0.5">*</span>
-                  </label>
+                    URL Slug Path <span className="text-destructive">*</span>
+                  </Label>
                   <div className="flex items-center gap-0">
-                    <div className="h-[40px] px-3.5 flex items-center bg-[#f6f6f7] dark:bg-zinc-800 rounded-l-[8px] border border-r-0 border-[#aeb4b9] dark:border-zinc-700 text-[#616161] font-mono text-[14px] font-semibold select-none">
+                    <div className="h-9 px-3 flex items-center bg-[#f6f6f7] dark:bg-zinc-800 rounded-l-[6px] border border-r-0 border-[#d2d5d9] dark:border-zinc-700 text-[#616161] font-mono text-xs font-semibold select-none">
                       /
                     </div>
                     <Input
@@ -310,7 +336,12 @@ export function CreatePageManager() {
                       name="slug"
                       placeholder="services"
                       value={formik.values.slug}
-                      className="h-[40px] text-[14px] font-mono rounded-l-none rounded-r-[8px] bg-white dark:bg-zinc-900 border-[#aeb4b9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100"
+                      className={cn(
+                        "h-9 text-xs font-mono rounded-l-none rounded-r-[6px] bg-white dark:bg-zinc-900 border-[#d2d5d9] dark:border-zinc-800 text-[#303030] dark:text-zinc-100",
+                        (formik.touched.slug || formik.submitCount > 0) &&
+                          formik.errors.slug &&
+                          "border-destructive focus-visible:ring-destructive",
+                      )}
                       onChange={(e) => {
                         const val = e.target.value
                           .toLowerCase()
@@ -329,15 +360,47 @@ export function CreatePageManager() {
                   </div>
                   {(formik.touched.slug || formik.submitCount > 0) &&
                     formik.errors.slug && (
-                      <p className="text-[12.5px] font-normal text-[#d72c0d] leading-[18px]">
-                        {formik.errors.slug as string}
+                      <p className="text-[11px] font-medium text-destructive">
+                        {formik.errors.slug}
                       </p>
                     )}
-                  <p className="text-[11.5px] text-[#616161]">
-                    Defines the URL path visitors will use to reach this page
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400">
+                    Defines the URL path visitors use to reach this page
                     (e.g. <code>thrico.community/{currentSlug}</code>).
                   </p>
                 </div>
+              </div>
+            </PolarisFormCard>
+
+            {/* Step 2: Page Archetype Selection */}
+            <PolarisFormCard
+              step={2}
+              title="Page Archetype"
+              description="Choose the primary visual purpose for this page container."
+              badge="Template"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <PolarisModeTile
+                  label="Standard Page"
+                  description="Multi-section informational page with headers, cards, and text"
+                  icon={FileText}
+                  selected={formik.values.archetype === "standard"}
+                  onClick={() => formik.setFieldValue("archetype", "standard")}
+                />
+                <PolarisModeTile
+                  label="Landing / Showcase"
+                  description="High-converting hero page with CTA banners and media spotlight"
+                  icon={Sparkles}
+                  selected={formik.values.archetype === "landing"}
+                  onClick={() => formik.setFieldValue("archetype", "landing")}
+                />
+                <PolarisModeTile
+                  label="Resources & Hub"
+                  description="Directory page for documentation, policies, FAQs, or courses"
+                  icon={Compass}
+                  selected={formik.values.archetype === "resources"}
+                  onClick={() => formik.setFieldValue("archetype", "resources")}
+                />
               </div>
             </PolarisFormCard>
           </form>

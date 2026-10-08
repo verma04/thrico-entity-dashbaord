@@ -9,8 +9,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { useForm } from "react-hook-form";
-import { Search, SaveIcon, Sparkles, Globe } from "lucide-react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { Search, SaveIcon, Sparkles, Globe, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -24,14 +25,40 @@ import { SchemaPreview } from "./schema-preview";
 import { OgCardPreview } from "./og-card-preview";
 import { SeoFormValues } from "./seo-types";
 
+export interface SeoPageData {
+  id: string;
+  name: string;
+  slug: string;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    keywords?: string[] | string | null;
+    ogImage?: string | null;
+    schemaMarkup?: unknown;
+  } | null;
+}
+
 interface SeoDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  page: any | null;
+  page: SeoPageData | null;
   websiteUrl: string;
   onSave: (values: SeoFormValues) => void | Promise<void>;
   isSaving: boolean;
 }
+
+const seoValidationSchema = Yup.object().shape({
+  title: Yup.string()
+    .trim()
+    .required("Meta title is required")
+    .max(70, "Meta title should stay under 70 characters"),
+  description: Yup.string()
+    .trim()
+    .max(160, "Meta description should stay under 160 characters"),
+  keywords: Yup.string().trim(),
+  ogImage: Yup.string().trim(),
+  schemaMarkup: Yup.string().trim(),
+});
 
 export function SeoDrawer({
   isOpen,
@@ -41,37 +68,30 @@ export function SeoDrawer({
   onSave,
   isSaving,
 }: SeoDrawerProps) {
-  const form = useForm<SeoFormValues>({
-    defaultValues: {
-      title: "",
-      description: "",
-      keywords: "",
-      ogImage: "",
-      schemaMarkup: "",
+  const formik = useFormik<SeoFormValues>({
+    initialValues: {
+      title: page?.seo?.title || page?.name || "",
+      description: page?.seo?.description || "",
+      keywords: Array.isArray(page?.seo?.keywords)
+        ? page?.seo?.keywords.join(", ")
+        : (page?.seo?.keywords as string) || "",
+      ogImage: page?.seo?.ogImage || "",
+      schemaMarkup:
+        typeof page?.seo?.schemaMarkup === "object" &&
+        page?.seo?.schemaMarkup !== null
+          ? JSON.stringify(page.seo.schemaMarkup, null, 2)
+          : (page?.seo?.schemaMarkup as string) || "",
+    },
+    validationSchema: seoValidationSchema,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      await onSave(values);
     },
   });
 
-  useEffect(() => {
-    if (page && isOpen) {
-      form.reset({
-        title: page.seo?.title || page.name || "",
-        description: page.seo?.description || "",
-        keywords: Array.isArray(page.seo?.keywords)
-          ? page.seo.keywords.join(", ")
-          : page.seo?.keywords || "",
-        ogImage: page.seo?.ogImage || "",
-        schemaMarkup:
-          typeof page.seo?.schemaMarkup === "object" &&
-          page.seo?.schemaMarkup !== null
-            ? JSON.stringify(page.seo.schemaMarkup, null, 2)
-            : page.seo?.schemaMarkup || "",
-      });
-    }
-  }, [page, isOpen, form]);
-
   const generateSchemaMarkup = () => {
-    const title = form.getValues("title") || page?.name || "Page";
-    const description = form.getValues("description") || "";
+    const title = formik.values.title || page?.name || "Page";
+    const description = formik.values.description || "";
     const slug = page?.slug || "";
 
     const schema = {
@@ -82,15 +102,9 @@ export function SeoDrawer({
       url: `${websiteUrl}/${slug}`,
     };
 
-    form.setValue("schemaMarkup", JSON.stringify(schema, null, 2), {
-      shouldDirty: true,
-    });
+    formik.setFieldValue("schemaMarkup", JSON.stringify(schema, null, 2));
     toast.success("JSON-LD WebPage schema generated");
   };
-
-  const handleSubmit = form.handleSubmit((values) => {
-    onSave(values);
-  });
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -98,33 +112,43 @@ export function SeoDrawer({
         side="right"
         className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-[740px] p-0 flex flex-col h-full bg-[#f6f6f7] dark:bg-zinc-950 border-l border-[#d2d5d9] dark:border-zinc-800 shadow-2xl z-[150] overflow-hidden"
       >
-        {/* Drawer Top Header */}
+        {/* 1. Sticky Drawer Top Header */}
         <div className="border-b border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-4 shrink-0 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="h-9 w-9 rounded-[8px] bg-zinc-100 dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700 text-[#303030] dark:text-zinc-100 flex items-center justify-center shrink-0 shadow-2xs">
-              <Search className="h-4.5 w-4.5" />
+            <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40 shrink-0 shadow-2xs">
+              <Search className="h-4 w-4" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <SheetTitle className="text-[15px] font-semibold text-[#303030] dark:text-zinc-100 tracking-tight leading-tight">
+                <SheetTitle className="text-xs font-bold text-[#303030] dark:text-zinc-100 tracking-tight leading-tight">
                   Page SEO & Social Metadata
                 </SheetTitle>
                 <Badge
                   variant="outline"
-                  className="bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-700 text-[10px] font-mono font-medium px-2 py-0 shrink-0"
+                  className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 text-[10px] font-mono font-medium px-1.5 py-0 shrink-0"
                 >
                   /{page?.slug || "page"}
                 </Badge>
               </div>
-              <SheetDescription className="text-[12px] text-[#616161] dark:text-zinc-400 mt-0.5 truncate">
-                Configure search title tags, OpenGraph previews, and structured JSON-LD data.
+              <SheetDescription className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 truncate">
+                Configure search title tags, OpenGraph previews, and structured JSON-LD data
               </SheetDescription>
             </div>
           </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-7 w-7 rounded-md hover:bg-muted shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Drawer Body - Scrollable Polaris Form Canvas */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+        {/* 2. Scrollable Body - Polaris Form Canvas */}
+        <form onSubmit={formik.handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
           {/* Card 1: Google SERP Projection (Live Preview) */}
           <PolarisCard
             title="Live Search Engine Preview"
@@ -139,8 +163,8 @@ export function SeoDrawer({
             description="Real-time projection of how this page snippet appears in search engine results."
           >
             <SeoPreview
-              title={form.watch("title")}
-              description={form.watch("description")}
+              title={formik.values.title}
+              description={formik.values.description}
               slug={page?.slug || ""}
               baseUrl={websiteUrl}
             />
@@ -154,29 +178,30 @@ export function SeoDrawer({
             <div className="space-y-3.5">
               <PolarisInput
                 id="seo-title"
+                name="title"
                 label="Meta Title Tag"
                 required
                 placeholder="e.g. Acme Community - Exclusive Builder Network"
-                value={form.watch("title")}
-                onChange={(e) =>
-                  form.setValue("title", e.target.value, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.title && formik.errors.title
+                    ? formik.errors.title
+                    : undefined
                 }
-                error={form.formState.errors.title?.message}
                 helperText={
                   <span className="flex items-center justify-between">
                     <span>Keep between 45–60 characters for optimal visibility.</span>
                     <span
                       className={cn(
                         "font-mono font-medium text-[11px]",
-                        (form.watch("title")?.length || 0) > 60
-                          ? "text-[#d72c0d] dark:text-rose-400"
+                        (formik.values.title?.length || 0) > 60
+                          ? "text-destructive font-semibold"
                           : "text-[#616161] dark:text-zinc-400",
                       )}
                     >
-                      {form.watch("title")?.length || 0}/60
+                      {formik.values.title?.length || 0}/60
                     </span>
                   </span>
                 }
@@ -184,30 +209,31 @@ export function SeoDrawer({
 
               <PolarisTextarea
                 id="seo-description"
+                name="description"
                 label="Meta Description Tag"
                 required
                 rows={3}
                 placeholder="Enter a concise 1-2 sentence description summarizing this page for search engine users..."
-                value={form.watch("description")}
-                onChange={(e) =>
-                  form.setValue("description", e.target.value, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.description && formik.errors.description
+                    ? formik.errors.description
+                    : undefined
                 }
-                error={form.formState.errors.description?.message}
                 helperText={
                   <span className="flex items-center justify-between">
                     <span>Keep between 120–160 characters for best display.</span>
                     <span
                       className={cn(
                         "font-mono font-medium text-[11px]",
-                        (form.watch("description")?.length || 0) > 160
-                          ? "text-[#d72c0d] dark:text-rose-400"
+                        (formik.values.description?.length || 0) > 160
+                          ? "text-destructive font-semibold"
                           : "text-[#616161] dark:text-zinc-400",
                       )}
                     >
-                      {form.watch("description")?.length || 0}/160
+                      {formik.values.description?.length || 0}/160
                     </span>
                   </span>
                 }
@@ -215,14 +241,12 @@ export function SeoDrawer({
 
               <PolarisInput
                 id="seo-keywords"
+                name="keywords"
                 label="Meta Keywords"
                 placeholder="community, creators, ecommerce, loyalty"
-                value={form.watch("keywords")}
-                onChange={(e) =>
-                  form.setValue("keywords", e.target.value, {
-                    shouldDirty: true,
-                  })
-                }
+                value={formik.values.keywords}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 helperText="Comma-separated terms and keywords relevant to this page content."
               />
             </div>
@@ -236,25 +260,26 @@ export function SeoDrawer({
             <div className="space-y-4">
               {/* Live OpenGraph Social Preview */}
               <OgCardPreview
-                title={form.watch("title")}
-                description={form.watch("description")}
-                ogImage={form.watch("ogImage")}
+                title={formik.values.title}
+                description={formik.values.description}
+                ogImage={formik.values.ogImage}
                 slug={page?.slug}
                 websiteUrl={websiteUrl}
               />
 
               <div className="p-3 rounded-[8px] bg-[#f6f6f7]/70 dark:bg-zinc-800/40 border border-[#d2d5d9] dark:border-zinc-700">
                 <ImageUploadWithCrop
-                  currentImage={form.watch("ogImage") || ""}
+                  currentImage={formik.values.ogImage || ""}
                   onImageUpdate={(url) =>
-                    form.setValue("ogImage", url || "", { shouldDirty: true })
+                    formik.setFieldValue("ogImage", url || "")
                   }
                   label="Social Share Image (OG Image)"
                   aspectRatio={1200 / 630}
                   recommendedWidth={1200}
                   recommendedHeight={630}
+                  allowFreeDimensions={true}
                   uploadButtonText={
-                    form.watch("ogImage")
+                    formik.values.ogImage
                       ? "Change social photo"
                       : "Upload social image (1200x630)"
                   }
@@ -263,15 +288,13 @@ export function SeoDrawer({
 
               <PolarisInput
                 id="seo-og-image"
+                name="ogImage"
                 label="Or Enter Direct Image URL"
                 prefix={<Globe className="h-4 w-4" />}
                 placeholder="https://images.unsplash.com/..."
-                value={form.watch("ogImage") || ""}
-                onChange={(e) =>
-                  form.setValue("ogImage", e.target.value, {
-                    shouldDirty: true,
-                  })
-                }
+                value={formik.values.ogImage || ""}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 helperText="Direct image URL for OpenGraph social cards (must begin with https://)."
               />
             </div>
@@ -295,51 +318,49 @@ export function SeoDrawer({
             }
           >
             <div className="space-y-3">
-              <SchemaPreview schemaMarkup={form.watch("schemaMarkup")} />
+              <SchemaPreview schemaMarkup={formik.values.schemaMarkup} />
 
               <PolarisTextarea
                 id="seo-schema"
+                name="schemaMarkup"
                 label="JSON-LD Markup"
                 rows={5}
                 className="font-mono text-[11.5px] leading-relaxed"
                 placeholder='{"@context": "https://schema.org", "@type": "WebPage", ...}'
-                value={form.watch("schemaMarkup")}
-                onChange={(e) =>
-                  form.setValue("schemaMarkup", e.target.value, {
-                    shouldDirty: true,
-                  })
-                }
+                value={formik.values.schemaMarkup}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 helperText="Must be valid JSON containing Schema.org structured annotations."
               />
             </div>
           </PolarisCard>
         </form>
 
-        {/* Drawer Sticky Bottom Footer */}
-        <div className="border-t border-[#d2d5d9] dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-6 py-3.5 shrink-0 flex items-center justify-between gap-3">
+        {/* 3. Sticky Drawer Bottom Footer */}
+        <div className="border-t border-[#d2d5d9] dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-6 py-3.5 shrink-0 flex items-center justify-end gap-2.5">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            disabled={isSaving}
-            className="h-8 px-3.5 rounded-[6px] text-xs font-medium border-[#d2d5d9] dark:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800"
+            disabled={isSaving || formik.isSubmitting}
+            className="h-8.5 px-3.5 rounded-[6px] text-xs font-medium border-[#d2d5d9] dark:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 cursor-pointer"
           >
             Cancel
           </Button>
 
           <Button
             type="button"
-            onClick={handleSubmit}
-            disabled={isSaving}
-            className="h-8 px-4 rounded-[6px] bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 font-semibold text-xs shadow-xs gap-1.5"
+            onClick={() => formik.handleSubmit()}
+            disabled={isSaving || formik.isSubmitting}
+            className="h-8.5 px-4 rounded-[6px] bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white font-medium text-xs shadow-2xs gap-1.5 cursor-pointer"
           >
             <SaveIcon
               className={cn(
                 "h-3.5 w-3.5",
-                isSaving && "animate-spin",
+                (isSaving || formik.isSubmitting) && "animate-spin",
               )}
             />
-            {isSaving ? "Saving..." : "Save Metadata"}
+            {isSaving || formik.isSubmitting ? "Saving..." : "Save Metadata"}
           </Button>
         </div>
       </SheetContent>

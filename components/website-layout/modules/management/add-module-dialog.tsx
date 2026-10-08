@@ -1,19 +1,22 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, PlusCircle, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Search, PlusCircle, Lock, Layers, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import { AVAILABLE_MODULES, BASIC_MODULE_TYPES } from "./constants";
 import { useModuleCreation } from "../../hooks/use-module-creation";
+import { PolarisQuickChip } from "@/components/gamification/shared/polaris-form-ui";
 
 interface AddModuleDialogProps {
   open?: boolean;
@@ -35,12 +38,12 @@ export function AddModuleDialog({
   const { isPremium } = useIsPremium();
   const { handleAddModule, isCreating } = useModuleCreation();
   const [creatingModuleType, setCreatingModuleType] = useState<string | null>(
-    null
+    null,
   );
 
   const categories = useMemo(
     () => Array.from(new Set(AVAILABLE_MODULES.map((m) => m.category))).sort(),
-    []
+    [],
   );
 
   const filteredModules = useMemo(() => {
@@ -61,7 +64,7 @@ export function AddModuleDialog({
   const groupedModules = useMemo(() => {
     return categories.reduce((acc, category) => {
       const categoryModules = filteredModules.filter(
-        (m) => m.category === category
+        (m) => m.category === category,
       );
       if (categoryModules.length > 0) {
         acc[category] = categoryModules;
@@ -81,7 +84,7 @@ export function AddModuleDialog({
         item.type,
         item.name,
         item.defaultLayout,
-        isPremiumModule
+        isPremiumModule,
       );
       if (success) {
         onOpenChange(false);
@@ -106,123 +109,134 @@ export function AddModuleDialog({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="z-[2000] max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Add Section</DialogTitle>
-          <DialogDescription>
-            Choose a module to add to this page.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="z-[2000] max-w-3xl p-0 gap-0 overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 shadow-2xl rounded-xl bg-white dark:bg-zinc-900">
+        {/* 1. Polaris Header */}
+        <div className="px-5 py-4 border-b border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb] dark:bg-zinc-900/90 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40 shrink-0">
+              <Layers className="h-4 w-4" />
+            </div>
+            <div>
+              <DialogTitle className="text-xs font-bold text-[#303030] dark:text-zinc-100">
+                Add Section Module
+              </DialogTitle>
+              <DialogDescription className="text-[11px] text-[#616161] dark:text-zinc-400">
+                Select a visual design section to append to this page layout
+              </DialogDescription>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange(false)}
+            className="h-7 w-7 rounded-md hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-        <div className="space-y-4">
+        {/* 2. Controls Bar: Search & Category Chips */}
+        <div className="p-4 border-b border-[#e1e3e5]/60 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-[#616161] dark:text-zinc-400" />
             <Input
-              placeholder="Search modules..."
+              placeholder="Search sections and layout modules..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 h-8.5 text-xs bg-[#f6f6f7] dark:bg-zinc-800/60 border-[#d2d5d9] dark:border-zinc-700"
             />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={selectedCategory === "all" ? "default" : "outline"}
-              size="sm"
+          <div className="flex flex-wrap items-center gap-1.5">
+            <PolarisQuickChip
+              label="All Categories"
+              active={selectedCategory === "all"}
               onClick={() => setSelectedCategory("all")}
-              className="h-7 text-xs"
-            >
-              All Categories
-            </Button>
+            />
             {categories.map((category) => (
-              <Button
+              <PolarisQuickChip
                 key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                size="sm"
+                label={category}
+                active={selectedCategory === category}
                 onClick={() => setSelectedCategory(category)}
-                className="h-7 text-xs"
-              >
-                {category}
-              </Button>
+              />
             ))}
           </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[50vh] space-y-6">
+        {/* 3. Scrollable Module Grid */}
+        <div className="overflow-y-auto max-h-[52vh] p-5 space-y-6 bg-[#f6f6f7]/50 dark:bg-zinc-950/40">
           {Object.entries(groupedModules).map(([category, modules]) => (
-            <div key={category}>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 sticky top-0 bg-background/95 backdrop-blur py-2 border-b">
-                {category}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div key={category} className="space-y-2.5">
+              <div className="flex items-center gap-2 pb-1.5 border-b border-[#e1e3e5]/60 dark:border-zinc-800/80">
+                <span className="text-[11px] font-bold text-[#303030] dark:text-zinc-200 uppercase tracking-wider">
+                  {category}
+                </span>
+                <Badge
+                  variant="outline"
+                  className="text-[9.5px] px-1.5 py-0 font-mono bg-white dark:bg-zinc-900 text-muted-foreground border-border/70"
+                >
+                  {modules.length}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {modules.map((item) => {
                   const IconComponent = item.icon;
-                  const isPremiumModule = !BASIC_MODULE_TYPES.includes(
-                    item.type
-                  );
+                  const isPremiumModule = !BASIC_MODULE_TYPES.includes(item.type);
                   const isLocked = isPremiumModule && !isPremium;
+                  const isCurrentCreating =
+                    isCreating && creatingModuleType === item.type;
 
                   return (
                     <button
                       key={item.type}
+                      type="button"
                       onClick={() => onAddModule(item)}
-                      disabled={isCreating}
+                      disabled={isCreating || isLocked}
                       className={cn(
-                        "flex items-start gap-3 p-4 border rounded-xl transition-all text-left group relative",
+                        "relative flex items-start gap-3 p-3 rounded-[8px] border text-left transition-all cursor-pointer w-full bg-white dark:bg-zinc-900",
                         isLocked
-                          ? "opacity-60 cursor-not-allowed hover:border-muted-foreground/30"
-                          : isCreating && creatingModuleType === item.type
-                          ? "border-primary bg-primary/5 cursor-wait"
-                          : "hover:border-primary hover:bg-primary/5",
-                        isCreating &&
-                          creatingModuleType !== item.type &&
-                          "opacity-50 cursor-not-allowed"
+                          ? "opacity-60 cursor-not-allowed border-[#d2d5d9] dark:border-zinc-800"
+                          : isCurrentCreating
+                            ? "border-[#303030] dark:border-zinc-100 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-2xs"
+                            : "border-[#d2d5d9] dark:border-zinc-800 hover:border-[#aeb4b9] dark:hover:border-zinc-700 hover:shadow-2xs",
                       )}
                     >
-                      {isCreating && creatingModuleType === item.type && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-xl z-10">
-                          <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      )}
                       <div
                         className={cn(
-                          "flex-shrink-0 p-2 rounded-lg transition-colors",
-                          isLocked
-                            ? "bg-muted/50"
-                            : "bg-muted group-hover:bg-primary/10"
+                          "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 border transition-colors",
+                          isCurrentCreating
+                            ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900"
+                            : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 border-[#d2d5d9] dark:border-zinc-700",
                         )}
                       >
-                        {React.createElement(IconComponent, {
-                          className: cn(
-                            "h-5 w-5 transition-colors",
-                            isLocked
-                              ? "text-muted-foreground/50"
-                              : "text-muted-foreground group-hover:text-primary"
-                          ),
-                        })}
+                        {isCurrentCreating ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-current" />
+                        ) : (
+                          <IconComponent className="h-4 w-4" />
+                        )}
                       </div>
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              "font-semibold text-sm transition-colors block",
-                              isLocked
-                                ? "text-muted-foreground"
-                                : "group-hover:text-primary"
-                            )}
-                          >
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-semibold text-[#303030] dark:text-zinc-100 block truncate">
                             {item.name}
                           </span>
                           {isPremiumModule && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 flex items-center gap-1">
+                            <Badge
+                              variant="outline"
+                              className="text-[9.5px] px-1 py-0 font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 shrink-0 flex items-center gap-0.5"
+                            >
                               <Lock className="h-2.5 w-2.5" />
-                              Premium
-                            </span>
+                              Pro
+                            </Badge>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground leading-relaxed block">
+                        <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 line-clamp-2 leading-[15px]">
                           {item.description}
-                        </span>
+                        </p>
                       </div>
                     </button>
                   );
@@ -232,11 +246,26 @@ export function AddModuleDialog({
           ))}
 
           {Object.keys(groupedModules).length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-sm">No modules found matching your search.</p>
+            <div className="text-center py-12 text-[#616161] dark:text-zinc-400">
+              <Search className="h-8 w-8 mx-auto mb-2 opacity-40" />
+              <p className="text-xs font-medium">No sections found matching your search</p>
             </div>
           )}
+        </div>
+
+        {/* 4. Polaris Sticky Footer */}
+        <div className="p-3.5 border-t border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb] dark:bg-zinc-900/90 flex items-center justify-between">
+          <span className="text-[11px] text-[#616161] dark:text-zinc-400 font-mono">
+            {filteredModules.length} module{filteredModules.length !== 1 ? "s" : ""} available
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="h-8 px-3 text-xs border-[#d2d5d9] dark:border-zinc-700 cursor-pointer"
+          >
+            Close
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

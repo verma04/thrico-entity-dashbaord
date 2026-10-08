@@ -31,47 +31,57 @@ export function ThemeCustomizer() {
   // GraphQL mutation for saving colors
   const [updateColors] = useUpdateWebsiteCustomColors();
 
+  // Timeout ref for debounced save
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
   // Debounced save function
   const debouncedSave = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout;
-      return (colors: typeof customColors) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(async () => {
-          if (!websiteId || Object.keys(colors).length === 0) return;
+    (colors: typeof customColors) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(async () => {
+        if (!websiteId || Object.keys(colors).length === 0) return;
 
-          try {
-            await updateColors({
-              variables: {
-                websiteId,
-                customColors: {
-                  primary: colors.primary,
-                  secondary: colors.secondary,
-                  accent: colors.accent,
-                  background: colors.background,
-                  muted: colors.muted,
-                  border: colors.border,
-                  buttonColor: colors.buttonColor,
-                  buttonTextColor: colors.buttonTextColor,
-                  borderRadius: colors.borderRadius,
-                  spacing: colors.spacing,
-                  fontSize: colors.fontSize,
-                },
+        try {
+          await updateColors({
+            variables: {
+              websiteId,
+              customColors: {
+                primary: colors.primary,
+                secondary: colors.secondary,
+                accent: colors.accent,
+                background: colors.background,
+                muted: colors.muted,
+                border: colors.border,
+                buttonColor: colors.buttonColor,
+                buttonTextColor: colors.buttonTextColor,
+                borderRadius: colors.borderRadius,
+                spacing: colors.spacing,
+                fontSize: colors.fontSize,
               },
-            });
-          } catch (error) {
-            console.error("Failed to save custom colors:", error);
-            toast({
-              title: "Error",
-              description: "Failed to save custom colors",
-              variant: "destructive",
-            });
-          }
-        }, 1000); // 1 second debounce
-      };
-    })(),
-    [websiteId, updateColors, toast]
+            },
+          });
+        } catch (error) {
+          console.error("Failed to save custom colors:", error);
+          toast({
+            title: "Error",
+            description: "Failed to save custom colors",
+            variant: "destructive",
+          });
+        }
+      }, 1000); // 1 second debounce
+    },
+    [websiteId, updateColors, toast],
   );
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Apply custom colors when they change
   useEffect(() => {
@@ -85,7 +95,7 @@ export function ThemeCustomizer() {
 
   const handleColorChange = (
     colorKey: keyof typeof customColors,
-    value: string | number
+    value: string | number,
   ) => {
     setCustomColor(colorKey, value as string);
   };
@@ -113,22 +123,27 @@ export function ThemeCustomizer() {
 
   if (!isPremium) {
     return (
-      <div className="p-2 bg-linear-to-br from-primary/5 to-primary/8 rounded-md border border-primary/15">
-        <div className="flex items-start gap-2">
-          <div className="p-1.5 bg-primary/10 rounded-md shrink-0">
-            <Sparkles className="h-3 w-3 text-primary/70" />
+      <div className="p-3 bg-white dark:bg-zinc-900 rounded-xl border border-[#d2d5d9] dark:border-zinc-800 shadow-2xs">
+        <div className="flex items-start gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/80 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5">
+            <Sparkles className="h-3.5 w-3.5" />
           </div>
-          <div className="flex-1 space-y-1.5">
-            <h3 className="text-xs font-semibold">Custom Colors</h3>
-            <p className="text-[10px] text-muted-foreground/70">
-              Match your brand colors
-            </p>
+          <div className="flex-1 space-y-1.5 min-w-0">
+            <div>
+              <h3 className="text-xs font-semibold text-[#303030] dark:text-zinc-100">
+                Custom Palette
+              </h3>
+              <p className="text-[11px] text-muted-foreground leading-tight">
+                Unlock custom branding and theme colors.
+              </p>
+            </div>
             <Button
+              type="button"
               onClick={() => openDrawer()}
               size="sm"
-              className="w-full h-6 text-[10px]"
+              className="w-full h-7 text-[11px] font-medium bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white shadow-2xs cursor-pointer"
             >
-              Upgrade
+              Upgrade Studio
             </Button>
           </div>
         </div>
@@ -137,21 +152,27 @@ export function ThemeCustomizer() {
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       {/* Header */}
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
-          "w-full flex items-center justify-between p-2 rounded-md transition-all",
-          "hover:bg-muted/40 border",
-          isExpanded ? "border-primary/25 bg-primary/5" : "border-transparent"
+          "w-full flex items-center justify-between p-2 rounded-xl transition-all cursor-pointer border shadow-2xs",
+          isExpanded
+            ? "border-indigo-600 dark:border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 ring-1 ring-indigo-500/20"
+            : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-indigo-300 dark:hover:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/60",
         )}
       >
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3 text-primary/70" />
-          <span className="text-xs font-semibold">Colors</span>
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/80 text-indigo-600 dark:text-indigo-400 shrink-0">
+            <Sparkles className="h-3 w-3" />
+          </div>
+          <span className="text-xs font-semibold text-[#303030] dark:text-zinc-100">
+            Brand Colors
+          </span>
           {hasCustomColors && (
-            <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-px rounded-full font-medium">
+            <span className="text-[9.5px] bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded-md font-semibold border border-indigo-200 dark:border-indigo-800">
               Active
             </span>
           )}
@@ -159,13 +180,14 @@ export function ThemeCustomizer() {
         <div className="flex items-center gap-1">
           {hasCustomColors && (
             <Button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 handleReset();
               }}
               size="sm"
               variant="ghost"
-              className="h-5 text-[10px] gap-0.5 px-1.5"
+              className="h-5 text-[10px] gap-0.5 px-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <RotateCcw className="h-2.5 w-2.5" />
               Reset
@@ -173,8 +195,8 @@ export function ThemeCustomizer() {
           )}
           <ChevronDown
             className={cn(
-              "h-3 w-3 text-muted-foreground/50 transition-transform",
-              isExpanded && "rotate-180"
+              "h-3.5 w-3.5 text-muted-foreground/60 transition-transform",
+              isExpanded && "rotate-180",
             )}
           />
         </div>
@@ -186,15 +208,15 @@ export function ThemeCustomizer() {
           "grid transition-all duration-200 overflow-hidden",
           isExpanded
             ? "grid-rows-[1fr] opacity-100"
-            : "grid-rows-[0fr] opacity-0"
+            : "grid-rows-[0fr] opacity-0",
         )}
       >
         <div className="overflow-hidden">
-          <div className="p-2 space-y-2 bg-muted/20 rounded-md">
+          <div className="p-2.5 space-y-2.5 bg-[#f6f6f7] dark:bg-zinc-950 rounded-xl border border-[#d2d5d9] dark:border-zinc-800 shadow-2xs">
             {/* Colors Section */}
             <div className="space-y-2">
-              <div className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                Colors
+              <div className="text-[10.5px] font-bold uppercase tracking-wider text-[#616161] dark:text-zinc-400">
+                Palette Tokens
               </div>
 
               {/* All 6 colors in a 3-column grid */}
@@ -238,8 +260,8 @@ export function ThemeCustomizer() {
               </div>
 
               {/* Button Colors */}
-              <div className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider pt-1">
-                Buttons
+              <div className="text-[10.5px] font-bold uppercase tracking-wider text-[#616161] dark:text-zinc-400 pt-1">
+                Button Accents
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <ColorPicker
@@ -251,7 +273,9 @@ export function ThemeCustomizer() {
                 <ColorPicker
                   label="Button Text"
                   value={customColors.buttonTextColor || "#FFFFFF"}
-                  onChange={(value) => handleColorChange("buttonTextColor", value)}
+                  onChange={(value) =>
+                    handleColorChange("buttonTextColor", value)
+                  }
                   compact
                 />
               </div>
@@ -259,16 +283,17 @@ export function ThemeCustomizer() {
 
             {/* Advanced Settings Toggle */}
             <button
+              type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-background/50 transition-colors"
+              className="w-full flex items-center justify-between p-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-900 transition-colors cursor-pointer border border-transparent hover:border-[#d2d5d9] dark:hover:border-zinc-800"
             >
-              <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
-                Advanced
+              <span className="text-[10.5px] font-bold uppercase tracking-wider text-[#616161] dark:text-zinc-400">
+                Advanced Geometry
               </span>
               <ChevronDown
                 className={cn(
-                  "h-2.5 w-2.5 text-muted-foreground/40 transition-transform",
-                  showAdvanced && "rotate-180"
+                  "h-3 w-3 text-muted-foreground/60 transition-transform",
+                  showAdvanced && "rotate-180",
                 )}
               />
             </button>

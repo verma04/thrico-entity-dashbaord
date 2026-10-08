@@ -245,72 +245,71 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 import BuilderLayout from "@/components/website-layout/builder-layout";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { LayoutTemplate, ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const WebsiteBuilderPage = () => {
+  const router = useRouter();
+
   return (
     <div
-      className={`fixed inset-0 z-50 bg-background w-screen h-screen p-0 m-0 flex flex-col overflow-hidden animate-in fade-in duration-500 ${plusJakartaSans.variable} ${figtree.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.variable} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable}`}
+      className={`fixed inset-0 z-50 bg-[#f6f6f7] dark:bg-zinc-950 w-screen h-screen p-0 m-0 flex flex-col overflow-hidden ${plusJakartaSans.variable} ${figtree.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.variable} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable}`}
     >
-      <header className="flex flex-row items-center justify-between px-8 py-4 border-b shrink-0 bg-background/80 backdrop-blur-md relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-              <path d="M3 9h18" />
-              <path d="M9 21V9" />
-            </svg>
+      {/* ─── Zero-Clutter Polaris Studio Header ─── */}
+      <header className="flex flex-row items-center justify-between px-4 sm:px-6 py-2.5 border-b border-[#d2d5d9] dark:border-zinc-800 shrink-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md relative z-20 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.push("/app-layout")}
+            className="h-8 w-8 rounded-lg border border-[#d2d5d9] dark:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 flex items-center justify-center text-[#616161] hover:text-[#303030] dark:text-zinc-400 dark:hover:text-zinc-100 transition-all cursor-pointer shrink-0 shadow-2xs"
+            aria-label="Back to Pages"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+
+          <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <LayoutTemplate className="h-4 w-4" />
           </div>
+
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">
-              Website Builder
-            </h1>
-            <p className="text-muted-foreground text-xs font-medium">
-              Enterprise CMS & Layout Manager
+            <div className="flex items-center gap-2">
+              <h1 className="text-xs sm:text-sm font-bold text-[#303030] dark:text-zinc-100 tracking-tight leading-none">
+                Website Builder Studio
+              </h1>
+              <Badge
+                variant="outline"
+                className="text-[10px] bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 font-semibold px-1.5 py-0"
+              >
+                Linear CMS
+              </Badge>
+            </div>
+            <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-snug mt-0.5 hidden sm:block">
+              Visual page layout builder and interactive module studio
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
-              Live Preview
-            </span>
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-[10.5px] font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="hidden sm:inline">Live Canvas</span>
           </div>
 
-          <button
-            className="group flex items-center justify-center w-10 h-10 rounded-full bg-muted/50 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all duration-300"
-            aria-label="Close"
-            onClick={() => redirect("/app-layout/")}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/app-layout")}
+            className="h-8 px-3 text-xs border-[#d2d5d9] dark:border-zinc-700 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 text-[#303030] dark:text-zinc-200 gap-1.5 cursor-pointer shadow-2xs font-medium"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="group-hover:rotate-90 transition-transform duration-300"
-            >
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          </button>
+            <span>Exit Studio</span>
+          </Button>
         </div>
       </header>
 
-      <main className="flex-1 w-full h-full relative overflow-hidden bg-muted/20">
+      <main className="flex-1 w-full h-full relative overflow-hidden bg-[#f6f6f7] dark:bg-zinc-950">
         <BuilderLayout />
       </main>
     </div>

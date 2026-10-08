@@ -186,11 +186,11 @@ const FontSelector = () => {
   const currentFontData = FONTS.find((f) => f.id === font) || FONTS[0];
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <h3 className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1.5">
-          <Type className="h-3 w-3 text-primary/60" />
-          Font
+        <h3 className="text-[10px] font-bold text-[#616161] dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+          <Type className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+          Typography
         </h3>
       </div>
 
@@ -200,39 +200,39 @@ const FontSelector = () => {
           <div
             className={cn(
               "relative group",
-              isPremium ? "cursor-pointer" : "cursor-not-allowed opacity-80"
+              isPremium ? "cursor-pointer" : "cursor-not-allowed opacity-80",
             )}
             onClick={() => isPremium && setIsExpanded(!isExpanded)}
           >
             <div
               className={cn(
-                "flex items-center gap-2.5 bg-card p-2.5 rounded-lg border transition-all duration-150",
+                "flex items-center gap-2.5 p-2 rounded-[8px] border transition-all duration-150 bg-white dark:bg-zinc-900",
                 isPremium
-                  ? "border-border/60 hover:border-primary/40 group-hover:shadow-sm"
-                  : "border-muted-foreground/20 grayscale"
+                  ? "border-[#d2d5d9] dark:border-zinc-800 hover:border-[#303030] dark:hover:border-zinc-500 shadow-2xs"
+                  : "border-[#d2d5d9] dark:border-zinc-800 grayscale",
               )}
             >
-              <div className="shrink-0 p-1.5 rounded-md bg-primary/8">
-                <Type className="h-3.5 w-3.5 text-primary/70" />
+              <div className="shrink-0 p-1.5 rounded-[5px] bg-[#f6f6f7] dark:bg-zinc-800 border border-[#d2d5d9] dark:border-zinc-700">
+                <Type className="h-3.5 w-3.5 text-[#303030] dark:text-zinc-100" />
               </div>
               <div className="flex-1 min-w-0">
                 <span
-                  className="text-xs font-semibold text-foreground"
+                  className="text-xs font-semibold text-[#303030] dark:text-zinc-100 block"
                   style={{ fontFamily: currentFontData.fontFamily }}
                 >
                   {currentFontData.name}
                 </span>
-                <p className="text-[10px] text-muted-foreground/60 truncate">
+                <p className="text-[10.5px] text-[#616161] dark:text-zinc-400 truncate leading-tight">
                   {currentFontData.description}
                 </p>
               </div>
               {!isPremium ? (
-                <Lock className="h-3 w-3 text-muted-foreground/50" />
+                <Lock className="h-3 w-3 text-muted-foreground/50 shrink-0" />
               ) : (
                 <ChevronDown
                   className={cn(
-                    "h-3 w-3 text-muted-foreground/50 transition-transform duration-150",
-                    isExpanded && "rotate-180"
+                    "h-3 w-3 text-muted-foreground transition-transform duration-150 shrink-0",
+                    isExpanded && "rotate-180",
                   )}
                 />
               )}
@@ -240,12 +240,11 @@ const FontSelector = () => {
           </div>
         </TooltipTrigger>
         {!isPremium && (
-          <TooltipContent side="right" className="max-w-xs">
-            <div className="space-y-2">
+          <TooltipContent side="right" className="max-w-xs text-xs">
+            <div className="space-y-1">
               <p className="font-semibold">Premium Feature</p>
-              <p className="text-xs">
-                Upgrade to access {FONTS.length} professional font families for
-                your website.
+              <p className="text-[11px] text-muted-foreground">
+                Upgrade to access {FONTS.length} professional font families for your website.
               </p>
             </div>
           </TooltipContent>
@@ -254,17 +253,17 @@ const FontSelector = () => {
 
       {/* Upgrade Prompt for Non-Premium Users */}
       {!isPremium && (
-        <div className="mt-1.5 p-2 bg-muted/40 rounded-md border border-dashed">
-          <p className="text-[10px] text-muted-foreground mb-1.5">
+        <div className="p-2.5 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-lg border border-indigo-200 dark:border-indigo-800">
+          <p className="text-[10.5px] font-medium text-indigo-950 dark:text-indigo-200 mb-1.5">
             ✨ Unlock {FONTS.length} premium fonts
           </p>
           <Button
+            type="button"
             onClick={() => openDrawer()}
             size="sm"
-            variant="outline"
-            className="w-full h-6 text-[10px]"
+            className="w-full h-6.5 text-[10px] font-semibold bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs cursor-pointer"
           >
-            Upgrade
+            Upgrade Plan
           </Button>
         </div>
       )}
@@ -272,20 +271,21 @@ const FontSelector = () => {
       {/* Font Options Grid */}
       <div
         className={cn(
-          "grid gap-2 transition-all duration-300 overflow-hidden",
+          "grid gap-2 transition-all duration-200 overflow-hidden",
           isExpanded
-            ? "grid-rows-[1fr] opacity-100"
-            : "grid-rows-[0fr] opacity-0"
+            ? "grid-rows-[1fr] opacity-100 pt-1"
+            : "grid-rows-[0fr] opacity-0",
         )}
       >
         <div className="overflow-hidden">
-          <div className="grid grid-cols-1 gap-2 pb-2">
+          <div className="grid grid-cols-1 gap-1.5 max-h-[260px] overflow-y-auto pr-1 pb-1">
             {FONTS.map((fontOption) => {
               const isSelected = font === fontOption.id;
 
               return (
                 <button
                   key={fontOption.id}
+                  type="button"
                   onClick={() => {
                     setFont(fontOption.id);
                     setIsExpanded(false);
@@ -299,40 +299,36 @@ const FontSelector = () => {
                     }
                   }}
                   className={cn(
-                    "flex items-center gap-2 p-2 rounded-lg border transition-all duration-150 text-left group hover:scale-[1.01] active:scale-[0.99]",
+                    "flex items-center gap-2 p-2 rounded-[6px] border text-left transition-all cursor-pointer w-full",
                     isSelected
-                      ? "border-primary/50 bg-primary/5 ring-1 ring-primary/15"
-                      : "border-transparent hover:bg-muted/40 hover:border-border/40"
+                      ? "border-[#303030] dark:border-zinc-100 bg-[#f6f6f7] dark:bg-zinc-800 ring-1 ring-[#303030] dark:ring-zinc-100 shadow-2xs"
+                      : "border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#aeb4b9]",
                   )}
                 >
                   <div
                     className={cn(
-                      "p-1.5 rounded-md transition-colors",
-                      isSelected ? "bg-primary/15" : "bg-muted/60"
+                      "p-1.5 rounded-[4px] border shrink-0 transition-colors",
+                      isSelected
+                        ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                        : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-700",
                     )}
                   >
-                    <Type
-                      className={cn(
-                        "h-3 w-3",
-                        isSelected ? "text-primary" : "text-muted-foreground/60"
-                      )}
-                    />
+                    <Type className="h-3 w-3" />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span
-                        className={cn(
-                          "text-xs font-medium",
-                          isSelected ? "text-primary" : "text-foreground"
-                        )}
+                        className="text-xs font-semibold text-[#303030] dark:text-zinc-100 block"
                         style={{ fontFamily: fontOption.fontFamily }}
                       >
                         {fontOption.name}
                       </span>
-                      {isSelected && <Check className="h-3 w-3 text-primary" />}
+                      {isSelected && (
+                        <Check className="h-3 w-3 text-[#303030] dark:text-zinc-100 shrink-0" />
+                      )}
                     </div>
-                    <p className="text-[10px] text-muted-foreground/60 truncate">
+                    <p className="text-[10px] text-[#616161] dark:text-zinc-400 truncate mt-0.5">
                       {fontOption.preview}
                     </p>
                   </div>
@@ -342,7 +338,6 @@ const FontSelector = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

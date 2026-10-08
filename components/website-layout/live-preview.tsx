@@ -75,7 +75,6 @@ import { PollsModule } from "./modules/polls-module";
 
 // Event and Timeline Modules
 import { EventCountdownModule } from "./modules/event-countdown-module";
-import { MilestonesModule } from "./modules/milestones-module";
 import { RoadmapModule } from "./modules/roadmap-module";
 
 // Learning Modules
@@ -156,10 +155,10 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
       <LocationMapModule module={module} previewDevice={previewDevice} />
     ),
     "contact-form": (
-      <ContactRenderer module={module} previewDevice={previewDevice as any} />
+      <ContactRenderer module={module} previewDevice={previewDevice} />
     ),
     "contact-info": (
-      <ContactRenderer module={module} previewDevice={previewDevice as any} />
+      <ContactRenderer module={module} previewDevice={previewDevice} />
     ),
     milestones: (
       <MilestonesRenderer module={module} previewDevice={previewDevice} />
@@ -194,6 +193,9 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
 
     // Content & Media Components
     "video-spotlight": (
+      <VideoSpotlightModule module={module} previewDevice={previewDevice} />
+    ),
+    video: (
       <VideoSpotlightModule module={module} previewDevice={previewDevice} />
     ),
 
@@ -353,25 +355,43 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ")
+          handleClick(e as unknown as React.MouseEvent);
+      }}
       className={cn(
-        "w-full transition-all duration-300 relative group cursor-pointer",
-        isSelected && "ring-2 ring-primary ring-offset-2"
+        "w-full transition-all duration-300 relative group cursor-pointer outline-none",
+        isSelected &&
+          "ring-2 ring-indigo-600 dark:ring-indigo-500 ring-offset-2 dark:ring-offset-zinc-950 shadow-md",
       )}
     >
+      {/* Floating active section indicator */}
+      {isSelected && (
+        <div className="absolute top-2 left-2 z-30 pointer-events-none">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-600 text-[10.5px] font-semibold text-white shadow-md">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Active: {module.name}
+          </span>
+        </div>
+      )}
+
       {/* Hover overlay to hint at interactivity in builder */}
       <div
         className={cn(
           "absolute inset-0 border-2 border-transparent pointer-events-none z-10 transition-colors",
-          !isSelected && "group-hover:border-primary/50"
+          !isSelected &&
+            "group-hover:border-indigo-400/50 dark:group-hover:border-indigo-500/50",
         )}
       />
 
       {/* Render the appropriate module component */}
       {moduleComponents[type] || (
-        <div className="p-12 bg-gray-100 border-2 border-dashed border-gray-300 text-center">
-          <p className="text-gray-500">
-            Module type &ldquo;{type}&rdquo; not found
+        <div className="p-12 bg-white dark:bg-zinc-900 border-2 border-dashed border-[#d2d5d9] dark:border-zinc-800 text-center rounded-xl m-4">
+          <p className="text-muted-foreground text-xs font-medium">
+            Section type &ldquo;{type}&rdquo; not found
           </p>
         </div>
       )}
@@ -450,39 +470,42 @@ const LivePreview = () => {
 
   return (
     <div
-      className="flex flex-col h-full bg-slate-100 dark:bg-slate-900 relative transition-colors overflow-hidden"
+      className="flex flex-col h-full bg-[#f6f6f7] dark:bg-zinc-950 relative transition-colors overflow-hidden"
       onWheel={handleWheel}
     >
       {/* Simulation Bar */}
       <PreviewTopBar currentTheme={currentTheme}>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <DeviceSelector
             previewDevice={previewDevice}
             setPreviewDevice={setPreviewDevice}
           />
-          <div className="h-4 w-px bg-border/50" />
-          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-md border">
+          <div className="h-4 w-px bg-[#d2d5d9] dark:bg-zinc-800" />
+          <div className="flex items-center gap-1 bg-white dark:bg-zinc-900 p-0.5 rounded-lg border border-[#d2d5d9] dark:border-zinc-800 shadow-2xs">
             <button
+              type="button"
               onClick={() => setZoomLevel(Math.max(25, zoomLevel - 10))}
-              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors"
+              className="p-1 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 rounded-md text-[#616161] dark:text-zinc-400 hover:text-[#303030] dark:hover:text-zinc-100 transition-colors cursor-pointer"
               title="Zoom Out"
             >
               <ZoomOut className="h-3.5 w-3.5" />
             </button>
-            <span className="text-[10px] w-10 text-center font-medium">
+            <span className="text-[11px] w-10 text-center font-mono font-medium text-[#303030] dark:text-zinc-200">
               {zoomLevel}%
             </span>
             <button
+              type="button"
               onClick={() => setZoomLevel(Math.min(200, zoomLevel + 10))}
-              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors"
+              className="p-1 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 rounded-md text-[#616161] dark:text-zinc-400 hover:text-[#303030] dark:hover:text-zinc-100 transition-colors cursor-pointer"
               title="Zoom In"
             >
               <ZoomIn className="h-3.5 w-3.5" />
             </button>
             <button
+              type="button"
               onClick={() => setZoomLevel(100)}
-              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors ml-1"
-              title="Reset Zoom"
+              className="p-1 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 rounded-md text-[#616161] dark:text-zinc-400 hover:text-[#303030] dark:hover:text-zinc-100 transition-colors ml-0.5 cursor-pointer"
+              title="Reset Zoom to 100%"
             >
               <RotateCcw className="h-3 w-3" />
             </button>

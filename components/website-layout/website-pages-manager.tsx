@@ -42,6 +42,17 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CtaButton } from "@/components/ui/cta-button";
 
+interface WebsitePageRecord {
+  id: string;
+  name: string;
+  slug: string;
+  isEnabled: boolean;
+  isSystem?: boolean;
+  canDelete?: boolean;
+  createdAt?: string | number | Date;
+  updatedAt?: string | number | Date;
+}
+
 export function WebsitePagesManager() {
   const router = useRouter();
   const { addPage, deletePage, setCurrentPage, togglePageStatus } =
@@ -55,7 +66,7 @@ export function WebsitePagesManager() {
     refetch,
   } = useGetWebsite({});
 
-  const [updatePageMutation, { loading: updatingPage }] = useUpdatePage({
+  const [updatePageMutation] = useUpdatePage({
     onCompleted: (data) => {
       toast({
         title: "Success",
@@ -105,7 +116,8 @@ export function WebsitePagesManager() {
   }>({ open: false, pageId: null });
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const displayPages = websiteData?.getWebsite?.pages || [];
+  const displayPages: WebsitePageRecord[] =
+    (websiteData?.getWebsite?.pages as WebsitePageRecord[]) || [];
 
   const handleEditPage = (pageId: string) => {
     setCurrentPage(pageId);
@@ -113,7 +125,7 @@ export function WebsitePagesManager() {
   };
 
   const handleToggleStatus = (pageId: string, currentStatus: boolean) => {
-    const page = displayPages?.find((p: any) => p.id === pageId);
+    const page = displayPages.find((p: WebsitePageRecord) => p.id === pageId);
     if (!page || page.isSystem) return;
 
     if (currentStatus) {
@@ -156,7 +168,7 @@ export function WebsitePagesManager() {
     }
   };
 
-  const columns: AdminTableColumn<any>[] = [
+  const columns: AdminTableColumn<WebsitePageRecord>[] = [
     {
       key: "designation",
       header: "Page Name",
@@ -324,7 +336,7 @@ export function WebsitePagesManager() {
                   </div>
                   <div className="flex flex-col items-center justify-center py-2 text-emerald-600">
                     <span className="text-2xl font-bold">
-                      {displayPages.filter((p: any) => p.isEnabled).length}
+                      {displayPages.filter((p: WebsitePageRecord) => p.isEnabled).length}
                     </span>
                     <span className="text-[10px] uppercase font-bold mt-1 text-emerald-600/70">
                       Published
@@ -345,7 +357,7 @@ export function WebsitePagesManager() {
                     <li className="flex gap-2">
                       <span className="text-indigo-600 font-bold">•</span>
                       <span>
-                        The 'home' page is required and serves as the main page
+                        The &apos;home&apos; page is required and serves as the main page
                         of your website.
                       </span>
                     </li>
@@ -355,7 +367,7 @@ export function WebsitePagesManager() {
                     </li>
                     <li className="flex gap-2">
                       <span className="text-indigo-600 font-bold">•</span>
-                      <span>Click "Design" to edit the page content.</span>
+                      <span>Click &quot;Design&quot; to edit the page content.</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -417,11 +429,11 @@ export function WebsitePagesManager() {
             return;
           }
           const csv = buildCsv(displayPages, [
-            { header: "Page Name", getValue: (p: any) => p.name || "" },
-            { header: "Slug", getValue: (p: any) => p.slug ? `/${p.slug}` : "" },
-            { header: "Status", getValue: (p: any) => p.isEnabled ? "Published" : "Draft" },
-            { header: "Created At", getValue: (p: any) => p.createdAt ? new Date(p.createdAt).toISOString().slice(0, 10) : "" },
-            { header: "Updated At", getValue: (p: any) => p.updatedAt ? new Date(p.updatedAt).toISOString().slice(0, 10) : "" },
+            { header: "Page Name", getValue: (p: WebsitePageRecord) => p.name || "" },
+            { header: "Slug", getValue: (p: WebsitePageRecord) => p.slug ? `/${p.slug}` : "" },
+            { header: "Status", getValue: (p: WebsitePageRecord) => p.isEnabled ? "Published" : "Draft" },
+            { header: "Created At", getValue: (p: WebsitePageRecord) => p.createdAt ? new Date(p.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At", getValue: (p: WebsitePageRecord) => p.updatedAt ? new Date(p.updatedAt).toISOString().slice(0, 10) : "" },
           ]);
           downloadCsv(csv, `website-pages-${new Date().toISOString().slice(0, 10)}`, format);
           toast({
