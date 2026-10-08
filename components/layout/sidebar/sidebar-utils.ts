@@ -1,3 +1,5 @@
+import type { MenuItem } from "./types";
+
 export type ActiveSidebarTab =
   | "home"
   | "members"
@@ -46,7 +48,7 @@ export function getActiveSidebarTab(pathName?: string | null): ActiveSidebarTab 
   }
 
   // 5. Gamification & Rewards
-  if (path.startsWith("/gamification")) {
+  if (path.startsWith("/gamification") || path.startsWith("/rewards")) {
     return "gamification";
   }
 
@@ -128,3 +130,49 @@ export function isFormRoute(pathName?: string | null): boolean {
     (route) => path === route || path.startsWith(`${route}/`),
   );
 }
+
+/**
+ * Resolves the first available (subscribed, enabled) module path.
+ * If all modules are disabled or locked, falls back to the Module Registry settings.
+ */
+export function getFirstAvailableModulePath(modules: MenuItem[] = []): string {
+  const firstEnabled = modules.find(
+    (m) => !m.isLocked && !m.isDisabled && Boolean(m.path),
+  );
+  return firstEnabled?.path || "/settings/modules";
+}
+
+/**
+ * Resolves the destination href for the "Modules" rail button in the Parent Sidebar.
+ *
+ * 1. If the user is currently inside an enabled module (e.g., on `/events/create`),
+ *    returns that module's root path (`/events`) to preserve their context.
+ * 2. If the user is on a non-module route or the current module is disabled/locked,
+ *    returns the first available enabled module path (e.g. `/events` when communities is disabled).
+ * 3. If no modules are enabled, falls back to `/settings/modules`.
+ */
+export function getActiveModulePath(
+  pathName: string | null | undefined,
+  modules: MenuItem[] = [],
+): string {
+  if (!pathName) {
+    return getFirstAvailableModulePath(modules);
+  }
+
+  const path = pathName.split("?")[0].replace(/\/+$/, "") || "/";
+
+  // Check if current path matches an active, enabled module
+  const currentModule = modules.find((m) => {
+    if (!m.path) return false;
+    const moduleBasePath = m.path.split("?")[0].replace(/\/+$/, "");
+    return path === moduleBasePath || path.startsWith(moduleBasePath + "/");
+  });
+
+  if (currentModule && !currentModule.isLocked && !currentModule.isDisabled) {
+    return currentModule.path || "/";
+  }
+
+  // Not inside an enabled module: land on the first available module
+  return getFirstAvailableModulePath(modules);
+}
+

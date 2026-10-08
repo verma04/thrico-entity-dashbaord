@@ -166,7 +166,11 @@ export function MenuItemRow({
 
   const rowBase = cn(
     "group relative flex items-center w-full transition-colors duration-200 select-none",
-    item.isLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+    item.isLocked
+      ? "cursor-not-allowed opacity-60"
+      : item.isDisabled
+        ? "cursor-pointer opacity-70"
+        : "cursor-pointer",
     depth === 0
       ? "h-7 px-2 rounded-md gap-2 my-[1px]"
       : "h-6 px-2 rounded-md gap-1.5 my-[1px]",
@@ -229,6 +233,10 @@ export function MenuItemRow({
               size={12}
               className="shrink-0 text-muted-foreground/40 group-data-[collapsible=icon]:hidden"
             />
+          ) : item.isDisabled ? (
+            <span className="text-[10px] text-muted-foreground/60 font-medium mr-1 group-data-[collapsible=icon]:hidden">
+              Disabled
+            </span>
           ) : (
             <ChevronRight
               size={11}
@@ -319,6 +327,11 @@ export function MenuItemRow({
               size={12}
               className="ml-auto text-muted-foreground/50 shrink-0 group-data-[collapsible=icon]:hidden"
             />
+          )}
+          {!item.isLocked && item.isDisabled && (
+            <span className="ml-auto text-[10px] text-muted-foreground/60 font-medium group-data-[collapsible=icon]:hidden">
+              Disabled
+            </span>
           )}
           {!item.isLocked && item.badge && (
             <Badge

@@ -3,24 +3,14 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import {
-  Home,
-  Users,
   Trophy,
-  Grid,
   Settings,
-  UserPlus,
   ArrowUpCircle,
   Users2,
-  Mail,
-  Smartphone,
   Blocks,
-  Globe,
-  FileText,
   Sparkles,
-  Zap,
   Megaphone,
   UserGroup,
-  TableOfContents,
   NotebookDot,
   Workflow,
   GlobeCode,
@@ -29,13 +19,26 @@ import {
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 import { useHasAnyIntegration } from "@/graphql/actions";
-import { getActiveSidebarTab } from "./sidebar-utils";
+import { getActiveSidebarTab, getActiveModulePath } from "./sidebar-utils";
+import { useFilteredExtendedItems } from "./menu-items";
+import type { MenuItem } from "./types";
 
-export function ParentSidebar() {
+interface ParentSidebarProps {
+  modules?: MenuItem[];
+}
+
+export function ParentSidebar({ modules: propModules }: ParentSidebarProps = {}) {
   const pathName = usePathname();
   const activeTab = getActiveSidebarTab(pathName);
   const { data: integrationsData } = useHasAnyIntegration();
   const showIntegrations = !!integrationsData?.hasAnyIntegration;
+
+  const { modules: hookModules } = useFilteredExtendedItems();
+
+  const modulesHref = React.useMemo(() => {
+    const modules = propModules || hookModules || [];
+    return getActiveModulePath(pathName, modules);
+  }, [pathName, propModules, hookModules]);
 
   return (
     <div className="hidden md:flex w-[64px] flex-shrink-0 bg-black text-white flex-col items-center py-3 border-r border-neutral-900 z-50 rounded-l-xl my-2 ml-2 shadow-sm">
@@ -69,7 +72,7 @@ export function ParentSidebar() {
         <NavRailItem
           icon={<Blocks size={18} />}
           label="Modules"
-          href="/communities"
+          href={modulesHref}
           active={activeTab === "modules"}
         />
         {showIntegrations && (

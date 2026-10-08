@@ -4,8 +4,6 @@ import React, {
   useState,
   useEffect,
   useMemo,
-  useCallback,
-  useRef,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, X, ChevronRight, LogOut } from "lucide-react";
@@ -34,7 +32,6 @@ import {
   useFilteredManagementItems,
   profile,
   emailItems,
-  mobileAppItems,
   websiteItems,
 } from "./menu-items";
 import { useWorkspaceSwitch } from "@/hooks/use-workspace-switch";
@@ -45,7 +42,7 @@ import { TopNavbar } from "./top-navbar";
 import { ParentSidebar } from "./parent-sidebar";
 import LogoutModal from "./logout";
 import { SwitchingLoader } from "./switching-loader";
-import { getActiveSidebarTab, isFormRoute } from "./sidebar-utils";
+import { getActiveSidebarTab } from "./sidebar-utils";
 
 interface SearchItem {
   key: string;
@@ -79,6 +76,35 @@ function flattenItems(
   }, []);
 }
 
+function filterMenuItems(
+  list: MenuItem[] = [],
+  query: string,
+): MenuItem[] {
+  if (!list) return [];
+  if (!query.trim()) return list;
+  const q = query.toLowerCase();
+
+  return list
+    .map((item) => {
+      const labelMatch =
+        typeof item.label === "string" &&
+        item.label.toLowerCase().includes(q);
+      const filteredChildren = item.children
+        ? filterMenuItems(item.children, query)
+        : undefined;
+      const childrenMatch = filteredChildren && filteredChildren.length > 0;
+
+      if (labelMatch || childrenMatch) {
+        return {
+          ...item,
+          children: labelMatch ? item.children : filteredChildren,
+        } as MenuItem;
+      }
+      return null;
+    })
+    .filter(Boolean) as MenuItem[];
+}
+
 export function ChildSidebarContainer({
   children,
 }: {
@@ -86,13 +112,6 @@ export function ChildSidebarContainer({
 }) {
   const pathName = usePathname();
   const router = useRouter();
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
-  const [logoutOpen, setLogoutOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
-  const { state, toggleSidebar, setOpen } = useSidebar();
-  const isCollapsed = state === "collapsed";
-
   const activeTab = getActiveSidebarTab(pathName);
   const hasChildSidebar =
     activeTab !== "mobile-app" &&
@@ -100,18 +119,34 @@ export function ChildSidebarContainer({
     activeTab !== "team" &&
     activeTab !== "upgrade";
 
-  // Default-open group based on active route
-  useEffect(() => {
-    if (activeTab === "members") {
-      setOpenGroup("members-classifications");
-    } else if (pathName.startsWith("/stories")) {
-      setOpenGroup("stories");
-    } else if (pathName.startsWith("/marketing/whatsapp")) {
-      setOpenGroup("whatsapp-parent");
-    } else if (pathName.startsWith("/marketing/email")) {
-      setOpenGroup("email-parent");
-    }
+  const defaultOpenGroup = useMemo(() => {
+    if (activeTab === "members") return "members-classifications";
+    if (pathName.startsWith("/stories")) return "stories";
+    if (pathName.startsWith("/marketing/whatsapp")) return "whatsapp-parent";
+    if (pathName.startsWith("/marketing/email")) return "email-parent";
+    return null;
   }, [activeTab, pathName]);
+
+  const [toggledGroup, setToggledGroup] = useState<{
+    path: string;
+    group: string | null;
+  } | null>(null);
+
+  const openGroup =
+    toggledGroup?.path === pathName ? toggledGroup.group : defaultOpenGroup;
+
+  const toggleGroup = (key: string) => {
+    setToggledGroup((prev) => {
+      const current = prev?.path === pathName ? prev.group : defaultOpenGroup;
+      return { path: pathName, group: current === key ? null : key };
+    });
+  };
+
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const { state, toggleSidebar } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -140,106 +175,65 @@ export function ChildSidebarContainer({
   const { billingAndTeamItems, setupAndDesignItems, supportAndLegalItems } =
     useFilteredManagementItems();
 
-  const toggleGroup = (key: string) => {
-    setOpenGroup((prev) => (prev === key ? null : key));
-  };
-
-  const filterList = useCallback(
-    (list: MenuItem[] = [], query: string): MenuItem[] => {
-      if (!list) return [];
-      if (!query.trim()) return list;
-      const q = query.toLowerCase();
-
-      return list
-        .map((item) => {
-          const labelMatch =
-            typeof item.label === "string" &&
-            item.label.toLowerCase().includes(q);
-          const filteredChildren = item.children
-            ? filterList(item.children, query)
-            : undefined;
-          const childrenMatch = filteredChildren && filteredChildren.length > 0;
-
-          if (labelMatch || childrenMatch) {
-            return {
-              ...item,
-              children: labelMatch ? item.children : filteredChildren,
-            } as MenuItem;
-          }
-          return null;
-        })
-        .filter(Boolean) as MenuItem[];
-    },
-    [],
-  );
-
-  const filteredHome = useMemo(
-    () => filterList(homeItems as MenuItem[], searchQuery),
-    [searchQuery, homeItems, filterList],
-  );
   const filteredAiStudio = useMemo(
-    () => filterList(aiStudioItems as MenuItem[], searchQuery),
-    [searchQuery, aiStudioItems, filterList],
+    () => filterMenuItems(aiStudioItems as MenuItem[], searchQuery),
+    [searchQuery, aiStudioItems],
   );
   const filteredAiSuperAgents = useMemo(
-    () => filterList(aiSuperAgentsItems as MenuItem[], searchQuery),
-    [searchQuery, aiSuperAgentsItems, filterList],
+    () => filterMenuItems(aiSuperAgentsItems as MenuItem[], searchQuery),
+    [searchQuery, aiSuperAgentsItems],
   );
   const filteredAiChat = useMemo(
-    () => filterList(aiChatItems as MenuItem[], searchQuery),
-    [searchQuery, aiChatItems, filterList],
+    () => filterMenuItems(aiChatItems as MenuItem[], searchQuery),
+    [searchQuery, aiChatItems],
   );
   const filteredMembers = useMemo(
-    () => filterList(membersIntelligence as MenuItem[], searchQuery),
-    [searchQuery, membersIntelligence, filterList],
+    () => filterMenuItems(membersIntelligence as MenuItem[], searchQuery),
+    [searchQuery, membersIntelligence],
   );
   const filteredFeed = useMemo(
-    () => filterList(feedItems as MenuItem[], searchQuery),
-    [searchQuery, feedItems, filterList],
+    () => filterMenuItems(feedItems as MenuItem[], searchQuery),
+    [searchQuery, feedItems],
   );
   const filteredModeration = useMemo(
-    () => filterList(moderationItems as MenuItem[], searchQuery),
-    [searchQuery, moderationItems, filterList],
+    () => filterMenuItems(moderationItems as MenuItem[], searchQuery),
+    [searchQuery, moderationItems],
   );
   const filteredReported = useMemo(
-    () => filterList(reportedItems as MenuItem[], searchQuery),
-    [searchQuery, reportedItems, filterList],
+    () => filterMenuItems(reportedItems as MenuItem[], searchQuery),
+    [searchQuery, reportedItems],
   );
   const filteredGamification = useMemo(
-    () => filterList(gamificationEngine as MenuItem[], searchQuery),
-    [searchQuery, gamificationEngine, filterList],
+    () => filterMenuItems(gamificationEngine as MenuItem[], searchQuery),
+    [searchQuery, gamificationEngine],
   );
   const filteredModules = useMemo(
-    () => filterList(modulesItems as MenuItem[], searchQuery),
-    [searchQuery, modulesItems, filterList],
+    () => filterMenuItems(modulesItems as MenuItem[], searchQuery),
+    [searchQuery, modulesItems],
   );
   const filteredBillingAndTeam = useMemo(
-    () => filterList(billingAndTeamItems as MenuItem[], searchQuery),
-    [searchQuery, billingAndTeamItems, filterList],
+    () => filterMenuItems(billingAndTeamItems as MenuItem[], searchQuery),
+    [searchQuery, billingAndTeamItems],
   );
   const filteredSetupAndDesign = useMemo(
-    () => filterList(setupAndDesignItems as MenuItem[], searchQuery),
-    [searchQuery, setupAndDesignItems, filterList],
+    () => filterMenuItems(setupAndDesignItems as MenuItem[], searchQuery),
+    [searchQuery, setupAndDesignItems],
   );
   const filteredSupportAndLegal = useMemo(
-    () => filterList(supportAndLegalItems as MenuItem[], searchQuery),
-    [searchQuery, supportAndLegalItems, filterList],
+    () => filterMenuItems(supportAndLegalItems as MenuItem[], searchQuery),
+    [searchQuery, supportAndLegalItems],
   );
   const filteredEmail = useMemo(
-    () => filterList(emailItems as MenuItem[], searchQuery),
-    [searchQuery, filterList],
-  );
-  const filteredMobileApp = useMemo(
-    () => filterList(mobileAppItems as MenuItem[], searchQuery),
-    [searchQuery, filterList],
+    () => filterMenuItems(emailItems as MenuItem[], searchQuery),
+    [searchQuery],
   );
   const filteredWebsite = useMemo(
-    () => filterList(websiteItems as MenuItem[], searchQuery),
-    [searchQuery, filterList],
+    () => filterMenuItems(websiteItems as MenuItem[], searchQuery),
+    [searchQuery],
   );
   const filteredIntegrations = useMemo(
-    () => filterList(integrationsItems as MenuItem[], searchQuery),
-    [searchQuery, integrationsItems, filterList],
+    () => filterMenuItems(integrationsItems as MenuItem[], searchQuery),
+    [searchQuery, integrationsItems],
   );
 
   const { data: userData } = useGetUser();
@@ -388,7 +382,7 @@ export function ChildSidebarContainer({
         showSidebarToggle={hasChildSidebar}
       />
       <div className="flex flex-1 relative w-full bg-white dark:bg-neutral-950 group/sidebar-wrapper">
-        <ParentSidebar />
+        <ParentSidebar modules={modulesItems} />
         {/* ── SIDEBAR (Hidden when no child route exists: Home, Mobile App, Team, Upgrade/Subscription) ── */}
         {hasChildSidebar && (
           <Sidebar
