@@ -28,6 +28,8 @@ import {
   Sliders,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { DynamicIcon } from "@/components/website-layout/preview/DynamicIcon";
 import { Badge } from "@/components/ui/badge";
 import {
   PolarisFormLayout,
@@ -79,6 +81,7 @@ export interface MediaGalleryFeedLink {
   id: string;
   albumId: string;
   name: string;
+  icon?: string;
 }
 
 export interface FeedField {
@@ -187,7 +190,7 @@ interface SortableMediaLinkRowProps {
   link: MediaGalleryFeedLink;
   index: number;
   albums: any[];
-  onUpdate: (index: number, field: "name" | "albumId", value: string) => void;
+  onUpdate: (index: number, field: "name" | "albumId" | "icon", value: string) => void;
   onRemoveRequest: (index: number, name: string) => void;
 }
 
@@ -240,7 +243,14 @@ function SortableMediaLinkRow({
         </span>
       </div>
 
-      <div className="w-full sm:w-[200px]">
+      <div className="w-full sm:w-[130px] shrink-0">
+        <IconPicker
+          value={link.icon || "Images"}
+          onChange={(newIcon) => onUpdate(index, "icon", newIcon)}
+        />
+      </div>
+
+      <div className="w-full sm:w-[190px]">
         <input
           type="text"
           placeholder="Tab Display Name"
@@ -356,6 +366,7 @@ export default function FeedVisibility() {
           id: `link-${Date.now()}`,
           albumId: defaultAlbum?.id || "",
           name: defaultAlbum?.title || "Media Gallery",
+          icon: "Images",
         },
       ],
     }));
@@ -364,7 +375,7 @@ export default function FeedVisibility() {
 
   const handleUpdateMediaLink = (
     index: number,
-    field: "name" | "albumId",
+    field: "name" | "albumId" | "icon",
     value: string,
   ) => {
     setFormData((prev) => {
@@ -823,21 +834,45 @@ export default function FeedVisibility() {
                     {contentSources.length}):
                   </span>
                   <div className="flex flex-wrap gap-1.5">
-                    {contentSources.map((source) => (
-                      <Badge
-                        key={source.key}
-                        variant={source.enabled ? "secondary" : "outline"}
-                        className={cn(
-                          "text-[11px] px-2 py-0.5 rounded-[4px] flex items-center gap-1 transition-all",
-                          source.enabled
-                            ? "bg-white dark:bg-zinc-800 border-[#d2d5d9] text-[#303030] dark:text-zinc-200 shadow-2xs"
-                            : "opacity-40 line-through border-dashed text-[#8c9196]",
-                        )}
-                      >
-                        <source.icon className="h-3 w-3" />
-                        <span>{source.label.replace("Show ", "")}</span>
-                      </Badge>
-                    ))}
+                    {contentSources.map((source) => {
+                      if (
+                        source.key === "allowEntityMediaGalleryInFeed" &&
+                        source.enabled &&
+                        formData.mediaGalleryFeedLinks.length > 0
+                      ) {
+                        return formData.mediaGalleryFeedLinks.map((link, idx) => (
+                          <Badge
+                            key={link.id || idx}
+                            variant="secondary"
+                            className="text-[11px] px-2 py-0.5 rounded-[4px] flex items-center gap-1 transition-all bg-white dark:bg-zinc-800 border-[#d2d5d9] text-[#303030] dark:text-zinc-200 shadow-2xs"
+                          >
+                            {link.icon !== "none" && (
+                              <DynamicIcon
+                                name={link.icon || "Images"}
+                                className="h-3 w-3 text-blue-600 dark:text-blue-400"
+                              />
+                            )}
+                            <span>{link.name || `Gallery ${idx + 1}`}</span>
+                          </Badge>
+                        ));
+                      }
+
+                      return (
+                        <Badge
+                          key={source.key}
+                          variant={source.enabled ? "secondary" : "outline"}
+                          className={cn(
+                            "text-[11px] px-2 py-0.5 rounded-[4px] flex items-center gap-1 transition-all",
+                            source.enabled
+                              ? "bg-white dark:bg-zinc-800 border-[#d2d5d9] text-[#303030] dark:text-zinc-200 shadow-2xs"
+                              : "opacity-40 line-through border-dashed text-[#8c9196]",
+                          )}
+                        >
+                          <source.icon className="h-3 w-3" />
+                          <span>{source.label.replace("Show ", "")}</span>
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
