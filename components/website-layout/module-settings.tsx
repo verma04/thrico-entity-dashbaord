@@ -109,8 +109,23 @@ const getAvailableLayouts = (
   moduleType: ModuleType
 ): LayoutType[] => {
   if (moduleType === "hero") {
-    // 4 Core Hero Layouts
-    return ["carousel", "split", "video", "single-image", "globe-interactive"];
+    return [
+      "carousel",
+      "split",
+      "single-image",
+      "video",
+      "saas-modern",
+      "bento-grid",
+      "creator-showcase",
+      "dark-cinematic",
+      "newsletter-focus",
+      "app-showcase",
+      "globe-interactive",
+      "gradient-mesh",
+      "event-countdown",
+      "product-showcase",
+      "minimal-editorial",
+    ];
   }
   if (moduleType === "navbar") {
     return ["simple", "centered", "minimal", "stacked", "split"];

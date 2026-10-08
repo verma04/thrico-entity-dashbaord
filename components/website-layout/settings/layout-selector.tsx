@@ -19,6 +19,15 @@ import {
   Rows,
   AlignCenter,
   Code2,
+  Video,
+  Users,
+  Film,
+  Smartphone,
+  Globe,
+  Flame,
+  Timer,
+  BookOpen,
+  Feather,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -57,27 +66,63 @@ const layoutMetadata: Record<
   },
   carousel: {
     icon: Circle,
-    description: "Rotating slides",
+    description: "Rotating slide gallery",
   },
   video: {
-    icon: Square,
-    description: "Video background",
+    icon: Video,
+    description: "Cinematic video background",
   },
   "saas-modern": {
     icon: Sparkles,
-    description: "Modern SaaS",
+    description: "Modern SaaS product",
   },
   "bento-grid": {
     icon: LayoutGrid,
-    description: "Grid layout",
+    description: "Bento feature grid",
   },
   "single-image": {
     icon: Square,
-    description: "Single hero image",
+    description: "Full background hero",
   },
   split: {
     icon: Boxes,
-    description: "Split layout",
+    description: "Split content & media",
+  },
+  "creator-showcase": {
+    icon: Users,
+    description: "Creators & member grid",
+  },
+  "dark-cinematic": {
+    icon: Film,
+    description: "Ultra-dark cinematic",
+  },
+  "newsletter-focus": {
+    icon: Mail,
+    description: "Lead capture & signup",
+  },
+  "app-showcase": {
+    icon: Smartphone,
+    description: "Mobile app mockups & badges",
+  },
+  "globe-interactive": {
+    icon: Globe,
+    description: "Interactive 3D globe",
+  },
+  "gradient-mesh": {
+    icon: Flame,
+    description: "Mesh glow & metrics",
+  },
+  "event-countdown": {
+    icon: Timer,
+    description: "Live timer & summit",
+  },
+  "product-showcase": {
+    icon: BookOpen,
+    description: "3D product & curriculum",
+  },
+  "minimal-editorial": {
+    icon: Feather,
+    description: "Refined typographic layout",
   },
   "fullwidth-embed": {
     icon: Layout,
@@ -111,6 +156,21 @@ const layoutDisplayNames: Record<string, string> = {
   minimal: "Minimal Clean Bar",
   corporate: "Corporate Base",
   newsletter: "Newsletter Focus",
+  carousel: "Carousel Slides",
+  split: "Split Showcase",
+  "single-image": "Single Full Image",
+  video: "Cinematic Video",
+  "saas-modern": "Modern SaaS",
+  "bento-grid": "Bento Grid",
+  "creator-showcase": "Creator Showcase",
+  "dark-cinematic": "Dark Cinematic",
+  "newsletter-focus": "Newsletter Focus",
+  "app-showcase": "App Showcase",
+  "globe-interactive": "Interactive Globe",
+  "gradient-mesh": "Gradient Mesh",
+  "event-countdown": "Event Countdown",
+  "product-showcase": "Product Showcase",
+  "minimal-editorial": "Minimal Editorial",
   "fullwidth-embed": "Full Width Embed",
   contained: "Contained Box",
   direct: "Direct HTML",

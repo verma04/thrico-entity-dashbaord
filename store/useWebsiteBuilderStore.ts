@@ -54,6 +54,10 @@ export type LayoutType =
   | "newsletter-focus"
   | "app-showcase" // Hero
   | "globe-interactive"
+  | "gradient-mesh"
+  | "event-countdown"
+  | "product-showcase"
+  | "minimal-editorial"
   | "simple"
   | "centered"
   | "minimal"

@@ -1,5 +1,9 @@
-export { default as HeroAppShowcase } from "./HeroAppShowcase";
-export { default as HeroCreatorShowcase } from "./HeroCreatorShowcase";
-export { default as HeroSingleImage } from "./HeroSingleImage";
-export { default as HeroDarkCinematic } from "./HeroDarkCinematic";
-export { default as HeroSplit } from "./HeroSplit";
+export { default as HeroAppShowcase } from "./hero-app-showcase";
+export { default as HeroCreatorShowcase } from "./hero-creator-showcase";
+export { default as HeroSingleImage } from "./hero-single-image";
+export { default as HeroDarkCinematic } from "./hero-dark-cinematic";
+export { default as HeroSplit } from "./hero-split";
+export { default as HeroGradientMesh } from "./hero-gradient-mesh";
+export { default as HeroEventCountdown } from "./hero-event-countdown";
+export { default as HeroProductShowcase } from "./hero-product-showcase";
+export { default as HeroMinimalEditorial } from "./hero-minimal-editorial";

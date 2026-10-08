@@ -1,28 +1,33 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
-import { LayoutType } from "@/store/useWebsiteBuilderStore";
 
 interface HeroSplitProps {
-  content: Record<string, any>;
+  content: Record<string, unknown>;
 }
 
 const HeroSplit: React.FC<HeroSplitProps> = ({ content }) => {
+  const buttons: Array<{ text?: string; link?: string; variant?: string }> =
+    Array.isArray(content.buttons) ? content.buttons : [];
+
+  const rawFeatures = Array.isArray(content.features) ? content.features : [];
+
   return (
     <div className="max-w-7xl mx-auto px-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center min-h-[500px]">
         {/* Content Side */}
         <div className="space-y-6">
           <h1 className="text-5xl md:text-6xl font-black text-slate-900 leading-tight">
-            {content.title || "Build Your Community"}
+            {(content.title as string) || "Build Your Community"}
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed">
-            {content.description ||
+            {(content.description as string) ||
               "Create meaningful connections and grow your audience with our powerful community platform."}
           </p>
 
           {/* CTA Buttons */}
-          {content.buttons && content.buttons.length > 0 && (
+          {buttons.length > 0 && (
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              {content.buttons.map((button: any, index: number) => (
+              {buttons.map((button, index: number) => (
                 <a
                   key={index}
                   href={button.link || "#"}
@@ -43,20 +48,30 @@ const HeroSplit: React.FC<HeroSplitProps> = ({ content }) => {
           )}
 
           {/* Stats or Features */}
-          {content.features && content.features.length > 0 && (
+          {rawFeatures.length > 0 && (
             <div className="grid grid-cols-3 gap-6 pt-8">
-              {content.features.slice(0, 3).map((feature: any, index: number) => (
-                <div key={index} className="text-center">
-                  <div className="text-2xl font-bold text-slate-900">
-                    {feature.title || feature}
-                  </div>
-                  {feature.description && (
-                    <div className="text-sm text-slate-600 mt-1">
-                      {feature.description}
+              {rawFeatures.slice(0, 3).map((feature: unknown, index: number) => {
+                const title =
+                  typeof feature === "string"
+                    ? feature
+                    : (feature as { title?: string })?.title || "Metric";
+                const desc =
+                  typeof feature === "object"
+                    ? (feature as { description?: string })?.description
+                    : undefined;
+                return (
+                  <div key={index} className="text-center">
+                    <div className="text-2xl font-bold text-slate-900">
+                      {title}
                     </div>
-                  )}
-                </div>
-              ))}
+                    {desc && (
+                      <div className="text-sm text-slate-600 mt-1">
+                        {desc}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -66,7 +81,7 @@ const HeroSplit: React.FC<HeroSplitProps> = ({ content }) => {
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <img
               src={
-                content.image ||
+                (content.image as string) ||
                 "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"
               }
               alt="Hero"

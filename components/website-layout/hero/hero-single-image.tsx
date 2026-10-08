@@ -1,10 +1,17 @@
 import React from "react";
 
 interface HeroSingleImageProps {
-  content: Record<string, any>;
+  content: Record<string, unknown>;
 }
 
 const HeroSingleImage: React.FC<HeroSingleImageProps> = ({ content }) => {
+  const buttons: Array<{ text?: string; link?: string; variant?: string }> =
+    Array.isArray(content.buttons) ? content.buttons : [];
+
+  const rawFeatures = Array.isArray(content.features)
+    ? content.features
+    : ["Community", "Analytics", "Growth"];
+
   return (
     <div className="relative min-h-[600px] flex items-center justify-center">
       {/* Background Image with Overlay */}
@@ -12,7 +19,7 @@ const HeroSingleImage: React.FC<HeroSingleImageProps> = ({ content }) => {
         className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: `url(${
-            content.image ||
+            (content.image as string) ||
             "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070&auto=format&fit=crop"
           })`,
         }}
@@ -23,17 +30,17 @@ const HeroSingleImage: React.FC<HeroSingleImageProps> = ({ content }) => {
       <div className="relative z-10 text-center max-w-4xl px-6 space-y-8">
         <div className="space-y-4">
           <h1 className="text-5xl md:text-7xl font-black text-white leading-tight tracking-tight">
-            {content.title || ""}
+            {(content.title as string) || ""}
           </h1>
           <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-light leading-relaxed">
-            {content.description || ""}
+            {(content.description as string) || ""}
           </p>
         </div>
 
         {/* CTA Buttons */}
-        {content.buttons && content.buttons.length > 0 && (
+        {buttons.length > 0 && (
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            {content.buttons.map((button: any, index: number) => (
+            {buttons.map((button, index: number) => (
               <a
                 key={index}
                 href={button.link || "#"}
@@ -55,14 +62,18 @@ const HeroSingleImage: React.FC<HeroSingleImageProps> = ({ content }) => {
 
         {/* Feature highlights */}
         <div className="flex flex-wrap justify-center gap-8 pt-12 text-white/80">
-          {(content.features || ["Community", "Analytics", "Growth"]).map(
-            (feature: string, i: number) => (
+          {rawFeatures.map((feature: unknown, i: number) => {
+            const label =
+              typeof feature === "string"
+                ? feature
+                : (feature as { title?: string })?.title || "Feature";
+            return (
               <div key={i} className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-white/60" />
-                <span className="text-sm font-medium">{feature}</span>
+                <span className="text-sm font-medium">{label}</span>
               </div>
-            )
-          )}
+            );
+          })}
         </div>
       </div>
     </div>
