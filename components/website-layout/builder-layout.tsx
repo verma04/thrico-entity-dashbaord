@@ -6,9 +6,20 @@ import ModuleManager from "./module-manager";
 import ModuleSettings from "./module-settings";
 import LivePreview from "./live-preview";
 import { useSearchParams } from "next/navigation";
-import { ThemeType, useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
+import {
+  ThemeType,
+  useWebsiteBuilderStore,
+} from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
-import { Globe, Plus, Lock, ChevronDown, Check, Layout, RotateCw } from "lucide-react";
+import {
+  Globe,
+  Plus,
+  Lock,
+  ChevronDown,
+  Check,
+  Layout,
+  RotateCw,
+} from "lucide-react";
 import ThemeSelector from "./theme-selector";
 import FontSelector from "./font-selector";
 import { syncBuilderUrl } from "./builder-url-utils";
@@ -297,13 +308,15 @@ const BuilderLayout = () => {
                   await refetch();
                   toast({
                     title: "Synchronized",
-                    description: "Website layout and pages are synced with server.",
+                    description:
+                      "Website layout and pages are synced with server.",
                   });
                 } catch (error: unknown) {
                   toast({
                     title: "Sync Failed",
                     description:
-                      (error as Error)?.message || "Failed to sync website data",
+                      (error as Error)?.message ||
+                      "Failed to sync website data",
                     variant: "destructive",
                   });
                 } finally {
@@ -314,7 +327,10 @@ const BuilderLayout = () => {
               className="h-8 px-2.5 text-xs font-medium border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 text-[#303030] dark:text-zinc-200 gap-1.5 shadow-2xs cursor-pointer ml-1"
             >
               <RotateCw
-                className={cn("h-3.5 w-3.5", isSyncing && "animate-spin text-indigo-600")}
+                className={cn(
+                  "h-3.5 w-3.5",
+                  isSyncing && "animate-spin text-indigo-600",
+                )}
               />
               <span className="hidden sm:inline">
                 {isSyncing ? "Syncing..." : "Sync Changes"}
