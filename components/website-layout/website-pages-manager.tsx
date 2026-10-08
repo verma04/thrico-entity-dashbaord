@@ -120,8 +120,13 @@ export function WebsitePagesManager() {
     (websiteData?.getWebsite?.pages as WebsitePageRecord[]) || [];
 
   const handleEditPage = (pageId: string) => {
+    const page = displayPages.find((p) => p.id === pageId);
     setCurrentPage(pageId);
-    router.push("/app-layout/layout");
+    if (page?.slug) {
+      router.push(`/app-layout/layout?page=${page.slug}`);
+    } else {
+      router.push(`/app-layout/layout?pageId=${pageId}`);
+    }
   };
 
   const handleToggleStatus = (pageId: string, currentStatus: boolean) => {

@@ -244,6 +244,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
 });
 
+import React, { Suspense } from "react";
 import BuilderLayout from "@/components/website-layout/builder-layout";
 import { useRouter } from "next/navigation";
 import { LayoutTemplate, ArrowLeft } from "lucide-react";
@@ -310,7 +311,15 @@ const WebsiteBuilderPage = () => {
       </header>
 
       <main className="flex-1 w-full h-full relative overflow-hidden bg-[#f6f6f7] dark:bg-zinc-950">
-        <BuilderLayout />
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center h-full w-full bg-[#f6f6f7] dark:bg-zinc-950">
+              <div className="h-6 w-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          }
+        >
+          <BuilderLayout />
+        </Suspense>
       </main>
     </div>
   );

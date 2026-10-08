@@ -5,7 +5,8 @@ import React from "react";
 import ModuleManager from "./module-manager";
 import ModuleSettings from "./module-settings";
 import LivePreview from "./live-preview";
-import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { ThemeType, useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Globe, Plus, Lock, ChevronDown, Check, Layout, RotateCw } from "lucide-react";
 import ThemeSelector from "./theme-selector";
@@ -39,8 +40,13 @@ const BuilderLayout = () => {
     setCurrentPage,
     addPage,
     initializeWebsiteData,
+    theme,
+    setTheme,
   } = useWebsiteBuilderStore();
   const resetInitialized = useWebsiteBuilderStore((s) => s.resetInitialized);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = React.useState(false);
   const [isAddPageOpen, setIsAddPageOpen] = React.useState(false);
   const { isPremium } = useIsPremium();
@@ -72,12 +78,41 @@ const BuilderLayout = () => {
     }
   }, [websiteData, initializeWebsiteData]);
 
-  // Set currentPageId to first page if not set
+  // Read page & theme from URL search params on mount or when pages load
   React.useEffect(() => {
+    if (pages.length === 0) return;
+
+    const pageParam = searchParams.get("page") || searchParams.get("pageId");
+    const themeParam = searchParams.get("theme") as ThemeType | null;
+
+    const validThemes: ThemeType[] = [
+      "academia",
+      "enterprise",
+      "creator",
+      "association",
+      "startup",
+    ];
+    if (themeParam && validThemes.includes(themeParam) && themeParam !== theme) {
+      setTheme(themeParam);
+    }
+
+    if (pageParam) {
+      const matchedPage = pages.find(
+        (p) => p.slug === pageParam || p.id === pageParam,
+      );
+      if (matchedPage) {
+        if (matchedPage.id !== currentPageId) {
+          setCurrentPage(matchedPage.id);
+        }
+        return;
+      }
+    }
+
+    // Fallback: Set currentPageId to first page if not set
     if (!currentPageId && pages.length > 0) {
       setCurrentPage(pages[0].id);
     }
-  }, [currentPageId, pages, setCurrentPage]);
+  }, [pages, searchParams, currentPageId, theme, setCurrentPage, setTheme]);
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -92,12 +127,56 @@ const BuilderLayout = () => {
     };
   }, [resetInitialized]);
 
+  const currentPage =
+    pages.find((p) => p.id === currentPageId) || pages[0] || null;
+
+  // Keep URL search params synchronized with active page and active theme
+  React.useEffect(() => {
+    if (!isMounted || !currentPage) return;
+
+    const currentUrlPage = searchParams.get("page") || searchParams.get("pageId");
+    const currentUrlTheme = searchParams.get("theme");
+
+    const targetPageSlug = currentPage.slug || currentPage.id;
+    const targetTheme = theme || "academia";
+
+    if (currentUrlPage !== targetPageSlug || currentUrlTheme !== targetTheme) {
+      const params = new URLSearchParams(searchParams.toString());
+      if (currentPage.slug) {
+        params.set("page", currentPage.slug);
+        params.delete("pageId");
+      } else {
+        params.set("pageId", currentPage.id);
+        params.delete("page");
+      }
+      params.set("theme", targetTheme);
+
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [currentPage, theme, isMounted, searchParams, router, pathname]);
+
+  const handleSelectPage = React.useCallback(
+    (page: { id: string; slug: string }) => {
+      setCurrentPage(page.id);
+      const params = new URLSearchParams(searchParams.toString());
+      if (page.slug) {
+        params.set("page", page.slug);
+        params.delete("pageId");
+      } else {
+        params.set("pageId", page.id);
+        params.delete("page");
+      }
+      if (theme) {
+        params.set("theme", theme);
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [setCurrentPage, searchParams, theme, router, pathname],
+  );
+
   if (!isMounted) {
     return null; // Prevent hydration mismatch
   }
-
-  const currentPage =
-    pages.find((p) => p.id === currentPageId) || pages[0] || null;
 
   return (
     <>
@@ -137,7 +216,7 @@ const BuilderLayout = () => {
                   return (
                     <DropdownMenuItem
                       key={page.id}
-                      onClick={() => setCurrentPage(page.id)}
+                      onClick={() => handleSelectPage(page)}
                       className={cn(
                         "flex items-center justify-between px-2 py-1.5 rounded-lg text-xs cursor-pointer",
                         isSelected
@@ -306,6 +385,11 @@ const BuilderLayout = () => {
         websiteId={websiteData?.getWebsite?.id}
         onSuccess={(pageData) => {
           addPage(pageData.name, pageData.slug);
+          setCurrentPage(pageData.id);
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("page", pageData.slug);
+          if (theme) params.set("theme", theme);
+          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
           refetch();
         }}
       />
