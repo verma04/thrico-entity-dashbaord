@@ -32,7 +32,6 @@ export const ModuleContainer = ({
   containerSettings,
   className,
 }: ModuleContainerProps) => {
-  console.log(containerSettings?.backgroundImage);
   const fullWidth = containerSettings?.fullWidth ?? false;
   const background = containerSettings?.background || "bg-background";
   const textColor = containerSettings?.textColor;
@@ -81,7 +80,7 @@ export const ModuleContainer = ({
 
   // Separate background class and inline style
   let backgroundClass = isCustomColor ? "" : background;
-  let inlineStyle: React.CSSProperties = {};
+  const inlineStyle: React.CSSProperties = {};
 
   if (isCustomColor) {
     if (background.startsWith("linear-gradient")) {

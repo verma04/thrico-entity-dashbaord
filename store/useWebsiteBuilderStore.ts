@@ -605,7 +605,13 @@ export interface WebsiteBuilderState {
   togglePageStatus: (id: string) => void;
   togglePageSitemap: (id: string) => void;
   updateSiteSettings: (settings: Partial<SiteSettings>) => void;
-  initializeWebsiteData: (websiteData: any) => void;
+  initializeWebsiteData: (
+    websiteData: Record<string, unknown>,
+    options?: {
+      initialPageSlugOrId?: string | null;
+      initialTheme?: ThemeType | null;
+    },
+  ) => void;
   resetInitialized: () => void;
 }
 
@@ -1815,39 +1821,81 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         };
       }),
 
-    initializeWebsiteData: (websiteData) => {
+    initializeWebsiteData: (websiteData, options) => {
       if (!websiteData) return;
 
       // Only initialize once — never overwrite unsaved in-flight changes on refetch
       if (get().isInitialized) return;
 
+      const rawPages = (websiteData.pages as Page[]) || [];
+      const validThemes: ThemeType[] = [
+        "academia",
+        "enterprise",
+        "creator",
+        "association",
+        "startup",
+        "dark-mode",
+      ];
+
+      // Resolve initial theme: URL param takes precedence, then server data, then default
+      const resolvedTheme =
+        options?.initialTheme && validThemes.includes(options.initialTheme)
+          ? options.initialTheme
+          : ((websiteData.theme as ThemeType) || "academia");
+
+      // Resolve initial page: URL param takes precedence, then first page
+      let resolvedPageId: string | null = null;
+      if (options?.initialPageSlugOrId && rawPages.length > 0) {
+        const matched = rawPages.find(
+          (p) =>
+            p.slug === options.initialPageSlugOrId ||
+            p.id === options.initialPageSlugOrId,
+        );
+        if (matched) {
+          resolvedPageId = matched.id;
+        }
+      }
+      if (!resolvedPageId && rawPages.length > 0) {
+        resolvedPageId = rawPages[0].id;
+      }
+
+      const siteSettings = websiteData.siteSettings as
+        | (SiteSettings & { socialLinks?: Record<string, string> })
+        | undefined;
+
+      const resolvedSiteSettings: SiteSettings = siteSettings
+        ? {
+            googleAnalyticsId: siteSettings.googleAnalyticsId || "",
+            googleSearchConsoleId: siteSettings.googleSearchConsoleId || "",
+            robotsTxt: siteSettings.robotsTxt || "",
+            favicon: siteSettings.favicon || "",
+            socialLinks: {
+              twitter: siteSettings.socialLinks?.twitter || "",
+              linkedin: siteSettings.socialLinks?.linkedin || "",
+              github: siteSettings.socialLinks?.github || "",
+              instagram: siteSettings.socialLinks?.instagram || "",
+            },
+          }
+        : get().siteSettings;
+
       set(() => ({
         isInitialized: true,
-        theme: websiteData.theme || "academia",
-        font: websiteData.font || "inter",
-        customColors: websiteData.customColors || {},
-        pages: websiteData.pages || [],
+        theme: resolvedTheme,
+        currentPageId: resolvedPageId,
+        font: (websiteData.font as FontType) || "inter",
+        customColors: (websiteData.customColors as CustomThemeColors) || {},
+        pages: rawPages,
         // Accept globalHeader/globalFooter (enriched with id/type/name) if provided,
         // otherwise fall back to raw navbar/footer fields
         globalHeader:
-          websiteData.globalHeader || websiteData.navbar || get().globalHeader,
+          (websiteData.globalHeader ||
+            websiteData.navbar ||
+            get().globalHeader) as NavbarContentConfig,
         globalFooter:
-          websiteData.globalFooter || websiteData.footer || get().globalFooter,
-        ...(websiteData.siteSettings && {
-          siteSettings: {
-            googleAnalyticsId: websiteData.siteSettings.googleAnalyticsId || "",
-            googleSearchConsoleId:
-              websiteData.siteSettings.googleSearchConsoleId || "",
-            robotsTxt: websiteData.siteSettings.robotsTxt || "",
-            favicon: "",
-            socialLinks: {
-              twitter: websiteData.siteSettings.socialLinks?.twitter || "",
-              linkedin: websiteData.siteSettings.socialLinks?.linkedin || "",
-              github: websiteData.siteSettings.socialLinks?.github || "",
-              instagram: websiteData.siteSettings.socialLinks?.instagram || "",
-            },
-          },
-        }),
+          (websiteData.globalFooter ||
+            websiteData.footer ||
+            get().globalFooter) as FooterContentConfig,
+        siteSettings: resolvedSiteSettings,
       }));
     },
     resetInitialized: () => set(() => ({ isInitialized: false })),

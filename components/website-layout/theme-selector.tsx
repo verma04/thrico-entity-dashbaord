@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useDrawerStore } from "@/store/drawerStore";
 import { ThemeCustomizer } from "./theme-customizer";
+import { syncBuilderUrl } from "./builder-url-utils";
 
 const THEMES: {
   id: ThemeType;
@@ -191,6 +192,7 @@ const ThemeSelector = () => {
                   onClick={() => {
                     setTheme(item.id);
                     setIsExpanded(false);
+                    syncBuilderUrl({ theme: item.id });
                   }}
                   className={cn(
                     "flex items-center gap-2 p-2 rounded-[6px] border text-left transition-all cursor-pointer w-full",

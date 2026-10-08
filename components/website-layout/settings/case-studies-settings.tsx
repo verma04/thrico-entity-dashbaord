@@ -219,7 +219,6 @@ export const CaseStudiesSettings = ({
                         />
                       </div>
 
-                      {console.log(caseStudy.image)}
                       {/* Image Upload */}
                       <div className="space-y-2">
                         <ImageUploadWithCrop

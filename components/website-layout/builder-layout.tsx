@@ -5,12 +5,13 @@ import React from "react";
 import ModuleManager from "./module-manager";
 import ModuleSettings from "./module-settings";
 import LivePreview from "./live-preview";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ThemeType, useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Globe, Plus, Lock, ChevronDown, Check, Layout, RotateCw } from "lucide-react";
 import ThemeSelector from "./theme-selector";
 import FontSelector from "./font-selector";
+import { syncBuilderUrl } from "./builder-url-utils";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -44,8 +45,6 @@ const BuilderLayout = () => {
     setTheme,
   } = useWebsiteBuilderStore();
   const resetInitialized = useWebsiteBuilderStore((s) => s.resetInitialized);
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isMounted, setIsMounted] = React.useState(false);
   const [isAddPageOpen, setIsAddPageOpen] = React.useState(false);
@@ -56,63 +55,83 @@ const BuilderLayout = () => {
   // Fetch website data for websiteId
   const { data: websiteData, refetch } = useGetWebsite({});
 
-  // Initialize store with fetched data
+  // Initialize store with fetched data and URL params atomically
   React.useEffect(() => {
     if (websiteData?.getWebsite) {
       const website = websiteData.getWebsite;
-      initializeWebsiteData({
-        ...website,
-        globalFooter: {
-          ...website?.footer,
-          id: "footer",
-          type: "footer",
-          name: "Footer",
+      const pageParam = searchParams.get("page") || searchParams.get("pageId");
+      const themeParam = searchParams.get("theme") as ThemeType | null;
+
+      initializeWebsiteData(
+        {
+          ...website,
+          globalFooter: {
+            ...website?.footer,
+            id: "footer",
+            type: "footer",
+            name: "Footer",
+          },
+          globalHeader: {
+            ...website?.navbar,
+            id: "navbar",
+            type: "navbar",
+            name: "Navbar",
+          },
         },
-        globalHeader: {
-          ...website?.navbar,
-          id: "navbar",
-          type: "navbar",
-          name: "Navbar",
+        {
+          initialPageSlugOrId: pageParam,
+          initialTheme: themeParam,
         },
-      });
-    }
-  }, [websiteData, initializeWebsiteData]);
-
-  // Read page & theme from URL search params on mount or when pages load
-  React.useEffect(() => {
-    if (pages.length === 0) return;
-
-    const pageParam = searchParams.get("page") || searchParams.get("pageId");
-    const themeParam = searchParams.get("theme") as ThemeType | null;
-
-    const validThemes: ThemeType[] = [
-      "academia",
-      "enterprise",
-      "creator",
-      "association",
-      "startup",
-    ];
-    if (themeParam && validThemes.includes(themeParam) && themeParam !== theme) {
-      setTheme(themeParam);
-    }
-
-    if (pageParam) {
-      const matchedPage = pages.find(
-        (p) => p.slug === pageParam || p.id === pageParam,
       );
-      if (matchedPage) {
-        if (matchedPage.id !== currentPageId) {
-          setCurrentPage(matchedPage.id);
-        }
-        return;
+
+      // If user landed on builder without URL query params, sync initial default page & theme cleanly
+      if (!pageParam && website.pages && website.pages.length > 0) {
+        const firstPage = website.pages[0];
+        const defaultTheme = themeParam || website.theme || "academia";
+        syncBuilderUrl({
+          page: firstPage.slug || null,
+          pageId: firstPage.slug ? null : firstPage.id,
+          theme: defaultTheme,
+        });
       }
     }
+  }, [websiteData, searchParams, initializeWebsiteData]);
 
-    // Fallback: Set currentPageId to first page if not set
-    if (!currentPageId && pages.length > 0) {
-      setCurrentPage(pages[0].id);
-    }
-  }, [pages, searchParams, currentPageId, theme, setCurrentPage, setTheme]);
+  // Handle browser back / forward navigation via popstate
+  React.useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = params.get("page") || params.get("pageId");
+      const themeParam = params.get("theme") as ThemeType | null;
+
+      if (pageParam && pages.length > 0) {
+        const matched = pages.find(
+          (p) => p.slug === pageParam || p.id === pageParam,
+        );
+        if (matched && matched.id !== currentPageId) {
+          setCurrentPage(matched.id);
+        }
+      }
+
+      const validThemes: ThemeType[] = [
+        "academia",
+        "enterprise",
+        "creator",
+        "association",
+        "startup",
+      ];
+      if (
+        themeParam &&
+        validThemes.includes(themeParam) &&
+        themeParam !== theme
+      ) {
+        setTheme(themeParam);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [pages, currentPageId, theme, setCurrentPage, setTheme]);
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -128,50 +147,20 @@ const BuilderLayout = () => {
   }, [resetInitialized]);
 
   const currentPage =
-    pages.find((p) => p.id === currentPageId) || pages[0] || null;
-
-  // Keep URL search params synchronized with active page and active theme
-  React.useEffect(() => {
-    if (!isMounted || !currentPage) return;
-
-    const currentUrlPage = searchParams.get("page") || searchParams.get("pageId");
-    const currentUrlTheme = searchParams.get("theme");
-
-    const targetPageSlug = currentPage.slug || currentPage.id;
-    const targetTheme = theme || "academia";
-
-    if (currentUrlPage !== targetPageSlug || currentUrlTheme !== targetTheme) {
-      const params = new URLSearchParams(searchParams.toString());
-      if (currentPage.slug) {
-        params.set("page", currentPage.slug);
-        params.delete("pageId");
-      } else {
-        params.set("pageId", currentPage.id);
-        params.delete("page");
-      }
-      params.set("theme", targetTheme);
-
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    }
-  }, [currentPage, theme, isMounted, searchParams, router, pathname]);
+    pages.find((p) => p.id === currentPageId) ||
+    (currentPageId ? null : pages[0]) ||
+    null;
 
   const handleSelectPage = React.useCallback(
     (page: { id: string; slug: string }) => {
       setCurrentPage(page.id);
-      const params = new URLSearchParams(searchParams.toString());
-      if (page.slug) {
-        params.set("page", page.slug);
-        params.delete("pageId");
-      } else {
-        params.set("pageId", page.id);
-        params.delete("page");
-      }
-      if (theme) {
-        params.set("theme", theme);
-      }
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      syncBuilderUrl({
+        page: page.slug || null,
+        pageId: page.slug ? null : page.id,
+        theme: theme || null,
+      });
     },
-    [setCurrentPage, searchParams, theme, router, pathname],
+    [setCurrentPage, theme],
   );
 
   if (!isMounted) {
@@ -386,10 +375,11 @@ const BuilderLayout = () => {
         onSuccess={(pageData) => {
           addPage(pageData.name, pageData.slug);
           setCurrentPage(pageData.id);
-          const params = new URLSearchParams(searchParams.toString());
-          params.set("page", pageData.slug);
-          if (theme) params.set("theme", theme);
-          router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+          syncBuilderUrl({
+            page: pageData.slug || null,
+            pageId: pageData.slug ? null : pageData.id,
+            theme: theme || null,
+          });
           refetch();
         }}
       />

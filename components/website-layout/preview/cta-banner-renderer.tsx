@@ -13,8 +13,6 @@ export const CtaBannerRenderer = ({
   const { layout, content } = module;
   const isMobile = previewDevice === "mobile";
 
-  console.log(layout);
-
   const title = content.title || "Ready to Get Started?";
   const description =
     content.description ||
