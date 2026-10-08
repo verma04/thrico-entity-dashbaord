@@ -8,9 +8,7 @@ import {
   Check,
   Search,
   X,
-  Sparkles,
   Images,
-  FolderHeart,
   Ban,
 } from "lucide-react";
 import {
@@ -64,28 +62,61 @@ export const SOCIAL_BRAND_ICONS = [
   "Slack",
 ];
 
-export const getIconComponent = (name?: string) => {
-  if (!name || name === "none") return null;
-  const formatted = name.charAt(0).toUpperCase() + name.slice(1);
-  return (
-    (BrandIcons as any)[formatted] ||
-    (BrandIcons as any)[name] ||
-    (LucideIcons as any)[formatted] ||
-    (LucideIcons as any)[name] ||
-    null
-  );
+export const isValidIconComponent = (comp: any): boolean => {
+  if (!comp) return false;
+  if (
+    comp === (LucideIcons as any).useLucideContext ||
+    comp === (LucideIcons as any).LucideProvider ||
+    comp === (LucideIcons as any).createLucideIcon
+  ) {
+    return false;
+  }
+  if (typeof comp === "function") {
+    if (comp.name && comp.name.startsWith("use")) return false;
+    return true;
+  }
+  if (typeof comp === "object" && (comp.$$typeof || comp.render)) {
+    return true;
+  }
+  return false;
 };
 
-const ALL_LUCIDE_NAMES = Object.keys(LucideIcons).filter(
-  (n) =>
-    n !== "icons" &&
-    n !== "createLucideIcon" &&
-    isNaN(Number(n)) &&
-    typeof (LucideIcons as any)[n] === "function"
-);
+export const getIconComponent = (name?: string): React.ComponentType<any> | null => {
+  if (!name || typeof name !== "string") return null;
+  const trimmed = name.trim();
+  if (!trimmed || trimmed === "none") return null;
+  const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  const comp =
+    (BrandIcons as any)[formatted] ||
+    (BrandIcons as any)[trimmed] ||
+    (LucideIcons as any)[formatted] ||
+    (LucideIcons as any)[trimmed] ||
+    null;
+
+  if (isValidIconComponent(comp)) {
+    return comp;
+  }
+  return null;
+};
+
+const ALL_LUCIDE_NAMES =
+  (LucideIcons as any).icons && Object.keys((LucideIcons as any).icons).length > 0
+    ? Object.keys((LucideIcons as any).icons)
+    : Object.keys(LucideIcons).filter(
+        (n) =>
+          !n.startsWith("use") &&
+          n !== "icons" &&
+          n !== "createLucideIcon" &&
+          isNaN(Number(n)) &&
+          isValidIconComponent((LucideIcons as any)[n])
+      );
 
 const ALL_BRAND_NAMES = Object.keys(BrandIcons).filter(
-  (n) => isNaN(Number(n)) && typeof (BrandIcons as any)[n] === "function"
+  (n) =>
+    n !== "default" &&
+    n !== "__esModule" &&
+    isNaN(Number(n)) &&
+    isValidIconComponent((BrandIcons as any)[n])
 );
 
 const ALL_ICON_NAMES = Array.from(
@@ -118,9 +149,11 @@ export function IconPicker({
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<"media" | "social" | "all">("media");
 
-  const isNoIcon = value === "none";
-  const currentIconName = isNoIcon ? "none" : value || defaultIcon;
-  const CurrentIcon = isNoIcon ? null : getIconComponent(currentIconName) || Images;
+  const stringValue = typeof value === "string" ? value : undefined;
+  const isNoIcon = stringValue === "none";
+  const currentIconName = isNoIcon ? "none" : stringValue || defaultIcon;
+  const ResolvedIcon = isNoIcon ? null : getIconComponent(currentIconName);
+  const CurrentIcon = ResolvedIcon || Images;
 
   const activeIconList = useMemo(() => {
     if (search.trim()) {
@@ -171,10 +204,14 @@ export function IconPicker({
             ) : (
               <>
                 <span className="h-4 w-4 shrink-0 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                  {CurrentIcon && <CurrentIcon className="h-4 w-4" />}
+                  {CurrentIcon && isValidIconComponent(CurrentIcon) ? (
+                    <CurrentIcon className="h-4 w-4" />
+                  ) : (
+                    <Images className="h-4 w-4" />
+                  )}
                 </span>
                 <span className="truncate max-w-[85px]">
-                  {value || placeholder}
+                  {stringValue || placeholder}
                 </span>
               </>
             )}
@@ -283,7 +320,7 @@ export function IconPicker({
               <div className="grid grid-cols-5 gap-1.5">
                 {activeIconList.slice(0, 100).map((iconName) => {
                   const Icon = getIconComponent(iconName);
-                  if (!Icon) return null;
+                  if (!Icon || !isValidIconComponent(Icon)) return null;
                   const isSelected =
                     !isNoIcon && currentIconName.toLowerCase() === iconName.toLowerCase();
 
@@ -311,7 +348,7 @@ export function IconPicker({
             )}
           </div>
 
-          {/* Footer Reset & None Toggle */}
+          {/* Footer Reset */}
           <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-between text-[11px]">
             <span className="text-[#8c9196]">
               Selected: <strong className="text-[#303030] dark:text-zinc-200">{isNoIcon ? "None" : currentIconName}</strong>

@@ -194,6 +194,38 @@ interface SortableMediaLinkRowProps {
   onRemoveRequest: (index: number, name: string) => void;
 }
 
+
+function parseFeedLinks(
+  raw: any,
+  fallbackName = "Media Gallery",
+  fallbackAlbumId = ""
+): MediaGalleryFeedLink[] {
+  let list: any[] = [];
+  if (Array.isArray(raw)) {
+    list = raw;
+  } else if (typeof raw === "string" && raw.trim().startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) list = parsed;
+    } catch {}
+  }
+  if (list.length > 0) {
+    return list.map((item, idx) => ({
+      id: typeof item?.id === "string" ? item.id : `link-${idx}`,
+      name: typeof item?.name === "string" ? item.name : fallbackName,
+      albumId: typeof item?.albumId === "string" ? item.albumId : "",
+      icon: typeof item?.icon === "string" ? item.icon : undefined,
+    }));
+  }
+  return [
+    {
+      id: "link-default",
+      name: fallbackName,
+      albumId: fallbackAlbumId,
+    },
+  ];
+}
+
 function SortableMediaLinkRow({
   link,
   index,
@@ -245,7 +277,7 @@ function SortableMediaLinkRow({
 
       <div className="w-full sm:w-[130px] shrink-0">
         <IconPicker
-          value={link.icon || "Images"}
+          value={typeof link.icon === "string" ? link.icon : "Images"}
           onChange={(newIcon) => onUpdate(index, "icon", newIcon)}
         />
       </div>
@@ -418,20 +450,11 @@ export default function FeedVisibility() {
     mediaGalleryFeedAlbumId:
       data?.getEntitySettings?.mediaGalleryFeedAlbumId || "",
     mediaGalleryFeedName: data?.getEntitySettings?.mediaGalleryFeedName || "",
-    mediaGalleryFeedLinks:
-      data?.getEntitySettings?.mediaGalleryFeedLinks &&
-      Array.isArray(data.getEntitySettings.mediaGalleryFeedLinks) &&
-      data.getEntitySettings.mediaGalleryFeedLinks.length > 0
-        ? data.getEntitySettings.mediaGalleryFeedLinks
-        : [
-            {
-              id: "link-default",
-              name:
-                data?.getEntitySettings?.mediaGalleryFeedName ||
-                "Media Gallery",
-              albumId: data?.getEntitySettings?.mediaGalleryFeedAlbumId || "",
-            },
-          ],
+    mediaGalleryFeedLinks: parseFeedLinks(
+      data?.getEntitySettings?.mediaGalleryFeedLinks,
+      data?.getEntitySettings?.mediaGalleryFeedName || "Media Gallery",
+      data?.getEntitySettings?.mediaGalleryFeedAlbumId || ""
+    ),
     allowMediaGalleryShareToFeed:
       data?.getEntitySettings?.allowMediaGalleryShareToFeed ?? true,
     feedEntityName: data?.getEntitySettings?.feedEntityName || "",
@@ -479,20 +502,11 @@ export default function FeedVisibility() {
         mediaGalleryFeedAlbumId:
           data.getEntitySettings.mediaGalleryFeedAlbumId || "",
         mediaGalleryFeedName: data.getEntitySettings.mediaGalleryFeedName || "",
-        mediaGalleryFeedLinks:
-          data.getEntitySettings.mediaGalleryFeedLinks &&
-          Array.isArray(data.getEntitySettings.mediaGalleryFeedLinks) &&
-          data.getEntitySettings.mediaGalleryFeedLinks.length > 0
-            ? data.getEntitySettings.mediaGalleryFeedLinks
-            : [
-                {
-                  id: "link-default",
-                  name:
-                    data.getEntitySettings.mediaGalleryFeedName ||
-                    "Media Gallery",
-                  albumId: data.getEntitySettings.mediaGalleryFeedAlbumId || "",
-                },
-              ],
+        mediaGalleryFeedLinks: parseFeedLinks(
+          data.getEntitySettings.mediaGalleryFeedLinks,
+          data.getEntitySettings.mediaGalleryFeedName || "Media Gallery",
+          data.getEntitySettings.mediaGalleryFeedAlbumId || ""
+        ),
         allowMediaGalleryShareToFeed:
           data.getEntitySettings.allowMediaGalleryShareToFeed ?? true,
         feedEntityName: data.getEntitySettings.feedEntityName || "",
@@ -554,20 +568,11 @@ export default function FeedVisibility() {
         mediaGalleryFeedAlbumId:
           data.getEntitySettings.mediaGalleryFeedAlbumId || "",
         mediaGalleryFeedName: data.getEntitySettings.mediaGalleryFeedName || "",
-        mediaGalleryFeedLinks:
-          data.getEntitySettings.mediaGalleryFeedLinks &&
-          Array.isArray(data.getEntitySettings.mediaGalleryFeedLinks) &&
-          data.getEntitySettings.mediaGalleryFeedLinks.length > 0
-            ? data.getEntitySettings.mediaGalleryFeedLinks
-            : [
-                {
-                  id: "link-default",
-                  name:
-                    data.getEntitySettings.mediaGalleryFeedName ||
-                    "Media Gallery",
-                  albumId: data.getEntitySettings.mediaGalleryFeedAlbumId || "",
-                },
-              ],
+        mediaGalleryFeedLinks: parseFeedLinks(
+          data.getEntitySettings.mediaGalleryFeedLinks,
+          data.getEntitySettings.mediaGalleryFeedName || "Media Gallery",
+          data.getEntitySettings.mediaGalleryFeedAlbumId || ""
+        ),
         allowMediaGalleryShareToFeed:
           data.getEntitySettings.allowMediaGalleryShareToFeed ?? true,
         feedEntityName: data.getEntitySettings.feedEntityName || "",
