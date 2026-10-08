@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   MoreHorizontal,
   ExternalLink,
+  Settings,
 } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -26,6 +27,7 @@ import { cn } from "@/lib/utils";
 interface AlbumCardCompactProps {
   album: any;
   onEdit: (album: any) => void;
+  onOpenSettings?: (album: any) => void;
   onDelete: (id: string) => void;
   onClick: (id: string) => void;
   enableDrag?: boolean;
@@ -34,6 +36,7 @@ interface AlbumCardCompactProps {
 export function AlbumCardCompact({
   album,
   onEdit,
+  onOpenSettings,
   onDelete,
   onClick,
   enableDrag = false,
@@ -140,6 +143,15 @@ export function AlbumCardCompact({
                   <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                   Edit Album
                 </DropdownMenuItem>
+                {onOpenSettings && (
+                  <DropdownMenuItem
+                    onClick={() => onOpenSettings(album)}
+                    className="text-xs font-medium cursor-pointer gap-2 py-1.5"
+                  >
+                    <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                    Gallery Settings
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator className="my-1" />
                 <DropdownMenuItem
                   onClick={() => onDelete(album?.id)}
@@ -217,6 +229,15 @@ export function AlbumCardCompact({
                   <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                   Edit Album
                 </DropdownMenuItem>
+                {onOpenSettings && (
+                  <DropdownMenuItem
+                    onClick={() => onOpenSettings(album)}
+                    className="text-xs font-medium cursor-pointer gap-2 py-1.5"
+                  >
+                    <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                    Gallery Settings
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator className="my-1" />
                 <DropdownMenuItem
                   onClick={() => onDelete(album?.id)}

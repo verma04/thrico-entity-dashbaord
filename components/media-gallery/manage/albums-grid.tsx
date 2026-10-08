@@ -13,6 +13,7 @@ import {
 interface AlbumsGridProps {
   albums: any[];
   onEdit: (album: any) => void;
+  onOpenSettings?: (album: any) => void;
   onDelete: (id: string) => void;
   onClick: (id: string) => void;
   enableDrag?: boolean;
@@ -21,6 +22,7 @@ interface AlbumsGridProps {
 export function AlbumsGrid({
   albums,
   onEdit,
+  onOpenSettings,
   onDelete,
   onClick,
   enableDrag = false,
@@ -50,6 +52,7 @@ export function AlbumsGrid({
           key={album?.id}
           album={album}
           onEdit={onEdit}
+          onOpenSettings={onOpenSettings}
           onDelete={onDelete}
           onClick={onClick}
           enableDrag={enableDrag}

@@ -12,18 +12,35 @@ import {
   Loader2,
   AlertCircle,
   Video,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+
+export interface MediaGalleryImageItem {
+  id: string;
+  url?: string | null;
+  thumbnailUrl?: string | null;
+  optimizedUrl?: string | null;
+  caption?: string | null;
+  fileName?: string | null;
+  type?: "IMAGE" | "VIDEO" | string;
+  status?: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | string;
+  errorMessage?: string | null;
+  duration?: number | null;
+  commentCount?: number | null;
+  order?: number | null;
+  [key: string]: unknown;
+}
 
 export function SortableImageCard({
   image,
-  albumId,
   onDelete,
   onViewComments,
   onEditCaption,
@@ -31,11 +48,11 @@ export function SortableImageCard({
   isSelected,
   onToggleSelect,
 }: {
-  image: any;
-  albumId: string;
+  image: MediaGalleryImageItem;
+  albumId?: string;
   onDelete: (id: string) => void;
   onViewComments: (id: string) => void;
-  onEditCaption: (image: any) => void;
+  onEditCaption: (image: MediaGalleryImageItem) => void;
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelect?: () => void;
@@ -76,7 +93,7 @@ export function SortableImageCard({
     ? videoPlaybackUrl
     : `https://cdn.thrico.network/${videoPlaybackUrl?.replace(/^\//, "")}`;
 
-  const formatDuration = (sec: number | null) => {
+  const formatDuration = (sec: number | null | undefined) => {
     if (!sec) return "";
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
@@ -88,13 +105,15 @@ export function SortableImageCard({
       <div
         ref={setNodeRef}
         style={style}
-        className={`relative group aspect-square rounded-xl overflow-hidden border ${
+        className={cn(
+          "relative group aspect-square rounded-[10px] overflow-hidden border transition-all select-none",
           isSelected
-            ? "border-indigo-500 ring-2 ring-indigo-500"
+            ? "border-[#303030] dark:border-zinc-100 ring-2 ring-[#303030] dark:ring-zinc-100 shadow-2xs"
             : isFailed
-            ? "border-red-200 bg-red-50/30"
-            : "border-gray-100"
-        } bg-gray-900 transition-all ${isSelectionMode ? "cursor-pointer" : ""}`}
+              ? "border-destructive/40 bg-destructive/5"
+              : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7] dark:bg-zinc-900",
+          isSelectionMode ? "cursor-pointer" : "",
+        )}
         onClick={() => {
           if (isSelectionMode && onToggleSelect) {
             onToggleSelect();
@@ -108,9 +127,11 @@ export function SortableImageCard({
         <img
           src={displayUrl}
           alt={image.caption ?? (isVideo ? "Gallery video" : "Gallery image")}
-          className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
-            isSelected ? "scale-95" : ""
-          } ${isPending ? "opacity-60 blur-[1px]" : ""}`}
+          className={cn(
+            "w-full h-full object-cover transition-transform duration-200 group-hover:scale-105",
+            isSelected && "scale-95",
+            isPending && "opacity-60 blur-[1px]",
+          )}
         />
 
         {/* Video Indicators */}
@@ -126,7 +147,7 @@ export function SortableImageCard({
             )}
 
             {/* Video Badge (top right) */}
-            <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-black/70 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-semibold text-white">
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-semibold text-white">
               <Video className="w-3 h-3 text-indigo-400" />
               {image.duration ? formatDuration(image.duration) : "VIDEO"}
             </div>
@@ -135,21 +156,23 @@ export function SortableImageCard({
 
         {/* Processing Indicator */}
         {isPending && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 p-2 text-center">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 p-2 text-center backdrop-blur-xs">
             <Loader2 className="w-6 h-6 text-amber-400 animate-spin mb-1" />
             <span className="text-[11px] font-bold text-white tracking-wide">
               {image.status === "PROCESSING" ? "Optimizing..." : "Processing..."}
             </span>
-            <span className="text-[9px] text-amber-200/90 mt-0.5">FFmpeg worker active</span>
+            <span className="text-[9.5px] text-amber-200/90 mt-0.5">
+              Worker active
+            </span>
           </div>
         )}
 
         {/* Failed Indicator */}
         {isFailed && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-red-950/80 p-2 text-center text-red-200">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-red-950/85 p-2 text-center text-red-200">
             <AlertCircle className="w-6 h-6 text-red-400 mb-1" />
             <span className="text-[11px] font-bold text-white">Processing Failed</span>
-            <span className="text-[9px] text-red-300 mt-0.5 line-clamp-2">
+            <span className="text-[9.5px] text-red-300 mt-0.5 line-clamp-2">
               {image.errorMessage || "Exceeded 2-min limit or format error"}
             </span>
           </div>
@@ -159,17 +182,18 @@ export function SortableImageCard({
         {isSelectionMode && (
           <div className="absolute top-2 left-2 z-20">
             <div
-              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+              className={cn(
+                "w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors shadow-2xs",
                 isSelected
-                  ? "bg-indigo-600 border-indigo-600 text-white"
-                  : "bg-white/80 border-gray-300"
-              }`}
+                  ? "bg-[#303030] text-white border-[#303030] dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                  : "bg-white/90 dark:bg-zinc-900/90 border-[#d2d5d9] dark:border-zinc-700",
+              )}
             >
               {isSelected && (
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
-                  className="w-3 h-3 text-white stroke-current stroke-2"
+                  className="w-3 h-3 stroke-current stroke-2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
@@ -182,17 +206,20 @@ export function SortableImageCard({
 
         {/* Overlay on hover */}
         {!isSelectionMode && (
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex flex-col justify-between p-2">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/55 transition-all duration-150 flex flex-col justify-between p-2">
             <div className="flex justify-between opacity-0 group-hover:opacity-100 transition-opacity">
               <button
+                type="button"
                 {...attributes}
                 {...listeners}
-                className="p-1.5 rounded-md bg-white/20 backdrop-blur-sm text-white cursor-grab hover:bg-white/30"
+                className="p-1.5 rounded-md bg-white/20 backdrop-blur-sm text-white cursor-grab hover:bg-white/30 transition-colors"
+                title="Drag to reorder"
               >
                 <GripVertical className="w-4 h-4" />
               </button>
               <div className="flex gap-1">
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 bg-white/20 backdrop-blur-sm text-white hover:bg-white/40"
@@ -200,17 +227,20 @@ export function SortableImageCard({
                     e.stopPropagation();
                     onEditCaption(image);
                   }}
+                  title="Edit caption"
                 >
                   <Pencil className="w-3 h-3" />
                 </Button>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 bg-white/20 backdrop-blur-sm text-white hover:bg-red-500/80"
+                  className="h-7 w-7 bg-white/20 backdrop-blur-sm text-white hover:bg-destructive/80"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete(image.id);
                   }}
+                  title="Delete media"
                 >
                   <Trash2 className="w-3 h-3" />
                 </Button>
@@ -220,14 +250,15 @@ export function SortableImageCard({
             {/* Caption + comments */}
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
               {image.caption && (
-                <p className="text-white text-xs font-medium truncate mb-1">
+                <p className="text-white text-xs font-medium truncate mb-1 px-1">
                   {image.caption}
                 </p>
               )}
               <Button
+                type="button"
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-xs bg-white/20 backdrop-blur-sm text-white hover:bg-white/40 w-full"
+                className="h-6.5 px-2 text-[11px] bg-white/20 backdrop-blur-sm text-white hover:bg-white/40 w-full justify-center"
                 onClick={(e) => {
                   e.stopPropagation();
                   onViewComments(image.id);
@@ -241,16 +272,34 @@ export function SortableImageCard({
         )}
       </div>
 
-      {/* Video Preview Dialog */}
+      {/* Video Preview Dialog (Pattern C: Modal Dialog) */}
       {isVideo && (
         <Dialog open={showVideoPreview} onOpenChange={setShowVideoPreview}>
-          <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-black border-zinc-800">
-            <DialogHeader className="p-4 bg-zinc-900 border-b border-zinc-800">
-              <DialogTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                <Video className="w-4 h-4 text-indigo-400" />
-                {image.caption || "Video Preview"}
-              </DialogTitle>
-            </DialogHeader>
+          <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden bg-black border border-[#d2d5d9] dark:border-zinc-800 shadow-2xl rounded-xl">
+            <div className="p-4 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0 pr-2">
+                <div className="h-7 w-7 rounded-md bg-indigo-950/60 text-indigo-400 flex items-center justify-center border border-indigo-900/40 shrink-0">
+                  <Video className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xs font-bold text-white truncate">
+                    {image.caption || "Video Preview"}
+                  </DialogTitle>
+                  <DialogDescription className="text-[10.5px] text-zinc-400">
+                    High definition video stream
+                  </DialogDescription>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowVideoPreview(false)}
+                className="h-7 w-7 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
             <div className="aspect-video bg-black flex items-center justify-center">
               <video
                 src={fullVideoUrl}

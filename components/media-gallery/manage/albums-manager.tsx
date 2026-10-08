@@ -11,6 +11,7 @@ import {
   List as ListIcon,
   Upload,
   RefreshCw,
+  Layers,
 } from "lucide-react";
 import {
   DndContext,
@@ -78,9 +79,25 @@ import {
 import { getAlbumTableColumns } from "./albums-list";
 import { ExportAlbumsModal } from "./export-albums-modal";
 import { AlbumFormDialog } from "./album-form-dialog";
+import { MultiGalleryUploadDialog } from "../multi-gallery-upload-dialog";
+
+export interface MediaGalleryAlbumItem {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  coverImage?: string | null;
+  isFeatured?: boolean | null;
+  imageCount?: number | null;
+  imagesCount?: number | null;
+  images?: unknown[];
+  order?: number | null;
+  createdAt?: string | null;
+  [key: string]: unknown;
+}
 
 export function AlbumsManager() {
   const router = useRouter();
+  const [showMultiUpload, setShowMultiUpload] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -132,7 +149,7 @@ export function AlbumsManager() {
   // Modal & Dialog states
   const [showExportModal, setShowExportModal] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingAlbum, setEditingAlbum] = useState<any | null>(null);
+  const [editingAlbum, setEditingAlbum] = useState<MediaGalleryAlbumItem | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Column visibility for List view
@@ -171,7 +188,7 @@ export function AlbumsManager() {
   const [deleteAlbum] = useDeleteMediaGalleryAlbum();
   const [reorderAlbums] = useReorderMediaGalleryAlbums();
 
-  const [albums, setAlbums] = useState<any[]>([]);
+  const [albums, setAlbums] = useState<MediaGalleryAlbumItem[]>([]);
 
   useEffect(() => {
     if (data?.getMediaGalleryAlbums) {
@@ -256,12 +273,12 @@ export function AlbumsManager() {
     return filteredAlbums.slice(offset, offset + limit);
   }, [filteredAlbums, offset, limit]);
 
-  const handleCreate = async (input: any) => {
+  const handleCreate = async (input: unknown) => {
     await createAlbum({ variables: { input } });
     refetch();
   };
 
-  const handleUpdate = async (id: string, input: any) => {
+  const handleUpdate = async (id: string, input: unknown) => {
     await updateAlbum({ variables: { id, input } });
     refetch();
   };
@@ -272,31 +289,34 @@ export function AlbumsManager() {
       await deleteAlbum({ variables: { id: deleteId } });
       toast.success("Album deleted successfully");
       refetch();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete album");
+    } catch (err: unknown) {
+      toast.error((err as Error)?.message || "Failed to delete album");
     } finally {
       setDeleteId(null);
     }
   };
 
-  const handleClickAlbum = (albumId: string) => {
-    router.push(`/media-gallery/${albumId}`);
-  };
+  const handleClickAlbum = useCallback(
+    (albumId: string) => {
+      router.push(`/media-gallery/${albumId}`);
+    },
+    [router],
+  );
 
-  const handleEditAlbum = (album: any) => {
+  const handleEditAlbum = useCallback((album: MediaGalleryAlbumItem) => {
     setEditingAlbum(album);
     setIsFormOpen(true);
-  };
+  }, []);
 
-  const handleDeleteAlbum = (id: string) => {
+  const handleDeleteAlbum = useCallback((id: string) => {
     setDeleteId(id);
-  };
+  }, []);
 
   const isDragActive = sortBy === "custom" && view === "grid" && !debouncedSearch && filter === "ALL";
 
   const availableColumns = useMemo(
     () => getAlbumTableColumns(handleEditAlbum, handleDeleteAlbum, handleClickAlbum),
-    [],
+    [handleEditAlbum, handleDeleteAlbum, handleClickAlbum],
   );
 
   return (
@@ -318,6 +338,14 @@ export function AlbumsManager() {
             >
               <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
             </Button>
+            <CtaButton
+              variant="outline"
+              size="lg"
+              onClick={() => setShowMultiUpload(true)}
+            >
+              <Layers className="h-4 w-4 text-indigo-500" />
+              Multi-Gallery Upload
+            </CtaButton>
             <CtaButton
               onClick={() => {
                 setEditingAlbum(null);
@@ -520,6 +548,7 @@ export function AlbumsManager() {
               loading={loading}
               albums={paginatedAlbums}
               onEdit={handleEditAlbum}
+              onOpenSettings={(album: MediaGalleryAlbumItem) => router.push(`/media-gallery/${album.id}/settings`)}
               onDelete={handleDeleteAlbum}
               onClick={handleClickAlbum}
               enableDrag={true}
@@ -533,6 +562,7 @@ export function AlbumsManager() {
             loading={loading}
             albums={paginatedAlbums}
             onEdit={handleEditAlbum}
+            onOpenSettings={(album: MediaGalleryAlbumItem) => router.push(`/media-gallery/${album.id}/settings`)}
             onDelete={handleDeleteAlbum}
             onClick={handleClickAlbum}
             enableDrag={false}
@@ -586,6 +616,13 @@ export function AlbumsManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ── Multi-Gallery Upload Dialog ───────────────────────────────────── */}
+      <MultiGalleryUploadDialog
+        open={showMultiUpload}
+        onOpenChange={setShowMultiUpload}
+        onUploaded={() => refetch()}
+      />
 
       {/* ── Export CSV Modal ──────────────────────────────────────────────── */}
       <ExportAlbumsModal

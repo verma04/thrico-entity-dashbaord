@@ -8,6 +8,7 @@ import {
   Pencil,
   Trash2,
   ExternalLink,
+  Settings,
   MoreHorizontal,
 } from "lucide-react";
 import {
@@ -35,6 +36,7 @@ export const getAlbumTableColumns = (
   onEdit: (album: any) => void,
   onDelete: (id: string) => void,
   onClick: (id: string) => void,
+  onOpenSettings?: (album: any) => void,
 ): AdminTableColumn<any>[] => [
   {
     key: "serial",
@@ -133,6 +135,15 @@ export const getAlbumTableColumns = (
               <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
               Edit Album
             </DropdownMenuItem>
+            {onOpenSettings && (
+              <DropdownMenuItem
+                onClick={() => onOpenSettings(album)}
+                className="text-xs font-medium cursor-pointer gap-2 py-1.5"
+              >
+                <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+                Gallery Settings
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator className="my-1" />
             <DropdownMenuItem
               onClick={() => onDelete(album?.id)}
@@ -155,6 +166,7 @@ export const getAlbumTableColumns = (
 export interface AlbumsListProps {
   albums: any[];
   onEdit: (album: any) => void;
+  onOpenSettings?: (album: any) => void;
   onDelete: (id: string) => void;
   onClick: (id: string) => void;
   visibleColumns?: Record<string, boolean>;
@@ -164,14 +176,15 @@ export interface AlbumsListProps {
 export function AlbumsList({
   albums,
   onEdit,
+  onOpenSettings,
   onDelete,
   onClick,
   visibleColumns,
   offset = 0,
 }: AlbumsListProps) {
   const baseColumns = React.useMemo(
-    () => getAlbumTableColumns(onEdit, onDelete, onClick),
-    [onEdit, onDelete, onClick],
+    () => getAlbumTableColumns(onEdit, onDelete, onClick, onOpenSettings),
+    [onEdit, onDelete, onClick, onOpenSettings],
   );
 
   const activeColumns = React.useMemo(() => {

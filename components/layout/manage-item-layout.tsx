@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { X, Loader2, ArrowLeft, type LucideIcon } from "lucide-react";
+import { X, Loader2, ArrowLeft, Camera, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -168,6 +168,9 @@ export interface ManageItemLayoutProps {
   loading?: boolean;
   loadingText?: string;
   coverImage?: string | null;
+  onCoverImageClick?: () => void;
+  onCoverImageChange?: (file: File) => void;
+  isCoverEditable?: boolean;
   defaultIcon?: LucideIcon | React.ComponentType<{ className?: string }>;
   iconContainerClassName?: string;
   status?: string | null;
@@ -199,6 +202,9 @@ export function ManageItemLayout({
   loading = false,
   loadingText,
   coverImage,
+  onCoverImageClick,
+  onCoverImageChange,
+  isCoverEditable,
   defaultIcon: DefaultIcon,
   iconContainerClassName,
   status,
@@ -224,6 +230,26 @@ export function ManageItemLayout({
 }: ManageItemLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const coverFileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleCoverContainerClick = () => {
+    if (onCoverImageClick) {
+      onCoverImageClick();
+    } else if (onCoverImageChange) {
+      coverFileInputRef.current?.click();
+    }
+  };
+
+  const handleCoverFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onCoverImageChange) {
+      onCoverImageChange(file);
+    }
+  };
+
+  const isCoverClickable = Boolean(
+    onCoverImageClick || onCoverImageChange || isCoverEditable,
+  );
 
   const handleClose = () => {
     if (onClose) {
@@ -264,8 +290,26 @@ export function ManageItemLayout({
                 </Button>
               )}
 
+              {onCoverImageChange && (
+                <input
+                  ref={coverFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCoverFileSelected}
+                />
+              )}
+
               {coverImage ? (
-                <div className="relative shrink-0">
+                <div
+                  className={cn(
+                    "relative shrink-0",
+                    isCoverClickable && "cursor-pointer group/cover",
+                  )}
+                  onClick={isCoverClickable ? handleCoverContainerClick : undefined}
+                  title={isCoverClickable ? "Change cover image" : undefined}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={
                       coverImage.startsWith("http")
@@ -275,6 +319,11 @@ export function ManageItemLayout({
                     alt={title || "Cover"}
                     className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                   />
+                  {isCoverClickable && (
+                    <div className="absolute inset-0 bg-black/45 rounded-xl flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity">
+                      <Camera className="w-4 h-4 text-white" />
+                    </div>
+                  )}
                   {statusColor && (
                     <span
                       className={cn(
@@ -285,7 +334,14 @@ export function ManageItemLayout({
                   )}
                 </div>
               ) : DefaultIcon ? (
-                <div className="relative shrink-0">
+                <div
+                  className={cn(
+                    "relative shrink-0",
+                    isCoverClickable && "cursor-pointer group/cover",
+                  )}
+                  onClick={isCoverClickable ? handleCoverContainerClick : undefined}
+                  title={isCoverClickable ? "Upload cover image" : undefined}
+                >
                   <div
                     className={cn(
                       "w-11 h-11 rounded-xl bg-muted/60 border border-border/60 flex items-center justify-center shadow-sm",
@@ -294,6 +350,11 @@ export function ManageItemLayout({
                   >
                     <DefaultIcon className="w-5 h-5" />
                   </div>
+                  {isCoverClickable && (
+                    <div className="absolute inset-0 bg-black/45 rounded-xl flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity">
+                      <Camera className="w-4 h-4 text-white" />
+                    </div>
+                  )}
                   {statusColor && (
                     <span
                       className={cn(

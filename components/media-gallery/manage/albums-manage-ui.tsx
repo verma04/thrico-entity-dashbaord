@@ -135,6 +135,7 @@ interface ContentAreaProps {
   loading: boolean;
   albums: any[];
   onEdit: (album: any) => void;
+  onOpenSettings?: (album: any) => void;
   onDelete: (id: string) => void;
   onClick: (id: string) => void;
   enableDrag?: boolean;
@@ -147,6 +148,7 @@ export function ContentArea({
   loading,
   albums,
   onEdit,
+  onOpenSettings,
   onDelete,
   onClick,
   enableDrag = false,
@@ -225,6 +227,7 @@ export function ContentArea({
             <AlbumsGrid
               albums={albums}
               onEdit={onEdit}
+              onOpenSettings={onOpenSettings}
               onDelete={onDelete}
               onClick={onClick}
               enableDrag={enableDrag}
@@ -233,6 +236,7 @@ export function ContentArea({
             <AlbumsList
               albums={albums}
               onEdit={onEdit}
+              onOpenSettings={onOpenSettings}
               onDelete={onDelete}
               onClick={onClick}
               visibleColumns={visibleColumns}

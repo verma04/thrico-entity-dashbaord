@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Video,
@@ -20,13 +19,21 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
-  Play,
   X,
+  Layers,
 } from "lucide-react";
 import {
   useGetMediaGalleryUploadUrl,
   useAddMediaGalleryVideo,
+  useGetMediaGalleryAlbums,
 } from "@/graphql/actions/mediaGallery";
+import { cn } from "@/lib/utils";
+
+interface GalleryAlbum {
+  id: string;
+  title?: string | null;
+  [key: string]: unknown;
+}
 
 export function VideoUploadDialog({
   open,
@@ -50,6 +57,19 @@ export function VideoUploadDialog({
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [durationError, setDurationError] = useState<string | null>(null);
 
+  // Multi-Gallery Upload state
+  const { data: albumsData } = useGetMediaGalleryAlbums();
+  const allAlbums: GalleryAlbum[] = albumsData?.getMediaGalleryAlbums || [];
+  const [selectedAlbumIds, setSelectedAlbumIds] = useState<string[]>([albumId]);
+
+  useEffect(() => {
+    if (albumId && open) {
+      setSelectedAlbumIds((prev) =>
+        prev.includes(albumId) ? prev : [albumId, ...prev],
+      );
+    }
+  }, [albumId, open]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [getUploadUrl] = useGetMediaGalleryUploadUrl();
@@ -65,6 +85,7 @@ export function VideoUploadDialog({
     setUploadProgress(0);
     setUploadStatus(null);
     setDurationError(null);
+    setSelectedAlbumIds([albumId]);
   };
 
   const handleClose = () => {
@@ -95,7 +116,7 @@ export function VideoUploadDialog({
       setDuration(dur);
       if (dur > 120) {
         setDurationError(
-          `Video duration (${Math.round(dur)}s) exceeds the maximum limit of 2 minutes (120 seconds). Please trim your video.`
+          `Video duration (${Math.round(dur)}s) exceeds the maximum limit of 2 minutes (120 seconds). Please trim your video.`,
         );
       }
     };
@@ -111,7 +132,7 @@ export function VideoUploadDialog({
   const uploadFileWithProgress = (
     url: string,
     file: File,
-    onProgress: (pct: number) => void
+    onProgress: (pct: number) => void,
   ) => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -148,7 +169,7 @@ export function VideoUploadDialog({
 
     setUploading(true);
     setUploadProgress(0);
-    setUploadStatus("Requesting direct upload channel...");
+    setUploadStatus("Requesting direct S3 upload authorization...");
 
     try {
       // 1. Get presigned S3 upload URL from admin-graphql
@@ -174,12 +195,21 @@ export function VideoUploadDialog({
         setUploadProgress(pct);
       });
 
-      // 3. Confirm video record creation in database
-      setUploadStatus("Queuing FFmpeg background processing...");
+      // 3. Confirm video record creation in database across selected albums (Single SQS job)
+      const targetAlbums =
+        selectedAlbumIds.length > 0 ? selectedAlbumIds : [albumId];
+
+      setUploadStatus(
+        targetAlbums.length > 1
+          ? `Dispatching single transcode job to ${targetAlbums.length} galleries...`
+          : "Queuing FFmpeg background processing...",
+      );
+
       await addVideo({
         variables: {
           input: {
             albumId,
+            albumIds: targetAlbums,
             url: fileUrl,
             caption: caption.trim() || null,
             duration: duration ? Math.round(duration) : null,
@@ -188,12 +218,15 @@ export function VideoUploadDialog({
         },
       });
 
-      toast.success("Video uploaded! FFmpeg is optimizing it in the background.");
+      toast.success(
+        targetAlbums.length > 1
+          ? `Video uploaded to ${targetAlbums.length} galleries! 1 transcode job started.`
+          : "Video uploaded! FFmpeg is optimizing it in the background.",
+      );
       onUploaded();
       handleClose();
-    } catch (err: any) {
-      console.error("Video upload error:", err);
-      toast.error(err.message || "Failed to upload video");
+    } catch (err: unknown) {
+      toast.error((err as Error)?.message || "Failed to upload video");
     } finally {
       setUploading(false);
       setUploadStatus(null);
@@ -207,23 +240,58 @@ export function VideoUploadDialog({
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
+  const toggleAlbum = (targetId: string) => {
+    if (targetId === albumId) return; // Keep current album selected
+    setSelectedAlbumIds((prev) =>
+      prev.includes(targetId)
+        ? prev.filter((id) => id !== targetId)
+        : [...prev, targetId],
+    );
+  };
+
+  const selectAllAlbums = () => {
+    setSelectedAlbumIds(allAlbums.map((a) => a.id));
+  };
+
+  const selectOnlyCurrent = () => {
+    setSelectedAlbumIds([albumId]);
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
-        <DialogHeader className="p-6 pb-4 border-b border-gray-100">
-          <DialogTitle className="text-lg font-bold flex items-center gap-2">
-            <Video className="w-5 h-5 text-indigo-600" />
-            Upload Album Video
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Directly upload an MP4 video to this album. Video length must be less than 2 minutes.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-xl p-0 gap-0 overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 shadow-2xl rounded-xl bg-white dark:bg-zinc-900">
+        {/* Header (Pattern C: Modal Dialog) */}
+        <div className="p-5 border-b border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb] dark:bg-zinc-900/90 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40">
+              <Video className="h-4 w-4" />
+            </div>
+            <div>
+              <DialogTitle className="text-xs font-bold text-[#303030] dark:text-zinc-100">
+                Upload Video (Multi-Gallery Support)
+              </DialogTitle>
+              <DialogDescription className="text-[11px] text-[#616161] dark:text-zinc-400">
+                Directly upload MP4 video. Uploads 1 source file to S3 and attaches to selected galleries.
+              </DialogDescription>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={handleClose}
+            disabled={uploading}
+            className="h-7 w-7 rounded-md hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-        <div className="p-6 space-y-4">
+        {/* Modal Body */}
+        <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
           {!videoFile ? (
             <div
-              className="border-2 border-dashed border-gray-200 hover:border-indigo-400 bg-gray-50/50 hover:bg-indigo-50/20 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors"
+              className="border-2 border-dashed border-[#d2d5d9] dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-[#f9fafb]/60 dark:bg-zinc-900/40 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors"
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -242,26 +310,26 @@ export function VideoUploadDialog({
                   if (file) handleFileSelect(file);
                 }}
               />
-              <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-                <Upload className="w-6 h-6" />
+              <div className="h-10 w-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40">
+                <Upload className="w-5 h-5" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-semibold text-gray-700">
+                <p className="text-xs font-semibold text-[#303030] dark:text-zinc-100">
                   Click to choose video or drag & drop
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5">
                   MP4, MOV, or WebM (strictly under 2 minutes)
                 </p>
               </div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200/60 mt-1">
-                <Clock className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10.5px] font-medium border border-amber-500/20">
+                <Clock className="w-3 h-3" />
                 Max Duration: 2 mins (120 seconds)
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               {/* Video Preview */}
-              <div className="relative rounded-xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-gray-200">
+              <div className="relative rounded-xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-[#d2d5d9] dark:border-zinc-800">
                 {previewUrl && (
                   <video
                     src={previewUrl}
@@ -280,32 +348,108 @@ export function VideoUploadDialog({
               </div>
 
               {/* Video Stats */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-100 text-xs">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-[#f6f6f7] dark:bg-zinc-800/50 border border-[#d2d5d9] dark:border-zinc-800 text-xs">
                 <div className="flex items-center gap-2 truncate pr-2">
-                  <Video className="w-4 h-4 text-indigo-600 shrink-0" />
-                  <span className="font-medium text-gray-700 truncate">
+                  <Video className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                  <span className="font-medium text-[#303030] dark:text-zinc-100 truncate">
                     {videoFile.name}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-muted-foreground">
+                  <span className="text-[11px] text-[#616161] dark:text-zinc-400">
                     {(videoFile.size / (1024 * 1024)).toFixed(1)} MB
                   </span>
                   <span
-                    className={`font-semibold px-2 py-0.5 rounded ${
+                    className={cn(
+                      "font-semibold px-2 py-0.5 rounded text-[10.5px]",
                       duration && duration > 120
-                        ? "bg-red-100 text-red-700"
-                        : "bg-emerald-100 text-emerald-700"
-                    }`}
+                        ? "bg-red-500/10 text-red-600 border border-red-500/20"
+                        : "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20",
+                    )}
                   >
                     {formatDuration(duration)}
                   </span>
                 </div>
               </div>
 
+              {/* Multi-Gallery Selector */}
+              {allAlbums.length > 1 && (
+                <div className="p-3.5 rounded-xl border border-indigo-500/20 bg-indigo-500/[0.03] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                      <span className="text-xs font-bold text-[#303030] dark:text-zinc-100">
+                        Multi-Gallery Upload (Single Source)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={
+                          selectedAlbumIds.length === allAlbums.length
+                            ? selectOnlyCurrent
+                            : selectAllAlbums
+                        }
+                        className="text-[10.5px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
+                      >
+                        {selectedAlbumIds.length === allAlbums.length
+                          ? "Reset"
+                          : "Select All"}
+                      </button>
+                      <Badge
+                        variant="outline"
+                        className="text-[9.5px] font-mono px-1.5 py-0 border-border/80 text-muted-foreground"
+                      >
+                        {selectedAlbumIds.length} of {allAlbums.length} selected
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-relaxed">
+                    Source video is uploaded to S3 only once and processed by a single FFmpeg worker. Shared across selected galleries with zero duplicated storage.
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pt-1">
+                    {allAlbums.map((alb) => {
+                      const isCurrent = alb.id === albumId;
+                      const isSelected = selectedAlbumIds.includes(alb.id);
+                      return (
+                        <button
+                          key={alb.id}
+                          type="button"
+                          onClick={() => toggleAlbum(alb.id)}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all border cursor-pointer",
+                            isSelected
+                              ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800 shadow-2xs"
+                              : "bg-white dark:bg-zinc-900 text-[#616161] dark:text-zinc-400 border-[#d2d5d9] dark:border-zinc-800 hover:border-[#aeb4b9]",
+                          )}
+                        >
+                          <CheckCircle2
+                            className={cn(
+                              "w-3 h-3 shrink-0",
+                              isSelected
+                                ? "text-indigo-600 dark:text-indigo-400"
+                                : "text-muted-foreground/30",
+                            )}
+                          />
+                          <span className="truncate max-w-[150px]">
+                            {alb.title}
+                          </span>
+                          {isCurrent && (
+                            <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-500/80">
+                              (this)
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Duration Error Warning */}
               {durationError && (
-                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2">
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 text-xs flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{durationError}</span>
                 </div>
@@ -313,9 +457,17 @@ export function VideoUploadDialog({
 
               {/* Caption Input */}
               <div className="space-y-1.5">
-                <Label htmlFor="video-caption" className="text-xs font-semibold text-gray-700">
-                  Caption (Optional)
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label
+                    htmlFor="video-caption"
+                    className="text-xs font-semibold text-[#303030] dark:text-zinc-100"
+                  >
+                    Caption (Optional)
+                  </Label>
+                  <span className="text-[11px] text-[#616161] dark:text-zinc-400 font-mono">
+                    {caption.length}/500
+                  </span>
+                </div>
                 <Textarea
                   id="video-caption"
                   placeholder="Describe this video..."
@@ -323,21 +475,23 @@ export function VideoUploadDialog({
                   onChange={(e) => setCaption(e.target.value)}
                   disabled={uploading}
                   rows={2}
-                  className="text-xs resize-none"
+                  className="text-xs resize-none h-16"
                 />
               </div>
 
               {/* Upload Progress */}
               {uploading && (
-                <div className="space-y-2 p-3.5 rounded-lg bg-indigo-50/60 border border-indigo-100">
-                  <div className="flex items-center justify-between text-xs font-medium text-indigo-900">
+                <div className="space-y-2 p-3.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
+                  <div className="flex items-center justify-between text-xs font-medium text-foreground">
                     <span className="flex items-center gap-1.5">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600 dark:text-indigo-400" />
                       {uploadStatus || "Uploading..."}
                     </span>
-                    <span className="font-bold">{uploadProgress}%</span>
+                    <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono">
+                      {uploadProgress}%
+                    </span>
                   </div>
-                  <div className="w-full bg-indigo-100 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
                     <div
                       className="bg-indigo-600 h-full transition-all duration-200"
                       style={{ width: `${uploadProgress}%` }}
@@ -349,21 +503,22 @@ export function VideoUploadDialog({
           )}
         </div>
 
-        <div className="p-4 bg-gray-50/80 border-t border-gray-100 flex items-center justify-end gap-2">
+        {/* Footer (Pattern C: Modal Dialog) */}
+        <div className="p-3.5 border-t border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb] dark:bg-zinc-900/90 flex items-center justify-end gap-2">
           <Button
+            type="button"
             variant="outline"
-            size="sm"
             onClick={handleClose}
             disabled={uploading}
-            className="text-xs font-semibold"
+            className="h-8.5 px-3 text-xs border-[#d2d5d9] dark:border-zinc-700"
           >
             Cancel
           </Button>
           <Button
-            size="sm"
+            type="button"
             onClick={handleUpload}
             disabled={!videoFile || !!durationError || uploading}
-            className="text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white min-w-[120px]"
+            className="h-8.5 px-4 text-xs font-medium bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs"
           >
             {uploading ? (
               <>
@@ -373,7 +528,9 @@ export function VideoUploadDialog({
             ) : (
               <>
                 <Upload className="w-3.5 h-3.5 mr-1.5" />
-                Upload Video
+                {selectedAlbumIds.length > 1
+                  ? `Publish (${selectedAlbumIds.length} Albums)`
+                  : "Upload Video"}
               </>
             )}
           </Button>

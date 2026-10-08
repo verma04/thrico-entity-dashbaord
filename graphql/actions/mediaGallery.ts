@@ -7,6 +7,25 @@ import {
   MutationHookOptions,
 } from "@apollo/client";
 
+const SETTINGS_FIELDS = `
+  allowDownload
+  allowPlatformRepost
+  allowPlatformRepostWithThoughts
+  allowSocialShare
+  allowLinkedinShare
+  allowLinkedinNative
+  allowLinkedinCopyLink
+  allowInstagramShare
+  allowInstagramNative
+  allowInstagramCopyLink
+  allowWhatsappShare
+  allowWhatsappNative
+  allowWhatsappCopyLink
+  allowWhatsappStoryShare
+  allowComments
+  socialShareCustomMessage
+`;
+
 const ALBUM_FIELDS = `
   id
   entityId
@@ -16,6 +35,25 @@ const ALBUM_FIELDS = `
   order
   coverImage
   imageCount
+  settings {
+    ${SETTINGS_FIELDS}
+  }
+  allowDownload
+  allowPlatformRepost
+  allowPlatformRepostWithThoughts
+  allowSocialShare
+  allowLinkedinShare
+  allowLinkedinNative
+  allowLinkedinCopyLink
+  allowInstagramShare
+  allowInstagramNative
+  allowInstagramCopyLink
+  allowWhatsappShare
+  allowWhatsappNative
+  allowWhatsappCopyLink
+  allowWhatsappStoryShare
+  allowComments
+  socialShareCustomMessage
   createdAt
   updatedAt
 `;
@@ -180,6 +218,22 @@ export const DELETE_MEDIA_GALLERY_COMMENT_ADMIN = gql`
   }
 `;
 
+export const GET_MEDIA_GALLERY_ALBUM_SETTINGS = gql`
+  query GetMediaGalleryAlbumSettings($albumId: ID!) {
+    getMediaGalleryAlbumSettings(albumId: $albumId) {
+      ${SETTINGS_FIELDS}
+    }
+  }
+`;
+
+export const UPDATE_MEDIA_GALLERY_ALBUM_SETTINGS = gql`
+  mutation UpdateMediaGalleryAlbumSettings($albumId: ID!, $input: UpdateMediaGalleryAlbumSettingsInput!) {
+    updateMediaGalleryAlbumSettings(albumId: $albumId, input: $input) {
+      ${SETTINGS_FIELDS}
+    }
+  }
+`;
+
 // ──────────────────────────────────────────
 // Hooks
 // ──────────────────────────────────────────
@@ -191,6 +245,32 @@ export const useGetMediaGalleryAlbum = (id: string) =>
     variables: { id },
     skip: !id,
     fetchPolicy: "network-only",
+  });
+
+export const useGetMediaGalleryAlbumSettings = (
+  albumId: string,
+  options?: QueryHookOptions,
+) =>
+  useQuery(GET_MEDIA_GALLERY_ALBUM_SETTINGS, {
+    variables: { albumId },
+    skip: !albumId,
+    fetchPolicy: "network-only",
+    ...options,
+  });
+
+export const useUpdateMediaGalleryAlbumSettings = (
+  albumId?: string,
+  options?: MutationHookOptions,
+) =>
+  useMutation(UPDATE_MEDIA_GALLERY_ALBUM_SETTINGS, {
+    refetchQueries: albumId
+      ? [
+          { query: GET_MEDIA_GALLERY_ALBUM, variables: { id: albumId } },
+          { query: GET_MEDIA_GALLERY_ALBUM_SETTINGS, variables: { albumId } },
+          { query: GET_MEDIA_GALLERY_ALBUMS },
+        ]
+      : [{ query: GET_MEDIA_GALLERY_ALBUMS }],
+    ...options,
   });
 
 export const useGetMediaGalleryImageComments = (

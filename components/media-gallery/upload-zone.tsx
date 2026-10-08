@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Upload, Loader2, Video, Image as ImageIcon } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   useAddMediaGalleryImage,
   useAddMediaGalleryVideo,
   useGetMediaGalleryUploadUrl,
 } from "@/graphql/actions/mediaGallery";
+import { Badge } from "@/components/ui/badge";
 import { VideoUploadDialog } from "./video-upload-dialog";
+import { cn } from "@/lib/utils";
 
 export function UploadZone({
   albumId,
@@ -32,15 +34,15 @@ export function UploadZone({
 
   const uploadFileWithProgress = (
     url: string,
-    file: File
-  ): Promise<any> => {
+    file: File,
+  ): Promise<string> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", url);
       xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(xhr.response);
+          resolve(xhr.response as string);
         } else {
           reject(new Error(`Upload failed with HTTP ${xhr.status}`));
         }
@@ -58,7 +60,7 @@ export function UploadZone({
         window.URL.revokeObjectURL(video.src);
         resolve(video.duration);
       };
-      video.onerror = () => reject("Failed to load video metadata");
+      video.onerror = () => reject(new Error("Failed to load video metadata"));
       video.src = URL.createObjectURL(file);
     });
   };
@@ -87,7 +89,7 @@ export function UploadZone({
 
         if (duration && duration > 120) {
           toast.error(
-            `${file.name} exceeds 2 minutes limit (${Math.round(duration)}s). Skipping.`
+            `${file.name} exceeds 2 minutes limit (${Math.round(duration)}s). Skipping.`,
           );
           continue;
         }
@@ -123,9 +125,8 @@ export function UploadZone({
 
         successCount++;
         toast.success(`Uploaded ${file.name}! Processing in background.`);
-      } catch (err: any) {
-        console.error("Video drop error:", err);
-        toast.error(`Failed to upload ${file.name}: ${err.message}`);
+      } catch (err: unknown) {
+        toast.error(`Failed to upload ${file.name}: ${(err as Error)?.message}`);
       }
     }
 
@@ -145,10 +146,10 @@ export function UploadZone({
               },
             });
             successCount++;
-          } catch (err: any) {
+          } catch {
             toast.error(`Failed to upload ${file.name}`);
           }
-        })
+        }),
       );
     }
 
@@ -163,11 +164,12 @@ export function UploadZone({
   return (
     <>
       <div
-        className={`relative border-2 border-dashed rounded-xl aspect-square flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
+        className={cn(
+          "relative border-2 border-dashed rounded-[10px] aspect-square flex flex-col items-center justify-center gap-2 cursor-pointer transition-all p-3",
           dragOver
-            ? "border-indigo-400 bg-indigo-50/40"
-            : "border-gray-200 bg-gray-50/50 hover:border-indigo-200 hover:bg-gray-50"
-        }`}
+            ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40"
+            : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb]/60 dark:bg-zinc-900/40 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-white dark:hover:bg-zinc-900",
+        )}
         onClick={() => fileRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
@@ -190,22 +192,30 @@ export function UploadZone({
         />
         {uploading ? (
           <div className="flex flex-col items-center gap-1.5 p-2 text-center">
-            <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-            <span className="text-[11px] font-medium text-gray-600 line-clamp-1">
+            <Loader2 className="w-7 h-7 text-indigo-600 dark:text-indigo-400 animate-spin" />
+            <span className="text-[11px] font-medium text-[#303030] dark:text-zinc-200 line-clamp-1">
               {uploadProgress || "Uploading media..."}
             </span>
           </div>
         ) : (
           <>
-            <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-              <Upload className="w-5 h-5" />
+            <div className="h-9 w-9 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40">
+              <Upload className="w-4 h-4" />
             </div>
-            <span className="text-xs font-semibold text-gray-700 text-center px-2">
-              Add Photos or Video
-            </span>
-            <span className="text-[10px] text-gray-400 text-center px-2">
-              Drag media or click to browse (videos &lt; 2 mins)
-            </span>
+            <div className="text-center px-1">
+              <span className="text-xs font-semibold text-[#303030] dark:text-zinc-100 block">
+                Add Photos or Video
+              </span>
+              <span className="text-[10px] text-[#616161] dark:text-zinc-400 block mt-0.5 leading-snug">
+                Drop files or click to browse
+              </span>
+            </div>
+            <Badge
+              variant="outline"
+              className="text-[9px] font-mono px-1 py-0 text-muted-foreground border-border/80"
+            >
+              Video &lt; 2 mins
+            </Badge>
           </>
         )}
       </div>
