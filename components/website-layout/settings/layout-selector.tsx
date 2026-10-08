@@ -28,6 +28,10 @@ import {
   Timer,
   BookOpen,
   Feather,
+  CreditCard,
+  Table2,
+  BadgePercent,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -144,6 +148,30 @@ const layoutMetadata: Record<
     icon: Code2,
     description: "Manual / Custom HTML",
   },
+  "cards-pricing": {
+    icon: CreditCard,
+    description: "3-tier card columns",
+  },
+  "table-pricing": {
+    icon: Table2,
+    description: "Feature comparison matrix",
+  },
+  "toggle-pricing": {
+    icon: BadgePercent,
+    description: "Monthly / annual switch",
+  },
+  "gradient-tier-matrix": {
+    icon: Zap,
+    description: "Glowing dark gradient cards",
+  },
+  "lifetime-deal-banner": {
+    icon: Flame,
+    description: "Single lifetime pass banner",
+  },
+  "minimal-editorial-plans": {
+    icon: Feather,
+    description: "Linear monochrome tiers",
+  },
   default: {
     icon: Layout,
     description: "Standard layout",
@@ -171,6 +199,12 @@ const layoutDisplayNames: Record<string, string> = {
   "event-countdown": "Event Countdown",
   "product-showcase": "Product Showcase",
   "minimal-editorial": "Minimal Editorial",
+  "cards-pricing": "Cards Pricing",
+  "table-pricing": "Table Matrix Pricing",
+  "toggle-pricing": "Toggle Billing Pricing",
+  "gradient-tier-matrix": "Gradient Matrix",
+  "lifetime-deal-banner": "Lifetime Deal Banner",
+  "minimal-editorial-plans": "Minimal Editorial Plans",
   "fullwidth-embed": "Full Width Embed",
   contained: "Contained Box",
   direct: "Direct HTML",

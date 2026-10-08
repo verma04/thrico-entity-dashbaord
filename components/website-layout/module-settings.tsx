@@ -235,7 +235,14 @@ const getAvailableLayouts = (
     return ["horizontal-steps", "vertical-steps", "card-steps", "icon-steps"];
   }
   if (moduleType === "pricing") {
-    return ["cards-pricing", "table-pricing", "toggle-pricing"];
+    return [
+      "cards-pricing",
+      "table-pricing",
+      "toggle-pricing",
+      "gradient-tier-matrix",
+      "lifetime-deal-banner",
+      "minimal-editorial-plans",
+    ];
   }
   if (moduleType === "events") {
     return ["card-events", "list-events", "timeline-events", "calendar-events"];

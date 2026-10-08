@@ -139,11 +139,12 @@ export type LayoutType =
   | "calendar-events" // Events
   | "pricing-cards"
   | "comparison-table"
-  | "toggle-pricing"
-  | "featured-tier"
-  | "minimal-pricing"
   | "cards-pricing"
   | "table-pricing"
+  | "toggle-pricing"
+  | "gradient-tier-matrix"
+  | "lifetime-deal-banner"
+  | "minimal-editorial-plans"
   | "simple-pricing" // Pricing
   | "step-timeline"
   | "numbered-cards"
