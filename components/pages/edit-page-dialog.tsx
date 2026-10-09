@@ -103,6 +103,24 @@ const editPageValidationSchema = Yup.object().shape({
         .trim()
         .required("Destination URL or target page is required")
         .test(
+          "not-self-redirect",
+          "Cannot redirect a page to itself",
+          function (val) {
+            if (!val) return true;
+            if (this.parent.redirectType === "internal") {
+              const currentSlug = this.parent.slug;
+              const cleanVal = val.replace(/^\//, "");
+              if (
+                cleanVal === currentSlug ||
+                (currentSlug === "home" && (val === "/" || cleanVal === "home" || cleanVal === ""))
+              ) {
+                return false;
+              }
+            }
+            return true;
+          },
+        )
+        .test(
           "valid-external-url",
           "External URL must begin with http:// or https://",
           function (val) {
@@ -198,7 +216,7 @@ export function EditPageDialog({
         });
 
         const redirectConfig: PageRedirectConfig | null =
-          !isHome && values.isRedirect
+          values.isRedirect
             ? {
                 isRedirect: true,
                 type: values.redirectType,
@@ -425,31 +443,60 @@ export function EditPageDialog({
               </div>
             )}
 
-            {/* Redirection Configuration Card (Disabled on Home Page) */}
-            {!isHome && (
-              <PolarisFormCard
-                title="URL Redirection"
-                description="Automatically forward visitors landing on this URL to another destination."
-              >
+            {/* Redirection Configuration Card (Enabled for both Home and Custom Pages) */}
+            <PolarisFormCard
+              title="URL Redirection"
+              description={
+                isHome
+                  ? "Automatically forward visitors landing on root (/) to another page or external URL."
+                  : "Automatically forward visitors landing on this URL to another destination."
+              }
+            >
                 <div className="space-y-3.5">
+                  {isHome && (
+                    <div className="p-2.5 rounded-lg border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 text-[11px] flex items-start gap-2">
+                      <Globe className="h-3.5 w-3.5 shrink-0 mt-0.5 text-indigo-600 dark:text-indigo-400" />
+                      <span>
+                        <strong>Root Forwarding:</strong> When enabled, any user visiting your website domain root (<strong>/</strong>) will immediately redirect to the configured destination.
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/60 bg-muted/15">
                     <div className="space-y-0.5">
                       <Label
                         htmlFor="edit-enable-redirect"
                         className="text-xs font-semibold text-foreground cursor-pointer"
                       >
-                        Enable Page Redirect
+                        {isHome ? "Enable Homepage Redirection" : "Enable Page Redirect"}
                       </Label>
                       <p className="text-[11px] text-muted-foreground">
-                        Forward traffic arriving at /{formik.values.slug || "this-page"}
+                        {isHome
+                          ? "Forward traffic arriving at root domain (/)"
+                          : `Forward traffic arriving at /${formik.values.slug || "this-page"}`}
                       </p>
                     </div>
                     <Switch
                       id="edit-enable-redirect"
                       checked={formik.values.isRedirect}
-                      onCheckedChange={(checked) =>
-                        formik.setFieldValue("isRedirect", checked)
-                      }
+                      onCheckedChange={(checked) => {
+                        formik.setFieldValue("isRedirect", checked);
+                        if (
+                          checked &&
+                          isHome &&
+                          (!formik.values.redirectUrl || formik.values.redirectUrl === "/")
+                        ) {
+                          const firstOther = existingPages.find(
+                            (p) => p.slug !== "home" && p.slug !== "",
+                          )?.slug;
+                          if (firstOther) {
+                            formik.setFieldValue("redirectUrl", `/${firstOther}`);
+                          } else {
+                            formik.setFieldValue("redirectType", "external");
+                            formik.setFieldValue("redirectUrl", "https://");
+                          }
+                        }
+                      }}
                       disabled={formik.isSubmitting}
                     />
                   </div>
@@ -467,7 +514,13 @@ export function EditPageDialog({
                             onClick={() => {
                               formik.setFieldValue("redirectType", "internal");
                               if (formik.values.redirectUrl.startsWith("http")) {
-                                formik.setFieldValue("redirectUrl", "/");
+                                const firstOther = existingPages.find(
+                                  (p) => p.slug !== "home" && p.slug !== "",
+                                )?.slug;
+                                formik.setFieldValue(
+                                  "redirectUrl",
+                                  isHome ? (firstOther ? `/${firstOther}` : "") : "/",
+                                );
                               }
                             }}
                             className={cn(
@@ -512,7 +565,7 @@ export function EditPageDialog({
                             Target Website Page <span className="text-destructive">*</span>
                           </Label>
                           <Select
-                            value={formik.values.redirectUrl || "/"}
+                            value={formik.values.redirectUrl || ""}
                             onValueChange={(val) =>
                               formik.setFieldValue("redirectUrl", val)
                             }
@@ -524,17 +577,23 @@ export function EditPageDialog({
                               <SelectValue placeholder="Select target page..." />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="/">
-                                <div className="flex items-center gap-2">
-                                  <FileText className="h-3 w-3 text-muted-foreground" />
-                                  <span>Home Page</span>
-                                  <span className="text-muted-foreground font-mono text-[10px]">
-                                    /
-                                  </span>
-                                </div>
-                              </SelectItem>
+                              {!isHome && (
+                                <SelectItem value="/">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-3 w-3 text-muted-foreground" />
+                                    <span>Home Page</span>
+                                    <span className="text-muted-foreground font-mono text-[10px]">
+                                      /
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              )}
                               {existingPages
-                                .filter((p) => p.slug !== formik.values.slug)
+                                .filter(
+                                  (p) =>
+                                    p.slug !== formik.values.slug &&
+                                    (!isHome || (p.slug !== "home" && p.slug !== "")),
+                                )
                                 .map((p) => (
                                   <SelectItem key={p.id} value={`/${p.slug}`}>
                                     <div className="flex items-center gap-2">
@@ -644,7 +703,6 @@ export function EditPageDialog({
                   )}
                 </div>
               </PolarisFormCard>
-            )}
           </div>
 
           {/* 3. Sticky Footer */}

@@ -260,12 +260,23 @@ export function WebsitePagesManager() {
               title={row.name}
               badge={
                 isHomePage ? (
-                  <Badge
-                    variant="outline"
-                    className="text-[9.5px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 px-1.5 py-0"
-                  >
-                    Root Index
-                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <Badge
+                      variant="outline"
+                      className="text-[9.5px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 px-1.5 py-0"
+                    >
+                      Root Index
+                    </Badge>
+                    {redirect && (
+                      <Badge
+                        variant="outline"
+                        className="text-[9.5px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800 px-1.5 py-0 flex items-center gap-1"
+                      >
+                        <CornerDownRight className="h-2.5 w-2.5" />
+                        <span>Redirect {redirect.statusCode}</span>
+                      </Badge>
+                    )}
+                  </div>
                 ) : redirect ? (
                   <Badge
                     variant="outline"
