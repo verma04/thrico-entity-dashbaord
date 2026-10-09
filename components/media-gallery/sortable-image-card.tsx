@@ -17,6 +17,7 @@ import {
   Globe,
   ExternalLink,
 } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "@/components/ui/brand-icons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -95,6 +96,39 @@ export function SortableImageCard({
     }
   }, [image.url]);
 
+  const isFacebook = Boolean(
+    image.url && /facebook\.com|fb\.watch|fb\.me|fb\.com/i.test(image.url),
+  );
+  const isInstagram = Boolean(
+    image.url && /instagram\.com|instagr\.am/i.test(image.url),
+  );
+  const isYouTube = Boolean(
+    image.url && /youtube\.com|youtu\.be/i.test(image.url),
+  );
+
+  const isReelOrVideo = Boolean(
+    (isFacebook && /share\/r\/|\/reel\/|\/reels\/|\/watch|fb\.watch/i.test(image.url || "")) ||
+    (isInstagram && /reel/i.test(image.url || "")) ||
+    isYouTube,
+  );
+
+  const safeCaption = React.useMemo(() => {
+    if (!image.caption) return "";
+    const cap = image.caption.trim();
+    const isError =
+      cap.toLowerCase() === "error" ||
+      cap.toLowerCase().startsWith("log in") ||
+      cap.toLowerCase().includes("something went wrong") ||
+      cap.toLowerCase().includes("security check");
+
+    if (isError) {
+      if (isFacebook) return isReelOrVideo ? "Facebook Reel" : "Facebook Post";
+      if (isInstagram) return isReelOrVideo ? "Instagram Reel" : "Instagram Post";
+      return "Web Link";
+    }
+    return cap;
+  }, [image.caption, isFacebook, isInstagram, isReelOrVideo]);
+
   // Resolve best image URL
   const rawUrl = image.thumbnailUrl || image.optimizedUrl || image.url;
   const displayUrl = rawUrl?.startsWith("http")
@@ -139,25 +173,51 @@ export function SortableImageCard({
       >
         {/* Poster / Thumbnail Image / Link Card */}
         {isLink && !image.thumbnailUrl ? (
-          <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-br from-indigo-50/60 to-blue-50/40 dark:from-indigo-950/30 dark:to-zinc-900">
-            <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-1.5 border border-indigo-200 dark:border-indigo-800">
-              <Globe className="w-4 h-4" />
-            </div>
-            <span className="text-[11px] font-semibold text-[#303030] dark:text-zinc-200 line-clamp-1">
-              {domain || "External Link"}
-            </span>
-            {image.caption && (
-              <span className="text-[9.5px] text-muted-foreground line-clamp-2 mt-0.5 leading-tight">
-                {image.caption}
+          isFacebook ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-br from-[#1877F2]/15 via-zinc-900 to-zinc-950 text-white">
+              <div className="h-9 w-9 rounded-full bg-[#1877F2]/20 text-[#1877F2] flex items-center justify-center mb-1.5 border border-[#1877F2]/30 shadow-xs">
+                <Facebook className="w-4 h-4 fill-[#1877F2]" />
+              </div>
+              <span className="text-[11px] font-semibold text-white line-clamp-1">
+                {safeCaption || (isReelOrVideo ? "Facebook Reel" : "Facebook Post")}
               </span>
-            )}
-          </div>
+              <span className="text-[9.5px] text-white/60 line-clamp-1 mt-0.5">
+                facebook.com
+              </span>
+            </div>
+          ) : isInstagram ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-br from-[#f09433]/15 via-[#dc2743]/15 to-zinc-950 text-white">
+              <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-[#f09433]/20 via-[#dc2743]/20 to-[#bc1888]/20 text-[#dc2743] flex items-center justify-center mb-1.5 border border-[#dc2743]/30 shadow-xs">
+                <Instagram className="w-4 h-4" />
+              </div>
+              <span className="text-[11px] font-semibold text-white line-clamp-1">
+                {safeCaption || (isReelOrVideo ? "Instagram Reel" : "Instagram Post")}
+              </span>
+              <span className="text-[9.5px] text-white/60 line-clamp-1 mt-0.5">
+                instagram.com
+              </span>
+            </div>
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-br from-indigo-50/60 to-blue-50/40 dark:from-indigo-950/30 dark:to-zinc-900">
+              <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-1.5 border border-indigo-200 dark:border-indigo-800">
+                <Globe className="w-4 h-4" />
+              </div>
+              <span className="text-[11px] font-semibold text-[#303030] dark:text-zinc-200 line-clamp-1">
+                {domain || "External Link"}
+              </span>
+              {safeCaption && (
+                <span className="text-[9.5px] text-muted-foreground line-clamp-2 mt-0.5 leading-tight">
+                  {safeCaption}
+                </span>
+              )}
+            </div>
+          )
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={displayUrl}
             alt={
-              image.caption ??
+              safeCaption ||
               (isVideo ? "Gallery video" : isLink ? "Link preview" : "Gallery image")
             }
             className={cn(
@@ -188,11 +248,39 @@ export function SortableImageCard({
           </>
         )}
 
+        {/* Link Play Button Overlay for Reels & Videos */}
+        {isLink && isReelOrVideo && !isSelectionMode && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:scale-110 transition-transform">
+            <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white border border-white/25 shadow-lg">
+              <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
+            </div>
+          </div>
+        )}
+
         {/* Link Badge (top right) */}
         {isLink && (
-          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-semibold text-white">
-            <Link2 className="w-3 h-3 text-cyan-400" />
-            <span className="max-w-[70px] truncate">{domain || "LINK"}</span>
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-black/80 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-semibold text-white shadow-xs">
+            {isFacebook ? (
+              <>
+                <Facebook className="w-3 h-3 text-[#1877F2] fill-[#1877F2]" />
+                <span className="max-w-[70px] truncate">{isReelOrVideo ? "Reel" : "Facebook"}</span>
+              </>
+            ) : isInstagram ? (
+              <>
+                <Instagram className="w-3 h-3 text-[#E4405F]" />
+                <span className="max-w-[70px] truncate">{isReelOrVideo ? "Reel" : "Instagram"}</span>
+              </>
+            ) : isYouTube ? (
+              <>
+                <Youtube className="w-3 h-3 text-red-500" />
+                <span className="max-w-[70px] truncate">YouTube</span>
+              </>
+            ) : (
+              <>
+                <Link2 className="w-3 h-3 text-cyan-400" />
+                <span className="max-w-[70px] truncate">{domain || "LINK"}</span>
+              </>
+            )}
           </div>
         )}
 

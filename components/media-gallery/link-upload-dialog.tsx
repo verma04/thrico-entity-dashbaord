@@ -25,7 +25,9 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
+  Play,
 } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "@/components/ui/brand-icons";
 import {
   useGetMediaGalleryAlbums,
   useAddMediaGalleryLink,
@@ -42,12 +44,22 @@ interface GalleryAlbum {
 interface LinkPreviewData {
   url?: string;
   title?: string;
+  caption?: string;
   description?: string;
   images?: string[];
   favicons?: string[];
   mediaType?: string;
   contentType?: string;
   siteName?: string;
+  author?: string;
+  stats?: string;
+  isInstagram?: boolean;
+  isFacebook?: boolean;
+  isYouTube?: boolean;
+  isLinkedIn?: boolean;
+  isReel?: boolean;
+  isVideo?: boolean;
+  isPost?: boolean;
   [key: string]: unknown;
 }
 
@@ -96,6 +108,31 @@ export function LinkUploadDialog({
   const primaryAlbumId = currentAlbumId || allAlbums[0]?.id || "";
   const [addLink] = useAddMediaGalleryLink(primaryAlbumId);
 
+  const cleanTitle = useMemo(() => {
+    if (!previewData?.title) return "";
+    const t = previewData.title.trim();
+    const isGenericError =
+      t.toLowerCase() === "error" ||
+      t.toLowerCase().startsWith("log in") ||
+      t.toLowerCase().includes("something went wrong") ||
+      t.toLowerCase().includes("security check");
+
+    if (isGenericError) {
+      if (previewData.isFacebook) {
+        return previewData.isReel
+          ? "Facebook Reel"
+          : previewData.isVideo
+            ? "Facebook Video"
+            : "Facebook Post";
+      }
+      if (previewData.isInstagram) {
+        return previewData.isReel ? "Instagram Reel" : "Instagram Post";
+      }
+      return "Web Link";
+    }
+    return t;
+  }, [previewData]);
+
   const formik = useFormik({
     initialValues: {
       url: "",
@@ -115,7 +152,7 @@ export function LinkUploadDialog({
             : null;
 
         const effectiveCaption =
-          values.caption?.trim() || previewData?.title || null;
+          values.caption?.trim() || cleanTitle || null;
 
         await addLink({
           variables: {
@@ -356,55 +393,263 @@ export function LinkUploadDialog({
                   </p>
                 </div>
               ) : previewData ? (
-                <div className="rounded-lg border border-border/80 overflow-hidden bg-background shadow-2xs">
-                  <div className="flex flex-col sm:flex-row items-stretch">
-                    {previewData.images && previewData.images.length > 0 && (
-                      <div className="sm:w-36 h-28 sm:h-auto flex-shrink-0 bg-muted relative overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={previewData.images[0]}
-                          alt={previewData.title || "Link preview"}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="p-3 flex flex-col justify-center flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 text-[10.5px] text-muted-foreground font-medium mb-1 truncate">
-                        {previewData.favicons &&
-                        previewData.favicons.length > 0 ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={previewData.favicons[0]}
-                            alt=""
-                            className="w-3.5 h-3.5 rounded-xs shrink-0"
-                          />
-                        ) : (
-                          <Globe className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+                previewData.isFacebook ? (
+                  /* Dedicated Facebook Preview Card */
+                  <div className="rounded-xl border border-[#1877F2]/30 overflow-hidden bg-zinc-950 text-white shadow-md">
+                    <div className="px-3.5 py-2.5 bg-gradient-to-r from-[#1877F2]/20 via-zinc-900 to-zinc-950 border-b border-white/10 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1 rounded-md bg-[#1877F2] text-white flex items-center justify-center shadow-xs">
+                          <Facebook className="w-3.5 h-3.5 fill-white text-white" />
+                        </span>
+                        <span className="text-xs font-semibold text-white">
+                          Facebook
+                        </span>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/15">
+                          {previewData.isReel ? "Reel" : previewData.isVideo ? "Video" : "Post"}
+                        </span>
+                        {previewData.author && (
+                          <span className="text-[11px] text-white/70 font-medium truncate max-w-[150px]">
+                            • {previewData.author}
+                          </span>
                         )}
-                        <span className="truncate">{domain}</span>
-                        <a
-                          href={formik.values.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-auto text-muted-foreground/60 hover:text-primary transition-colors"
-                          title="Open link in new tab"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
                       </div>
-
-                      <h4 className="font-semibold text-xs line-clamp-1 mb-1 text-foreground">
-                        {previewData.title}
-                      </h4>
-
-                      {previewData.description && (
-                        <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
-                          {previewData.description}
-                        </p>
+                      <a
+                        href={formik.values.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-white/70 hover:text-white flex items-center gap-1 transition-colors"
+                      >
+                        <span>Open</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-stretch">
+                      {previewData.images && previewData.images.length > 0 ? (
+                        <div className="sm:w-44 h-36 sm:h-auto flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={previewData.images[0]}
+                            alt={cleanTitle || "Facebook preview"}
+                            className="w-full h-full object-cover"
+                          />
+                          {(previewData.isReel || previewData.isVideo) && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                              <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg">
+                                <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="sm:w-36 h-28 flex-shrink-0 bg-gradient-to-br from-[#1877F2]/30 via-zinc-900 to-black flex items-center justify-center relative overflow-hidden">
+                          <Facebook className="w-10 h-10 text-white/20" />
+                          {(previewData.isReel || previewData.isVideo) && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-full bg-black/60 border border-white/30 flex items-center justify-center">
+                                <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
+                      <div className="p-3.5 flex flex-col justify-center flex-1 min-w-0">
+                        <h4 className="font-semibold text-xs text-white line-clamp-2 mb-1.5 leading-snug">
+                          {cleanTitle}
+                        </h4>
+                        {previewData.description && (
+                          <p className="text-[11px] text-white/65 line-clamp-2 leading-relaxed mb-2">
+                            {previewData.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-1 text-[10.5px] text-white/50 font-medium mt-auto">
+                          <Globe className="w-3 h-3 text-[#1877F2]" />
+                          <span>facebook.com</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : previewData.isInstagram ? (
+                  /* Dedicated Instagram Preview Card */
+                  <div className="rounded-xl border border-[#dc2743]/30 overflow-hidden bg-zinc-950 text-white shadow-md">
+                    <div className="px-3.5 py-2.5 bg-gradient-to-r from-[#f09433]/20 via-[#dc2743]/20 to-[#bc1888]/20 border-b border-white/10 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1 rounded-md bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white flex items-center justify-center shadow-xs">
+                          <Instagram className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-xs font-semibold text-white">
+                          Instagram
+                        </span>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/15">
+                          {previewData.isReel ? "Reel" : "Post"}
+                        </span>
+                        {previewData.author && (
+                          <span className="text-[11px] text-white/70 font-medium truncate max-w-[150px]">
+                            • {previewData.author}
+                          </span>
+                        )}
+                      </div>
+                      <a
+                        href={formik.values.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-white/70 hover:text-white flex items-center gap-1 transition-colors"
+                      >
+                        <span>Open</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-stretch">
+                      {previewData.images && previewData.images.length > 0 ? (
+                        <div className="sm:w-44 h-36 sm:h-auto flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={previewData.images[0]}
+                            alt={cleanTitle || "Instagram preview"}
+                            className="w-full h-full object-cover"
+                          />
+                          {previewData.isReel && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                              <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg">
+                                <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="sm:w-36 h-28 flex-shrink-0 bg-gradient-to-br from-[#f09433]/20 via-[#dc2743]/20 to-black flex items-center justify-center relative overflow-hidden">
+                          <Instagram className="w-10 h-10 text-white/20" />
+                          {previewData.isReel && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-full bg-black/60 border border-white/30 flex items-center justify-center">
+                                <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="p-3.5 flex flex-col justify-center flex-1 min-w-0">
+                        <h4 className="font-semibold text-xs text-white line-clamp-2 mb-1.5 leading-snug">
+                          {cleanTitle}
+                        </h4>
+                        {previewData.stats && (
+                          <p className="text-[11px] text-pink-300 font-medium mb-1">
+                            {previewData.stats}
+                          </p>
+                        )}
+                        {previewData.description && (
+                          <p className="text-[11px] text-white/65 line-clamp-2 leading-relaxed mb-2">
+                            {previewData.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-1 text-[10.5px] text-white/50 font-medium mt-auto">
+                          <Globe className="w-3 h-3 text-[#E4405F]" />
+                          <span>instagram.com</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : previewData.isYouTube ? (
+                  /* Dedicated YouTube Preview Card */
+                  <div className="rounded-xl border border-red-500/30 overflow-hidden bg-zinc-950 text-white shadow-md">
+                    <div className="px-3.5 py-2.5 bg-gradient-to-r from-red-600/20 via-zinc-900 to-zinc-950 border-b border-white/10 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1 rounded-md bg-[#FF0000] text-white flex items-center justify-center shadow-xs">
+                          <Youtube className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-xs font-semibold text-white">YouTube</span>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/15">
+                          Video
+                        </span>
+                      </div>
+                      <a
+                        href={formik.values.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-white/70 hover:text-white flex items-center gap-1 transition-colors"
+                      >
+                        <span>Open</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-stretch">
+                      {previewData.images && previewData.images.length > 0 && (
+                        <div className="sm:w-44 h-36 sm:h-auto flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={previewData.images[0]}
+                            alt={cleanTitle || "YouTube video"}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                            <div className="w-9 h-9 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-lg">
+                              <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div className="p-3.5 flex flex-col justify-center flex-1 min-w-0">
+                        <h4 className="font-semibold text-xs text-white line-clamp-2 mb-1.5 leading-snug">
+                          {cleanTitle}
+                        </h4>
+                        <div className="flex items-center gap-1 text-[10.5px] text-white/50 font-medium mt-auto">
+                          <Globe className="w-3 h-3 text-red-500" />
+                          <span>youtube.com</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Standard Web Page Card */
+                  <div className="rounded-lg border border-border/80 overflow-hidden bg-background shadow-2xs">
+                    <div className="flex flex-col sm:flex-row items-stretch">
+                      {previewData.images && previewData.images.length > 0 && (
+                        <div className="sm:w-36 h-28 sm:h-auto flex-shrink-0 bg-muted relative overflow-hidden">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={previewData.images[0]}
+                            alt={cleanTitle || "Link preview"}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="p-3 flex flex-col justify-center flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 text-[10.5px] text-muted-foreground font-medium mb-1 truncate">
+                          {previewData.favicons &&
+                          previewData.favicons.length > 0 ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={previewData.favicons[0]}
+                              alt=""
+                              className="w-3.5 h-3.5 rounded-xs shrink-0"
+                            />
+                          ) : (
+                            <Globe className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+                          )}
+                          <span className="truncate">{domain}</span>
+                          <a
+                            href={formik.values.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-auto text-muted-foreground/60 hover:text-primary transition-colors"
+                            title="Open link in new tab"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+
+                        <h4 className="font-semibold text-xs line-clamp-1 mb-1 text-foreground">
+                          {cleanTitle}
+                        </h4>
+
+                        {previewData.description && (
+                          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                            {previewData.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
               ) : previewError ? (
                 <div className="rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 p-3 flex items-start gap-2 text-amber-700 dark:text-amber-400">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -451,8 +696,8 @@ export function LinkUploadDialog({
                   name="caption"
                   rows={2}
                   placeholder={
-                    previewData?.title
-                      ? `Defaults to: "${previewData.title}"`
+                    cleanTitle
+                      ? `Defaults to: "${cleanTitle.slice(0, 60)}${cleanTitle.length > 60 ? "..." : ""}"`
                       : "Add custom context, notes, or author credits for this link..."
                   }
                   value={formik.values.caption}
