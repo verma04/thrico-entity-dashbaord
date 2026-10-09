@@ -10,6 +10,8 @@ import {
 } from "@/graphql/actions/mediaGallery";
 import { Badge } from "@/components/ui/badge";
 import { VideoUploadDialog } from "./video-upload-dialog";
+import { LinkUploadDialog } from "./link-upload-dialog";
+import { Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function UploadZone({
@@ -29,6 +31,7 @@ export function UploadZone({
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -204,18 +207,31 @@ export function UploadZone({
             </div>
             <div className="text-center px-1">
               <span className="text-xs font-semibold text-[#303030] dark:text-zinc-100 block">
-                Add Photos or Video
+                Add Photos, Video, or Link
               </span>
               <span className="text-[10px] text-[#616161] dark:text-zinc-400 block mt-0.5 leading-snug">
-                Drop files or click to browse
+                Drop files or add web link
               </span>
             </div>
-            <Badge
-              variant="outline"
-              className="text-[9px] font-mono px-1 py-0 text-muted-foreground border-border/80"
-            >
-              Video &lt; 2 mins
-            </Badge>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Badge
+                variant="outline"
+                className="text-[9px] font-mono px-1 py-0 text-muted-foreground border-border/80"
+              >
+                Video &lt; 2m
+              </Badge>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowLinkModal(true);
+                }}
+                className="text-[9.5px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5 cursor-pointer bg-indigo-50/80 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-200 dark:border-indigo-800"
+              >
+                <Link2 className="w-2.5 h-2.5" />
+                Add Link
+              </button>
+            </div>
           </>
         )}
       </div>
@@ -225,6 +241,13 @@ export function UploadZone({
         onOpenChange={setShowVideoModal}
         albumId={albumId}
         currentCount={imageCount}
+        onUploaded={onUploaded}
+      />
+
+      <LinkUploadDialog
+        open={showLinkModal}
+        onOpenChange={setShowLinkModal}
+        currentAlbumId={albumId}
         onUploaded={onUploaded}
       />
     </>

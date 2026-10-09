@@ -13,6 +13,9 @@ import {
   AlertCircle,
   Video,
   X,
+  Link2,
+  Globe,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,8 +82,18 @@ export function SortableImageCard({
   };
 
   const isVideo = image.type === "VIDEO";
+  const isLink = image.type === "LINK";
   const isPending = image.status === "PENDING" || image.status === "PROCESSING";
   const isFailed = image.status === "FAILED";
+
+  const domain = React.useMemo(() => {
+    if (!image.url) return "";
+    try {
+      return new URL(image.url).hostname.replace(/^www\./, "");
+    } catch {
+      return "";
+    }
+  }, [image.url]);
 
   // Resolve best image URL
   const rawUrl = image.thumbnailUrl || image.optimizedUrl || image.url;
@@ -119,20 +132,41 @@ export function SortableImageCard({
             onToggleSelect();
           } else if (isVideo && !isPending && !isFailed) {
             setShowVideoPreview(true);
+          } else if (isLink && image.url && !isSelectionMode) {
+            window.open(image.url, "_blank", "noopener,noreferrer");
           }
         }}
       >
-        {/* Poster / Thumbnail Image */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={displayUrl}
-          alt={image.caption ?? (isVideo ? "Gallery video" : "Gallery image")}
-          className={cn(
-            "w-full h-full object-cover transition-transform duration-200 group-hover:scale-105",
-            isSelected && "scale-95",
-            isPending && "opacity-60 blur-[1px]",
-          )}
-        />
+        {/* Poster / Thumbnail Image / Link Card */}
+        {isLink && !image.thumbnailUrl ? (
+          <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-gradient-to-br from-indigo-50/60 to-blue-50/40 dark:from-indigo-950/30 dark:to-zinc-900">
+            <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-1.5 border border-indigo-200 dark:border-indigo-800">
+              <Globe className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-semibold text-[#303030] dark:text-zinc-200 line-clamp-1">
+              {domain || "External Link"}
+            </span>
+            {image.caption && (
+              <span className="text-[9.5px] text-muted-foreground line-clamp-2 mt-0.5 leading-tight">
+                {image.caption}
+              </span>
+            )}
+          </div>
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={displayUrl}
+            alt={
+              image.caption ??
+              (isVideo ? "Gallery video" : isLink ? "Link preview" : "Gallery image")
+            }
+            className={cn(
+              "w-full h-full object-cover transition-transform duration-200 group-hover:scale-105",
+              isSelected && "scale-95",
+              isPending && "opacity-60 blur-[1px]",
+            )}
+          />
+        )}
 
         {/* Video Indicators */}
         {isVideo && (
@@ -152,6 +186,14 @@ export function SortableImageCard({
               {image.duration ? formatDuration(image.duration) : "VIDEO"}
             </div>
           </>
+        )}
+
+        {/* Link Badge (top right) */}
+        {isLink && (
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-semibold text-white">
+            <Link2 className="w-3 h-3 text-cyan-400" />
+            <span className="max-w-[70px] truncate">{domain || "LINK"}</span>
+          </div>
         )}
 
         {/* Processing Indicator */}
@@ -218,6 +260,21 @@ export function SortableImageCard({
                 <GripVertical className="w-4 h-4" />
               </button>
               <div className="flex gap-1">
+                {isLink && image.url && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 bg-white/20 backdrop-blur-sm text-white hover:bg-white/40"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(image.url!, "_blank", "noopener,noreferrer");
+                    }}
+                    title="Open link in new tab"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="ghost"

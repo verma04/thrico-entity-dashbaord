@@ -339,6 +339,13 @@ export const useAddMediaGalleryVideo = (albumId: string) =>
     ],
   });
 
+export const useAddMediaGalleryLink = (albumId: string) =>
+  useMutation(ADD_MEDIA_GALLERY_IMAGE, {
+    refetchQueries: [
+      { query: GET_MEDIA_GALLERY_ALBUM, variables: { id: albumId } },
+    ],
+  });
+
 
 export const GET_MEDIA_GALLERY_SDK_SETTINGS = gql`
   query GetMediaGallerySdkSettings {

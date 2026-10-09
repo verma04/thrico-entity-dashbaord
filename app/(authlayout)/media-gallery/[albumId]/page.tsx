@@ -20,6 +20,7 @@ import {
   Upload,
   CheckSquare,
   XSquare,
+  Link2,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -67,6 +68,7 @@ import { UploadZone } from "@/components/media-gallery/upload-zone";
 import { VideoUploadDialog } from "@/components/media-gallery/video-upload-dialog";
 import { CaptionDialog } from "@/components/media-gallery/caption-dialog";
 import { MultiGalleryUploadDialog } from "@/components/media-gallery/multi-gallery-upload-dialog";
+import { LinkUploadDialog } from "@/components/media-gallery/link-upload-dialog";
 
 export default function AlbumDetailPage() {
   const router = useRouter();
@@ -121,6 +123,7 @@ export default function AlbumDetailPage() {
   const [isDeletingSingle, setIsDeletingSingle] = useState(false);
   const [showVideoUploadModal, setShowVideoUploadModal] = useState(false);
   const [showPhotoUploadModal, setShowPhotoUploadModal] = useState(false);
+  const [showLinkUploadModal, setShowLinkUploadModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -328,10 +331,20 @@ export default function AlbumDetailPage() {
         <EcosystemActionBar.Item>
           <CtaButton
             size="sm"
+            variant="outline"
             onClick={() => setShowVideoUploadModal(true)}
           >
-            <VideoIcon className="w-3.5 h-3.5" />
+            <VideoIcon className="w-3.5 h-3.5 text-indigo-500" />
             Upload Video
+          </CtaButton>
+        </EcosystemActionBar.Item>
+        <EcosystemActionBar.Item>
+          <CtaButton
+            size="sm"
+            onClick={() => setShowLinkUploadModal(true)}
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            Add Link
           </CtaButton>
         </EcosystemActionBar.Item>
         <EcosystemActionBar.Group align="right">
@@ -523,6 +536,13 @@ export default function AlbumDetailPage() {
       <MultiGalleryUploadDialog
         open={showPhotoUploadModal}
         onOpenChange={setShowPhotoUploadModal}
+        currentAlbumId={albumId}
+        onUploaded={() => refetch()}
+      />
+
+      <LinkUploadDialog
+        open={showLinkUploadModal}
+        onOpenChange={setShowLinkUploadModal}
         currentAlbumId={albumId}
         onUploaded={() => refetch()}
       />

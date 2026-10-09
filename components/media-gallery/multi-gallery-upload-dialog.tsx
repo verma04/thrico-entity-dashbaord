@@ -20,7 +20,9 @@ import {
   CheckCircle2,
   Loader2,
   X,
+  Link2,
 } from "lucide-react";
+import { LinkUploadDialog } from "./link-upload-dialog";
 import {
   useGetMediaGalleryAlbums,
   useAddMediaGalleryImage,
@@ -61,6 +63,7 @@ export function MultiGalleryUploadDialog({
   const [caption, setCaption] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -223,7 +226,8 @@ export function MultiGalleryUploadDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <>
+      <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-xl p-0 gap-0 overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 shadow-2xl rounded-xl bg-white dark:bg-zinc-900">
         {/* Header (Pattern C: Modal Dialog) */}
         <div className="p-5 border-b border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb] dark:bg-zinc-900/90 flex items-center justify-between">
@@ -254,6 +258,30 @@ export function MultiGalleryUploadDialog({
 
         {/* Modal Body */}
         <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
+          {/* Switch to Link Banner */}
+          <div className="flex items-center justify-between p-2.5 rounded-lg bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-md bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <Link2 className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-[11px] text-muted-foreground">
+                Want to share a website or article link instead?
+              </span>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                onOpenChange(false);
+                setShowLinkDialog(true);
+              }}
+              className="h-7 px-2 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100/50"
+            >
+              Add Web Link &rarr;
+            </Button>
+          </div>
+
           {/* File Picker / Dropzone */}
           <div
             className="border-2 border-dashed border-[#d2d5d9] dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-500 bg-[#f9fafb]/50 dark:bg-zinc-900/40 hover:bg-white dark:hover:bg-zinc-900 rounded-xl p-6 flex flex-col items-center justify-center gap-2.5 cursor-pointer transition-colors"
@@ -468,5 +496,13 @@ export function MultiGalleryUploadDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    <LinkUploadDialog
+      open={showLinkDialog}
+      onOpenChange={setShowLinkDialog}
+      currentAlbumId={currentAlbumId}
+      onUploaded={onUploaded}
+    />
+  </>
   );
 }
