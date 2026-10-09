@@ -295,7 +295,16 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme })
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    if (
+                      tab.id === "navigation" ||
+                      tab.id === "sidebar" ||
+                      tab.id === "bottomsheet"
+                    ) {
+                      setPreviewMode("mobile");
+                    }
+                  }}
                   className={cn(
                     "flex-1 min-w-[70px] flex items-center justify-center gap-1.5 py-2.5 text-[11.5px] font-medium transition-colors relative cursor-pointer whitespace-nowrap px-2",
                     isActive
@@ -1001,7 +1010,17 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme })
                 transition={{ type: "spring", bounce: 0.1, duration: 0.4 }}
                 className={cn("w-full flex justify-center", previewMode === "desktop" ? "max-w-3xl" : "max-w-[340px]")}
               >
-                <ThemePreview theme={formValues} mode={previewMode} />
+                <ThemePreview
+                  theme={formValues}
+                  mode={previewMode}
+                  activeMobileView={
+                    activeTab === "sidebar"
+                      ? "drawer"
+                      : activeTab === "bottomsheet"
+                        ? "sheet"
+                        : "tabbar"
+                  }
+                />
               </motion.div>
             </div>
           </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import { useState } from "react";
 import {
   Home,
@@ -25,11 +24,23 @@ import { cn } from "@/lib/utils";
 
 interface MobileDevicePreviewProps {
   theme: EntityTheme;
+  activeView?: "tabbar" | "drawer" | "sheet";
 }
 
-export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({ theme }) => {
-  const [mobileView, setMobileView] = useState<"tabbar" | "drawer" | "sheet">("tabbar");
+export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({
+  theme,
+  activeView,
+}) => {
+  const [prevActiveView, setPrevActiveView] = useState(activeView);
+  const [mobileView, setMobileView] = useState<"tabbar" | "drawer" | "sheet">(
+    activeView || "tabbar"
+  );
   const [activeTab, setActiveTab] = useState("home");
+
+  if (activeView && activeView !== prevActiveView) {
+    setPrevActiveView(activeView);
+    setMobileView(activeView);
+  }
 
   // Navigation tokens with fallbacks
   const navBg = theme.Navigation?.tabBg || "#ffffff";

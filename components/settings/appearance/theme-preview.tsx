@@ -12,11 +12,16 @@ import MobileDevicePreview from "./mobile-device-preview"
 interface ThemePreviewProps {
   theme: EntityTheme
   mode?: "desktop" | "mobile"
+  activeMobileView?: "tabbar" | "drawer" | "sheet"
 }
 
-const ThemePreview: React.FC<ThemePreviewProps> = ({ theme, mode = "desktop" }) => {
+const ThemePreview: React.FC<ThemePreviewProps> = ({
+  theme,
+  mode = "desktop",
+  activeMobileView,
+}) => {
   if (mode === "mobile") {
-    return <MobileDevicePreview theme={theme} />
+    return <MobileDevicePreview theme={theme} activeView={activeMobileView} />
   }
 
   return (
