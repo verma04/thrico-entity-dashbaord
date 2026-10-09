@@ -518,6 +518,14 @@ export interface ModuleData {
   order?: number; // Explicit order order for modules
 }
 
+export interface PageRedirectConfig {
+  isRedirect: boolean;
+  type: "internal" | "external";
+  targetUrl: string;
+  openInNewTab?: boolean;
+  statusCode?: 301 | 302;
+}
+
 export interface Page {
   id: string;
   name: string;
@@ -525,6 +533,7 @@ export interface Page {
   modules: ModuleData[];
   isEnabled: boolean;
   includeInSitemap: boolean;
+  redirect?: PageRedirectConfig;
   seo?: {
     title: string;
     description: string;
@@ -604,9 +613,10 @@ export interface WebsiteBuilderState {
   addModuleToPage: (pageId: string, module: ModuleData) => void;
   deleteModule: (moduleId: string) => void;
   // Page Management
-  addPage: (name: string, slug: string) => void;
+  addPage: (name: string, slug: string, redirect?: PageRedirectConfig) => void;
   deletePage: (id: string) => void;
   updatePageSeo: (id: string, seo: Partial<Page["seo"]>) => void;
+  updatePageRedirect: (id: string, redirect: PageRedirectConfig | null) => void;
   togglePageStatus: (id: string) => void;
   togglePageSitemap: (id: string) => void;
   updateSiteSettings: (settings: Partial<SiteSettings>) => void;
@@ -1721,56 +1731,59 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         };
       }),
 
-    addPage: (name, slug) =>
+    addPage: (name, slug, redirect) =>
       set((state) => {
         const newPage: Page = {
           id: slug, // Using slug as ID for simplicity
           name,
           slug,
-          modules: [
-            {
-              id: `hero-${slug}`,
-              type: "hero",
-              name: "Hero",
-              isEnabled: true,
-              layout: "split",
-              content: {
-                title: `Welcome to ${name}`,
-                subtitle: "Start building your page",
-                ctaText: "Get Started",
-                ctaLink: "#",
-                image:
-                  "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
-              },
-              isCustomized: false,
-              visibility: "public",
-            },
-            {
-              id: `content-${slug}`,
-              type: "custom-content",
-              name: "Content",
-              isEnabled: true,
-              layout: "details-list",
-              content: {
-                title: "Main Features",
-                subtitle: "Explore what we offer.",
-                items: [
-                  {
-                    title: "Feature One",
-                    description: "Description for feature one goes here.",
-                    image: "",
+          redirect: redirect || undefined,
+          modules: redirect?.isRedirect
+            ? []
+            : [
+                {
+                  id: `hero-${slug}`,
+                  type: "hero",
+                  name: "Hero",
+                  isEnabled: true,
+                  layout: "split",
+                  content: {
+                    title: `Welcome to ${name}`,
+                    subtitle: "Start building your page",
+                    ctaText: "Get Started",
+                    ctaLink: "#",
+                    image:
+                      "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
                   },
-                  {
-                    title: "Feature Two",
-                    description: "Description for feature two goes here.",
-                    image: "",
+                  isCustomized: false,
+                  visibility: "public",
+                },
+                {
+                  id: `content-${slug}`,
+                  type: "custom-content",
+                  name: "Content",
+                  isEnabled: true,
+                  layout: "details-list",
+                  content: {
+                    title: "Main Features",
+                    subtitle: "Explore what we offer.",
+                    items: [
+                      {
+                        title: "Feature One",
+                        description: "Description for feature one goes here.",
+                        image: "",
+                      },
+                      {
+                        title: "Feature Two",
+                        description: "Description for feature two goes here.",
+                        image: "",
+                      },
+                    ],
                   },
-                ],
-              },
-              isCustomized: false,
-              visibility: "public",
-            },
-          ],
+                  isCustomized: false,
+                  visibility: "public",
+                },
+              ],
           isEnabled: true,
           includeInSitemap: true,
           seo: {
@@ -1792,6 +1805,15 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         pages: state.pages.map((page) =>
           page.id === id
             ? { ...page, seo: { ...page.seo, ...seo } as any }
+            : page,
+        ),
+      })),
+
+    updatePageRedirect: (id, redirect) =>
+      set((state) => ({
+        pages: state.pages.map((page) =>
+          page.id === id || page.slug === id
+            ? { ...page, redirect: redirect || undefined }
             : page,
         ),
       })),
@@ -1832,7 +1854,25 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
       // Only initialize once — never overwrite unsaved in-flight changes on refetch
       if (get().isInitialized) return;
 
-      const rawPages = (websiteData.pages as Page[]) || [];
+      const basePages: Page[] = (websiteData.pages as Page[]) || [];
+      const rawPages: Page[] = basePages.map((page): Page => {
+        let redirect: PageRedirectConfig | undefined = page.redirect;
+        if (!redirect && page.seo?.schemaMarkup) {
+          try {
+            const schema =
+              typeof page.seo.schemaMarkup === "string"
+                ? (JSON.parse(page.seo.schemaMarkup) as Record<string, unknown>)
+                : (page.seo.schemaMarkup as Record<string, unknown>);
+            const parsedRedirect = schema?.redirect as PageRedirectConfig | undefined;
+            if (parsedRedirect?.isRedirect) {
+              redirect = parsedRedirect;
+            }
+          } catch {
+            // ignore JSON parse error
+          }
+        }
+        return redirect ? { ...page, redirect } : page;
+      });
       const validThemes: ThemeType[] = [
         "academia",
         "enterprise",
@@ -1895,11 +1935,11 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         globalHeader:
           (websiteData.globalHeader ||
             websiteData.navbar ||
-            get().globalHeader) as NavbarContentConfig,
+            get().globalHeader) as unknown as ModuleData,
         globalFooter:
           (websiteData.globalFooter ||
             websiteData.footer ||
-            get().globalFooter) as FooterContentConfig,
+            get().globalFooter) as unknown as ModuleData,
         siteSettings: resolvedSiteSettings,
       }));
     },

@@ -18,6 +18,8 @@ import {
   ArrowUpRight,
   ArrowRight,
   FileCode,
+  CornerDownRight,
+  ExternalLink,
 } from "lucide-react";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
 import type {
@@ -56,6 +58,11 @@ import {
   PolarisInfoBanner,
   PolarisQuickChip,
 } from "@/components/gamification/shared/polaris-form-ui";
+import {
+  PageRedirectConfig,
+  getPageRedirect,
+  formatRedirectDestination,
+} from "@/components/website-layout/page-redirect-utils";
 
 interface WebsitePageRecord {
   id: string;
@@ -64,11 +71,16 @@ interface WebsitePageRecord {
   isEnabled: boolean;
   isSystem?: boolean;
   canDelete?: boolean;
+  redirect?: PageRedirectConfig;
+  seo?: {
+    schemaMarkup?: unknown;
+    [key: string]: unknown;
+  };
   createdAt?: string | number | Date;
   updatedAt?: string | number | Date;
 }
 
-type StatusFilterType = "ALL" | "PUBLISHED" | "DRAFT";
+type StatusFilterType = "ALL" | "PUBLISHED" | "DRAFT" | "REDIRECTS";
 
 export function WebsitePagesManager() {
   const router = useRouter();
@@ -150,6 +162,10 @@ export function WebsitePagesManager() {
     [displayPages],
   );
   const draftCount = totalCount - publishedCount;
+  const redirectCount = useMemo(
+    () => displayPages.filter((p) => getPageRedirect(p) !== null).length,
+    [displayPages],
+  );
 
   // Filtered pages based on search and status chip
   const filteredPages = useMemo(() => {
@@ -163,7 +179,8 @@ export function WebsitePagesManager() {
       const matchesStatus =
         statusFilter === "ALL" ||
         (statusFilter === "PUBLISHED" && p.isEnabled) ||
-        (statusFilter === "DRAFT" && !p.isEnabled);
+        (statusFilter === "DRAFT" && !p.isEnabled) ||
+        (statusFilter === "REDIRECTS" && getPageRedirect(p) !== null);
 
       return matchesSearch && matchesStatus;
     });
@@ -234,10 +251,12 @@ export function WebsitePagesManager() {
       header: "Page Name",
       cell: (row) => {
         const isHomePage = row.slug === "home";
+        const redirect = getPageRedirect(row);
+
         return (
           <div className="flex items-center gap-2.5">
             <AdminTableItem
-              icon={Layout}
+              icon={redirect ? CornerDownRight : Layout}
               title={row.name}
               badge={
                 isHomePage ? (
@@ -247,8 +266,29 @@ export function WebsitePagesManager() {
                   >
                     Root Index
                   </Badge>
+                ) : redirect ? (
+                  <Badge
+                    variant="outline"
+                    className="text-[9.5px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800 px-1.5 py-0 flex items-center gap-1"
+                  >
+                    <CornerDownRight className="h-2.5 w-2.5" />
+                    <span>Redirect {redirect.statusCode}</span>
+                  </Badge>
                 ) : row.isSystem ? (
                   <AdminTableTag variant="indigo">System Page</AdminTableTag>
+                ) : undefined
+              }
+              subtitle={
+                redirect ? (
+                  <span className="text-[10.5px] text-amber-600 dark:text-amber-400 font-mono flex items-center gap-1">
+                    <span>➔</span>
+                    <span className="truncate max-w-[160px]">
+                      {formatRedirectDestination(redirect)}
+                    </span>
+                    {redirect.openInNewTab && (
+                      <ExternalLink className="h-2.5 w-2.5 shrink-0 opacity-70" />
+                    )}
+                  </span>
                 ) : undefined
               }
             />
@@ -259,11 +299,24 @@ export function WebsitePagesManager() {
     {
       key: "namespace",
       header: "URL Path",
-      cell: (row) => (
-        <span className="font-mono text-xs text-[#616161] dark:text-zinc-400 bg-[#f6f6f7] dark:bg-zinc-800 px-2 py-0.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 select-all">
-          /{row.slug}
-        </span>
-      ),
+      cell: (row) => {
+        const redirect = getPageRedirect(row);
+        return (
+          <div className="flex items-center gap-1.5">
+            <span className="font-mono text-xs text-[#616161] dark:text-zinc-400 bg-[#f6f6f7] dark:bg-zinc-800 px-2 py-0.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 select-all">
+              /{row.slug}
+            </span>
+            {redirect && (
+              <span
+                className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold"
+                title={`Redirects to ${redirect.targetUrl}`}
+              >
+                ➔
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "protocol-status",
@@ -301,19 +354,34 @@ export function WebsitePagesManager() {
       className: "text-right",
       cell: (row) => {
         const isHomePage = row.slug === "home";
+        const redirect = getPageRedirect(row);
         return (
           <div className="flex items-center justify-end gap-1.5">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-7 px-2.5 text-xs font-medium border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs gap-1.5 cursor-pointer"
-              onClick={() => handleEditPage(row.id)}
-              title="Open in Visual Builder"
-            >
-              <Layers className="h-3 w-3" />
-              <span>Design</span>
-            </Button>
+            {redirect ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 px-2.5 text-xs font-medium border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200 hover:bg-amber-100/60 dark:hover:bg-amber-900/40 shadow-2xs gap-1.5 cursor-pointer"
+                onClick={() => handleOpenEditModal(row)}
+                title="Configure URL Redirection"
+              >
+                <CornerDownRight className="h-3 w-3 text-amber-600" />
+                <span>Redirect</span>
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 px-2.5 text-xs font-medium border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs gap-1.5 cursor-pointer"
+                onClick={() => handleEditPage(row.id)}
+                title="Open in Visual Builder"
+              >
+                <Layers className="h-3 w-3" />
+                <span>Design</span>
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -425,6 +493,14 @@ export function WebsitePagesManager() {
                         ) : (
                           "thrico.community"
                         )
+                      }
+                    />
+                    <PolarisSummaryRow
+                      label="Redirect Routes"
+                      value={
+                        <span className="font-mono text-xs text-amber-600 dark:text-amber-400 font-semibold">
+                          {redirectCount} configured
+                        </span>
                       }
                     />
                     <PolarisSummaryRow
@@ -608,6 +684,11 @@ export function WebsitePagesManager() {
                     active={statusFilter === "DRAFT"}
                     onClick={() => setStatusFilter("DRAFT")}
                   />
+                  <PolarisQuickChip
+                    label={`Redirects (${redirectCount})`}
+                    active={statusFilter === "REDIRECTS"}
+                    onClick={() => setStatusFilter("REDIRECTS")}
+                  />
                 </div>
               </div>
 
@@ -642,7 +723,7 @@ export function WebsitePagesManager() {
         onOpenChange={setIsCreateOpen}
         websiteId={websiteData?.getWebsite?.id}
         onSuccess={(pageData) => {
-          addPage(pageData.name, pageData.slug);
+          addPage(pageData.name, pageData.slug, pageData.redirect);
           refetch();
         }}
       />
@@ -713,6 +794,15 @@ export function WebsitePagesManager() {
               header: "Status",
               getValue: (p: WebsitePageRecord) =>
                 p.isEnabled ? "Published" : "Draft",
+            },
+            {
+              header: "Redirect",
+              getValue: (p: WebsitePageRecord) => {
+                const r = getPageRedirect(p);
+                return r
+                  ? `${r.type.toUpperCase()}: ${r.targetUrl} (${r.statusCode})`
+                  : "None";
+              },
             },
             {
               header: "Created At",

@@ -4,14 +4,36 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { Layout, Globe, ArrowLeft, Sparkles, FileText, Compass } from "lucide-react";
+import {
+  Layout,
+  Globe,
+  ArrowLeft,
+  Sparkles,
+  FileText,
+  Compass,
+  CornerDownRight,
+  ArrowRight,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useToast } from "@/hooks/use-toast";
-import { useCreatePage, useGetWebsite } from "@/graphql/actions/website";
+import {
+  useCreatePage,
+  useUpdatePageSeo,
+  useGetWebsite,
+} from "@/graphql/actions/website";
 import { GET_WEBSITE } from "@/graphql/quries/website/index";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -28,6 +50,17 @@ import {
 } from "@/components/gamification/shared/polaris-form-ui";
 import { cn } from "@/lib/utils";
 
+interface CreatePageFormValues {
+  name: string;
+  slug: string;
+  pageType: "content" | "redirect";
+  archetype: "standard" | "landing" | "resources";
+  redirectType: "internal" | "external";
+  redirectUrl: string;
+  openInNewTab: boolean;
+  statusCode: 301 | 302;
+}
+
 const createPageSchema = Yup.object().shape({
   name: Yup.string()
     .trim()
@@ -41,7 +74,37 @@ const createPageSchema = Yup.object().shape({
       /^[a-z0-9-]+$/,
       "Slug can only contain lowercase letters, numbers, and hyphens",
     ),
-  archetype: Yup.string().oneOf(["standard", "landing", "resources"]).required(),
+  pageType: Yup.string().oneOf(["content", "redirect"]).required(),
+  archetype: Yup.string().when("pageType", {
+    is: "content",
+    then: (schema) =>
+      schema.oneOf(["standard", "landing", "resources"]).required(),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  redirectType: Yup.string().when("pageType", {
+    is: "redirect",
+    then: (schema) => schema.oneOf(["internal", "external"]).required(),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  redirectUrl: Yup.string().when("pageType", {
+    is: "redirect",
+    then: (schema) =>
+      schema
+        .trim()
+        .required("Destination URL or target page is required")
+        .test(
+          "valid-destination",
+          "External URL must begin with http:// or https://",
+          function (val) {
+            if (!val) return false;
+            if (this.parent.redirectType === "external") {
+              return /^https?:\/\/.+/i.test(val);
+            }
+            return true;
+          },
+        ),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 export function CreatePageManager() {
@@ -53,17 +116,64 @@ export function CreatePageManager() {
   const { data: websiteData } = useGetWebsite({});
   const websiteId = websiteData?.getWebsite?.id;
 
+  const existingPages = (websiteData?.getWebsite?.pages || []) as Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+
+  const [updatePageSeoMutation] = useUpdatePageSeo();
+
   const [createPageMutation, { loading: isCreating }] = useCreatePage({
     refetchQueries: [{ query: GET_WEBSITE }],
     awaitRefetchQueries: true,
-    onCompleted: (data) => {
+    onCompleted: async (data) => {
+      const createdPage = data?.createPage;
+      const isRedirect = formik.values.pageType === "redirect";
+
+      if (createdPage?.id && isRedirect) {
+        try {
+          await updatePageSeoMutation({
+            variables: {
+              pageId: createdPage.id,
+              schemaMarkup: {
+                redirect: {
+                  isRedirect: true,
+                  type: formik.values.redirectType,
+                  targetUrl: formik.values.redirectUrl.trim(),
+                  openInNewTab: formik.values.openInNewTab,
+                  statusCode: formik.values.statusCode,
+                },
+              },
+            },
+          });
+        } catch (err: unknown) {
+          console.error("Failed to persist redirect SEO metadata:", err);
+        }
+      }
+
       toast({
         title: "Page Created",
-        description: `Page '${data?.createPage?.name || "New Page"}' has been successfully created.`,
+        description: isRedirect
+          ? `Redirect page '${createdPage?.name || "New Page"}' configured successfully.`
+          : `Page '${createdPage?.name || "New Page"}' has been successfully created.`,
       });
       setSaved(true);
-      if (data?.createPage?.name && data?.createPage?.slug) {
-        addPage(data.createPage.name, data.createPage.slug);
+
+      if (createdPage?.name && createdPage?.slug) {
+        addPage(
+          createdPage.name,
+          createdPage.slug,
+          isRedirect
+            ? {
+                isRedirect: true,
+                type: formik.values.redirectType,
+                targetUrl: formik.values.redirectUrl.trim(),
+                openInNewTab: formik.values.openInNewTab,
+                statusCode: formik.values.statusCode,
+              }
+            : undefined,
+        );
       }
 
       setTimeout(() => {
@@ -79,11 +189,16 @@ export function CreatePageManager() {
     },
   });
 
-  const formik = useFormik({
+  const formik = useFormik<CreatePageFormValues>({
     initialValues: {
       name: "",
       slug: "",
+      pageType: "content",
       archetype: "standard",
+      redirectType: "internal",
+      redirectUrl: "",
+      openInNewTab: false,
+      statusCode: 301,
     },
     validationSchema: createPageSchema,
     enableReinitialize: true,
@@ -174,12 +289,13 @@ export function CreatePageManager() {
 
   const currentSlug = formik.values.slug || "new-page";
   const currentPageName = formik.values.name || "Untitled Page";
+  const isRedirect = formik.values.pageType === "redirect";
 
   return (
     <EcosystemWrapper>
       <EcosystemHeader
         title="Create Page"
-        description="Configure the title, URL slug, and layout archetype for your website page."
+        description="Configure the title, URL slug, and layout archetype or redirect rule for your website page."
         icon={Layout}
         badgeText="Website Studio"
         breadcrumbs={[
@@ -208,8 +324,8 @@ export function CreatePageManager() {
               {/* Browser Preview Sidebar Card */}
               <PolarisSidebarCard
                 title="Page Preview"
-                badge="Draft Page"
-                icon={Globe}
+                badge={isRedirect ? "URL Redirect" : "Draft Page"}
+                icon={isRedirect ? CornerDownRight : Globe}
               >
                 <div className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xs overflow-hidden flex flex-col">
                   {/* Browser Address Bar */}
@@ -228,19 +344,45 @@ export function CreatePageManager() {
                   </div>
 
                   {/* Browser Canvas */}
-                  <div className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-                    <div className="w-10 h-10 rounded-[8px] bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40">
-                      <Layout className="h-5 w-5" />
+                  {isRedirect ? (
+                    <div className="p-4 flex flex-col items-center justify-center text-center space-y-2.5">
+                      <div className="w-10 h-10 rounded-[8px] bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-200 dark:border-amber-900/40">
+                        <CornerDownRight className="h-5 w-5" />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-xs font-bold text-[#303030] dark:text-zinc-100 truncate max-w-[200px]">
+                          {currentPageName}
+                        </h4>
+                        <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400 font-mono">
+                          <span>/{currentSlug}</span>
+                          <ArrowRight className="h-3 w-3 text-amber-600" />
+                          <span className="text-amber-700 dark:text-amber-400 font-semibold truncate max-w-[120px]">
+                            {formik.values.redirectUrl || "target"}
+                          </span>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="text-[9.5px] uppercase font-mono px-1.5 py-0 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800"
+                      >
+                        HTTP {formik.values.statusCode} Redirect
+                      </Badge>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-[#303030] dark:text-zinc-100 truncate max-w-[200px]">
-                        {currentPageName}
-                      </h4>
-                      <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 max-w-[200px] mx-auto leading-tight">
-                        After saving, you can customize layout sections and visual design blocks.
-                      </p>
+                  ) : (
+                    <div className="p-4 flex flex-col items-center justify-center text-center space-y-2">
+                      <div className="w-10 h-10 rounded-[8px] bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40">
+                        <Layout className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-[#303030] dark:text-zinc-100 truncate max-w-[200px]">
+                          {currentPageName}
+                        </h4>
+                        <p className="text-[11px] text-[#616161] dark:text-zinc-400 mt-0.5 max-w-[200px] mx-auto leading-tight">
+                          After saving, you can customize layout sections and visual design blocks.
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Summary Metadata */}
@@ -250,13 +392,26 @@ export function CreatePageManager() {
                     value={`/${currentSlug}`}
                   />
                   <PolarisSummaryRow
-                    label="Archetype"
+                    label="Type"
                     value={
-                      <Badge variant="outline" className="text-[9.5px] uppercase font-mono px-1 py-0">
-                        {formik.values.archetype}
+                      <Badge
+                        variant="outline"
+                        className="text-[9.5px] uppercase font-mono px-1 py-0"
+                      >
+                        {isRedirect ? "Redirect" : formik.values.archetype}
                       </Badge>
                     }
                   />
+                  {isRedirect && (
+                    <PolarisSummaryRow
+                      label="Target Mode"
+                      value={
+                        formik.values.redirectType === "internal"
+                          ? "Internal Page"
+                          : "External URL"
+                      }
+                    />
+                  )}
                   <PolarisSummaryRow
                     label="Publication State"
                     value="Draft (Unpublished)"
@@ -266,10 +421,18 @@ export function CreatePageManager() {
               </PolarisSidebarCard>
 
               {/* Strategic Tip */}
-              <PolarisTipCard title="URL & SEO Best Practice">
-                Keep path slugs clean and concise (e.g. <code>/about</code> or{" "}
-                <code>/services</code>). This improves social link sharing,
-                bookmarking, and search engine indexability.
+              <PolarisTipCard title={isRedirect ? "Redirect Best Practice" : "URL & SEO Best Practice"}>
+                {isRedirect ? (
+                  <>
+                    Use <strong>301 Permanent</strong> for moved routes or legacy links so search engines preserve search authority. Use <strong>Internal</strong> to link cleanly to existing site modules.
+                  </>
+                ) : (
+                  <>
+                    Keep path slugs clean and concise (e.g. <code>/about</code> or{" "}
+                    <code>/services</code>). This improves social link sharing,
+                    bookmarking, and search engine indexability.
+                  </>
+                )}
               </PolarisTipCard>
             </div>
           }
@@ -277,11 +440,15 @@ export function CreatePageManager() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <PolarisInfoBanner
               variant="info"
-              title="Publishing Workflow"
-              description="Create the page container first, then use the visual page builder studio to drag and drop interactive modules, banners, and layout grids."
+              title={isRedirect ? "URL Redirection Rule" : "Publishing Workflow"}
+              description={
+                isRedirect
+                  ? "Incoming traffic to this route will seamlessly route to the target destination. No visual layout blocks or canvas modules are required."
+                  : "Create the page container first, then use the visual page builder studio to drag and drop interactive modules, banners, and layout grids."
+              }
             />
 
-            {/* Step 1: Page Details */}
+            {/* Step 1: Page Identity & Path */}
             <PolarisFormCard
               step={1}
               title="Page Identity & Path"
@@ -300,7 +467,7 @@ export function CreatePageManager() {
                   <Input
                     id="name"
                     name="name"
-                    placeholder="e.g. Services, About Us, Core Features"
+                    placeholder="e.g. Services, About Us, Partner Portal"
                     value={formik.values.name}
                     onChange={handleNameChange}
                     onBlur={formik.handleBlur}
@@ -372,37 +539,284 @@ export function CreatePageManager() {
               </div>
             </PolarisFormCard>
 
-            {/* Step 2: Page Archetype Selection */}
+            {/* Step 2: Page Behavior Mode */}
             <PolarisFormCard
               step={2}
-              title="Page Archetype"
-              description="Choose the primary visual purpose for this page container."
-              badge="Template"
+              title="Page Behavior"
+              description="Choose whether this route serves visual page content or automatically redirects."
+              badge="Routing Mode"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <PolarisModeTile
-                  label="Standard Page"
-                  description="Multi-section informational page with headers, cards, and text"
-                  icon={FileText}
-                  selected={formik.values.archetype === "standard"}
-                  onClick={() => formik.setFieldValue("archetype", "standard")}
+                  label="Standard Content Page"
+                  description="Build responsive visual sections, hero headers, grids, and dynamic modules"
+                  icon={Layout}
+                  selected={formik.values.pageType === "content"}
+                  onClick={() => formik.setFieldValue("pageType", "content")}
                 />
                 <PolarisModeTile
-                  label="Landing / Showcase"
-                  description="High-converting hero page with CTA banners and media spotlight"
-                  icon={Sparkles}
-                  selected={formik.values.archetype === "landing"}
-                  onClick={() => formik.setFieldValue("archetype", "landing")}
-                />
-                <PolarisModeTile
-                  label="Resources & Hub"
-                  description="Directory page for documentation, policies, FAQs, or courses"
-                  icon={Compass}
-                  selected={formik.values.archetype === "resources"}
-                  onClick={() => formik.setFieldValue("archetype", "resources")}
+                  label="URL Redirection"
+                  description="Forward traffic arriving at this route to an internal page or external website"
+                  icon={CornerDownRight}
+                  selected={formik.values.pageType === "redirect"}
+                  onClick={() => formik.setFieldValue("pageType", "redirect")}
                 />
               </div>
             </PolarisFormCard>
+
+            {/* Step 3: Content Archetype OR Redirect Destination */}
+            {formik.values.pageType === "content" ? (
+              <PolarisFormCard
+                step={3}
+                title="Page Archetype"
+                description="Choose the primary visual purpose for this page container."
+                badge="Template"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <PolarisModeTile
+                    label="Standard Page"
+                    description="Multi-section informational page with headers, cards, and text"
+                    icon={FileText}
+                    selected={formik.values.archetype === "standard"}
+                    onClick={() => formik.setFieldValue("archetype", "standard")}
+                  />
+                  <PolarisModeTile
+                    label="Landing / Showcase"
+                    description="High-converting hero page with CTA banners and media spotlight"
+                    icon={Sparkles}
+                    selected={formik.values.archetype === "landing"}
+                    onClick={() => formik.setFieldValue("archetype", "landing")}
+                  />
+                  <PolarisModeTile
+                    label="Resources & Hub"
+                    description="Directory page for documentation, policies, FAQs, or courses"
+                    icon={Compass}
+                    selected={formik.values.archetype === "resources"}
+                    onClick={() => formik.setFieldValue("archetype", "resources")}
+                  />
+                </div>
+              </PolarisFormCard>
+            ) : (
+              <PolarisFormCard
+                step={3}
+                title="Redirect Destination & Behavior"
+                description="Configure the destination URL and routing status code for this redirect."
+                badge="Destination"
+              >
+                <div className="space-y-4">
+                  {/* Redirect Type Tiles */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-[#303030] dark:text-zinc-100 select-none block">
+                      Destination Target
+                    </Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <PolarisModeTile
+                        label="Internal Website Page"
+                        description="Route visitors to an existing page on your website"
+                        icon={FileText}
+                        selected={formik.values.redirectType === "internal"}
+                        onClick={() => {
+                          formik.setFieldValue("redirectType", "internal");
+                          if (formik.values.redirectUrl.startsWith("http")) {
+                            formik.setFieldValue("redirectUrl", "/");
+                          }
+                        }}
+                      />
+                      <PolarisModeTile
+                        label="External URL"
+                        description="Forward to an external domain or web link (https://...)"
+                        icon={Globe}
+                        selected={formik.values.redirectType === "external"}
+                        onClick={() => {
+                          formik.setFieldValue("redirectType", "external");
+                          if (!formik.values.redirectUrl.startsWith("http")) {
+                            formik.setFieldValue("redirectUrl", "https://");
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Destination Field */}
+                  {formik.values.redirectType === "internal" ? (
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="internal-redirect"
+                        className="text-xs font-semibold text-[#303030] dark:text-zinc-100 select-none block"
+                      >
+                        Target Website Page <span className="text-destructive">*</span>
+                      </Label>
+                      <Select
+                        value={formik.values.redirectUrl || "/"}
+                        onValueChange={(val) =>
+                          formik.setFieldValue("redirectUrl", val)
+                        }
+                      >
+                        <SelectTrigger
+                          id="internal-redirect"
+                          className="h-9 text-xs bg-white dark:bg-zinc-900 border-[#d2d5d9] dark:border-zinc-800"
+                        >
+                          <SelectValue placeholder="Select target page..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="/">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-3 w-3 text-muted-foreground" />
+                              <span>Home Page</span>
+                              <span className="text-muted-foreground font-mono text-[10px]">
+                                /
+                              </span>
+                            </div>
+                          </SelectItem>
+                          {existingPages
+                            .filter((p) => p.slug !== formik.values.slug)
+                            .map((p) => (
+                              <SelectItem key={p.id} value={`/${p.slug}`}>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-3 w-3 text-muted-foreground" />
+                                  <span>{p.name}</span>
+                                  <span className="text-muted-foreground font-mono text-[10px]">
+                                    /{p.slug}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-[11px] text-muted-foreground">
+                        Select which page in your website visitors will be forwarded to.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="redirectUrl"
+                        className="text-xs font-semibold text-[#303030] dark:text-zinc-100 select-none block"
+                      >
+                        External Target URL <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="redirectUrl"
+                        name="redirectUrl"
+                        placeholder="https://example.com/partner"
+                        value={formik.values.redirectUrl}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={cn(
+                          "h-9 text-xs font-mono bg-white dark:bg-zinc-900 border-[#d2d5d9] dark:border-zinc-800",
+                          formik.touched.redirectUrl &&
+                            formik.errors.redirectUrl &&
+                            "border-destructive focus-visible:ring-destructive",
+                        )}
+                      />
+                      {formik.touched.redirectUrl &&
+                        formik.errors.redirectUrl && (
+                          <p className="text-[11px] font-medium text-destructive">
+                            {formik.errors.redirectUrl}
+                          </p>
+                        )}
+                      <p className="text-[11px] text-muted-foreground">
+                        Full destination URL including <code>https://</code>.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Open in New Tab Switch */}
+                  <div className="flex items-center justify-between p-2.5 rounded-lg border border-border/60 bg-muted/15">
+                    <div className="space-y-0.5">
+                      <Label
+                        htmlFor="openInNewTab"
+                        className="text-xs font-semibold text-foreground cursor-pointer"
+                      >
+                        Open in New Tab
+                      </Label>
+                      <p className="text-[11px] text-muted-foreground">
+                        Launch target in a new browser window when clicked
+                      </p>
+                    </div>
+                    <Switch
+                      id="openInNewTab"
+                      checked={formik.values.openInNewTab}
+                      onCheckedChange={(checked) =>
+                        formik.setFieldValue("openInNewTab", checked)
+                      }
+                    />
+                  </div>
+
+                  {/* HTTP Status Code Selection */}
+                  <div className="space-y-1.5 pt-1">
+                    <Label className="text-xs font-semibold text-[#303030] dark:text-zinc-100 select-none block">
+                      HTTP Status Code
+                    </Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => formik.setFieldValue("statusCode", 301)}
+                        className={cn(
+                          "p-2.5 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5",
+                          formik.values.statusCode === 301
+                            ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                            : "border-border/60 hover:border-border hover:bg-muted/30 bg-card",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0",
+                            formik.values.statusCode === 301
+                              ? "border-primary bg-primary text-white"
+                              : "border-muted-foreground/40",
+                          )}
+                        >
+                          {formik.values.statusCode === 301 && (
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-foreground">
+                            301 Moved Permanently
+                          </div>
+                          <div className="text-[10.5px] text-muted-foreground leading-snug mt-0.5">
+                            Best for SEO when URL has permanently relocated
+                          </div>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => formik.setFieldValue("statusCode", 302)}
+                        className={cn(
+                          "p-2.5 rounded-lg border text-left transition-all cursor-pointer flex items-start gap-2.5",
+                          formik.values.statusCode === 302
+                            ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                            : "border-border/60 hover:border-border hover:bg-muted/30 bg-card",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0",
+                            formik.values.statusCode === 302
+                              ? "border-primary bg-primary text-white"
+                              : "border-muted-foreground/40",
+                          )}
+                        >
+                          {formik.values.statusCode === 302 && (
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-xs font-semibold text-foreground">
+                            302 Found / Temporary
+                          </div>
+                          <div className="text-[10.5px] text-muted-foreground leading-snug mt-0.5">
+                            Short-term forward or temporary marketing campaign
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </PolarisFormCard>
+            )}
           </form>
         </PolarisFormLayout>
       </EcosystemContainer>
@@ -418,7 +832,7 @@ export function CreatePageManager() {
         }}
         title="New Website Page"
         description="Ready to create this website page?"
-        buttonText="Create Page"
+        buttonText={isRedirect ? "Create Redirect" : "Create Page"}
       />
     </EcosystemWrapper>
   );
