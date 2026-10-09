@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -26,8 +26,8 @@ import type {
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { toast } from "sonner";
 
-import PostModal from "@/components/feed/add-feed";
 import { useNumberOfFeeds, useAllFeed } from "@/graphql/actions/feed";
+import type { FeedProps } from "@/components/feed/types";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -156,7 +156,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
               variant="outline"
               size="sm"
               onClick={() => setShowExportModal(true)}
-              className="h-9 px-3 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground"
+              className="h-9 px-3 gap-1.5 shrink-0 border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs text-xs font-medium cursor-pointer"
             >
               <Upload className="h-3.5 w-3.5" />
               Export
@@ -164,7 +164,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
             <Button
               asChild
               size="sm"
-              className="h-9 px-3 gap-1.5 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xs text-xs font-semibold rounded-lg"
+              className="h-9 px-3.5 gap-1.5 shrink-0 bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white shadow-2xs text-xs font-medium rounded-lg cursor-pointer"
             >
               <Link href="/feed/create">
                 <Plus className="h-3.5 w-3.5" />
@@ -177,7 +177,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
 
       <EcosystemActionBar
         shadow="none"
-        className="p-0 border-b border-border bg-white dark:bg-background"
+        className="p-0 border-b border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900"
       >
         <div className="flex items-center gap-0 w-full overflow-x-auto no-scrollbar px-6">
           {tabs.map((tab) => (
@@ -185,17 +185,17 @@ function RootLayout({ children }: { children: React.ReactNode }) {
               key={tab.key}
               onClick={() => router.push(`/feed/${tab.key}`)}
               className={cn(
-                "group/tab relative flex items-center gap-1.5 px-4 py-3 text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap",
+                "group/tab relative flex items-center gap-1.5 px-4 py-3 text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap cursor-pointer",
                 activeTabKey === tab.key
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "text-[#303030] dark:text-zinc-100 font-semibold"
+                  : "text-[#616161] dark:text-zinc-400 hover:text-[#303030] dark:hover:text-zinc-100",
               )}
             >
               {/* Active underline indicator */}
               {activeTabKey === tab.key && (
                 <motion.div
                   layoutId="feed-tab-underline"
-                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground dark:bg-white"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#303030] dark:bg-zinc-100"
                   transition={{
                     type: "spring",
                     bounce: 0.2,
@@ -209,8 +209,8 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "h-3.5 w-3.5 transition-colors duration-150",
                   activeTabKey === tab.key
-                    ? "text-foreground"
-                    : "text-muted-foreground group-hover/tab:text-foreground",
+                    ? "text-[#303030] dark:text-zinc-100"
+                    : "text-[#616161] dark:text-zinc-400 group-hover/tab:text-[#303030] dark:group-hover/tab:text-zinc-100",
                 )}
               />
 
@@ -223,8 +223,8 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                   className={cn(
                     "ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[10px] font-medium transition-colors",
                     activeTabKey === tab.key
-                      ? "bg-foreground/10 text-foreground"
-                      : "bg-muted text-muted-foreground group-hover/tab:bg-muted/80",
+                      ? "bg-[#303030]/10 text-[#303030] dark:bg-zinc-100/15 dark:text-zinc-100 font-semibold"
+                      : "bg-[#f6f6f7] dark:bg-zinc-800 text-[#616161] dark:text-zinc-400 group-hover/tab:bg-[#e4e5e7] dark:group-hover/tab:bg-zinc-700",
                   )}
                 >
                   {tab.count}
@@ -254,27 +254,27 @@ function RootLayout({ children }: { children: React.ReactNode }) {
           const csv = buildCsv(feeds, [
             {
               header: "Author First Name",
-              getValue: (p: any) => p.user?.firstName || "",
+              getValue: (p: FeedProps) => p.user?.firstName || "",
             },
             {
               header: "Author Last Name",
-              getValue: (p: any) => p.user?.lastName || "",
+              getValue: (p: FeedProps) => p.user?.lastName || "",
             },
             {
               header: "Content / Description",
-              getValue: (p: any) => p.description || "",
+              getValue: (p: FeedProps) => p.description || "",
             },
-            { header: "Source", getValue: (p: any) => p.source || "" },
-            { header: "Privacy", getValue: (p: any) => p.privacy || "" },
+            { header: "Source", getValue: (p: FeedProps) => p.source || "" },
+            { header: "Privacy", getValue: (p: FeedProps) => p.privacy || "" },
             {
               header: "Reactions",
-              getValue: (p: any) => p.totalReactions ?? 0,
+              getValue: (p: FeedProps) => p.totalReactions ?? 0,
             },
-            { header: "Comments", getValue: (p: any) => p.totalComment ?? 0 },
-            { header: "Reshares", getValue: (p: any) => p.totalReShare ?? 0 },
+            { header: "Comments", getValue: (p: FeedProps) => p.totalComment ?? 0 },
+            { header: "Reshares", getValue: (p: FeedProps) => p.totalReShare ?? 0 },
             {
               header: "Created At",
-              getValue: (p: any) =>
+              getValue: (p: FeedProps) =>
                 p.createdAt
                   ? new Date(parseInt(p.createdAt)).toISOString().slice(0, 10)
                   : "",

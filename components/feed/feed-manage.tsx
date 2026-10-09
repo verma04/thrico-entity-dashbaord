@@ -55,7 +55,7 @@ import {
   useListingFeed,
   useNumberOfFeeds,
 } from "@/graphql/actions/feed";
-import PostModal from "./add-feed";
+import { FeedQuickComposer } from "./add-feed";
 import { FeedGrid } from "./feed-grid";
 import { FeedTable, feedTableColumns } from "./feed-table";
 import { ExportFeedModal } from "./export-feed-modal";
@@ -68,30 +68,30 @@ import { cn } from "@/lib/utils";
 
 function FeedSkeletonGrid() {
   return (
-    <div className="grid grid-cols-1 gap-5 max-w-2xl mx-auto">
+    <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="w-full rounded-2xl bg-card border border-border/80 p-5 space-y-4 shadow-xs"
+          className="w-full rounded-[10px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-800 p-4 space-y-3.5 shadow-2xs"
         >
           <div className="flex items-center gap-3">
-            <Skeleton className="h-11 w-11 rounded-xl" />
-            <div className="space-y-2 flex-1">
-              <Skeleton className="h-4 w-32 rounded-md" />
-              <Skeleton className="h-3 w-20 rounded-md" />
+            <Skeleton className="h-10 w-10 rounded-lg" />
+            <div className="space-y-1.5 flex-1">
+              <Skeleton className="h-3.5 w-32 rounded-md" />
+              <Skeleton className="h-2.5 w-20 rounded-md" />
             </div>
           </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full rounded-md" />
-            <Skeleton className="h-4 w-4/5 rounded-md" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-3.5 w-full rounded-md" />
+            <Skeleton className="h-3.5 w-4/5 rounded-md" />
           </div>
-          <Skeleton className="h-44 w-full rounded-xl" />
-          <div className="flex items-center justify-between pt-2 border-t border-border/40">
+          <Skeleton className="h-40 w-full rounded-lg" />
+          <div className="flex items-center justify-between pt-2 border-t border-[#e1e3e5]/60 dark:border-zinc-800/60">
             <div className="flex gap-2">
-              <Skeleton className="h-8 w-16 rounded-lg" />
-              <Skeleton className="h-8 w-20 rounded-lg" />
+              <Skeleton className="h-7 w-14 rounded-md" />
+              <Skeleton className="h-7 w-16 rounded-md" />
             </div>
-            <Skeleton className="h-8 w-20 rounded-lg" />
+            <Skeleton className="h-7 w-16 rounded-md" />
           </div>
         </div>
       ))}
@@ -101,8 +101,8 @@ function FeedSkeletonGrid() {
 
 function FeedSkeletonTable() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
-      <div className="h-10 border-b border-border bg-muted/30 px-5 flex items-center gap-4">
+    <div className="overflow-hidden rounded-[10px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs">
+      <div className="h-10 border-b border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb] dark:bg-zinc-800/40 px-5 flex items-center gap-4">
         {[40, 140, 260, 80, 80, 60, 60, 60, 90, 40].map((w, i) => (
           <Skeleton key={i} className="h-2.5 rounded" style={{ width: w }} />
         ))}
@@ -110,7 +110,7 @@ function FeedSkeletonTable() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 px-5 py-3 border-b border-border/40 last:border-0"
+          className="flex items-center gap-4 px-5 py-3 border-b border-[#e1e3e5]/60 dark:border-zinc-800/60 last:border-0"
         >
           <Skeleton className="h-4 w-6 rounded" />
           <div className="flex items-center gap-2.5 w-36">
@@ -289,7 +289,10 @@ export function FeedManage({
       ? countData?.numberOfFeeds || activeQueryResult.data?.length || 0
       : activeQueryResult.data?.length || 0;
 
-  const rawFeeds: FeedProps[] = activeQueryResult.data || [];
+  const rawFeeds: FeedProps[] = useMemo(
+    () => activeQueryResult.data || [],
+    [activeQueryResult.data]
+  );
   const loading = activeQueryResult.loading;
   const refetch = activeQueryResult.refetch;
 
@@ -437,7 +440,10 @@ export function FeedManage({
   return (
     <div className="space-y-6">
       {/* ── Action / Filter Bar ───────────────────────────────────────────── */}
-      <EcosystemActionBar shadow="none" className="rounded-xl border border-border/80 bg-card p-2">
+      <EcosystemActionBar
+        shadow="none"
+        className="rounded-[10px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xs p-2"
+      >
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
@@ -459,10 +465,10 @@ export function FeedManage({
                 value={selectedType}
                 onValueChange={(v) => updateParams({ type: v, page: null })}
               >
-                <SelectTrigger className="w-[140px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                <SelectTrigger className="w-[140px] h-8.5 rounded-lg border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-medium text-[#303030] dark:text-zinc-100 shadow-2xs focus:ring-1 focus:ring-primary">
                   <SelectValue placeholder="Post Type" />
                 </SelectTrigger>
-                <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[150px]">
+                <SelectContent className="rounded-lg border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-md p-1 min-w-[150px]">
                   {TYPE_OPTIONS.map((opt) => {
                     const Icon = opt.icon;
                     return (
@@ -489,10 +495,10 @@ export function FeedManage({
               value={selectedPrivacy}
               onValueChange={(v) => updateParams({ privacy: v, page: null })}
             >
-              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+              <SelectTrigger className="w-[130px] h-8.5 rounded-lg border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-medium text-[#303030] dark:text-zinc-100 shadow-2xs focus:ring-1 focus:ring-primary">
                 <SelectValue placeholder="Privacy" />
               </SelectTrigger>
-              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[130px]">
+              <SelectContent className="rounded-lg border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-md p-1 min-w-[130px]">
                 {PRIVACY_OPTIONS.map((opt) => {
                   const Icon = opt.icon;
                   return (
@@ -525,10 +531,10 @@ export function FeedManage({
                   })
                 }
                 className={cn(
-                  "h-8 px-2.5 rounded-md text-xs font-medium gap-1.5 transition-all shadow-2xs",
+                  "h-8.5 px-3 rounded-lg text-xs font-medium gap-1.5 transition-all shadow-2xs cursor-pointer",
                   selectedPinned
-                    ? "bg-amber-500 hover:bg-amber-600 text-white"
-                    : "border-border text-foreground"
+                    ? "bg-amber-500 hover:bg-amber-600 text-white border-transparent"
+                    : "border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800"
                 )}
               >
                 <Pin className={cn("h-3.5 w-3.5", selectedPinned && "fill-white")} />
@@ -544,7 +550,7 @@ export function FeedManage({
                 variant="ghost"
                 size="sm"
                 onClick={clearAllFilters}
-                className="h-8 px-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+                className="h-8.5 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 Clear
               </Button>
@@ -559,13 +565,13 @@ export function FeedManage({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+                  className="h-8.5 gap-1.5 shrink-0 border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs text-xs font-medium px-2.5 cursor-pointer"
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
                   Columns
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuContent align="end" className="w-[180px] rounded-lg border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-lg">
                 <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
                   Toggle Columns
                 </DropdownMenuLabel>
@@ -591,7 +597,7 @@ export function FeedManage({
             variant="outline"
             size="sm"
             onClick={() => refetch()}
-            className="h-8 px-2.5 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground"
+            className="h-8.5 px-2.5 gap-1.5 shrink-0 border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs text-xs font-medium cursor-pointer"
           >
             <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
             Refresh
@@ -602,7 +608,7 @@ export function FeedManage({
             variant="outline"
             size="sm"
             onClick={() => setShowExportModal(true)}
-            className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            className="h-8.5 gap-1.5 shrink-0 border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs text-xs font-medium px-2.5 cursor-pointer"
           >
             <Upload className="h-3.5 w-3.5" />
             Export
@@ -627,6 +633,11 @@ export function FeedManage({
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
+      {/* ── Polaris Quick Composer (Active on Global/All Feed) ────────────── */}
+      {feedType === "all" && (
+        <FeedQuickComposer onSuccess={() => refetch()} />
+      )}
+
       {/* ── Main Content Area (Animated View Switch) ──────────────────────── */}
       <AnimatePresence mode="wait">
         {loading && filteredFeeds.length === 0 ? (
@@ -645,26 +656,26 @@ export function FeedManage({
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center py-16 px-6 text-center rounded-2xl border border-dashed border-border/80 bg-card/50"
+            className="flex flex-col items-center justify-center py-14 px-6 text-center rounded-[10px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40"
           >
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4 shadow-xs">
-              <EmptyIcon className="h-7 w-7" />
+            <div className="h-12 w-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-center mb-3 shadow-2xs">
+              <EmptyIcon className="h-6 w-6" />
             </div>
-            <h3 className="text-base font-semibold text-foreground tracking-tight mb-1">
+            <h3 className="text-sm font-bold text-[#303030] dark:text-zinc-100 tracking-tight mb-1">
               {defaultEmptyTitle}
             </h3>
-            <p className="text-xs text-muted-foreground max-w-sm mb-6 leading-relaxed">
+            <p className="text-xs text-[#616161] dark:text-zinc-400 max-w-sm mb-5 leading-relaxed">
               {hasActiveFilters
                 ? "No posts match your selected filter criteria. Try resetting filters."
                 : defaultEmptyDescription}
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {hasActiveFilters ? (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={clearAllFilters}
-                  className="rounded-xl h-9 text-xs font-semibold"
+                  className="rounded-lg h-8.5 px-3.5 text-xs font-semibold border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs cursor-pointer"
                 >
                   Reset Filters
                 </Button>
@@ -672,7 +683,7 @@ export function FeedManage({
                 <Button
                   asChild
                   size="sm"
-                  className="rounded-xl h-9 text-xs font-semibold gap-1.5"
+                  className="rounded-lg h-8.5 px-4 text-xs font-medium bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white shadow-2xs cursor-pointer gap-1.5"
                 >
                   <Link href="/feed/create">
                     <Plus className="h-3.5 w-3.5" />
@@ -684,7 +695,7 @@ export function FeedManage({
                 variant="outline"
                 size="sm"
                 onClick={() => refetch()}
-                className="rounded-xl h-9 text-xs font-semibold gap-1.5"
+                className="rounded-lg h-8.5 px-3 text-xs font-semibold border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 shadow-2xs cursor-pointer gap-1.5"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 Refresh

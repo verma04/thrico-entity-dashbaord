@@ -8,7 +8,6 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  Sparkles,
   Globe,
   RefreshCw,
   Copy,
@@ -16,10 +15,6 @@ import {
   Eye,
   Activity,
   Bookmark,
-  ExternalLink,
-  ShieldCheck,
-  MousePointerClick,
-  Layers,
 } from "lucide-react";
 import {
   Sheet,

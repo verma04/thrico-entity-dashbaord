@@ -1,6 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
+import type { ApolloCache } from "@apollo/client";
 import {
   AdminTable,
   AdminTableColumn,
@@ -103,7 +105,7 @@ export function FeedTable({
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
     refetchQueries: [{ query: GET_ALL_FEED }, { query: NUMBER_OF_FEED }],
-    update(cache: any) {
+    update(cache: ApolloCache<unknown>) {
       if (feedToDelete) {
         cache.evict({ id: cache.identify({ __typename: "Feed", id: feedToDelete.id }) });
         cache.gc();
@@ -116,7 +118,7 @@ export function FeedTable({
         icon: <Trash2 className="h-4 w-4 text-emerald-500" />,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       if (error.message?.toLowerCase().includes("not found")) {
         setFeedToDelete(null);
         toast.info("Post already removed", {
@@ -137,7 +139,7 @@ export function FeedTable({
         { query: GET_ALL_FEED },
         { query: NUMBER_OF_FEED },
       ],
-      update(cache: any) {
+      update(cache: ApolloCache<unknown>) {
         if (feedToDelete) {
           cache.evict({ id: cache.identify({ __typename: "Feed", id: feedToDelete.id }) });
           cache.gc();
@@ -150,7 +152,7 @@ export function FeedTable({
           icon: <Trash2 className="h-4 w-4 text-emerald-500" />,
         });
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         if (error.message?.toLowerCase().includes("not found")) {
           setFeedToDelete(null);
           toast.info("Post already removed", {
@@ -166,7 +168,7 @@ export function FeedTable({
 
   const [pinFeed, { loading: isPinning }] = usePinFeed({
     refetchQueries: [{ query: GET_PINNED_FEED }],
-    onCompleted: (data: any) => {
+    onCompleted: (data: { pinFeed?: { isPinned?: boolean } }) => {
       const isPinned = data?.pinFeed?.isPinned;
       toast.success(isPinned ? "Post Pinned" : "Post Unpinned", {
         description: isPinned
@@ -175,7 +177,7 @@ export function FeedTable({
         icon: <Pin className="h-4 w-4 text-amber-500" />,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error("Action failed", {
         description: error.message || "Could not update pin status.",
       });
@@ -663,20 +665,24 @@ export function FeedTable({
           if (!open) setFeedToDelete(null);
         }}
       >
-        <AlertDialogContent className="rounded-2xl">
+        <AlertDialogContent className="rounded-xl border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this post?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-sm font-bold text-[#303030] dark:text-zinc-100">
+              Delete this post?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-[#616161] dark:text-zinc-400">
               This will permanently remove the post and its comments from the
               community feed. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="pt-2">
+            <AlertDialogCancel className="rounded-lg h-8.5 px-3 text-xs font-semibold border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeletingGlobal || isDeletingCommunity}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+              className="rounded-lg h-8.5 px-3.5 text-xs font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isDeletingGlobal || isDeletingCommunity ? (
                 <>

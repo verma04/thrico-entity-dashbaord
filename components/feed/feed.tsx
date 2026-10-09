@@ -1,6 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
+import type { ApolloCache } from "@apollo/client";
 import {
   Trash2,
   Pin,
@@ -20,7 +22,6 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +50,7 @@ import Like from "./actions/like";
 import Analytics from "./analytics";
 import Comments from "./comment/comment";
 import PollVote from "../polls/poll-vote";
+import type { poll } from "../polls/ts-types";
 import FeedMedia from "./feed-media";
 import FeedDescription from "./feed-description";
 import { cn } from "@/lib/utils";
@@ -74,7 +76,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
     refetchQueries: [{ query: GET_ALL_FEED }, { query: NUMBER_OF_FEED }],
-    update(cache: any) {
+    update(cache: ApolloCache<unknown>) {
       cache.evict({ id: cache.identify({ __typename: "Feed", id: feed.id }) });
       cache.gc();
     },
@@ -85,7 +87,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
         icon: <Trash2 className="h-4 w-4 text-emerald-500" />,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       if (error.message?.toLowerCase().includes("not found")) {
         setIsDeleteDialogOpen(false);
         toast.info("Post already removed", {
@@ -107,7 +109,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
         { query: GET_ALL_FEED },
         { query: NUMBER_OF_FEED },
       ],
-      update(cache: any) {
+      update(cache: ApolloCache<unknown>) {
         cache.evict({ id: cache.identify({ __typename: "Feed", id: feed.id }) });
         cache.gc();
       },
@@ -119,7 +121,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
           icon: <Trash2 className="h-4 w-4 text-emerald-500" />,
         });
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         if (error.message?.toLowerCase().includes("not found")) {
           setIsDeleteDialogOpen(false);
           toast.info("Post already removed", {
@@ -140,20 +142,22 @@ export default function Feed({ feed }: { feed: FeedProps }) {
 
   const [pinFeed, { loading: isPinning }] = usePinFeed({
     refetchQueries: [{ query: GET_PINNED_FEED }],
-    update(cache: any, { data: { pinFeed } }: any) {
+    update(cache: ApolloCache<unknown>, { data }: { data?: { pinFeed?: { isPinned: boolean; pinnedAt?: string } } }) {
+      if (!data?.pinFeed) return;
+      const updatedPin = data.pinFeed;
       cache.modify({
-        id: cache.identify(feed),
+        id: cache.identify({ __typename: "Feed", id: feed.id }),
         fields: {
           isPinned() {
-            return pinFeed.isPinned;
+            return updatedPin.isPinned;
           },
           pinnedAt() {
-            return pinFeed.pinnedAt;
+            return updatedPin.pinnedAt;
           },
         },
       });
     },
-    onCompleted: (data: any) => {
+    onCompleted: (data: { pinFeed?: { isPinned?: boolean } }) => {
       const isPinned = data?.pinFeed?.isPinned;
       toast.success(isPinned ? "Post Pinned" : "Post Unpinned", {
         description: isPinned
@@ -162,7 +166,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
         icon: <Pin className="h-4 w-4 text-amber-500" />,
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error("Action failed", {
         description: error.message || "Could not update the pin status.",
       });
@@ -216,23 +220,23 @@ export default function Feed({ feed }: { feed: FeedProps }) {
 
   return (
     <div className="w-full">
-      <Card className="w-full rounded-2xl bg-card border border-border/80 shadow-xs hover:shadow-md hover:border-border transition-all duration-300 overflow-hidden group">
+      <div className="w-full rounded-[10px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-800 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-xs transition-all duration-150 overflow-hidden group">
         {/* Pinned Highlight Banner */}
         {feed.isPinned && (
-          <div className="flex items-center justify-between px-5 py-2 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-b border-amber-500/20 text-amber-600 dark:text-amber-400">
+          <div className="flex items-center justify-between px-4 py-2 bg-amber-50/70 dark:bg-amber-950/30 border-b border-amber-200/80 dark:border-amber-800/60 text-amber-900 dark:text-amber-200">
             <div className="flex items-center gap-1.5 text-xs font-semibold">
               <Pin className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
               <span>Pinned Announcement</span>
             </div>
             {feed.pinnedAt && (
-              <span className="text-[11px] text-amber-600/70 dark:text-amber-400/70 font-medium">
+              <span className="text-[11px] text-amber-700/80 dark:text-amber-400/80 font-medium font-mono">
                 {moment(feed.pinnedAt).fromNow()}
               </span>
             )}
           </div>
         )}
 
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           {/* Card Top: Author Info + Category Badge + Actions Menu */}
           <div className="flex justify-between items-start gap-3 mb-3.5">
             <FeedUserDetails {...feed} />
@@ -242,7 +246,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
               {isJob && (
                 <Badge
                   variant="outline"
-                  className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5"
+                  className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-[4px]"
                 >
                   <Briefcase className="h-3 w-3" /> Job
                 </Badge>
@@ -250,7 +254,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
               {isMarketplace && (
                 <Badge
                   variant="outline"
-                  className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5"
+                  className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-[4px]"
                 >
                   <ShoppingBag className="h-3 w-3" /> Listing
                 </Badge>
@@ -258,7 +262,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
               {feed.moment && (
                 <Badge
                   variant="outline"
-                  className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5"
+                  className="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-[4px]"
                 >
                   <Play className="h-3 w-3" /> Moment
                 </Badge>
@@ -266,7 +270,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
               {feed.poll && (
                 <Badge
                   variant="outline"
-                  className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5"
+                  className="bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-[4px]"
                 >
                   <BarChart2 className="h-3 w-3" /> Poll
                 </Badge>
@@ -274,7 +278,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
               {feed.celebration && (
                 <Badge
                   variant="outline"
-                  className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5"
+                  className="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 text-[10px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded-[4px]"
                 >
                   <Sparkles className="h-3 w-3" /> Celebration
                 </Badge>
@@ -369,22 +373,24 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <AlertDialogContent className="rounded-2xl">
+                <AlertDialogContent className="rounded-xl border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl max-w-md">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this post?</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="text-sm font-bold text-[#303030] dark:text-zinc-100">
+                      Delete this post?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-xs text-[#616161] dark:text-zinc-400">
                       This will permanently remove the post and all its contents
                       from the community feed. This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">
+                  <AlertDialogFooter className="pt-2">
+                    <AlertDialogCancel className="rounded-lg h-8.5 px-3 text-xs font-semibold border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#303030] dark:text-zinc-200">
                       Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                      className="rounded-lg h-8.5 px-3.5 text-xs font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
                       {isDeleting ? "Deleting..." : "Delete"}
                     </AlertDialogAction>
@@ -435,8 +441,8 @@ export default function Feed({ feed }: { feed: FeedProps }) {
 
             {/* Poll Component Embed */}
             {feed?.poll && (
-              <div className="mt-2 rounded-xl overflow-hidden border border-border/60 bg-muted/20">
-                <PollVote data={feed.poll as any} />
+              <div className="mt-2 rounded-xl overflow-hidden border border-[#d2d5d9] dark:border-zinc-800 bg-[#f9fafb]/50 dark:bg-zinc-900/40">
+                <PollVote data={feed.poll as unknown as poll} />
               </div>
             )}
 
@@ -571,14 +577,14 @@ export default function Feed({ feed }: { feed: FeedProps }) {
         </div>
 
         {/* Card Footer: Engagement Actions Bar */}
-        <div className="px-4 py-2.5 bg-muted/20 border-t border-border/60 flex items-center justify-between gap-2">
+        <div className="px-4 py-2.5 bg-[#f9fafb]/50 dark:bg-zinc-900/50 border-t border-[#e1e3e5]/60 dark:border-zinc-800/60 flex items-center justify-between gap-2">
           <div className="flex items-center gap-1">
-            <Like item={feed as any} />
+            <Like item={feed} />
             <Comments id={feed.id} totalComments={feed.totalComment} />
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-lg h-8 px-2.5 font-medium text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all flex items-center gap-1.5"
+              className="rounded-lg h-8 px-2.5 font-medium text-xs text-[#616161] dark:text-zinc-400 hover:text-[#303030] dark:hover:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5 cursor-pointer"
               onClick={handleShare}
             >
               {copied ? (
@@ -606,7 +612,7 @@ export default function Feed({ feed }: { feed: FeedProps }) {
             />
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
