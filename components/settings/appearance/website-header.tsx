@@ -14,7 +14,7 @@ interface WebsiteHeaderProps {
 }
 
 const WebsiteHeader: React.FC<WebsiteHeaderProps> = ({ theme }) => {
-  const { data, loading, error } = useQuery(GET_ORGANIZATION);
+  const { data, loading } = useQuery(GET_ORGANIZATION);
 
   if (loading) {
     return (

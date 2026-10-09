@@ -12,6 +12,12 @@ interface ButtonTheme {
   fontSize: number;
 }
 
+import type {
+  NavigationTheme,
+  SidebarTheme,
+  BottomSheetTheme,
+} from "./ts-types";
+
 interface Theme {
   primaryColor: string;
   secondaryColor: string;
@@ -29,6 +35,9 @@ interface Theme {
   boxShadow: string;
   hoverEffect: string;
   Button: ButtonTheme;
+  Navigation?: NavigationTheme;
+  Sidebar?: SidebarTheme;
+  BottomSheet?: BottomSheetTheme;
   setTheme: (theme: Partial<Omit<Theme, "setTheme">>) => void;
 }
 
@@ -59,6 +68,32 @@ export const useThemeStore = create<Theme>()(
         defaultColor: "#000000",
         defaultBorderColor: "#d9d9d9",
         fontSize: 16,
+      },
+      Navigation: {
+        tabBg: "#ffffff",
+        tabActiveColor: "#3b82f6",
+        tabActiveBg: "rgba(59, 130, 246, 0.1)",
+        tabInactiveColor: "#64748b",
+        tabBorderColor: "#e2e8f0",
+        tabStyle: "pill",
+        tabIndicatorColor: "#3b82f6",
+        tabLayoutVariant: "pills",
+      },
+      Sidebar: {
+        sidebarBg: "#ffffff",
+        sidebarTextColor: "#334155",
+        sidebarActiveColor: "#3b82f6",
+        sidebarActiveBg: "#eff6ff",
+        sidebarBorderColor: "#e2e8f0",
+        sidebarHeaderBg: "#f8fafc",
+      },
+      BottomSheet: {
+        sheetBg: "#f8fafc",
+        sheetHandleColor: "#cbd5e1",
+        sheetBorderRadius: 28,
+        sheetHeaderBg: "#ffffff",
+        sheetHeaderTextColor: "#0f172a",
+        sheetBorderColor: "#f1f5f9",
       },
       setTheme: (newTheme) => set((state) => ({ ...state, ...newTheme })),
     }),

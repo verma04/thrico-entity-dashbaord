@@ -13,6 +13,32 @@ export const GET_THEME = gql`
         defaultBorderColor
         fontSize
       }
+      Navigation {
+        tabBg
+        tabActiveColor
+        tabActiveBg
+        tabInactiveColor
+        tabBorderColor
+        tabStyle
+        tabIndicatorColor
+        tabLayoutVariant
+      }
+      Sidebar {
+        sidebarBg
+        sidebarTextColor
+        sidebarActiveColor
+        sidebarActiveBg
+        sidebarBorderColor
+        sidebarHeaderBg
+      }
+      BottomSheet {
+        sheetBg
+        sheetHandleColor
+        sheetBorderRadius
+        sheetHeaderBg
+        sheetHeaderTextColor
+        sheetBorderColor
+      }
       backgroundColor
       borderColor
       borderRadius
@@ -44,6 +70,32 @@ export const EDIT_THEME = gql`
         defaultColor
         defaultBorderColor
         fontSize
+      }
+      Navigation {
+        tabBg
+        tabActiveColor
+        tabActiveBg
+        tabInactiveColor
+        tabBorderColor
+        tabStyle
+        tabIndicatorColor
+        tabLayoutVariant
+      }
+      Sidebar {
+        sidebarBg
+        sidebarTextColor
+        sidebarActiveColor
+        sidebarActiveBg
+        sidebarBorderColor
+        sidebarHeaderBg
+      }
+      BottomSheet {
+        sheetBg
+        sheetHandleColor
+        sheetBorderRadius
+        sheetHeaderBg
+        sheetHeaderTextColor
+        sheetBorderColor
       }
       backgroundColor
       borderColor

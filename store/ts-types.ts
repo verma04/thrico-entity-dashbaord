@@ -47,6 +47,35 @@ export interface ButtonTheme {
   fontSize: number;
 }
 
+export interface NavigationTheme {
+  tabBg: string;
+  tabActiveColor: string;
+  tabActiveBg: string;
+  tabInactiveColor: string;
+  tabBorderColor: string;
+  tabStyle: "pill" | "line" | "floating" | "minimal";
+  tabIndicatorColor: string;
+  tabLayoutVariant?: "pills" | "underline" | "segmented" | "bordered";
+}
+
+export interface SidebarTheme {
+  sidebarBg: string;
+  sidebarTextColor: string;
+  sidebarActiveColor: string;
+  sidebarActiveBg: string;
+  sidebarBorderColor: string;
+  sidebarHeaderBg?: string;
+}
+
+export interface BottomSheetTheme {
+  sheetBg: string;
+  sheetHandleColor: string;
+  sheetBorderRadius: number;
+  sheetHeaderBg: string;
+  sheetHeaderTextColor: string;
+  sheetBorderColor?: string;
+}
+
 export interface EntityTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -64,6 +93,9 @@ export interface EntityTheme {
   boxShadow: string;
   hoverEffect: string;
   Button?: ButtonTheme;
+  Navigation?: NavigationTheme;
+  Sidebar?: SidebarTheme;
+  BottomSheet?: BottomSheetTheme;
 }
 
 export interface FormSettings extends EntityTheme {}

@@ -65,7 +65,7 @@ const PostCard: React.FC<PostCardProps> = ({ theme, post }) => {
         style={{
           color: theme.textColor,
           fontSize: `${theme.fontSize + 2}px`,
-          fontWeight: theme.fontWeight as any,
+          fontWeight: theme.fontWeight,
         }}
       >
         {post.title}

@@ -17,12 +17,18 @@ const TrendingTopics: React.FC<TrendingTopicsProps> = ({ theme }) => {
     { topic: "GraphQL", posts: 12 },
   ]
 
+  const sidebarBg = theme.Sidebar?.sidebarBg || theme.inputBackground || "#ffffff";
+  const sidebarTextColor = theme.Sidebar?.sidebarTextColor || theme.textColor || "#0f172a";
+  const sidebarBorderColor = theme.Sidebar?.sidebarBorderColor || theme.borderColor || "#e2e8f0";
+  const sidebarActiveColor = theme.Sidebar?.sidebarActiveColor || theme.primaryColor || "#3b82f6";
+  const sidebarActiveBg = theme.Sidebar?.sidebarActiveBg || `${sidebarActiveColor}15`;
+
   return (
     <Card
       className="p-4"
       style={{
-        backgroundColor: theme.inputBackground,
-        borderColor: theme.borderColor,
+        backgroundColor: sidebarBg,
+        borderColor: sidebarBorderColor,
         borderRadius: `${theme.borderRadius}px`,
         boxShadow: theme.boxShadow,
       }}
@@ -30,9 +36,9 @@ const TrendingTopics: React.FC<TrendingTopicsProps> = ({ theme }) => {
       <h3
         className="font-semibold mb-4"
         style={{
-          color: theme.textColor,
+          color: sidebarTextColor,
           fontSize: `${theme.fontSize}px`,
-          fontWeight: theme.fontWeight as any,
+          fontWeight: theme.fontWeight,
         }}
       >
         Trending Topics
@@ -43,11 +49,11 @@ const TrendingTopics: React.FC<TrendingTopicsProps> = ({ theme }) => {
             key={index}
             className="flex justify-between items-center pb-3"
             style={{
-              borderBottom: index < topics.length - 1 ? `1px solid ${theme.borderColor}` : "none",
+              borderBottom: index < topics.length - 1 ? `1px solid ${sidebarBorderColor}` : "none",
             }}
           >
-            <p style={{ color: theme.primaryColor, cursor: "pointer" }}>#{item.topic}</p>
-            <Badge style={{ backgroundColor: theme.primaryColor, color: "#fff" }}>{item.posts}</Badge>
+            <p style={{ color: sidebarActiveColor, cursor: "pointer" }}>#{item.topic}</p>
+            <Badge style={{ backgroundColor: sidebarActiveBg, color: sidebarActiveColor }}>{item.posts}</Badge>
           </div>
         ))}
       </div>

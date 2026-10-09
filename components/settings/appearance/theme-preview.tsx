@@ -7,21 +7,27 @@ import WebsiteHeader from "./website-header"
 import NavigationTabs from "./navigation-tabs"
 import PostsFeed from "./posts-feed"
 import Sidebar from "./sidebar"
+import MobileDevicePreview from "./mobile-device-preview"
 
 interface ThemePreviewProps {
   theme: EntityTheme
+  mode?: "desktop" | "mobile"
 }
 
-const ThemePreview: React.FC<ThemePreviewProps> = ({ theme }) => {
+const ThemePreview: React.FC<ThemePreviewProps> = ({ theme, mode = "desktop" }) => {
+  if (mode === "mobile") {
+    return <MobileDevicePreview theme={theme} />
+  }
+
   return (
-    <Card className="p-0 overflow-hidden border">
+    <Card className="p-0 overflow-hidden border shadow-xs">
       <div
         className="rounded-lg overflow-hidden"
         style={{
           backgroundColor: theme.backgroundColor,
           borderRadius: `${theme.borderRadius}px`,
           borderWidth: `${theme.borderWidth}px`,
-          borderStyle: theme.borderStyle as any,
+          borderStyle: (theme.borderStyle || "solid") as React.CSSProperties["borderStyle"],
           borderColor: theme.borderColor,
           boxShadow: theme.boxShadow,
         }}

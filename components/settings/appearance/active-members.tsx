@@ -17,12 +17,17 @@ const ActiveMembers: React.FC<ActiveMembersProps> = ({ theme }) => {
     { name: "Taylor", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor" },
   ]
 
+  const sidebarBg = theme.Sidebar?.sidebarBg || theme.inputBackground || "#ffffff";
+  const sidebarTextColor = theme.Sidebar?.sidebarTextColor || theme.textColor || "#0f172a";
+  const sidebarBorderColor = theme.Sidebar?.sidebarBorderColor || theme.borderColor || "#e2e8f0";
+  const sidebarActiveColor = theme.Sidebar?.sidebarActiveColor || theme.primaryColor || "#3b82f6";
+
   return (
     <Card
       className="p-4"
       style={{
-        backgroundColor: theme.inputBackground,
-        borderColor: theme.borderColor,
+        backgroundColor: sidebarBg,
+        borderColor: sidebarBorderColor,
         borderRadius: `${theme.borderRadius}px`,
         boxShadow: theme.boxShadow,
       }}
@@ -30,9 +35,9 @@ const ActiveMembers: React.FC<ActiveMembersProps> = ({ theme }) => {
       <h3
         className="font-semibold mb-4"
         style={{
-          color: theme.textColor,
+          color: sidebarTextColor,
           fontSize: `${theme.fontSize}px`,
-          fontWeight: theme.fontWeight as any,
+          fontWeight: theme.fontWeight,
         }}
       >
         Active Members
@@ -42,7 +47,7 @@ const ActiveMembers: React.FC<ActiveMembersProps> = ({ theme }) => {
           <Avatar
             key={idx}
             className="w-9 h-9 border-2 cursor-pointer hover:scale-110 transition"
-            style={{ borderColor: theme.primaryColor }}
+            style={{ borderColor: sidebarActiveColor }}
           >
             <AvatarImage src={member.avatar || "/placeholder.svg"} />
             <AvatarFallback>{member.name[0]}</AvatarFallback>
