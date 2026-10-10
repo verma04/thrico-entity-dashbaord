@@ -78,6 +78,9 @@ export const useThemeStore = create<Theme>()(
         tabStyle: "pill",
         tabIndicatorColor: "#3b82f6",
         tabLayoutVariant: "pills",
+        tabBadgeBg: "#ef4444",
+        tabBadgeColor: "#ffffff",
+        tabSize: "md",
       },
       Sidebar: {
         sidebarBg: "#ffffff",

@@ -162,6 +162,9 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme })
         tabStyle: theme?.Navigation?.tabStyle || "pill",
         tabIndicatorColor: theme?.Navigation?.tabIndicatorColor || theme?.primaryColor || "#3b82f6",
         tabLayoutVariant: theme?.Navigation?.tabLayoutVariant || "pills",
+        tabBadgeBg: theme?.Navigation?.tabBadgeBg || "#ef4444",
+        tabBadgeColor: theme?.Navigation?.tabBadgeColor || "#ffffff",
+        tabSize: theme?.Navigation?.tabSize || "md",
       },
       Sidebar: {
         sidebarBg: theme?.Sidebar?.sidebarBg || "#ffffff",
@@ -229,6 +232,9 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme })
             tabStyle: values.Navigation.tabStyle,
             tabIndicatorColor: values.Navigation.tabIndicatorColor,
             tabLayoutVariant: values.Navigation.tabLayoutVariant,
+            tabBadgeBg: values.Navigation.tabBadgeBg,
+            tabBadgeColor: values.Navigation.tabBadgeColor,
+            tabSize: values.Navigation.tabSize,
           }
         : undefined;
 
@@ -584,6 +590,64 @@ export const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme })
                           </button>
                         );
                       })}
+                    </div>
+                  </div>
+
+                  {/* Tab Size */}
+                  <div className="space-y-2 pt-3 border-t border-border/40">
+                    <Label className="uppercase text-[10px] text-muted-foreground/60 font-semibold tracking-wider">
+                      Tab Size (Padding & Scale)
+                    </Label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { id: "sm", label: "Small", desc: "Compact & dense" },
+                        { id: "md", label: "Medium", desc: "Default balanced" },
+                        { id: "lg", label: "Large", desc: "Spacious & prominent" },
+                      ].map((sizeOpt) => {
+                        const isSelected = (formValues.Navigation?.tabSize || "md") === sizeOpt.id;
+                        return (
+                          <button
+                            key={sizeOpt.id}
+                            type="button"
+                            onClick={() => formik.setFieldValue("Navigation.tabSize", sizeOpt.id)}
+                            className={cn(
+                              "p-2.5 rounded-lg border text-left transition-all cursor-pointer",
+                              isSelected
+                                ? "border-primary/50 bg-primary/5 ring-1 ring-primary/15"
+                                : "border-transparent bg-muted/20 hover:bg-muted/40 hover:border-border/40",
+                            )}
+                          >
+                            <div className="flex items-center justify-between">
+                              <p className={cn("text-[11.5px] font-medium", isSelected ? "text-primary" : "text-foreground")}>
+                                {sizeOpt.label}
+                              </p>
+                              {isSelected && <Check className="w-3.5 h-3.5 text-primary" />}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground/70 mt-0.5">{sizeOpt.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Tab Badges & Notification Badges */}
+                  <div className="space-y-2 pt-3 border-t border-border/40">
+                    <Label className="uppercase text-[10px] text-muted-foreground/60 font-semibold tracking-wider">
+                      Tab Badges & Alerts
+                    </Label>
+                    <div className="rounded-lg border border-border/40 bg-muted/10 overflow-hidden divide-y divide-border/30">
+                      <ColorRow
+                        label="Badge Background"
+                        description="Color for notification and count badges on tabs"
+                        value={formValues.Navigation?.tabBadgeBg || "#ef4444"}
+                        onChange={(val) => formik.setFieldValue("Navigation.tabBadgeBg", val)}
+                      />
+                      <ColorRow
+                        label="Badge Text Color"
+                        description="Label and number color inside badges"
+                        value={formValues.Navigation?.tabBadgeColor || "#ffffff"}
+                        onChange={(val) => formik.setFieldValue("Navigation.tabBadgeColor", val)}
+                      />
                     </div>
                   </div>
                 </motion.div>

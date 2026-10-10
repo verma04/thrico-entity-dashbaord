@@ -22,6 +22,9 @@ export const GET_THEME = gql`
         tabStyle
         tabIndicatorColor
         tabLayoutVariant
+        tabBadgeBg
+        tabBadgeColor
+        tabSize
       }
       Sidebar {
         sidebarBg
@@ -80,6 +83,9 @@ export const EDIT_THEME = gql`
         tabStyle
         tabIndicatorColor
         tabLayoutVariant
+        tabBadgeBg
+        tabBadgeColor
+        tabSize
       }
       Sidebar {
         sidebarBg

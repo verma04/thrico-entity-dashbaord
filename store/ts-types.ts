@@ -56,6 +56,9 @@ export interface NavigationTheme {
   tabStyle: "pill" | "line" | "floating" | "minimal";
   tabIndicatorColor: string;
   tabLayoutVariant?: "pills" | "underline" | "segmented" | "bordered";
+  tabBadgeBg?: string;
+  tabBadgeColor?: string;
+  tabSize?: "sm" | "md" | "lg";
 }
 
 export interface SidebarTheme {
@@ -98,7 +101,7 @@ export interface EntityTheme {
   BottomSheet?: BottomSheetTheme;
 }
 
-export interface FormSettings extends EntityTheme {}
+export type FormSettings = EntityTheme;
 
 export type DuplicateQuestionFn = (id: string | number) => void;
 export type RemoveQuestionFn = (id: string | number) => void;
@@ -114,7 +117,7 @@ export type AddOptionFn = (questionId: string | number) => void;
 export type UpdateQuestionFn = (
   id: string | number,
   field: keyof Question,
-  value: any,
+  value: unknown,
 ) => void;
 
 export type UpdateFormSettingFn = (
@@ -122,4 +125,4 @@ export type UpdateFormSettingFn = (
   value: string | number,
 ) => void;
 
-export type AnswerMapFn = (questionId: string | number, value: any) => any;
+export type AnswerMapFn = (questionId: string | number, value: unknown) => unknown;

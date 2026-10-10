@@ -50,6 +50,9 @@ export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({
   const navBorderColor = theme.Navigation?.tabBorderColor || theme.borderColor || "#e2e8f0";
   const navStyle = theme.Navigation?.tabStyle || "pill";
   const navIndicatorColor = theme.Navigation?.tabIndicatorColor || navActiveColor;
+  const navBadgeBg = theme.Navigation?.tabBadgeBg || "#ef4444";
+  const navBadgeColor = theme.Navigation?.tabBadgeColor || "#ffffff";
+  const tabSize = theme.Navigation?.tabSize || "md";
 
   // Sidebar tokens with fallbacks
   const sidebarBg = theme.Sidebar?.sidebarBg || "#ffffff";
@@ -70,7 +73,7 @@ export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({
   const navItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "networks", label: "Networks", icon: Compass },
-    { id: "communities", label: "Communities", icon: Users },
+    { id: "communities", label: "Communities", icon: Users, badge: 3 },
     { id: "events", label: "Events", icon: Calendar },
     { id: "menu", label: "Menu", icon: LayoutDashboard },
     { id: "profile", label: "Profile", icon: User },
@@ -160,7 +163,7 @@ export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({
                 <Bell className="w-3.5 h-3.5" />
                 <span
                   className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: theme.primaryColor }}
+                  style={{ backgroundColor: navBadgeBg }}
                 />
               </div>
             </div>
@@ -261,7 +264,8 @@ export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({
           >
             <div
               className={cn(
-                "grid h-14 items-center px-1 border-t transition-all",
+                "grid items-center px-1 border-t transition-all",
+                tabSize === "sm" ? "h-12" : tabSize === "lg" ? "h-16" : "h-14",
                 navStyle === "floating"
                   ? "rounded-2xl border shadow-lg mx-1"
                   : "",
@@ -301,14 +305,33 @@ export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({
                       />
                     )}
 
-                    <Icon
-                      className="w-4 h-4 transition-transform"
-                      style={{
-                        color: isActive ? navActiveColor : navInactiveColor,
-                      }}
-                    />
+                    <div className="relative">
+                      <Icon
+                        className={cn(
+                          "transition-transform",
+                          tabSize === "sm" ? "w-3.5 h-3.5" : tabSize === "lg" ? "w-4.5 h-4.5" : "w-4 h-4",
+                        )}
+                        style={{
+                          color: isActive ? navActiveColor : navInactiveColor,
+                        }}
+                      />
+                      {"badge" in item && item.badge !== undefined && (
+                        <span
+                          className="absolute -top-1.5 -right-2 px-1 min-w-3.5 h-3.5 rounded-full text-[8.5px] font-bold flex items-center justify-center leading-none shadow-xs"
+                          style={{
+                            backgroundColor: navBadgeBg,
+                            color: navBadgeColor,
+                          }}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
                     <span
-                      className="text-[9.5px] truncate max-w-full text-center leading-tight"
+                      className={cn(
+                        "truncate max-w-full text-center leading-tight",
+                        tabSize === "sm" ? "text-[8.5px]" : tabSize === "lg" ? "text-[10px]" : "text-[9.5px]",
+                      )}
                       style={{
                         color: isActive ? navActiveColor : navInactiveColor,
                         fontWeight: isActive ? 600 : 400,
