@@ -168,6 +168,10 @@ export const GET_ENTITY_SETTINGS = gql`
       allowEntityMediaGalleryInFeed
       allowEntityDiscoverInFeed
       discoverFeedName
+      discoverFeedType
+      discoverFeedHtml
+      discoverFeedCss
+      discoverFeedHtmlFileName
       feedTabNames
       mediaGalleryFeedAlbumId
       mediaGalleryFeedName
@@ -285,6 +289,10 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       allowEntityMediaGalleryInFeed
       allowEntityDiscoverInFeed
       discoverFeedName
+      discoverFeedType
+      discoverFeedHtml
+      discoverFeedCss
+      discoverFeedHtmlFileName
       feedTabNames
       mediaGalleryFeedAlbumId
       mediaGalleryFeedName

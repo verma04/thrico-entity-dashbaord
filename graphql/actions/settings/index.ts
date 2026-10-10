@@ -69,6 +69,10 @@ export interface EntitySettings {
   allowEntityMediaGalleryInFeed?: boolean;
   allowEntityDiscoverInFeed?: boolean;
   discoverFeedName?: string | null;
+  discoverFeedType?: "normal" | "html" | string | null;
+  discoverFeedHtml?: string | null;
+  discoverFeedCss?: string | null;
+  discoverFeedHtmlFileName?: string | null;
   feedTabNames?: Record<string, string>;
   mediaGalleryFeedAlbumId?: string | null;
   mediaGalleryFeedName?: string | null;
@@ -275,6 +279,10 @@ export interface UpdateEntitySettingsInput {
   allowEntityMediaGalleryInFeed?: boolean;
   allowEntityDiscoverInFeed?: boolean;
   discoverFeedName?: string | null;
+  discoverFeedType?: "normal" | "html" | string | null;
+  discoverFeedHtml?: string | null;
+  discoverFeedCss?: string | null;
+  discoverFeedHtmlFileName?: string | null;
   feedTabNames?: Record<string, string>;
   mediaGalleryFeedAlbumId?: string | null;
   mediaGalleryFeedName?: string | null;

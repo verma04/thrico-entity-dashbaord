@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   Images,
   Wand2,
@@ -26,6 +28,10 @@ import {
   Heart,
   Eye,
   Sliders,
+  FileCode,
+  FileUp,
+  Eye as EyeIcon,
+  Info,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { IconPicker } from "@/components/ui/icon-picker";
@@ -76,6 +82,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { IsolatedHtmlRenderer } from "@/components/website-layout/modules/isolated-html-renderer";
 
 export interface MediaGalleryFeedLink {
   id: string;
@@ -88,7 +102,7 @@ export interface FeedField {
   key: string;
   label: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   type?: string;
 }
 
@@ -97,7 +111,7 @@ export const FEED_FIELDS: FeedField[] = [
     key: "allowEntityDiscoverInFeed",
     label: "Show Discover Feed",
     description:
-      "Main community stream showcasing personalized updates, trending posts, and curated activities.",
+      "Main community stream showcasing personalized updates, trending posts, or custom HTML section.",
     icon: Wand2,
     type: "switch",
   },
@@ -162,6 +176,10 @@ export const FEED_FIELDS: FeedField[] = [
 interface FeedVisibilitySettings {
   allowEntityDiscoverInFeed: boolean;
   discoverFeedName: string;
+  discoverFeedType: "normal" | "html";
+  discoverFeedHtml: string;
+  discoverFeedCss: string;
+  discoverFeedHtmlFileName: string;
   feedTabNames: Record<string, string>;
   allowEntityCommunityInFeed: boolean;
   allowEntityDiscussionForumInFeed: boolean;
@@ -186,21 +204,109 @@ interface FeedVisibilitySettings {
   allowReactionVisibility: boolean;
 }
 
+const feedVisibilityValidationSchema = Yup.object().shape({
+  allowEntityDiscoverInFeed: Yup.boolean().required(),
+  discoverFeedName: Yup.string().nullable(),
+  discoverFeedType: Yup.string().oneOf(["normal", "html"]).default("normal"),
+  discoverFeedHtml: Yup.string().nullable(),
+  discoverFeedCss: Yup.string().nullable(),
+  discoverFeedHtmlFileName: Yup.string().nullable(),
+  feedTabNames: Yup.object().default({}),
+  allowEntityCommunityInFeed: Yup.boolean().required(),
+  allowEntityDiscussionForumInFeed: Yup.boolean().required(),
+  allowEntityPollsInFeed: Yup.boolean().required(),
+  allowEntityMomentsInFeed: Yup.boolean().required(),
+  allowEntityFeedInFeed: Yup.boolean().required(),
+  allowEntityOpportunitiesInFeed: Yup.boolean().required(),
+  allowEntityMediaGalleryInFeed: Yup.boolean().required(),
+  mediaGalleryFeedAlbumId: Yup.string().nullable(),
+  mediaGalleryFeedName: Yup.string().nullable(),
+  mediaGalleryFeedLinks: Yup.array().default([]),
+  allowMediaGalleryShareToFeed: Yup.boolean().required(),
+  feedEntityName: Yup.string().nullable(),
+  aiModerationFeed: Yup.boolean().required(),
+  aiModerationComments: Yup.boolean().required(),
+  allowFeedPost: Yup.boolean().required(),
+  allowComment: Yup.boolean().required(),
+  allowReshare: Yup.boolean().required(),
+  allowStory: Yup.boolean().required(),
+  allowSocialReshare: Yup.boolean().required(),
+  allowFeedReaction: Yup.boolean().required(),
+  allowReactionVisibility: Yup.boolean().required(),
+});
+
+const DISCOVER_STARTER_TEMPLATES = [
+  {
+    id: "welcome-hero",
+    name: "Hero Banner",
+    category: "Hero",
+    html: `<div style="padding: 40px 24px; text-align: center; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);">
+  <span style="display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Discover & Connect</span>
+  <h2 style="font-size: 28px; font-weight: 700; margin: 0 0 12px 0; color: #ffffff;">Welcome to Our Community</h2>
+  <p style="font-size: 15px; opacity: 0.9; max-width: 540px; margin: 0 auto 20px auto; line-height: 1.6;">Explore curated updates, join exciting discussions, and connect with fellow members across the network.</p>
+  <a href="#explore" style="display: inline-block; padding: 10px 24px; background: #ffffff; color: #4f46e5; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">Get Started &rarr;</a>
+</div>`,
+    css: ``,
+  },
+  {
+    id: "highlights-grid",
+    name: "3-Column Highlights",
+    category: "Cards",
+    html: `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin: 12px 0;">
+  <div style="padding: 24px; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 14px;">01</div>
+    <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 8px 0; color: #0f172a;">Connect & Network</h3>
+    <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Meet peers, industry mentors, and thought leaders directly in your space.</p>
+  </div>
+  <div style="padding: 24px; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 14px;">02</div>
+    <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 8px 0; color: #0f172a;">Exclusive Events</h3>
+    <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Participate in virtual meetups, keynote webinars, and workshops.</p>
+  </div>
+  <div style="padding: 24px; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+    <div style="width: 40px; height: 40px; border-radius: 10px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 14px;">03</div>
+    <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 8px 0; color: #0f172a;">Growth & Rewards</h3>
+    <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Earn points, unlock badges, and redeem perks as you engage daily.</p>
+  </div>
+</div>`,
+    css: ``,
+  },
+  {
+    id: "resource-center",
+    name: "Resource Center",
+    category: "Links",
+    html: `<div style="padding: 30px; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0;">
+  <h2 style="font-size: 22px; font-weight: 700; margin: 0 0 8px 0; color: #1e293b;">Member Resource Center</h2>
+  <p style="font-size: 14px; color: #64748b; margin: 0 0 20px 0;">Essential guides, quick links, and featured documentation for all members.</p>
+  <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+    <a href="/dashboard/events" style="padding: 10px 18px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; text-decoration: none;">Upcoming Events &rarr;</a>
+    <a href="/dashboard/communities" style="padding: 10px 18px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; text-decoration: none;">Browse Communities &rarr;</a>
+    <a href="/dashboard/discussions" style="padding: 10px 18px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; text-decoration: none;">Discussions & Forum &rarr;</a>
+  </div>
+</div>`,
+    css: ``,
+  },
+];
+
+interface AlbumItem {
+  id: string;
+  title: string;
+}
+
 interface SortableMediaLinkRowProps {
   link: MediaGalleryFeedLink;
   index: number;
-  albums: any[];
+  albums: AlbumItem[];
   onUpdate: (index: number, field: "name" | "albumId" | "icon", value: string) => void;
   onRemoveRequest: (index: number, name: string) => void;
 }
 
-
 function parseFeedLinks(
-  raw: any,
+  raw: unknown,
   fallbackName = "Media Gallery",
   fallbackAlbumId = ""
 ): MediaGalleryFeedLink[] {
-  let list: any[] = [];
+  let list: Array<{ id?: string; name?: string; albumId?: string; icon?: string }> = [];
   if (Array.isArray(raw)) {
     list = raw;
   } else if (typeof raw === "string" && raw.trim().startsWith("[")) {
@@ -297,7 +403,7 @@ function SortableMediaLinkRow({
           value={link.albumId}
           onChange={(e) => {
             const selectedId = e.target.value;
-            const selectedAlbum = albums.find((a: any) => a.id === selectedId);
+            const selectedAlbum = albums.find((a: AlbumItem) => a.id === selectedId);
             onUpdate(index, "albumId", selectedId);
             if (
               selectedAlbum &&
@@ -312,7 +418,7 @@ function SortableMediaLinkRow({
           className="w-full text-[12px] h-8 px-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="">All Albums (Default Stream)</option>
-          {albums.map((a: any) => (
+          {albums.map((a: AlbumItem) => (
             <option key={a.id} value={a.id}>
               {a.title}
             </option>
@@ -333,13 +439,18 @@ function SortableMediaLinkRow({
 }
 
 export default function FeedVisibility() {
-  const { data, loading } = useEntitySettings();
+  const { data } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
-  const [updateFeedName, { loading: loadingName }] = useUpdateFeedEntityName(
-    {},
-  );
+  const [updateFeedName, { loading: loadingName }] = useUpdateFeedEntityName({});
   const { data: albumsData } = useGetMediaGalleryAlbums();
   const albums = albumsData?.getMediaGalleryAlbums || [];
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
+    index: number;
+    name: string;
+  } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -352,87 +463,18 @@ export default function FeedVisibility() {
     }),
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setFormData((prev) => {
-        const oldIndex = prev.mediaGalleryFeedLinks.findIndex(
-          (i) => i.id === active.id,
-        );
-        const newIndex = prev.mediaGalleryFeedLinks.findIndex(
-          (i) => i.id === over.id,
-        );
-        if (oldIndex === -1 || newIndex === -1) return prev;
-        const newLinks = arrayMove(
-          prev.mediaGalleryFeedLinks,
-          oldIndex,
-          newIndex,
-        );
-        return {
-          ...prev,
-          mediaGalleryFeedLinks: newLinks,
-        };
-      });
-      setHasChanged(true);
-    }
-  };
-
-  const handleTabNameChange = (key: string, name: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      feedTabNames: {
-        ...prev.feedTabNames,
-        [key]: name,
-      },
-    }));
-    setHasChanged(true);
-  };
-
-  const handleAddMediaLink = () => {
-    const defaultAlbum = albums[0];
-    setFormData((prev) => ({
-      ...prev,
-      mediaGalleryFeedLinks: [
-        ...prev.mediaGalleryFeedLinks,
-        {
-          id: `link-${Date.now()}`,
-          albumId: defaultAlbum?.id || "",
-          name: defaultAlbum?.title || "Media Gallery",
-          icon: "Images",
-        },
-      ],
-    }));
-    setHasChanged(true);
-  };
-
-  const handleUpdateMediaLink = (
-    index: number,
-    field: "name" | "albumId" | "icon",
-    value: string,
-  ) => {
-    setFormData((prev) => {
-      const nextLinks = [...prev.mediaGalleryFeedLinks];
-      nextLinks[index] = { ...nextLinks[index], [field]: value };
-      return { ...prev, mediaGalleryFeedLinks: nextLinks };
-    });
-    setHasChanged(true);
-  };
-
-  const handleRemoveMediaLink = (index: number) => {
-    setFormData((prev) => {
-      const nextLinks = prev.mediaGalleryFeedLinks.filter(
-        (_, i) => i !== index,
-      );
-      return { ...prev, mediaGalleryFeedLinks: nextLinks };
-    });
-    setHasChanged(true);
-  };
-
   const initialSettings: FeedVisibilitySettings = {
     allowEntityDiscoverInFeed:
       data?.getEntitySettings?.allowEntityDiscoverInFeed ?? true,
     discoverFeedName: data?.getEntitySettings?.discoverFeedName || "",
-    feedTabNames: (data?.getEntitySettings?.feedTabNames as any) || {},
+    discoverFeedType:
+      (data?.getEntitySettings?.discoverFeedType as "normal" | "html") ||
+      "normal",
+    discoverFeedHtml: data?.getEntitySettings?.discoverFeedHtml || "",
+    discoverFeedCss: data?.getEntitySettings?.discoverFeedCss || "",
+    discoverFeedHtmlFileName:
+      data?.getEntitySettings?.discoverFeedHtmlFileName || "",
+    feedTabNames: (data?.getEntitySettings?.feedTabNames as Record<string, string>) || {},
     allowEntityCommunityInFeed:
       data?.getEntitySettings?.allowEntityCommunityInFeed ?? true,
     allowEntityDiscussionForumInFeed:
@@ -459,7 +501,8 @@ export default function FeedVisibility() {
       data?.getEntitySettings?.allowMediaGalleryShareToFeed ?? true,
     feedEntityName: data?.getEntitySettings?.feedEntityName || "",
     aiModerationFeed: data?.getEntitySettings?.aiModerationFeed ?? true,
-    aiModerationComments: data?.getEntitySettings?.aiModerationComments ?? true,
+    aiModerationComments:
+      data?.getEntitySettings?.aiModerationComments ?? true,
     allowFeedPost: data?.getEntitySettings?.allowFeedPost ?? true,
     allowComment: data?.getEntitySettings?.allowComment ?? true,
     allowReshare: data?.getEntitySettings?.allowReshare ?? true,
@@ -470,194 +513,179 @@ export default function FeedVisibility() {
       data?.getEntitySettings?.allowReactionVisibility ?? true,
   };
 
-  const [formData, setFormData] =
-    useState<FeedVisibilitySettings>(initialSettings);
-  const [hasChanged, setHasChanged] = useState(false);
-  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
-    index: number;
-    name: string;
-  } | null>(null);
+  const formik = useFormik<FeedVisibilitySettings>({
+    initialValues: initialSettings,
+    validationSchema: feedVisibilityValidationSchema,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      try {
+        const cleanSettings = {
+          allowEntityDiscoverInFeed: values.allowEntityDiscoverInFeed,
+          discoverFeedName:
+            values.feedTabNames["allowEntityDiscoverInFeed"] ||
+            values.discoverFeedName ||
+            null,
+          discoverFeedType: values.discoverFeedType,
+          discoverFeedHtml: values.discoverFeedHtml || null,
+          discoverFeedCss: values.discoverFeedCss || null,
+          discoverFeedHtmlFileName: values.discoverFeedHtmlFileName || null,
+          feedTabNames: values.feedTabNames || {},
+          allowEntityCommunityInFeed: values.allowEntityCommunityInFeed,
+          allowEntityDiscussionForumInFeed:
+            values.allowEntityDiscussionForumInFeed,
+          allowEntityPollsInFeed: values.allowEntityPollsInFeed,
+          allowEntityMomentsInFeed: values.allowEntityMomentsInFeed,
+          allowEntityFeedInFeed: values.allowEntityFeedInFeed,
+          allowEntityOpportunitiesInFeed: values.allowEntityOpportunitiesInFeed,
+          allowEntityMediaGalleryInFeed: values.allowEntityMediaGalleryInFeed,
+          mediaGalleryFeedAlbumId:
+            values.mediaGalleryFeedLinks[0]?.albumId || null,
+          mediaGalleryFeedName: values.mediaGalleryFeedLinks[0]?.name || null,
+          mediaGalleryFeedLinks: values.mediaGalleryFeedLinks || [],
+          allowMediaGalleryShareToFeed: values.allowMediaGalleryShareToFeed,
+          aiModerationFeed: values.aiModerationFeed,
+          aiModerationComments: values.aiModerationComments,
+          allowFeedPost: values.allowFeedPost,
+          allowComment: values.allowComment,
+          allowReshare: values.allowReshare,
+          allowStory: values.allowStory,
+          allowSocialReshare: values.allowSocialReshare,
+          allowFeedReaction: values.allowFeedReaction,
+          allowReactionVisibility: values.allowReactionVisibility,
+        };
 
-  useEffect(() => {
-    if (data?.getEntitySettings) {
-      const serverSettings: FeedVisibilitySettings = {
-        allowEntityDiscoverInFeed:
-          data.getEntitySettings.allowEntityDiscoverInFeed ?? true,
-        discoverFeedName: data.getEntitySettings.discoverFeedName || "",
-        feedTabNames: (data.getEntitySettings.feedTabNames as any) || {},
-        allowEntityCommunityInFeed:
-          data.getEntitySettings.allowEntityCommunityInFeed ?? true,
-        allowEntityDiscussionForumInFeed:
-          data.getEntitySettings.allowEntityDiscussionForumInFeed ?? true,
-        allowEntityPollsInFeed:
-          data.getEntitySettings.allowEntityPollsInFeed ?? true,
-        allowEntityMomentsInFeed:
-          data.getEntitySettings.allowEntityMomentsInFeed ?? true,
-        allowEntityFeedInFeed:
-          data.getEntitySettings.allowEntityFeedInFeed ?? true,
-        allowEntityOpportunitiesInFeed:
-          data.getEntitySettings.allowEntityOpportunitiesInFeed ?? true,
-        allowEntityMediaGalleryInFeed:
-          data.getEntitySettings.allowEntityMediaGalleryInFeed ?? true,
-        mediaGalleryFeedAlbumId:
-          data.getEntitySettings.mediaGalleryFeedAlbumId || "",
-        mediaGalleryFeedName: data.getEntitySettings.mediaGalleryFeedName || "",
-        mediaGalleryFeedLinks: parseFeedLinks(
-          data.getEntitySettings.mediaGalleryFeedLinks,
-          data.getEntitySettings.mediaGalleryFeedName || "Media Gallery",
-          data.getEntitySettings.mediaGalleryFeedAlbumId || ""
-        ),
-        allowMediaGalleryShareToFeed:
-          data.getEntitySettings.allowMediaGalleryShareToFeed ?? true,
-        feedEntityName: data.getEntitySettings.feedEntityName || "",
-        aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
-        aiModerationComments:
-          data.getEntitySettings.aiModerationComments ?? true,
-        allowFeedPost: data.getEntitySettings.allowFeedPost ?? true,
-        allowComment: data.getEntitySettings.allowComment ?? true,
-        allowReshare: data.getEntitySettings.allowReshare ?? true,
-        allowStory: data.getEntitySettings.allowStory ?? true,
-        allowSocialReshare: data.getEntitySettings.allowSocialReshare ?? true,
-        allowFeedReaction: data.getEntitySettings.allowFeedReaction ?? true,
-        allowReactionVisibility:
-          data.getEntitySettings.allowReactionVisibility ?? true,
-      };
-      setFormData(serverSettings);
-      setHasChanged(false);
-    }
-  }, [data]);
+        const promises = [];
 
-  const handleToggle = (field: keyof FeedVisibilitySettings) => {
-    setFormData((prev) => {
-      const next = { ...prev, [field]: !prev[field] };
-      setHasChanged(true);
-      return next;
-    });
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData((prev) => {
-      const next = { ...prev, feedEntityName: value };
-      setHasChanged(true);
-      return next;
-    });
-  };
-
-  const handleReset = () => {
-    if (data?.getEntitySettings) {
-      setFormData({
-        allowEntityDiscoverInFeed:
-          data.getEntitySettings.allowEntityDiscoverInFeed ?? true,
-        discoverFeedName: data.getEntitySettings.discoverFeedName || "",
-        feedTabNames: (data.getEntitySettings.feedTabNames as any) || {},
-        allowEntityCommunityInFeed:
-          data.getEntitySettings.allowEntityCommunityInFeed ?? true,
-        allowEntityDiscussionForumInFeed:
-          data.getEntitySettings.allowEntityDiscussionForumInFeed ?? true,
-        allowEntityPollsInFeed:
-          data.getEntitySettings.allowEntityPollsInFeed ?? true,
-        allowEntityMomentsInFeed:
-          data.getEntitySettings.allowEntityMomentsInFeed ?? true,
-        allowEntityFeedInFeed:
-          data.getEntitySettings.allowEntityFeedInFeed ?? true,
-        allowEntityOpportunitiesInFeed:
-          data.getEntitySettings.allowEntityOpportunitiesInFeed ?? true,
-        allowEntityMediaGalleryInFeed:
-          data.getEntitySettings.allowEntityMediaGalleryInFeed ?? true,
-        mediaGalleryFeedAlbumId:
-          data.getEntitySettings.mediaGalleryFeedAlbumId || "",
-        mediaGalleryFeedName: data.getEntitySettings.mediaGalleryFeedName || "",
-        mediaGalleryFeedLinks: parseFeedLinks(
-          data.getEntitySettings.mediaGalleryFeedLinks,
-          data.getEntitySettings.mediaGalleryFeedName || "Media Gallery",
-          data.getEntitySettings.mediaGalleryFeedAlbumId || ""
-        ),
-        allowMediaGalleryShareToFeed:
-          data.getEntitySettings.allowMediaGalleryShareToFeed ?? true,
-        feedEntityName: data.getEntitySettings.feedEntityName || "",
-        aiModerationFeed: data.getEntitySettings.aiModerationFeed ?? true,
-        aiModerationComments:
-          data.getEntitySettings.aiModerationComments ?? true,
-        allowFeedPost: data.getEntitySettings.allowFeedPost ?? true,
-        allowComment: data.getEntitySettings.allowComment ?? true,
-        allowReshare: data.getEntitySettings.allowReshare ?? true,
-        allowStory: data.getEntitySettings.allowStory ?? true,
-        allowSocialReshare: data.getEntitySettings.allowSocialReshare ?? true,
-        allowFeedReaction: data.getEntitySettings.allowFeedReaction ?? true,
-        allowReactionVisibility:
-          data.getEntitySettings.allowReactionVisibility ?? true,
-      });
-      setHasChanged(false);
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      const cleanSettings = {
-        allowEntityDiscoverInFeed: formData.allowEntityDiscoverInFeed,
-        discoverFeedName:
-          formData.feedTabNames["allowEntityDiscoverInFeed"] ||
-          formData.discoverFeedName ||
-          null,
-        feedTabNames: formData.feedTabNames || {},
-        allowEntityCommunityInFeed: formData.allowEntityCommunityInFeed,
-        allowEntityDiscussionForumInFeed:
-          formData.allowEntityDiscussionForumInFeed,
-        allowEntityPollsInFeed: formData.allowEntityPollsInFeed,
-        allowEntityMomentsInFeed: formData.allowEntityMomentsInFeed,
-        allowEntityFeedInFeed: formData.allowEntityFeedInFeed,
-        allowEntityOpportunitiesInFeed: formData.allowEntityOpportunitiesInFeed,
-        allowEntityMediaGalleryInFeed: formData.allowEntityMediaGalleryInFeed,
-        mediaGalleryFeedAlbumId:
-          formData.mediaGalleryFeedLinks[0]?.albumId || null,
-        mediaGalleryFeedName: formData.mediaGalleryFeedLinks[0]?.name || null,
-        mediaGalleryFeedLinks: formData.mediaGalleryFeedLinks || [],
-        allowMediaGalleryShareToFeed: formData.allowMediaGalleryShareToFeed,
-        aiModerationFeed: formData.aiModerationFeed,
-        aiModerationComments: formData.aiModerationComments,
-        allowFeedPost: formData.allowFeedPost,
-        allowComment: formData.allowComment,
-        allowReshare: formData.allowReshare,
-        allowStory: formData.allowStory,
-        allowSocialReshare: formData.allowSocialReshare,
-        allowFeedReaction: formData.allowFeedReaction,
-        allowReactionVisibility: formData.allowReactionVisibility,
-      };
-
-      const promises = [];
-
-      promises.push(
-        update({
-          variables: { input: cleanSettings },
-        }),
-      );
-
-      if (formData.feedEntityName !== data?.getEntitySettings?.feedEntityName) {
         promises.push(
-          updateFeedName({
-            variables: { name: formData.feedEntityName },
+          update({
+            variables: { input: cleanSettings },
           }),
         );
-      }
 
-      await Promise.all(promises);
-      toast.success("Feed protocols synchronized successfully.");
-      setHasChanged(false);
-    } catch (error) {
-      toast.error("Failed to update feed parameters.");
-      console.error(error);
+        if (
+          values.feedEntityName !== data?.getEntitySettings?.feedEntityName
+        ) {
+          promises.push(
+            updateFeedName({
+              variables: { name: values.feedEntityName },
+            }),
+          );
+        }
+
+        await Promise.all(promises);
+        toast.success("Feed visibility parameters updated successfully.");
+      } catch (error: unknown) {
+        toast.error((error as Error)?.message || "Failed to update feed parameters.");
+        console.error(error);
+      }
+    },
+  });
+
+  const handleToggle = (key: keyof FeedVisibilitySettings) => {
+    formik.setFieldValue(key, !formik.values[key]);
+  };
+
+  const handleTabNameChange = (key: string, name: string) => {
+    formik.setFieldValue("feedTabNames", {
+      ...formik.values.feedTabNames,
+      [key]: name,
+    });
+  };
+
+  const handleAddMediaLink = () => {
+    const newLink: MediaGalleryFeedLink = {
+      id: `link-${Date.now()}`,
+      albumId: "",
+      name: `Media Gallery ${formik.values.mediaGalleryFeedLinks.length + 1}`,
+      icon: "Images",
+    };
+    formik.setFieldValue("mediaGalleryFeedLinks", [
+      ...formik.values.mediaGalleryFeedLinks,
+      newLink,
+    ]);
+  };
+
+  const handleUpdateMediaLink = (
+    index: number,
+    field: "name" | "albumId" | "icon",
+    value: string,
+  ) => {
+    const nextLinks = [...formik.values.mediaGalleryFeedLinks];
+    nextLinks[index] = { ...nextLinks[index], [field]: value };
+    formik.setFieldValue("mediaGalleryFeedLinks", nextLinks);
+  };
+
+  const handleRemoveMediaLink = (index: number) => {
+    const nextLinks = formik.values.mediaGalleryFeedLinks.filter(
+      (_, i) => i !== index,
+    );
+    formik.setFieldValue("mediaGalleryFeedLinks", nextLinks);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = formik.values.mediaGalleryFeedLinks.findIndex(
+        (i) => i.id === active.id,
+      );
+      const newIndex = formik.values.mediaGalleryFeedLinks.findIndex(
+        (i) => i.id === over.id,
+      );
+      if (oldIndex === -1 || newIndex === -1) return;
+      const newLinks = arrayMove(
+        formik.values.mediaGalleryFeedLinks,
+        oldIndex,
+        newIndex,
+      );
+      formik.setFieldValue("mediaGalleryFeedLinks", newLinks);
     }
+  };
+
+  const handleHtmlFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validExtensions = [".html", ".htm", ".txt"];
+    const ext = "." + (file.name.split(".").pop()?.toLowerCase() || "");
+    if (!validExtensions.includes(ext)) {
+      toast.error("Please upload a valid .html, .htm, or .txt file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      if (text) {
+        formik.setFieldValue("discoverFeedHtml", text);
+        formik.setFieldValue("discoverFeedHtmlFileName", file.name);
+        formik.setFieldValue("discoverFeedType", "html");
+        toast.success(
+          `Loaded "${file.name}" (${(file.size / 1024).toFixed(1)} KB) into Custom HTML.`,
+        );
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleApplyTemplate = (template: (typeof DISCOVER_STARTER_TEMPLATES)[0]) => {
+    formik.setFieldValue("discoverFeedHtml", template.html);
+    if (template.css) {
+      formik.setFieldValue("discoverFeedCss", template.css);
+    }
+    formik.setFieldValue("discoverFeedHtmlFileName", `${template.id}.html`);
+    toast.success(`Inserted template "${template.name}".`);
   };
 
   const activeSourcesCount = [
-    formData.allowEntityCommunityInFeed,
-    formData.allowEntityDiscussionForumInFeed,
-    formData.allowEntityPollsInFeed,
-    formData.allowEntityMomentsInFeed,
-    formData.allowEntityFeedInFeed,
-    formData.allowEntityOpportunitiesInFeed,
-    formData.allowEntityMediaGalleryInFeed,
+    formik.values.allowEntityDiscoverInFeed,
+    formik.values.allowEntityCommunityInFeed,
+    formik.values.allowEntityDiscussionForumInFeed,
+    formik.values.allowEntityPollsInFeed,
+    formik.values.allowEntityMomentsInFeed,
+    formik.values.allowEntityFeedInFeed,
+    formik.values.allowEntityOpportunitiesInFeed,
+    formik.values.allowEntityMediaGalleryInFeed,
   ].filter(Boolean).length;
 
   const contentSources = [
@@ -666,18 +694,18 @@ export default function FeedVisibility() {
       label: "Show Discover Feed",
       defaultName: "Discover",
       description:
-        "Main community stream showcasing personalized updates, trending posts, and curated activities.",
-      icon: Wand2,
-      enabled: formData.allowEntityDiscoverInFeed,
+        "Main community stream showcasing personalized updates, trending posts, or custom HTML section.",
+      icon: formik.values.discoverFeedType === "html" ? FileCode : Wand2,
+      enabled: formik.values.allowEntityDiscoverInFeed,
     },
     {
       key: "allowEntityFeedInFeed" as const,
-      label: `Show ${formData.feedTabNames["allowEntityFeedInFeed"] || formData.feedEntityName || "Admin"} Announcements`,
+      label: `Show ${formik.values.feedTabNames["allowEntityFeedInFeed"] || formik.values.feedEntityName || "Admin"} Announcements`,
       defaultName: "By Admin",
       description:
         "Surface official administrative broadcasts, alerts, and pinned entity updates.",
       icon: ShieldAlert,
-      enabled: formData.allowEntityFeedInFeed,
+      enabled: formik.values.allowEntityFeedInFeed,
     },
     {
       key: "allowEntityCommunityInFeed" as const,
@@ -686,7 +714,7 @@ export default function FeedVisibility() {
       description:
         "Surface community group activities and member announcements in the main feed stream.",
       icon: Users2,
-      enabled: formData.allowEntityCommunityInFeed,
+      enabled: formik.values.allowEntityCommunityInFeed,
     },
     {
       key: "allowEntityDiscussionForumInFeed" as const,
@@ -695,7 +723,7 @@ export default function FeedVisibility() {
       description:
         "Allow structured discussion forum topics and questions to appear in the stream.",
       icon: MessageSquare,
-      enabled: formData.allowEntityDiscussionForumInFeed,
+      enabled: formik.values.allowEntityDiscussionForumInFeed,
     },
     {
       key: "allowEntityPollsInFeed" as const,
@@ -704,7 +732,7 @@ export default function FeedVisibility() {
       description:
         "Allow interactive community voting polls and opinion cards directly in member feeds.",
       icon: BarChart2,
-      enabled: formData.allowEntityPollsInFeed,
+      enabled: formik.values.allowEntityPollsInFeed,
     },
     {
       key: "allowEntityMomentsInFeed" as const,
@@ -713,7 +741,7 @@ export default function FeedVisibility() {
       description:
         "Surface short-form vertical video clips and milestone moments in feed cards.",
       icon: Film,
-      enabled: formData.allowEntityMomentsInFeed,
+      enabled: formik.values.allowEntityMomentsInFeed,
     },
     {
       key: "allowEntityOpportunitiesInFeed" as const,
@@ -722,7 +750,7 @@ export default function FeedVisibility() {
       description:
         "Surface job openings, grants, internships, and partnerships directly in member feed streams.",
       icon: Briefcase,
-      enabled: formData.allowEntityOpportunitiesInFeed,
+      enabled: formik.values.allowEntityOpportunitiesInFeed,
     },
     {
       key: "allowEntityMediaGalleryInFeed" as const,
@@ -731,7 +759,7 @@ export default function FeedVisibility() {
       description:
         "Surface photo albums and curated visual media collections directly in member feed tabs.",
       icon: Images,
-      enabled: formData.allowEntityMediaGalleryInFeed,
+      enabled: formik.values.allowEntityMediaGalleryInFeed,
     },
   ];
 
@@ -742,7 +770,7 @@ export default function FeedVisibility() {
       description:
         "Allow members to create and publish new feed posts in the community.",
       icon: PenLine,
-      enabled: formData.allowFeedPost,
+      enabled: formik.values.allowFeedPost,
     },
     {
       key: "allowComment" as const,
@@ -750,7 +778,7 @@ export default function FeedVisibility() {
       description:
         "Allow members to comment and participate in discussions under feed posts.",
       icon: MessageCircle,
-      enabled: formData.allowComment,
+      enabled: formik.values.allowComment,
     },
     {
       key: "allowFeedReaction" as const,
@@ -758,7 +786,7 @@ export default function FeedVisibility() {
       description:
         "Allow members to react with emojis and like feed posts and updates.",
       icon: Heart,
-      enabled: formData.allowFeedReaction,
+      enabled: formik.values.allowFeedReaction,
     },
     {
       key: "allowReactionVisibility" as const,
@@ -766,7 +794,7 @@ export default function FeedVisibility() {
       description:
         "Display reaction counts and member reaction lists on feed posts.",
       icon: Eye,
-      enabled: formData.allowReactionVisibility,
+      enabled: formik.values.allowReactionVisibility,
     },
     {
       key: "allowReshare" as const,
@@ -774,7 +802,7 @@ export default function FeedVisibility() {
       description:
         "Allow members to reshare feed posts internally within the platform.",
       icon: Repeat2,
-      enabled: formData.allowReshare,
+      enabled: formik.values.allowReshare,
     },
     {
       key: "allowStory" as const,
@@ -782,7 +810,7 @@ export default function FeedVisibility() {
       description:
         "Allow members to publish short-lived story cards and ephemeral media.",
       icon: BookOpen,
-      enabled: formData.allowStory,
+      enabled: formik.values.allowStory,
     },
     {
       key: "allowSocialReshare" as const,
@@ -790,7 +818,7 @@ export default function FeedVisibility() {
       description:
         "Allow members to share feed posts externally to third-party social networks.",
       icon: Share2,
-      enabled: formData.allowSocialReshare,
+      enabled: formik.values.allowSocialReshare,
     },
     {
       key: "allowMediaGalleryShareToFeed" as const,
@@ -798,12 +826,12 @@ export default function FeedVisibility() {
       description:
         "Allow members to repost photos and albums from the media gallery directly into the community feed.",
       icon: Images,
-      enabled: formData.allowMediaGalleryShareToFeed,
+      enabled: formik.values.allowMediaGalleryShareToFeed,
     },
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-20">
       <PolarisFormLayout
         sidebar={
           <div className="space-y-4">
@@ -820,7 +848,7 @@ export default function FeedVisibility() {
                       <Rss className="h-3 w-3" />
                     </div>
                     <span className="text-[13px] font-semibold text-[#303030] dark:text-zinc-100">
-                      {formData.feedEntityName || "Community"} Feed
+                      {formik.values.feedEntityName || "Community"} Feed
                     </span>
                   </div>
                   <Badge
@@ -843,9 +871,9 @@ export default function FeedVisibility() {
                       if (
                         source.key === "allowEntityMediaGalleryInFeed" &&
                         source.enabled &&
-                        formData.mediaGalleryFeedLinks.length > 0
+                        formik.values.mediaGalleryFeedLinks.length > 0
                       ) {
-                        return formData.mediaGalleryFeedLinks.map((link, idx) => (
+                        return formik.values.mediaGalleryFeedLinks.map((link, idx) => (
                           <Badge
                             key={link.id || idx}
                             variant="secondary"
@@ -875,17 +903,37 @@ export default function FeedVisibility() {
                         >
                           <source.icon className="h-3 w-3" />
                           <span>{source.label.replace("Show ", "")}</span>
+                          {source.key === "allowEntityDiscoverInFeed" &&
+                            source.enabled && (
+                              <span className="text-[9.5px] px-1 py-0 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-bold ml-0.5">
+                                {formik.values.discoverFeedType === "html"
+                                  ? "HTML"
+                                  : "Stream"}
+                              </span>
+                            )}
                         </Badge>
                       );
                     })}
                   </div>
                 </div>
               </div>
+
               {/* Configuration Breakdown */}
               <div className="space-y-1 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
                 <PolarisSummaryRow
                   label="Official Brand Tag"
-                  value={formData.feedEntityName || "Default (Admin)"}
+                  value={formik.values.feedEntityName || "Default (Admin)"}
+                />
+                <PolarisSummaryRow
+                  label="Discover Tab Mode"
+                  value={
+                    !formik.values.allowEntityDiscoverInFeed
+                      ? "Disabled (Auto-routed)"
+                      : formik.values.discoverFeedType === "html"
+                        ? "Custom HTML Page"
+                        : "Standard Stream"
+                  }
+                  highlight={formik.values.allowEntityDiscoverInFeed}
                 />
                 <PolarisSummaryRow
                   label="Enabled Protocols"
@@ -894,13 +942,13 @@ export default function FeedVisibility() {
                 />
                 <PolarisSummaryRow
                   label="AI Feed Sentinel"
-                  value={formData.aiModerationFeed ? "Active" : "Disabled"}
-                  highlight={formData.aiModerationFeed}
+                  value={formik.values.aiModerationFeed ? "Active" : "Disabled"}
+                  highlight={formik.values.aiModerationFeed}
                 />
                 <PolarisSummaryRow
                   label="AI Comment Sentinel"
-                  value={formData.aiModerationComments ? "Active" : "Disabled"}
-                  highlight={formData.aiModerationComments}
+                  value={formik.values.aiModerationComments ? "Active" : "Disabled"}
+                  highlight={formik.values.aiModerationComments}
                 />
                 <PolarisSummaryRow
                   label="User Action Controls"
@@ -913,15 +961,12 @@ export default function FeedVisibility() {
 
             {/* Engagement Strategy Tip */}
             <PolarisTipCard title="Feed Optimization Tip">
-              Enabling interactive sources like community polls and moments
-              increases member return rates. Keep AI Moderation active to
-              automatically filter toxicity and maintain clean community
-              discussions.
+              Configure the Discover tab as an HTML landing page to highlight custom onboarding guides or welcome resources, or leave it as a Dynamic Stream for automated content aggregation. When disabled, users are automatically routed to your first active tab.
             </PolarisTipCard>
           </div>
         }
       >
-        <div className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           {/* Section 1: Official Brand Identity */}
           <PolarisFormCard
             step={1}
@@ -936,8 +981,8 @@ export default function FeedVisibility() {
                 name="feedEntityName"
                 label="Feed Brand Display Name"
                 placeholder="e.g. Acme Official, Community Team"
-                value={formData.feedEntityName}
-                onChange={handleNameChange}
+                value={formik.values.feedEntityName}
+                onChange={formik.handleChange}
                 helperText="This custom name will appear as the author name on official entity posts."
                 prefix={<Sparkles className="h-4 w-4" />}
               />
@@ -991,7 +1036,266 @@ export default function FeedVisibility() {
                     />
                   </div>
 
-                  {source.key !== "allowEntityMediaGalleryInFeed" &&
+                  {/* Discover Feed specific options */}
+                  {source.key === "allowEntityDiscoverInFeed" && (
+                    <>
+                      {!source.enabled && (
+                        <div className="mt-2.5 pt-2.5 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70 flex items-center gap-2 text-[11px] text-[#616161] dark:text-zinc-400">
+                          <Info className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                          <span>
+                            Discover feed tab is turned off. Visiting /dashboard/feed in the user website will automatically redirect members to your first active tab.
+                          </span>
+                        </div>
+                      )}
+
+                      {source.enabled && (
+                        <div className="mt-3.5 pt-3.5 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-3.5">
+                          {/* Tab Display Name */}
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
+                              <span>Tab Display Name:</span>
+                              <span className="text-[10px] text-[#8c9196]">
+                                (Default: &quot;{source.defaultName}&quot;)
+                              </span>
+                            </div>
+                            <input
+                              type="text"
+                              placeholder={source.defaultName}
+                              value={
+                                formik.values.feedTabNames[source.key] || ""
+                              }
+                              onChange={(e) =>
+                                handleTabNameChange(source.key, e.target.value)
+                              }
+                              className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full sm:w-[240px] focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                          </div>
+
+                          {/* Mode Selection Tiles: Normal Feed vs Custom HTML */}
+                          <div className="space-y-1.5">
+                            <span className="text-[11px] font-semibold text-[#303030] dark:text-zinc-300">
+                              Discover Tab Display Mode:
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                              {/* Option 1: Normal Feed Stream */}
+                              <div
+                                onClick={() =>
+                                  formik.setFieldValue(
+                                    "discoverFeedType",
+                                    "normal",
+                                  )
+                                }
+                                className={cn(
+                                  "p-3 rounded-[8px] border cursor-pointer transition-all flex items-start gap-2.5",
+                                  formik.values.discoverFeedType === "normal"
+                                    ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs ring-1 ring-blue-500/20"
+                                    : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 hover:border-[#b4b7bb]",
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    "h-7 w-7 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 border",
+                                    formik.values.discoverFeedType === "normal"
+                                      ? "bg-blue-600 text-white border-blue-600"
+                                      : "bg-white dark:bg-zinc-800 border-[#d2d5d9] text-[#616161]",
+                                  )}
+                                >
+                                  <Wand2 className="h-3.5 w-3.5" />
+                                </div>
+                                <div className="space-y-0.5 min-w-0 flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
+                                      Dynamic Feed Stream
+                                    </span>
+                                    {formik.values.discoverFeedType ===
+                                      "normal" && (
+                                      <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />
+                                    )}
+                                  </div>
+                                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                                    Personalized member stream aggregating trending updates and posts.
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Option 2: Custom HTML Page */}
+                              <div
+                                onClick={() =>
+                                  formik.setFieldValue(
+                                    "discoverFeedType",
+                                    "html",
+                                  )
+                                }
+                                className={cn(
+                                  "p-3 rounded-[8px] border cursor-pointer transition-all flex items-start gap-2.5",
+                                  formik.values.discoverFeedType === "html"
+                                    ? "border-blue-600 bg-blue-50/40 dark:bg-blue-950/20 shadow-xs ring-1 ring-blue-500/20"
+                                    : "border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 hover:border-[#b4b7bb]",
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    "h-7 w-7 rounded-[6px] flex items-center justify-center shrink-0 mt-0.5 border",
+                                    formik.values.discoverFeedType === "html"
+                                      ? "bg-blue-600 text-white border-blue-600"
+                                      : "bg-white dark:bg-zinc-800 border-[#d2d5d9] text-[#616161]",
+                                  )}
+                                >
+                                  <FileCode className="h-3.5 w-3.5" />
+                                </div>
+                                <div className="space-y-0.5 min-w-0 flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[12px] font-semibold text-[#303030] dark:text-zinc-100">
+                                      Custom HTML Page
+                                    </span>
+                                    {formik.values.discoverFeedType ===
+                                      "html" && (
+                                      <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />
+                                    )}
+                                  </div>
+                                  <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                                    Upload an HTML file or configure scoped markup/CSS rendered in Shadow DOM.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Custom HTML Configuration Sub-panel */}
+                          {formik.values.discoverFeedType === "html" && (
+                            <div className="p-3.5 rounded-[8px] border border-blue-200 dark:border-blue-900/40 bg-blue-50/20 dark:bg-blue-950/10 space-y-3.5">
+                              {/* Hidden file input */}
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".html,.htm,.txt"
+                                onChange={handleHtmlFileSelect}
+                                className="hidden"
+                              />
+
+                              {/* Upload Bar & Action Buttons */}
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-[6px] bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-zinc-900 transition-colors shadow-xs cursor-pointer"
+                                  >
+                                    <FileUp className="h-3.5 w-3.5" />
+                                    Upload .html File
+                                  </button>
+
+                                  {/* Starter Templates Dropdown */}
+                                  <div className="flex items-center gap-1">
+                                    {DISCOVER_STARTER_TEMPLATES.map((tpl) => (
+                                      <button
+                                        key={tpl.id}
+                                        type="button"
+                                        onClick={() => handleApplyTemplate(tpl)}
+                                        className="px-2 py-1 text-[10.5px] rounded border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                                        title={`Insert ${tpl.name}`}
+                                      >
+                                        + {tpl.name}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Preview Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewModalOpen(true)}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] transition-colors cursor-pointer"
+                                >
+                                  <EyeIcon className="h-3.5 w-3.5 text-blue-600" />
+                                  Live Preview
+                                </button>
+                              </div>
+
+                              {/* Uploaded File Pill */}
+                              {formik.values.discoverFeedHtmlFileName && (
+                                <div className="flex items-center justify-between p-2 rounded-[6px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-800 text-[11.5px]">
+                                  <div className="flex items-center gap-2">
+                                    <FileCode className="h-4 w-4 text-blue-600" />
+                                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
+                                      {formik.values.discoverFeedHtmlFileName}
+                                    </span>
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-[9.5px] px-1.5 py-0"
+                                    >
+                                      Active File
+                                    </Badge>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      formik.setFieldValue(
+                                        "discoverFeedHtmlFileName",
+                                        "",
+                                      );
+                                    }}
+                                    className="p-1 text-[#8c9196] hover:text-red-600 rounded transition-colors cursor-pointer"
+                                    title="Clear file tag"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              )}
+
+                              {/* HTML Code Editor */}
+                              <div className="space-y-1">
+                                <label className="text-[11px] font-semibold text-[#303030] dark:text-zinc-300 flex items-center justify-between">
+                                  <span>HTML Markup (Shadow DOM Isolated):</span>
+                                  <span className="text-[10px] text-[#8c9196] font-normal">
+                                    HTML5, styles &amp; embeds supported
+                                  </span>
+                                </label>
+                                <textarea
+                                  value={formik.values.discoverFeedHtml || ""}
+                                  onChange={(e) =>
+                                    formik.setFieldValue(
+                                      "discoverFeedHtml",
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder="<div class='hero'>...</div>"
+                                  rows={8}
+                                  className="w-full text-[11.5px] font-mono p-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-950 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
+                                />
+                              </div>
+
+                              {/* Scoped CSS Editor */}
+                              <div className="space-y-1">
+                                <label className="text-[11px] font-semibold text-[#303030] dark:text-zinc-300 flex items-center justify-between">
+                                  <span>Custom Scoped CSS (Optional):</span>
+                                  <span className="text-[10px] text-[#8c9196] font-normal">
+                                    Mapped to :host container automatically
+                                  </span>
+                                </label>
+                                <textarea
+                                  value={formik.values.discoverFeedCss || ""}
+                                  onChange={(e) =>
+                                    formik.setFieldValue(
+                                      "discoverFeedCss",
+                                      e.target.value,
+                                    )
+                                  }
+                                  placeholder=":host { display: block; } .custom-banner { border-radius: 12px; }"
+                                  rows={3}
+                                  className="w-full text-[11.5px] font-mono p-2 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-950 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Standard Tab Name Input for other sources */}
+                  {source.key !== "allowEntityDiscoverInFeed" &&
+                    source.key !== "allowEntityMediaGalleryInFeed" &&
                     source.enabled && (
                       <div className="mt-2.5 pt-2.5 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
@@ -1003,7 +1307,9 @@ export default function FeedVisibility() {
                         <input
                           type="text"
                           placeholder={source.defaultName}
-                          value={formData.feedTabNames[source.key] || ""}
+                          value={
+                            formik.values.feedTabNames[source.key] || ""
+                          }
                           onChange={(e) =>
                             handleTabNameChange(source.key, e.target.value)
                           }
@@ -1012,6 +1318,7 @@ export default function FeedVisibility() {
                       </div>
                     )}
 
+                  {/* Media Gallery Link Rows */}
                   {source.key === "allowEntityMediaGalleryInFeed" &&
                     source.enabled && (
                       <div className="mt-3.5 pt-3.5 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-3.5">
@@ -1036,7 +1343,7 @@ export default function FeedVisibility() {
                           </button>
                         </div>
 
-                        {formData.mediaGalleryFeedLinks.length === 0 ? (
+                        {formik.values.mediaGalleryFeedLinks.length === 0 ? (
                           <div className="p-4 text-center rounded-[6px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50">
                             <p className="text-[12px] text-[#616161] dark:text-zinc-400">
                               No media tabs configured. Click &quot;Add Media
@@ -1050,13 +1357,13 @@ export default function FeedVisibility() {
                             onDragEnd={handleDragEnd}
                           >
                             <SortableContext
-                              items={formData.mediaGalleryFeedLinks.map(
+                              items={formik.values.mediaGalleryFeedLinks.map(
                                 (l) => l.id,
                               )}
                               strategy={verticalListSortingStrategy}
                             >
                               <div className="space-y-2">
-                                {formData.mediaGalleryFeedLinks.map(
+                                {formik.values.mediaGalleryFeedLinks.map(
                                   (link, idx) => (
                                     <SortableMediaLinkRow
                                       key={link.id}
@@ -1106,7 +1413,7 @@ export default function FeedVisibility() {
                   </div>
                 </div>
                 <Switch
-                  checked={formData.aiModerationFeed}
+                  checked={formik.values.aiModerationFeed}
                   onCheckedChange={() => handleToggle("aiModerationFeed")}
                 />
               </div>
@@ -1127,7 +1434,7 @@ export default function FeedVisibility() {
                   </div>
                 </div>
                 <Switch
-                  checked={formData.aiModerationComments}
+                  checked={formik.values.aiModerationComments}
                   onCheckedChange={() => handleToggle("aiModerationComments")}
                 />
               </div>
@@ -1182,43 +1489,33 @@ export default function FeedVisibility() {
               ))}
             </div>
           </PolarisFormCard>
-        </div>
+
+          {/* Floating Save Panel */}
+          <FloatingSavePanel
+            show={formik.dirty}
+            isSaving={loadingBtn || loadingName}
+            onSave={formik.handleSubmit}
+            onDiscard={() => formik.resetForm()}
+          />
+        </form>
       </PolarisFormLayout>
 
-      {/* Floating Save Action Bar */}
-      <FloatingSavePanel
-        hasChanged={hasChanged}
-        saved={false}
-        isSaving={loadingBtn || loadingName}
-        onSave={handleSave}
-        onReset={handleReset}
-        title="Unsaved Feed Protocols"
-        description="You have modified content aggregation parameters."
-        buttonText="Save Protocols"
-      />
-
-      {/* Delete Media Tab Confirmation Dialog */}
+      {/* Delete Media Link Confirmation Dialog */}
       <AlertDialog
-        open={deleteConfirmTarget !== null}
-        onOpenChange={(open) => {
-          if (!open) setDeleteConfirmTarget(null);
-        }}
+        open={!!deleteConfirmTarget}
+        onOpenChange={(open) => !open && setDeleteConfirmTarget(null)}
       >
-        <AlertDialogContent className="rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[14px] font-bold text-[#303030] dark:text-zinc-100">
-              Remove Media Tab?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[12px] text-[#616161] dark:text-zinc-400">
-              Are you sure you want to remove &quot;{deleteConfirmTarget?.name}
-              &quot; from the community feed? This action will remove the tab
-              from member feed navigation.
+            <AlertDialogTitle>Delete Media Gallery Tab?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove &quot;
+              {deleteConfirmTarget?.name}&quot; from the community feed? Members
+              will no longer see this media stream in their navigation tabs.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="h-8 text-[12px] font-medium rounded-[6px]">
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (deleteConfirmTarget !== null) {
@@ -1226,13 +1523,41 @@ export default function FeedVisibility() {
                   setDeleteConfirmTarget(null);
                 }
               }}
-              className="h-8 text-[12px] font-medium rounded-[6px] bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Remove Tab
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Discover HTML Live Preview Modal */}
+      <Dialog open={previewModalOpen} onOpenChange={setPreviewModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col p-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <FileCode className="h-4 w-4 text-blue-600" />
+              Discover Tab HTML Live Preview
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Simulated preview inside isolated Shadow DOM container with scoped styles.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 p-4 bg-white dark:bg-zinc-950 min-h-[300px]">
+            {formik.values.discoverFeedHtml?.trim() ? (
+              <IsolatedHtmlRenderer
+                html={formik.values.discoverFeedHtml}
+                css={formik.values.discoverFeedCss}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-48 text-[#8c9196] text-xs">
+                No HTML content provided. Upload an HTML file or enter markup to preview.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
