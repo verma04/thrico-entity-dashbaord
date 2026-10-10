@@ -171,6 +171,7 @@ interface FeedVisibilitySettings {
   discoverFeedHtml: string;
   discoverFeedCss: string;
   discoverFeedHtmlFileName: string;
+  discoverFeedIcon: string;
   feedTabNames: Record<string, string>;
   allowEntityCommunityInFeed: boolean;
   allowEntityDiscussionForumInFeed: boolean;
@@ -202,6 +203,7 @@ const feedVisibilityValidationSchema = Yup.object().shape({
   discoverFeedHtml: Yup.string().nullable(),
   discoverFeedCss: Yup.string().nullable(),
   discoverFeedHtmlFileName: Yup.string().nullable(),
+  discoverFeedIcon: Yup.string().nullable(),
   feedTabNames: Yup.object().default({}),
   allowEntityCommunityInFeed: Yup.boolean().required(),
   allowEntityDiscussionForumInFeed: Yup.boolean().required(),
@@ -412,6 +414,9 @@ export default function FeedVisibility() {
     discoverFeedCss: data?.getEntitySettings?.discoverFeedCss || "",
     discoverFeedHtmlFileName:
       data?.getEntitySettings?.discoverFeedHtmlFileName || "",
+    discoverFeedIcon:
+      data?.getEntitySettings?.discoverFeedIcon ||
+      (data?.getEntitySettings?.discoverFeedType === "html" ? "FileCode" : "Wand2"),
     feedTabNames:
       (data?.getEntitySettings?.feedTabNames as Record<string, string>) || {},
     allowEntityCommunityInFeed:
@@ -468,6 +473,7 @@ export default function FeedVisibility() {
           discoverFeedHtml: values.discoverFeedHtml || null,
           discoverFeedCss: values.discoverFeedCss || null,
           discoverFeedHtmlFileName: values.discoverFeedHtmlFileName || null,
+          discoverFeedIcon: values.discoverFeedIcon || null,
           feedTabNames: values.feedTabNames || {},
           allowEntityCommunityInFeed: values.allowEntityCommunityInFeed,
           allowEntityDiscussionForumInFeed:
@@ -815,8 +821,22 @@ export default function FeedVisibility() {
                               : "opacity-40 line-through border-dashed text-[#8c9196]",
                           )}
                         >
-                          <source.icon className="h-3 w-3" />
-                          <span>{source.label.replace("Show ", "")}</span>
+                          {source.key === "allowEntityDiscoverInFeed" &&
+                          formik.values.discoverFeedIcon ? (
+                            <DynamicIcon
+                              name={formik.values.discoverFeedIcon}
+                              className="h-3 w-3 text-blue-600 dark:text-blue-400"
+                            />
+                          ) : (
+                            <source.icon className="h-3 w-3" />
+                          )}
+                          <span>
+                            {source.key === "allowEntityDiscoverInFeed"
+                              ? formik.values.feedTabNames["allowEntityDiscoverInFeed"] ||
+                                formik.values.discoverFeedName ||
+                                "Discover"
+                              : source.label.replace("Show ", "")}
+                          </span>
                           {source.key === "allowEntityDiscoverInFeed" &&
                             source.enabled && (
                               <span className="text-[9.5px] px-1 py-0 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-bold ml-0.5">
@@ -967,25 +987,47 @@ export default function FeedVisibility() {
 
                       {source.enabled && (
                         <div className="mt-3.5 pt-3.5 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-3.5">
-                          {/* Tab Display Name */}
+                          {/* Tab Icon & Display Name */}
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5 text-[11px] text-[#616161] dark:text-zinc-400">
-                              <span>Tab Display Name:</span>
+                              <span>Tab Icon & Display Name:</span>
                               <span className="text-[10px] text-[#8c9196]">
                                 (Default: &quot;{source.defaultName}&quot;)
                               </span>
                             </div>
-                            <input
-                              type="text"
-                              placeholder={source.defaultName}
-                              value={
-                                formik.values.feedTabNames[source.key] || ""
-                              }
-                              onChange={(e) =>
-                                handleTabNameChange(source.key, e.target.value)
-                              }
-                              className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full sm:w-[240px] focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                              <div className="w-full sm:w-[130px] shrink-0">
+                                <IconPicker
+                                  value={
+                                    formik.values.discoverFeedIcon ||
+                                    (formik.values.discoverFeedType === "html"
+                                      ? "FileCode"
+                                      : "Wand2")
+                                  }
+                                  onChange={(newIcon) => {
+                                    setManualDirty(true);
+                                    formik.setFieldValue(
+                                      "discoverFeedIcon",
+                                      newIcon,
+                                    );
+                                  }}
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                placeholder={source.defaultName}
+                                value={
+                                  formik.values.feedTabNames[source.key] || ""
+                                }
+                                onChange={(e) =>
+                                  handleTabNameChange(
+                                    source.key,
+                                    e.target.value,
+                                  )
+                                }
+                                className="text-[12px] h-8 px-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-[#f6f6f7] dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 font-medium w-full sm:w-[200px] focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </div>
                           </div>
 
                           {/* Mode Selection Tiles: Normal Feed vs Custom HTML */}

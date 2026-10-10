@@ -152,6 +152,7 @@ export interface EntitySettings {
   discoverFeedHtml?: string | null;
   discoverFeedCss?: string | null;
   discoverFeedHtmlFileName?: string | null;
+  discoverFeedIcon?: string | null;
   feedTabNames?: Record<string, string>;
   mediaGalleryFeedAlbumId?: string | null;
   mediaGalleryFeedName?: string | null;
