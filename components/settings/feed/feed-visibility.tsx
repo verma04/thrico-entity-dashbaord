@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -29,8 +29,6 @@ import {
   Eye,
   Sliders,
   FileCode,
-  FileUp,
-  Eye as EyeIcon,
   Info,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -82,14 +80,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { IsolatedHtmlRenderer } from "@/components/website-layout/modules/isolated-html-renderer";
+import { HtmlSettings } from "@/components/website-layout/settings/html-settings";
 
 export interface MediaGalleryFeedLink {
   id: string;
@@ -234,59 +225,6 @@ const feedVisibilityValidationSchema = Yup.object().shape({
   allowFeedReaction: Yup.boolean().required(),
   allowReactionVisibility: Yup.boolean().required(),
 });
-
-const DISCOVER_STARTER_TEMPLATES = [
-  {
-    id: "welcome-hero",
-    name: "Hero Banner",
-    category: "Hero",
-    html: `<div style="padding: 40px 24px; text-align: center; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);">
-  <span style="display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 9999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Discover & Connect</span>
-  <h2 style="font-size: 28px; font-weight: 700; margin: 0 0 12px 0; color: #ffffff;">Welcome to Our Community</h2>
-  <p style="font-size: 15px; opacity: 0.9; max-width: 540px; margin: 0 auto 20px auto; line-height: 1.6;">Explore curated updates, join exciting discussions, and connect with fellow members across the network.</p>
-  <a href="#explore" style="display: inline-block; padding: 10px 24px; background: #ffffff; color: #4f46e5; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">Get Started &rarr;</a>
-</div>`,
-    css: ``,
-  },
-  {
-    id: "highlights-grid",
-    name: "3-Column Highlights",
-    category: "Cards",
-    html: `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin: 12px 0;">
-  <div style="padding: 24px; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
-    <div style="width: 40px; height: 40px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 14px;">01</div>
-    <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 8px 0; color: #0f172a;">Connect & Network</h3>
-    <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Meet peers, industry mentors, and thought leaders directly in your space.</p>
-  </div>
-  <div style="padding: 24px; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
-    <div style="width: 40px; height: 40px; border-radius: 10px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 14px;">02</div>
-    <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 8px 0; color: #0f172a;">Exclusive Events</h3>
-    <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Participate in virtual meetups, keynote webinars, and workshops.</p>
-  </div>
-  <div style="padding: 24px; border-radius: 14px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
-    <div style="width: 40px; height: 40px; border-radius: 10px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 14px;">03</div>
-    <h3 style="font-size: 17px; font-weight: 700; margin: 0 0 8px 0; color: #0f172a;">Growth & Rewards</h3>
-    <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">Earn points, unlock badges, and redeem perks as you engage daily.</p>
-  </div>
-</div>`,
-    css: ``,
-  },
-  {
-    id: "resource-center",
-    name: "Resource Center",
-    category: "Links",
-    html: `<div style="padding: 30px; border-radius: 16px; background: #f8fafc; border: 1px solid #e2e8f0;">
-  <h2 style="font-size: 22px; font-weight: 700; margin: 0 0 8px 0; color: #1e293b;">Member Resource Center</h2>
-  <p style="font-size: 14px; color: #64748b; margin: 0 0 20px 0;">Essential guides, quick links, and featured documentation for all members.</p>
-  <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-    <a href="/dashboard/events" style="padding: 10px 18px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; text-decoration: none;">Upcoming Events &rarr;</a>
-    <a href="/dashboard/communities" style="padding: 10px 18px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; text-decoration: none;">Browse Communities &rarr;</a>
-    <a href="/dashboard/discussions" style="padding: 10px 18px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; text-decoration: none;">Discussions & Forum &rarr;</a>
-  </div>
-</div>`,
-    css: ``,
-  },
-];
 
 interface AlbumItem {
   id: string;
@@ -445,8 +383,6 @@ export default function FeedVisibility() {
   const { data: albumsData } = useGetMediaGalleryAlbums();
   const albums = albumsData?.getMediaGalleryAlbums || [];
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
     index: number;
     name: string;
@@ -474,7 +410,8 @@ export default function FeedVisibility() {
     discoverFeedCss: data?.getEntitySettings?.discoverFeedCss || "",
     discoverFeedHtmlFileName:
       data?.getEntitySettings?.discoverFeedHtmlFileName || "",
-    feedTabNames: (data?.getEntitySettings?.feedTabNames as Record<string, string>) || {},
+    feedTabNames:
+      (data?.getEntitySettings?.feedTabNames as Record<string, string>) || {},
     allowEntityCommunityInFeed:
       data?.getEntitySettings?.allowEntityCommunityInFeed ?? true,
     allowEntityDiscussionForumInFeed:
@@ -639,42 +576,6 @@ export default function FeedVisibility() {
       );
       formik.setFieldValue("mediaGalleryFeedLinks", newLinks);
     }
-  };
-
-  const handleHtmlFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validExtensions = [".html", ".htm", ".txt"];
-    const ext = "." + (file.name.split(".").pop()?.toLowerCase() || "");
-    if (!validExtensions.includes(ext)) {
-      toast.error("Please upload a valid .html, .htm, or .txt file.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      if (text) {
-        formik.setFieldValue("discoverFeedHtml", text);
-        formik.setFieldValue("discoverFeedHtmlFileName", file.name);
-        formik.setFieldValue("discoverFeedType", "html");
-        toast.success(
-          `Loaded "${file.name}" (${(file.size / 1024).toFixed(1)} KB) into Custom HTML.`,
-        );
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  };
-
-  const handleApplyTemplate = (template: (typeof DISCOVER_STARTER_TEMPLATES)[0]) => {
-    formik.setFieldValue("discoverFeedHtml", template.html);
-    if (template.css) {
-      formik.setFieldValue("discoverFeedCss", template.css);
-    }
-    formik.setFieldValue("discoverFeedHtmlFileName", `${template.id}.html`);
-    toast.success(`Inserted template "${template.name}".`);
   };
 
   const activeSourcesCount = [
@@ -1161,131 +1062,37 @@ export default function FeedVisibility() {
                             </div>
                           </div>
 
-                          {/* Custom HTML Configuration Sub-panel */}
+                          {/* Reusable Rich HTML Editor Component */}
                           {formik.values.discoverFeedType === "html" && (
-                            <div className="p-3.5 rounded-[8px] border border-blue-200 dark:border-blue-900/40 bg-blue-50/20 dark:bg-blue-950/10 space-y-3.5">
-                              {/* Hidden file input */}
-                              <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept=".html,.htm,.txt"
-                                onChange={handleHtmlFileSelect}
-                                className="hidden"
-                              />
-
-                              {/* Upload Bar & Action Buttons */}
-                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-[6px] bg-[#303030] hover:bg-[#202020] text-white dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-zinc-900 transition-colors shadow-xs cursor-pointer"
-                                  >
-                                    <FileUp className="h-3.5 w-3.5" />
-                                    Upload .html File
-                                  </button>
-
-                                  {/* Starter Templates Dropdown */}
-                                  <div className="flex items-center gap-1">
-                                    {DISCOVER_STARTER_TEMPLATES.map((tpl) => (
-                                      <button
-                                        key={tpl.id}
-                                        type="button"
-                                        onClick={() => handleApplyTemplate(tpl)}
-                                        className="px-2 py-1 text-[10.5px] rounded border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] dark:hover:bg-zinc-700 transition-colors cursor-pointer"
-                                        title={`Insert ${tpl.name}`}
-                                      >
-                                        + {tpl.name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                {/* Preview Button */}
-                                <button
-                                  type="button"
-                                  onClick={() => setPreviewModalOpen(true)}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-200 hover:bg-[#f6f6f7] transition-colors cursor-pointer"
-                                >
-                                  <EyeIcon className="h-3.5 w-3.5 text-blue-600" />
-                                  Live Preview
-                                </button>
-                              </div>
-
-                              {/* Uploaded File Pill */}
-                              {formik.values.discoverFeedHtmlFileName && (
-                                <div className="flex items-center justify-between p-2 rounded-[6px] bg-white dark:bg-zinc-900 border border-[#d2d5d9] dark:border-zinc-800 text-[11.5px]">
-                                  <div className="flex items-center gap-2">
-                                    <FileCode className="h-4 w-4 text-blue-600" />
-                                    <span className="font-semibold text-[#303030] dark:text-zinc-200">
-                                      {formik.values.discoverFeedHtmlFileName}
-                                    </span>
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-[9.5px] px-1.5 py-0"
-                                    >
-                                      Active File
-                                    </Badge>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      formik.setFieldValue(
-                                        "discoverFeedHtmlFileName",
-                                        "",
-                                      );
-                                    }}
-                                    className="p-1 text-[#8c9196] hover:text-red-600 rounded transition-colors cursor-pointer"
-                                    title="Clear file tag"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                </div>
-                              )}
-
-                              {/* HTML Code Editor */}
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-semibold text-[#303030] dark:text-zinc-300 flex items-center justify-between">
-                                  <span>HTML Markup (Shadow DOM Isolated):</span>
-                                  <span className="text-[10px] text-[#8c9196] font-normal">
-                                    HTML5, styles &amp; embeds supported
-                                  </span>
-                                </label>
-                                <textarea
-                                  value={formik.values.discoverFeedHtml || ""}
-                                  onChange={(e) =>
+                            <div className="pt-2">
+                              <HtmlSettings
+                                content={{
+                                  htmlCode: formik.values.discoverFeedHtml,
+                                  customCss: formik.values.discoverFeedCss,
+                                  fileName: formik.values.discoverFeedHtmlFileName,
+                                  renderMode: "direct",
+                                }}
+                                onChange={(updates) => {
+                                  if (updates.htmlCode !== undefined) {
                                     formik.setFieldValue(
                                       "discoverFeedHtml",
-                                      e.target.value,
-                                    )
+                                      updates.htmlCode,
+                                    );
                                   }
-                                  placeholder="<div class='hero'>...</div>"
-                                  rows={8}
-                                  className="w-full text-[11.5px] font-mono p-2.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-950 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
-                                />
-                              </div>
-
-                              {/* Scoped CSS Editor */}
-                              <div className="space-y-1">
-                                <label className="text-[11px] font-semibold text-[#303030] dark:text-zinc-300 flex items-center justify-between">
-                                  <span>Custom Scoped CSS (Optional):</span>
-                                  <span className="text-[10px] text-[#8c9196] font-normal">
-                                    Mapped to :host container automatically
-                                  </span>
-                                </label>
-                                <textarea
-                                  value={formik.values.discoverFeedCss || ""}
-                                  onChange={(e) =>
+                                  if (updates.customCss !== undefined) {
                                     formik.setFieldValue(
                                       "discoverFeedCss",
-                                      e.target.value,
-                                    )
+                                      updates.customCss,
+                                    );
                                   }
-                                  placeholder=":host { display: block; } .custom-banner { border-radius: 12px; }"
-                                  rows={3}
-                                  className="w-full text-[11.5px] font-mono p-2 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-950 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
-                                />
-                              </div>
+                                  if (updates.fileName !== undefined) {
+                                    formik.setFieldValue(
+                                      "discoverFeedHtmlFileName",
+                                      updates.fileName,
+                                    );
+                                  }
+                                }}
+                              />
                             </div>
                           )}
                         </div>
@@ -1530,34 +1337,6 @@ export default function FeedVisibility() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Discover HTML Live Preview Modal */}
-      <Dialog open={previewModalOpen} onOpenChange={setPreviewModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col p-6">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base">
-              <FileCode className="h-4 w-4 text-blue-600" />
-              Discover Tab HTML Live Preview
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Simulated preview inside isolated Shadow DOM container with scoped styles.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto rounded-[8px] border border-[#d2d5d9] dark:border-zinc-800 p-4 bg-white dark:bg-zinc-950 min-h-[300px]">
-            {formik.values.discoverFeedHtml?.trim() ? (
-              <IsolatedHtmlRenderer
-                html={formik.values.discoverFeedHtml}
-                css={formik.values.discoverFeedCss}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-48 text-[#8c9196] text-xs">
-                No HTML content provided. Upload an HTML file or enter markup to preview.
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
