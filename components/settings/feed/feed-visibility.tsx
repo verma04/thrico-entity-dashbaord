@@ -387,6 +387,8 @@ export default function FeedVisibility() {
     index: number;
     name: string;
   } | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [manualDirty, setManualDirty] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -510,6 +512,9 @@ export default function FeedVisibility() {
         }
 
         await Promise.all(promises);
+        setSaved(true);
+        setManualDirty(false);
+        setTimeout(() => setSaved(false), 3000);
         toast.success("Feed visibility parameters updated successfully.");
       } catch (error: unknown) {
         toast.error((error as Error)?.message || "Failed to update feed parameters.");
@@ -519,10 +524,12 @@ export default function FeedVisibility() {
   });
 
   const handleToggle = (key: keyof FeedVisibilitySettings) => {
+    setManualDirty(true);
     formik.setFieldValue(key, !formik.values[key]);
   };
 
   const handleTabNameChange = (key: string, name: string) => {
+    setManualDirty(true);
     formik.setFieldValue("feedTabNames", {
       ...formik.values.feedTabNames,
       [key]: name,
@@ -530,6 +537,7 @@ export default function FeedVisibility() {
   };
 
   const handleAddMediaLink = () => {
+    setManualDirty(true);
     const newLink: MediaGalleryFeedLink = {
       id: `link-${Date.now()}`,
       albumId: "",
@@ -547,12 +555,14 @@ export default function FeedVisibility() {
     field: "name" | "albumId" | "icon",
     value: string,
   ) => {
+    setManualDirty(true);
     const nextLinks = [...formik.values.mediaGalleryFeedLinks];
     nextLinks[index] = { ...nextLinks[index], [field]: value };
     formik.setFieldValue("mediaGalleryFeedLinks", nextLinks);
   };
 
   const handleRemoveMediaLink = (index: number) => {
+    setManualDirty(true);
     const nextLinks = formik.values.mediaGalleryFeedLinks.filter(
       (_, i) => i !== index,
     );
@@ -569,6 +579,7 @@ export default function FeedVisibility() {
         (i) => i.id === over.id,
       );
       if (oldIndex === -1 || newIndex === -1) return;
+      setManualDirty(true);
       const newLinks = arrayMove(
         formik.values.mediaGalleryFeedLinks,
         oldIndex,
@@ -731,6 +742,8 @@ export default function FeedVisibility() {
     },
   ];
 
+  const hasChanged = Boolean(formik.dirty || manualDirty);
+
   return (
     <div className="w-full pb-20">
       <PolarisFormLayout
@@ -883,7 +896,10 @@ export default function FeedVisibility() {
                 label="Feed Brand Display Name"
                 placeholder="e.g. Acme Official, Community Team"
                 value={formik.values.feedEntityName}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  setManualDirty(true);
+                  formik.handleChange(e);
+                }}
                 helperText="This custom name will appear as the author name on official entity posts."
                 prefix={<Sparkles className="h-4 w-4" />}
               />
@@ -980,12 +996,13 @@ export default function FeedVisibility() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                               {/* Option 1: Normal Feed Stream */}
                               <div
-                                onClick={() =>
+                                onClick={() => {
+                                  setManualDirty(true);
                                   formik.setFieldValue(
                                     "discoverFeedType",
                                     "normal",
-                                  )
-                                }
+                                  );
+                                }}
                                 className={cn(
                                   "p-3 rounded-[8px] border cursor-pointer transition-all flex items-start gap-2.5",
                                   formik.values.discoverFeedType === "normal"
@@ -1021,12 +1038,13 @@ export default function FeedVisibility() {
 
                               {/* Option 2: Custom HTML Page */}
                               <div
-                                onClick={() =>
+                                onClick={() => {
+                                  setManualDirty(true);
                                   formik.setFieldValue(
                                     "discoverFeedType",
                                     "html",
-                                  )
-                                }
+                                  );
+                                }}
                                 className={cn(
                                   "p-3 rounded-[8px] border cursor-pointer transition-all flex items-start gap-2.5",
                                   formik.values.discoverFeedType === "html"
@@ -1073,6 +1091,7 @@ export default function FeedVisibility() {
                                   renderMode: "direct",
                                 }}
                                 onChange={(updates) => {
+                                  setManualDirty(true);
                                   if (updates.htmlCode !== undefined) {
                                     formik.setFieldValue(
                                       "discoverFeedHtml",
@@ -1299,10 +1318,17 @@ export default function FeedVisibility() {
 
           {/* Floating Save Panel */}
           <FloatingSavePanel
-            show={formik.dirty}
+            hasChanged={hasChanged}
+            saved={saved}
             isSaving={loadingBtn || loadingName}
             onSave={formik.handleSubmit}
-            onDiscard={() => formik.resetForm()}
+            onReset={() => {
+              formik.resetForm();
+              setManualDirty(false);
+            }}
+            title="Unsaved Feed Protocol Changes"
+            saveButtonText="Save Changes"
+            discardButtonText="Discard"
           />
         </form>
       </PolarisFormLayout>
