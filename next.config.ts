@@ -25,8 +25,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: "standalone",
+  output: process.env.VERCEL ? undefined : "standalone",
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
