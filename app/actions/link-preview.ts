@@ -23,7 +23,9 @@ async function scrapeMetadata(rawUrl: string) {
   if (/instagram\.com|instagr\.am/i.test(rawUrl)) {
     try {
       const u = new URL(rawUrl);
-      targetUrl = u.origin + u.pathname;
+      let path = u.pathname.replace(/\/reels\//i, "/reel/");
+      if (!path.endsWith("/")) path += "/";
+      targetUrl = u.origin + path;
     } catch {}
   }
 
@@ -73,7 +75,21 @@ async function scrapeMetadata(rawUrl: string) {
     getMeta("og:description") ||
     getMeta("twitter:description") ||
     getMeta("description");
-  let ogImage = getMeta("og:image") || getMeta("twitter:image");
+
+  const rawOgImage = getMeta("og:image");
+  const rawTwitterImage = getMeta("twitter:image");
+
+  // On Instagram/Facebook, og:image is often an ugly horizontal crop (e.g. stp=c0.352.720.224a_...)
+  // while twitter:image contains the full uncropped square or portrait cover.
+  let ogImage = rawOgImage;
+  if (rawTwitterImage) {
+    if (!ogImage || /stp=c\d+\.\d+\.\d+\.\d+a/i.test(ogImage)) {
+      ogImage = rawTwitterImage;
+    }
+  } else if (!ogImage) {
+    ogImage = rawTwitterImage;
+  }
+
   let siteName =
     getMeta("og:site_name") || finalUrlObj.hostname.replace(/^www\./, "");
 
@@ -141,11 +157,16 @@ async function scrapeMetadata(rawUrl: string) {
   // Instagram Intelligence
   if (isInstagram) {
     siteName = "Instagram";
-    const match = finalUrl.match(/\/(p|reel|reels|tv)\/([a-zA-Z0-9_-]+)/i);
+    const match =
+      finalUrl.match(/\/(p|reel|reels|tv)\/([a-zA-Z0-9_-]+)/i) ||
+      rawUrl.match(/\/(p|reel|reels|tv)\/([a-zA-Z0-9_-]+)/i);
     if (match) {
       instagramId = match[2];
       isReel = match[1].toLowerCase().includes("reel");
       isPost = match[1].toLowerCase() === "p";
+    }
+    if (!isReel && (/reel/i.test(finalUrl) || /reel/i.test(rawUrl))) {
+      isReel = true;
     }
     if (ogTitle) {
       const titleMatch = ogTitle.match(
@@ -296,9 +317,21 @@ async function scrapeMetadata(rawUrl: string) {
         images.push(`https://img.youtube.com/vi/${youTubeId}/hqdefault.jpg`);
       }
     }
-    if (!ogTitle || ogTitle === "YouTube") {
-      ogTitle = rawUrl.includes("shorts") ? "YouTube Shorts" : "YouTube Video";
+    const isShorts =
+      /shorts\//i.test(rawUrl) || /shorts\//i.test(finalUrl);
+    if (isShorts) {
+      isReel = true;
     }
+    if (!ogTitle || ogTitle === "YouTube") {
+      ogTitle = isShorts ? "YouTube Shorts" : "YouTube Video";
+    }
+  }
+
+  const isTikTok =
+    /tiktok\.com/i.test(finalUrl) || /tiktok\.com/i.test(rawUrl);
+  if (isTikTok) {
+    siteName = "TikTok";
+    isReel = true;
   }
 
   if (isLinkedIn) {

@@ -70,7 +70,13 @@ interface LinkUploadDialogProps {
   onUploaded: () => void;
 }
 
-const linkValidationSchema = Yup.object().shape({
+export interface LinkUploadFormValues {
+  url: string;
+  caption: string;
+  albumIds: string[];
+}
+
+export const linkValidationSchema = Yup.object().shape({
   url: Yup.string()
     .trim()
     .required("Please enter a link URL")
@@ -133,7 +139,7 @@ export function LinkUploadDialog({
     return t;
   }, [previewData]);
 
-  const formik = useFormik({
+  const formik = useFormik<LinkUploadFormValues>({
     initialValues: {
       url: "",
       caption: "",
@@ -423,14 +429,21 @@ export function LinkUploadDialog({
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-stretch">
+                    <div className="flex flex-row items-stretch">
                       {previewData.images && previewData.images.length > 0 ? (
-                        <div className="sm:w-44 h-36 sm:h-auto flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center">
+                        <div
+                          className={cn(
+                            "flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center border-r border-white/10",
+                            previewData.isReel
+                              ? "w-28 sm:w-36 aspect-[9/16]"
+                              : "sm:w-44 h-36 sm:h-auto",
+                          )}
+                        >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={previewData.images[0]}
                             alt={cleanTitle || "Facebook preview"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-center"
                           />
                           {(previewData.isReel || previewData.isVideo) && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
@@ -439,9 +452,23 @@ export function LinkUploadDialog({
                               </div>
                             </div>
                           )}
+                          {previewData.isReel && (
+                            <div className="absolute top-2 left-2 z-10 pointer-events-none">
+                              <span className="text-[9px] font-semibold bg-black/75 backdrop-blur-md text-white/90 px-1.5 py-0.5 rounded border border-white/15">
+                                9:16
+                              </span>
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <div className="sm:w-36 h-28 flex-shrink-0 bg-gradient-to-br from-[#1877F2]/30 via-zinc-900 to-black flex items-center justify-center relative overflow-hidden">
+                        <div
+                          className={cn(
+                            "flex-shrink-0 bg-gradient-to-br from-[#1877F2]/30 via-zinc-900 to-black flex items-center justify-center relative overflow-hidden border-r border-white/10",
+                            previewData.isReel
+                              ? "w-28 sm:w-36 aspect-[9/16]"
+                              : "sm:w-36 h-28",
+                          )}
+                        >
                           <Facebook className="w-10 h-10 text-white/20" />
                           {(previewData.isReel || previewData.isVideo) && (
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -452,18 +479,27 @@ export function LinkUploadDialog({
                           )}
                         </div>
                       )}
-                      <div className="p-3.5 flex flex-col justify-center flex-1 min-w-0">
-                        <h4 className="font-semibold text-xs text-white line-clamp-2 mb-1.5 leading-snug">
-                          {cleanTitle}
-                        </h4>
-                        {previewData.description && (
-                          <p className="text-[11px] text-white/65 line-clamp-2 leading-relaxed mb-2">
-                            {previewData.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-1 text-[10.5px] text-white/50 font-medium mt-auto">
-                          <Globe className="w-3 h-3 text-[#1877F2]" />
-                          <span>facebook.com</span>
+                      <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1 min-w-0">
+                        <div>
+                          <h4 className="font-semibold text-xs text-white line-clamp-2 sm:line-clamp-3 mb-1.5 leading-snug">
+                            {cleanTitle}
+                          </h4>
+                          {previewData.description && (
+                            <p className="text-[11px] text-white/65 line-clamp-3 leading-relaxed mb-2">
+                              {previewData.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between gap-1 text-[10.5px] text-white/50 font-medium mt-auto pt-2 border-t border-white/5">
+                          <div className="flex items-center gap-1">
+                            <Globe className="w-3 h-3 text-[#1877F2]" />
+                            <span>facebook.com</span>
+                          </div>
+                          {previewData.author && (
+                            <span className="text-white/70 truncate max-w-[140px]">
+                              {previewData.author}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -498,25 +534,46 @@ export function LinkUploadDialog({
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-stretch">
+                    <div className="flex flex-row items-stretch">
                       {previewData.images && previewData.images.length > 0 ? (
-                        <div className="sm:w-44 h-36 sm:h-auto flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center">
+                        <div
+                          className={cn(
+                            "flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center border-r border-white/10",
+                            previewData.isReel
+                              ? "w-28 sm:w-36 aspect-[9/16]"
+                              : "w-28 sm:w-36 aspect-square sm:aspect-auto sm:w-44",
+                          )}
+                        >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={previewData.images[0]}
                             alt={cleanTitle || "Instagram preview"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-center"
                           />
                           {previewData.isReel && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                              <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg">
-                                <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                            <>
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none">
+                                <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg">
+                                  <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                                </div>
                               </div>
-                            </div>
+                              <div className="absolute top-2 left-2 z-10 pointer-events-none">
+                                <span className="text-[9px] font-semibold bg-black/75 backdrop-blur-md text-white/90 px-1.5 py-0.5 rounded border border-white/15">
+                                  9:16
+                                </span>
+                              </div>
+                            </>
                           )}
                         </div>
                       ) : (
-                        <div className="sm:w-36 h-28 flex-shrink-0 bg-gradient-to-br from-[#f09433]/20 via-[#dc2743]/20 to-black flex items-center justify-center relative overflow-hidden">
+                        <div
+                          className={cn(
+                            "flex-shrink-0 bg-gradient-to-br from-[#f09433]/20 via-[#dc2743]/20 to-black flex items-center justify-center relative overflow-hidden border-r border-white/10",
+                            previewData.isReel
+                              ? "w-28 sm:w-36 aspect-[9/16]"
+                              : "w-28 sm:w-36 aspect-square sm:aspect-auto sm:w-36",
+                          )}
+                        >
                           <Instagram className="w-10 h-10 text-white/20" />
                           {previewData.isReel && (
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -527,23 +584,32 @@ export function LinkUploadDialog({
                           )}
                         </div>
                       )}
-                      <div className="p-3.5 flex flex-col justify-center flex-1 min-w-0">
-                        <h4 className="font-semibold text-xs text-white line-clamp-2 mb-1.5 leading-snug">
-                          {cleanTitle}
-                        </h4>
-                        {previewData.stats && (
-                          <p className="text-[11px] text-pink-300 font-medium mb-1">
-                            {previewData.stats}
-                          </p>
-                        )}
-                        {previewData.description && (
-                          <p className="text-[11px] text-white/65 line-clamp-2 leading-relaxed mb-2">
-                            {previewData.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-1 text-[10.5px] text-white/50 font-medium mt-auto">
-                          <Globe className="w-3 h-3 text-[#E4405F]" />
-                          <span>instagram.com</span>
+                      <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1 min-w-0">
+                        <div>
+                          <h4 className="font-semibold text-xs text-white line-clamp-2 sm:line-clamp-3 mb-1.5 leading-snug">
+                            {cleanTitle}
+                          </h4>
+                          {previewData.stats && (
+                            <p className="text-[11px] text-pink-300 font-medium mb-1">
+                              {previewData.stats}
+                            </p>
+                          )}
+                          {previewData.description && (
+                            <p className="text-[11px] text-white/65 line-clamp-3 leading-relaxed mb-2">
+                              {previewData.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between gap-1 text-[10.5px] text-white/50 font-medium mt-auto pt-2 border-t border-white/5">
+                          <div className="flex items-center gap-1">
+                            <Globe className="w-3 h-3 text-[#E4405F]" />
+                            <span>instagram.com</span>
+                          </div>
+                          {previewData.author && (
+                            <span className="text-white/70 truncate max-w-[140px]">
+                              @{previewData.author}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -558,7 +624,7 @@ export function LinkUploadDialog({
                         </span>
                         <span className="text-xs font-semibold text-white">YouTube</span>
                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/15">
-                          Video
+                          {previewData.isReel ? "Shorts" : "Video"}
                         </span>
                       </div>
                       <a
@@ -571,27 +637,43 @@ export function LinkUploadDialog({
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-stretch">
+                    <div className="flex flex-row items-stretch">
                       {previewData.images && previewData.images.length > 0 && (
-                        <div className="sm:w-44 h-36 sm:h-auto flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center">
+                        <div
+                          className={cn(
+                            "flex-shrink-0 bg-black relative overflow-hidden flex items-center justify-center border-r border-white/10",
+                            previewData.isReel
+                              ? "w-28 sm:w-36 aspect-[9/16]"
+                              : "sm:w-44 h-36 sm:h-auto",
+                          )}
+                        >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={previewData.images[0]}
                             alt={cleanTitle || "YouTube video"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-center"
                           />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
                             <div className="w-9 h-9 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-lg">
                               <Play className="w-4 h-4 fill-white text-white ml-0.5" />
                             </div>
                           </div>
+                          {previewData.isReel && (
+                            <div className="absolute top-2 left-2 z-10 pointer-events-none">
+                              <span className="text-[9px] font-semibold bg-black/75 backdrop-blur-md text-white/90 px-1.5 py-0.5 rounded border border-white/15">
+                                9:16
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )}
-                      <div className="p-3.5 flex flex-col justify-center flex-1 min-w-0">
-                        <h4 className="font-semibold text-xs text-white line-clamp-2 mb-1.5 leading-snug">
-                          {cleanTitle}
-                        </h4>
-                        <div className="flex items-center gap-1 text-[10.5px] text-white/50 font-medium mt-auto">
+                      <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1 min-w-0">
+                        <div>
+                          <h4 className="font-semibold text-xs text-white line-clamp-2 sm:line-clamp-3 mb-1.5 leading-snug">
+                            {cleanTitle}
+                          </h4>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10.5px] text-white/50 font-medium mt-auto pt-2 border-t border-white/5">
                           <Globe className="w-3 h-3 text-red-500" />
                           <span>youtube.com</span>
                         </div>
@@ -601,15 +683,29 @@ export function LinkUploadDialog({
                 ) : (
                   /* Standard Web Page Card */
                   <div className="rounded-lg border border-border/80 overflow-hidden bg-background shadow-2xs">
-                    <div className="flex flex-col sm:flex-row items-stretch">
+                    <div className="flex flex-row items-stretch">
                       {previewData.images && previewData.images.length > 0 && (
-                        <div className="sm:w-36 h-28 sm:h-auto flex-shrink-0 bg-muted relative overflow-hidden">
+                        <div
+                          className={cn(
+                            "flex-shrink-0 bg-muted relative overflow-hidden border-r border-border/70",
+                            previewData.isReel
+                              ? "w-28 sm:w-36 aspect-[9/16]"
+                              : "sm:w-36 h-28 sm:h-auto",
+                          )}
+                        >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={previewData.images[0]}
                             alt={cleanTitle || "Link preview"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover object-center"
                           />
+                          {previewData.isReel && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none">
+                              <div className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-lg">
+                                <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                       <div className="p-3 flex flex-col justify-center flex-1 min-w-0">
