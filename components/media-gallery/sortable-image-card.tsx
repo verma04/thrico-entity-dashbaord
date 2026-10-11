@@ -221,7 +221,7 @@ export function SortableImageCard({
               (isVideo ? "Gallery video" : isLink ? "Link preview" : "Gallery image")
             }
             className={cn(
-              "w-full h-full object-cover transition-transform duration-200 group-hover:scale-105",
+              "w-full h-full object-cover object-center transition-transform duration-200 group-hover:scale-105",
               isSelected && "scale-95",
               isPending && "opacity-60 blur-[1px]",
             )}
