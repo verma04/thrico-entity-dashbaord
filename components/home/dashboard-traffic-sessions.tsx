@@ -2,6 +2,7 @@ import React from "react";
 import { DashboardDistributionChart } from "./dashboard-distribution-chart";
 import { DashboardSessionRadarChart } from "./dashboard-session-radar-chart";
 import { SessionAnalyticsCard } from "@/components/analytics";
+import { InViewContainer } from "@/components/shared/in-view-container";
 
 interface DashboardTrafficSessionsProps {
   DashboardSectionHeading: React.FC<{ title: string; action?: React.ReactNode; tooltip?: string }>;
@@ -20,7 +21,9 @@ export function DashboardTrafficSessions({ DashboardSectionHeading }: DashboardT
           <DashboardSessionRadarChart />
         </section>
       </div>
-      <SessionAnalyticsCard />
+      <InViewContainer minHeight={200}>
+        <SessionAnalyticsCard />
+      </InViewContainer>
     </div>
   );
 }

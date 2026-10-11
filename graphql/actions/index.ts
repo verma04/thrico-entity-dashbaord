@@ -1,4 +1,4 @@
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery, type QueryHookOptions } from "@apollo/client";
 import {
   CHANGE_THEME_COLOR,
   CHECK_DOMAIN,
@@ -472,8 +472,8 @@ export const useGetModuleCustomName = (id: string) =>
     skip: !id,
   });
 
-export const useHasAnyIntegration = () =>
-  useQuery(HAS_ANY_INTEGRATION);
+export const useHasAnyIntegration = (options?: QueryHookOptions) =>
+  useQuery(HAS_ANY_INTEGRATION, options);
 
 export * from "./social";
 

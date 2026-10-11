@@ -6,7 +6,9 @@ import { useGetEntityTheme } from "@/graphql/actions";
 
 export function BrandStyles() {
   const { theme } = useTheme();
-  const { data } = useGetEntityTheme();
+  const { data } = useGetEntityTheme({
+    skip: theme !== "brand",
+  });
 
   useEffect(() => {
     if (theme === "brand" && data?.getEntityTheme) {

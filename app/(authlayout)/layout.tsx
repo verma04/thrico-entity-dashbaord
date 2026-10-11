@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 
 import {
   useGetEntity,
-  useGetUser,
   useCheckEntitySubscription,
 } from "@/graphql/actions";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -22,11 +21,6 @@ import DomainStatusAlert from "@/components/layout/domain-status-alert";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data, loading } = useGetEntity();
-  const {
-    data: { getUser },
-    loading: loadingUser,
-  } = useGetUser();
-
   const { data: subData } = useCheckEntitySubscription();
   const setCommunityModuleName = useModuleStore(
     (state) => state.setCommunityModuleName,
@@ -70,7 +64,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (subData?.checkEntitySubscription?.modules) {
-      subData.checkEntitySubscription.modules.forEach((module: any) => {
+      subData.checkEntitySubscription.modules.forEach((module: { name?: string | null; customName?: string | null }) => {
         if (!module.customName) return;
 
         switch (module.name?.toUpperCase()) {
@@ -123,19 +117,19 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         }
       });
     }
-  }, [subData]);
+  }, [subData, setCommunityModuleName, setJobModuleName, setListingModuleName, setMomentModuleName, setShopModuleName, setForumModuleName, setPollModuleName, setSurveyModuleName, setOfferModuleName, setMentorshipModuleName, setEventModuleName, setGamificationModuleName, setGamesCenterModuleName, setCurrencyModuleName, setRewardsModuleName]);
 
   const searchParams = useSearchParams();
   const showDrawer = searchParams.has("choose-plan");
-  const { isOpen: drawerOpen, openDrawer } = useDrawerStore();
+  const { openDrawer } = useDrawerStore();
   useEffect(() => {
     if (showDrawer) {
       openDrawer();
     }
-  }, [showDrawer]);
+  }, [showDrawer, openDrawer]);
   return (
     <>
-      {!loading && !loadingUser && (
+      {!loading && (
         <>
           <>
             <TrialBanner />

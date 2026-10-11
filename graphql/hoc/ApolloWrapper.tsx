@@ -9,8 +9,8 @@ import {
 } from "@apollo/client-integration-nextjs";
 import { onError } from "@apollo/client/link/error";
 import { toast } from "sonner";
+// @ts-expect-error apollo-upload-client does not export TypeScript types
 import { createUploadLink } from "apollo-upload-client";
-import { useTokenStore } from "@/store/store";
 
 interface Props {
   children?: React.ReactNode;
@@ -18,10 +18,8 @@ interface Props {
 }
 
 export function ApolloWrapper({ children }: Props) {
-  const token = useTokenStore((state) => state.token);
-
   function makeClient() {
-    const errorControl = onError(({ graphQLErrors, networkError }) => {
+    const errorControl = onError(({ graphQLErrors }) => {
       if (graphQLErrors) {
         graphQLErrors.forEach(({ message, extensions }) => {
           if (extensions?.code === "FORBIDDEN") {
@@ -64,6 +62,15 @@ export function ApolloWrapper({ children }: Props) {
     return new ApolloClient({
       link: ApolloLink.from([authMiddleware, errorControl, uploadLink]),
       cache: new InMemoryCache(),
+      defaultOptions: {
+        watchQuery: {
+          fetchPolicy: "cache-first",
+          nextFetchPolicy: "cache-first",
+        },
+        query: {
+          fetchPolicy: "cache-first",
+        },
+      },
     });
   }
 

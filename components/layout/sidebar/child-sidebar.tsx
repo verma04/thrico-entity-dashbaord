@@ -26,7 +26,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
-import { useGetUser, useGetMyOtherAccounts } from "@/graphql/actions";
+import { useGetMyOtherAccounts } from "@/graphql/actions";
+import { useUserStore } from "@/store/store";
 import {
   useFilteredExtendedItems,
   useFilteredManagementItems,
@@ -236,12 +237,12 @@ export function ChildSidebarContainer({
     [searchQuery, integrationsItems],
   );
 
-  const { data: userData } = useGetUser();
+  const user = useUserStore((state) => state.user);
   const { data: otherAccountsData } = useGetMyOtherAccounts();
   const { isSwitching, targetName, handleSwitch } = useWorkspaceSwitch();
 
-  const nameOfUser = userData?.getUser
-    ? `${userData.getUser.firstName} ${userData.getUser.lastName}`
+  const nameOfUser = user
+    ? `${user.firstName} ${user.lastName}`
     : "Deepak Rai";
 
   const profileItems = useMemo(
@@ -382,7 +383,10 @@ export function ChildSidebarContainer({
         showSidebarToggle={hasChildSidebar}
       />
       <div className="flex flex-1 relative w-full bg-white dark:bg-neutral-950 group/sidebar-wrapper">
-        <ParentSidebar modules={modulesItems} />
+        <ParentSidebar
+          modules={modulesItems}
+          showIntegrations={!!integrationsItems?.length}
+        />
         {/* ── SIDEBAR (Hidden when no child route exists: Home, Mobile App, Team, Upgrade/Subscription) ── */}
         {hasChildSidebar && (
           <Sidebar

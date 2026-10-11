@@ -99,16 +99,18 @@ import {
   Heart,
   Type,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  useGetUser,
   useCheckEntitySubscription,
   useHasAnyIntegration,
 } from "@/graphql/actions";
 import { useGetShopifyConnection } from "@/graphql/actions/settings/shopify";
 import { useUserStore } from "@/store/store";
-import { hasUserModulePermission } from "@/hooks/use-module-permission";
+import {
+  hasUserModulePermission,
+  type PermissionAction,
+} from "@/hooks/use-module-permission";
 
 const menuLink = (href: string, text: string) => (
   <Link
@@ -1288,7 +1290,9 @@ export const useFilteredExtendedItems = () => {
   const { data, loading: subLoading } = useCheckEntitySubscription();
   const { data: integrationsData, loading: integrationsLoading } =
     useHasAnyIntegration();
-  const { data: shopifyData } = useGetShopifyConnection();
+  const { data: shopifyData } = useGetShopifyConnection({
+    skip: !integrationsData?.hasAnyIntegration,
+  });
   const user = useUserStore((state) => state.user);
 
   const isShopifyConnected = Boolean(
@@ -1532,12 +1536,16 @@ export const useFilteredManagementItems = () => {
   const isSuperAdmin = user?.isSuperAdmin;
   const isSystemRole = user?.role?.isSystem;
 
-  const hasModulePermission = (moduleName: string, action: any = "canRead") => {
-    return hasUserModulePermission(user, moduleName, action);
-  };
+  const hasModulePermission = useCallback(
+    (moduleName: string, action: PermissionAction = "canRead") => {
+      return hasUserModulePermission(user, moduleName, action);
+    },
+    [user],
+  );
 
-  const filterSettingsGroup = (group: any[]) => {
-    if (isSuperAdmin || isSystemRole) return group;
+  const filterSettingsGroup = useCallback(
+    (group: any[]) => {
+      if (isSuperAdmin || isSystemRole) return group;
 
     return group
       .map((section) => {
@@ -1647,19 +1655,21 @@ export const useFilteredManagementItems = () => {
         return filteredSection;
       })
       .filter(Boolean);
-  };
+    },
+    [hasModulePermission, isSuperAdmin, isSystemRole],
+  );
 
   const filteredBillingAndTeam = useMemo(
     () => filterSettingsGroup(billingAndTeamItems),
-    [user, isSuperAdmin, isSystemRole],
+    [filterSettingsGroup],
   );
   const filteredSetupAndDesign = useMemo(
     () => filterSettingsGroup(setupAndDesignItems),
-    [user, isSuperAdmin, isSystemRole],
+    [filterSettingsGroup],
   );
   const filteredSupportAndLegal = useMemo(
     () => filterSettingsGroup(supportAndLegalItems),
-    [user, isSuperAdmin, isSystemRole],
+    [filterSettingsGroup],
   );
 
   return {
@@ -1680,13 +1690,12 @@ const getInitials = (name?: string) => {
 };
 
 export const UserAvatar = () => {
-  const { data } = useGetUser();
-  const user = data?.getUser;
+  const user = useUserStore((state) => state.user);
 
   return (
     <Avatar className="w-6 h-6">
       {user?.profilePicture && (
-        <AvatarImage src={user.profilePicture} alt={user?.name || "User"} />
+        <AvatarImage src={user.profilePicture} alt={user?.firstName || "User"} />
       )}
       <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-[10px] font-bold">
         {getInitials(user?.firstName || user?.lastName)}
@@ -1696,8 +1705,7 @@ export const UserAvatar = () => {
 };
 
 export const UserName = () => {
-  const { data } = useGetUser();
-  const user = data?.getUser;
+  const user = useUserStore((state) => state.user);
   return (
     <span>{user ? `${user.firstName} ${user.lastName}` : "Deepak Rai"}</span>
   );

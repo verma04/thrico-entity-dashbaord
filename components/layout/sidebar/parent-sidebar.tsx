@@ -20,25 +20,32 @@ import {
 import { NavRailItem } from "./sidebar-components";
 import { useHasAnyIntegration } from "@/graphql/actions";
 import { getActiveSidebarTab, getActiveModulePath } from "./sidebar-utils";
-import { useFilteredExtendedItems } from "./menu-items";
 import type { MenuItem } from "./types";
 
 interface ParentSidebarProps {
   modules?: MenuItem[];
+  showIntegrations?: boolean;
 }
 
-export function ParentSidebar({ modules: propModules }: ParentSidebarProps = {}) {
+export function ParentSidebar({
+  modules: propModules,
+  showIntegrations: propShowIntegrations,
+}: ParentSidebarProps = {}) {
   const pathName = usePathname();
   const activeTab = getActiveSidebarTab(pathName);
-  const { data: integrationsData } = useHasAnyIntegration();
-  const showIntegrations = !!integrationsData?.hasAnyIntegration;
 
-  const { modules: hookModules } = useFilteredExtendedItems();
+  const { data: integrationsData } = useHasAnyIntegration({
+    skip: propShowIntegrations !== undefined,
+  });
+  const showIntegrations =
+    propShowIntegrations !== undefined
+      ? propShowIntegrations
+      : !!integrationsData?.hasAnyIntegration;
 
   const modulesHref = React.useMemo(() => {
-    const modules = propModules || hookModules || [];
+    const modules = propModules || [];
     return getActiveModulePath(pathName, modules);
-  }, [pathName, propModules, hookModules]);
+  }, [pathName, propModules]);
 
   return (
     <div className="hidden md:flex w-[64px] flex-shrink-0 bg-black text-white flex-col items-center py-3 border-r border-neutral-900 z-50 rounded-l-xl my-2 ml-2 shadow-sm">
