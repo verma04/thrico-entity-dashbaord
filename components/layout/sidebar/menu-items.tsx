@@ -140,6 +140,13 @@ export const aiStudioItems = [
     icon: <LayoutDashboard size={18} />,
   },
   {
+    key: "ai-filter-studio",
+    label: "AR Filter Studio",
+    path: "/ai/filter-studio",
+    icon: <Sparkles size={18} />,
+    badge: "New",
+  },
+  {
     key: "ai-chat-studio",
     label: "Chat",
     path: "/ai/chat",

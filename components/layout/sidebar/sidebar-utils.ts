@@ -124,6 +124,7 @@ export function isFormRoute(pathName?: string | null): boolean {
     "/settings/branding",
     "/settings/appearance",
     "/gamification/currency/economics",
+    "/ai/filter-studio",
   ];
 
   return specificFormRoutes.some(
