@@ -1,6 +1,6 @@
 import { Figtree } from "next/font/google";
 import "./globals.css";
-import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
+import { ApolloWrapper } from "@/graphql/hoc/apollo-wrapper";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
