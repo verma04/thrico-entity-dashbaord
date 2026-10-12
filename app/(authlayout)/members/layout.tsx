@@ -139,4 +139,4 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(MembersLayout, "MEMBERS_ALL");
+export default MembersLayout;
