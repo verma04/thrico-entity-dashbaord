@@ -256,6 +256,9 @@ export type LayoutType =
   | "podium-view"
   | "stats-board"
   | "card-rankings" // Layout variants
+  | "clean-minimalist"
+  | "neon-arcade"
+  | "flashy-arena"
   | "numbered-rules"
   | "accordion-rules"
   | "card-guidelines"

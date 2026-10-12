@@ -32,6 +32,9 @@ import {
   Table2,
   BadgePercent,
   Zap,
+  ListOrdered,
+  Trophy,
+  Gamepad2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -172,6 +175,34 @@ const layoutMetadata: Record<
     icon: Feather,
     description: "Linear monochrome tiers",
   },
+  "clean-minimalist": {
+    icon: ListOrdered,
+    description: "Executive clean linear rows",
+  },
+  "card-rankings": {
+    icon: LayoutGrid,
+    description: "Modern Bento card grid",
+  },
+  "podium-view": {
+    icon: Trophy,
+    description: "3-tier celebratory pedestal",
+  },
+  "neon-arcade": {
+    icon: Gamepad2,
+    description: "Cyber neon arcade glow",
+  },
+  "flashy-arena": {
+    icon: Sparkles,
+    description: "Holographic VIP arena",
+  },
+  "rank-list": {
+    icon: Rows,
+    description: "Classic rank list",
+  },
+  "stats-board": {
+    icon: Table2,
+    description: "Metric stats cards",
+  },
   default: {
     icon: Layout,
     description: "Standard layout",
@@ -210,6 +241,13 @@ const layoutDisplayNames: Record<string, string> = {
   direct: "Direct HTML",
   iframe: "Sandboxed IFrame",
   "custom-html": "Custom HTML",
+  "clean-minimalist": "Clean Minimalist",
+  "card-rankings": "Bento Card Rankings",
+  "podium-view": "Olympic Podium 3D",
+  "neon-arcade": "Cyber Neon Arcade",
+  "flashy-arena": "Flashy VIP Arena",
+  "rank-list": "Classic Rank List",
+  "stats-board": "Stats Board",
 };
 
 const getLayoutInfo = (layout: LayoutType) => {

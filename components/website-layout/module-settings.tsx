@@ -370,7 +370,13 @@ const getAvailableLayouts = (
     ];
   }
   if (moduleType === "leaderboard") {
-    return ["rank-list", "podium-view", "stats-board", "card-rankings"];
+    return [
+      "clean-minimalist",
+      "card-rankings",
+      "podium-view",
+      "neon-arcade",
+      "flashy-arena",
+    ];
   }
   if (moduleType === "guidelines") {
     return [
