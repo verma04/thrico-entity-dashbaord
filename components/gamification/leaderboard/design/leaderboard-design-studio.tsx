@@ -37,6 +37,11 @@ import {
   LeaderboardEntry,
 } from "@/components/website-layout/modules/leaderboard";
 import { useWebsiteBuilderStore, LayoutType } from "@/store/useWebsiteBuilderStore";
+import {
+  useGetWebsite,
+  useUpdateModule,
+  useCreateModule,
+} from "@/graphql/actions/website";
 
 type StyleVariantId =
   | "clean-minimalist"
@@ -205,7 +210,30 @@ export function LeaderboardDesignStudio() {
   const { pages, updateModuleLayout, updateModuleContent } =
     useWebsiteBuilderStore();
 
-  // Find existing leaderboard module in website builder store if any
+  // Fetch website data from GraphQL backend
+  const {
+    data: websiteData,
+    refetch: refetchWebsite,
+  } = useGetWebsite({});
+
+  const [updateModuleMutation, { loading: isUpdatingModule }] =
+    useUpdateModule();
+  const [createModuleMutation, { loading: isCreatingModule }] =
+    useCreateModule();
+
+  // Find existing leaderboard module in backend website pages or builder store
+  const serverLeaderboardModule = useMemo(() => {
+    const serverPages = websiteData?.getWebsite?.pages || [];
+    for (const page of serverPages) {
+      const found = page.modules?.find(
+        (m: { type: string; id: string; layout?: string; name?: string; content?: Record<string, unknown> }) =>
+          m.type === "leaderboard"
+      );
+      if (found) return { module: found, pageId: page.id };
+    }
+    return null;
+  }, [websiteData]);
+
   const existingLeaderboardModule = useMemo(() => {
     for (const page of pages) {
       const found = page.modules.find((m) => m.type === "leaderboard");
@@ -214,21 +242,60 @@ export function LeaderboardDesignStudio() {
     return null;
   }, [pages]);
 
-  const initialValues: LeaderboardDesignFormValues = {
-    style: (existingLeaderboardModule?.layout as StyleVariantId) || "podium-view",
-    title:
-      existingLeaderboardModule?.content?.title || "Community Leaderboard",
-    description:
-      existingLeaderboardModule?.content?.description ||
-      "Celebrating our most dedicated contributors, top earners, and community champions.",
-    showPeriodTabs: true,
-    showStreaks: true,
-    showLevels: true,
-    showHonorableMentions: true,
-    previewDevice: "desktop",
-    previewTheme: "dark",
-    itemLimit: 5,
-  };
+  const targetModule =
+    serverLeaderboardModule?.module || existingLeaderboardModule;
+
+  const initialValues: LeaderboardDesignFormValues = useMemo(() => {
+    let localPref: Partial<LeaderboardDesignFormValues> | null = null;
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("thrico_leaderboard_design_pref");
+        if (stored) localPref = JSON.parse(stored) as Partial<LeaderboardDesignFormValues>;
+      } catch {
+        // ignore
+      }
+    }
+
+    const modContent = targetModule?.content as Record<string, unknown> | undefined;
+
+    return {
+      style:
+        (targetModule?.layout as StyleVariantId) ||
+        (localPref?.style as StyleVariantId) ||
+        "podium-view",
+      title:
+        targetModule?.name ||
+        (modContent?.title as string) ||
+        localPref?.title ||
+        "Community Leaderboard",
+      description:
+        (modContent?.description as string) ||
+        localPref?.description ||
+        "Celebrating our most dedicated contributors, top earners, and community champions.",
+      showPeriodTabs:
+        (modContent?.showPeriodTabs as boolean | undefined) ??
+        localPref?.showPeriodTabs ??
+        true,
+      showStreaks:
+        (modContent?.showStreaks as boolean | undefined) ??
+        localPref?.showStreaks ??
+        true,
+      showLevels:
+        (modContent?.showLevels as boolean | undefined) ??
+        localPref?.showLevels ??
+        true,
+      showHonorableMentions:
+        (modContent?.showHonorableMentions as boolean | undefined) ??
+        localPref?.showHonorableMentions ??
+        true,
+      previewDevice: "desktop",
+      previewTheme: "dark",
+      itemLimit:
+        (modContent?.itemLimit as number | undefined) ||
+        localPref?.itemLimit ||
+        5,
+    };
+  }, [targetModule]);
 
   const formik = useFormik<LeaderboardDesignFormValues>({
     initialValues,
@@ -237,19 +304,58 @@ export function LeaderboardDesignStudio() {
     onSubmit: async (values) => {
       setIsSaving(true);
       try {
-        // Sync with Website Builder Store if module exists
-        if (existingLeaderboardModule) {
-          updateModuleLayout(
-            existingLeaderboardModule.id,
-            values.style as LayoutType
-          );
-          updateModuleContent(existingLeaderboardModule.id, {
-            title: values.title,
-            description: values.description,
+        const payloadContent = {
+          title: values.title,
+          description: values.description,
+          showPeriodTabs: values.showPeriodTabs,
+          showStreaks: values.showStreaks,
+          showLevels: values.showLevels,
+          showHonorableMentions: values.showHonorableMentions,
+          itemLimit: values.itemLimit,
+        };
+
+        const existingId =
+          serverLeaderboardModule?.module?.id || existingLeaderboardModule?.id;
+
+        if (existingId) {
+          // Update existing module on GraphQL backend
+          await updateModuleMutation({
+            variables: {
+              moduleId: existingId,
+              name: values.title,
+              layout: values.style,
+              content: payloadContent,
+            },
+          });
+        } else if (
+          websiteData?.getWebsite?.pages &&
+          websiteData.getWebsite.pages.length > 0
+        ) {
+          // Create module on primary or leaderboard page in backend
+          const targetPage =
+            websiteData.getWebsite.pages.find(
+              (p: { slug?: string; id: string }) =>
+                p.slug === "home" || p.slug === "leaderboard"
+            ) || websiteData.getWebsite.pages[0];
+
+          await createModuleMutation({
+            variables: {
+              pageId: targetPage.id,
+              name: values.title,
+              type: "leaderboard",
+              layout: values.style,
+              content: payloadContent,
+            },
           });
         }
 
-        // Persist preferences in localStorage for seamless dashboard sync
+        // Sync local builder store
+        if (existingId) {
+          updateModuleLayout(existingId, values.style as LayoutType);
+          updateModuleContent(existingId, payloadContent);
+        }
+
+        // Persist preferences in localStorage for instant sync across website and dashboard
         localStorage.setItem(
           "thrico_leaderboard_design_pref",
           JSON.stringify({
@@ -263,15 +369,21 @@ export function LeaderboardDesignStudio() {
           })
         );
 
+        // Refetch website to sync cache
+        await refetchWebsite().catch(() => {});
+
         setSavedSuccess(true);
+        formik.resetForm({ values });
         toast.success(
           `Leaderboard style updated to "${
             STYLE_OPTIONS.find((s) => s.id === values.style)?.title
-          }"!`
+          }" and saved to backend!`
         );
         setTimeout(() => setSavedSuccess(false), 2500);
       } catch (err: unknown) {
-        toast.error((err as Error).message || "Failed to update design configuration");
+        toast.error(
+          (err as Error).message || "Failed to update design configuration"
+        );
       } finally {
         setIsSaving(false);
       }
@@ -343,6 +455,23 @@ export function LeaderboardDesignStudio() {
           >
             <Trophy className="h-3.5 w-3.5 text-amber-500" />
             Live Standings
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSaving || isUpdatingModule || isCreatingModule}
+            className="h-8 gap-1.5 text-xs font-medium bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs cursor-pointer"
+          >
+            {isSaving || isUpdatingModule || isCreatingModule ? (
+              <>
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                <span>Save Design</span>
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -674,9 +803,9 @@ export function LeaderboardDesignStudio() {
       <FloatingSavePanel
         hasChanged={formik.dirty}
         saved={savedSuccess}
-        isSaving={isSaving}
-        onSave={formik.handleSubmit}
-        onReset={formik.resetForm}
+        isSaving={isSaving || isUpdatingModule || isCreatingModule}
+        onSave={() => formik.handleSubmit()}
+        onReset={() => formik.resetForm()}
         title="Unsaved Leaderboard Design"
         description="Changes will update website and community dashboard."
         saveButtonText="Apply Design"
