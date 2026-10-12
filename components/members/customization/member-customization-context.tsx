@@ -22,6 +22,7 @@ import { CustomizationStartersDrawer } from "./customization-starters-drawer";
 export const memberOnboardingValidationSchema = Yup.object().shape({
   logo: Yup.string().optional().nullable(),
   logoAlignment: Yup.string().oneOf(["left", "center", "right"]).optional(),
+  logoSize: Yup.number().min(20).max(120).optional(),
   authMethod: Yup.string()
     .oneOf(["BOTH", "EMAIL_ONLY", "GOOGLE_ONLY"], "Invalid authentication method")
     .required("Authentication method is required"),
@@ -62,6 +63,7 @@ export const memberOnboardingValidationSchema = Yup.object().shape({
   authTexts: Yup.object().shape({
     logo: Yup.string().optional().nullable(),
     logoAlignment: Yup.string().oneOf(["left", "center", "right"]).optional(),
+    logoSize: Yup.number().min(20).max(120).optional(),
     loginTagline: Yup.string().optional(),
     loginTitle: Yup.string().optional(),
     loginDescription: Yup.string().optional(),
@@ -101,6 +103,7 @@ export interface MemberCustomizationContextType {
   handleTermsUpdate: (updates: Partial<TermsAndConditionsConfig>) => void;
   handleLogoChange: (logoUrl: string) => void;
   handleLogoAlignmentChange: (alignment: LogoAlignment) => void;
+  handleLogoSizeChange: (size: number) => void;
 }
 
 const MemberCustomizationContext = createContext<MemberCustomizationContextType | null>(null);
@@ -141,9 +144,16 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
         const resolvedLogo = parsed.logo || parsed.authTexts?.logo || "";
         const resolvedAlignment: LogoAlignment =
           parsed.logoAlignment || parsed.authTexts?.logoAlignment || "center";
+        const resolvedSize: number =
+          typeof parsed.logoSize === "number"
+            ? parsed.logoSize
+            : typeof parsed.authTexts?.logoSize === "number"
+            ? parsed.authTexts.logoSize
+            : 40;
         return {
           logo: resolvedLogo,
           logoAlignment: resolvedAlignment,
+          logoSize: resolvedSize,
           authMethod: parsed.authMethod || "BOTH",
           enableGoogleLogin: parsed.enableGoogleLogin ?? true,
           enableEmailLogin: parsed.enableEmailLogin ?? true,
@@ -156,6 +166,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
           authTexts: {
             logo: resolvedLogo,
             logoAlignment: resolvedAlignment,
+            logoSize: resolvedSize,
             loginTagline: parsed.authTexts?.loginTagline || DEFAULT_AUTH_TEXTS.loginTagline,
             loginTitle: parsed.authTexts?.loginTitle || DEFAULT_AUTH_TEXTS.loginTitle,
             loginDescription: parsed.authTexts?.loginDescription || DEFAULT_AUTH_TEXTS.loginDescription,
@@ -294,6 +305,14 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     });
   };
 
+  const handleLogoSizeChange = (size: number) => {
+    formik.setFieldValue("logoSize", size);
+    formik.setFieldValue("authTexts", {
+      ...formik.values.authTexts,
+      logoSize: size,
+    });
+  };
+
   if ((settingsLoading || entityLoading) && !settingsData) {
     return <CustomizationSkeleton />;
   }
@@ -318,6 +337,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     handleTermsUpdate,
     handleLogoChange,
     handleLogoAlignmentChange,
+    handleLogoSizeChange,
   };
 
   return (

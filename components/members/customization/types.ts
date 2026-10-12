@@ -36,6 +36,7 @@ export type LogoAlignment = "left" | "center" | "right";
 export interface AuthPageTexts {
   logo?: string;
   logoAlignment?: LogoAlignment;
+  logoSize?: number;
   loginTagline: string;
   loginTitle: string;
   loginDescription: string;
@@ -53,6 +54,7 @@ export interface AuthPageTexts {
 export const DEFAULT_AUTH_TEXTS: AuthPageTexts = {
   logo: "",
   logoAlignment: "center",
+  logoSize: 40,
   loginTagline: "WELCOME BACK",
   loginTitle: "Community Login",
   loginDescription: "Log in to access your community and exclusive features.",
@@ -91,6 +93,7 @@ export const DEFAULT_TERMS_CONFIG: TermsAndConditionsConfig = {
 export interface MemberOnboardingConfig {
   logo?: string;
   logoAlignment?: LogoAlignment;
+  logoSize?: number;
   authMethod: AuthMethod;
   enableGoogleLogin: boolean;
   enableEmailLogin: boolean;
@@ -107,6 +110,7 @@ export interface MemberOnboardingConfig {
 export const DEFAULT_ONBOARDING_CONFIG: MemberOnboardingConfig = {
   logo: "",
   logoAlignment: "center",
+  logoSize: 40,
   authMethod: "BOTH",
   enableGoogleLogin: true,
   enableEmailLogin: true,

@@ -18,24 +18,29 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Slider } from "@/components/ui/slider";
 import { LogoAlignment } from "./types";
 
 interface AuthLogoCardProps {
   logo?: string;
   logoAlignment?: LogoAlignment;
+  logoSize?: number;
   entityName?: string;
   entityLogo?: string;
   onChange: (logoUrl: string) => void;
   onAlignmentChange?: (alignment: LogoAlignment) => void;
+  onSizeChange?: (size: number) => void;
 }
 
 export function AuthLogoCard({
   logo = "",
   logoAlignment = "center",
+  logoSize = 40,
   entityName = "Your Community",
   entityLogo = "",
   onChange,
   onAlignmentChange,
+  onSizeChange,
 }: AuthLogoCardProps) {
   const hasLogo = Boolean(logo && logo.trim().length > 0);
   const isUsingEntityLogo = hasLogo && entityLogo && logo === entityLogo;
@@ -120,14 +125,15 @@ export function AuthLogoCard({
             <div className="flex items-center gap-3">
               <div
                 className={cn(
-                  "h-16 w-44 rounded-md border border-border/70 bg-white dark:bg-zinc-900 flex items-center p-2.5 shadow-2xs overflow-hidden transition-all",
+                  "h-20 w-52 rounded-md border border-border/70 bg-white dark:bg-zinc-900 flex items-center p-2.5 shadow-2xs overflow-hidden transition-all",
                   alignmentClass
                 )}
               >
                 <img
                   src={formatImageUrl(logo)}
                   alt={`${entityName} Logo`}
-                  className="max-h-full max-w-full object-contain"
+                  style={{ height: `${logoSize}px`, maxHeight: "100%" }}
+                  className="max-w-full object-contain transition-all"
                 />
               </div>
 
@@ -239,6 +245,104 @@ export function AuthLogoCard({
                 <AlignRight className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
                 <span>Right</span>
               </button>
+            </div>
+          </div>
+
+          {/* ── Logo Size & Scaling (Presets + Dragger) ── */}
+          <div className="pt-3 border-t border-border/60 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-foreground">
+                    Logo Display Size
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="font-mono text-[10px] px-1.5 py-0 h-4 bg-muted/40 font-semibold"
+                  >
+                    {logoSize}px
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Choose standard presets (Small, Medium, Large, Big) or drag the slider for custom size.
+                </p>
+              </div>
+
+              {/* Quick Size Presets */}
+              <div className="inline-flex items-center rounded-lg border border-border/80 bg-muted/40 p-1 gap-1 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => onSizeChange?.(28)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                    logoSize === 28
+                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  title="Small (28px)"
+                >
+                  Small
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSizeChange?.(40)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                    logoSize === 40
+                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  title="Medium (40px)"
+                >
+                  Medium
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSizeChange?.(56)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                    logoSize === 56
+                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  title="Large (56px)"
+                >
+                  Large
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSizeChange?.(72)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                    logoSize === 72
+                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  title="Big (72px)"
+                >
+                  Big
+                </button>
+              </div>
+            </div>
+
+            {/* Dragger / Slider Row */}
+            <div className="flex items-center gap-3 bg-muted/20 dark:bg-zinc-950/40 rounded-lg p-2.5 border border-border/60">
+              <span className="text-[11px] font-mono text-muted-foreground shrink-0 w-8 text-right">
+                20px
+              </span>
+              <div className="flex-1">
+                <Slider
+                  value={[logoSize]}
+                  min={20}
+                  max={84}
+                  step={2}
+                  onValueChange={(vals) => onSizeChange?.(vals[0])}
+                  className="cursor-pointer"
+                />
+              </div>
+              <span className="text-[11px] font-mono text-muted-foreground shrink-0 w-8">
+                84px
+              </span>
             </div>
           </div>
         </div>

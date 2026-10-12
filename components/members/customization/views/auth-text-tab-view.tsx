@@ -15,6 +15,7 @@ export function AuthTextTabView() {
     entityLogo,
     handleLogoChange,
     handleLogoAlignmentChange,
+    handleLogoSizeChange,
   } = useMemberCustomization();
 
   return (
@@ -74,10 +75,16 @@ export function AuthTextTabView() {
             formik.values.authTexts?.logoAlignment ||
             "center"
           }
+          logoSize={
+            formik.values.logoSize ||
+            formik.values.authTexts?.logoSize ||
+            40
+          }
           entityName={entityName}
           entityLogo={entityLogo}
           onChange={handleLogoChange}
           onAlignmentChange={handleLogoAlignmentChange}
+          onSizeChange={handleLogoSizeChange}
         />
 
         <AuthTextCard

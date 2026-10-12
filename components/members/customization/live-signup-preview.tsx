@@ -56,6 +56,7 @@ export function LiveSignupPreview({
 
   const displayLogo = config.logo || config.authTexts?.logo || "";
   const logoAlignment = config.logoAlignment || config.authTexts?.logoAlignment || "center";
+  const logoSize = config.logoSize || config.authTexts?.logoSize || 40;
   const alignmentClass =
     logoAlignment === "left"
       ? "justify-start"
@@ -146,7 +147,8 @@ export function LiveSignupPreview({
                         : `https://cdn.thrico.network/${displayLogo}`
                     }
                     alt={entityName}
-                    className="max-h-8 max-w-[140px] object-contain transition-all"
+                    style={{ height: `${logoSize}px`, maxHeight: `${logoSize}px` }}
+                    className="max-w-[180px] object-contain transition-all"
                   />
                 </div>
               ) : null}
@@ -442,7 +444,7 @@ export function LiveSignupPreview({
               )}
             >
               {displayLogo
-                ? `Custom Logo Active (${logoAlignment.toUpperCase()})`
+                ? `Custom Logo Active (${logoAlignment.toUpperCase()}, ${logoSize}px)`
                 : "None (Optional)"}
             </span>
           </div>
