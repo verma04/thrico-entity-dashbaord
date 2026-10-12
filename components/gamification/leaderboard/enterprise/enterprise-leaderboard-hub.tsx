@@ -36,6 +36,7 @@ import {
   LayoutGrid,
   List as ListIcon,
   Sparkles,
+  Palette,
 } from "lucide-react";
 
 import { EnterpriseLeaderboardKpiSummary } from "./enterprise-leaderboard-kpi-summary";
@@ -292,6 +293,19 @@ export function EnterpriseLeaderboardHub({ className }: EnterpriseLeaderboardHub
               title="Refresh data"
             >
               <RotateCcw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                router.push(
+                  "/gamification/points-and-badges/settings/leaderboard/design"
+                )
+              }
+              className="h-8 gap-1.5 text-xs font-medium border-border shadow-2xs hover:text-primary cursor-pointer rounded-lg"
+            >
+              <Palette className="h-3.5 w-3.5 text-amber-500" />
+              Design Studio
             </Button>
             <Button
               size="sm"

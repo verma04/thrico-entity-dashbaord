@@ -1,6 +1,6 @@
 "use client";
 
-import { Gamepad2, Settings2, MessageCircleQuestion, Trophy } from "lucide-react";
+import { Gamepad2, Settings2, MessageCircleQuestion, Trophy, Palette } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
 import { useModuleStore } from "@/store/useModuleStore";
 
@@ -21,6 +21,12 @@ export default function GamificationSettingsLayout({
       label: "Leaderboards & Headless",
       icon: Trophy,
       href: "/gamification/points-and-badges/settings/leaderboard",
+    },
+    {
+      id: "design",
+      label: "Leaderboard Design",
+      icon: Palette,
+      href: "/gamification/points-and-badges/settings/leaderboard/design",
     },
     {
       id: "faq",
