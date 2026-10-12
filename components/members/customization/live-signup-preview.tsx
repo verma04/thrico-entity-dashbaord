@@ -55,6 +55,13 @@ export function LiveSignupPreview({
   const [previewTermsModalOpen, setPreviewTermsModalOpen] = useState(false);
 
   const displayLogo = config.logo || config.authTexts?.logo || "";
+  const logoAlignment = config.logoAlignment || config.authTexts?.logoAlignment || "center";
+  const alignmentClass =
+    logoAlignment === "left"
+      ? "justify-start"
+      : logoAlignment === "right"
+      ? "justify-end"
+      : "justify-center";
 
   const showGoogle = config.authMethod === "BOTH" || config.authMethod === "GOOGLE_ONLY";
   const showEmail = config.authMethod === "BOTH" || config.authMethod === "EMAIL_ONLY";
@@ -124,7 +131,12 @@ export function LiveSignupPreview({
             {/* Header */}
             <div>
               {displayLogo ? (
-                <div className="flex items-center justify-center py-1.5 mb-2 border-b border-zinc-100 dark:border-zinc-800/80">
+                <div
+                  className={cn(
+                    "flex items-center py-1.5 mb-2 border-b border-zinc-100 dark:border-zinc-800/80 transition-all",
+                    alignmentClass
+                  )}
+                >
                   <img
                     src={
                       displayLogo.startsWith("http") ||
@@ -429,7 +441,9 @@ export function LiveSignupPreview({
                   : "text-zinc-500 dark:text-zinc-400"
               )}
             >
-              {displayLogo ? "Custom Auth Logo Active" : "None (Optional)"}
+              {displayLogo
+                ? `Custom Logo Active (${logoAlignment.toUpperCase()})`
+                : "None (Optional)"}
             </span>
           </div>
           <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">

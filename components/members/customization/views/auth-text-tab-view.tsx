@@ -9,7 +9,13 @@ import { useMemberCustomization } from "../member-customization-context";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 
 export function AuthTextTabView() {
-  const { formik, entityName, entityLogo, handleLogoChange } = useMemberCustomization();
+  const {
+    formik,
+    entityName,
+    entityLogo,
+    handleLogoChange,
+    handleLogoAlignmentChange,
+  } = useMemberCustomization();
 
   return (
     <PolarisFormLayout
@@ -63,9 +69,15 @@ export function AuthTextTabView() {
         {/* Brand Logo Upload Option at Top (Optional) */}
         <AuthLogoCard
           logo={formik.values.logo || formik.values.authTexts?.logo || ""}
+          logoAlignment={
+            formik.values.logoAlignment ||
+            formik.values.authTexts?.logoAlignment ||
+            "center"
+          }
           entityName={entityName}
           entityLogo={entityLogo}
           onChange={handleLogoChange}
+          onAlignmentChange={handleLogoAlignmentChange}
         />
 
         <AuthTextCard

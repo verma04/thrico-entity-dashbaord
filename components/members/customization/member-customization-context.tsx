@@ -13,6 +13,7 @@ import {
   TermsAndConditionsConfig,
   AuthMethod,
   CustomFieldItem,
+  LogoAlignment,
 } from "./types";
 import { CustomizationSkeleton } from "./customization-skeleton";
 import { CustomFieldDrawer } from "./custom-field-drawer";
@@ -20,6 +21,7 @@ import { CustomizationStartersDrawer } from "./customization-starters-drawer";
 
 export const memberOnboardingValidationSchema = Yup.object().shape({
   logo: Yup.string().optional().nullable(),
+  logoAlignment: Yup.string().oneOf(["left", "center", "right"]).optional(),
   authMethod: Yup.string()
     .oneOf(["BOTH", "EMAIL_ONLY", "GOOGLE_ONLY"], "Invalid authentication method")
     .required("Authentication method is required"),
@@ -59,6 +61,7 @@ export const memberOnboardingValidationSchema = Yup.object().shape({
   }).optional(),
   authTexts: Yup.object().shape({
     logo: Yup.string().optional().nullable(),
+    logoAlignment: Yup.string().oneOf(["left", "center", "right"]).optional(),
     loginTagline: Yup.string().optional(),
     loginTitle: Yup.string().optional(),
     loginDescription: Yup.string().optional(),
@@ -97,6 +100,7 @@ export interface MemberCustomizationContextType {
   handleSelectRecipe: (recipeField: Omit<CustomFieldItem, "id" | "order">) => void;
   handleTermsUpdate: (updates: Partial<TermsAndConditionsConfig>) => void;
   handleLogoChange: (logoUrl: string) => void;
+  handleLogoAlignmentChange: (alignment: LogoAlignment) => void;
 }
 
 const MemberCustomizationContext = createContext<MemberCustomizationContextType | null>(null);
@@ -135,8 +139,11 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
       try {
         const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
         const resolvedLogo = parsed.logo || parsed.authTexts?.logo || "";
+        const resolvedAlignment: LogoAlignment =
+          parsed.logoAlignment || parsed.authTexts?.logoAlignment || "center";
         return {
           logo: resolvedLogo,
+          logoAlignment: resolvedAlignment,
           authMethod: parsed.authMethod || "BOTH",
           enableGoogleLogin: parsed.enableGoogleLogin ?? true,
           enableEmailLogin: parsed.enableEmailLogin ?? true,
@@ -148,6 +155,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
           customFields: Array.isArray(parsed.customFields) ? parsed.customFields : [],
           authTexts: {
             logo: resolvedLogo,
+            logoAlignment: resolvedAlignment,
             loginTagline: parsed.authTexts?.loginTagline || DEFAULT_AUTH_TEXTS.loginTagline,
             loginTitle: parsed.authTexts?.loginTitle || DEFAULT_AUTH_TEXTS.loginTitle,
             loginDescription: parsed.authTexts?.loginDescription || DEFAULT_AUTH_TEXTS.loginDescription,
@@ -278,6 +286,14 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     });
   };
 
+  const handleLogoAlignmentChange = (alignment: LogoAlignment) => {
+    formik.setFieldValue("logoAlignment", alignment);
+    formik.setFieldValue("authTexts", {
+      ...formik.values.authTexts,
+      logoAlignment: alignment,
+    });
+  };
+
   if ((settingsLoading || entityLoading) && !settingsData) {
     return <CustomizationSkeleton />;
   }
@@ -301,6 +317,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     handleSelectRecipe,
     handleTermsUpdate,
     handleLogoChange,
+    handleLogoAlignmentChange,
   };
 
   return (
