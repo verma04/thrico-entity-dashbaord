@@ -19,6 +19,7 @@ import { CustomFieldDrawer } from "./custom-field-drawer";
 import { CustomizationStartersDrawer } from "./customization-starters-drawer";
 
 export const memberOnboardingValidationSchema = Yup.object().shape({
+  logo: Yup.string().optional().nullable(),
   authMethod: Yup.string()
     .oneOf(["BOTH", "EMAIL_ONLY", "GOOGLE_ONLY"], "Invalid authentication method")
     .required("Authentication method is required"),
@@ -57,6 +58,7 @@ export const memberOnboardingValidationSchema = Yup.object().shape({
     contentHtml: Yup.string().optional(),
   }).optional(),
   authTexts: Yup.object().shape({
+    logo: Yup.string().optional().nullable(),
     loginTagline: Yup.string().optional(),
     loginTitle: Yup.string().optional(),
     loginDescription: Yup.string().optional(),
@@ -75,6 +77,7 @@ export const memberOnboardingValidationSchema = Yup.object().shape({
 export interface MemberCustomizationContextType {
   formik: FormikProps<MemberOnboardingConfig>;
   entityName: string;
+  entityLogo: string;
   isSaving: boolean;
   isSaved: boolean;
   isRefreshing: boolean;
@@ -93,6 +96,7 @@ export interface MemberCustomizationContextType {
   handleCustomFieldsChange: (customFields: CustomFieldItem[]) => void;
   handleSelectRecipe: (recipeField: Omit<CustomFieldItem, "id" | "order">) => void;
   handleTermsUpdate: (updates: Partial<TermsAndConditionsConfig>) => void;
+  handleLogoChange: (logoUrl: string) => void;
 }
 
 const MemberCustomizationContext = createContext<MemberCustomizationContextType | null>(null);
@@ -117,6 +121,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
   const [updateSettings, { loading: isSaving }] = useUpdateEntitySettings({});
 
   const entityName = entityData?.getEntity?.name || "Your Community";
+  const entityLogo = entityData?.getEntity?.logo || "";
 
   const [isSaved, setIsSaved] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -129,7 +134,9 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     if (raw) {
       try {
         const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+        const resolvedLogo = parsed.logo || parsed.authTexts?.logo || "";
         return {
+          logo: resolvedLogo,
           authMethod: parsed.authMethod || "BOTH",
           enableGoogleLogin: parsed.enableGoogleLogin ?? true,
           enableEmailLogin: parsed.enableEmailLogin ?? true,
@@ -140,6 +147,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
           },
           customFields: Array.isArray(parsed.customFields) ? parsed.customFields : [],
           authTexts: {
+            logo: resolvedLogo,
             loginTagline: parsed.authTexts?.loginTagline || DEFAULT_AUTH_TEXTS.loginTagline,
             loginTitle: parsed.authTexts?.loginTitle || DEFAULT_AUTH_TEXTS.loginTitle,
             loginDescription: parsed.authTexts?.loginDescription || DEFAULT_AUTH_TEXTS.loginDescription,
@@ -262,6 +270,14 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     }
   };
 
+  const handleLogoChange = (logoUrl: string) => {
+    formik.setFieldValue("logo", logoUrl);
+    formik.setFieldValue("authTexts", {
+      ...formik.values.authTexts,
+      logo: logoUrl,
+    });
+  };
+
   if ((settingsLoading || entityLoading) && !settingsData) {
     return <CustomizationSkeleton />;
   }
@@ -269,6 +285,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
   const contextValue: MemberCustomizationContextType = {
     formik,
     entityName,
+    entityLogo,
     isSaving,
     isSaved,
     isRefreshing,
@@ -283,6 +300,7 @@ export function MemberCustomizationProvider({ children }: MemberCustomizationPro
     handleCustomFieldsChange,
     handleSelectRecipe,
     handleTermsUpdate,
+    handleLogoChange,
   };
 
   return (

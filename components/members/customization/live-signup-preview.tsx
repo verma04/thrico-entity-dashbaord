@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
@@ -52,6 +53,8 @@ export function LiveSignupPreview({
 }: LiveSignupPreviewProps) {
   const [activeTab, setActiveTab] = useState<"signup" | "login">("signup");
   const [previewTermsModalOpen, setPreviewTermsModalOpen] = useState(false);
+
+  const displayLogo = config.logo || config.authTexts?.logo || "";
 
   const showGoogle = config.authMethod === "BOTH" || config.authMethod === "GOOGLE_ONLY";
   const showEmail = config.authMethod === "BOTH" || config.authMethod === "EMAIL_ONLY";
@@ -120,6 +123,21 @@ export function LiveSignupPreview({
           <div className="bg-white dark:bg-zinc-900 rounded-lg p-3 border border-zinc-200/80 dark:border-zinc-800 shadow-xs space-y-3">
             {/* Header */}
             <div>
+              {displayLogo ? (
+                <div className="flex items-center justify-center py-1.5 mb-2 border-b border-zinc-100 dark:border-zinc-800/80">
+                  <img
+                    src={
+                      displayLogo.startsWith("http") ||
+                      displayLogo.startsWith("blob:") ||
+                      displayLogo.startsWith("data:")
+                        ? displayLogo
+                        : `https://cdn.thrico.network/${displayLogo}`
+                    }
+                    alt={entityName}
+                    className="max-h-8 max-w-[140px] object-contain transition-all"
+                  />
+                </div>
+              ) : null}
               <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
                 {activeTab === "signup"
                   ? (config.authTexts?.signupTagline || "GET STARTED")
@@ -401,6 +419,19 @@ export function LiveSignupPreview({
 
         {/* Live Status Indicators */}
         <div className="space-y-1.5 pt-1 text-[11px]">
+          <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+            <span>Brand Logo:</span>
+            <span
+              className={cn(
+                "font-semibold",
+                displayLogo
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-zinc-500 dark:text-zinc-400"
+              )}
+            >
+              {displayLogo ? "Custom Auth Logo Active" : "None (Optional)"}
+            </span>
+          </div>
           <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
             <span>Authentication Mode:</span>
             <span className="font-semibold text-zinc-800 dark:text-zinc-200">

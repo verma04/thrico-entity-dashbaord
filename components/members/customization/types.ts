@@ -32,6 +32,7 @@ export interface CustomFieldItem {
 }
 
 export interface AuthPageTexts {
+  logo?: string;
   loginTagline: string;
   loginTitle: string;
   loginDescription: string;
@@ -47,6 +48,7 @@ export interface AuthPageTexts {
 }
 
 export const DEFAULT_AUTH_TEXTS: AuthPageTexts = {
+  logo: "",
   loginTagline: "WELCOME BACK",
   loginTitle: "Community Login",
   loginDescription: "Log in to access your community and exclusive features.",
@@ -83,6 +85,7 @@ export const DEFAULT_TERMS_CONFIG: TermsAndConditionsConfig = {
 };
 
 export interface MemberOnboardingConfig {
+  logo?: string;
   authMethod: AuthMethod;
   enableGoogleLogin: boolean;
   enableEmailLogin: boolean;
@@ -97,6 +100,7 @@ export interface MemberOnboardingConfig {
 }
 
 export const DEFAULT_ONBOARDING_CONFIG: MemberOnboardingConfig = {
+  logo: "",
   authMethod: "BOTH",
   enableGoogleLogin: true,
   enableEmailLogin: true,

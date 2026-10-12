@@ -3,18 +3,22 @@
 import React from "react";
 import { PolarisFormLayout, PolarisTipCard } from "@/components/gamification/shared/polaris-form-ui";
 import { AuthTextCard } from "../auth-text-card";
+import { AuthLogoCard } from "../auth-logo-card";
 import { LiveSignupPreview } from "../live-signup-preview";
 import { useMemberCustomization } from "../member-customization-context";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 
 export function AuthTextTabView() {
-  const { formik, entityName } = useMemberCustomization();
+  const { formik, entityName, entityLogo, handleLogoChange } = useMemberCustomization();
 
   return (
     <PolarisFormLayout
       sidebar={
         <div className="space-y-4">
-          <LiveSignupPreview config={formik.values} entityName={entityName} />
+          <LiveSignupPreview
+            config={formik.values}
+            entityName={entityName}
+          />
 
           <PolarisTipCard title="Copywriting & Conversion Strategy">
             <div className="space-y-2 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -56,6 +60,14 @@ export function AuthTextTabView() {
       }
     >
       <div className="space-y-4">
+        {/* Brand Logo Upload Option at Top (Optional) */}
+        <AuthLogoCard
+          logo={formik.values.logo || formik.values.authTexts?.logo || ""}
+          entityName={entityName}
+          entityLogo={entityLogo}
+          onChange={handleLogoChange}
+        />
+
         <AuthTextCard
           authTexts={formik.values.authTexts}
           entityName={entityName}
