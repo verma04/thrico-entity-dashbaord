@@ -569,3 +569,39 @@ const UPDATE_GAMIFICATION_SETTINGS = gql`
 export function useUpdateGamificationSettings(options?: MutationHookOptions) {
   return useMutation(UPDATE_GAMIFICATION_SETTINGS, options);
 }
+
+// ---------------------------------------------------------
+// LEADERBOARD DESIGN MUTATION
+// ---------------------------------------------------------
+
+export interface UpdateLeaderboardDesignInput {
+  style: string;
+  title?: string | null;
+  description?: string | null;
+  showPeriodTabs?: boolean | null;
+  showStreaks?: boolean | null;
+  showLevels?: boolean | null;
+  showHonorableMentions?: boolean | null;
+  itemLimit?: number | null;
+}
+
+const UPDATE_LEADERBOARD_DESIGN = gql`
+  mutation UpdateLeaderboardDesign($input: UpdateLeaderboardDesignInput!) {
+    updateLeaderboardDesign(input: $input) {
+      style
+      title
+      description
+      showPeriodTabs
+      showStreaks
+      showLevels
+      showHonorableMentions
+      itemLimit
+      updatedAt
+    }
+  }
+`;
+
+export function useUpdateLeaderboardDesign(options?: MutationHookOptions) {
+  return useMutation(UPDATE_LEADERBOARD_DESIGN, options);
+}
+

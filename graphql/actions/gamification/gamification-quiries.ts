@@ -133,7 +133,7 @@ export interface Badge {
   targetValue?: number;
   count?: number;
   points?: number;
-  condition?: any;
+  condition?: Record<string, unknown> | null;
   memberEligibility?: "ALL" | "VERIFIED" | "TIERS" | "SPECIFIC_CUSTOMERS";
   membershipTierId?: string[];
   eligibleTierIds?: string[];
@@ -784,7 +784,7 @@ export function useGetUserGamificationActivityLog(
   >(GET_USER_GAMIFICATION_ACTIVITY_LOG, options);
 }
 
-export const useGetGamificationSummary = (userId: string, options?: any) =>
+export const useGetGamificationSummary = (userId: string, options?: QueryHookOptions) =>
   useQuery(GET_GAMIFICATION_SUMMARY, {
     variables: { userId },
     skip: !userId,
@@ -796,7 +796,7 @@ export const useGetUserActivityLog = (
   limit?: number,
   offset?: number,
   pointFilter?: string,
-  options?: any,
+  options?: QueryHookOptions,
 ) =>
   useQuery(GET_USER_ACTIVITY_LOG, {
     variables: { userId, limit, offset, pointFilter: pointFilter === "all" ? null : pointFilter },
@@ -808,7 +808,7 @@ export const useGetUserEarnedBadges = (
   userId: string,
   limit?: number,
   cursor?: string,
-  options?: any,
+  options?: QueryHookOptions,
 ) =>
   useQuery(GET_USER_EARNED_BADGES, {
     variables: { userId, limit, cursor },
@@ -927,3 +927,49 @@ export function useGetGamificationSettings(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// LEADERBOARD DESIGN
+// ---------------------------------------------------------
+
+export interface LeaderboardDesign {
+  style: string;
+  title?: string | null;
+  description?: string | null;
+  showPeriodTabs?: boolean | null;
+  showStreaks?: boolean | null;
+  showLevels?: boolean | null;
+  showHonorableMentions?: boolean | null;
+  itemLimit?: number | null;
+  updatedAt?: string | null;
+}
+
+export interface GetLeaderboardDesignData {
+  getLeaderboardDesign: LeaderboardDesign;
+}
+
+export const GET_LEADERBOARD_DESIGN = gql`
+  query GetLeaderboardDesign {
+    getLeaderboardDesign {
+      style
+      title
+      description
+      showPeriodTabs
+      showStreaks
+      showLevels
+      showHonorableMentions
+      itemLimit
+      updatedAt
+    }
+  }
+`;
+
+export function useGetLeaderboardDesign(
+  options?: QueryHookOptions<GetLeaderboardDesignData>,
+) {
+  return useQuery<GetLeaderboardDesignData>(
+    GET_LEADERBOARD_DESIGN,
+    options,
+  );
+}
+

@@ -534,3 +534,36 @@ export const GET_ENTITY_GAMIFICATION_MODULES = gql`
     }
   }
 `;
+
+export const GET_LEADERBOARD_DESIGN = gql`
+  query GetLeaderboardDesign {
+    getLeaderboardDesign {
+      style
+      title
+      description
+      showPeriodTabs
+      showStreaks
+      showLevels
+      showHonorableMentions
+      itemLimit
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_LEADERBOARD_DESIGN = gql`
+  mutation UpdateLeaderboardDesign($input: UpdateLeaderboardDesignInput!) {
+    updateLeaderboardDesign(input: $input) {
+      style
+      title
+      description
+      showPeriodTabs
+      showStreaks
+      showLevels
+      showHonorableMentions
+      itemLimit
+      updatedAt
+    }
+  }
+`;
+
