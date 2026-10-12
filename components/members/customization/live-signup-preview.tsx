@@ -45,13 +45,24 @@ function GoogleSvg({ className }: { className?: string }) {
 interface LiveSignupPreviewProps {
   config: MemberOnboardingConfig;
   entityName?: string;
+  activeTab?: "signup" | "login";
+  onTabChange?: (tab: "signup" | "login") => void;
+  variant?: "default" | "branding";
 }
 
 export function LiveSignupPreview({
   config,
   entityName = "Thrico Community",
+  activeTab: activeTabProp,
+  onTabChange,
+  variant = "default",
 }: LiveSignupPreviewProps) {
-  const [activeTab, setActiveTab] = useState<"signup" | "login">("signup");
+  const [internalTab, setInternalTab] = useState<"signup" | "login">("signup");
+  const activeTab = activeTabProp ?? internalTab;
+  const setActiveTab = (tab: "signup" | "login") => {
+    onTabChange?.(tab);
+    setInternalTab(tab);
+  };
   const [previewTermsModalOpen, setPreviewTermsModalOpen] = useState(false);
 
   const displayLogo = config.logo || config.authTexts?.logo || "";
@@ -93,7 +104,7 @@ export function LiveSignupPreview({
       <div className="space-y-3">
         {/* Subtitle / Mode info */}
         <div className="flex items-center justify-between text-[11px] text-zinc-400">
-          <span>Member Registration & Gatekeeping</span>
+          <span>{variant === "branding" ? "Brand & Typography Preview" : "Member Registration & Gatekeeping"}</span>
           <span className="font-mono text-[10px]">interactive</span>
         </div>
 
@@ -105,7 +116,7 @@ export function LiveSignupPreview({
               type="button"
               onClick={() => setActiveTab("signup")}
               className={cn(
-                "flex-1 py-1 rounded-md text-center transition-all",
+                "flex-1 py-1 rounded-md text-center transition-all cursor-pointer",
                 activeTab === "signup"
                   ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-semibold shadow-xs"
                   : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
@@ -117,7 +128,7 @@ export function LiveSignupPreview({
               type="button"
               onClick={() => setActiveTab("login")}
               className={cn(
-                "flex-1 py-1 rounded-md text-center transition-all",
+                "flex-1 py-1 rounded-md text-center transition-all cursor-pointer",
                 activeTab === "login"
                   ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-semibold shadow-xs"
                   : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
@@ -433,53 +444,89 @@ export function LiveSignupPreview({
 
         {/* Live Status Indicators */}
         <div className="space-y-1.5 pt-1 text-[11px]">
-          <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-            <span>Brand Logo:</span>
-            <span
-              className={cn(
-                "font-semibold",
-                displayLogo
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-zinc-500 dark:text-zinc-400"
-              )}
-            >
-              {displayLogo
-                ? `Custom Logo Active (${logoAlignment.toUpperCase()}, ${logoSize}px)`
-                : "None (Optional)"}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-            <span>Authentication Mode:</span>
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-              {config.authMethod === "BOTH"
-                ? "Email & Google"
-                : config.authMethod === "EMAIL_ONLY"
-                ? "Email Only"
-                : "Google Only"}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-            <span>Gatekeeping Fields:</span>
-            <span className="font-semibold text-purple-600 dark:text-purple-400">
-              {gatekeeperFields.length} active roster / regex filters
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-            <span>Terms & Legal:</span>
-            <span className="font-semibold text-rose-600 dark:text-rose-400">
-              {!config.termsAndConditions?.enabled
-                ? "Disabled"
-                : config.termsAndConditions?.required
-                ? "Mandatory Check"
-                : "Optional Agreement"}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-            <span>Total Custom Fields:</span>
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-              {config.customFields.length} total ({config.customFields.filter((f) => f.required).length} required)
-            </span>
-          </div>
+          {variant === "branding" ? (
+            <>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Active Screen:</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                  {activeTab === "signup" ? "Registration Dialog" : "Login Dialog"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Brand Logo:</span>
+                <span
+                  className={cn(
+                    "font-semibold",
+                    displayLogo
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-zinc-500 dark:text-zinc-400"
+                  )}
+                >
+                  {displayLogo
+                    ? `${logoAlignment.toUpperCase()} • ${logoSize}px`
+                    : "Not configured"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Primary CTA:</span>
+                <span className="font-semibold text-blue-600 dark:text-blue-400 truncate max-w-[140px]">
+                  {activeTab === "signup"
+                    ? (config.authTexts?.signupButtonText || "Create Account & Join")
+                    : (config.authTexts?.loginButtonText || "Login to Community")}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Brand Logo:</span>
+                <span
+                  className={cn(
+                    "font-semibold",
+                    displayLogo
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-zinc-500 dark:text-zinc-400"
+                  )}
+                >
+                  {displayLogo
+                    ? `Custom Logo Active (${logoAlignment.toUpperCase()}, ${logoSize}px)`
+                    : "None (Optional)"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Authentication Mode:</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                  {config.authMethod === "BOTH"
+                    ? "Email & Google"
+                    : config.authMethod === "EMAIL_ONLY"
+                    ? "Email Only"
+                    : "Google Only"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Gatekeeping Fields:</span>
+                <span className="font-semibold text-purple-600 dark:text-purple-400">
+                  {gatekeeperFields.length} active roster / regex filters
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Terms & Legal:</span>
+                <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  {!config.termsAndConditions?.enabled
+                    ? "Disabled"
+                    : config.termsAndConditions?.required
+                    ? "Mandatory Check"
+                    : "Optional Agreement"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Total Custom Fields:</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                  {config.customFields.length} total ({config.customFields.filter((f) => f.required).length} required)
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     

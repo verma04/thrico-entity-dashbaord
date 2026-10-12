@@ -9,8 +9,6 @@ import {
   Trash2,
   Sparkles,
   Building2,
-  CheckCircle2,
-  Info,
   UploadCloud,
   AlignLeft,
   AlignCenter,
@@ -48,13 +46,13 @@ export function AuthLogoCard({
 
   const handleRemoveLogo = () => {
     onChange("");
-    toast.info("Auth logo removed. Falling back to default text heading.");
+    toast.info("Logo removed. Defaulting to community name typography.");
   };
 
   const handleApplyEntityLogo = () => {
     if (!entityLogo) return;
     onChange(entityLogo);
-    toast.success("Applied organization logo to authentication screen.");
+    toast.success("Applied organization logo.");
   };
 
   const formatImageUrl = (url: string) => {
@@ -75,30 +73,30 @@ export function AuthLogoCard({
   return (
     <div className="rounded-xl border border-border/70 p-4 bg-card shadow-2xs space-y-4">
       {/* ── Section Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-3 border-b border-border/60 pb-3">
+        <div className="flex items-center gap-2.5">
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shrink-0">
             ★
           </span>
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wide">
-                Authentication Modal Brand Logo
+                Authentication Brand Logo
               </h3>
               <Badge
                 variant="outline"
                 className={cn(
-                  "text-[10px] px-1.5 py-0 font-normal",
+                  "text-[10px] px-1.5 py-0 font-medium",
                   hasLogo
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 font-semibold"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
                     : "text-muted-foreground border-border/80"
                 )}
               >
-                {hasLogo ? "Active Logo" : "Optional"}
+                {hasLogo ? (isUsingEntityLogo ? "Org Logo Active" : "Custom Logo Active") : "Optional"}
               </Badge>
             </div>
             <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
-              Custom brand mark rendered at the top of member login and registration dialogs.
+              Custom brand mark rendered at the top of your login & registration dialogs.
             </p>
           </div>
         </div>
@@ -109,49 +107,34 @@ export function AuthLogoCard({
             variant="ghost"
             size="sm"
             onClick={handleRemoveLogo}
-            className="h-8 text-xs gap-1.5 text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer self-start sm:self-auto"
+            className="h-7 text-xs gap-1.5 text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
           >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span>Remove Logo</span>
+            <Trash2 className="h-3 w-3" />
+            <span>Remove</span>
           </Button>
         )}
       </div>
 
-      {/* ── Logo View: Active State ── */}
+      {/* ── Active State: 2-Column Responsive Layout ── */}
       {hasLogo ? (
-        <div className="space-y-4">
-          <div className="relative rounded-lg border border-border/80 bg-muted/20 dark:bg-zinc-950/50 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            {/* Visual Logo Render Container */}
-            <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  "h-20 w-52 rounded-md border border-border/70 bg-white dark:bg-zinc-900 flex items-center p-2.5 shadow-2xs overflow-hidden transition-all",
-                  alignmentClass
-                )}
-              >
-                <img
-                  src={formatImageUrl(logo)}
-                  alt={`${entityName} Logo`}
-                  style={{ height: `${logoSize}px`, maxHeight: "100%" }}
-                  className="max-w-full object-contain transition-all"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span className="text-xs font-semibold text-foreground">
-                    {isUsingEntityLogo ? "Organization Default Logo" : "Custom Auth Screen Logo"}
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
-                  Rendered at the top of your login & signup modal previews.
-                </p>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          {/* Left: Interactive Preview & Replace Actions (5 cols) */}
+          <div className="md:col-span-5 space-y-2">
+            <div
+              className={cn(
+                "h-24 rounded-lg border border-border/80 bg-white dark:bg-zinc-900/90 p-3 flex items-center shadow-2xs overflow-hidden transition-all",
+                alignmentClass
+              )}
+            >
+              <img
+                src={formatImageUrl(logo)}
+                alt={`${entityName} Logo`}
+                style={{ height: `${logoSize}px`, maxHeight: "100%" }}
+                className="max-w-full object-contain transition-all"
+              />
             </div>
 
-            {/* Actions for active logo */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
               <ImageUploadWithCrop
                 currentImage={logo}
                 onImageUpdate={(cdnUrl) => onChange(cdnUrl)}
@@ -168,10 +151,10 @@ export function AuthLogoCard({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-8 text-xs gap-1.5 cursor-pointer shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-800"
+                  className="h-7 text-xs gap-1.5 cursor-pointer flex-1 border-border/80 hover:border-indigo-300 dark:hover:border-indigo-800"
                 >
-                  <UploadCloud className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                  <span>Replace Logo</span>
+                  <UploadCloud className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>Replace Image</span>
                 </Button>
               </ImageUploadWithCrop>
 
@@ -181,173 +164,137 @@ export function AuthLogoCard({
                   variant="ghost"
                   size="sm"
                   onClick={handleApplyEntityLogo}
-                  className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground cursor-pointer"
+                  className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground cursor-pointer"
                   title="Use default organization logo"
                 >
-                  <Building2 className="h-3.5 w-3.5" />
-                  <span>Revert to Org Logo</span>
+                  <Building2 className="h-3 w-3" />
+                  <span>Org Logo</span>
                 </Button>
               )}
             </div>
           </div>
 
-          {/* ── Logo Alignment Selector ── */}
-          <div className="pt-2 border-t border-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-foreground">
-                Logo Horizontal Alignment
-              </span>
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                Align the logo to the left, center, or right of the modal header.
-              </p>
-            </div>
-
-            <div className="inline-flex items-center rounded-lg border border-border/80 bg-muted/40 p-1 gap-1 self-start sm:self-auto">
-              <button
-                type="button"
-                onClick={() => onAlignmentChange?.("left")}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
-                  logoAlignment === "left"
-                    ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-                title="Align Left"
-              >
-                <AlignLeft className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                <span>Left</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onAlignmentChange?.("center")}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
-                  logoAlignment === "center"
-                    ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-                title="Align Center"
-              >
-                <AlignCenter className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                <span>Center</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onAlignmentChange?.("right")}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer",
-                  logoAlignment === "right"
-                    ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-                title="Align Right"
-              >
-                <AlignRight className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                <span>Right</span>
-              </button>
-            </div>
-          </div>
-
-          {/* ── Logo Size & Scaling (Presets + Dragger) ── */}
-          <div className="pt-3 border-t border-border/60 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          {/* Right: Controls (Alignment + Sizing) (7 cols) */}
+          <div className="md:col-span-7 space-y-3.5 pl-0 md:pl-2">
+            {/* Alignment Row */}
+            <div className="flex items-center justify-between gap-2">
               <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-foreground block">
+                  Alignment
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  Position within modal header
+                </span>
+              </div>
+
+              <div className="inline-flex items-center rounded-lg border border-border/80 bg-muted/40 p-0.5 gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => onAlignmentChange?.("left")}
+                  className={cn(
+                    "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer",
+                    logoAlignment === "left"
+                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  title="Align Left"
+                >
+                  <AlignLeft className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>Left</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onAlignmentChange?.("center")}
+                  className={cn(
+                    "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer",
+                    logoAlignment === "center"
+                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  title="Align Center"
+                >
+                  <AlignCenter className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>Center</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onAlignmentChange?.("right")}
+                  className={cn(
+                    "flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer",
+                    logoAlignment === "right"
+                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  title="Align Right"
+                >
+                  <AlignRight className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>Right</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Sizing Row */}
+            <div className="space-y-2 pt-1 border-t border-border/50">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
                   <span className="text-xs font-semibold text-foreground">
-                    Logo Display Size
+                    Display Height
                   </span>
-                  <Badge
-                    variant="outline"
-                    className="font-mono text-[10px] px-1.5 py-0 h-4 bg-muted/40 font-semibold"
-                  >
+                  <Badge variant="outline" className="font-mono text-[10px] px-1.5 py-0 h-4 bg-muted/40 font-semibold">
                     {logoSize}px
                   </Badge>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">
-                  Choose standard presets (Small, Medium, Large, Big) or drag the slider for custom size.
-                </p>
+
+                {/* Quick Presets */}
+                <div className="inline-flex items-center gap-1 text-[11px]">
+                  {[
+                    { label: "S", size: 28, title: "Small (28px)" },
+                    { label: "M", size: 40, title: "Medium (40px)" },
+                    { label: "L", size: 56, title: "Large (56px)" },
+                    { label: "XL", size: 72, title: "Big (72px)" },
+                  ].map((p) => (
+                    <button
+                      key={p.size}
+                      type="button"
+                      onClick={() => onSizeChange?.(p.size)}
+                      className={cn(
+                        "h-6 px-2 rounded-md font-medium text-[11px] transition-all cursor-pointer border",
+                        logoSize === p.size
+                          ? "bg-white dark:bg-zinc-800 text-foreground border-border/80 shadow-2xs font-semibold"
+                          : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                      )}
+                      title={p.title}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Quick Size Presets */}
-              <div className="inline-flex items-center rounded-lg border border-border/80 bg-muted/40 p-1 gap-1 self-start sm:self-auto">
-                <button
-                  type="button"
-                  onClick={() => onSizeChange?.(28)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
-                    logoSize === 28
-                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  title="Small (28px)"
-                >
-                  Small
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSizeChange?.(40)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
-                    logoSize === 40
-                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  title="Medium (40px)"
-                >
-                  Medium
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSizeChange?.(56)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
-                    logoSize === 56
-                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  title="Large (56px)"
-                >
-                  Large
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSizeChange?.(72)}
-                  className={cn(
-                    "px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
-                    logoSize === 72
-                      ? "bg-white dark:bg-zinc-800 text-foreground shadow-2xs border border-border/80 font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  title="Big (72px)"
-                >
-                  Big
-                </button>
+              {/* Slider */}
+              <div className="flex items-center gap-2.5 pt-0.5">
+                <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                  20px
+                </span>
+                <div className="flex-1">
+                  <Slider
+                    value={[logoSize]}
+                    min={20}
+                    max={84}
+                    step={2}
+                    onValueChange={(vals) => onSizeChange?.(vals[0])}
+                    className="cursor-pointer"
+                  />
+                </div>
+                <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                  84px
+                </span>
               </div>
-            </div>
-
-            {/* Dragger / Slider Row */}
-            <div className="flex items-center gap-3 bg-muted/20 dark:bg-zinc-950/40 rounded-lg p-2.5 border border-border/60">
-              <span className="text-[11px] font-mono text-muted-foreground shrink-0 w-8 text-right">
-                20px
-              </span>
-              <div className="flex-1">
-                <Slider
-                  value={[logoSize]}
-                  min={20}
-                  max={84}
-                  step={2}
-                  onValueChange={(vals) => onSizeChange?.(vals[0])}
-                  className="cursor-pointer"
-                />
-              </div>
-              <span className="text-[11px] font-mono text-muted-foreground shrink-0 w-8">
-                84px
-              </span>
             </div>
           </div>
         </div>
       ) : (
-        /* ── Logo View: Empty / Upload State ── */
+        /* ── Empty State: Compact & Clear ── */
         <div className="space-y-3">
           <ImageUploadWithCrop
             currentImage=""
@@ -359,30 +306,24 @@ export function AuthLogoCard({
             allowFreeDimensions={true}
             defaultDimensionMode="free"
             maxFileSize={5}
-            uploadButtonText="Upload Auth Logo (Optional)"
-            customDescription="Click to browse or drag and drop SVG, PNG, JPG, or WEBP (Max 5MB). Horizontal or square logo with transparent background recommended."
-            dropzoneClassName="min-h-[120px] p-5 border-dashed border-border/80 hover:border-indigo-400 dark:hover:border-indigo-600 bg-muted/10 hover:bg-muted/30"
+            uploadButtonText="Upload Brand Logo (Optional)"
+            customDescription="Upload SVG, PNG, JPG, or WEBP (Max 5MB). If left empty, your organization title is rendered cleanly."
+            dropzoneClassName="min-h-[96px] p-4 border-dashed border-border/80 hover:border-indigo-400 dark:hover:border-indigo-600 bg-muted/10 hover:bg-muted/30"
           />
 
-          {/* Quick Apply Organization Logo Shortcut if available */}
           {canUseEntityLogo && (
-            <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/70 bg-muted/20 dark:bg-zinc-900/40">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-md border border-border/60 bg-white dark:bg-zinc-800 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+            <div className="flex items-center justify-between gap-3 p-2.5 rounded-lg border border-border/70 bg-muted/20">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded border border-border/60 bg-white dark:bg-zinc-800 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
                   <img
                     src={formatImageUrl(entityLogo)}
                     alt={entityName}
                     className="max-h-full max-w-full object-contain"
                   />
                 </div>
-                <div>
-                  <span className="text-xs font-semibold text-foreground block">
-                    Organization Logo Available
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">
-                    Quickly reuse your community brand logo ({entityName}) without re-uploading.
-                  </span>
-                </div>
+                <span className="text-xs text-muted-foreground">
+                  Quickly apply your default <strong className="text-foreground">{entityName}</strong> logo
+                </span>
               </div>
 
               <Button
@@ -399,19 +340,6 @@ export function AuthLogoCard({
           )}
         </div>
       )}
-
-      {/* ── Brand Guidance Info Banner ── */}
-      <div className="flex items-start gap-2.5 p-3 rounded-lg border border-border/60 bg-muted/20 text-xs text-muted-foreground leading-relaxed">
-        <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
-        <div className="space-y-0.5 text-[11px]">
-          <p>
-            <strong className="text-foreground font-semibold">Optional Brand Element:</strong> If no logo is uploaded, your community name is cleanly displayed in title typography.
-          </p>
-          <p>
-            For best visual results on both light and dark themes, upload an SVG or transparent PNG with a 3:1 to 5:1 horizontal ratio.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
