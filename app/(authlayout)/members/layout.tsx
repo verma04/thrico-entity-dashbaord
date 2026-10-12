@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { usePathname } from "next/navigation";
-import { CardContent } from "@/components/ui/card";
 import {
   Users,
   Plus,
@@ -14,17 +12,14 @@ import {
   Wrench,
   LayoutDashboard,
   Zap,
-  SlidersHorizontal,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModulePermission } from "@/hooks/use-module-permission";
-import { useUserStore } from "@/store/store";
 import { useMembersLayoutStore } from "@/store/members-layout-store";
 import { useTabOrder } from "@/hooks/use-tab-order";
 
 function MembersLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
   const canReadMembers = useModulePermission("MEMBERS_ALL", "canRead");
   const canCreateMembers = useModulePermission("MEMBERS_ALL", "canCreate");
   const canReadReferrals = useModulePermission("MEMBERS_REFERRALS", "canRead");
@@ -144,4 +139,4 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withSubscriptionCheck(MembersLayout, "NETWORK");
+export default withSubscriptionCheck(MembersLayout, "MEMBERS");
