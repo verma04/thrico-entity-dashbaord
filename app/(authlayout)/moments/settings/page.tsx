@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import {
@@ -8,6 +8,7 @@ import {
   useEntitySettings,
   useUpdateEntitySettings,
 } from "@/graphql/actions";
+import { useGetAllMoments } from "@/graphql/actions/moments";
 import {
   Globe,
   Video,
@@ -21,9 +22,17 @@ import {
   Plus,
   Sliders,
   Layers,
+  Sparkles,
+  Pin,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  Film,
+  X,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   PolarisFormLayout,
   PolarisFormCard,
@@ -36,6 +45,15 @@ import {
   ModuleTabManager,
   ModuleTabItem,
 } from "@/components/settings/shared/module-tab-manager";
+import { MomentSelectorModal } from "@/components/settings/moments/moment-selector-modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useModuleStore } from "@/store/useModuleStore";
 import { cn } from "@/lib/utils";
@@ -58,6 +76,14 @@ const DEFAULT_SETTINGS: MomentsSettingsState = {
   moderatedFeed: false,
 };
 
+interface CustomTabConfig {
+  id: string;
+  name: string;
+  icon?: string;
+  enabled?: boolean;
+  momentIds?: string[];
+}
+
 const createDefaultTabs = (
   moduleName: string,
   singularName: string,
@@ -71,6 +97,9 @@ const createDefaultTabs = (
   ];
   const allowConnections = entitySettings?.allowMomentsConnectionsTab ?? true;
   const allowMyMoments = entitySettings?.allowMomentsMyMomentsTab ?? true;
+  const customTabsList: CustomTabConfig[] = Array.isArray(entitySettings?.momentsCustomTabs)
+    ? (entitySettings.momentsCustomTabs as CustomTabConfig[])
+    : [];
 
   const baseMap: Record<string, ModuleTabItem> = {
     discover: {
@@ -88,7 +117,7 @@ const createDefaultTabs = (
       key: "allowMomentsConnectionsTab",
       defaultName: "Connections Moment",
       label: tabNames["connections"] || "",
-      description: `Updates and highlights posted exclusively by mutual connections.`,
+      description: "Updates and highlights posted exclusively by mutual connections.",
       icon: Users,
       canHide: true,
       enabled: allowConnections,
@@ -104,6 +133,21 @@ const createDefaultTabs = (
       enabled: allowMyMoments,
     },
   };
+
+  // Add custom tabs to baseMap
+  customTabsList.forEach((cTab) => {
+    baseMap[cTab.id] = {
+      id: cTab.id,
+      defaultName: cTab.name,
+      label: tabNames[cTab.id] || cTab.name,
+      description: `Custom curated collection of ${cTab.momentIds?.length || 0} ${singularName.toLowerCase()} clips.`,
+      icon: Sparkles,
+      canHide: true,
+      enabled: cTab.enabled !== false,
+      isCustom: true,
+      momentIds: cTab.momentIds || [],
+    };
+  });
 
   const ordered: ModuleTabItem[] = [];
   tabOrder.forEach((id) => {
@@ -125,6 +169,18 @@ function MomentsSettingsPage() {
   const { data, refetch } = useEntitySettings();
   const [update, { loading: isSaving }] = useUpdateEntitySettings({});
 
+  const { data: momentsData } = useGetAllMoments({
+    pagination: { page: 1, limit: 100 },
+  });
+  const allMomentsList = useMemo(() => {
+    return momentsData?.getAllMoments?.data || [];
+  }, [momentsData]);
+  const momentsByIdMap = useMemo(() => {
+    const map = new Map<string, any>();
+    allMomentsList.forEach((m) => map.set(m.id, m));
+    return map;
+  }, [allMomentsList]);
+
   const [formData, setFormData] = useState<MomentsSettingsState>(() => ({
     ...DEFAULT_SETTINGS,
     allowEntityMomentsInFeed:
@@ -139,11 +195,27 @@ function MomentsSettingsPage() {
     data?.getEntitySettings?.momentsCtaName || ""
   );
 
+  const [pinnedMomentIds, setPinnedMomentIds] = useState<string[]>(() => {
+    const raw = data?.getEntitySettings?.momentsPinnedMomentIds;
+    return Array.isArray(raw) ? (raw as string[]) : [];
+  });
+
   const [hasChanged, setHasChanged] = useState(false);
+
+  // Modals state
+  const [isNewTabModalOpen, setIsNewTabModalOpen] = useState(false);
+  const [newTabNameInput, setNewTabNameInput] = useState("");
+
+  const [isCurateModalOpen, setIsCurateModalOpen] = useState(false);
+  const [activeCurateTarget, setActiveCurateTarget] = useState<{
+    id: string; // tab id or "__pinned__"
+    title: string;
+    description: string;
+    momentIds: string[];
+  } | null>(null);
 
   useEffect(() => {
     if (data?.getEntitySettings) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData((prev) => ({
         ...prev,
         allowEntityMomentsInFeed:
@@ -151,6 +223,8 @@ function MomentsSettingsPage() {
       }));
       setTabs(createDefaultTabs(moduleName, singularName, data.getEntitySettings));
       setCtaName(data.getEntitySettings.momentsCtaName || "");
+      const rawPinned = data.getEntitySettings.momentsPinnedMomentIds;
+      setPinnedMomentIds(Array.isArray(rawPinned) ? (rawPinned as string[]) : []);
     }
   }, [data, moduleName, singularName]);
 
@@ -172,6 +246,133 @@ function MomentsSettingsPage() {
     setHasChanged(true);
   };
 
+  // Add Custom Tab Flow
+  const handleOpenNewTabModal = () => {
+    setNewTabNameInput("");
+    setIsNewTabModalOpen(true);
+  };
+
+  const handleCreateCustomTab = () => {
+    const trimmed = newTabNameInput.trim();
+    if (!trimmed) {
+      toast.error("Please provide a name for the new tab.");
+      return;
+    }
+
+    const newTabId = `custom-tab-${Date.now()}`;
+    const newTab: ModuleTabItem = {
+      id: newTabId,
+      defaultName: trimmed,
+      label: trimmed,
+      description: `Custom curated collection of 0 ${singularName.toLowerCase()} clips.`,
+      icon: Sparkles,
+      canHide: true,
+      enabled: true,
+      isCustom: true,
+      momentIds: [],
+    };
+
+    setTabs((prev) => [...prev, newTab]);
+    setHasChanged(true);
+    setIsNewTabModalOpen(false);
+
+    // Prompt user immediately to select moments for this newly created tab
+    setActiveCurateTarget({
+      id: newTabId,
+      title: `Curate ${trimmed}`,
+      description: `Select and sequence ${singularName.toLowerCase()} clips for your new "${trimmed}" tab.`,
+      momentIds: [],
+    });
+    setIsCurateModalOpen(true);
+  };
+
+  const handleDeleteCustomTab = (tabId: string) => {
+    const targetTab = tabs.find((t) => t.id === tabId);
+    if (!targetTab) return;
+    setTabs((prev) => prev.filter((t) => t.id !== tabId));
+    setHasChanged(true);
+    toast.success(`Removed "${targetTab.label || targetTab.defaultName}" tab.`);
+  };
+
+  // Curate Tab Moments Flow
+  const handleOpenCurateTab = (tabId: string) => {
+    const targetTab = tabs.find((t) => t.id === tabId);
+    if (!targetTab) return;
+    setActiveCurateTarget({
+      id: tabId,
+      title: `Curate "${targetTab.label || targetTab.defaultName}"`,
+      description: `Select and sequence ${singularName.toLowerCase()} clips for this tab.`,
+      momentIds: targetTab.momentIds || [],
+    });
+    setIsCurateModalOpen(true);
+  };
+
+  // Curate Pinned Moments Flow
+  const handleOpenCuratePinned = () => {
+    setActiveCurateTarget({
+      id: "__pinned__",
+      title: "Admin Pinned Moments",
+      description: `Select and sequence ${singularName.toLowerCase()} clips pinned to the top of Discover feed.`,
+      momentIds: pinnedMomentIds,
+    });
+    setIsCurateModalOpen(true);
+  };
+
+  const handleConfirmSelectedMoments = (selectedIds: string[]) => {
+    if (!activeCurateTarget) return;
+
+    if (activeCurateTarget.id === "__pinned__") {
+      setPinnedMomentIds(selectedIds);
+      setHasChanged(true);
+      toast.success(`Updated pinned moments (${selectedIds.length} pinned).`);
+    } else {
+      // It's a custom tab
+      setTabs((prev) =>
+        prev.map((t) => {
+          if (t.id === activeCurateTarget.id) {
+            return {
+              ...t,
+              momentIds: selectedIds,
+              description: `Custom curated collection of ${selectedIds.length} ${singularName.toLowerCase()} clips.`,
+            };
+          }
+          return t;
+        })
+      );
+      setHasChanged(true);
+      toast.success(`Updated moments for tab (${selectedIds.length} selected).`);
+    }
+  };
+
+  const handleMovePinnedUp = (index: number) => {
+    if (index === 0) return;
+    setPinnedMomentIds((prev) => {
+      const next = [...prev];
+      const temp = next[index - 1];
+      next[index - 1] = next[index];
+      next[index] = temp;
+      return next;
+    });
+    setHasChanged(true);
+  };
+
+  const handleMovePinnedDown = (index: number) => {
+    if (index >= pinnedMomentIds.length - 1) return;
+    setPinnedMomentIds((prev) => {
+      const next = [...prev];
+      const temp = next[index + 1];
+      next[index + 1] = next[index];
+      next[index] = temp;
+      return next;
+    });
+    setHasChanged(true);
+  };
+
+  const handleRemovePinned = (id: string) => {
+    setPinnedMomentIds((prev) => prev.filter((item) => item !== id));
+    setHasChanged(true);
+  };
+
   const handleReset = () => {
     setFormData({
       ...DEFAULT_SETTINGS,
@@ -180,6 +381,8 @@ function MomentsSettingsPage() {
     });
     setTabs(createDefaultTabs(moduleName, singularName, data?.getEntitySettings));
     setCtaName(data?.getEntitySettings?.momentsCtaName || "");
+    const rawPinned = data?.getEntitySettings?.momentsPinnedMomentIds;
+    setPinnedMomentIds(Array.isArray(rawPinned) ? (rawPinned as string[]) : []);
     setHasChanged(false);
   };
 
@@ -196,6 +399,16 @@ function MomentsSettingsPage() {
         const connectionsTab = tabs.find((t) => t.id === "connections");
         const myMomentsTab = tabs.find((t) => t.id === "myMoments");
 
+        const momentsCustomTabs = tabs
+          .filter((t) => t.isCustom)
+          .map((t) => ({
+            id: t.id,
+            name: t.label || t.defaultName,
+            icon: "Sparkles",
+            enabled: t.enabled,
+            momentIds: t.momentIds || [],
+          }));
+
         await update({
           variables: {
             input: {
@@ -206,6 +419,8 @@ function MomentsSettingsPage() {
               momentsTabNames,
               momentsTabOrder: tabs.map((t) => t.id),
               momentsCtaName: ctaName.trim() || null,
+              momentsPinnedMomentIds: pinnedMomentIds,
+              momentsCustomTabs,
             },
           },
         });
@@ -269,11 +484,21 @@ function MomentsSettingsPage() {
                             {tab.label || tab.defaultName}
                           </span>
                         </div>
-                        {idx === 0 && (
-                          <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-500 shrink-0 ml-1">
-                            Default
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1 shrink-0 ml-1">
+                          {tab.isCustom && (
+                            <Badge
+                              variant="outline"
+                              className="text-[8.5px] px-1 py-0 rounded-[2px] bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                            >
+                              {tab.momentIds?.length || 0} clips
+                            </Badge>
+                          )}
+                          {idx === 0 && (
+                            <span className="text-[9px] uppercase tracking-wider font-bold text-indigo-500">
+                              Default
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -299,6 +524,15 @@ function MomentsSettingsPage() {
                   highlight
                 />
                 <PolarisSummaryRow
+                  label="Pinned Moments"
+                  value={`${pinnedMomentIds.length} Pinned`}
+                  highlight={pinnedMomentIds.length > 0}
+                />
+                <PolarisSummaryRow
+                  label="Custom Tabs"
+                  value={`${tabs.filter((t) => t.isCustom).length} Created`}
+                />
+                <PolarisSummaryRow
                   label="Connections Stream"
                   value={
                     tabs.find((t) => t.id === "connections")?.enabled
@@ -319,8 +553,8 @@ function MomentsSettingsPage() {
             </PolarisSidebarCard>
 
             {/* Tip Card */}
-            <PolarisTipCard title="Tab Navigation Tip">
-              The <strong>Discover</strong> tab serves as the primary landing destination and cannot be hidden, ensuring members always have video content to browse. Drag items to adjust tab order.
+            <PolarisTipCard title="Navigation & Curation Tips">
+              Create custom tabs like <strong>&quot;Staff Picks&quot;</strong> or <strong>&quot;Highlights&quot;</strong> and select exactly which clips members see. Pinned moments will appear prominently at the top of Discover.
             </PolarisTipCard>
           </div>
         }
@@ -330,14 +564,20 @@ function MomentsSettingsPage() {
           <PolarisFormCard
             step={1}
             title="Navigation Tabs & CTA Customization"
-            description="Configure member navigation tabs (Discover is locked on; Connections and My Moments can be hidden). Reorder and rename tabs to match your community taxonomy."
+            description="Manage member navigation tabs. Reorder tabs, rename default tabs, or add new custom tabs with your own curated moment clips."
             badge="Navigation"
             badgeVariant="emerald"
             icon={Sliders}
           >
             <div className="space-y-4">
-              {/* Reusable Tab Manager Component */}
-              <ModuleTabManager tabs={tabs} onChange={handleTabsChange} />
+              {/* Tab Manager Component with Custom Tab Support */}
+              <ModuleTabManager
+                tabs={tabs}
+                onChange={handleTabsChange}
+                onAddCustomTab={handleOpenNewTabModal}
+                onCurateMoments={handleOpenCurateTab}
+                onDeleteCustomTab={handleDeleteCustomTab}
+              />
 
               {/* Primary CTA Button Label Customization */}
               <div className="p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-2">
@@ -376,9 +616,124 @@ function MomentsSettingsPage() {
             </div>
           </PolarisFormCard>
 
-          {/* Section 2: Visibility & Creator Permissions */}
+          {/* Section 2: Admin Pinned Moments (Discover Feed) */}
           <PolarisFormCard
             step={2}
+            title="Admin Pinned Moments"
+            description="Feature standout moments at the very top of the Discover feed. Members will see these clips highlighted with a pinned indicator."
+            badge="Featured"
+            badgeVariant="indigo"
+            icon={Pin}
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                    Featured Discover Stream Clips
+                  </span>
+                  <p className="text-[11px] text-[#616161] dark:text-zinc-400">
+                    {pinnedMomentIds.length} moment{pinnedMomentIds.length === 1 ? "" : "s"} currently pinned.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={handleOpenCuratePinned}
+                  className="text-[12px] h-7 gap-1.5 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                >
+                  <Pin className="h-3.5 w-3.5" />
+                  <span>{pinnedMomentIds.length > 0 ? "Manage Pinned Clips" : "Select Moments to Pin"}</span>
+                </Button>
+              </div>
+
+              {/* Pinned Items List */}
+              {pinnedMomentIds.length === 0 ? (
+                <div className="p-4 rounded-[6px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 flex flex-col items-center justify-center text-center gap-1.5">
+                  <Pin className="h-5 w-5 text-[#8c9196]/50" />
+                  <span className="text-[12px] font-medium text-[#303030] dark:text-zinc-300">
+                    No moments pinned to Discover yet
+                  </span>
+                  <p className="text-[11px] text-[#8c9196] max-w-xs">
+                    Pin key videos so they are immediately visible to members on the landing feed.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {pinnedMomentIds.map((id, idx) => {
+                    const moment = momentsByIdMap.get(id);
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center justify-between p-2 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-800/80 shadow-2xs"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 w-4 text-center shrink-0">
+                            #{idx + 1}
+                          </span>
+                          {moment?.thumbnailUrl ? (
+                            <img
+                              src={moment.thumbnailUrl}
+                              alt=""
+                              className="h-9 w-9 rounded-[4px] object-cover shrink-0"
+                            />
+                          ) : (
+                            <div className="h-9 w-9 rounded-[4px] bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center shrink-0 text-[#8c9196]">
+                              <Film className="h-4 w-4" />
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[12px] font-medium text-[#303030] dark:text-zinc-100 truncate">
+                              {moment?.caption || "Untitled Moment"}
+                            </p>
+                            <span className="text-[10.5px] text-[#8c9196]">
+                              {moment?.owner
+                                ? `${moment.owner.firstName || ""} ${moment.owner.lastName || ""}`.trim() || "Member"
+                                : "Member"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Reorder and Remove buttons */}
+                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                          <button
+                            type="button"
+                            onClick={() => handleMovePinnedUp(idx)}
+                            disabled={idx === 0}
+                            title="Move up"
+                            className="p-1 rounded text-[#8c9196] hover:text-[#303030] disabled:opacity-30"
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMovePinnedDown(idx)}
+                            disabled={idx === pinnedMomentIds.length - 1}
+                            title="Move down"
+                            className="p-1 rounded text-[#8c9196] hover:text-[#303030] disabled:opacity-30"
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePinned(id)}
+                            title="Unpin"
+                            className="p-1 rounded text-[#8c9196] hover:text-red-600"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 3: Visibility & Creator Permissions */}
+          <PolarisFormCard
+            step={3}
             title="Visibility & Creator Permissions"
             description="Configure discoverability parameters and creator upload rights."
             badge="Visibility"
@@ -509,9 +864,9 @@ function MomentsSettingsPage() {
             </div>
           </PolarisFormCard>
 
-          {/* Section 3: Moderation & Quality Protocols */}
+          {/* Section 4: Moderation & Quality Protocols */}
           <PolarisFormCard
-            step={3}
+            step={4}
             title="Moderation & Quality Protocols"
             description="Configure automated safety checks and manual moderation gateways."
             badge="Moderation"
@@ -644,6 +999,76 @@ function MomentsSettingsPage() {
           buttonText="Save Settings"
         />
       </PolarisFormLayout>
+
+      {/* Dialog for Adding New Custom Tab */}
+      <Dialog open={isNewTabModalOpen} onOpenChange={setIsNewTabModalOpen}>
+        <DialogContent className="max-w-md p-5 rounded-xl border border-[#d2d5d9] dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-[15px] font-semibold text-[#303030] dark:text-zinc-100 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-purple-600" />
+              Add New Custom Tab
+            </DialogTitle>
+            <DialogDescription className="text-[11.5px] text-[#616161] dark:text-zinc-400">
+              Create a custom navigation tab. You can name it and curate specific {singularName.toLowerCase()} clips for it.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 py-3">
+            <label className="text-[11.5px] font-medium text-[#303030] dark:text-zinc-200">
+              Tab Display Name
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Staff Highlights, Top Demos, Weekly Best"
+              value={newTabNameInput}
+              onChange={(e) => setNewTabNameInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleCreateCustomTab();
+                }
+              }}
+              autoFocus
+              className="w-full text-[12px] h-8 px-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+          </div>
+
+          <DialogFooter className="flex items-center justify-end gap-2 pt-2 border-t border-[#e1e3e5] dark:border-zinc-800">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsNewTabModalOpen(false)}
+              className="text-[12px] h-8"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleCreateCustomTab}
+              className="text-[12px] h-8 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+            >
+              Create & Curate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Moment Selector Modal */}
+      {activeCurateTarget && (
+        <MomentSelectorModal
+          isOpen={isCurateModalOpen}
+          onClose={() => {
+            setIsCurateModalOpen(false);
+            setActiveCurateTarget(null);
+          }}
+          title={activeCurateTarget.title}
+          description={activeCurateTarget.description}
+          selectedMomentIds={activeCurateTarget.momentIds}
+          onConfirm={handleConfirmSelectedMoments}
+        />
+      )}
     </div>
   );
 }

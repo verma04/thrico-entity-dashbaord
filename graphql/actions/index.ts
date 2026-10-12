@@ -167,6 +167,8 @@ export interface EntitySettings {
   momentsTabNames?: Record<string, string>;
   momentsTabOrder?: string[];
   momentsCtaName?: string | null;
+  momentsPinnedMomentIds?: string[];
+  momentsCustomTabs?: any[];
 
   // Communities Tab Settings
   allowCommunitiesDiscoverTab?: boolean;

@@ -7,7 +7,7 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { GripVertical, LucideIcon, Lock } from "lucide-react";
+import { GripVertical, LucideIcon, Lock, Sparkles, Trash2, Plus } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -21,17 +21,25 @@ export interface ModuleTabItem {
   icon: LucideIcon;
   canHide: boolean; // if false, cannot be hidden (e.g. Discover tab)
   enabled: boolean;
+  isCustom?: boolean;
+  momentIds?: string[];
 }
 
 export interface ModuleTabManagerProps {
   tabs: ModuleTabItem[];
   onChange: (updatedTabs: ModuleTabItem[]) => void;
+  onAddCustomTab?: () => void;
+  onCurateMoments?: (tabId: string) => void;
+  onDeleteCustomTab?: (tabId: string) => void;
   className?: string;
 }
 
 export const ModuleTabManager: React.FC<ModuleTabManagerProps> = ({
   tabs,
   onChange,
+  onAddCustomTab,
+  onCurateMoments,
+  onDeleteCustomTab,
   className,
 }) => {
   const handleDragEnd = (result: DropResult) => {
@@ -107,7 +115,9 @@ export const ModuleTabManager: React.FC<ModuleTabManagerProps> = ({
                               className={cn(
                                 "h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
                                 tab.enabled
-                                  ? "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
+                                  ? tab.isCustom
+                                    ? "bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400 dark:border-purple-900/50"
+                                    : "bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
                                   : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
                               )}
                             >
@@ -127,6 +137,13 @@ export const ModuleTabManager: React.FC<ModuleTabManagerProps> = ({
                                   >
                                     <Lock className="h-2.5 w-2.5" />
                                     Core Tab
+                                  </Badge>
+                                ) : tab.isCustom ? (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[9.5px] px-1.5 py-0 rounded-[3px] font-bold bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                                  >
+                                    Custom Tab
                                   </Badge>
                                 ) : (
                                   <Badge
@@ -148,8 +165,30 @@ export const ModuleTabManager: React.FC<ModuleTabManagerProps> = ({
                             </div>
                           </div>
 
-                          {/* Toggle Switch */}
+                          {/* Actions: Curate / Delete / Toggle */}
                           <div className="flex items-center gap-2 shrink-0 pt-0.5">
+                            {tab.isCustom && onCurateMoments && (
+                              <button
+                                type="button"
+                                onClick={() => onCurateMoments(tab.id)}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-[11px] font-medium transition-colors border border-indigo-200 dark:border-indigo-800 cursor-pointer shadow-2xs"
+                              >
+                                <Sparkles className="h-3 w-3" />
+                                <span>Curate ({tab.momentIds?.length || 0})</span>
+                              </button>
+                            )}
+
+                            {tab.isCustom && onDeleteCustomTab && (
+                              <button
+                                type="button"
+                                onClick={() => onDeleteCustomTab(tab.id)}
+                                title="Delete custom tab"
+                                className="p-1 rounded text-[#8c9196] hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+
                             {tab.canHide ? (
                               <Switch
                                 checked={tab.enabled}
@@ -193,6 +232,18 @@ export const ModuleTabManager: React.FC<ModuleTabManagerProps> = ({
           )}
         </Droppable>
       </DragDropContext>
+
+      {/* Add Custom Tab Button */}
+      {onAddCustomTab && (
+        <button
+          type="button"
+          onClick={onAddCustomTab}
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-[8px] border border-dashed border-[#c9cccf] dark:border-zinc-700 hover:border-indigo-400 dark:hover:border-indigo-600 bg-[#f6f6f7]/50 hover:bg-indigo-50/20 dark:bg-zinc-900/40 text-[12px] font-medium text-[#303030] dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all cursor-pointer shadow-2xs"
+        >
+          <Plus className="h-3.5 w-3.5 stroke-[2.5px]" />
+          <span>Add New Custom Tab</span>
+        </button>
+      )}
     </div>
   );
 };

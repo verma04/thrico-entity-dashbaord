@@ -183,6 +183,8 @@ export const GET_ENTITY_SETTINGS = gql`
       momentsTabNames
       momentsTabOrder
       momentsCtaName
+      momentsPinnedMomentIds
+      momentsCustomTabs
       allowCommunitiesDiscoverTab
       allowCommunitiesMyCommunitiesTab
       allowCommunitiesJoinedTab
@@ -305,6 +307,8 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       momentsTabNames
       momentsTabOrder
       momentsCtaName
+      momentsPinnedMomentIds
+      momentsCustomTabs
       allowCommunitiesDiscoverTab
       allowCommunitiesMyCommunitiesTab
       allowCommunitiesJoinedTab
