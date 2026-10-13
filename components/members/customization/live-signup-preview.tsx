@@ -109,6 +109,45 @@ export function LiveSignupPreview({
       ? config.authTexts?.signupHeaderImageSize || (headerPlacement === "inline" ? 22 : 40)
       : config.authTexts?.loginHeaderImageSize || (headerPlacement === "inline" ? 22 : 40);
 
+  const taglineRaw =
+    activeTab === "signup"
+      ? config.authTexts?.signupTagline
+      : config.authTexts?.loginTagline;
+  const taglineText =
+    typeof taglineRaw === "string"
+      ? taglineRaw
+      : headerImage
+      ? ""
+      : activeTab === "signup"
+      ? "GET STARTED"
+      : "WELCOME BACK";
+
+  const headlineRaw =
+    activeTab === "signup"
+      ? config.authTexts?.signupTitle
+      : config.authTexts?.loginTitle;
+  const headlineText =
+    typeof headlineRaw === "string"
+      ? headlineRaw
+      : headerImage
+      ? ""
+      : activeTab === "signup"
+      ? `Register to ${entityName}`
+      : `Sign In to ${entityName}`;
+
+  const descriptionRaw =
+    activeTab === "signup"
+      ? config.authTexts?.signupDescription
+      : config.authTexts?.loginDescription;
+  const descriptionText =
+    typeof descriptionRaw === "string"
+      ? descriptionRaw
+      : headerImage
+      ? ""
+      : activeTab === "signup"
+      ? "Sign up to unlock exclusive features."
+      : "Log in to access your community.";
+
   const showGoogle = config.authMethod === "BOTH" || config.authMethod === "GOOGLE_ONLY";
   const showEmail = config.authMethod === "BOTH" || config.authMethod === "EMAIL_ONLY";
 
@@ -218,44 +257,45 @@ export function LiveSignupPreview({
                   </div>
                 )}
 
-                <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-                  {activeTab === "signup"
-                    ? (config.authTexts?.signupTagline || "GET STARTED")
-                    : (config.authTexts?.loginTagline || "WELCOME BACK")}
-                </span>
-
-                <h4
-                  className={cn(
-                    "text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 flex items-center gap-1.5 flex-wrap",
-                    headerFlexJustify
-                  )}
-                >
-                  {headerImage && headerPlacement === "inline" && (
-                    <img
-                      src={
-                        headerImage.startsWith("http") ||
-                        headerImage.startsWith("blob:") ||
-                        headerImage.startsWith("data:")
-                          ? headerImage
-                          : `https://cdn.thrico.network/${headerImage}`
-                      }
-                      alt="Headline Icon"
-                      style={{ height: `${headerImageSize}px`, width: `${headerImageSize}px` }}
-                      className="object-contain shrink-0 rounded"
-                    />
-                  )}
-                  <span>
-                    {activeTab === "signup"
-                      ? (config.authTexts?.signupTitle || `Register to ${entityName}`)
-                      : (config.authTexts?.loginTitle || `Sign In to ${entityName}`)}
+                {/* Eyebrow Tagline */}
+                {taglineText ? (
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
+                    {taglineText}
                   </span>
-                </h4>
+                ) : null}
 
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2">
-                  {activeTab === "signup"
-                    ? (config.authTexts?.signupDescription || "Sign up to unlock exclusive features.")
-                    : (config.authTexts?.loginDescription || "Log in to access your community.")}
-                </p>
+                {/* Main Headline */}
+                {headlineText || (headerImage && headerPlacement === "inline") ? (
+                  <h4
+                    className={cn(
+                      "text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 flex items-center gap-1.5 flex-wrap",
+                      headerFlexJustify
+                    )}
+                  >
+                    {headerImage && headerPlacement === "inline" && (
+                      <img
+                        src={
+                          headerImage.startsWith("http") ||
+                          headerImage.startsWith("blob:") ||
+                          headerImage.startsWith("data:")
+                            ? headerImage
+                            : `https://cdn.thrico.network/${headerImage}`
+                        }
+                        alt="Headline Icon"
+                        style={{ height: `${headerImageSize}px`, width: `${headerImageSize}px` }}
+                        className="object-contain shrink-0 rounded"
+                      />
+                    )}
+                    {headlineText ? <span>{headlineText}</span> : null}
+                  </h4>
+                ) : null}
+
+                {/* Sub-headline & Description */}
+                {descriptionText ? (
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2">
+                    {descriptionText}
+                  </p>
+                ) : null}
               </div>
             </div>
 

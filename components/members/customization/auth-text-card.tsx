@@ -306,16 +306,36 @@ export function AuthTextCard({
   const currentFooterTextField = activeSection === "login" ? "loginFooterText" : "signupFooterText";
   const currentFooterLinkField = activeSection === "login" ? "loginFooterLink" : "signupFooterLink";
 
-  const taglineVal = authTexts[currentTaglineField] ?? DEFAULT_AUTH_TEXTS[currentTaglineField];
-  const titleVal = authTexts[currentTitleField] ?? DEFAULT_AUTH_TEXTS[currentTitleField];
-  const descVal = authTexts[currentDescField] ?? DEFAULT_AUTH_TEXTS[currentDescField];
+  const hasCurrentHeaderImage = Boolean(headerImageVal);
+
+  const taglineVal =
+    typeof authTexts[currentTaglineField] === "string"
+      ? authTexts[currentTaglineField]
+      : hasCurrentHeaderImage
+      ? ""
+      : DEFAULT_AUTH_TEXTS[currentTaglineField];
+
+  const titleVal =
+    typeof authTexts[currentTitleField] === "string"
+      ? authTexts[currentTitleField]
+      : hasCurrentHeaderImage
+      ? ""
+      : DEFAULT_AUTH_TEXTS[currentTitleField];
+
+  const descVal =
+    typeof authTexts[currentDescField] === "string"
+      ? authTexts[currentDescField]
+      : hasCurrentHeaderImage
+      ? ""
+      : DEFAULT_AUTH_TEXTS[currentDescField];
+
   const btnVal = authTexts[currentBtnField] ?? DEFAULT_AUTH_TEXTS[currentBtnField];
   const footerTextVal = authTexts[currentFooterTextField] ?? DEFAULT_AUTH_TEXTS[currentFooterTextField];
   const footerLinkVal = authTexts[currentFooterLinkField] ?? DEFAULT_AUTH_TEXTS[currentFooterLinkField];
 
-  const isTaglineCustom = taglineVal !== DEFAULT_AUTH_TEXTS[currentTaglineField];
-  const isTitleCustom = titleVal !== DEFAULT_AUTH_TEXTS[currentTitleField];
-  const isDescCustom = descVal !== DEFAULT_AUTH_TEXTS[currentDescField];
+  const isTaglineCustom = Boolean(taglineVal && taglineVal !== DEFAULT_AUTH_TEXTS[currentTaglineField]);
+  const isTitleCustom = Boolean(titleVal && titleVal !== DEFAULT_AUTH_TEXTS[currentTitleField]);
+  const isDescCustom = Boolean(descVal && descVal !== DEFAULT_AUTH_TEXTS[currentDescField]);
   const isBtnCustom = btnVal !== DEFAULT_AUTH_TEXTS[currentBtnField];
   const isFooterTextCustom = footerTextVal !== DEFAULT_AUTH_TEXTS[currentFooterTextField];
   const isFooterLinkCustom = footerLinkVal !== DEFAULT_AUTH_TEXTS[currentFooterLinkField];
@@ -800,7 +820,7 @@ export function AuthTextCard({
           <Input
             value={taglineVal}
             onChange={(e) => handleFieldChange(currentTaglineField, e.target.value)}
-            placeholder={DEFAULT_AUTH_TEXTS[currentTaglineField]}
+            placeholder={hasCurrentHeaderImage ? "Leave empty for no tagline" : DEFAULT_AUTH_TEXTS[currentTaglineField]}
             className="h-9 text-xs font-mono uppercase tracking-wider"
           />
 
@@ -862,7 +882,7 @@ export function AuthTextCard({
           <Input
             value={titleVal}
             onChange={(e) => handleFieldChange(currentTitleField, e.target.value)}
-            placeholder={DEFAULT_AUTH_TEXTS[currentTitleField]}
+            placeholder={hasCurrentHeaderImage ? "Leave empty for artwork only" : DEFAULT_AUTH_TEXTS[currentTitleField]}
             className="h-9 text-xs font-semibold"
           />
 
@@ -920,7 +940,7 @@ export function AuthTextCard({
           <Textarea
             value={descVal}
             onChange={(e) => handleFieldChange(currentDescField, e.target.value)}
-            placeholder={DEFAULT_AUTH_TEXTS[currentDescField]}
+            placeholder={hasCurrentHeaderImage ? "Leave empty for no description" : DEFAULT_AUTH_TEXTS[currentDescField]}
             rows={2}
             className="text-xs min-h-[64px] resize-none"
           />
