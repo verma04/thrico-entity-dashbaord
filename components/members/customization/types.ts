@@ -32,11 +32,27 @@ export interface CustomFieldItem {
 }
 
 export type LogoAlignment = "left" | "center" | "right";
+export type HeaderAlignment = "left" | "center" | "right";
+export type HeaderImagePlacement = "above" | "inline";
 
 export interface AuthPageTexts {
   logo?: string;
   logoAlignment?: LogoAlignment;
   logoSize?: number;
+
+  // Hero Header Alignment & Images
+  headerAlignment?: HeaderAlignment;
+  loginHeaderAlignment?: HeaderAlignment;
+  signupHeaderAlignment?: HeaderAlignment;
+
+  loginHeaderImage?: string;
+  loginHeaderImagePlacement?: HeaderImagePlacement;
+  loginHeaderImageSize?: number;
+
+  signupHeaderImage?: string;
+  signupHeaderImagePlacement?: HeaderImagePlacement;
+  signupHeaderImageSize?: number;
+
   loginTagline: string;
   loginTitle: string;
   loginDescription: string;
@@ -55,6 +71,15 @@ export const DEFAULT_AUTH_TEXTS: AuthPageTexts = {
   logo: "",
   logoAlignment: "center",
   logoSize: 40,
+  headerAlignment: "center",
+  loginHeaderAlignment: "center",
+  signupHeaderAlignment: "center",
+  loginHeaderImage: "",
+  loginHeaderImagePlacement: "above",
+  loginHeaderImageSize: 40,
+  signupHeaderImage: "",
+  signupHeaderImagePlacement: "above",
+  signupHeaderImageSize: 40,
   loginTagline: "WELCOME BACK",
   loginTitle: "Community Login",
   loginDescription: "Log in to access your community and exclusive features.",

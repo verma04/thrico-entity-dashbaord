@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
@@ -6,7 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AuthPageTexts, DEFAULT_AUTH_TEXTS } from "./types";
+import { Slider } from "@/components/ui/slider";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import {
+  AuthPageTexts,
+  DEFAULT_AUTH_TEXTS,
+  HeaderAlignment,
+  HeaderImagePlacement,
+} from "./types";
 import {
   RotateCcw,
   LogIn,
@@ -18,6 +26,13 @@ import {
   Rocket,
   Info,
   Check,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  UploadCloud,
+  Trash2,
+  Image as ImageIcon,
+  LayoutTemplate,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -46,6 +61,7 @@ const TONE_PRESETS: TonePreset[] = [
     icon: Compass,
     description: "Warm, engaging, and welcoming tone for member networks.",
     login: {
+      loginHeaderAlignment: "center",
       loginTagline: "WELCOME BACK",
       loginTitle: "Good to see you again!",
       loginDescription: "Sign in to catch up with fellow members, events, and latest discussions.",
@@ -54,6 +70,7 @@ const TONE_PRESETS: TonePreset[] = [
       loginFooterLink: "Join us today",
     },
     signup: {
+      signupHeaderAlignment: "center",
       signupTagline: "JOIN THE COMMUNITY",
       signupTitle: "Become a member today",
       signupDescription: "Connect with thousands of creators, mentors, and peers building together.",
@@ -68,6 +85,7 @@ const TONE_PRESETS: TonePreset[] = [
     icon: Briefcase,
     description: "Polished, trust-focused, and concise for corporate organizations.",
     login: {
+      loginHeaderAlignment: "left",
       loginTagline: "SECURE PORTAL",
       loginTitle: "Sign in to your account",
       loginDescription: "Enter your registered email or Google account to continue to your workspace.",
@@ -76,6 +94,7 @@ const TONE_PRESETS: TonePreset[] = [
       loginFooterLink: "Request Access",
     },
     signup: {
+      signupHeaderAlignment: "left",
       signupTagline: "GET STARTED",
       signupTitle: "Create your organization account",
       signupDescription: "Set up your verified member profile to access company tools and resources.",
@@ -90,6 +109,7 @@ const TONE_PRESETS: TonePreset[] = [
     icon: Crown,
     description: "High-status voice for private alpha clubs or gated cohorts.",
     login: {
+      loginHeaderAlignment: "center",
       loginTagline: "PRIVATE ACCESS",
       loginTitle: "Members Only Portal",
       loginDescription: "Provide your authenticated identity to unlock private cohort spaces.",
@@ -98,6 +118,7 @@ const TONE_PRESETS: TonePreset[] = [
       loginFooterLink: "Redeem invite",
     },
     signup: {
+      signupHeaderAlignment: "center",
       signupTagline: "BY INVITATION",
       signupTitle: "Apply for Cohort Membership",
       signupDescription: "Complete onboarding application to verify credentials with our council.",
@@ -112,6 +133,7 @@ const TONE_PRESETS: TonePreset[] = [
     icon: Rocket,
     description: "Action-driven, punchy copy geared toward high conversion velocity.",
     login: {
+      loginHeaderAlignment: "center",
       loginTagline: "WELCOME BACK",
       loginTitle: "Jump back into action",
       loginDescription: "Continue where you left off and keep leveling up your accomplishments.",
@@ -120,6 +142,7 @@ const TONE_PRESETS: TonePreset[] = [
       loginFooterLink: "Sign up in 30s",
     },
     signup: {
+      signupHeaderAlignment: "center",
       signupTagline: "LEVEL UP",
       signupTitle: "Start your journey now",
       signupDescription: "Get instant access to tools, rewards, leaderboards, and exclusive perks.",
@@ -152,7 +175,7 @@ export function AuthTextCard({
     }
   };
 
-  const handleFieldChange = (field: keyof AuthPageTexts, value: string) => {
+  const handleFieldChange = (field: keyof AuthPageTexts, value: unknown) => {
     onChange({ [field]: value });
   };
 
@@ -169,6 +192,10 @@ export function AuthTextCard({
   const handleResetSection = (section: "login" | "signup") => {
     if (section === "login") {
       onChange({
+        loginHeaderAlignment: DEFAULT_AUTH_TEXTS.loginHeaderAlignment,
+        loginHeaderImage: DEFAULT_AUTH_TEXTS.loginHeaderImage,
+        loginHeaderImagePlacement: DEFAULT_AUTH_TEXTS.loginHeaderImagePlacement,
+        loginHeaderImageSize: DEFAULT_AUTH_TEXTS.loginHeaderImageSize,
         loginTagline: DEFAULT_AUTH_TEXTS.loginTagline,
         loginTitle: DEFAULT_AUTH_TEXTS.loginTitle,
         loginDescription: DEFAULT_AUTH_TEXTS.loginDescription,
@@ -178,6 +205,10 @@ export function AuthTextCard({
       });
     } else {
       onChange({
+        signupHeaderAlignment: DEFAULT_AUTH_TEXTS.signupHeaderAlignment,
+        signupHeaderImage: DEFAULT_AUTH_TEXTS.signupHeaderImage,
+        signupHeaderImagePlacement: DEFAULT_AUTH_TEXTS.signupHeaderImagePlacement,
+        signupHeaderImageSize: DEFAULT_AUTH_TEXTS.signupHeaderImageSize,
         signupTagline: DEFAULT_AUTH_TEXTS.signupTagline,
         signupTitle: DEFAULT_AUTH_TEXTS.signupTitle,
         signupDescription: DEFAULT_AUTH_TEXTS.signupDescription,
@@ -190,7 +221,7 @@ export function AuthTextCard({
   };
 
   const handleInsertToken = (field: keyof AuthPageTexts, token: string) => {
-    const currentValue = authTexts[field] || "";
+    const currentValue = (authTexts[field] as string) || "";
     const updated = currentValue ? `${currentValue} ${token}` : token;
     onChange({ [field]: updated });
     toast.success(`Inserted ${token} variable.`);
@@ -201,8 +232,18 @@ export function AuthTextCard({
     toast.info(`Reset to default.`);
   };
 
+  const formatImageUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("http") || url.startsWith("blob:") || url.startsWith("data:")) {
+      return url;
+    }
+    return `https://cdn.thrico.network/${url}`;
+  };
+
   // Edited counts
   const loginKeys: (keyof AuthPageTexts)[] = [
+    "loginHeaderAlignment",
+    "loginHeaderImage",
     "loginTagline",
     "loginTitle",
     "loginDescription",
@@ -211,6 +252,8 @@ export function AuthTextCard({
     "loginFooterLink",
   ];
   const signupKeys: (keyof AuthPageTexts)[] = [
+    "signupHeaderAlignment",
+    "signupHeaderImage",
     "signupTagline",
     "signupTitle",
     "signupDescription",
@@ -227,7 +270,35 @@ export function AuthTextCard({
     (k) => (authTexts[k] || DEFAULT_AUTH_TEXTS[k]) !== DEFAULT_AUTH_TEXTS[k]
   ).length;
 
-  // Active field mappings
+  // Active field mappings for Header Alignment & Imagery
+  const currentHeaderAlignmentField =
+    activeSection === "login" ? "loginHeaderAlignment" : "signupHeaderAlignment";
+  const currentImageField =
+    activeSection === "login" ? "loginHeaderImage" : "signupHeaderImage";
+  const currentPlacementField =
+    activeSection === "login" ? "loginHeaderImagePlacement" : "signupHeaderImagePlacement";
+  const currentImageSizeField =
+    activeSection === "login" ? "loginHeaderImageSize" : "signupHeaderImageSize";
+
+  const headerAlignmentVal: HeaderAlignment =
+    authTexts[currentHeaderAlignmentField] ||
+    authTexts.headerAlignment ||
+    "center";
+
+  const headerImageVal: string =
+    (authTexts[currentImageField] as string) || "";
+
+  const headerPlacementVal: HeaderImagePlacement =
+    authTexts[currentPlacementField] || "above";
+
+  const headerImageSizeVal: number =
+    typeof authTexts[currentImageSizeField] === "number"
+      ? (authTexts[currentImageSizeField] as number)
+      : headerPlacementVal === "inline"
+      ? 24
+      : 40;
+
+  // Active field mappings for Text
   const currentTaglineField = activeSection === "login" ? "loginTagline" : "signupTagline";
   const currentTitleField = activeSection === "login" ? "loginTitle" : "signupTitle";
   const currentDescField = activeSection === "login" ? "loginDescription" : "signupDescription";
@@ -365,20 +436,329 @@ export function AuthTextCard({
 
       {/* ── Card 1: Hero Header & Value Proposition ── */}
       <div className="rounded-xl border border-border/70 p-4 bg-card shadow-2xs space-y-4">
-        <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-3">
+        {/* Header with Title and Section Alignment Control */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-3">
           <div className="flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shrink-0">
               1
             </span>
             <div>
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wide">
-                Hero Header & Value Proposition
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs font-bold text-foreground uppercase tracking-wide">
+                  Hero Header & Value Proposition
+                </h3>
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0 font-normal uppercase">
+                  {headerAlignmentVal}
+                </Badge>
+              </div>
               <p className="text-[11px] text-muted-foreground leading-snug">
-                The headline and welcoming message shown at the top of the {activeSection} modal.
+                Headline, imagery, and alignment shown at the top of the {activeSection} modal.
               </p>
             </div>
           </div>
+
+          {/* Section 1 Alignment Controls: Left / Center / Right */}
+          <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/60 self-start sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                onChange({
+                  [currentHeaderAlignmentField]: "left",
+                  headerAlignment: "left",
+                });
+                toast.success(`Header aligned Left for ${activeSection === "login" ? "Login" : "Registration"}.`);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                headerAlignmentVal === "left"
+                  ? "bg-background text-foreground shadow-2xs border border-border/70 font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              title="Align Full Hero Header to Left"
+            >
+              <AlignLeft className="h-3.5 w-3.5" />
+              <span className="text-[11px]">Left</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onChange({
+                  [currentHeaderAlignmentField]: "center",
+                  headerAlignment: "center",
+                });
+                toast.success(`Header aligned Center for ${activeSection === "login" ? "Login" : "Registration"}.`);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                headerAlignmentVal === "center"
+                  ? "bg-background text-foreground shadow-2xs border border-border/70 font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              title="Align Full Hero Header to Center"
+            >
+              <AlignCenter className="h-3.5 w-3.5" />
+              <span className="text-[11px]">Center</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onChange({
+                  [currentHeaderAlignmentField]: "right",
+                  headerAlignment: "right",
+                });
+                toast.success(`Header aligned Right for ${activeSection === "login" ? "Login" : "Registration"}.`);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer",
+                headerAlignmentVal === "right"
+                  ? "bg-background text-foreground shadow-2xs border border-border/70 font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              title="Align Full Hero Header to Right"
+            >
+              <AlignRight className="h-3.5 w-3.5" />
+              <span className="text-[11px]">Right</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── Headline Graphic / Illustration Setting ── */}
+        <div className="p-3.5 rounded-xl border border-border/70 bg-muted/15 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+              <Label className="text-xs font-semibold text-foreground">
+                Headline Graphic / Artwork
+              </Label>
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0 font-normal text-muted-foreground">
+                Optional
+              </Badge>
+              {headerImageVal && (
+                <Badge
+                  variant="secondary"
+                  className="text-[9px] px-1.5 py-0 font-normal bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 rounded-full"
+                >
+                  Active Artwork
+                </Badge>
+              )}
+            </div>
+
+            {headerImageVal && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  handleFieldChange(currentImageField, "");
+                  toast.info("Removed headline graphic.");
+                }}
+                className="h-6 text-[11px] gap-1 text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer"
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>Remove</span>
+              </Button>
+            )}
+          </div>
+
+          {headerImageVal ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-lg border border-border/80 bg-white dark:bg-zinc-900 p-1 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                  <img
+                    src={formatImageUrl(headerImageVal)}
+                    alt="Headline Graphic"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+
+                <div className="flex-1 space-y-1">
+                  <span className="text-xs font-semibold text-foreground">
+                    {headerPlacementVal === "above"
+                      ? "Hero Graphic (Positioned Above Headline)"
+                      : "Inline Icon (Embedded in Headline)"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <ImageUploadWithCrop
+                      currentImage={headerImageVal}
+                      onImageUpdate={(cdnUrl) => handleFieldChange(currentImageField, cdnUrl)}
+                      label={`Change ${activeSection === "login" ? "Login" : "Registration"} Graphic`}
+                      recommendedWidth={160}
+                      recommendedHeight={160}
+                      aspectRatio={1 / 1}
+                      allowFreeDimensions={true}
+                      defaultDimensionMode="free"
+                      maxFileSize={5}
+                      showDimensions={false}
+                    >
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[11px] gap-1 cursor-pointer border-border/80 hover:border-indigo-400"
+                      >
+                        <UploadCloud className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                        <span>Replace Artwork</span>
+                      </Button>
+                    </ImageUploadWithCrop>
+                  </div>
+                </div>
+              </div>
+
+              {/* Placement Selector: Above Headline ("Image on that") vs Inline with Headline */}
+              <div className="pt-2 border-t border-border/60 space-y-1.5">
+                <Label className="text-[11px] font-semibold text-foreground">
+                  Graphic Position in Modal
+                </Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleFieldChange(currentPlacementField, "above");
+                      toast.success("Artwork positioned above headline.");
+                    }}
+                    className={cn(
+                      "flex items-start gap-2.5 p-2 rounded-lg border text-left transition-all cursor-pointer",
+                      headerPlacementVal === "above"
+                        ? "bg-background border-indigo-500 ring-1 ring-indigo-500 shadow-2xs"
+                        : "bg-muted/30 border-border/60 hover:bg-muted/50 text-muted-foreground"
+                    )}
+                  >
+                    <LayoutTemplate
+                      className={cn(
+                        "h-4 w-4 mt-0.5 shrink-0",
+                        headerPlacementVal === "above" ? "text-indigo-600 dark:text-indigo-400" : "text-muted-foreground"
+                      )}
+                    />
+                    <div>
+                      <span className="text-xs font-semibold text-foreground block">
+                        Above Headline (Hero Graphic)
+                      </span>
+                      <span className="text-[10px] text-muted-foreground leading-snug block">
+                        Positioned on top of the headline as an illustration banner or emblem.
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleFieldChange(currentPlacementField, "inline");
+                      toast.success("Artwork positioned inline with headline.");
+                    }}
+                    className={cn(
+                      "flex items-start gap-2.5 p-2 rounded-lg border text-left transition-all cursor-pointer",
+                      headerPlacementVal === "inline"
+                        ? "bg-background border-indigo-500 ring-1 ring-indigo-500 shadow-2xs"
+                        : "bg-muted/30 border-border/60 hover:bg-muted/50 text-muted-foreground"
+                    )}
+                  >
+                    <Sparkles
+                      className={cn(
+                        "h-4 w-4 mt-0.5 shrink-0",
+                        headerPlacementVal === "inline" ? "text-indigo-600 dark:text-indigo-400" : "text-muted-foreground"
+                      )}
+                    />
+                    <div>
+                      <span className="text-xs font-semibold text-foreground block">
+                        Inline with Headline (Title Icon)
+                      </span>
+                      <span className="text-[10px] text-muted-foreground leading-snug block">
+                        Embedded directly beside the main modal headline text.
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Artwork Height Presets & Fine-Tune Slider */}
+              <div className="pt-2 border-t border-border/60 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-[11px] font-semibold text-foreground">
+                    Artwork Height:{" "}
+                    <span className="font-mono text-indigo-600 dark:text-indigo-400">
+                      {headerImageSizeVal}px
+                    </span>
+                  </Label>
+                  <div className="flex items-center gap-1">
+                    {[
+                      { label: "S", px: headerPlacementVal === "inline" ? 18 : 28 },
+                      { label: "M", px: headerPlacementVal === "inline" ? 24 : 40 },
+                      { label: "L", px: headerPlacementVal === "inline" ? 32 : 56 },
+                      { label: "XL", px: headerPlacementVal === "inline" ? 40 : 72 },
+                    ].map((sz) => (
+                      <button
+                        key={sz.label}
+                        type="button"
+                        onClick={() => handleFieldChange(currentImageSizeField, sz.px)}
+                        className={cn(
+                          "px-2 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer",
+                          headerImageSizeVal === sz.px
+                            ? "bg-foreground text-background font-bold border-foreground"
+                            : "bg-muted/40 border-border/70 hover:bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {sz.label} ({sz.px}px)
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-1">
+                  <span className="text-[10px] font-mono text-muted-foreground shrink-0">16px</span>
+                  <div className="flex-1">
+                    <Slider
+                      value={[headerImageSizeVal]}
+                      min={16}
+                      max={headerPlacementVal === "inline" ? 48 : 84}
+                      step={2}
+                      onValueChange={(vals) => handleFieldChange(currentImageSizeField, vals[0])}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+                    {headerPlacementVal === "inline" ? "48px" : "84px"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-lg border border-dashed border-border/80 bg-background hover:bg-muted/10 transition-colors">
+              <div className="space-y-0.5">
+                <span className="text-xs font-semibold text-foreground block">
+                  Add artwork, icon, or badge graphic
+                </span>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Upload an illustration to place on top of the headline or an icon beside the headline text.
+                </p>
+              </div>
+
+              <ImageUploadWithCrop
+                currentImage=""
+                onImageUpdate={(cdnUrl) => {
+                  handleFieldChange(currentImageField, cdnUrl);
+                  toast.success("Headline artwork added!");
+                }}
+                label={`Upload ${activeSection === "login" ? "Login" : "Registration"} Graphic`}
+                recommendedWidth={160}
+                recommendedHeight={160}
+                aspectRatio={1 / 1}
+                allowFreeDimensions={true}
+                defaultDimensionMode="free"
+                maxFileSize={5}
+                showDimensions={false}
+              >
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5 cursor-pointer border-border/80 hover:border-indigo-400 font-medium shrink-0"
+                >
+                  <UploadCloud className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                  <span>Upload Graphic</span>
+                </Button>
+              </ImageUploadWithCrop>
+            </div>
+          )}
         </div>
 
         {/* Eyebrow Tagline */}

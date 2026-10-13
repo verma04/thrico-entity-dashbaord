@@ -75,6 +75,40 @@ export function LiveSignupPreview({
       ? "justify-end"
       : "justify-center";
 
+  const currentHeaderAlignment =
+    activeTab === "signup"
+      ? config.authTexts?.signupHeaderAlignment || config.authTexts?.headerAlignment || "center"
+      : config.authTexts?.loginHeaderAlignment || config.authTexts?.headerAlignment || "center";
+
+  const headerAlignClass =
+    currentHeaderAlignment === "left"
+      ? "text-left items-start"
+      : currentHeaderAlignment === "right"
+      ? "text-right items-end"
+      : "text-center items-center";
+
+  const headerFlexJustify =
+    currentHeaderAlignment === "left"
+      ? "justify-start"
+      : currentHeaderAlignment === "right"
+      ? "justify-end"
+      : "justify-center";
+
+  const headerImage =
+    activeTab === "signup"
+      ? config.authTexts?.signupHeaderImage || ""
+      : config.authTexts?.loginHeaderImage || "";
+
+  const headerPlacement =
+    activeTab === "signup"
+      ? config.authTexts?.signupHeaderImagePlacement || "above"
+      : config.authTexts?.loginHeaderImagePlacement || "above";
+
+  const headerImageSize =
+    activeTab === "signup"
+      ? config.authTexts?.signupHeaderImageSize || (headerPlacement === "inline" ? 22 : 40)
+      : config.authTexts?.loginHeaderImageSize || (headerPlacement === "inline" ? 22 : 40);
+
   const showGoogle = config.authMethod === "BOTH" || config.authMethod === "GOOGLE_ONLY";
   const showEmail = config.authMethod === "BOTH" || config.authMethod === "EMAIL_ONLY";
 
@@ -163,21 +197,66 @@ export function LiveSignupPreview({
                   />
                 </div>
               ) : null}
-              <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-                {activeTab === "signup"
-                  ? (config.authTexts?.signupTagline || "GET STARTED")
-                  : (config.authTexts?.loginTagline || "WELCOME BACK")}
-              </span>
-              <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-0.5">
-                {activeTab === "signup"
-                  ? (config.authTexts?.signupTitle || `Register to ${entityName}`)
-                  : (config.authTexts?.loginTitle || `Sign In to ${entityName}`)}
-              </h4>
-              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2">
-                {activeTab === "signup"
-                  ? (config.authTexts?.signupDescription || "Sign up to unlock exclusive features.")
-                  : (config.authTexts?.loginDescription || "Log in to access your community.")}
-              </p>
+
+              {/* Hero Header & Value Proposition Content */}
+              <div className={cn("flex flex-col transition-all", headerAlignClass)}>
+                {/* Optional Hero Graphic Above Headline ("Image on that") */}
+                {headerImage && headerPlacement === "above" && (
+                  <div className={cn("flex mb-2 w-full", headerFlexJustify)}>
+                    <img
+                      src={
+                        headerImage.startsWith("http") ||
+                        headerImage.startsWith("blob:") ||
+                        headerImage.startsWith("data:")
+                          ? headerImage
+                          : `https://cdn.thrico.network/${headerImage}`
+                      }
+                      alt="Header Graphic"
+                      style={{ height: `${headerImageSize}px`, maxHeight: "72px" }}
+                      className="max-w-[160px] object-contain rounded"
+                    />
+                  </div>
+                )}
+
+                <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
+                  {activeTab === "signup"
+                    ? (config.authTexts?.signupTagline || "GET STARTED")
+                    : (config.authTexts?.loginTagline || "WELCOME BACK")}
+                </span>
+
+                <h4
+                  className={cn(
+                    "text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-0.5 flex items-center gap-1.5 flex-wrap",
+                    headerFlexJustify
+                  )}
+                >
+                  {headerImage && headerPlacement === "inline" && (
+                    <img
+                      src={
+                        headerImage.startsWith("http") ||
+                        headerImage.startsWith("blob:") ||
+                        headerImage.startsWith("data:")
+                          ? headerImage
+                          : `https://cdn.thrico.network/${headerImage}`
+                      }
+                      alt="Headline Icon"
+                      style={{ height: `${headerImageSize}px`, width: `${headerImageSize}px` }}
+                      className="object-contain shrink-0 rounded"
+                    />
+                  )}
+                  <span>
+                    {activeTab === "signup"
+                      ? (config.authTexts?.signupTitle || `Register to ${entityName}`)
+                      : (config.authTexts?.loginTitle || `Sign In to ${entityName}`)}
+                  </span>
+                </h4>
+
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2">
+                  {activeTab === "signup"
+                    ? (config.authTexts?.signupDescription || "Sign up to unlock exclusive features.")
+                    : (config.authTexts?.loginDescription || "Log in to access your community.")}
+                </p>
+              </div>
             </div>
 
             {/* Google OAuth Button */}
@@ -465,6 +544,27 @@ export function LiveSignupPreview({
                   {displayLogo
                     ? `${logoAlignment.toUpperCase()} • ${logoSize}px`
                     : "Not configured"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Header Alignment:</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200 uppercase">
+                  {currentHeaderAlignment}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
+                <span>Headline Artwork:</span>
+                <span
+                  className={cn(
+                    "font-semibold",
+                    headerImage
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-zinc-500 dark:text-zinc-400"
+                  )}
+                >
+                  {headerImage
+                    ? `${headerPlacement === "above" ? "Hero Graphic" : "Inline Icon"} (${headerImageSize}px)`
+                    : "None (Optional)"}
                 </span>
               </div>
               <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
