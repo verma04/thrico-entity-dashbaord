@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { toast } from "sonner";
 import { MemberCustomizationKpis } from "./member-customization-kpi";
 import { useMemberCustomization } from "./member-customization-context";
 import {
@@ -231,7 +232,21 @@ export function MemberCustomizationLayoutShell({
         hasChanged={formik.dirty}
         saved={isSaved}
         isSaving={isSaving || formik.isSubmitting}
-        onSave={() => formik.handleSubmit()}
+        onSave={async () => {
+          const errors = await formik.validateForm();
+          if (errors && Object.keys(errors).length > 0) {
+            console.warn("Validation errors preventing save:", errors);
+            const firstKey = Object.keys(errors)[0];
+            const firstVal = (errors as Record<string, unknown>)[firstKey];
+            const msg =
+              typeof firstVal === "string"
+                ? firstVal
+                : `Please check field: ${firstKey}`;
+            toast.error(msg);
+            return;
+          }
+          await formik.submitForm();
+        }}
         onReset={handleReset}
         saveButtonText="Save Changes"
         discardButtonText="Discard"
