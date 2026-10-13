@@ -14,7 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
-import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
 import { useModulePermission } from "@/hooks/use-module-permission";
 import { useMembersLayoutStore } from "@/store/members-layout-store";
 import { useTabOrder } from "@/hooks/use-tab-order";
