@@ -3,7 +3,6 @@
 import React from "react";
 import {
   Trophy,
-  Star,
   Hash,
   Award,
   Clock,
@@ -12,9 +11,10 @@ import {
   Gift,
   Activity,
   TrendingDown,
+  AlertCircle,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -396,6 +396,24 @@ export function GamificationTab({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-6">
+      {(member?.excludeFromGamification || member?.excludeFromImpactScore) && (
+        <div className="flex items-center gap-3 p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs">
+          <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="space-y-0.5">
+            <span className="font-semibold text-amber-800 dark:text-amber-300">
+              Calculations Excluded / Paused
+            </span>
+            <p className="text-[11px] text-amber-700/90 dark:text-amber-400/90 leading-snug">
+              {member?.excludeFromGamification && member?.excludeFromImpactScore
+                ? "This member is currently excluded from both automated Gamification point awards and Impact Score calculations."
+                : member?.excludeFromGamification
+                  ? "This member is currently excluded from automated Gamification point awards."
+                  : "This member is currently excluded from algorithmic Impact Score calculations."}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <SummaryCard

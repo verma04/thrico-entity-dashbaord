@@ -154,6 +154,10 @@ const details = `
       }
       impactScore
       customFields
+      excludeFromGamification
+      excludeFromImpactScore
+    }
+  }
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {
@@ -306,6 +310,8 @@ export const GET_USER_DETIALS = gql`
         rankPosition
       }
       impactScore
+      excludeFromGamification
+      excludeFromImpactScore
     }
   }
 `;
@@ -463,6 +469,8 @@ export const UPDATE_MEMBER = gql`
       status
       lastActive
       isOnline
+      excludeFromGamification
+      excludeFromImpactScore
       user {
         id
         firstName

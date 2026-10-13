@@ -60,6 +60,8 @@ const EditMemberPage = () => {
     interestIds: member.interests?.map((i: any) => i.id) || [],
     membershipTierId: member.membershipTier?.id || null,
     avatar: user.avatar || null,
+    excludeFromGamification: Boolean(member.excludeFromGamification ?? false),
+    excludeFromImpactScore: Boolean(member.excludeFromImpactScore ?? false),
   };
 
   const onFinish = (values: any) => {
@@ -78,6 +80,8 @@ const EditMemberPage = () => {
       skills: values.skills,
       interestIds: values.interestIds,
       membershipTierId: values.membershipTierId,
+      excludeFromGamification: Boolean(values.excludeFromGamification),
+      excludeFromImpactScore: Boolean(values.excludeFromImpactScore),
     };
 
     updateMember({ variables: { input } });

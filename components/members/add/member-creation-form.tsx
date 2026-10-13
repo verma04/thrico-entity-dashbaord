@@ -18,7 +18,10 @@ import {
   Globe,
   ShieldCheck,
   AlertCircle,
+  Trophy,
+  Activity,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -137,6 +140,8 @@ export function MemberCreationForm({
     gender: Yup.string().nullable(),
     language: Yup.string().max(50, "Max 50 characters"),
     location: Yup.string().max(100, "Max 100 characters"),
+    excludeFromGamification: Yup.boolean(),
+    excludeFromImpactScore: Yup.boolean(),
   });
 
   const formik = useFormik({
@@ -177,6 +182,12 @@ export function MemberCreationForm({
       gender: initialValues?.gender || "",
       language: initialValues?.language || "",
       location: initialValues?.location || "",
+      excludeFromGamification: Boolean(
+        initialValues?.excludeFromGamification ?? false,
+      ),
+      excludeFromImpactScore: Boolean(
+        initialValues?.excludeFromImpactScore ?? false,
+      ),
     },
     validationSchema: memberSchema,
     enableReinitialize: true,
@@ -519,7 +530,65 @@ export function MemberCreationForm({
               </PolarisCard>
 
               {/* Card 3: Skills & Competencies */}
-              <DetailedSkillsSection availableSkills={skills} />
+              <DetailedSkillsSection entitySkills={skills} />
+
+              {/* Card 4: Gamification & Impact Engine Controls */}
+              <PolarisCard
+                title="Gamification & Impact Engine Controls"
+                description="Manage eligibility flags for automated point accrual and community impact calculations."
+              >
+                <div className="space-y-3">
+                  {/* Toggle 1: Exclude from Gamification */}
+                  <div className="flex items-start justify-between gap-4 p-3 rounded-lg border border-border/60 bg-muted/10 hover:bg-muted/20 transition-colors">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-amber-500" />
+                        <label
+                          htmlFor="excludeFromGamification"
+                          className="text-xs font-semibold text-foreground cursor-pointer"
+                        >
+                          Exclude from Gamification Points
+                        </label>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-snug">
+                        When enabled, this member is excluded from point accrual, streak progression, and badge rewards across community activities.
+                      </p>
+                    </div>
+                    <Switch
+                      id="excludeFromGamification"
+                      checked={formik.values.excludeFromGamification}
+                      onCheckedChange={(checked) =>
+                        formik.setFieldValue("excludeFromGamification", checked)
+                      }
+                    />
+                  </div>
+
+                  {/* Toggle 2: Exclude from Impact Score */}
+                  <div className="flex items-start justify-between gap-4 p-3 rounded-lg border border-border/60 bg-muted/10 hover:bg-muted/20 transition-colors">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-emerald-500" />
+                        <label
+                          htmlFor="excludeFromImpactScore"
+                          className="text-xs font-semibold text-foreground cursor-pointer"
+                        >
+                          Exclude from Impact Score Calculation
+                        </label>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-snug">
+                        When enabled, algorithmic community Impact Score tracking and score adjustments will be bypassed for this member.
+                      </p>
+                    </div>
+                    <Switch
+                      id="excludeFromImpactScore"
+                      checked={formik.values.excludeFromImpactScore}
+                      onCheckedChange={(checked) =>
+                        formik.setFieldValue("excludeFromImpactScore", checked)
+                      }
+                    />
+                  </div>
+                </div>
+              </PolarisCard>
             </div>
 
             {/* ── Right Column (Sticky Preview & Media - 4 Cols) ── */}
