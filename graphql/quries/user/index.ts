@@ -156,8 +156,6 @@ const details = `
       customFields
       excludeFromGamification
       excludeFromImpactScore
-    }
-  }
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {
