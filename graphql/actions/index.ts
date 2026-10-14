@@ -24,6 +24,7 @@ export * from "./membership/membership-queries";
 export * from "./membership/membership-mutations";
 export * from "./export";
 export * from "./enterprise-leaderboard";
+export * from "./classification/classification-actions";
 export {
   useGetUserStatusTimeline,
   useLazyGetUserStatusTimeline,

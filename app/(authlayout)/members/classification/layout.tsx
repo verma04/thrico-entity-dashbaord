@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
@@ -15,6 +15,7 @@ import {
   Type,
   MapPin,
   Loader2,
+  Settings,
 } from "lucide-react";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 import { useClassificationStore } from "@/store/classification-store";
@@ -27,26 +28,27 @@ function ClassificationLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   // Determine active tab based on route
-  const activeTab = pathname.includes("/members/classification/industries")
-    ? "industries"
-    : pathname.includes("/members/classification/functions")
-      ? "functions"
-      : pathname.includes("/members/classification/skills")
-        ? "skills"
-        : pathname.includes("/members/classification/interests")
-          ? "interests"
-          : pathname.includes("/members/classification/experience")
-            ? "experience"
-            : pathname.includes("/members/classification/education")
-              ? "education"
-              : pathname.includes("/members/classification/headline")
-                ? "headline"
-                : pathname.includes("/members/classification/location")
-                  ? "location"
-                  : "location";
+  const activeTab = pathname.includes("/members/classification/setting")
+    ? "setting"
+    : pathname.includes("/members/classification/industries")
+      ? "industries"
+      : pathname.includes("/members/classification/functions")
+        ? "functions"
+        : pathname.includes("/members/classification/skills")
+          ? "skills"
+          : pathname.includes("/members/classification/interests")
+            ? "interests"
+            : pathname.includes("/members/classification/experience")
+              ? "experience"
+              : pathname.includes("/members/classification/education")
+                ? "education"
+                : pathname.includes("/members/classification/headline")
+                  ? "headline"
+                  : pathname.includes("/members/classification/location")
+                    ? "location"
+                    : "location";
 
   const defaultItems = useMemo(
     () => [
@@ -90,6 +92,11 @@ function ClassificationLayout({
         label: "Headlines",
         icon: <Type className="h-4 w-4" />,
       },
+      {
+        key: "setting",
+        label: "Settings",
+        icon: <Settings className="h-4 w-4" />,
+      },
     ],
     [],
   );
@@ -97,8 +104,7 @@ function ClassificationLayout({
   const { getOrderedTabs, onReorder } = useTabOrder("CLASSIFICATION", useClassificationStore, defaultItems);
   const items = getOrderedTabs(defaultItems);
 
-  const { data: subData, loading: subLoading } = useCheckMemberSubscription();
-  const message = subData?.checkMemberSubscription?.message;
+  const { loading: subLoading } = useCheckMemberSubscription();
 
   if (subLoading) {
     return (
