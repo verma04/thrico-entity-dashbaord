@@ -47,6 +47,11 @@ export const GET_CLASSIFICATION_SETTING = gql`
       allowProfileFunctions
       allowProfileIndustries
       allowProfileInterests
+      allowProfileGamification
+      allowUserSettings
+      allowDataDownload
+      allowFaq
+      supportEmail
     }
   }
 `;
@@ -64,6 +69,11 @@ export const UPDATE_CLASSIFICATION_SETTING = gql`
       allowProfileFunctions
       allowProfileIndustries
       allowProfileInterests
+      allowProfileGamification
+      allowUserSettings
+      allowDataDownload
+      allowFaq
+      supportEmail
     }
   }
 `;
@@ -79,6 +89,11 @@ export interface ClassificationSettingData {
   allowProfileFunctions?: boolean;
   allowProfileIndustries?: boolean;
   allowProfileInterests?: boolean;
+  allowProfileGamification?: boolean;
+  allowUserSettings?: boolean;
+  allowDataDownload?: boolean;
+  allowFaq?: boolean;
+  supportEmail?: string | null;
 }
 
 export interface GetClassificationSettingResponse {
@@ -94,6 +109,11 @@ export interface UpdateClassificationSettingInput {
   allowProfileFunctions?: boolean;
   allowProfileIndustries?: boolean;
   allowProfileInterests?: boolean;
+  allowProfileGamification?: boolean;
+  allowUserSettings?: boolean;
+  allowDataDownload?: boolean;
+  allowFaq?: boolean;
+  supportEmail?: string | null;
 }
 
 export interface UpdateClassificationSettingResponse {

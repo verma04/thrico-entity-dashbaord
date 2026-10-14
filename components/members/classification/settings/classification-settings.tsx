@@ -17,8 +17,14 @@ import {
   Eye,
   User,
   Check,
+  Trophy,
+  Settings as SettingsIcon,
+  Download,
+  HelpCircle,
+  Mail,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -45,6 +51,11 @@ interface ProfileVisibilityFormValues {
   allowProfileFunctions: boolean;
   allowProfileIndustries: boolean;
   allowProfileInterests: boolean;
+  allowProfileGamification: boolean;
+  allowUserSettings: boolean;
+  allowDataDownload: boolean;
+  allowFaq: boolean;
+  supportEmail: string;
 }
 
 const validationSchema = Yup.object().shape({
@@ -56,6 +67,14 @@ const validationSchema = Yup.object().shape({
   allowProfileFunctions: Yup.boolean().required(),
   allowProfileIndustries: Yup.boolean().required(),
   allowProfileInterests: Yup.boolean().required(),
+  allowProfileGamification: Yup.boolean().required(),
+  allowUserSettings: Yup.boolean().required(),
+  allowDataDownload: Yup.boolean().required(),
+  allowFaq: Yup.boolean().required(),
+  supportEmail: Yup.string()
+    .email("Please enter a valid email address")
+    .nullable()
+    .optional(),
 });
 
 interface SectionToggleItemProps {
@@ -142,6 +161,14 @@ export default function ClassificationProfileSettings() {
       data?.getClassificationSetting?.allowProfileIndustries ?? true,
     allowProfileInterests:
       data?.getClassificationSetting?.allowProfileInterests ?? true,
+    allowProfileGamification:
+      data?.getClassificationSetting?.allowProfileGamification ?? true,
+    allowUserSettings:
+      data?.getClassificationSetting?.allowUserSettings ?? true,
+    allowDataDownload:
+      data?.getClassificationSetting?.allowDataDownload ?? true,
+    allowFaq: data?.getClassificationSetting?.allowFaq ?? true,
+    supportEmail: data?.getClassificationSetting?.supportEmail ?? "",
   };
 
   const formik = useFormik<ProfileVisibilityFormValues>({
@@ -161,15 +188,20 @@ export default function ClassificationProfileSettings() {
               allowProfileFunctions: values.allowProfileFunctions,
               allowProfileIndustries: values.allowProfileIndustries,
               allowProfileInterests: values.allowProfileInterests,
+              allowProfileGamification: values.allowProfileGamification,
+              allowUserSettings: values.allowUserSettings,
+              allowDataDownload: values.allowDataDownload,
+              allowFaq: values.allowFaq,
+              supportEmail: values.supportEmail ? values.supportEmail.trim() : null,
             },
           },
         });
         resetForm({ values });
         setJustSaved(true);
         setTimeout(() => setJustSaved(false), 3000);
-        toast.success("Profile section visibility settings updated successfully.");
+        toast.success("Classification & experience settings updated successfully.");
       } catch (err: unknown) {
-        toast.error((err as Error).message || "Failed to update profile settings.");
+        toast.error((err as Error).message || "Failed to update settings.");
       }
     },
   });
@@ -184,8 +216,23 @@ export default function ClassificationProfileSettings() {
     );
   }
 
-  const enabledCount = Object.values(formik.values).filter(Boolean).length;
-  const totalCount = Object.keys(formik.values).length;
+  // Count boolean toggles that are enabled
+  const booleanValues = [
+    formik.values.allowProfileExperience,
+    formik.values.allowProfileEducation,
+    formik.values.allowProfileSkills,
+    formik.values.allowProfileSocialConnect,
+    formik.values.allowProfileSocialLinks,
+    formik.values.allowProfileFunctions,
+    formik.values.allowProfileIndustries,
+    formik.values.allowProfileInterests,
+    formik.values.allowProfileGamification,
+    formik.values.allowUserSettings,
+    formik.values.allowDataDownload,
+    formik.values.allowFaq,
+  ];
+  const enabledCount = booleanValues.filter(Boolean).length;
+  const totalCount = booleanValues.length;
 
   return (
     <div className="w-full">
@@ -194,14 +241,14 @@ export default function ClassificationProfileSettings() {
           <div className="space-y-4">
             {/* Live Profile Mockup Preview Card */}
             <PolarisSidebarCard
-              title="Live Profile Preview"
+              title="Live Member Preview"
               badge="User Perspective"
               icon={Eye}
             >
               <div className="space-y-3">
                 <p className="text-[11.5px] text-muted-foreground leading-snug">
                   Real-time preview of sections visible on member profile pages (
-                  <span className="font-mono text-[10.5px]">/dashboard/profile</span>).
+                  <span className="font-mono text-[10.5px]">/dashboard/profile</span>) and settings.
                 </p>
 
                 {/* Mock Member Profile Card */}
@@ -270,9 +317,28 @@ export default function ClassificationProfileSettings() {
                     >
                       <span className="flex items-center gap-1.5 font-medium">
                         <Award className="h-3 w-3 text-amber-500" />
-                        Skills & Badges
+                        Skills & Endorsements
                       </span>
                       {formik.values.allowProfileSkills ? (
+                        <Check className="h-3 w-3 text-emerald-500" />
+                      ) : (
+                        <XCircle className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </div>
+
+                    <div
+                      className={cn(
+                        "flex items-center justify-between text-[11px] p-1.5 rounded-md transition-all",
+                        formik.values.allowProfileGamification
+                          ? "bg-muted/40 text-foreground"
+                          : "opacity-35 line-through text-muted-foreground bg-muted/10"
+                      )}
+                    >
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <Trophy className="h-3 w-3 text-yellow-500" />
+                        Gamification & Rank Card
+                      </span>
+                      {formik.values.allowProfileGamification ? (
                         <Check className="h-3 w-3 text-emerald-500" />
                       ) : (
                         <XCircle className="h-3 w-3 text-muted-foreground" />
@@ -320,46 +386,92 @@ export default function ClassificationProfileSettings() {
                     <div
                       className={cn(
                         "flex items-center justify-between text-[11px] p-1.5 rounded-md transition-all",
-                        formik.values.allowProfileFunctions ||
-                          formik.values.allowProfileIndustries ||
-                          formik.values.allowProfileInterests
+                        formik.values.allowUserSettings
                           ? "bg-muted/40 text-foreground"
                           : "opacity-35 line-through text-muted-foreground bg-muted/10"
                       )}
                     >
                       <span className="flex items-center gap-1.5 font-medium">
-                        <Layers className="h-3 w-3 text-violet-500" />
-                        Taxonomy (Functions/Industries)
+                        <SettingsIcon className="h-3 w-3 text-slate-500" />
+                        Settings Menu Item
                       </span>
-                      {formik.values.allowProfileFunctions ||
-                      formik.values.allowProfileIndustries ||
-                      formik.values.allowProfileInterests ? (
+                      {formik.values.allowUserSettings ? (
+                        <Check className="h-3 w-3 text-emerald-500" />
+                      ) : (
+                        <XCircle className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </div>
+
+                    <div
+                      className={cn(
+                        "flex items-center justify-between text-[11px] p-1.5 rounded-md transition-all",
+                        formik.values.allowDataDownload
+                          ? "bg-muted/40 text-foreground"
+                          : "opacity-35 line-through text-muted-foreground bg-muted/10"
+                      )}
+                    >
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <Download className="h-3 w-3 text-blue-500" />
+                        Data Download Tab
+                      </span>
+                      {formik.values.allowDataDownload ? (
+                        <Check className="h-3 w-3 text-emerald-500" />
+                      ) : (
+                        <XCircle className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </div>
+
+                    <div
+                      className={cn(
+                        "flex items-center justify-between text-[11px] p-1.5 rounded-md transition-all",
+                        formik.values.allowFaq
+                          ? "bg-muted/40 text-foreground"
+                          : "opacity-35 line-through text-muted-foreground bg-muted/10"
+                      )}
+                    >
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <HelpCircle className="h-3 w-3 text-teal-500" />
+                        FAQ Knowledge Base
+                      </span>
+                      {formik.values.allowFaq ? (
                         <Check className="h-3 w-3 text-emerald-500" />
                       ) : (
                         <XCircle className="h-3 w-3 text-muted-foreground" />
                       )}
                     </div>
                   </div>
+
+                  {formik.values.supportEmail ? (
+                    <div className="pt-2 border-t border-border/50 flex items-center gap-2 text-[10.5px] text-muted-foreground truncate">
+                      <Mail className="h-3 w-3 shrink-0 text-indigo-500" />
+                      <span className="truncate">Support: {formik.values.supportEmail}</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </PolarisSidebarCard>
 
             {/* Visibility Metrics Card */}
             <PolarisSidebarCard
-              title="Visibility Summary"
-              badge="Configuration"
+              title="Configuration Status"
+              badge="Overview"
               icon={Sparkles}
             >
               <div className="space-y-1">
                 <PolarisSummaryRow
-                  label="Visible Sections"
+                  label="Enabled Toggles"
                   value={`${enabledCount} of ${totalCount}`}
                   status={enabledCount > 0 ? "success" : "warning"}
                 />
                 <PolarisSummaryRow
                   label="Hidden Sections"
-                  value={`${totalCount - enabledCount} sections`}
+                  value={`${totalCount - enabledCount} items`}
                   status={totalCount - enabledCount > 0 ? "warning" : "default"}
+                />
+                <PolarisSummaryRow
+                  label="Support Email"
+                  value={formik.values.supportEmail ? "Configured" : "Default"}
+                  status={formik.values.supportEmail ? "success" : "default"}
                 />
                 <PolarisSummaryRow
                   label="Status"
@@ -371,8 +483,8 @@ export default function ClassificationProfileSettings() {
 
             {/* Tip Card */}
             <PolarisTipCard
-              title="Organization Privacy Control"
-              description="Disabling profile sections prevents users from viewing or submitting these attributes across their personal dashboard overview and public member directory cards."
+              title="Experience & Privacy Controls"
+              description="Customize what members can see, edit, and access across their personal dashboard, settings menu, and directory cards."
             />
           </div>
         }
@@ -426,9 +538,33 @@ export default function ClassificationProfileSettings() {
             </div>
           </PolarisFormCard>
 
-          {/* Card 2: Social & Connectivity */}
+          {/* Card 2: Gamification & Engagement */}
           <PolarisFormCard
             step={2}
+            icon={Trophy}
+            title="Gamification & Leaderboard Progress"
+            description="Control whether rank progress cards, badges, and gamification metrics appear on member profiles."
+            badge="Gamification"
+            badgeVariant="amber"
+          >
+            <div className="space-y-2.5">
+              <SectionToggleItem
+                id="allowProfileGamification"
+                title="Gamification Profile Card & Rank Progress"
+                description="Displays user level, XP progress bar, rank badge, and quick link to leaderboard overview on member profiles."
+                icon={Trophy}
+                iconColor="text-yellow-500"
+                checked={formik.values.allowProfileGamification}
+                onChange={(checked) =>
+                  formik.setFieldValue("allowProfileGamification", checked)
+                }
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* Card 3: Social & External Connectivity */}
+          <PolarisFormCard
+            step={3}
             icon={Share2}
             title="Social & External Connectivity"
             description="Configure whether members can link external OAuth accounts and display public portfolio links."
@@ -462,9 +598,9 @@ export default function ClassificationProfileSettings() {
             </div>
           </PolarisFormCard>
 
-          {/* Card 3: Taxonomy & Classification Tags */}
+          {/* Card 4: Taxonomy & Classification Tags */}
           <PolarisFormCard
-            step={3}
+            step={4}
             icon={Layers}
             title="Classification & Taxonomy Tags"
             description="Control the visibility of member category tags used for directory filtering and peer matching."
@@ -506,6 +642,103 @@ export default function ClassificationProfileSettings() {
                   formik.setFieldValue("allowProfileInterests", checked)
                 }
               />
+            </div>
+          </PolarisFormCard>
+
+          {/* Card 5: Member Account & Settings Controls */}
+          <PolarisFormCard
+            step={5}
+            icon={SettingsIcon}
+            title="Member Account & Settings Navigation"
+            description="Control user access to application settings and personal data archives."
+            badge="Navigation"
+            badgeVariant="indigo"
+          >
+            <div className="space-y-2.5">
+              <SectionToggleItem
+                id="allowUserSettings"
+                title="User Settings Navigation Item"
+                description="Controls whether the 'Settings' link (/dashboard/settings) appears in the profile dropdown, sidebar, and mobile menu."
+                icon={SettingsIcon}
+                iconColor="text-slate-500"
+                checked={formik.values.allowUserSettings}
+                onChange={(checked) =>
+                  formik.setFieldValue("allowUserSettings", checked)
+                }
+              />
+
+              <SectionToggleItem
+                id="allowDataDownload"
+                title="Personal Data Export & Download"
+                description="Permits members to access the 'Data' tab (/dashboard/settings/download-data) to export an archive of their account information."
+                icon={Download}
+                iconColor="text-blue-500"
+                checked={formik.values.allowDataDownload}
+                onChange={(checked) =>
+                  formik.setFieldValue("allowDataDownload", checked)
+                }
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* Card 6: Help, Support & FAQ Configuration */}
+          <PolarisFormCard
+            step={6}
+            icon={HelpCircle}
+            title="Help, Support & FAQ Configuration"
+            description="Manage member assistance channels, support contact emails, and knowledge base visibility."
+            badge="Support"
+            badgeVariant="emerald"
+          >
+            <div className="space-y-4">
+              <SectionToggleItem
+                id="allowFaq"
+                title="Frequently Asked Questions (FAQ)"
+                description="Controls whether the FAQ section and link (/faq) are displayed in member settings and assistance menus."
+                icon={HelpCircle}
+                iconColor="text-teal-500"
+                checked={formik.values.allowFaq}
+                onChange={(checked) =>
+                  formik.setFieldValue("allowFaq", checked)
+                }
+              />
+
+              <div className="space-y-1.5 p-3 rounded-lg border border-border/60 bg-muted/10">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-indigo-500 shrink-0" />
+                  <label
+                    htmlFor="supportEmail"
+                    className="text-xs font-semibold text-foreground cursor-pointer"
+                  >
+                    Help & Support Contact Email
+                  </label>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Provide an official support email address. When specified, members will see this address in their settings and can send inquiries directly via mailto link.
+                </p>
+                <div className="pt-1.5">
+                  <Input
+                    id="supportEmail"
+                    name="supportEmail"
+                    type="email"
+                    placeholder="support@yourdomain.com"
+                    inputSize="default"
+                    value={formik.values.supportEmail}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={cn(
+                      formik.touched.supportEmail &&
+                        formik.errors.supportEmail &&
+                        "border-destructive focus-visible:ring-destructive"
+                    )}
+                  />
+                  {formik.touched.supportEmail && formik.errors.supportEmail && (
+                    <p className="text-[11px] text-destructive font-medium mt-1">
+                      {formik.errors.supportEmail}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </PolarisFormCard>
         </form>
