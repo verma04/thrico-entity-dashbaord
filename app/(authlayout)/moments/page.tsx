@@ -350,7 +350,10 @@ function MomentsDashboardPage() {
                         barSize={40}
                       >
                         {(stats?.engagement || []).map(
-                          (entry: { name: string; value: number }, index: number) => (
+                          (
+                            entry: { name: string; value: number },
+                            index: number,
+                          ) => (
                             <Cell
                               key={`cell-${index}`}
                               fill={index === 0 ? "#8b5cf6" : "#ec4899"}
