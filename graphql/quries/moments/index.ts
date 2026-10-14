@@ -115,6 +115,11 @@ export const GET_MOMENT_SETTING = gql`
       momentsAiLabelTitle
       momentsAiLabelDescription
       momentsMaxDuration
+      momentsUploadTitle
+      momentsUploadDescription
+      momentsUploadFormat
+      momentsUploadCardTitle
+      momentsUploadCardDescription
     }
   }
 `;
@@ -131,6 +136,11 @@ export const UPDATE_MOMENT_SETTING = gql`
       momentsAiLabelTitle
       momentsAiLabelDescription
       momentsMaxDuration
+      momentsUploadTitle
+      momentsUploadDescription
+      momentsUploadFormat
+      momentsUploadCardTitle
+      momentsUploadCardDescription
     }
   }
 `;

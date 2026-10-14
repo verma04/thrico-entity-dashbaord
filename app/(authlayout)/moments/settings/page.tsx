@@ -1,7 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import {
@@ -9,7 +11,12 @@ import {
   useEntitySettings,
   useUpdateEntitySettings,
 } from "@/graphql/actions";
-import { useGetAllMoments, Moment, useGetMomentSetting, useUpdateMomentSetting } from "@/graphql/actions/moments";
+import {
+  useGetAllMoments,
+  Moment,
+  useGetMomentSetting,
+  useUpdateMomentSetting,
+} from "@/graphql/actions/moments";
 import {
   Globe,
   Video,
@@ -32,6 +39,7 @@ import {
   Clock,
   Send,
   AlertCircle,
+  Type,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -60,24 +68,6 @@ import {
 import { toast } from "sonner";
 import { useModuleStore } from "@/store/useModuleStore";
 import { cn } from "@/lib/utils";
-
-interface MomentsSettingsState {
-  allowPublicMoments: boolean;
-  enableShortUploads: boolean;
-  allowEntityMomentsInFeed: boolean;
-  uploadNotifications: boolean;
-  autoModeration: boolean;
-  moderatedFeed: boolean;
-}
-
-const DEFAULT_SETTINGS: MomentsSettingsState = {
-  allowPublicMoments: true,
-  enableShortUploads: true,
-  allowEntityMomentsInFeed: true,
-  uploadNotifications: false,
-  autoModeration: true,
-  moderatedFeed: false,
-};
 
 interface CustomTabConfig {
   id: string;
@@ -112,7 +102,7 @@ const createDefaultTabs = (
       label: tabNames["discover"] || "",
       description: `Personalized public feed and trending ${singularName.toLowerCase()} clips.`,
       icon: Compass,
-      canHide: false, // Discover tab CANNOT be hidden
+      canHide: false,
       enabled: true,
     },
     connections: {
@@ -137,7 +127,6 @@ const createDefaultTabs = (
     },
   };
 
-  // Add custom tabs to baseMap
   customTabsList.forEach((cTab) => {
     baseMap[cTab.id] = {
       id: cTab.id,
@@ -165,12 +154,71 @@ const createDefaultTabs = (
   return ordered;
 };
 
+// Formik Form Interface
+interface MomentsFormValues {
+  ctaName: string;
+  allowPublicMoments: boolean;
+  enableShortUploads: boolean;
+  allowEntityMomentsInFeed: boolean;
+  autoModeration: boolean;
+  moderatedFeed: boolean;
+  uploadNotifications: boolean;
+
+  // MomentSetting fields
+  momentsUploadTitle: string;
+  momentsUploadDescription: string;
+  momentsUploadFormat: string;
+  momentsUploadCardTitle: string;
+  momentsUploadCardDescription: string;
+  momentsMaxDuration: number;
+  allowMomentsShareInFeed: boolean;
+  momentsShareInFeedTitle: string;
+  momentsShareInFeedDescription: string;
+  allowMomentsAiLabel: boolean;
+  momentsAiLabelTitle: string;
+  momentsAiLabelDescription: string;
+}
+
+// Yup Validation Schema
+const momentsFormValidationSchema = Yup.object().shape({
+  ctaName: Yup.string().max(60, "CTA label cannot exceed 60 characters"),
+  allowPublicMoments: Yup.boolean(),
+  enableShortUploads: Yup.boolean(),
+  allowEntityMomentsInFeed: Yup.boolean(),
+  autoModeration: Yup.boolean(),
+  moderatedFeed: Yup.boolean(),
+  uploadNotifications: Yup.boolean(),
+
+  momentsUploadTitle: Yup.string().max(80, "Upload title cannot exceed 80 characters"),
+  momentsUploadDescription: Yup.string().max(180, "Upload description cannot exceed 180 characters"),
+  momentsUploadFormat: Yup.string().max(20, "Format cannot exceed 20 characters"),
+  momentsUploadCardTitle: Yup.string().max(60, "Card title cannot exceed 60 characters"),
+  momentsUploadCardDescription: Yup.string().max(140, "Card description cannot exceed 140 characters"),
+
+  momentsMaxDuration: Yup.number()
+    .typeError("Duration must be a valid number")
+    .required("Duration is required")
+    .min(3, "Duration must be at least 3 seconds")
+    .max(120, "Duration cannot exceed 2 minutes (120 seconds)"),
+
+  allowMomentsShareInFeed: Yup.boolean(),
+  momentsShareInFeedTitle: Yup.string().max(60, "Option title cannot exceed 60 characters"),
+  momentsShareInFeedDescription: Yup.string().max(140, "Option description cannot exceed 140 characters"),
+
+  allowMomentsAiLabel: Yup.boolean(),
+  momentsAiLabelTitle: Yup.string().max(60, "Option title cannot exceed 60 characters"),
+  momentsAiLabelDescription: Yup.string().max(140, "Option description cannot exceed 140 characters"),
+});
+
 function MomentsSettingsPage() {
-  const moduleName = useModuleStore((state) => state.momentModuleName);
+  const moduleName = useModuleStore((state) => state.momentName);
   const singularName = useModuleStore((state) => state.momentSingularName);
 
-  const { data, refetch } = useEntitySettings();
-  const [update, { loading: isSaving }] = useUpdateEntitySettings({});
+  const { data, refetch: refetchEntitySettings } = useEntitySettings();
+  const [updateEntitySettings, { loading: isSavingEntitySettings }] = useUpdateEntitySettings({});
+
+  const { data: momentSettingData, refetch: refetchMomentSetting } = useGetMomentSetting();
+  const [updateMomentSetting, { loading: isUpdatingMomentSetting }] = useUpdateMomentSetting();
 
   const { data: momentsData } = useGetAllMoments({
     pagination: { page: 1, limit: 100 },
@@ -184,115 +232,152 @@ function MomentsSettingsPage() {
     return map;
   }, [allMomentsList]);
 
-  const [formData, setFormData] = useState<MomentsSettingsState>(() => ({
-    ...DEFAULT_SETTINGS,
-    allowEntityMomentsInFeed:
-      data?.getEntitySettings?.allowEntityMomentsInFeed ?? true,
-  }));
-
+  // Tab & Pinned States
   const [tabs, setTabs] = useState<ModuleTabItem[]>(() =>
     createDefaultTabs(moduleName, singularName, data?.getEntitySettings)
   );
-
-  const [ctaName, setCtaName] = useState<string>(
-    data?.getEntitySettings?.momentsCtaName || ""
-  );
-
   const [pinnedMomentIds, setPinnedMomentIds] = useState<string[]>(() => {
     const raw = data?.getEntitySettings?.momentsPinnedMomentIds;
     return Array.isArray(raw) ? (raw as string[]) : [];
   });
-
-  const [hasChanged, setHasChanged] = useState(false);
-  const { data: momentSettingData, refetch: refetchMomentSetting } = useGetMomentSetting();
-  const [updateMomentSetting, { loading: isUpdatingMomentSetting }] = useUpdateMomentSetting();
-
-  const [creatorSettings, setCreatorSettings] = useState({
-    allowMomentsShareInFeed: true,
-    momentsShareInFeedTitle: "Share in Feed",
-    momentsShareInFeedDescription: "Make this visible across your community feed",
-    allowMomentsAiLabel: true,
-    momentsAiLabelTitle: "Add AI Label",
-    momentsAiLabelDescription: "Label realistic content made with AI.",
-    momentsMaxDuration: 60,
-  });
-
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    if (momentSettingData?.getMomentSetting) {
-      const ms = momentSettingData.getMomentSetting;
-      setCreatorSettings({
-        allowMomentsShareInFeed: ms.allowMomentsShareInFeed ?? true,
-        momentsShareInFeedTitle: ms.momentsShareInFeedTitle || "Share in Feed",
-        momentsShareInFeedDescription: ms.momentsShareInFeedDescription || "Make this visible across your community feed",
-        allowMomentsAiLabel: ms.allowMomentsAiLabel ?? true,
-        momentsAiLabelTitle: ms.momentsAiLabelTitle || "Add AI Label",
-        momentsAiLabelDescription: ms.momentsAiLabelDescription || "Label realistic content made with AI.",
-        momentsMaxDuration: ms.momentsMaxDuration ?? 60,
-      });
-    }
-  }, [momentSettingData]);
-
-  const durationError = useMemo(() => {
-    const d = Number(creatorSettings.momentsMaxDuration);
-    if (isNaN(d) || !creatorSettings.momentsMaxDuration) {
-      return "Duration is required";
-    }
-    if (d < 3) {
-      return "Duration must be at least 3 seconds";
-    }
-    if (d > 120) {
-      return "Duration cannot exceed 2 minutes (120 seconds)";
-    }
-    return null;
-  }, [creatorSettings.momentsMaxDuration]);
-
+  const [tabsDirty, setTabsDirty] = useState(false);
+  const [pinnedDirty, setPinnedDirty] = useState(false);
 
   // Modals state
   const [isNewTabModalOpen, setIsNewTabModalOpen] = useState(false);
   const [newTabNameInput, setNewTabNameInput] = useState("");
-
   const [isCurateModalOpen, setIsCurateModalOpen] = useState(false);
   const [activeCurateTarget, setActiveCurateTarget] = useState<{
-    id: string; // tab id or "__pinned__"
+    id: string;
     title: string;
     description: string;
     momentIds: string[];
   } | null>(null);
 
-  useEffect(() => {
-    if (data?.getEntitySettings) {
-      setFormData((prev) => ({
-        ...prev,
-        allowEntityMomentsInFeed:
-          data.getEntitySettings.allowEntityMomentsInFeed ?? true,
-      }));
-      setTabs(createDefaultTabs(moduleName, singularName, data.getEntitySettings));
-      setCtaName(data.getEntitySettings.momentsCtaName || "");
-      const rawPinned = data.getEntitySettings.momentsPinnedMomentIds;
-      setPinnedMomentIds(Array.isArray(rawPinned) ? (rawPinned as string[]) : []);
-    }
-  }, [data, moduleName, singularName]);
+  // Initial Formik Values from Backend & Cache
+  const initialValues: MomentsFormValues = useMemo(() => {
+    const ms = momentSettingData?.getMomentSetting;
+    const es = data?.getEntitySettings;
+    return {
+      ctaName: es?.momentsCtaName || "",
+      allowPublicMoments: true,
+      enableShortUploads: true,
+      allowEntityMomentsInFeed: es?.allowEntityMomentsInFeed ?? true,
+      autoModeration: true,
+      moderatedFeed: false,
+      uploadNotifications: false,
 
-  const handleToggle = (key: keyof MomentsSettingsState) => {
-    setFormData((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      setHasChanged(true);
-      return next;
-    });
+      momentsUploadTitle: ms?.momentsUploadTitle || "",
+      momentsUploadDescription: ms?.momentsUploadDescription || "",
+      momentsUploadFormat: ms?.momentsUploadFormat || "9:16",
+      momentsUploadCardTitle: ms?.momentsUploadCardTitle || "",
+      momentsUploadCardDescription: ms?.momentsUploadCardDescription || "",
+      momentsMaxDuration: ms?.momentsMaxDuration ?? 60,
+      allowMomentsShareInFeed: ms?.allowMomentsShareInFeed ?? true,
+      momentsShareInFeedTitle: ms?.momentsShareInFeedTitle || "Share in Feed",
+      momentsShareInFeedDescription:
+        ms?.momentsShareInFeedDescription || "Make this visible across your community feed",
+      allowMomentsAiLabel: ms?.allowMomentsAiLabel ?? true,
+      momentsAiLabelTitle: ms?.momentsAiLabelTitle || "Add AI Label",
+      momentsAiLabelDescription:
+        ms?.momentsAiLabelDescription || "Label realistic content made with AI.",
+    };
+  }, [momentSettingData, data]);
+
+  // Formik Configuration
+  const formik = useFormik<MomentsFormValues>({
+    initialValues,
+    validationSchema: momentsFormValidationSchema,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      try {
+        // 1. Update Dedicated Moment Setting
+        await updateMomentSetting({
+          variables: {
+            input: {
+              momentsUploadTitle: values.momentsUploadTitle.trim() || null,
+              momentsUploadDescription: values.momentsUploadDescription.trim() || null,
+              momentsUploadFormat: values.momentsUploadFormat.trim() || "9:16",
+              momentsUploadCardTitle: values.momentsUploadCardTitle.trim() || null,
+              momentsUploadCardDescription: values.momentsUploadCardDescription.trim() || null,
+              momentsMaxDuration: Number(values.momentsMaxDuration),
+              allowMomentsShareInFeed: values.allowMomentsShareInFeed,
+              momentsShareInFeedTitle: values.momentsShareInFeedTitle.trim() || null,
+              momentsShareInFeedDescription:
+                values.momentsShareInFeedDescription.trim() || null,
+              allowMomentsAiLabel: values.allowMomentsAiLabel,
+              momentsAiLabelTitle: values.momentsAiLabelTitle.trim() || null,
+              momentsAiLabelDescription: values.momentsAiLabelDescription.trim() || null,
+            },
+          },
+        });
+        refetchMomentSetting?.();
+
+        // 2. Update Entity Settings (Tabs, CTA, Feed, Pinned)
+        if (data?.getEntitySettings) {
+          const momentsTabNames: Record<string, string> = {};
+          tabs.forEach((t) => {
+            if (t.label && t.label.trim()) {
+              momentsTabNames[t.id] = t.label.trim();
+            }
+          });
+
+          const connectionsTab = tabs.find((t) => t.id === "connections");
+          const myMomentsTab = tabs.find((t) => t.id === "myMoments");
+
+          const momentsCustomTabs = tabs
+            .filter((t) => t.isCustom)
+            .map((t) => ({
+              id: t.id,
+              name: t.label || t.defaultName,
+              enabled: t.enabled !== false,
+              momentIds: t.momentIds || [],
+            }));
+
+          await updateEntitySettings({
+            variables: {
+              input: {
+                momentsCtaName: values.ctaName.trim() || null,
+                allowMomentsDiscoverTab: true,
+                allowMomentsConnectionsTab: connectionsTab ? connectionsTab.enabled !== false : true,
+                allowMomentsMyMomentsTab: myMomentsTab ? myMomentsTab.enabled !== false : true,
+                momentsTabNames,
+                momentsTabOrder: tabs.map((t) => t.id),
+                momentsPinnedMomentIds: pinnedMomentIds,
+                momentsCustomTabs,
+                allowEntityMomentsInFeed: values.allowEntityMomentsInFeed,
+              },
+            },
+          });
+          refetchEntitySettings?.();
+        }
+
+        toast.success(`${moduleName} settings saved successfully!`);
+        setTabsDirty(false);
+        setPinnedDirty(false);
+      } catch (err: unknown) {
+        toast.error((err as Error).message || "Failed to update settings");
+      }
+    },
+  });
+
+  const hasChanged = formik.dirty || tabsDirty || pinnedDirty;
+
+  const handleReset = () => {
+    formik.resetForm();
+    setTabs(createDefaultTabs(moduleName, singularName, data?.getEntitySettings));
+    const rawPinned = data?.getEntitySettings?.momentsPinnedMomentIds;
+    setPinnedMomentIds(Array.isArray(rawPinned) ? (rawPinned as string[]) : []);
+    setTabsDirty(false);
+    setPinnedDirty(false);
   };
 
+  // Tab Manager Handlers
   const handleTabsChange = (updatedTabs: ModuleTabItem[]) => {
     setTabs(updatedTabs);
-    setHasChanged(true);
+    setTabsDirty(true);
   };
 
-  const handleCtaNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCtaName(e.target.value);
-    setHasChanged(true);
-  };
-
-  // Add Custom Tab Flow
   const handleOpenNewTabModal = () => {
     setNewTabNameInput("");
     setIsNewTabModalOpen(true);
@@ -301,64 +386,54 @@ function MomentsSettingsPage() {
   const handleCreateCustomTab = () => {
     const trimmed = newTabNameInput.trim();
     if (!trimmed) {
-      toast.error("Please provide a name for the new tab.");
+      toast.error("Please enter a tab name");
       return;
     }
-
-    const newTabId = `custom-tab-${Date.now()}`;
+    const newTabId = `custom_${Date.now()}`;
     const newTab: ModuleTabItem = {
       id: newTabId,
       defaultName: trimmed,
       label: trimmed,
-      description: `Custom curated collection of 0 ${singularName.toLowerCase()} clips.`,
+      description: `Curated collection of ${singularName.toLowerCase()} clips.`,
       icon: Sparkles,
       canHide: true,
       enabled: true,
       isCustom: true,
       momentIds: [],
     };
-
     setTabs((prev) => [...prev, newTab]);
-    setHasChanged(true);
+    setTabsDirty(true);
     setIsNewTabModalOpen(false);
-
-    // Prompt user immediately to select moments for this newly created tab
     setActiveCurateTarget({
       id: newTabId,
-      title: `Curate ${trimmed}`,
-      description: `Select and sequence ${singularName.toLowerCase()} clips for your new "${trimmed}" tab.`,
+      title: `Curate Moments for "${trimmed}"`,
+      description: `Select moments to feature in this custom tab.`,
       momentIds: [],
     });
     setIsCurateModalOpen(true);
   };
 
   const handleDeleteCustomTab = (tabId: string) => {
-    const targetTab = tabs.find((t) => t.id === tabId);
-    if (!targetTab) return;
     setTabs((prev) => prev.filter((t) => t.id !== tabId));
-    setHasChanged(true);
-    toast.success(`Removed "${targetTab.label || targetTab.defaultName}" tab.`);
+    setTabsDirty(true);
   };
 
-  // Curate Tab Moments Flow
-  const handleOpenCurateTab = (tabId: string) => {
-    const targetTab = tabs.find((t) => t.id === tabId);
-    if (!targetTab) return;
+  const handleOpenCurateTab = (tab: ModuleTabItem) => {
     setActiveCurateTarget({
-      id: tabId,
-      title: `Curate "${targetTab.label || targetTab.defaultName}"`,
-      description: `Select and sequence ${singularName.toLowerCase()} clips for this tab.`,
-      momentIds: targetTab.momentIds || [],
+      id: tab.id,
+      title: `Curate Moments for "${tab.label || tab.defaultName}"`,
+      description: `Select and order clips for this custom tab.`,
+      momentIds: tab.momentIds || [],
     });
     setIsCurateModalOpen(true);
   };
 
-  // Curate Pinned Moments Flow
+  // Pinned Moments Handlers
   const handleOpenCuratePinned = () => {
     setActiveCurateTarget({
       id: "__pinned__",
-      title: "Admin Pinned Moments",
-      description: `Select and sequence ${singularName.toLowerCase()} clips pinned to the top of Discover feed.`,
+      title: `Curate Admin Pinned ${moduleName}`,
+      description: `Select standout moments to feature at the top of the Discover feed.`,
       momentIds: pinnedMomentIds,
     });
     setIsCurateModalOpen(true);
@@ -366,158 +441,113 @@ function MomentsSettingsPage() {
 
   const handleConfirmSelectedMoments = (selectedIds: string[]) => {
     if (!activeCurateTarget) return;
-
     if (activeCurateTarget.id === "__pinned__") {
       setPinnedMomentIds(selectedIds);
-      setHasChanged(true);
-      toast.success(`Updated pinned moments (${selectedIds.length} pinned).`);
+      setPinnedDirty(true);
     } else {
-      // It's a custom tab
       setTabs((prev) =>
-        prev.map((t) => {
-          if (t.id === activeCurateTarget.id) {
-            return {
-              ...t,
-              momentIds: selectedIds,
-              description: `Custom curated collection of ${selectedIds.length} ${singularName.toLowerCase()} clips.`,
-            };
-          }
-          return t;
-        })
+        prev.map((t) => (t.id === activeCurateTarget.id ? { ...t, momentIds: selectedIds } : t))
       );
-      setHasChanged(true);
-      toast.success(`Updated moments for tab (${selectedIds.length} selected).`);
+      setTabsDirty(true);
     }
+    setIsCurateModalOpen(false);
+    setActiveCurateTarget(null);
   };
 
-  const handleMovePinnedUp = (index: number) => {
-    if (index === 0) return;
-    setPinnedMomentIds((prev) => {
-      const next = [...prev];
-      const temp = next[index - 1];
-      next[index - 1] = next[index];
-      next[index] = temp;
-      return next;
-    });
-    setHasChanged(true);
-  };
-
-  const handleMovePinnedDown = (index: number) => {
-    if (index >= pinnedMomentIds.length - 1) return;
-    setPinnedMomentIds((prev) => {
-      const next = [...prev];
-      const temp = next[index + 1];
-      next[index + 1] = next[index];
-      next[index] = temp;
-      return next;
-    });
-    setHasChanged(true);
+  const handleMovePinned = (index: number, direction: "up" | "down") => {
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= pinnedMomentIds.length) return;
+    const next = [...pinnedMomentIds];
+    const [moved] = next.splice(index, 1);
+    next.splice(targetIdx, 0, moved);
+    setPinnedMomentIds(next);
+    setPinnedDirty(true);
   };
 
   const handleRemovePinned = (id: string) => {
     setPinnedMomentIds((prev) => prev.filter((item) => item !== id));
-    setHasChanged(true);
+    setPinnedDirty(true);
   };
 
-  const handleReset = () => {
-    setFormData({
-      ...DEFAULT_SETTINGS,
-      allowEntityMomentsInFeed:
-        data?.getEntitySettings?.allowEntityMomentsInFeed ?? true,
-    });
-    setTabs(createDefaultTabs(moduleName, singularName, data?.getEntitySettings));
-    setCtaName(data?.getEntitySettings?.momentsCtaName || "");
-    const rawPinned = data?.getEntitySettings?.momentsPinnedMomentIds;
-    setPinnedMomentIds(Array.isArray(rawPinned) ? (rawPinned as string[]) : []);
-    if (momentSettingData?.getMomentSetting) {
-      const ms = momentSettingData.getMomentSetting;
-      setCreatorSettings({
-        allowMomentsShareInFeed: ms.allowMomentsShareInFeed ?? true,
-        momentsShareInFeedTitle: ms.momentsShareInFeedTitle || "Share in Feed",
-        momentsShareInFeedDescription: ms.momentsShareInFeedDescription || "Make this visible across your community feed",
-        allowMomentsAiLabel: ms.allowMomentsAiLabel ?? true,
-        momentsAiLabelTitle: ms.momentsAiLabelTitle || "Add AI Label",
-        momentsAiLabelDescription: ms.momentsAiLabelDescription || "Label realistic content made with AI.",
-        momentsMaxDuration: ms.momentsMaxDuration ?? 60,
-      });
-    }
-    setHasChanged(false);
-  };
-
-  const handleSave = async () => {
-    if (durationError) {
-      toast.error(durationError);
-      return;
-    }
-    try {
-      await updateMomentSetting({
-        variables: {
-          input: {
-            allowMomentsShareInFeed: creatorSettings.allowMomentsShareInFeed,
-            momentsShareInFeedTitle: creatorSettings.momentsShareInFeedTitle.trim() || null,
-            momentsShareInFeedDescription: creatorSettings.momentsShareInFeedDescription.trim() || null,
-            allowMomentsAiLabel: creatorSettings.allowMomentsAiLabel,
-            momentsAiLabelTitle: creatorSettings.momentsAiLabelTitle.trim() || null,
-            momentsAiLabelDescription: creatorSettings.momentsAiLabelDescription.trim() || null,
-            momentsMaxDuration: Number(creatorSettings.momentsMaxDuration),
-          },
-        },
-      });
-      refetchMomentSetting?.();
-      if (data?.getEntitySettings) {
-        const momentsTabNames: Record<string, string> = {};
-        tabs.forEach((t) => {
-          if (t.label && t.label.trim()) {
-            momentsTabNames[t.id] = t.label.trim();
-          }
-        });
-
-        const connectionsTab = tabs.find((t) => t.id === "connections");
-        const myMomentsTab = tabs.find((t) => t.id === "myMoments");
-
-        const momentsCustomTabs = tabs
-          .filter((t) => t.isCustom)
-          .map((t) => ({
-            id: t.id,
-            name: t.label || t.defaultName,
-            icon: "Sparkles",
-            enabled: t.enabled,
-            momentIds: t.momentIds || [],
-          }));
-
-        await update({
-          variables: {
-            input: {
-              allowEntityMomentsInFeed: formData.allowEntityMomentsInFeed,
-              allowMomentsDiscoverTab: true,
-              allowMomentsConnectionsTab: connectionsTab ? connectionsTab.enabled : true,
-              allowMomentsMyMomentsTab: myMomentsTab ? myMomentsTab.enabled : true,
-              momentsTabNames,
-              momentsTabOrder: tabs.map((t) => t.id),
-              momentsCtaName: ctaName.trim() || null,
-              momentsPinnedMomentIds: pinnedMomentIds,
-              momentsCustomTabs,
-            },
-          },
-        });
-      }
-      toast.success(`${moduleName} settings synchronized successfully.`);
-      setHasChanged(false);
-      refetch?.();
-    } catch (error: unknown) {
-      toast.error(
-        (error as Error).message || `Failed to update ${moduleName.toLowerCase()} settings.`
-      );
-    }
-  };
-
-  const activeTabs = tabs.filter((t) => t.enabled);
+  const activeTabs = useMemo(() => tabs.filter((t) => t.enabled !== false), [tabs]);
 
   return (
     <div className="w-full">
       <PolarisFormLayout
         sidebar={
           <div className="space-y-4">
+            {/* Live Upload Modal Preview (Step 1 Studio View) */}
+            <PolarisSidebarCard
+              title="Creator Studio Preview"
+              badge="Upload Screen"
+              icon={Film}
+            >
+              <div
+                className="rounded-xl border border-white/10 p-4 text-white space-y-3.5 shadow-xl relative overflow-hidden"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 50% 30%, #1a1f3d 0%, #0d1025 60%, #080a16 100%)",
+                }}
+              >
+                {/* Center Pulse Circle with Video Icon */}
+                <div className="flex justify-center pt-1">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <Video className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+
+                {/* Upload Title & Subtitle */}
+                <div className="text-center space-y-1">
+                  <h4 className="text-[13px] font-bold text-white tracking-tight leading-snug">
+                    {formik.values.momentsUploadTitle || `Capture the ${singularName}`}
+                  </h4>
+                  <p className="text-[10px] text-zinc-400 leading-tight">
+                    {formik.values.momentsUploadDescription ||
+                      "Share your story with the world in a vertical short-form video."}
+                  </p>
+                </div>
+
+                {/* Specs Box: Duration & Format */}
+                <div className="rounded-lg bg-white/[0.06] border border-white/10 p-2 flex items-center justify-around text-center">
+                  <div>
+                    <div className="text-[8px] uppercase tracking-wider font-bold text-zinc-400">
+                      Duration
+                    </div>
+                    <div className="text-[11px] font-extrabold text-white">
+                      3-{formik.values.momentsMaxDuration || 60}s
+                    </div>
+                  </div>
+                  <div className="w-px h-5 bg-white/10" />
+                  <div>
+                    <div className="text-[8px] uppercase tracking-wider font-bold text-zinc-400">
+                      Format
+                    </div>
+                    <div className="text-[11px] font-extrabold text-white">
+                      {formik.values.momentsUploadFormat || "9:16"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Card Mock */}
+                <div className="p-2.5 rounded-lg border border-indigo-500/30 bg-gradient-to-r from-indigo-600/20 to-indigo-600/5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-md bg-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+                      <Film className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-bold text-white truncate">
+                        {formik.values.momentsUploadCardTitle || "Select from Library"}
+                      </div>
+                      <div className="text-[9px] text-zinc-400 truncate">
+                        {formik.values.momentsUploadCardDescription ||
+                          "Choose your best video or drag & drop here"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </PolarisSidebarCard>
+
             {/* Live Navigation Tabs Preview */}
             <PolarisSidebarCard
               title="Navigation Bar Preview"
@@ -587,7 +617,7 @@ function MomentsSettingsPage() {
                   </span>
                   <div className="inline-flex items-center gap-1 px-2 py-1 rounded-[4px] bg-indigo-600 text-white text-[10.5px] font-medium shadow-2xs">
                     <Plus className="h-3 w-3 stroke-[2.5px]" />
-                    <span>{ctaName || `Create ${singularName}`}</span>
+                    <span>{formik.values.ctaName || `Create ${singularName}`}</span>
                   </div>
                 </div>
               </div>
@@ -609,42 +639,24 @@ function MomentsSettingsPage() {
                   value={`${tabs.filter((t) => t.isCustom).length} Created`}
                 />
                 <PolarisSummaryRow
-                  label="Connections Stream"
-                  value={
-                    tabs.find((t) => t.id === "connections")?.enabled
-                      ? "Active"
-                      : "Hidden"
-                  }
-                />
-                <PolarisSummaryRow
-                  label="My Clips Stream"
-                  value={
-                    tabs.find((t) => t.id === "myMoments")?.enabled
-                      ? "Active"
-                      : "Hidden"
-                  }
-                />
-                <PolarisSummaryRow
                   label="Max Duration"
-                  value={`${creatorSettings.momentsMaxDuration}s (${creatorSettings.momentsMaxDuration > 60 ? (creatorSettings.momentsMaxDuration / 60).toFixed(1) + "m" : creatorSettings.momentsMaxDuration + "s"})`}
+                  value={`${formik.values.momentsMaxDuration}s (${formik.values.momentsMaxDuration > 60 ? (formik.values.momentsMaxDuration / 60).toFixed(1) + "m" : formik.values.momentsMaxDuration + "s"})`}
                   highlight
                 />
                 <PolarisSummaryRow
                   label="Share in Feed"
-                  value={creatorSettings.allowMomentsShareInFeed ? "Allowed" : "Disabled"}
-                  highlight={creatorSettings.allowMomentsShareInFeed}
+                  value={formik.values.allowMomentsShareInFeed ? "Enabled" : "Disabled"}
+                  highlight={formik.values.allowMomentsShareInFeed}
                 />
                 <PolarisSummaryRow
-                  label="AI Labeling"
-                  value={creatorSettings.allowMomentsAiLabel ? "Enabled" : "Disabled"}
-                  isLast
+                  label="AI Content Label"
+                  value={formik.values.allowMomentsAiLabel ? "Enabled" : "Disabled"}
                 />
               </div>
             </PolarisSidebarCard>
 
-            {/* Tip Card */}
-            <PolarisTipCard title="Navigation & Curation Tips">
-              Create custom tabs like <strong>&quot;Staff Picks&quot;</strong> or <strong>&quot;Highlights&quot;</strong> and select exactly which clips members see. Pinned moments will appear prominently at the top of Discover.
+            <PolarisTipCard title="Pro-Tip">
+              Custom upload copy helps brand your creator workflow. Set an inspiring headline and max duration that matches your community guidelines.
             </PolarisTipCard>
           </div>
         }
@@ -660,7 +672,6 @@ function MomentsSettingsPage() {
             icon={Sliders}
           >
             <div className="space-y-4">
-              {/* Tab Manager Component with Custom Tab Support */}
               <ModuleTabManager
                 tabs={tabs}
                 onChange={handleTabsChange}
@@ -694,13 +705,25 @@ function MomentsSettingsPage() {
                   <span className="text-[11px] text-[#616161] dark:text-zinc-400">
                     Button Text: <span className="text-[10px] text-[#8c9196]">(Default: &quot;Create {singularName}&quot;)</span>
                   </span>
-                  <input
-                    type="text"
-                    placeholder={`Create ${singularName}`}
-                    value={ctaName}
-                    onChange={handleCtaNameChange}
-                    className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full sm:w-[240px] focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
+                  <div className="flex flex-col w-full sm:w-[240px]">
+                    <input
+                      type="text"
+                      name="ctaName"
+                      placeholder={`Create ${singularName}`}
+                      value={formik.values.ctaName}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "text-[12px] h-7 px-2.5 rounded-[4px] border bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500",
+                        formik.touched.ctaName && formik.errors.ctaName
+                          ? "border-destructive focus:ring-destructive"
+                          : "border-[#d2d5d9] dark:border-zinc-700"
+                      )}
+                    />
+                    {formik.touched.ctaName && formik.errors.ctaName && (
+                      <span className="text-[10.5px] text-destructive mt-0.5">{formik.errors.ctaName}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -730,22 +753,21 @@ function MomentsSettingsPage() {
                   size="sm"
                   variant="outline"
                   onClick={handleOpenCuratePinned}
-                  className="text-[12px] h-7 gap-1.5 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                  className="text-[12px] h-7 px-2.5 flex items-center gap-1.5"
                 >
-                  <Pin className="h-3.5 w-3.5" />
-                  <span>{pinnedMomentIds.length > 0 ? "Manage Pinned Clips" : "Select Moments to Pin"}</span>
+                  <Plus className="h-3 w-3" />
+                  <span>Curate Pinned Moments</span>
                 </Button>
               </div>
 
-              {/* Pinned Items List */}
               {pinnedMomentIds.length === 0 ? (
-                <div className="p-4 rounded-[6px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 flex flex-col items-center justify-center text-center gap-1.5">
-                  <Pin className="h-5 w-5 text-[#8c9196]/50" />
-                  <span className="text-[12px] font-medium text-[#303030] dark:text-zinc-300">
-                    No moments pinned to Discover yet
-                  </span>
-                  <p className="text-[11px] text-[#8c9196] max-w-xs">
-                    Pin key videos so they are immediately visible to members on the landing feed.
+                <div className="p-4 rounded-[6px] border border-dashed border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/50 text-center">
+                  <Pin className="h-5 w-5 mx-auto text-[#8c9196] mb-1 opacity-70" />
+                  <p className="text-[12px] font-medium text-[#616161] dark:text-zinc-400">
+                    No moments currently pinned
+                  </p>
+                  <p className="text-[10.5px] text-[#8c9196]">
+                    Click &quot;Curate Pinned Moments&quot; above to feature clips on Discover.
                   </p>
                 </div>
               ) : (
@@ -784,31 +806,30 @@ function MomentsSettingsPage() {
                           </div>
                         </div>
 
-                        {/* Reorder and Remove buttons */}
                         <div className="flex items-center gap-1 shrink-0 ml-2">
                           <button
                             type="button"
-                            onClick={() => handleMovePinnedUp(idx)}
+                            onClick={() => handleMovePinned(idx, "up")}
                             disabled={idx === 0}
-                            title="Move up"
-                            className="p-1 rounded text-[#8c9196] hover:text-[#303030] disabled:opacity-30"
+                            className="p-1 rounded text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            title="Move Up"
                           >
                             <ArrowUp className="h-3.5 w-3.5" />
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleMovePinnedDown(idx)}
+                            onClick={() => handleMovePinned(idx, "down")}
                             disabled={idx === pinnedMomentIds.length - 1}
-                            title="Move down"
-                            className="p-1 rounded text-[#8c9196] hover:text-[#303030] disabled:opacity-30"
+                            className="p-1 rounded text-[#616161] hover:text-[#303030] dark:hover:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                            title="Move Down"
                           >
                             <ArrowDown className="h-3.5 w-3.5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleRemovePinned(id)}
+                            className="p-1 rounded text-[#8c9196] hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                             title="Unpin"
-                            className="p-1 rounded text-[#8c9196] hover:text-red-600"
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
@@ -821,62 +842,21 @@ function MomentsSettingsPage() {
             </div>
           </PolarisFormCard>
 
-          {/* Section 3: Visibility & Creator Permissions */}
+          {/* Section 3: Central Feed & Distribution */}
           <PolarisFormCard
             step={3}
-            title="Visibility & Creator Permissions"
-            description="Configure discoverability parameters and creator upload rights."
-            badge="Visibility"
+            title="Central Feed & Platform Distribution"
+            description="Control how short-form video clips appear across your organization's general feed."
+            badge="Distribution"
+            icon={Globe}
           >
             <div className="space-y-2.5">
-              {/* Allow Public Discoverability */}
               <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
                 <div className="flex items-start gap-2.5">
                   <div
                     className={cn(
                       "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                      formData.allowPublicMoments
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50"
-                        : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
-                    )}
-                  >
-                    <Globe className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
-                        Allow Public {moduleName}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                          formData.allowPublicMoments
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400"
-                            : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
-                        )}
-                      >
-                        {formData.allowPublicMoments ? "Public" : "Private"}
-                      </Badge>
-                    </div>
-                    <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
-                      Enable ecosystem-wide video discoverability so non-members can browse highlights.
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={formData.allowPublicMoments}
-                  onCheckedChange={() => handleToggle("allowPublicMoments")}
-                />
-              </div>
-
-              {/* Enable Short Uploads */}
-              <div className="flex items-start justify-between p-3 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/50 dark:bg-zinc-900/40 hover:bg-[#f6f6f7] dark:hover:bg-zinc-800/40 transition-colors">
-                <div className="flex items-start gap-2.5">
-                  <div
-                    className={cn(
-                      "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                      formData.enableShortUploads
+                      formik.values.enableShortUploads
                         ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-900/50"
                         : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
                     )}
@@ -892,12 +872,12 @@ function MomentsSettingsPage() {
                         variant="outline"
                         className={cn(
                           "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                          formData.enableShortUploads
+                          formik.values.enableShortUploads
                             ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400"
                             : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
                         )}
                       >
-                        {formData.enableShortUploads ? "Enabled" : "Disabled"}
+                        {formik.values.enableShortUploads ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
@@ -906,8 +886,8 @@ function MomentsSettingsPage() {
                   </div>
                 </div>
                 <Switch
-                  checked={formData.enableShortUploads}
-                  onCheckedChange={() => handleToggle("enableShortUploads")}
+                  checked={formik.values.enableShortUploads}
+                  onCheckedChange={(val) => formik.setFieldValue("enableShortUploads", val)}
                 />
               </div>
 
@@ -917,7 +897,7 @@ function MomentsSettingsPage() {
                   <div
                     className={cn(
                       "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                      formData.allowEntityMomentsInFeed
+                      formik.values.allowEntityMomentsInFeed
                         ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-900/50"
                         : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
                     )}
@@ -933,12 +913,12 @@ function MomentsSettingsPage() {
                         variant="outline"
                         className={cn(
                           "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                          formData.allowEntityMomentsInFeed
+                          formik.values.allowEntityMomentsInFeed
                             ? "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-400"
                             : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
                         )}
                       >
-                        {formData.allowEntityMomentsInFeed ? "Included" : "Excluded"}
+                        {formik.values.allowEntityMomentsInFeed ? "Included" : "Excluded"}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
@@ -947,24 +927,150 @@ function MomentsSettingsPage() {
                   </div>
                 </div>
                 <Switch
-                  checked={formData.allowEntityMomentsInFeed}
-                  onCheckedChange={() => handleToggle("allowEntityMomentsInFeed")}
+                  checked={formik.values.allowEntityMomentsInFeed}
+                  onCheckedChange={(val) => formik.setFieldValue("allowEntityMomentsInFeed", val)}
                 />
               </div>
             </div>
           </PolarisFormCard>
 
-          {/* Section 4: Creator Studio & Upload Options */}
+          {/* Section 4: Creator Studio & Upload Screen Customization */}
           <PolarisFormCard
             step={4}
-            title="Creator Studio & Upload Options"
-            description="Configure upload parameters, maximum video duration (up to 2 minutes), feed sharing rights, and AI labeling."
+            title="Creator Studio & Upload Screen Customization"
+            description="Customize upload modal copy (headline, subtitle, action cards), maximum video duration (up to 2 minutes), feed sharing rights, and AI labeling."
             badge="Creator Studio"
             badgeVariant="indigo"
             icon={Film}
           >
             <div className="space-y-4">
-              {/* Duration Setting */}
+              {/* Subcard 1: Upload Modal Copy Customization */}
+              <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b border-[#e1e3e5]/70 dark:border-zinc-800/70">
+                  <div className="h-7 w-7 rounded-[4px] bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/50 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                    <Type className="h-3.5 w-3.5" />
+                  </div>
+                  <div>
+                    <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                      Upload Modal Headline & Copy
+                    </span>
+                    <p className="text-[11px] text-[#616161] dark:text-zinc-400">
+                      Personalize the texts displayed to members on Step 1 of the upload workflow.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Upload Headline */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-200 flex items-center justify-between">
+                      <span>Modal Headline</span>
+                      <span className="text-[9.5px] text-[#8c9196]">(Default: &quot;Capture the {singularName}&quot;)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="momentsUploadTitle"
+                      placeholder={`Capture the ${singularName}`}
+                      value={formik.values.momentsUploadTitle}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "text-[12px] h-8 px-2.5 rounded-[4px] border bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500",
+                        formik.touched.momentsUploadTitle && formik.errors.momentsUploadTitle
+                          ? "border-destructive focus:ring-destructive"
+                          : "border-[#d2d5d9] dark:border-zinc-700"
+                      )}
+                    />
+                    {formik.touched.momentsUploadTitle && formik.errors.momentsUploadTitle && (
+                      <span className="text-[10px] text-destructive">{formik.errors.momentsUploadTitle}</span>
+                    )}
+                  </div>
+
+                  {/* Format Badge */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-200 flex items-center justify-between">
+                      <span>Video Aspect Ratio / Format</span>
+                      <span className="text-[9.5px] text-[#8c9196]">(Default: &quot;9:16&quot;)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="momentsUploadFormat"
+                      placeholder="9:16"
+                      value={formik.values.momentsUploadFormat}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "text-[12px] h-8 px-2.5 rounded-[4px] border bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono",
+                        formik.touched.momentsUploadFormat && formik.errors.momentsUploadFormat
+                          ? "border-destructive focus:ring-destructive"
+                          : "border-[#d2d5d9] dark:border-zinc-700"
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Upload Subtitle / Description */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-200 flex items-center justify-between">
+                    <span>Modal Subtitle / Description</span>
+                    <span className="text-[9.5px] text-[#8c9196]">(Default: &quot;Share your story with the world in a vertical short-form video.&quot;)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="momentsUploadDescription"
+                    placeholder="Share your story with the world in a vertical short-form video."
+                    value={formik.values.momentsUploadDescription}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={cn(
+                      "text-[12px] h-8 px-2.5 rounded-[4px] border bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500",
+                      formik.touched.momentsUploadDescription && formik.errors.momentsUploadDescription
+                        ? "border-destructive focus:ring-destructive"
+                        : "border-[#d2d5d9] dark:border-zinc-700"
+                    )}
+                  />
+                  {formik.touched.momentsUploadDescription && formik.errors.momentsUploadDescription && (
+                    <span className="text-[10px] text-destructive">{formik.errors.momentsUploadDescription}</span>
+                  )}
+                </div>
+
+                {/* Action Card Titles */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-200 flex items-center justify-between">
+                      <span>Action Card Title</span>
+                      <span className="text-[9.5px] text-[#8c9196]">(Default: &quot;Select from Library&quot;)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="momentsUploadCardTitle"
+                      placeholder="Select from Library"
+                      value={formik.values.momentsUploadCardTitle}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="text-[12px] h-8 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-200 flex items-center justify-between">
+                      <span>Action Card Subtitle</span>
+                      <span className="text-[9.5px] text-[#8c9196]">(Default: &quot;Choose your best video or drag & drop here&quot;)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="momentsUploadCardDescription"
+                      placeholder="Choose your best video or drag & drop here"
+                      value={formik.values.momentsUploadCardDescription}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      className="text-[12px] h-8 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Subcard 2: Duration Setting */}
               <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -976,7 +1082,7 @@ function MomentsSettingsPage() {
                         Maximum Video Duration
                       </span>
                       <p className="text-[11px] text-[#616161] dark:text-zinc-400">
-                        Set the maximum allowed clip duration for uploaded {singularName.toLowerCase()}s. Max allowed limit is 2 minutes (120s).
+                        Set the maximum allowed clip duration for uploaded {singularName.toLowerCase()}s (Between 3s and 120s / 2 minutes).
                       </p>
                     </div>
                   </div>
@@ -992,26 +1098,21 @@ function MomentsSettingsPage() {
                     </span>
                     <input
                       type="number"
+                      name="momentsMaxDuration"
                       min={3}
                       max={120}
-                      value={creatorSettings.momentsMaxDuration}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value, 10);
-                        setCreatorSettings((prev) => ({
-                          ...prev,
-                          momentsMaxDuration: isNaN(val) ? 0 : val,
-                        }));
-                        setHasChanged(true);
-                      }}
+                      value={formik.values.momentsMaxDuration}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       className={cn(
                         "text-[12px] h-8 px-2.5 w-24 rounded-[4px] border bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500",
-                        durationError
+                        formik.touched.momentsMaxDuration && formik.errors.momentsMaxDuration
                           ? "border-destructive text-destructive focus:ring-destructive"
                           : "border-[#d2d5d9] dark:border-zinc-700"
                       )}
                     />
                     <span className="text-[11px] text-[#8c9196]">
-                      seconds ({creatorSettings.momentsMaxDuration > 60 ? (creatorSettings.momentsMaxDuration / 60).toFixed(1) + " mins" : creatorSettings.momentsMaxDuration + "s"})
+                      seconds ({formik.values.momentsMaxDuration > 60 ? (formik.values.momentsMaxDuration / 60).toFixed(1) + " mins" : formik.values.momentsMaxDuration + "s"})
                     </span>
                   </div>
 
@@ -1021,16 +1122,10 @@ function MomentsSettingsPage() {
                       <button
                         key={preset}
                         type="button"
-                        onClick={() => {
-                          setCreatorSettings((prev) => ({
-                            ...prev,
-                            momentsMaxDuration: preset,
-                          }));
-                          setHasChanged(true);
-                        }}
+                        onClick={() => formik.setFieldValue("momentsMaxDuration", preset)}
                         className={cn(
                           "px-2 py-1 text-[10.5px] rounded-[3px] border font-medium transition-all cursor-pointer",
-                          creatorSettings.momentsMaxDuration === preset
+                          formik.values.momentsMaxDuration === preset
                             ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
                             : "bg-white dark:bg-zinc-800 border-[#d2d5d9] dark:border-zinc-700 text-[#616161] dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700"
                         )}
@@ -1041,15 +1136,15 @@ function MomentsSettingsPage() {
                   </div>
                 </div>
 
-                {durationError && (
+                {formik.touched.momentsMaxDuration && formik.errors.momentsMaxDuration && (
                   <div className="flex items-center gap-1.5 text-[11px] text-destructive font-medium pt-1">
                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                    <span>{durationError}</span>
+                    <span>{formik.errors.momentsMaxDuration}</span>
                   </div>
                 )}
               </div>
 
-              {/* Share in Feed Settings Card */}
+              {/* Subcard 3: Share in Feed Settings Card */}
               <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-2.5">
@@ -1065,12 +1160,12 @@ function MomentsSettingsPage() {
                           variant="outline"
                           className={cn(
                             "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                            creatorSettings.allowMomentsShareInFeed
+                            formik.values.allowMomentsShareInFeed
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400"
                               : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
                           )}
                         >
-                          {creatorSettings.allowMomentsShareInFeed ? "Enabled" : "Disabled"}
+                          {formik.values.allowMomentsShareInFeed ? "Enabled" : "Disabled"}
                         </Badge>
                       </div>
                       <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
@@ -1079,18 +1174,12 @@ function MomentsSettingsPage() {
                     </div>
                   </div>
                   <Switch
-                    checked={creatorSettings.allowMomentsShareInFeed}
-                    onCheckedChange={(checked) => {
-                      setCreatorSettings((prev) => ({
-                        ...prev,
-                        allowMomentsShareInFeed: checked,
-                      }));
-                      setHasChanged(true);
-                    }}
+                    checked={formik.values.allowMomentsShareInFeed}
+                    onCheckedChange={(checked) => formik.setFieldValue("allowMomentsShareInFeed", checked)}
                   />
                 </div>
 
-                {creatorSettings.allowMomentsShareInFeed && (
+                {formik.values.allowMomentsShareInFeed && (
                   <div className="pt-2.5 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70 space-y-2">
                     <div className="space-y-1">
                       <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-300">
@@ -1098,15 +1187,11 @@ function MomentsSettingsPage() {
                       </label>
                       <input
                         type="text"
+                        name="momentsShareInFeedTitle"
                         placeholder="Share in Feed"
-                        value={creatorSettings.momentsShareInFeedTitle}
-                        onChange={(e) => {
-                          setCreatorSettings((prev) => ({
-                            ...prev,
-                            momentsShareInFeedTitle: e.target.value,
-                          }));
-                          setHasChanged(true);
-                        }}
+                        value={formik.values.momentsShareInFeedTitle}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       />
                     </div>
@@ -1116,15 +1201,11 @@ function MomentsSettingsPage() {
                       </label>
                       <input
                         type="text"
+                        name="momentsShareInFeedDescription"
                         placeholder="Make this visible across your community feed"
-                        value={creatorSettings.momentsShareInFeedDescription}
-                        onChange={(e) => {
-                          setCreatorSettings((prev) => ({
-                            ...prev,
-                            momentsShareInFeedDescription: e.target.value,
-                          }));
-                          setHasChanged(true);
-                        }}
+                        value={formik.values.momentsShareInFeedDescription}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       />
                     </div>
@@ -1132,7 +1213,7 @@ function MomentsSettingsPage() {
                 )}
               </div>
 
-              {/* Add AI Label Settings Card */}
+              {/* Subcard 4: Add AI Label Settings Card */}
               <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-2.5">
@@ -1148,12 +1229,12 @@ function MomentsSettingsPage() {
                           variant="outline"
                           className={cn(
                             "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                            creatorSettings.allowMomentsAiLabel
+                            formik.values.allowMomentsAiLabel
                               ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
                               : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
                           )}
                         >
-                          {creatorSettings.allowMomentsAiLabel ? "Enabled" : "Disabled"}
+                          {formik.values.allowMomentsAiLabel ? "Enabled" : "Disabled"}
                         </Badge>
                       </div>
                       <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
@@ -1162,18 +1243,12 @@ function MomentsSettingsPage() {
                     </div>
                   </div>
                   <Switch
-                    checked={creatorSettings.allowMomentsAiLabel}
-                    onCheckedChange={(checked) => {
-                      setCreatorSettings((prev) => ({
-                        ...prev,
-                        allowMomentsAiLabel: checked,
-                      }));
-                      setHasChanged(true);
-                    }}
+                    checked={formik.values.allowMomentsAiLabel}
+                    onCheckedChange={(checked) => formik.setFieldValue("allowMomentsAiLabel", checked)}
                   />
                 </div>
 
-                {creatorSettings.allowMomentsAiLabel && (
+                {formik.values.allowMomentsAiLabel && (
                   <div className="pt-2.5 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70 space-y-2">
                     <div className="space-y-1">
                       <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-300">
@@ -1181,15 +1256,11 @@ function MomentsSettingsPage() {
                       </label>
                       <input
                         type="text"
+                        name="momentsAiLabelTitle"
                         placeholder="Add AI Label"
-                        value={creatorSettings.momentsAiLabelTitle}
-                        onChange={(e) => {
-                          setCreatorSettings((prev) => ({
-                            ...prev,
-                            momentsAiLabelTitle: e.target.value,
-                          }));
-                          setHasChanged(true);
-                        }}
+                        value={formik.values.momentsAiLabelTitle}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       />
                     </div>
@@ -1199,15 +1270,11 @@ function MomentsSettingsPage() {
                       </label>
                       <input
                         type="text"
+                        name="momentsAiLabelDescription"
                         placeholder="Label realistic content made with AI."
-                        value={creatorSettings.momentsAiLabelDescription}
-                        onChange={(e) => {
-                          setCreatorSettings((prev) => ({
-                            ...prev,
-                            momentsAiLabelDescription: e.target.value,
-                          }));
-                          setHasChanged(true);
-                        }}
+                        value={formik.values.momentsAiLabelDescription}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                         className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       />
                     </div>
@@ -1231,7 +1298,7 @@ function MomentsSettingsPage() {
                   <div
                     className={cn(
                       "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                      formData.autoModeration
+                      formik.values.autoModeration
                         ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50"
                         : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
                     )}
@@ -1247,12 +1314,12 @@ function MomentsSettingsPage() {
                         variant="outline"
                         className={cn(
                           "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                          formData.autoModeration
+                          formik.values.autoModeration
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400"
                             : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
                         )}
                       >
-                        {formData.autoModeration ? "Active" : "Off"}
+                        {formik.values.autoModeration ? "Active" : "Off"}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
@@ -1261,8 +1328,8 @@ function MomentsSettingsPage() {
                   </div>
                 </div>
                 <Switch
-                  checked={formData.autoModeration}
-                  onCheckedChange={() => handleToggle("autoModeration")}
+                  checked={formik.values.autoModeration}
+                  onCheckedChange={(val) => formik.setFieldValue("autoModeration", val)}
                 />
               </div>
 
@@ -1272,7 +1339,7 @@ function MomentsSettingsPage() {
                   <div
                     className={cn(
                       "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                      formData.moderatedFeed
+                      formik.values.moderatedFeed
                         ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/50"
                         : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
                     )}
@@ -1288,12 +1355,12 @@ function MomentsSettingsPage() {
                         variant="outline"
                         className={cn(
                           "text-[9px] px-1 py-0 rounded-[3px] font-bold",
-                          formData.moderatedFeed
+                          formik.values.moderatedFeed
                             ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400"
                             : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
                         )}
                       >
-                        {formData.moderatedFeed ? "Manual Queue" : "Instant"}
+                        {formik.values.moderatedFeed ? "Manual Queue" : "Instant"}
                       </Badge>
                     </div>
                     <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
@@ -1302,8 +1369,8 @@ function MomentsSettingsPage() {
                   </div>
                 </div>
                 <Switch
-                  checked={formData.moderatedFeed}
-                  onCheckedChange={() => handleToggle("moderatedFeed")}
+                  checked={formik.values.moderatedFeed}
+                  onCheckedChange={(val) => formik.setFieldValue("moderatedFeed", val)}
                 />
               </div>
 
@@ -1313,7 +1380,7 @@ function MomentsSettingsPage() {
                   <div
                     className={cn(
                       "h-7 w-7 rounded-[4px] flex items-center justify-center shrink-0 border transition-colors mt-0.5",
-                      formData.uploadNotifications
+                      formik.values.uploadNotifications
                         ? "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-400 dark:border-violet-900/50"
                         : "bg-[#f6f6f7] text-[#8c9196] border-[#d2d5d9] dark:bg-zinc-800 dark:border-zinc-700"
                     )}
@@ -1332,8 +1399,8 @@ function MomentsSettingsPage() {
                   </div>
                 </div>
                 <Switch
-                  checked={formData.uploadNotifications}
-                  onCheckedChange={() => handleToggle("uploadNotifications")}
+                  checked={formik.values.uploadNotifications}
+                  onCheckedChange={(val) => formik.setFieldValue("uploadNotifications", val)}
                 />
               </div>
             </div>
@@ -1344,8 +1411,8 @@ function MomentsSettingsPage() {
         <FloatingSavePanel
           hasChanged={hasChanged}
           saved={false}
-          isSaving={isSaving || isUpdatingMomentSetting}
-          onSave={handleSave}
+          isSaving={isSavingEntitySettings || isUpdatingMomentSetting || formik.isSubmitting}
+          onSave={formik.handleSubmit}
           onReset={handleReset}
           title={`Save ${moduleName} Settings`}
           description={`You have unsaved changes to ${singularName.toLowerCase()} configuration parameters.`}

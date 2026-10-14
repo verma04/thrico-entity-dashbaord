@@ -115,6 +115,11 @@ export interface MomentSetting {
   momentsAiLabelTitle?: string | null;
   momentsAiLabelDescription?: string | null;
   momentsMaxDuration: number;
+  momentsUploadTitle?: string | null;
+  momentsUploadDescription?: string | null;
+  momentsUploadFormat?: string | null;
+  momentsUploadCardTitle?: string | null;
+  momentsUploadCardDescription?: string | null;
 }
 
 export interface GetMomentSettingResponse {
