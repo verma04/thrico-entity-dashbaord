@@ -1,5 +1,15 @@
-import { useQuery, useMutation } from "@apollo/client";
-import { GET_ALL_MOMENTS, GET_MOMENT_DETAILS, GET_MOMENT_DASHBOARD_KPIs, ADMIN_DELETE_MOMENT, ADMIN_GENERATE_MOMENT_UPLOAD_URL, ADMIN_CONFIRM_MOMENT_UPLOAD, GET_MOMENT_SETTING, UPDATE_MOMENT_SETTING } from "../../quries/moments";
+import { useQuery, useMutation, MutationHookOptions } from "@apollo/client";
+import {
+  GET_ALL_MOMENTS,
+  GET_MOMENT_DETAILS,
+  GET_MOMENT_DASHBOARD_KPIs,
+  ADMIN_DELETE_MOMENT,
+  ADMIN_EDIT_MOMENT,
+  ADMIN_GENERATE_MOMENT_UPLOAD_URL,
+  ADMIN_CONFIRM_MOMENT_UPLOAD,
+  GET_MOMENT_SETTING,
+  UPDATE_MOMENT_SETTING,
+} from "../../quries/moments";
 import { TimeRange, DateRangeInput } from "../dashboard";
 
 export interface Moment {
@@ -97,12 +107,53 @@ export const useAdminGenerateMomentUploadUrl = () => {
   return [generateUploadUrl, { loading }] as const;
 };
 
-export const useAdminConfirmMomentUpload = (options?: any) => {
-  const [confirmUpload, { loading }] = useMutation(ADMIN_CONFIRM_MOMENT_UPLOAD, {
+export interface AdminConfirmMomentUploadInput {
+  fileUrl: string;
+  caption: string;
+  thumbnailUrl?: string;
+  shareInFeed?: boolean;
+  isAiContent?: boolean;
+  userId?: string;
+}
+
+export interface AdminConfirmMomentUploadResponse {
+  adminConfirmMomentUpload: Moment;
+}
+
+export const useAdminConfirmMomentUpload = (
+  options?: MutationHookOptions<
+    AdminConfirmMomentUploadResponse,
+    { input: AdminConfirmMomentUploadInput }
+  >,
+) => {
+  const [confirmUpload, { loading }] = useMutation<
+    AdminConfirmMomentUploadResponse,
+    { input: AdminConfirmMomentUploadInput }
+  >(ADMIN_CONFIRM_MOMENT_UPLOAD, {
     refetchQueries: [{ query: GET_ALL_MOMENTS }],
     ...options,
   });
   return [confirmUpload, { loading }] as const;
+};
+
+export interface AdminUpdateMomentInput {
+  caption?: string;
+  thumbnailUrl?: string;
+  status?: string;
+}
+
+export interface AdminEditMomentResponse {
+  adminEditMoment: Moment;
+}
+
+export const useAdminEditMoment = () => {
+  const [editMoment, { loading }] = useMutation<
+    AdminEditMomentResponse,
+    { id: string; input: AdminUpdateMomentInput }
+  >(ADMIN_EDIT_MOMENT, {
+    refetchQueries: [{ query: GET_ALL_MOMENTS }],
+  });
+  return { editMoment, loading };
 };
 
 export interface MomentSetting {

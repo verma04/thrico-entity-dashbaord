@@ -26,15 +26,19 @@ import {
   Copy,
   Trash2,
   Loader2,
+  ImageIcon,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Moment, useAdminDeleteMoment } from "@/graphql/actions/moments";
 import { useModuleStore } from "@/store/useModuleStore";
+import { ChangeThumbnailDialog } from "./change-thumbnail-dialog";
 
 export interface MomentActionsProps {
   moment: Moment;
   onPreview?: () => void;
   onDelete?: (id: string) => void;
+  onThumbnailUpdate?: (updatedMoment: Moment) => void;
   trigger?: React.ReactNode;
 }
 
@@ -42,10 +46,12 @@ export function MomentActions({
   moment,
   onPreview,
   onDelete,
+  onThumbnailUpdate,
   trigger,
 }: MomentActionsProps) {
   const singularName = useModuleStore((state) => state.momentSingularName);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [changeThumbnailOpen, setChangeThumbnailOpen] = useState(false);
   const { deleteMoment, loading: deleteLoading } = useAdminDeleteMoment();
 
   const handleCopyLink = (e: React.MouseEvent) => {
@@ -74,8 +80,8 @@ export function MomentActions({
       } else {
         toast.error(`Failed to delete ${singularName.toLowerCase()}`);
       }
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred while deleting");
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "An error occurred while deleting");
     }
   };
 
@@ -118,6 +124,22 @@ export function MomentActions({
           )}
 
           <DropdownMenuItem
+            onClick={() => setChangeThumbnailOpen(true)}
+            className="text-xs font-medium cursor-pointer gap-2 py-1.5"
+          >
+            <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+            Edit {singularName}
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() => setChangeThumbnailOpen(true)}
+            className="text-xs font-medium cursor-pointer gap-2 py-1.5"
+          >
+            <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+            Change Thumbnail
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
             onClick={handleCopyLink}
             className="text-xs font-medium cursor-pointer gap-2 py-1.5"
           >
@@ -136,6 +158,14 @@ export function MomentActions({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Change Thumbnail Modal */}
+      <ChangeThumbnailDialog
+        moment={moment}
+        open={changeThumbnailOpen}
+        onOpenChange={setChangeThumbnailOpen}
+        onSuccess={onThumbnailUpdate}
+      />
 
       {/* Delete Confirmation Alert Dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>

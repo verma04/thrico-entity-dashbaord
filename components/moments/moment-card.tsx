@@ -1,19 +1,16 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React from "react";
-import { Video, Play, Trash2, MoreVertical } from "lucide-react";
+import { Video, Play, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Moment } from "@/graphql/actions/moments";
 import { cn } from "@/lib/utils";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { useModuleStore } from "@/store/useModuleStore";
+import { MomentActions } from "./manage/moment-actions";
 
 interface MomentCardProps {
   moment: Moment;
@@ -28,15 +25,6 @@ export const MomentCard: React.FC<MomentCardProps> = ({
 }) => {
   const singularName = useModuleStore((state) => state.momentSingularName);
   const isPublished = moment?.status === "PUBLISHED";
-  const creatorName =
-    `${moment?.owner?.firstName ?? ""} ${moment?.owner?.lastName ?? ""}`.trim() ||
-    "Unknown";
-  const initials = creatorName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 
   return (
     <div
@@ -95,8 +83,11 @@ export const MomentCard: React.FC<MomentCardProps> = ({
           className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
           onClick={(e) => e.stopPropagation()}
         >
-          <Popover>
-            <PopoverTrigger asChild>
+          <MomentActions
+            moment={moment}
+            onPreview={onClick}
+            onDelete={onDelete}
+            trigger={
               <Button
                 variant="ghost"
                 size="icon"
@@ -104,20 +95,8 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               >
                 <MoreVertical className="h-3.5 w-3.5" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              className="w-52 p-1.5 rounded-xl border border-zinc-200/80 shadow-xl bg-white animate-in zoom-in-95 slide-in-from-top-1 duration-150"
-            >
-              <button
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[11px] font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
-                onClick={() => onDelete(moment?.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete {singularName.toLowerCase()}
-              </button>
-            </PopoverContent>
-          </Popover>
+            }
+          />
         </div>
 
         {/* Bottom info bar — overlaid on image */}

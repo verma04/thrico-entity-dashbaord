@@ -6,4 +6,5 @@ export * from "./moments-list";
 export * from "./moment-card-compact";
 export * from "./moment-grid";
 export * from "./moment-actions";
+export * from "./change-thumbnail-dialog";
 export * from "./export-moments-modal";

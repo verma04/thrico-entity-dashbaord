@@ -103,6 +103,27 @@ export const ADMIN_CONFIRM_MOMENT_UPLOAD = gql`
   }
 `;
 
+export const ADMIN_EDIT_MOMENT = gql`
+  mutation AdminEditMoment($id: ID!, $input: AdminUpdateMomentInput!) {
+    adminEditMoment(id: $id, input: $input) {
+      id
+      caption
+      videoUrl
+      thumbnailUrl
+      status
+      totalViews
+      createdAt
+      addedBy
+      owner {
+        id
+        firstName
+        lastName
+        avatar
+      }
+    }
+  }
+`;
+
 export const GET_MOMENT_SETTING = gql`
   query GetMomentSetting {
     getMomentSetting {
