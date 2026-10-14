@@ -72,7 +72,16 @@ const validationSchema = Yup.object().shape({
   allowDataDownload: Yup.boolean().required(),
   allowFaq: Yup.boolean().required(),
   supportEmail: Yup.string()
-    .email("Please enter a valid email address")
+    .test(
+      "valid-emails",
+      "Please enter valid email address(es), separated by commas",
+      (value) => {
+        if (!value || !value.trim()) return true;
+        const emails = value.split(/[,;\s]+/).filter(Boolean);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emails.every((email) => emailRegex.test(email.trim()));
+      }
+    )
     .nullable()
     .optional(),
 });
@@ -670,7 +679,7 @@ export default function ClassificationProfileSettings() {
               <SectionToggleItem
                 id="allowDataDownload"
                 title="Personal Data Export & Download"
-                description="Permits members to access the 'Data' tab (/dashboard/settings/download-data) to export an archive of their account information."
+                description="Permits members to access the data download features (/dashboard/settings/download-data). Disabling this hides the Data tab, sidebar link, and privacy export options, preventing member access."
                 icon={Download}
                 iconColor="text-blue-500"
                 checked={formik.values.allowDataDownload}
@@ -714,14 +723,14 @@ export default function ClassificationProfileSettings() {
                   </label>
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-snug">
-                  Provide an official support email address. When specified, members will see this address in their settings and can send inquiries directly via mailto link.
+                  Provide one or more official support email addresses (separated by commas). When specified, members will see these in their settings and can send inquiries directly.
                 </p>
                 <div className="pt-1.5">
                   <Input
                     id="supportEmail"
                     name="supportEmail"
-                    type="email"
-                    placeholder="support@yourdomain.com"
+                    type="text"
+                    placeholder="support@yourdomain.com, help@yourdomain.com"
                     inputSize="default"
                     value={formik.values.supportEmail}
                     onChange={formik.handleChange}
