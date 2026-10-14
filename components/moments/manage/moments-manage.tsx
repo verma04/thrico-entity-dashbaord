@@ -44,11 +44,11 @@ import {
   useAdminDeleteMoment,
   Moment,
 } from "@/graphql/actions/moments";
+import { useEntitySettings } from "@/graphql/actions";
 import { MomentPreviewDialog } from "@/components/moments/moment-preview-dialog";
 import {
   STATUS_TABS,
   SORT_OPTIONS,
-  MomentStatusValue,
   SectionHeader,
   ContentArea,
 } from "./moments-manage-ui";
@@ -66,6 +66,9 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
 
   const moduleName = useModuleStore((state) => state.momentModuleName);
   const singularName = useModuleStore((state) => state.momentSingularName);
+
+  const { data: settingsData } = useEntitySettings();
+  const customCta = settingsData?.getEntitySettings?.momentsCtaName;
 
   // ── Update URL parameters helper ──────────────────────────────────────────
   const updateParams = useCallback(
@@ -171,8 +174,8 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
       } else {
         toast.error(`Failed to delete ${singularName.toLowerCase()}`);
       }
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred while deleting");
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "An error occurred while deleting");
     }
   };
 
@@ -395,7 +398,7 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
           <Link href="/moments/create">
             <CtaButton>
               <Plus className="h-3.5 w-3.5" />
-              Create
+              {customCta || `Create ${singularName}`}
             </CtaButton>
           </Link>
 

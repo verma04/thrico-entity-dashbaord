@@ -7,17 +7,9 @@ import React from "react";
 import {
   Video,
   Plus,
-  Loader2,
   Heart,
   Eye,
   Users,
-  TrendingUp,
-  Zap,
-  ShieldCheck,
-  Activity,
-  Share2,
-  Sparkles,
-  LayoutGrid,
   RotateCcw,
   Clock,
   ChevronLeft,
@@ -28,6 +20,7 @@ import {
   useGetMomentDashboardKPIs,
   useGetAllMoments,
 } from "@/graphql/actions/moments";
+import { useEntitySettings } from "@/graphql/actions";
 import { TimeRange } from "@/graphql/actions/dashboard";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
@@ -57,6 +50,10 @@ import { CtaButton } from "@/components/ui/cta-button";
 function MomentsDashboardPage() {
   const moduleName = useModuleStore((state) => state.momentModuleName);
   const singularName = useModuleStore((state) => state.momentSingularName);
+
+  const { data: settingsData } = useEntitySettings();
+  const customCta = settingsData?.getEntitySettings?.momentsCtaName;
+
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
     TimeRange.LAST_30_DAYS,
   );
@@ -185,7 +182,7 @@ function MomentsDashboardPage() {
             <Link href="/moments/create">
               <CtaButton>
                 <Plus className="h-4 w-4" />
-                Create {singularName}
+                {customCta || `Create ${singularName}`}
               </CtaButton>
             </Link>
           </div>
@@ -353,7 +350,7 @@ function MomentsDashboardPage() {
                         barSize={40}
                       >
                         {(stats?.engagement || []).map(
-                          (entry: any, index: number) => (
+                          (entry: { name: string; value: number }, index: number) => (
                             <Cell
                               key={`cell-${index}`}
                               fill={index === 0 ? "#8b5cf6" : "#ec4899"}

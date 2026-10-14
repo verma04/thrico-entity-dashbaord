@@ -170,6 +170,9 @@ interface MomentsFormValues {
   moderatedFeed: boolean;
   uploadNotifications: boolean;
 
+  tabs: ModuleTabItem[];
+  pinnedMomentIds: string[];
+
   // MomentSetting fields
   momentsUploadTitle: string;
   momentsUploadDescription: string;
@@ -194,6 +197,9 @@ const momentsFormValidationSchema = Yup.object().shape({
   autoModeration: Yup.boolean(),
   moderatedFeed: Yup.boolean(),
   uploadNotifications: Yup.boolean(),
+
+  tabs: Yup.array(),
+  pinnedMomentIds: Yup.array(),
 
   momentsUploadTitle: Yup.string().max(80, "Upload title cannot exceed 80 characters"),
   momentsUploadDescription: Yup.string().max(180, "Upload description cannot exceed 180 characters"),
@@ -240,19 +246,8 @@ function MomentsSettingsPage() {
     return map;
   }, [allMomentsList]);
 
-  // Tab & Pinned States
-  const [tabs, setTabs] = useState<ModuleTabItem[]>(() =>
-    createDefaultTabs(moduleName, singularName, data?.getEntitySettings)
-  );
-  const [pinnedMomentIds, setPinnedMomentIds] = useState<string[]>(() => {
-    const raw = data?.getEntitySettings?.momentsPinnedMomentIds;
-    return Array.isArray(raw) ? (raw as string[]) : [];
-  });
-  const [tabsDirty, setTabsDirty] = useState(false);
-  const [pinnedDirty, setPinnedDirty] = useState(false);
-
-  // Active Live Preview Tab Switcher
-  const [previewTab, setPreviewTab] = useState<PreviewTabId>("step1");
+  // Active Live Preview Tab Switcher (Defaults to Nav Bar preview for Navigation & CTA)
+  const [previewTab, setPreviewTab] = useState<PreviewTabId>("navbar");
 
   // Modals state
   const [isNewTabModalOpen, setIsNewTabModalOpen] = useState(false);
@@ -269,6 +264,7 @@ function MomentsSettingsPage() {
   const initialValues: MomentsFormValues = useMemo(() => {
     const ms = momentSettingData?.getMomentSetting;
     const es = data?.getEntitySettings;
+    const rawPinned = es?.momentsPinnedMomentIds;
     return {
       ctaName: es?.momentsCtaName || "",
       allowPublicMoments: true,
@@ -277,6 +273,9 @@ function MomentsSettingsPage() {
       autoModeration: true,
       moderatedFeed: false,
       uploadNotifications: false,
+
+      tabs: createDefaultTabs(moduleName, singularName, es),
+      pinnedMomentIds: Array.isArray(rawPinned) ? (rawPinned as string[]) : [],
 
       momentsUploadTitle: ms?.momentsUploadTitle || "",
       momentsUploadDescription: ms?.momentsUploadDescription || "",
@@ -293,7 +292,7 @@ function MomentsSettingsPage() {
       momentsAiLabelDescription:
         ms?.momentsAiLabelDescription || "Label realistic content made with AI.",
     };
-  }, [momentSettingData, data]);
+  }, [momentSettingData, data, moduleName, singularName]);
 
   // Formik Configuration
   const formik = useFormik<MomentsFormValues>({
@@ -325,68 +324,61 @@ function MomentsSettingsPage() {
         refetchMomentSetting?.();
 
         // 2. Update Entity Settings (Tabs, CTA, Feed, Pinned)
-        if (data?.getEntitySettings) {
-          const momentsTabNames: Record<string, string> = {};
-          tabs.forEach((t) => {
-            if (t.label && t.label.trim()) {
-              momentsTabNames[t.id] = t.label.trim();
-            }
-          });
+        const momentsTabNames: Record<string, string> = {};
+        values.tabs.forEach((t) => {
+          if (t.label && t.label.trim()) {
+            momentsTabNames[t.id] = t.label.trim();
+          }
+        });
 
-          const connectionsTab = tabs.find((t) => t.id === "connections");
-          const myMomentsTab = tabs.find((t) => t.id === "myMoments");
+        const connectionsTab = values.tabs.find((t) => t.id === "connections");
+        const myMomentsTab = values.tabs.find((t) => t.id === "myMoments");
 
-          const momentsCustomTabs = tabs
-            .filter((t) => t.isCustom)
-            .map((t) => ({
-              id: t.id,
-              name: t.label || t.defaultName,
-              enabled: t.enabled !== false,
-              momentIds: t.momentIds || [],
-            }));
+        const momentsCustomTabs = values.tabs
+          .filter((t) => t.isCustom)
+          .map((t) => ({
+            id: t.id,
+            name: t.label || t.defaultName,
+            icon: "Sparkles",
+            enabled: t.enabled !== false,
+            momentIds: t.momentIds || [],
+          }));
 
-          await updateEntitySettings({
-            variables: {
-              input: {
-                momentsCtaName: values.ctaName.trim() || null,
-                allowMomentsDiscoverTab: true,
-                allowMomentsConnectionsTab: connectionsTab ? connectionsTab.enabled !== false : true,
-                allowMomentsMyMomentsTab: myMomentsTab ? myMomentsTab.enabled !== false : true,
-                momentsTabNames,
-                momentsTabOrder: tabs.map((t) => t.id),
-                momentsPinnedMomentIds: pinnedMomentIds,
-                momentsCustomTabs,
-                allowEntityMomentsInFeed: values.allowEntityMomentsInFeed,
-              },
+        await updateEntitySettings({
+          variables: {
+            input: {
+              momentsCtaName: values.ctaName.trim() || null,
+              allowMomentsDiscoverTab: true,
+              allowMomentsConnectionsTab: connectionsTab ? connectionsTab.enabled !== false : true,
+              allowMomentsMyMomentsTab: myMomentsTab ? myMomentsTab.enabled !== false : true,
+              momentsTabNames,
+              momentsTabOrder: values.tabs.map((t) => t.id),
+              momentsPinnedMomentIds: values.pinnedMomentIds,
+              momentsCustomTabs,
+              allowEntityMomentsInFeed: values.allowEntityMomentsInFeed,
             },
-          });
-          refetchEntitySettings?.();
-        }
+          },
+        });
+        refetchEntitySettings?.();
 
         toast.success(`${moduleName} settings saved successfully!`);
-        setTabsDirty(false);
-        setPinnedDirty(false);
       } catch (err: unknown) {
         toast.error((err as Error).message || "Failed to update settings");
       }
     },
   });
 
-  const hasChanged = formik.dirty || tabsDirty || pinnedDirty;
+  const tabs = formik.values.tabs;
+  const pinnedMomentIds = formik.values.pinnedMomentIds;
+  const hasChanged = formik.dirty;
 
   const handleReset = () => {
     formik.resetForm();
-    setTabs(createDefaultTabs(moduleName, singularName, data?.getEntitySettings));
-    const rawPinned = data?.getEntitySettings?.momentsPinnedMomentIds;
-    setPinnedMomentIds(Array.isArray(rawPinned) ? (rawPinned as string[]) : []);
-    setTabsDirty(false);
-    setPinnedDirty(false);
   };
 
   // Tab Manager Handlers
   const handleTabsChange = (updatedTabs: ModuleTabItem[]) => {
-    setTabs(updatedTabs);
-    setTabsDirty(true);
+    formik.setFieldValue("tabs", updatedTabs);
   };
 
   const handleOpenNewTabModal = () => {
@@ -412,8 +404,7 @@ function MomentsSettingsPage() {
       isCustom: true,
       momentIds: [],
     };
-    setTabs((prev) => [...prev, newTab]);
-    setTabsDirty(true);
+    formik.setFieldValue("tabs", [...formik.values.tabs, newTab]);
     setIsNewTabModalOpen(false);
     setActiveCurateTarget({
       id: newTabId,
@@ -425,16 +416,25 @@ function MomentsSettingsPage() {
   };
 
   const handleDeleteCustomTab = (tabId: string) => {
-    setTabs((prev) => prev.filter((t) => t.id !== tabId));
-    setTabsDirty(true);
+    const targetTab = formik.values.tabs.find((t) => t.id === tabId);
+    formik.setFieldValue(
+      "tabs",
+      formik.values.tabs.filter((t) => t.id !== tabId)
+    );
+    toast.success(`Removed custom tab "${targetTab?.label || targetTab?.defaultName || "Custom"}"`);
   };
 
-  const handleOpenCurateTab = (tab: ModuleTabItem) => {
+  const handleOpenCurateTab = (tabOrId: ModuleTabItem | string) => {
+    const targetTab =
+      typeof tabOrId === "string"
+        ? formik.values.tabs.find((t) => t.id === tabOrId)
+        : tabOrId;
+    if (!targetTab) return;
     setActiveCurateTarget({
-      id: tab.id,
-      title: `Curate Moments for "${tab.label || tab.defaultName}"`,
-      description: `Select and order clips for this custom tab.`,
-      momentIds: tab.momentIds || [],
+      id: targetTab.id,
+      title: `Curate Moments for "${targetTab.label || targetTab.defaultName}"`,
+      description: `Select and sequence ${singularName.toLowerCase()} clips for "${targetTab.label || targetTab.defaultName}".`,
+      momentIds: targetTab.momentIds || [],
     });
     setIsCurateModalOpen(true);
   };
@@ -445,7 +445,7 @@ function MomentsSettingsPage() {
       id: "__pinned__",
       title: `Curate Admin Pinned ${moduleName}`,
       description: `Select standout moments to feature at the top of the Discover feed.`,
-      momentIds: pinnedMomentIds,
+      momentIds: formik.values.pinnedMomentIds,
     });
     setIsCurateModalOpen(true);
   };
@@ -453,13 +453,14 @@ function MomentsSettingsPage() {
   const handleConfirmSelectedMoments = (selectedIds: string[]) => {
     if (!activeCurateTarget) return;
     if (activeCurateTarget.id === "__pinned__") {
-      setPinnedMomentIds(selectedIds);
-      setPinnedDirty(true);
+      formik.setFieldValue("pinnedMomentIds", selectedIds);
     } else {
-      setTabs((prev) =>
-        prev.map((t) => (t.id === activeCurateTarget.id ? { ...t, momentIds: selectedIds } : t))
+      formik.setFieldValue(
+        "tabs",
+        formik.values.tabs.map((t) =>
+          t.id === activeCurateTarget.id ? { ...t, momentIds: selectedIds } : t
+        )
       );
-      setTabsDirty(true);
     }
     setIsCurateModalOpen(false);
     setActiveCurateTarget(null);
@@ -467,28 +468,29 @@ function MomentsSettingsPage() {
 
   const handleMovePinned = (index: number, direction: "up" | "down") => {
     const targetIdx = direction === "up" ? index - 1 : index + 1;
-    if (targetIdx < 0 || targetIdx >= pinnedMomentIds.length) return;
-    const next = [...pinnedMomentIds];
+    if (targetIdx < 0 || targetIdx >= formik.values.pinnedMomentIds.length) return;
+    const next = [...formik.values.pinnedMomentIds];
     const [moved] = next.splice(index, 1);
     next.splice(targetIdx, 0, moved);
-    setPinnedMomentIds(next);
-    setPinnedDirty(true);
+    formik.setFieldValue("pinnedMomentIds", next);
   };
 
   const handleRemovePinned = (id: string) => {
-    setPinnedMomentIds((prev) => prev.filter((item) => item !== id));
-    setPinnedDirty(true);
+    formik.setFieldValue(
+      "pinnedMomentIds",
+      formik.values.pinnedMomentIds.filter((item) => item !== id)
+    );
   };
 
   const activeTabs = useMemo(() => tabs.filter((t) => t.enabled !== false), [tabs]);
 
   const PREVIEW_TABS = [
+    { id: "navbar", label: "Nav Bar", icon: Sliders },
+    { id: "pinned", label: "Pinned", icon: Pin },
     { id: "step1", label: "Upload Modal", icon: Film },
     { id: "step2", label: "Trimmer", icon: Clock },
     { id: "step3", label: "Publish", icon: Send },
     { id: "feed", label: "Feed Post", icon: Rss },
-    { id: "navbar", label: "Nav Bar", icon: Sliders },
-    { id: "pinned", label: "Pinned", icon: Pin },
   ] as const;
 
   return (
