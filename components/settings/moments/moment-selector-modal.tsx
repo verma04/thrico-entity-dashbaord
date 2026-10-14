@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useMemo } from "react";
@@ -19,7 +20,6 @@ import {
   Play,
   X,
   Loader2,
-  Sparkles,
   ArrowUp,
   ArrowDown,
   Layers,
