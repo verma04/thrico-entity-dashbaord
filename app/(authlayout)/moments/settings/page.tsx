@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -8,7 +9,7 @@ import {
   useEntitySettings,
   useUpdateEntitySettings,
 } from "@/graphql/actions";
-import { useGetAllMoments } from "@/graphql/actions/moments";
+import { useGetAllMoments, Moment, useGetMomentSetting, useUpdateMomentSetting } from "@/graphql/actions/moments";
 import {
   Globe,
   Video,
@@ -24,11 +25,13 @@ import {
   Layers,
   Sparkles,
   Pin,
-  Trash2,
   ArrowUp,
   ArrowDown,
   Film,
   X,
+  Clock,
+  Send,
+  AlertCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -176,7 +179,7 @@ function MomentsSettingsPage() {
     return momentsData?.getAllMoments?.data || [];
   }, [momentsData]);
   const momentsByIdMap = useMemo(() => {
-    const map = new Map<string, any>();
+    const map = new Map<string, Moment>();
     allMomentsList.forEach((m) => map.set(m.id, m));
     return map;
   }, [allMomentsList]);
@@ -201,6 +204,49 @@ function MomentsSettingsPage() {
   });
 
   const [hasChanged, setHasChanged] = useState(false);
+  const { data: momentSettingData, refetch: refetchMomentSetting } = useGetMomentSetting();
+  const [updateMomentSetting, { loading: isUpdatingMomentSetting }] = useUpdateMomentSetting();
+
+  const [creatorSettings, setCreatorSettings] = useState({
+    allowMomentsShareInFeed: true,
+    momentsShareInFeedTitle: "Share in Feed",
+    momentsShareInFeedDescription: "Make this visible across your community feed",
+    allowMomentsAiLabel: true,
+    momentsAiLabelTitle: "Add AI Label",
+    momentsAiLabelDescription: "Label realistic content made with AI.",
+    momentsMaxDuration: 60,
+  });
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (momentSettingData?.getMomentSetting) {
+      const ms = momentSettingData.getMomentSetting;
+      setCreatorSettings({
+        allowMomentsShareInFeed: ms.allowMomentsShareInFeed ?? true,
+        momentsShareInFeedTitle: ms.momentsShareInFeedTitle || "Share in Feed",
+        momentsShareInFeedDescription: ms.momentsShareInFeedDescription || "Make this visible across your community feed",
+        allowMomentsAiLabel: ms.allowMomentsAiLabel ?? true,
+        momentsAiLabelTitle: ms.momentsAiLabelTitle || "Add AI Label",
+        momentsAiLabelDescription: ms.momentsAiLabelDescription || "Label realistic content made with AI.",
+        momentsMaxDuration: ms.momentsMaxDuration ?? 60,
+      });
+    }
+  }, [momentSettingData]);
+
+  const durationError = useMemo(() => {
+    const d = Number(creatorSettings.momentsMaxDuration);
+    if (isNaN(d) || !creatorSettings.momentsMaxDuration) {
+      return "Duration is required";
+    }
+    if (d < 3) {
+      return "Duration must be at least 3 seconds";
+    }
+    if (d > 120) {
+      return "Duration cannot exceed 2 minutes (120 seconds)";
+    }
+    return null;
+  }, [creatorSettings.momentsMaxDuration]);
+
 
   // Modals state
   const [isNewTabModalOpen, setIsNewTabModalOpen] = useState(false);
@@ -383,11 +429,41 @@ function MomentsSettingsPage() {
     setCtaName(data?.getEntitySettings?.momentsCtaName || "");
     const rawPinned = data?.getEntitySettings?.momentsPinnedMomentIds;
     setPinnedMomentIds(Array.isArray(rawPinned) ? (rawPinned as string[]) : []);
+    if (momentSettingData?.getMomentSetting) {
+      const ms = momentSettingData.getMomentSetting;
+      setCreatorSettings({
+        allowMomentsShareInFeed: ms.allowMomentsShareInFeed ?? true,
+        momentsShareInFeedTitle: ms.momentsShareInFeedTitle || "Share in Feed",
+        momentsShareInFeedDescription: ms.momentsShareInFeedDescription || "Make this visible across your community feed",
+        allowMomentsAiLabel: ms.allowMomentsAiLabel ?? true,
+        momentsAiLabelTitle: ms.momentsAiLabelTitle || "Add AI Label",
+        momentsAiLabelDescription: ms.momentsAiLabelDescription || "Label realistic content made with AI.",
+        momentsMaxDuration: ms.momentsMaxDuration ?? 60,
+      });
+    }
     setHasChanged(false);
   };
 
   const handleSave = async () => {
+    if (durationError) {
+      toast.error(durationError);
+      return;
+    }
     try {
+      await updateMomentSetting({
+        variables: {
+          input: {
+            allowMomentsShareInFeed: creatorSettings.allowMomentsShareInFeed,
+            momentsShareInFeedTitle: creatorSettings.momentsShareInFeedTitle.trim() || null,
+            momentsShareInFeedDescription: creatorSettings.momentsShareInFeedDescription.trim() || null,
+            allowMomentsAiLabel: creatorSettings.allowMomentsAiLabel,
+            momentsAiLabelTitle: creatorSettings.momentsAiLabelTitle.trim() || null,
+            momentsAiLabelDescription: creatorSettings.momentsAiLabelDescription.trim() || null,
+            momentsMaxDuration: Number(creatorSettings.momentsMaxDuration),
+          },
+        },
+      });
+      refetchMomentSetting?.();
       if (data?.getEntitySettings) {
         const momentsTabNames: Record<string, string> = {};
         tabs.forEach((t) => {
@@ -547,6 +623,20 @@ function MomentsSettingsPage() {
                       ? "Active"
                       : "Hidden"
                   }
+                />
+                <PolarisSummaryRow
+                  label="Max Duration"
+                  value={`${creatorSettings.momentsMaxDuration}s (${creatorSettings.momentsMaxDuration > 60 ? (creatorSettings.momentsMaxDuration / 60).toFixed(1) + "m" : creatorSettings.momentsMaxDuration + "s"})`}
+                  highlight
+                />
+                <PolarisSummaryRow
+                  label="Share in Feed"
+                  value={creatorSettings.allowMomentsShareInFeed ? "Allowed" : "Disabled"}
+                  highlight={creatorSettings.allowMomentsShareInFeed}
+                />
+                <PolarisSummaryRow
+                  label="AI Labeling"
+                  value={creatorSettings.allowMomentsAiLabel ? "Enabled" : "Disabled"}
                   isLast
                 />
               </div>
@@ -864,9 +954,272 @@ function MomentsSettingsPage() {
             </div>
           </PolarisFormCard>
 
-          {/* Section 4: Moderation & Quality Protocols */}
+          {/* Section 4: Creator Studio & Upload Options */}
           <PolarisFormCard
             step={4}
+            title="Creator Studio & Upload Options"
+            description="Configure upload parameters, maximum video duration (up to 2 minutes), feed sharing rights, and AI labeling."
+            badge="Creator Studio"
+            badgeVariant="indigo"
+            icon={Film}
+          >
+            <div className="space-y-4">
+              {/* Duration Setting */}
+              <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 rounded-[4px] bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                      <Clock className="h-3.5 w-3.5" />
+                    </div>
+                    <div>
+                      <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                        Maximum Video Duration
+                      </span>
+                      <p className="text-[11px] text-[#616161] dark:text-zinc-400">
+                        Set the maximum allowed clip duration for uploaded {singularName.toLowerCase()}s. Max allowed limit is 2 minutes (120s).
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400">
+                    Max 120s
+                  </Badge>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11.5px] font-medium text-[#303030] dark:text-zinc-200">
+                      Duration in Seconds:
+                    </span>
+                    <input
+                      type="number"
+                      min={3}
+                      max={120}
+                      value={creatorSettings.momentsMaxDuration}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        setCreatorSettings((prev) => ({
+                          ...prev,
+                          momentsMaxDuration: isNaN(val) ? 0 : val,
+                        }));
+                        setHasChanged(true);
+                      }}
+                      className={cn(
+                        "text-[12px] h-8 px-2.5 w-24 rounded-[4px] border bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-indigo-500",
+                        durationError
+                          ? "border-destructive text-destructive focus:ring-destructive"
+                          : "border-[#d2d5d9] dark:border-zinc-700"
+                      )}
+                    />
+                    <span className="text-[11px] text-[#8c9196]">
+                      seconds ({creatorSettings.momentsMaxDuration > 60 ? (creatorSettings.momentsMaxDuration / 60).toFixed(1) + " mins" : creatorSettings.momentsMaxDuration + "s"})
+                    </span>
+                  </div>
+
+                  {/* Preset Buttons */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[15, 30, 60, 90, 120].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => {
+                          setCreatorSettings((prev) => ({
+                            ...prev,
+                            momentsMaxDuration: preset,
+                          }));
+                          setHasChanged(true);
+                        }}
+                        className={cn(
+                          "px-2 py-1 text-[10.5px] rounded-[3px] border font-medium transition-all cursor-pointer",
+                          creatorSettings.momentsMaxDuration === preset
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                            : "bg-white dark:bg-zinc-800 border-[#d2d5d9] dark:border-zinc-700 text-[#616161] dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700"
+                        )}
+                      >
+                        {preset}s {preset === 120 ? "(2m)" : ""}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {durationError && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-destructive font-medium pt-1">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    <span>{durationError}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Share in Feed Settings Card */}
+              <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-2.5">
+                    <div className="h-7 w-7 rounded-[4px] bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900/50 flex items-center justify-center text-sky-600 dark:text-sky-400 mt-0.5 shrink-0">
+                      <Send className="h-3.5 w-3.5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                          Allow &quot;Share in Feed&quot; Option
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                            creatorSettings.allowMomentsShareInFeed
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400"
+                              : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
+                          )}
+                        >
+                          {creatorSettings.allowMomentsShareInFeed ? "Enabled" : "Disabled"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                        Permits creators to choose whether their uploaded moment is published to the community feed.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={creatorSettings.allowMomentsShareInFeed}
+                    onCheckedChange={(checked) => {
+                      setCreatorSettings((prev) => ({
+                        ...prev,
+                        allowMomentsShareInFeed: checked,
+                      }));
+                      setHasChanged(true);
+                    }}
+                  />
+                </div>
+
+                {creatorSettings.allowMomentsShareInFeed && (
+                  <div className="pt-2.5 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70 space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-300">
+                        Custom Option Title (Default: &quot;Share in Feed&quot;)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Share in Feed"
+                        value={creatorSettings.momentsShareInFeedTitle}
+                        onChange={(e) => {
+                          setCreatorSettings((prev) => ({
+                            ...prev,
+                            momentsShareInFeedTitle: e.target.value,
+                          }));
+                          setHasChanged(true);
+                        }}
+                        className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-300">
+                        Custom Option Subtitle (Default: &quot;Make this visible across your community feed&quot;)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Make this visible across your community feed"
+                        value={creatorSettings.momentsShareInFeedDescription}
+                        onChange={(e) => {
+                          setCreatorSettings((prev) => ({
+                            ...prev,
+                            momentsShareInFeedDescription: e.target.value,
+                          }));
+                          setHasChanged(true);
+                        }}
+                        className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Add AI Label Settings Card */}
+              <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-2.5">
+                    <div className="h-7 w-7 rounded-[4px] bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/50 flex items-center justify-center text-purple-600 dark:text-purple-400 mt-0.5 shrink-0">
+                      <Sparkles className="h-3.5 w-3.5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                          Allow &quot;Add AI Label&quot; Disclosure
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                            creatorSettings.allowMomentsAiLabel
+                              ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-400"
+                              : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
+                          )}
+                        >
+                          {creatorSettings.allowMomentsAiLabel ? "Enabled" : "Disabled"}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                        Allows creators to disclose and label synthetic AI-generated content on uploaded clips.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={creatorSettings.allowMomentsAiLabel}
+                    onCheckedChange={(checked) => {
+                      setCreatorSettings((prev) => ({
+                        ...prev,
+                        allowMomentsAiLabel: checked,
+                      }));
+                      setHasChanged(true);
+                    }}
+                  />
+                </div>
+
+                {creatorSettings.allowMomentsAiLabel && (
+                  <div className="pt-2.5 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70 space-y-2">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-300">
+                        Custom Option Title (Default: &quot;Add AI Label&quot;)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Add AI Label"
+                        value={creatorSettings.momentsAiLabelTitle}
+                        onChange={(e) => {
+                          setCreatorSettings((prev) => ({
+                            ...prev,
+                            momentsAiLabelTitle: e.target.value,
+                          }));
+                          setHasChanged(true);
+                        }}
+                        className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-[#303030] dark:text-zinc-300">
+                        Custom Option Subtitle (Default: &quot;Label realistic content made with AI.&quot;)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Label realistic content made with AI."
+                        value={creatorSettings.momentsAiLabelDescription}
+                        onChange={(e) => {
+                          setCreatorSettings((prev) => ({
+                            ...prev,
+                            momentsAiLabelDescription: e.target.value,
+                          }));
+                          setHasChanged(true);
+                        }}
+                        className="text-[12px] h-7 px-2.5 rounded-[4px] border border-[#d2d5d9] dark:border-zinc-700 bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Section 5: Moderation & Quality Protocols */}
+          <PolarisFormCard
+            step={5}
             title="Moderation & Quality Protocols"
             description="Configure automated safety checks and manual moderation gateways."
             badge="Moderation"
@@ -991,7 +1344,7 @@ function MomentsSettingsPage() {
         <FloatingSavePanel
           hasChanged={hasChanged}
           saved={false}
-          isSaving={isSaving}
+          isSaving={isSaving || isUpdatingMomentSetting}
           onSave={handleSave}
           onReset={handleReset}
           title={`Save ${moduleName} Settings`}

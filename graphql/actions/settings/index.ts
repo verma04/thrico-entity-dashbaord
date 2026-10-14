@@ -90,6 +90,13 @@ export interface EntitySettings {
   momentsCtaName?: string | null;
   momentsPinnedMomentIds?: string[];
   momentsCustomTabs?: any[];
+  allowMomentsShareInFeed?: boolean;
+  momentsShareInFeedTitle?: string | null;
+  momentsShareInFeedDescription?: string | null;
+  allowMomentsAiLabel?: boolean;
+  momentsAiLabelTitle?: string | null;
+  momentsAiLabelDescription?: string | null;
+  momentsMaxDuration?: number | null;
 
   // Communities Tab Settings
   allowCommunitiesDiscoverTab?: boolean;
@@ -226,6 +233,13 @@ export interface UpdateEntitySettingsInput {
   momentsCtaName?: string | null;
   momentsPinnedMomentIds?: string[];
   momentsCustomTabs?: any[];
+  allowMomentsShareInFeed?: boolean;
+  momentsShareInFeedTitle?: string | null;
+  momentsShareInFeedDescription?: string | null;
+  allowMomentsAiLabel?: boolean;
+  momentsAiLabelTitle?: string | null;
+  momentsAiLabelDescription?: string | null;
+  momentsMaxDuration?: number | null;
 
   // Communities Tab Settings
   allowCommunitiesDiscoverTab?: boolean;

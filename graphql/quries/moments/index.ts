@@ -103,3 +103,36 @@ export const ADMIN_CONFIRM_MOMENT_UPLOAD = gql`
   }
 `;
 
+export const GET_MOMENT_SETTING = gql`
+  query GetMomentSetting {
+    getMomentSetting {
+      id
+      entity
+      allowMomentsShareInFeed
+      momentsShareInFeedTitle
+      momentsShareInFeedDescription
+      allowMomentsAiLabel
+      momentsAiLabelTitle
+      momentsAiLabelDescription
+      momentsMaxDuration
+    }
+  }
+`;
+
+export const UPDATE_MOMENT_SETTING = gql`
+  mutation UpdateMomentSetting($input: UpdateMomentSettingInput!) {
+    updateMomentSetting(input: $input) {
+      id
+      entity
+      allowMomentsShareInFeed
+      momentsShareInFeedTitle
+      momentsShareInFeedDescription
+      allowMomentsAiLabel
+      momentsAiLabelTitle
+      momentsAiLabelDescription
+      momentsMaxDuration
+    }
+  }
+`;
+
+

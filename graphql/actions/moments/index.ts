@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_ALL_MOMENTS, GET_MOMENT_DETAILS, GET_MOMENT_DASHBOARD_KPIs, ADMIN_DELETE_MOMENT, ADMIN_GENERATE_MOMENT_UPLOAD_URL, ADMIN_CONFIRM_MOMENT_UPLOAD } from "../../quries/moments";
+import { GET_ALL_MOMENTS, GET_MOMENT_DETAILS, GET_MOMENT_DASHBOARD_KPIs, ADMIN_DELETE_MOMENT, ADMIN_GENERATE_MOMENT_UPLOAD_URL, ADMIN_CONFIRM_MOMENT_UPLOAD, GET_MOMENT_SETTING, UPDATE_MOMENT_SETTING } from "../../quries/moments";
 import { TimeRange, DateRangeInput } from "../dashboard";
 
 export interface Moment {
@@ -104,3 +104,39 @@ export const useAdminConfirmMomentUpload = (options?: any) => {
   });
   return [confirmUpload, { loading }] as const;
 };
+
+export interface MomentSetting {
+  id?: string;
+  entity: string;
+  allowMomentsShareInFeed: boolean;
+  momentsShareInFeedTitle?: string | null;
+  momentsShareInFeedDescription?: string | null;
+  allowMomentsAiLabel: boolean;
+  momentsAiLabelTitle?: string | null;
+  momentsAiLabelDescription?: string | null;
+  momentsMaxDuration: number;
+}
+
+export interface GetMomentSettingResponse {
+  getMomentSetting: MomentSetting;
+}
+
+export interface UpdateMomentSettingResponse {
+  updateMomentSetting: MomentSetting;
+}
+
+export const useGetMomentSetting = () =>
+  useQuery<GetMomentSettingResponse>(GET_MOMENT_SETTING, {
+    fetchPolicy: "cache-and-network",
+  });
+
+export const useUpdateMomentSetting = () => {
+  const [updateMomentSetting, { loading }] = useMutation<
+    UpdateMomentSettingResponse,
+    { input: Partial<MomentSetting> }
+  >(UPDATE_MOMENT_SETTING, {
+    refetchQueries: [{ query: GET_MOMENT_SETTING }],
+  });
+  return [updateMomentSetting, { loading }] as const;
+};
+

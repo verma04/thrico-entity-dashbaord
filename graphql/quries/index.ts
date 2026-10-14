@@ -185,6 +185,13 @@ export const GET_ENTITY_SETTINGS = gql`
       momentsCtaName
       momentsPinnedMomentIds
       momentsCustomTabs
+      allowMomentsShareInFeed
+      momentsShareInFeedTitle
+      momentsShareInFeedDescription
+      allowMomentsAiLabel
+      momentsAiLabelTitle
+      momentsAiLabelDescription
+      momentsMaxDuration
       allowCommunitiesDiscoverTab
       allowCommunitiesMyCommunitiesTab
       allowCommunitiesJoinedTab
@@ -309,6 +316,13 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       momentsCtaName
       momentsPinnedMomentIds
       momentsCustomTabs
+      allowMomentsShareInFeed
+      momentsShareInFeedTitle
+      momentsShareInFeedDescription
+      allowMomentsAiLabel
+      momentsAiLabelTitle
+      momentsAiLabelDescription
+      momentsMaxDuration
       allowCommunitiesDiscoverTab
       allowCommunitiesMyCommunitiesTab
       allowCommunitiesJoinedTab
@@ -588,3 +602,4 @@ export * from "./enterprise-leaderboard";
 
 
 export * from "./allowed-identifiers";
+export * from "./moments";

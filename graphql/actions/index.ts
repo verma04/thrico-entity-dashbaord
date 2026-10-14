@@ -25,6 +25,7 @@ export * from "./membership/membership-mutations";
 export * from "./export";
 export * from "./enterprise-leaderboard";
 export * from "./classification/classification-actions";
+export * from "./moments";
 export {
   useGetUserStatusTimeline,
   useLazyGetUserStatusTimeline,
@@ -170,6 +171,13 @@ export interface EntitySettings {
   momentsCtaName?: string | null;
   momentsPinnedMomentIds?: string[];
   momentsCustomTabs?: any[];
+  allowMomentsShareInFeed?: boolean;
+  momentsShareInFeedTitle?: string | null;
+  momentsShareInFeedDescription?: string | null;
+  allowMomentsAiLabel?: boolean;
+  momentsAiLabelTitle?: string | null;
+  momentsAiLabelDescription?: string | null;
+  momentsMaxDuration?: number | null;
 
   // Communities Tab Settings
   allowCommunitiesDiscoverTab?: boolean;
