@@ -81,6 +81,23 @@ export const RouteSelectorPopover: React.FC<RouteSelectorPopoverProps> = ({
     currentRoute && currentRoute.trim() !== "" && currentRoute !== defaultRoute,
   );
 
+  const commitRoute = (routeVal: string) => {
+    const trimmed = (routeVal || "").trim();
+    if (!trimmed || trimmed === defaultRoute) {
+      onChangeRoute("");
+    } else {
+      const formatted =
+        trimmed.startsWith("/") ||
+        trimmed.startsWith("http://") ||
+        trimmed.startsWith("https://") ||
+        trimmed.startsWith("#") ||
+        trimmed.startsWith("mailto:")
+          ? trimmed
+          : `/${trimmed}`;
+      onChangeRoute(formatted);
+    }
+  };
+
   const formik = useFormik<RouteFormValues>({
     initialValues: {
       route: currentRoute || "",
@@ -88,20 +105,7 @@ export const RouteSelectorPopover: React.FC<RouteSelectorPopoverProps> = ({
     validationSchema: routeValidationSchema,
     enableReinitialize: true,
     onSubmit: (values) => {
-      const trimmed = (values.route || "").trim();
-      if (!trimmed || trimmed === defaultRoute) {
-        onChangeRoute("");
-      } else {
-        const formatted =
-          trimmed.startsWith("/") ||
-          trimmed.startsWith("http://") ||
-          trimmed.startsWith("https://") ||
-          trimmed.startsWith("#") ||
-          trimmed.startsWith("mailto:")
-            ? trimmed
-            : `/${trimmed}`;
-        onChangeRoute(formatted);
-      }
+      commitRoute(values.route);
       setOpen(false);
     },
   });
@@ -109,17 +113,18 @@ export const RouteSelectorPopover: React.FC<RouteSelectorPopoverProps> = ({
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
       formik.resetForm({ values: { route: currentRoute || "" } });
+    } else {
+      // Auto-commit on close if dirty and valid so clicking "Save Changes" on the page immediately saves the latest route
+      if (formik.dirty && !formik.errors.route) {
+        commitRoute(formik.values.route);
+      }
     }
     setOpen(isOpen);
   };
 
   const handlePresetSelect = (path: string) => {
     void formik.setFieldValue("route", path);
-    if (path === defaultRoute) {
-      onChangeRoute("");
-    } else {
-      onChangeRoute(path);
-    }
+    commitRoute(path);
     setOpen(false);
   };
 
@@ -277,15 +282,25 @@ export const RouteSelectorPopover: React.FC<RouteSelectorPopoverProps> = ({
               <span>Reset to Default</span>
             </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setOpen(false)}
-              className="h-7 px-2.5 text-[11px] cursor-pointer"
-            >
-              Close
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setOpen(false)}
+                className="h-7 px-2 text-[11px] cursor-pointer"
+              >
+                Close
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={formik.isSubmitting}
+                className="h-7 px-2.5 text-[11px] bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 font-medium cursor-pointer shadow-2xs"
+              >
+                Apply Route
+              </Button>
+            </div>
           </div>
         </form>
       </PopoverContent>

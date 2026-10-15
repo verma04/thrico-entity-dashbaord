@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { getNavIcon } from "./utils";
 import { RouteSelectorPopover } from "./route-selector-popover";
+import { TabNamePopover } from "./tab-name-popover";
 import type { ModuleItem } from "./types";
 
 interface MobileNavigationProps {
@@ -42,6 +43,7 @@ interface MobileNavigationProps {
   hideMenuMobile?: boolean;
   onToggleHideMenuMobile?: (val: boolean) => void;
   changeCustomRoute?: (id: string, route: string) => void;
+  changeCustomName?: (id: string, name: string) => void;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -54,6 +56,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   hideMenuMobile,
   onToggleHideMenuMobile,
   changeCustomRoute,
+  changeCustomName,
 }) => {
   const [activePreviewTab, setActivePreviewTab] = useState<string>("home");
 
@@ -428,12 +431,32 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                       {module.customName || module.name}
                                     </span>
                                     {module.customName && (
-                                      <span className="text-[11px] text-muted-foreground">
+                                      <span className="text-[11px] text-muted-foreground truncate">
                                         ({module.name})
                                       </span>
                                     )}
+                                    {module.canRename && (
+                                      <TabNamePopover
+                                        moduleName={module.name}
+                                        currentName={module.customName}
+                                        onChangeName={(newName) =>
+                                          changeCustomName?.(module.id, newName)
+                                        }
+                                        disabled={userRole === "directory"}
+                                        triggerVariant="icon"
+                                      />
+                                    )}
                                   </div>
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <TabNamePopover
+                                      moduleName={module.name}
+                                      currentName={module.customName}
+                                      onChangeName={(newName) =>
+                                        changeCustomName?.(module.id, newName)
+                                      }
+                                      disabled={userRole === "directory" || !module.canRename}
+                                      triggerVariant="chip"
+                                    />
                                     <RouteSelectorPopover
                                       moduleName={module.customName || module.name}
                                       currentRoute={module.route}

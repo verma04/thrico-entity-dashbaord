@@ -34,6 +34,7 @@ import { getCustomDomain, getThricoDomain } from "@/graphql/actions/domain";
 import { useGetEntity } from "@/graphql/actions";
 import { getNavIcon } from "./utils";
 import { RouteSelectorPopover } from "./route-selector-popover";
+import { TabNamePopover } from "./tab-name-popover";
 import type { ModuleItem } from "./types";
 
 export const dashboardNavigation = [
@@ -45,31 +46,36 @@ export const accountNavigation = [
     name: "Gamification",
     href: "/dashboard/gamification",
     icon: Trophy,
-    description: "Member points, achievement badges, leaderboards, and streak tracking.",
+    description:
+      "Member points, achievement badges, leaderboards, and streak tracking.",
   },
   {
     name: "Profile",
     href: "/dashboard/profile",
     icon: User,
-    description: "User public profile, bio, personal portfolio, and social identity.",
+    description:
+      "User public profile, bio, personal portfolio, and social identity.",
   },
   {
     name: "Refer & Earn",
     href: "/dashboard/refer",
     icon: UserPlus,
-    description: "Referral links, invite tracking, community tier rewards, and perks.",
+    description:
+      "Referral links, invite tracking, community tier rewards, and perks.",
   },
   {
     name: "Notifications",
     href: "/dashboard/notifications",
     icon: Bell,
-    description: "Real-time updates, interaction alerts, system announcements, and messages.",
+    description:
+      "Real-time updates, interaction alerts, system announcements, and messages.",
   },
   {
     name: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
-    description: "Account security, notifications preferences, credentials, and settings.",
+    description:
+      "Account security, notifications preferences, credentials, and settings.",
   },
 ];
 
@@ -82,6 +88,7 @@ interface WebNavigationProps {
   onDragEnd: (result: DropResult) => void;
   toggleNavigation: (id: string) => void;
   changeCustomRoute?: (id: string, route: string) => void;
+  changeCustomName?: (id: string, name: string) => void;
 }
 
 const WebNavigation: React.FC<WebNavigationProps> = ({
@@ -91,6 +98,7 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
   onDragEnd,
   toggleNavigation,
   changeCustomRoute,
+  changeCustomName,
 }) => {
   const [selectedPreviewModule, setSelectedPreviewModule] =
     useState<string>("dashboard");
@@ -139,8 +147,8 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
               Web Sidebar Navigation Sequence
             </p>
             <p className="text-[12px] text-blue-800/80 dark:text-blue-400/80 mt-0.5">
-              Sequence how modules appear in your entity&apos;s main web dashboard
-              sidebar. Drag items in the center to reorder.
+              Sequence how modules appear in your entity&apos;s main web
+              dashboard sidebar. Drag items in the center to reorder.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -179,6 +187,7 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                   {/* Entity Brand Header */}
                   <div className="flex items-center gap-2 px-2 py-1">
                     {entityLogo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={entityLogo}
                         alt={entityName}
@@ -249,7 +258,10 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                             )}
                           >
                             <span className="shrink-0">
-                              {getNavIcon(module.customIcon || module.icon, true)}
+                              {getNavIcon(
+                                module.customIcon || module.icon,
+                                true,
+                              )}
                             </span>
                             <span className="truncate">
                               {module.customName || module.name}
@@ -339,7 +351,8 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                         ? "Overview & Analytics"
                         : activeAccountItem
                           ? activeAccountItem.name
-                          : activeModuleItem?.customName || activeModuleItem?.name}
+                          : activeModuleItem?.customName ||
+                            activeModuleItem?.name}
                     </h4>
                   </div>
                   <p className="text-[11px] text-muted-foreground leading-snug">
@@ -385,34 +398,38 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                   </div>
                 )}
 
-                {!activeAccountItem && selectedPreviewModule !== "dashboard" && activeModuleItem && (
-                  <div className="rounded-lg border border-border/60 bg-card p-3 shadow-2xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono truncate max-w-[200px]">
-                        Target: {activeModuleItem.route || `/dashboard/${activeModuleItem.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-                      </span>
-                      {activeModuleItem.route ? (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-semibold uppercase">
-                          Custom Route
+                {!activeAccountItem &&
+                  selectedPreviewModule !== "dashboard" &&
+                  activeModuleItem && (
+                    <div className="rounded-lg border border-border/60 bg-card p-3 shadow-2xs space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono truncate max-w-[200px]">
+                          Target:{" "}
+                          {activeModuleItem.route ||
+                            `/dashboard/${activeModuleItem.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                         </span>
-                      ) : (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
-                          Default Route
-                        </span>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 pt-0.5">
-                      <div className="p-2.5 rounded-lg border border-border/50 bg-muted/20 space-y-1">
-                        <div className="h-2 w-16 bg-muted rounded" />
-                        <div className="h-3.5 w-10 bg-primary/20 rounded" />
+                        {activeModuleItem.route ? (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-semibold uppercase">
+                            Custom Route
+                          </span>
+                        ) : (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                            Default Route
+                          </span>
+                        )}
                       </div>
-                      <div className="p-2.5 rounded-lg border border-border/50 bg-muted/20 space-y-1">
-                        <div className="h-2 w-20 bg-muted rounded" />
-                        <div className="h-3.5 w-12 bg-emerald-500/20 rounded" />
+                      <div className="grid grid-cols-2 gap-2 pt-0.5">
+                        <div className="p-2.5 rounded-lg border border-border/50 bg-muted/20 space-y-1">
+                          <div className="h-2 w-16 bg-muted rounded" />
+                          <div className="h-3.5 w-10 bg-primary/20 rounded" />
+                        </div>
+                        <div className="p-2.5 rounded-lg border border-border/50 bg-muted/20 space-y-1">
+                          <div className="h-2 w-20 bg-muted rounded" />
+                          <div className="h-3.5 w-12 bg-emerald-500/20 rounded" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           </div>
@@ -486,7 +503,8 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                       Center Navigation Sequence
                     </p>
                     <h4 className="text-[14px] font-semibold text-foreground mt-0.5">
-                      Drag to Reorder Web Navigation ({navigationModules.length})
+                      Drag to Reorder Web Navigation ({navigationModules.length}
+                      )
                     </h4>
                   </div>
                 </div>
@@ -562,18 +580,52 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                                           {module.customName || module.name}
                                         </span>
                                         {module.customName && (
-                                          <span className="text-[11px] text-muted-foreground">
+                                          <span className="text-[11px] text-muted-foreground truncate">
                                             ({module.name})
                                           </span>
                                         )}
+                                        {module.canRename && (
+                                          <TabNamePopover
+                                            moduleName={module.name}
+                                            currentName={module.customName}
+                                            onChangeName={(newName) =>
+                                              changeCustomName?.(
+                                                module.id,
+                                                newName,
+                                              )
+                                            }
+                                            disabled={userRole === "directory"}
+                                            triggerVariant="icon"
+                                          />
+                                        )}
                                       </div>
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <TabNamePopover
+                                          moduleName={module.name}
+                                          currentName={module.customName}
+                                          onChangeName={(newName) =>
+                                            changeCustomName?.(
+                                              module.id,
+                                              newName,
+                                            )
+                                          }
+                                          disabled={
+                                            userRole === "directory" ||
+                                            !module.canRename
+                                          }
+                                          triggerVariant="chip"
+                                        />
                                         <RouteSelectorPopover
-                                          moduleName={module.customName || module.name}
+                                          moduleName={
+                                            module.customName || module.name
+                                          }
                                           currentRoute={module.route}
                                           defaultRoute={`/dashboard/${module.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                                           onChangeRoute={(newRoute) =>
-                                            changeCustomRoute?.(module.id, newRoute)
+                                            changeCustomRoute?.(
+                                              module.id,
+                                              newRoute,
+                                            )
                                           }
                                           disabled={userRole === "directory"}
                                         />
@@ -691,8 +743,8 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                     </h5>
                   </div>
                   <p className="text-[12px] text-muted-foreground mt-0.5">
-                    These standard system routes are anchored in the Account section of
-                    your member dashboard sidebar.
+                    These standard system routes are anchored in the Account
+                    section of your member dashboard sidebar.
                   </p>
                 </div>
 
@@ -798,7 +850,12 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                   </div>
                   <div className="flex items-center gap-2 text-foreground font-medium">
                     <Link2 className="h-3.5 w-3.5 text-primary" />
-                    <span>Target Route: <code className="font-mono text-primary font-bold">/dashboard</code></span>
+                    <span>
+                      Target Route:{" "}
+                      <code className="font-mono text-primary font-bold">
+                        /dashboard
+                      </code>
+                    </span>
                   </div>
                 </div>
               </div>

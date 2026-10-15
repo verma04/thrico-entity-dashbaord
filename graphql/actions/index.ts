@@ -326,6 +326,7 @@ export interface SubscriptionDetails {
     customName?: string | null;
     customIcon?: string | null;
     icon: string;
+    route?: string | null;
     enabled: boolean;
     isPopular: boolean;
     showInWebNavigation: boolean;

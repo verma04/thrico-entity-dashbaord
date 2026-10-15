@@ -14,6 +14,7 @@ export default function WebNavTab() {
     onDragEndWeb,
     toggleWebNavigation,
     changeCustomRoute,
+    changeCustomName,
   } = useModulesContext();
 
   return (
@@ -27,6 +28,7 @@ export default function WebNavTab() {
         onDragEnd={onDragEndWeb}
         toggleNavigation={toggleWebNavigation}
         changeCustomRoute={changeCustomRoute}
+        changeCustomName={changeCustomName}
       />
     </div>
   );

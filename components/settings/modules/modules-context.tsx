@@ -178,7 +178,6 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
             : undefined,
         isPopular: m.isPopular ?? false,
         customName: m.customName ?? null,
-        customIcon: m.customIcon ?? null,
         route: m.route ?? null,
         subtitle: m.subtitle ?? null,
         isPublicFacing: m.isPublicFacing ?? false,
@@ -279,6 +278,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
         const updateModulePromise = updateEntityModule({
           variables: { input },
           refetchQueries: ["CheckEntitySubscription"],
+          awaitRefetchQueries: true,
         });
 
         const promises: [
@@ -295,6 +295,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
                 },
               },
               refetchQueries: ["GetEntitySettings"],
+              awaitRefetchQueries: true,
             }),
           );
         }
@@ -351,7 +352,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
   const toggleModule = (id: string) => {
     if (userRole === "directory") return;
     const nextModules = modules.map((m) => {
-      if (m.id === id && !m.required) {
+      if (String(m.id) === String(id) && !m.required) {
         return m.enabled
           ? { ...m, enabled: false, showInMobileNavigation: false }
           : { ...m, enabled: true };
@@ -363,7 +364,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
 
   const togglePopular = (id: string) => {
     const nextModules = modules.map((m) =>
-      m.id === id ? { ...m, isPopular: !m.isPopular } : m,
+      String(m.id) === String(id) ? { ...m, isPopular: !m.isPopular } : m,
     );
     void formik.setFieldValue("modules", nextModules);
   };
@@ -418,7 +419,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
   const toggleWebNavigation = (id: string) => {
     if (userRole === "directory") return;
     const nextModules = modules.map((m) => {
-      if (m.id !== id) return m;
+      if (String(m.id) !== String(id)) return m;
       return { ...m, showInWebNavigation: !m.showInWebNavigation };
     });
     void formik.setFieldValue("modules", nextModules);
@@ -426,28 +427,28 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
 
   const changeCustomName = (id: string, value: string) => {
     const nextModules = modules.map((m) =>
-      m.id === id ? { ...m, customName: value } : m,
+      String(m.id) === String(id) ? { ...m, customName: value } : m,
     );
     void formik.setFieldValue("modules", nextModules);
   };
 
   const changeCustomIcon = (id: string, value: string) => {
     const nextModules = modules.map((m) =>
-      m.id === id ? { ...m, customIcon: value, icon: value } : m,
+      String(m.id) === String(id) ? { ...m, customIcon: value, icon: value } : m,
     );
     void formik.setFieldValue("modules", nextModules);
   };
 
   const changeSubtitle = (id: string, value: string) => {
     const nextModules = modules.map((m) =>
-      m.id === id ? { ...m, subtitle: value } : m,
+      String(m.id) === String(id) ? { ...m, subtitle: value } : m,
     );
     void formik.setFieldValue("modules", nextModules);
   };
 
   const changeCustomRoute = (id: string, value: string) => {
     const nextModules = modules.map((m) =>
-      m.id === id ? { ...m, route: value } : m,
+      String(m.id) === String(id) ? { ...m, route: value } : m,
     );
     void formik.setFieldValue("modules", nextModules);
   };
