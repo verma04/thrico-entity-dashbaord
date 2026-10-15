@@ -29,12 +29,14 @@ import {
   ImageIcon,
   Pencil,
   UserCheck,
+  History,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Moment, useAdminDeleteMoment } from "@/graphql/actions/moments";
 import { useModuleStore } from "@/store/useModuleStore";
 import { ChangeThumbnailDialog } from "./change-thumbnail-dialog";
 import { ChangeUploadTypeDialog } from "./change-upload-type-dialog";
+import { MomentHistoryDialog } from "./moment-history-dialog";
 
 export interface MomentActionsProps {
   moment: Moment;
@@ -57,6 +59,7 @@ export function MomentActions({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [changeThumbnailOpen, setChangeThumbnailOpen] = useState(false);
   const [changeUploadTypeOpen, setChangeUploadTypeOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { deleteMoment, loading: deleteLoading } = useAdminDeleteMoment();
 
   const handleCopyLink = (e: React.MouseEvent) => {
@@ -145,6 +148,13 @@ export function MomentActions({
           </DropdownMenuItem>
 
           <DropdownMenuItem
+            onClick={() => setHistoryOpen(true)}
+            className="text-xs font-medium cursor-pointer gap-2 py-1.5"
+          >
+            <History className="h-3.5 w-3.5 text-muted-foreground" />
+            Attribution History
+          </DropdownMenuItem>
+          <DropdownMenuItem
             onClick={() => setChangeUploadTypeOpen(true)}
             className="text-xs font-medium cursor-pointer gap-2 py-1.5"
           >
@@ -186,6 +196,17 @@ export function MomentActions({
         open={changeUploadTypeOpen}
         onOpenChange={setChangeUploadTypeOpen}
         onSuccess={onUploadTypeUpdate}
+        onViewHistory={() => {
+          setChangeUploadTypeOpen(false);
+          setHistoryOpen(true);
+        }}
+      />
+
+      {/* Moment History Transparency Modal */}
+      <MomentHistoryDialog
+        moment={moment}
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
       />
 
       {/* Delete Confirmation Alert Dialog */}

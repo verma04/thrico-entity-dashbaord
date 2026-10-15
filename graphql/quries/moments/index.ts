@@ -188,3 +188,45 @@ export const UPDATE_MOMENT_SETTING = gql`
 `;
 
 
+
+export const ADMIN_GET_MOMENT_HISTORY = gql`
+  query AdminGetMomentHistory($momentId: ID!) {
+    adminGetMomentHistory(momentId: $momentId) {
+      momentId
+      currentAddedBy
+      currentOwner {
+        id
+        firstName
+        lastName
+        avatar
+      }
+      admin {
+        id
+        firstName
+        lastName
+        avatar
+      }
+      createdAt
+      items {
+        id
+        action
+        admin {
+          id
+          firstName
+          lastName
+          avatar
+        }
+        targetUser {
+          id
+          firstName
+          lastName
+          avatar
+        }
+        previousState
+        newState
+        reason
+        createdAt
+      }
+    }
+  }
+`;

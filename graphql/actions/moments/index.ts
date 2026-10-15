@@ -8,6 +8,7 @@ import {
   ADMIN_GENERATE_MOMENT_UPLOAD_URL,
   ADMIN_CONFIRM_MOMENT_UPLOAD,
   ADMIN_CHANGE_MOMENT_UPLOAD_TYPE,
+  ADMIN_GET_MOMENT_HISTORY,
   GET_MOMENT_SETTING,
   UPDATE_MOMENT_SETTING,
 } from "../../quries/moments";
@@ -225,3 +226,42 @@ export const useUpdateMomentSetting = () => {
   return [updateMomentSetting, { loading }] as const;
 };
 
+
+export interface MomentHistoryUser {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  avatar?: string;
+  headline?: string;
+}
+
+export interface MomentHistoryItem {
+  id: string;
+  action: string;
+  admin?: MomentHistoryUser | null;
+  targetUser?: MomentHistoryUser | null;
+  previousState?: any;
+  newState?: any;
+  reason?: string | null;
+  createdAt: string;
+}
+
+export interface MomentHistoryData {
+  momentId: string;
+  currentAddedBy: "USER" | "ENTITY";
+  currentOwner?: MomentHistoryUser | null;
+  admin?: MomentHistoryUser | null;
+  createdAt?: string;
+  items: MomentHistoryItem[];
+}
+
+export interface AdminGetMomentHistoryResponse {
+  adminGetMomentHistory: MomentHistoryData;
+}
+
+export const useAdminGetMomentHistory = (momentId?: string) =>
+  useQuery<AdminGetMomentHistoryResponse>(ADMIN_GET_MOMENT_HISTORY, {
+    variables: { momentId },
+    skip: !momentId,
+    fetchPolicy: "network-only",
+  });

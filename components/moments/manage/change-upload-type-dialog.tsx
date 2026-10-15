@@ -19,7 +19,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Check, Building2, User, Loader2 } from "lucide-react";
+import { Check, Building2, User, Loader2, History } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Moment, useAdminChangeMomentUploadType } from "@/graphql/actions/moments";
@@ -30,6 +30,7 @@ interface ChangeUploadTypeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: (updated: Moment) => void;
+  onViewHistory?: () => void;
 }
 
 export function ChangeUploadTypeDialog({
@@ -37,6 +38,7 @@ export function ChangeUploadTypeDialog({
   open,
   onOpenChange,
   onSuccess,
+  onViewHistory,
 }: ChangeUploadTypeDialogProps) {
   const currentType = (moment?.addedBy === "ENTITY" ? "ENTITY" : "USER") as "ENTITY" | "USER";
   const [selectedType, setSelectedType] = useState<"ENTITY" | "USER">(
@@ -117,6 +119,72 @@ export function ChangeUploadTypeDialog({
             Configure whether this moment is attributed to the official Entity or an individual Member.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Current Attribution Card */}
+        <div className="rounded-lg border border-border/70 bg-muted/40 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              Current Attribution
+            </span>
+            {onViewHistory && (
+              <button
+                type="button"
+                onClick={onViewHistory}
+                className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <History className="h-3 w-3" />
+                View History
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {moment?.addedBy === "ENTITY" ? (
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <Building2 className="h-3.5 w-3.5" />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-foreground">
+                    Official Entity Post
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    Branded with Community / Entity identity
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 min-w-0">
+                <Avatar className="h-7 w-7 rounded-full border border-border/80">
+                  <AvatarImage
+                    src={
+                      moment?.owner?.avatar?.startsWith("http")
+                        ? moment.owner.avatar
+                        : moment?.owner?.avatar
+                        ? `https://cdn.thrico.network/${moment.owner.avatar}`
+                        : undefined
+                    }
+                    alt={moment?.owner?.firstName || ""}
+                  />
+                  <AvatarFallback className="text-[10px] font-bold bg-muted">
+                    {moment?.owner?.firstName?.[0] || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-foreground truncate">
+                    {moment?.owner
+                      ? `${moment.owner.firstName || ""} ${moment.owner.lastName || ""}`.trim()
+                      : "Unknown Member"}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    Individual Member Attribution
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
 
         {/* Mode Selector Cards */}
         <div className="grid grid-cols-2 gap-2.5">
