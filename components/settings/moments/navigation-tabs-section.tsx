@@ -77,7 +77,8 @@ export const NavigationTabsSection: React.FC<NavigationTabsSectionProps> = ({
                   Primary CTA Button Name
                 </span>
                 <p className="text-[11px] text-[#616161] dark:text-zinc-400">
-                  Customize the button label used across the member header to initiate uploads.
+                  Customize the button label used across the member header to
+                  initiate uploads.
                 </p>
               </div>
             </div>
@@ -88,7 +89,10 @@ export const NavigationTabsSection: React.FC<NavigationTabsSectionProps> = ({
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-[#e1e3e5]/70 dark:border-zinc-800/70">
             <span className="text-[11px] text-[#616161] dark:text-zinc-400">
-              Button Text: <span className="text-[10px] text-[#8c9196]">(Default: &quot;Create {singularName}&quot;)</span>
+              Button Text:{" "}
+              <span className="text-[10px] text-[#8c9196]">
+                (Default: &quot;Create {singularName}&quot;)
+              </span>
             </span>
             <div className="flex flex-col w-full sm:w-[240px]">
               <input
@@ -102,11 +106,13 @@ export const NavigationTabsSection: React.FC<NavigationTabsSectionProps> = ({
                   "text-[12px] h-7 px-2.5 rounded-[4px] border bg-white dark:bg-zinc-800 text-[#303030] dark:text-zinc-100 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500",
                   formik.touched.ctaName && formik.errors.ctaName
                     ? "border-destructive focus:ring-destructive"
-                    : "border-[#d2d5d9] dark:border-zinc-700"
+                    : "border-[#d2d5d9] dark:border-zinc-700",
                 )}
               />
               {formik.touched.ctaName && formik.errors.ctaName && (
-                <span className="text-[10.5px] text-destructive mt-0.5">{formik.errors.ctaName}</span>
+                <span className="text-[10.5px] text-destructive mt-0.5">
+                  {formik.errors.ctaName}
+                </span>
               )}
             </div>
           </div>
