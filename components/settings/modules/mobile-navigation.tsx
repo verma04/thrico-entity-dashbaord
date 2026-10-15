@@ -20,8 +20,6 @@ import {
   Sparkles,
   Wifi,
   Battery,
-  Layers,
-  CheckCircle2,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
@@ -29,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { getNavIcon } from "./utils";
+import { RouteSelectorPopover } from "./route-selector-popover";
 import type { ModuleItem } from "./types";
 
 interface MobileNavigationProps {
@@ -42,6 +41,7 @@ interface MobileNavigationProps {
   moveModule?: (id: string, direction: "up" | "down") => void;
   hideMenuMobile?: boolean;
   onToggleHideMenuMobile?: (val: boolean) => void;
+  changeCustomRoute?: (id: string, route: string) => void;
 }
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -53,6 +53,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   moveModule,
   hideMenuMobile,
   onToggleHideMenuMobile,
+  changeCustomRoute,
 }) => {
   const [activePreviewTab, setActivePreviewTab] = useState<string>("home");
 
@@ -139,17 +140,37 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 </div>
 
                 {/* Banner / Card Widget */}
-                <div className="p-3.5 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-primary text-[11px] font-semibold">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Live Simulation</span>
-                  </div>
-                  <p className="text-[12px] font-medium text-foreground leading-snug">
-                    {activePreviewTab === "home"
-                      ? "Welcome back to your mobile community hub."
-                      : `You are viewing the simulated ${activePreviewTab} module view.`}
-                  </p>
-                </div>
+                {(() => {
+                  const activeNavMod = navigationModules.find((m) => m.id === activePreviewTab);
+                  const effectiveTargetRoute = activeNavMod
+                    ? activeNavMod.route || `/dashboard/${activeNavMod.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`
+                    : activePreviewTab === "home"
+                      ? "/dashboard"
+                      : activePreviewTab === "profile"
+                        ? "/dashboard/profile"
+                        : "/dashboard";
+
+                  return (
+                    <div className="p-3.5 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 space-y-2">
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5 text-primary text-[11px] font-semibold">
+                          <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                          <span>Live Simulation</span>
+                        </div>
+                        <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-md bg-primary/15 text-primary font-semibold truncate max-w-[140px]">
+                          {effectiveTargetRoute}
+                        </span>
+                      </div>
+                      <p className="text-[12px] font-medium text-foreground leading-snug">
+                        {activePreviewTab === "home"
+                          ? "Welcome back to your mobile community hub."
+                          : activeNavMod
+                            ? `Destination path: ${effectiveTargetRoute}`
+                            : `You are viewing the simulated ${activePreviewTab} screen.`}
+                      </p>
+                    </div>
+                  );
+                })()}
 
                 {/* Simulated Content Feed */}
                 <div className="space-y-2 pt-1">
@@ -400,8 +421,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                   {getNavIcon(module.customIcon || module.icon, true)}
                                 </div>
 
-                                {/* Title & Subtitle */}
-                                <div className="flex-1 min-w-0">
+                                {/* Title, Subtitle & Target Route */}
+                                <div className="flex-1 min-w-0 space-y-1">
                                   <div className="flex items-center gap-1.5">
                                     <span className="text-[13px] font-semibold text-foreground truncate">
                                       {module.customName || module.name}
@@ -412,15 +433,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                       </span>
                                     )}
                                   </div>
-                                  {module.subtitle ? (
-                                    <p className="text-[11px] text-muted-foreground truncate">
-                                      {module.subtitle}
-                                    </p>
-                                  ) : (
-                                    <p className="text-[10px] text-muted-foreground/60 italic">
-                                      Position {idx + 1} in mobile bottom bar
-                                    </p>
-                                  )}
+                                  <div className="flex items-center gap-2">
+                                    <RouteSelectorPopover
+                                      moduleName={module.customName || module.name}
+                                      currentRoute={module.route}
+                                      defaultRoute={`/dashboard/${module.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                                      onChangeRoute={(newRoute) =>
+                                        changeCustomRoute?.(module.id, newRoute)
+                                      }
+                                      disabled={userRole === "directory"}
+                                    />
+                                    {module.subtitle && (
+                                      <span className="text-[10px] text-muted-foreground truncate hidden sm:inline">
+                                        • {module.subtitle}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
 
                                 {/* Remove Button */}

@@ -427,6 +427,7 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
         showInMobileNavigationSortNumber
         showInWebNavigationSortNumber
         customName
+        route
         canRename
         isPublicFacing
       }

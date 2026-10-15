@@ -70,6 +70,7 @@ export const modulesValidationSchema = Yup.object().shape({
       showInWebNavigation: Yup.boolean().required(),
       customName: Yup.string().nullable().optional(),
       customIcon: Yup.string().nullable().optional(),
+      route: Yup.string().nullable().optional(),
       subtitle: Yup.string().nullable().optional(),
       isPopular: Yup.boolean().required(),
       showInMobileNavigationSortNumber: Yup.number().nullable().optional(),
@@ -122,6 +123,7 @@ interface ModulesContextType {
   changeCustomName: (id: string, value: string) => void;
   changeCustomIcon: (id: string, value: string) => void;
   changeSubtitle: (id: string, value: string) => void;
+  changeCustomRoute: (id: string, value: string) => void;
   moveNavigationModule: (id: string, direction: "up" | "down") => void;
   onDragEnd: (result: DropResult) => void;
   onDragEndWeb: (result: DropResult) => void;
@@ -176,6 +178,8 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
             : undefined,
         isPopular: m.isPopular ?? false,
         customName: m.customName ?? null,
+        customIcon: m.customIcon ?? null,
+        route: m.route ?? null,
         subtitle: m.subtitle ?? null,
         isPublicFacing: m.isPublicFacing ?? false,
         canRename: m.canRename ?? true,
@@ -265,6 +269,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
           isPopular: m.isPopular ?? null,
           customName: m.customName ?? null,
           customIcon: m.customIcon ?? m.icon ?? null,
+          route: m.route ?? null,
           subtitle: m.subtitle ?? null,
           isPublicFacing: m.isPublicFacing ?? false,
         };
@@ -440,6 +445,13 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
     void formik.setFieldValue("modules", nextModules);
   };
 
+  const changeCustomRoute = (id: string, value: string) => {
+    const nextModules = modules.map((m) =>
+      m.id === id ? { ...m, route: value } : m,
+    );
+    void formik.setFieldValue("modules", nextModules);
+  };
+
   const navigationModules = useMemo(() => {
     return modules
       .filter((m) => m.showInMobileNavigation)
@@ -599,6 +611,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
     changeCustomName,
     changeCustomIcon,
     changeSubtitle,
+    changeCustomRoute,
     moveNavigationModule,
     onDragEnd,
     onDragEndWeb,

@@ -16,6 +16,7 @@ export default function MobileNavTab() {
     toggleNavigation,
     hideMenuMobile,
     setHideMenuMobile,
+    changeCustomRoute,
   } = useModulesContext();
 
   return (
@@ -31,6 +32,7 @@ export default function MobileNavTab() {
         toggleNavigation={toggleNavigation}
         hideMenuMobile={hideMenuMobile}
         onToggleHideMenuMobile={setHideMenuMobile}
+        changeCustomRoute={changeCustomRoute}
       />
     </div>
   );

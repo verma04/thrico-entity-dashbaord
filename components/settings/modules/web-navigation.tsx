@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { getCustomDomain, getThricoDomain } from "@/graphql/actions/domain";
 import { useGetEntity } from "@/graphql/actions";
 import { getNavIcon } from "./utils";
+import { RouteSelectorPopover } from "./route-selector-popover";
 import type { ModuleItem } from "./types";
 
 export const dashboardNavigation = [
@@ -80,6 +81,7 @@ interface WebNavigationProps {
   saveChanges: () => void;
   onDragEnd: (result: DropResult) => void;
   toggleNavigation: (id: string) => void;
+  changeCustomRoute?: (id: string, route: string) => void;
 }
 
 const WebNavigation: React.FC<WebNavigationProps> = ({
@@ -88,6 +90,7 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
   userRole,
   onDragEnd,
   toggleNavigation,
+  changeCustomRoute,
 }) => {
   const [selectedPreviewModule, setSelectedPreviewModule] =
     useState<string>("dashboard");
@@ -382,15 +385,31 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                   </div>
                 )}
 
-                {!activeAccountItem && selectedPreviewModule !== "dashboard" && (
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <div className="p-3 rounded-lg border border-border/60 bg-card shadow-2xs space-y-1.5">
-                      <div className="h-2 w-16 bg-muted rounded" />
-                      <div className="h-4 w-10 bg-primary/20 rounded" />
+                {!activeAccountItem && selectedPreviewModule !== "dashboard" && activeModuleItem && (
+                  <div className="rounded-lg border border-border/60 bg-card p-3 shadow-2xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono truncate max-w-[200px]">
+                        Target: {activeModuleItem.route || `/dashboard/${activeModuleItem.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                      </span>
+                      {activeModuleItem.route ? (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-semibold uppercase">
+                          Custom Route
+                        </span>
+                      ) : (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                          Default Route
+                        </span>
+                      )}
                     </div>
-                    <div className="p-3 rounded-lg border border-border/60 bg-card shadow-2xs space-y-1.5">
-                      <div className="h-2 w-20 bg-muted rounded" />
-                      <div className="h-4 w-12 bg-emerald-500/20 rounded" />
+                    <div className="grid grid-cols-2 gap-2 pt-0.5">
+                      <div className="p-2.5 rounded-lg border border-border/50 bg-muted/20 space-y-1">
+                        <div className="h-2 w-16 bg-muted rounded" />
+                        <div className="h-3.5 w-10 bg-primary/20 rounded" />
+                      </div>
+                      <div className="p-2.5 rounded-lg border border-border/50 bg-muted/20 space-y-1">
+                        <div className="h-2 w-20 bg-muted rounded" />
+                        <div className="h-3.5 w-12 bg-emerald-500/20 rounded" />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -536,8 +555,8 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                                       )}
                                     </div>
 
-                                    {/* Title & Subtitle */}
-                                    <div className="flex-1 min-w-0">
+                                    {/* Title, Subtitle & Target Route */}
+                                    <div className="flex-1 min-w-0 space-y-1">
                                       <div className="flex items-center gap-1.5">
                                         <span className="text-[13px] font-semibold text-foreground truncate">
                                           {module.customName || module.name}
@@ -548,15 +567,22 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                                           </span>
                                         )}
                                       </div>
-                                      {module.subtitle ? (
-                                        <p className="text-[11px] text-muted-foreground truncate">
-                                          {module.subtitle}
-                                        </p>
-                                      ) : (
-                                        <p className="text-[10px] text-muted-foreground/60 italic">
-                                          Position {idx + 1} in web sidebar
-                                        </p>
-                                      )}
+                                      <div className="flex items-center gap-2">
+                                        <RouteSelectorPopover
+                                          moduleName={module.customName || module.name}
+                                          currentRoute={module.route}
+                                          defaultRoute={`/dashboard/${module.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                                          onChangeRoute={(newRoute) =>
+                                            changeCustomRoute?.(module.id, newRoute)
+                                          }
+                                          disabled={userRole === "directory"}
+                                        />
+                                        {module.subtitle && (
+                                          <span className="text-[10px] text-muted-foreground truncate hidden sm:inline">
+                                            • {module.subtitle}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
 
                                     {/* Preview Button */}
@@ -671,7 +697,7 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                 </div>
 
                 <div className="space-y-2.5 pt-1">
-                  {accountNavigation.map((item, idx) => {
+                  {accountNavigation.map((item) => {
                     const Icon = item.icon;
                     const isPreviewed =
                       selectedPreviewModule === `account-${item.name}`;

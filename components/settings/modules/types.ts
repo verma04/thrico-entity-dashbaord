@@ -11,6 +11,7 @@ export interface ModuleItem {
   showInWebNavigationSortNumber?: number;
   customName?: string | null;
   customIcon?: string | null;
+  route?: string | null;
   subtitle?: string | null;
   category?: string;
   isPublicFacing: boolean;
