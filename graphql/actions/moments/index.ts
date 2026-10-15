@@ -7,6 +7,7 @@ import {
   ADMIN_EDIT_MOMENT,
   ADMIN_GENERATE_MOMENT_UPLOAD_URL,
   ADMIN_CONFIRM_MOMENT_UPLOAD,
+  ADMIN_CHANGE_MOMENT_UPLOAD_TYPE,
   GET_MOMENT_SETTING,
   UPDATE_MOMENT_SETTING,
 } from "../../quries/moments";
@@ -113,7 +114,7 @@ export interface AdminConfirmMomentUploadInput {
   thumbnailUrl?: string;
   shareInFeed?: boolean;
   isAiContent?: boolean;
-  userId?: string;
+  userId?: string | null;
 }
 
 export interface AdminConfirmMomentUploadResponse {
@@ -136,10 +137,38 @@ export const useAdminConfirmMomentUpload = (
   return [confirmUpload, { loading }] as const;
 };
 
+
+export interface AdminChangeMomentUploadTypeInput {
+  addedBy: "USER" | "ENTITY";
+  userId?: string;
+}
+
+export interface AdminChangeMomentUploadTypeResponse {
+  adminChangeMomentUploadType: Moment;
+}
+
+export const useAdminChangeMomentUploadType = (
+  options?: MutationHookOptions<
+    AdminChangeMomentUploadTypeResponse,
+    { id: string; input: AdminChangeMomentUploadTypeInput }
+  >,
+) => {
+  const [changeUploadType, { loading }] = useMutation<
+    AdminChangeMomentUploadTypeResponse,
+    { id: string; input: AdminChangeMomentUploadTypeInput }
+  >(ADMIN_CHANGE_MOMENT_UPLOAD_TYPE, {
+    refetchQueries: [{ query: GET_ALL_MOMENTS }],
+    ...options,
+  });
+  return [changeUploadType, { loading }] as const;
+};
+
 export interface AdminUpdateMomentInput {
   caption?: string;
   thumbnailUrl?: string;
   status?: string;
+  addedBy?: string;
+  userId?: string;
 }
 
 export interface AdminEditMomentResponse {

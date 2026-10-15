@@ -8,3 +8,4 @@ export * from "./moment-grid";
 export * from "./moment-actions";
 export * from "./change-thumbnail-dialog";
 export * from "./export-moments-modal";
+export * from "./change-upload-type-dialog";

@@ -28,17 +28,20 @@ import {
   Loader2,
   ImageIcon,
   Pencil,
+  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Moment, useAdminDeleteMoment } from "@/graphql/actions/moments";
 import { useModuleStore } from "@/store/useModuleStore";
 import { ChangeThumbnailDialog } from "./change-thumbnail-dialog";
+import { ChangeUploadTypeDialog } from "./change-upload-type-dialog";
 
 export interface MomentActionsProps {
   moment: Moment;
   onPreview?: () => void;
   onDelete?: (id: string) => void;
   onThumbnailUpdate?: (updatedMoment: Moment) => void;
+  onUploadTypeUpdate?: (updatedMoment: Moment) => void;
   trigger?: React.ReactNode;
 }
 
@@ -47,11 +50,13 @@ export function MomentActions({
   onPreview,
   onDelete,
   onThumbnailUpdate,
+  onUploadTypeUpdate,
   trigger,
 }: MomentActionsProps) {
   const singularName = useModuleStore((state) => state.momentSingularName);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [changeThumbnailOpen, setChangeThumbnailOpen] = useState(false);
+  const [changeUploadTypeOpen, setChangeUploadTypeOpen] = useState(false);
   const { deleteMoment, loading: deleteLoading } = useAdminDeleteMoment();
 
   const handleCopyLink = (e: React.MouseEvent) => {
@@ -140,6 +145,14 @@ export function MomentActions({
           </DropdownMenuItem>
 
           <DropdownMenuItem
+            onClick={() => setChangeUploadTypeOpen(true)}
+            className="text-xs font-medium cursor-pointer gap-2 py-1.5"
+          >
+            <UserCheck className="h-3.5 w-3.5 text-muted-foreground" />
+            Change Upload Type
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
             onClick={handleCopyLink}
             className="text-xs font-medium cursor-pointer gap-2 py-1.5"
           >
@@ -165,6 +178,14 @@ export function MomentActions({
         open={changeThumbnailOpen}
         onOpenChange={setChangeThumbnailOpen}
         onSuccess={onThumbnailUpdate}
+      />
+
+{/* Change Upload Type Modal */}
+      <ChangeUploadTypeDialog
+        moment={moment}
+        open={changeUploadTypeOpen}
+        onOpenChange={setChangeUploadTypeOpen}
+        onSuccess={onUploadTypeUpdate}
       />
 
       {/* Delete Confirmation Alert Dialog */}
