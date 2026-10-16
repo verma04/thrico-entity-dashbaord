@@ -70,7 +70,8 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
   const { data: settingsData } = useEntitySettings();
   const entitySettings = settingsData?.getEntitySettings;
   const customCta = entitySettings?.momentsCtaName;
-  const tabNames = (entitySettings?.momentsTabNames as Record<string, string>) || {};
+  const tabNames =
+    (entitySettings?.momentsTabNames as Record<string, string>) || {};
   const customCtaPath =
     entitySettings?.momentsCtaPath ||
     tabNames["__cta_path__"] ||
@@ -104,10 +105,7 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
   const limit = 24;
   const offset = (page - 1) * limit;
 
-  const status =
-    searchParams.get("status") ||
-    initialStatus ||
-    "ALL";
+  const status = searchParams.get("status") || initialStatus || "ALL";
 
   const sortBy = searchParams.get("sort") || "newest";
   const view = (searchParams.get("view") as "grid" | "list") || "grid";
@@ -129,15 +127,17 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Column visibility for List view
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
-    serial: true,
-    moment: true,
-    views: true,
-    status: true,
-    created: true,
-    creator: true,
-    actions: true,
-  });
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    {
+      serial: true,
+      moment: true,
+      views: true,
+      status: true,
+      created: true,
+      creator: true,
+      actions: true,
+    },
+  );
 
   const toggleColumn = (key: string) => {
     setVisibleColumns((prev) => ({
@@ -191,7 +191,9 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
 
     // Status filter
     if (status !== "ALL") {
-      list = list.filter((m) => m.status?.toUpperCase() === status.toUpperCase());
+      list = list.filter(
+        (m) => m.status?.toUpperCase() === status.toUpperCase(),
+      );
     }
 
     // Search filter
@@ -280,10 +282,7 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
         {/* Status Filter */}
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select
-              value={status}
-              onValueChange={(v) => setStatus(v)}
-            >
+            <Select value={status} onValueChange={(v) => setStatus(v)}>
               <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <div className="flex items-center gap-2">
                   {STATUS_TABS.find((t) => t.value === status)?.dot && (
@@ -323,10 +322,7 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
 
           {/* Sort Filter */}
           <EcosystemActionBar.Item>
-            <Select
-              value={sortBy}
-              onValueChange={(v) => setSortBy(v)}
-            >
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v)}>
               <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
@@ -401,7 +397,7 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
           />
 
           {/* Create CTA Button */}
-          <Link href={customCtaPath}>
+          <Link href={"/moments/create"}>
             <CtaButton>
               <Plus className="h-3.5 w-3.5" />
               {customCta || `Create ${singularName}`}
