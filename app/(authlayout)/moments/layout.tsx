@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Video, Settings, List, PlayCircle } from "lucide-react";
+import { Video, List, PlayCircle } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
-import { Card } from "@/components/ui/card";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useGetModuleCustomName, useEntitySettings } from "@/graphql/actions";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -30,6 +29,11 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: `All ${moduleName}`,
       icon: <List className="h-4 w-4" />,
+    },
+    {
+      key: "campaigns",
+      label: "Campaign Manager",
+      icon: <Video className="h-4 w-4" />,
     },
     {
       key: "create",
