@@ -860,3 +860,16 @@ export const GET_FEED_SHARE_STATS = gql`
     }
   }
 `;
+
+export const EDIT_FEED = gql`
+  mutation EditFeed($input: InputEditFeed!) {
+    editFeed(input: $input) {
+      id
+      description
+      moment {
+        id
+        caption
+      }
+    }
+  }
+`;

@@ -16,7 +16,13 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
   const fetchedName = customNameData?.getModuleCustomName;
 
   const { data: settingsData } = useEntitySettings();
-  const customCta = settingsData?.getEntitySettings?.momentsCtaName;
+  const entitySettings = settingsData?.getEntitySettings;
+  const customCta = entitySettings?.momentsCtaName;
+  const tabNames = (entitySettings?.momentsTabNames as Record<string, string>) || {};
+  const customCtaPath =
+    entitySettings?.momentsCtaPath ||
+    tabNames["__cta_path__"] ||
+    "/moments/create";
 
   React.useEffect(() => {
     if (fetchedName) {
@@ -38,6 +44,7 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
     {
       key: "create",
       label: customCta || `Create ${singularName}`,
+      href: customCtaPath,
       icon: <PlayCircle className="h-4 w-4" />,
     },
   ];

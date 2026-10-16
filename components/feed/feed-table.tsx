@@ -32,6 +32,7 @@ import {
   Loader2,
   Users,
   ShieldCheck,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +71,7 @@ import {
 } from "@/graphql/quries/feed";
 import type { FeedProps } from "./types";
 import { FeedDetailModal } from "./feed-detail-modal";
+import { EditFeedModal } from "./edit-feed-modal";
 
 export const feedTableColumns = [
   { key: "serial", header: "S.No" },
@@ -102,6 +104,7 @@ export function FeedTable({
   const [selectedFeedForView, setSelectedFeedForView] = useState<FeedProps | null>(null);
   const [modalDefaultTab, setModalDefaultTab] = useState<"preview" | "shares" | "engagement" | "demographics">("preview");
   const [feedToDelete, setFeedToDelete] = useState<FeedProps | null>(null);
+  const [feedToEdit, setFeedToEdit] = useState<FeedProps | null>(null);
 
   const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
     refetchQueries: [{ query: GET_ALL_FEED }, { query: NUMBER_OF_FEED }],
@@ -573,6 +576,14 @@ export function FeedTable({
             </DropdownMenuItem>
 
             <DropdownMenuItem
+              onClick={() => setFeedToEdit(row)}
+              className="cursor-pointer gap-2 text-xs font-medium"
+            >
+              <Pencil className="h-3.5 w-3.5 text-primary" />
+              <span>Edit Caption</span>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
               onClick={() => {
                 setSelectedFeedForView(row);
                 setModalDefaultTab("engagement");
@@ -696,6 +707,15 @@ export function FeedTable({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Caption Modal */}
+      <EditFeedModal
+        feed={feedToEdit}
+        open={!!feedToEdit}
+        onOpenChange={(open) => {
+          if (!open) setFeedToEdit(null);
+        }}
+      />
     </>
   );
 }

@@ -52,7 +52,13 @@ function MomentsDashboardPage() {
   const singularName = useModuleStore((state) => state.momentSingularName);
 
   const { data: settingsData } = useEntitySettings();
-  const customCta = settingsData?.getEntitySettings?.momentsCtaName;
+  const entitySettings = settingsData?.getEntitySettings;
+  const customCta = entitySettings?.momentsCtaName;
+  const tabNames = (entitySettings?.momentsTabNames as Record<string, string>) || {};
+  const customCtaPath =
+    entitySettings?.momentsCtaPath ||
+    tabNames["__cta_path__"] ||
+    "/moments/create";
 
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
     TimeRange.LAST_30_DAYS,
@@ -179,7 +185,7 @@ function MomentsDashboardPage() {
               />
             </Button>
             <div className="h-4 w-px bg-zinc-200 mx-1" />
-            <Link href="/moments/create">
+            <Link href={customCtaPath}>
               <CtaButton>
                 <Plus className="h-4 w-4" />
                 {customCta || `Create ${singularName}`}

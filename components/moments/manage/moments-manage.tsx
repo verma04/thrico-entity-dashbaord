@@ -68,7 +68,13 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
   const singularName = useModuleStore((state) => state.momentSingularName);
 
   const { data: settingsData } = useEntitySettings();
-  const customCta = settingsData?.getEntitySettings?.momentsCtaName;
+  const entitySettings = settingsData?.getEntitySettings;
+  const customCta = entitySettings?.momentsCtaName;
+  const tabNames = (entitySettings?.momentsTabNames as Record<string, string>) || {};
+  const customCtaPath =
+    entitySettings?.momentsCtaPath ||
+    tabNames["__cta_path__"] ||
+    "/moments/create";
 
   // ── Update URL parameters helper ──────────────────────────────────────────
   const updateParams = useCallback(
@@ -395,7 +401,7 @@ export function MomentsManage({ status: initialStatus }: MomentsManageProps) {
           />
 
           {/* Create CTA Button */}
-          <Link href="/moments/create">
+          <Link href={customCtaPath}>
             <CtaButton>
               <Plus className="h-3.5 w-3.5" />
               {customCta || `Create ${singularName}`}

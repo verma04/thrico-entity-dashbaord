@@ -17,6 +17,9 @@ import {
   Share2,
   Layers,
   Plus,
+  Flame,
+  ExternalLink,
+  ArrowRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -26,7 +29,7 @@ import {
 } from "@/components/gamification/shared/polaris-form-ui";
 import { ModuleTabItem } from "@/components/settings/shared/module-tab-manager";
 import { Moment } from "@/graphql/actions/moments";
-import { MomentsFormValues, PreviewTabId, PREVIEW_TABS } from "./types";
+import { MomentsFormValues, PreviewTabId, PREVIEW_TABS, resolveMomentsCtaPath } from "./types";
 import { cn } from "@/lib/utils";
 
 interface MomentsSettingsSidebarProps {
@@ -438,13 +441,40 @@ export const MomentsSettingsSidebar: React.FC<MomentsSettingsSidebarProps> = ({
             </div>
 
             {/* Primary CTA Button Preview */}
-            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 flex items-center justify-between">
-              <span className="text-[11px] text-[#616161] dark:text-zinc-400">
-                Action Button:
-              </span>
-              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-[4px] bg-indigo-600 text-white text-[10.5px] font-medium shadow-2xs">
-                <Plus className="h-3 w-3 stroke-[2.5px]" />
-                <span>{formValues.ctaName || `Create ${singularName}`}</span>
+            <div className="pt-2 border-t border-[#e1e3e5] dark:border-zinc-800 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-[#616161] dark:text-zinc-400">
+                  Header CTA:
+                </span>
+                <div className="inline-flex items-center gap-1 px-2 py-1 rounded-[4px] bg-indigo-600 text-white text-[10.5px] font-medium shadow-2xs">
+                  {formValues.ctaType === "CAMPAIGNS_ALL" ? (
+                    <Layers className="h-3 w-3 stroke-[2.5px]" />
+                  ) : formValues.ctaType === "SPECIFIC_CAMPAIGN" ? (
+                    <Flame className="h-3 w-3 stroke-[2.5px]" />
+                  ) : formValues.ctaType === "CUSTOM" ? (
+                    <ExternalLink className="h-3 w-3 stroke-[2.5px]" />
+                  ) : (
+                    <Plus className="h-3 w-3 stroke-[2.5px]" />
+                  )}
+                  <span>{formValues.ctaName || `Create ${singularName}`}</span>
+                </div>
+              </div>
+
+              {/* Destination Path Indicator */}
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/40 font-mono">
+                <span className="text-[9.5px] uppercase tracking-wider text-muted-foreground/80 font-sans font-semibold">
+                  Destination:
+                </span>
+                <span className="text-indigo-600 dark:text-indigo-400 truncate max-w-[180px] flex items-center gap-0.5">
+                  <ArrowRight className="h-2.5 w-2.5 shrink-0" />
+                  <span className="truncate">
+                    {resolveMomentsCtaPath(
+                      formValues.ctaType,
+                      formValues.ctaCampaignId,
+                      formValues.ctaPath,
+                    )}
+                  </span>
+                </span>
               </div>
             </div>
           </div>

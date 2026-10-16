@@ -11,9 +11,32 @@ export interface CustomTabConfig {
   momentIds?: string[];
 }
 
+export type MomentsCtaType = "CREATE" | "CAMPAIGNS_ALL" | "SPECIFIC_CAMPAIGN" | "CUSTOM";
+
+export const resolveMomentsCtaPath = (
+  type: MomentsCtaType,
+  campaignId?: string,
+  customPath?: string,
+): string => {
+  switch (type) {
+    case "CAMPAIGNS_ALL":
+      return "/moments/campaigns";
+    case "SPECIFIC_CAMPAIGN":
+      return campaignId ? `/moments/campaigns/${campaignId}` : "/moments/campaigns";
+    case "CUSTOM":
+      return customPath?.trim() || "/moments/create";
+    case "CREATE":
+    default:
+      return "/moments/create";
+  }
+};
+
 // Formik Form Values Interface
 export interface MomentsFormValues {
   ctaName: string;
+  ctaType: MomentsCtaType;
+  ctaPath: string;
+  ctaCampaignId: string;
   allowPublicMoments: boolean;
   enableShortUploads: boolean;
   allowEntityMomentsInFeed: boolean;
@@ -43,6 +66,11 @@ export interface MomentsFormValues {
 // Yup Validation Schema
 export const momentsFormValidationSchema = Yup.object().shape({
   ctaName: Yup.string().max(60, "CTA label cannot exceed 60 characters"),
+  ctaType: Yup.string()
+    .oneOf(["CREATE", "CAMPAIGNS_ALL", "SPECIFIC_CAMPAIGN", "CUSTOM"])
+    .required("CTA action type is required"),
+  ctaPath: Yup.string().max(250, "CTA path cannot exceed 250 characters"),
+  ctaCampaignId: Yup.string().nullable(),
   allowPublicMoments: Yup.boolean(),
   enableShortUploads: Yup.boolean(),
   allowEntityMomentsInFeed: Yup.boolean(),

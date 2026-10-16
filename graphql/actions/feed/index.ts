@@ -1,4 +1,9 @@
-import { useMutation, useQuery, QueryHookOptions } from "@apollo/client";
+import {
+  useMutation,
+  useQuery,
+  QueryHookOptions,
+  MutationHookOptions,
+} from "@apollo/client";
 import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
 export { TimeRange };
 export type { DateRangeInput };
@@ -25,7 +30,26 @@ import {
   PIN_FEED,
   GET_POST_ANALYTICS,
   GET_FEED_SHARE_STATS,
+  EDIT_FEED,
 } from "../../quries/feed";
+
+export interface EditFeedData {
+  editFeed: {
+    id: string;
+    description: string;
+    moment?: {
+      id: string;
+      caption?: string;
+    } | null;
+  };
+}
+
+export interface EditFeedVariables {
+  input: {
+    id: string;
+    description: string;
+  };
+}
 
 export const useAllFeed = (options: any) => useQuery(GET_ALL_FEED, options);
 
@@ -52,6 +76,10 @@ export const useDeleteCommunityFeed = (options: any) =>
   useMutation(DELETE_COMMUNITY_FEED, options);
 
 export const usePinFeed = (options: any) => useMutation(PIN_FEED, options);
+
+export const useEditFeed = (
+  options?: MutationHookOptions<EditFeedData, EditFeedVariables>,
+) => useMutation<EditFeedData, EditFeedVariables>(EDIT_FEED, options);
 
 export const useNumberOfFeeds = () => useQuery(NUMBER_OF_FEED);
 

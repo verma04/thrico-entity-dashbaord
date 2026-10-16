@@ -22,6 +22,8 @@ import { ModuleTabItem } from "@/components/settings/shared/module-tab-manager";
 import { useModuleStore } from "@/store/useModuleStore";
 import {
   MomentsFormValues,
+  MomentsCtaType,
+  resolveMomentsCtaPath,
   momentsFormValidationSchema,
   createDefaultTabs,
   PreviewTabId,
@@ -75,8 +77,26 @@ function MomentsSettingsPage() {
     const ms = momentSettingData?.getMomentSetting;
     const es = data?.getEntitySettings;
     const rawPinned = es?.momentsPinnedMomentIds;
+    const tabNames = (es?.momentsTabNames as Record<string, string>) || {};
+
+    const ctaType: MomentsCtaType =
+      (es?.momentsCtaType as MomentsCtaType) ||
+      (tabNames["__cta_type__"] as MomentsCtaType) ||
+      "CREATE";
+    const ctaPath: string =
+      es?.momentsCtaPath ||
+      tabNames["__cta_path__"] ||
+      "/moments/create";
+    const ctaCampaignId: string =
+      es?.momentsCtaCampaignId ||
+      tabNames["__cta_campaign_id__"] ||
+      "";
+
     return {
       ctaName: es?.momentsCtaName || "",
+      ctaType,
+      ctaPath,
+      ctaCampaignId,
       allowPublicMoments: true,
       enableShortUploads: true,
       allowEntityMomentsInFeed: es?.allowEntityMomentsInFeed ?? true,
@@ -143,6 +163,18 @@ function MomentsSettingsPage() {
           }
         });
 
+        // Store CTA destination metadata in momentsTabNames
+        const effectivePath = resolveMomentsCtaPath(
+          values.ctaType,
+          values.ctaCampaignId,
+          values.ctaPath,
+        );
+        momentsTabNames["__cta_type__"] = values.ctaType;
+        momentsTabNames["__cta_path__"] = effectivePath;
+        if (values.ctaCampaignId) {
+          momentsTabNames["__cta_campaign_id__"] = values.ctaCampaignId;
+        }
+
         const connectionsTab = values.tabs.find((t) => t.id === "connections");
         const myMomentsTab = values.tabs.find((t) => t.id === "myMoments");
 
@@ -160,6 +192,9 @@ function MomentsSettingsPage() {
           variables: {
             input: {
               momentsCtaName: values.ctaName.trim() || null,
+              momentsCtaType: values.ctaType,
+              momentsCtaPath: effectivePath,
+              momentsCtaCampaignId: values.ctaCampaignId || null,
               allowMomentsDiscoverTab: true,
               allowMomentsConnectionsTab: connectionsTab ? connectionsTab.enabled !== false : true,
               allowMomentsMyMomentsTab: myMomentsTab ? myMomentsTab.enabled !== false : true,

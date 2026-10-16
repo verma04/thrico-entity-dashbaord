@@ -183,6 +183,9 @@ export const GET_ENTITY_SETTINGS = gql`
       momentsTabNames
       momentsTabOrder
       momentsCtaName
+      momentsCtaType
+      momentsCtaPath
+      momentsCtaCampaignId
       momentsPinnedMomentIds
       momentsCustomTabs
       allowMomentsShareInFeed
@@ -315,6 +318,9 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       momentsTabNames
       momentsTabOrder
       momentsCtaName
+      momentsCtaType
+      momentsCtaPath
+      momentsCtaCampaignId
       momentsPinnedMomentIds
       momentsCustomTabs
       allowMomentsShareInFeed

@@ -21,6 +21,7 @@ import {
   BarChart3,
   Copy,
   Check,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -53,6 +54,7 @@ import PollVote from "../polls/poll-vote";
 import type { poll } from "../polls/ts-types";
 import FeedMedia from "./feed-media";
 import FeedDescription from "./feed-description";
+import { EditFeedModal } from "./edit-feed-modal";
 import { cn } from "@/lib/utils";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
 import {
@@ -71,6 +73,7 @@ import moment from "moment";
 
 export default function Feed({ feed }: { feed: FeedProps }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
 
@@ -317,6 +320,17 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                     {feed.isOwner ? (
                       <>
                         <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsEditOpen(true);
+                          }}
+                          className="cursor-pointer gap-2"
+                        >
+                          <Pencil className="h-4 w-4 text-primary" />
+                          <span>Edit Caption</span>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
                           onClick={handlePin}
                           disabled={isPinning}
                           className="cursor-pointer gap-2"
@@ -397,6 +411,13 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+
+              {/* Edit Caption Dialog */}
+              <EditFeedModal
+                feed={feed}
+                open={isEditOpen}
+                onOpenChange={setIsEditOpen}
+              />
             </div>
           </div>
 

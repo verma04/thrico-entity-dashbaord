@@ -169,6 +169,9 @@ export interface EntitySettings {
   momentsTabNames?: Record<string, string>;
   momentsTabOrder?: string[];
   momentsCtaName?: string | null;
+  momentsCtaType?: string | null;
+  momentsCtaPath?: string | null;
+  momentsCtaCampaignId?: string | null;
   momentsPinnedMomentIds?: string[];
   momentsCustomTabs?: any[];
   allowMomentsShareInFeed?: boolean;
