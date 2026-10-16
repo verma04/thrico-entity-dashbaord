@@ -190,6 +190,7 @@ export interface MomentSetting {
   id?: string;
   entity: string;
   allowMomentsShareInFeed: boolean;
+  allowMomentsInstantPublish: boolean;
   momentsShareInFeedTitle?: string | null;
   momentsShareInFeedDescription?: string | null;
   allowMomentsAiLabel: boolean;

@@ -32,6 +32,7 @@ export interface MomentsFormValues {
   momentsUploadCardDescription: string;
   momentsMaxDuration: number;
   allowMomentsShareInFeed: boolean;
+  allowMomentsInstantPublish: boolean;
   momentsShareInFeedTitle: string;
   momentsShareInFeedDescription: string;
   allowMomentsAiLabel: boolean;
@@ -65,6 +66,7 @@ export const momentsFormValidationSchema = Yup.object().shape({
     .max(120, "Duration cannot exceed 2 minutes (120 seconds)"),
 
   allowMomentsShareInFeed: Yup.boolean(),
+  allowMomentsInstantPublish: Yup.boolean(),
   momentsShareInFeedTitle: Yup.string().max(60, "Option title cannot exceed 60 characters"),
   momentsShareInFeedDescription: Yup.string().max(140, "Option description cannot exceed 140 characters"),
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { FormikProps } from "formik";
-import { Film, Type, Clock, AlertCircle, Send, Sparkles } from "lucide-react";
+import { Film, Zap, Type, Clock, AlertCircle, Send, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { PolarisFormCard } from "@/components/gamification/shared/polaris-form-ui";
@@ -340,6 +340,43 @@ export const CreatorStudioSection: React.FC<CreatorStudioSectionProps> = ({
             </div>
           )}
         </div>
+        {/* Subcard: Instant Moment Publishing Card */}
+        <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-2">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-2.5">
+              <div className="h-7 w-7 rounded-[4px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400 mt-0.5 shrink-0">
+                <Zap className="h-3.5 w-3.5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[12.5px] font-semibold text-[#303030] dark:text-zinc-100">
+                    Instant Moment Publishing
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-[9px] px-1 py-0 rounded-[3px] font-bold",
+                      formik.values.allowMomentsInstantPublish
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400"
+                        : "bg-zinc-100 text-zinc-500 border-zinc-200 dark:bg-zinc-800"
+                    )}
+                  >
+                    {formik.values.allowMomentsInstantPublish ? "Enabled" : "Disabled"}
+                  </Badge>
+                </div>
+                <p className="text-[11px] text-[#616161] dark:text-zinc-400 leading-[15px]">
+                  Publishes moments instantly without waiting for transcoding if video file is ≤ 16MB. Heavy files (&gt; 16MB) will transcode first to ensure smooth mobile playback.
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={formik.values.allowMomentsInstantPublish}
+              onCheckedChange={(checked) => formik.setFieldValue("allowMomentsInstantPublish", checked)}
+            />
+          </div>
+        </div>
+
+
 
         {/* Subcard 4: Add AI Label Settings Card */}
         <div className="p-3.5 rounded-[6px] border border-[#d2d5d9] dark:border-zinc-800 bg-[#f6f6f7]/40 dark:bg-zinc-900/40 space-y-3">

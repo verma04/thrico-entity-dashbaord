@@ -541,6 +541,11 @@ export const MomentsSettingsSidebar: React.FC<MomentsSettingsSidebarProps> = ({
             highlight={formValues.allowMomentsShareInFeed}
           />
           <PolarisSummaryRow
+            label="Instant Publish (≤16MB)"
+            value={formValues.allowMomentsInstantPublish ? "Enabled" : "Disabled"}
+            highlight={formValues.allowMomentsInstantPublish}
+          />
+          <PolarisSummaryRow
             label="AI Content Label"
             value={formValues.allowMomentsAiLabel ? "Enabled" : "Disabled"}
           />

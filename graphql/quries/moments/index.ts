@@ -151,6 +151,7 @@ export const GET_MOMENT_SETTING = gql`
       id
       entity
       allowMomentsShareInFeed
+      allowMomentsInstantPublish
       momentsShareInFeedTitle
       momentsShareInFeedDescription
       allowMomentsAiLabel
@@ -172,6 +173,7 @@ export const UPDATE_MOMENT_SETTING = gql`
       id
       entity
       allowMomentsShareInFeed
+      allowMomentsInstantPublish
       momentsShareInFeedTitle
       momentsShareInFeedDescription
       allowMomentsAiLabel

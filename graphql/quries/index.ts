@@ -186,6 +186,7 @@ export const GET_ENTITY_SETTINGS = gql`
       momentsPinnedMomentIds
       momentsCustomTabs
       allowMomentsShareInFeed
+      allowMomentsInstantPublish
       momentsShareInFeedTitle
       momentsShareInFeedDescription
       allowMomentsAiLabel
@@ -317,6 +318,7 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       momentsPinnedMomentIds
       momentsCustomTabs
       allowMomentsShareInFeed
+      allowMomentsInstantPublish
       momentsShareInFeedTitle
       momentsShareInFeedDescription
       allowMomentsAiLabel

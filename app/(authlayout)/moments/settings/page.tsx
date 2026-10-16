@@ -94,6 +94,7 @@ function MomentsSettingsPage() {
       momentsUploadCardDescription: ms?.momentsUploadCardDescription || "",
       momentsMaxDuration: ms?.momentsMaxDuration ?? 60,
       allowMomentsShareInFeed: ms?.allowMomentsShareInFeed ?? true,
+      allowMomentsInstantPublish: ms?.allowMomentsInstantPublish ?? true,
       momentsShareInFeedTitle: ms?.momentsShareInFeedTitle || "Share in Feed",
       momentsShareInFeedDescription:
         ms?.momentsShareInFeedDescription || "Make this visible across your community feed",
@@ -122,6 +123,7 @@ function MomentsSettingsPage() {
               momentsUploadCardDescription: values.momentsUploadCardDescription.trim() || null,
               momentsMaxDuration: Number(values.momentsMaxDuration),
               allowMomentsShareInFeed: values.allowMomentsShareInFeed,
+              allowMomentsInstantPublish: values.allowMomentsInstantPublish,
               momentsShareInFeedTitle: values.momentsShareInFeedTitle.trim() || null,
               momentsShareInFeedDescription:
                 values.momentsShareInFeedDescription.trim() || null,

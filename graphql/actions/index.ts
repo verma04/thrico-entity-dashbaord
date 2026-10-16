@@ -172,6 +172,7 @@ export interface EntitySettings {
   momentsPinnedMomentIds?: string[];
   momentsCustomTabs?: any[];
   allowMomentsShareInFeed?: boolean;
+  allowMomentsInstantPublish?: boolean;
   momentsShareInFeedTitle?: string | null;
   momentsShareInFeedDescription?: string | null;
   allowMomentsAiLabel?: boolean;
