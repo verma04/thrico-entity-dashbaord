@@ -14,6 +14,7 @@ interface ButtonTheme {
 
 import type {
   NavigationTheme,
+  NavbarTheme,
   SidebarTheme,
   BottomSheetTheme,
 } from "./ts-types";
@@ -36,6 +37,7 @@ interface Theme {
   hoverEffect: string;
   Button: ButtonTheme;
   Navigation?: NavigationTheme;
+  Navbar?: NavbarTheme;
   Sidebar?: SidebarTheme;
   BottomSheet?: BottomSheetTheme;
   setTheme: (theme: Partial<Omit<Theme, "setTheme">>) => void;
@@ -81,6 +83,12 @@ export const useThemeStore = create<Theme>()(
         tabBadgeBg: "#ef4444",
         tabBadgeColor: "#ffffff",
         tabSize: "md",
+      },
+      Navbar: {
+        navbarBg: "#ffffff",
+        navbarTextColor: "#0f172a",
+        navbarBorderColor: "#e2e8f0",
+        navbarLogo: "",
       },
       Sidebar: {
         sidebarBg: "#ffffff",

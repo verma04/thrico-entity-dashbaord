@@ -25,26 +25,52 @@ const WebsiteHeader: React.FC<WebsiteHeaderProps> = ({ theme }) => {
   }
 
   const organization = data?.getEntity;
+  const navbarBg =
+    theme.Navbar?.navbarBg ||
+    `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`;
+  const navbarTextColor = theme.Navbar?.navbarTextColor || "#ffffff";
+  const navbarBorderColor = theme.Navbar?.navbarBorderColor || "transparent";
+  const navbarLogo = theme.Navbar?.navbarLogo;
 
   return (
     <div
-      className="px-6 py-4 flex justify-between items-center"
+      className="px-6 py-4 flex justify-between items-center transition-colors border-b"
       style={{
-        background: `linear-gradient(135deg, ${theme.primaryColor} 0%, ${theme.secondaryColor} 100%)`,
+        background: navbarBg,
+        borderColor: navbarBorderColor,
+        color: navbarTextColor,
       }}
     >
       <div className="flex items-center gap-4">
-        <div
-          className="px-3 py-2 rounded-lg backdrop-blur-sm bg-card/20"
-          style={{
-            borderRadius: `${theme.borderRadius}px`,
-          }}
+        {navbarLogo ? (
+          <div className="flex items-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={navbarLogo}
+              alt="Navbar Logo"
+              className="h-8 max-w-[160px] object-contain"
+            />
+          </div>
+        ) : (
+          <div
+            className="px-3 py-2 rounded-lg backdrop-blur-sm bg-card/20"
+            style={{
+              borderRadius: `${theme.borderRadius}px`,
+            }}
+          >
+            <h1
+              className="font-bold text-lg leading-tight"
+              style={{ color: navbarTextColor }}
+            >
+              {organization?.name || "Organization"}
+            </h1>
+          </div>
+        )}
+        <button
+          type="button"
+          className="hover:opacity-80 p-2 rounded transition cursor-pointer"
+          style={{ color: navbarTextColor }}
         >
-          <h1 className="text-white font-bold text-lg">
-            {organization?.name || "Organization"}
-          </h1>
-        </div>
-        <button className="text-white hover:bg-card/20 p-2 rounded transition">
           <Menu size={20} />
         </button>
       </div>
@@ -52,9 +78,11 @@ const WebsiteHeader: React.FC<WebsiteHeaderProps> = ({ theme }) => {
       <div className="flex gap-3 items-center">
         {organization?.subscription && (
           <div
-            className="px-2 py-1 text-xs font-semibold text-white bg-card/20 rounded backdrop-blur-sm"
+            className="px-2 py-1 text-xs font-semibold rounded backdrop-blur-sm opacity-90"
             style={{
               borderRadius: `${(theme.borderRadius ?? 8) / 2}px`,
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              color: navbarTextColor,
             }}
           >
             {organization.subscription.planName}
@@ -63,19 +91,19 @@ const WebsiteHeader: React.FC<WebsiteHeaderProps> = ({ theme }) => {
         <div className="relative">
           <Input
             placeholder="Search..."
-            className="w-48 bg-card/90 placeholder:text-muted-foreground"
+            className="w-48 bg-card/90 placeholder:text-muted-foreground text-xs h-8"
             style={{
               borderRadius: `${theme.borderRadius}px`,
             }}
           />
           <SearchIcon
-            className="absolute right-3 top-2.5 text-muted-foreground"
-            size={18}
+            className="absolute right-2.5 top-2 text-muted-foreground"
+            size={16}
           />
         </div>
         <div className="relative">
-          <Avatar className="w-9 h-9 border-2 border-white/30" />
-          <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs">
+          <Avatar className="w-8 h-8 border-2 border-white/30" />
+          <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1 py-0">
             3
           </Badge>
         </div>

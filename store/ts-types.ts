@@ -79,6 +79,13 @@ export interface BottomSheetTheme {
   sheetBorderColor?: string;
 }
 
+export interface NavbarTheme {
+  navbarBg: string;
+  navbarTextColor: string;
+  navbarBorderColor: string;
+  navbarLogo?: string;
+}
+
 export interface EntityTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -97,6 +104,7 @@ export interface EntityTheme {
   hoverEffect: string;
   Button?: ButtonTheme;
   Navigation?: NavigationTheme;
+  Navbar?: NavbarTheme;
   Sidebar?: SidebarTheme;
   BottomSheet?: BottomSheetTheme;
 }

@@ -26,6 +26,12 @@ export const GET_THEME = gql`
         tabBadgeColor
         tabSize
       }
+      Navbar {
+        navbarBg
+        navbarTextColor
+        navbarBorderColor
+        navbarLogo
+      }
       Sidebar {
         sidebarBg
         sidebarTextColor
@@ -86,6 +92,12 @@ export const EDIT_THEME = gql`
         tabBadgeBg
         tabBadgeColor
         tabSize
+      }
+      Navbar {
+        navbarBg
+        navbarTextColor
+        navbarBorderColor
+        navbarLogo
       }
       Sidebar {
         sidebarBg

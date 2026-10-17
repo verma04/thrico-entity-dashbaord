@@ -133,28 +133,46 @@ export const MobileDevicePreview: React.FC<MobileDevicePreviewProps> = ({
 
           {/* Mobile App Header */}
           <div
-            className="flex items-center justify-between px-3.5 py-2.5 border-b shrink-0 z-20"
-            style={{ borderColor: theme.borderColor || "#e2e8f0" }}
+            className="flex items-center justify-between px-3.5 py-2.5 border-b shrink-0 z-20 transition-colors"
+            style={{
+              backgroundColor: theme.Navbar?.navbarBg || theme.backgroundColor || "#ffffff",
+              borderColor: theme.Navbar?.navbarBorderColor || theme.borderColor || "#e2e8f0",
+              color: theme.Navbar?.navbarTextColor || theme.textColor || "#0f172a",
+            }}
           >
             <div className="flex items-center gap-2">
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs text-white shadow-2xs"
-                style={{ backgroundColor: theme.primaryColor }}
-              >
-                T
-              </div>
-              <span
-                className="text-xs font-bold truncate max-w-[120px]"
-                style={{ color: theme.textColor }}
-              >
-                Thrico Mobile
-              </span>
+              {theme.Navbar?.navbarLogo ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={theme.Navbar.navbarLogo}
+                  alt="Navbar Logo"
+                  className="h-6 max-w-[100px] object-contain"
+                />
+              ) : (
+                <>
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs text-white shadow-2xs"
+                    style={{ backgroundColor: theme.primaryColor }}
+                  >
+                    T
+                  </div>
+                  <span
+                    className="text-xs font-bold truncate max-w-[120px]"
+                    style={{ color: theme.Navbar?.navbarTextColor || theme.textColor }}
+                  >
+                    Thrico Mobile
+                  </span>
+                </>
+              )}
             </div>
-            <div className="flex items-center gap-1.5 text-slate-600">
+            <div
+              className="flex items-center gap-1.5 opacity-80"
+              style={{ color: theme.Navbar?.navbarTextColor || "#475569" }}
+            >
               <button
                 type="button"
                 onClick={() => setMobileView("drawer")}
-                className="p-1 rounded-full hover:bg-muted/50 cursor-pointer"
+                className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
                 title="Preview Sidebar Drawer"
               >
                 <Search className="w-3.5 h-3.5" />
