@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { useDebounce } from "use-debounce";
 import Link from "next/link";
 import {
@@ -15,21 +14,20 @@ import {
   Check,
   MoreHorizontal,
   Trash2,
-  ExternalLink,
   PauseCircle,
   PlayCircle,
+  Archive,
   Edit3,
-  Layers,
   Radio,
   Smartphone,
-  Search,
+  Layers,
+  Image as ImageIcon,
 } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -71,8 +69,6 @@ import { FeedCampaignKpiSummary } from "./feed-campaign-kpi-summary";
 import { FeedCampaignsTable } from "./feed-campaigns-table";
 
 export function FeedCampaignManagerDashboard() {
-  const router = useRouter();
-
   // Filters & State
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch] = useDebounce(searchTerm, 300);
@@ -80,9 +76,10 @@ export function FeedCampaignManagerDashboard() {
   const [placementFilter, setPlacementFilter] = useState("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Deletion dialog state
-  const [campaignToDelete, setCampaignToDelete] = useState<string | null>(null);
+  const [campaignToDelete, setCampaignToDelete] = useState<FeedCampaign | null>(null);
 
   // GraphQL Queries & Mutations
   const { data, loading, refetch } = useGetFeedCampaigns({
@@ -90,7 +87,7 @@ export function FeedCampaignManagerDashboard() {
     search: debouncedSearch || undefined,
   });
 
-  const { deleteCampaign, loading: isDeleting } = useAdminDeleteFeedCampaign();
+  const { deleteCampaign } = useAdminDeleteFeedCampaign();
   const [updateCampaign] = useAdminUpdateFeedCampaign();
 
   const allCampaigns = useMemo(() => {
@@ -103,7 +100,11 @@ export function FeedCampaignManagerDashboard() {
     return allCampaigns.filter((c) => {
       if (placementFilter === "FEED") return c.placements.includes("FEED");
       if (placementFilter === "STORIES") return c.placements.includes("STORIES");
-      if (placementFilter === "BOTH") return c.placements.includes("BOTH") || (c.placements.includes("FEED") && c.placements.includes("STORIES"));
+      if (placementFilter === "BOTH")
+        return (
+          c.placements.includes("BOTH") ||
+          (c.placements.includes("FEED") && c.placements.includes("STORIES"))
+        );
       return true;
     });
   }, [allCampaigns, placementFilter]);
@@ -114,6 +115,18 @@ export function FeedCampaignManagerDashboard() {
     totalPosts: 0,
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      toast.success("Campaign metrics refreshed");
+    } catch {
+      toast.info("Refreshed");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const handleCopyLink = (campaign: FeedCampaign) => {
     const url = `${window.location.origin}/feed?campaign=${campaign.slug}`;
     navigator.clipboard.writeText(url);
@@ -122,16 +135,17 @@ export function FeedCampaignManagerDashboard() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleToggleStatus = async (campaign: FeedCampaign) => {
-    const nextStatus: CampaignStatus = campaign.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
+  const handleToggleStatus = async (campaign: FeedCampaign, nextStatus?: CampaignStatus) => {
+    const statusToSet: CampaignStatus =
+      nextStatus || (campaign.status === "ACTIVE" ? "PAUSED" : "ACTIVE");
     try {
       await updateCampaign({
         variables: {
           id: campaign.id,
-          input: { status: nextStatus },
+          input: { status: statusToSet },
         },
       });
-      toast.success(`Campaign status set to ${nextStatus}`);
+      toast.success(`Campaign status updated to ${statusToSet}`);
       refetch();
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to update campaign status");
@@ -141,7 +155,7 @@ export function FeedCampaignManagerDashboard() {
   const handleDelete = async () => {
     if (!campaignToDelete) return;
     try {
-      await deleteCampaign({ variables: { id: campaignToDelete } });
+      await deleteCampaign({ variables: { id: campaignToDelete.id } });
       toast.success("Feed Campaign deleted successfully");
       setCampaignToDelete(null);
       refetch();
@@ -150,34 +164,100 @@ export function FeedCampaignManagerDashboard() {
     }
   };
 
+  const getStatusBadge = (status: CampaignStatus, campaign: FeedCampaign) => {
+    const isActive = status === "ACTIVE";
+    const isPaused = status === "PAUSED";
+    const isDraft = status === "DRAFT";
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              "inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-semibold rounded-full transition-all cursor-pointer border",
+              isActive &&
+                "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20",
+              isPaused &&
+                "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/20",
+              isDraft &&
+                "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/20 hover:bg-zinc-500/20",
+              !isActive &&
+                !isPaused &&
+                !isDraft &&
+                "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+            )}
+          >
+            <span
+              className={cn(
+                "h-1.5 w-1.5 rounded-full",
+                isActive && "bg-emerald-500 animate-pulse",
+                isPaused && "bg-amber-500",
+                isDraft && "bg-zinc-400",
+                !isActive && !isPaused && !isDraft && "bg-muted-foreground"
+              )}
+            />
+            <span>{status}</span>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-36 text-xs">
+          <DropdownMenuItem onClick={() => handleToggleStatus(campaign, "ACTIVE")}>
+            <PlayCircle className="h-3.5 w-3.5 mr-2 text-emerald-600" />
+            Active
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleToggleStatus(campaign, "PAUSED")}>
+            <PauseCircle className="h-3.5 w-3.5 mr-2 text-amber-600" />
+            Paused
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleToggleStatus(campaign, "ARCHIVED")}>
+            <Archive className="h-3.5 w-3.5 mr-2 text-zinc-500" />
+            Archived
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   return (
     <EcosystemWrapper>
+      {/* Page Header matching Thrico standard */}
       <EcosystemHeader
         title="Feed & Story Campaigns"
-        description="Design branded transparent PNG frames for your members to apply when posting photos to the Feed or Stories."
-      >
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="h-8 gap-1.5 text-xs"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Refresh
-          </Button>
+        description="Design branded transparent PNG frame overlays for member posts in community feeds and vertical stories."
+        icon={Sparkles}
+        badgeText="Feed Studio"
+        breadcrumbs={[
+          { label: "Feed", href: "/feed" },
+          { label: "Campaigns", href: "/feed/campaigns" },
+        ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              className="h-9 gap-1.5 text-xs rounded-lg border-border/70 hover:border-indigo-400 cursor-pointer"
+              disabled={isRefreshing}
+            >
+              <RotateCcw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+              Refresh
+            </Button>
 
-          <Button asChild size="sm" className="h-8 gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-2xs">
             <Link href="/feed/campaigns/create">
-              <Plus className="h-3.5 w-3.5" />
-              New Campaign
+              <Button
+                size="sm"
+                className="h-9 gap-2 text-xs font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer shadow-2xs rounded-lg px-3.5"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Create Campaign
+              </Button>
             </Link>
-          </Button>
-        </div>
-      </EcosystemHeader>
+          </div>
+        }
+      />
 
       <EcosystemContainer className="space-y-6 py-6">
-        {/* KPI Cards */}
+        {/* KPI Summary Cards */}
         <FeedCampaignKpiSummary
           campaigns={allCampaigns}
           loading={loading}
@@ -191,47 +271,82 @@ export function FeedCampaignManagerDashboard() {
               <EcosystemActionBar.Search
                 value={searchTerm}
                 onChange={setSearchTerm}
-                placeholder="Search campaigns by title or slug..."
+                placeholder="Search campaigns by name, slug, or theme…"
               />
             </EcosystemActionBar.Item>
 
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-8 w-[125px] text-xs">
+              <SelectTrigger className="h-8 w-[130px] text-xs font-medium rounded-lg border-border/70">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-lg">
                 <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="DRAFT">Draft</SelectItem>
-                <SelectItem value="PAUSED">Paused</SelectItem>
-                <SelectItem value="ARCHIVED">Archived</SelectItem>
+                <SelectItem value="ACTIVE">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Active
+                  </span>
+                </SelectItem>
+                <SelectItem value="DRAFT">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+                    Draft
+                  </span>
+                </SelectItem>
+                <SelectItem value="PAUSED">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    Paused
+                  </span>
+                </SelectItem>
+                <SelectItem value="ARCHIVED">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+                    Archived
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
 
             {/* Placement Filter */}
             <Select value={placementFilter} onValueChange={setPlacementFilter}>
-              <SelectTrigger className="h-8 w-[135px] text-xs">
+              <SelectTrigger className="h-8 w-[145px] text-xs font-medium rounded-lg border-border/70">
                 <SelectValue placeholder="Placement" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Placements</SelectItem>
-                <SelectItem value="FEED">Feed Only</SelectItem>
-                <SelectItem value="STORIES">Stories Only</SelectItem>
-                <SelectItem value="BOTH">Feed & Stories</SelectItem>
+              <SelectContent className="rounded-lg">
+                <SelectItem value="ALL">All Destinations</SelectItem>
+                <SelectItem value="FEED">
+                  <span className="flex items-center gap-1.5">
+                    <Radio className="h-3 w-3 text-indigo-500" />
+                    Feed Posts
+                  </span>
+                </SelectItem>
+                <SelectItem value="STORIES">
+                  <span className="flex items-center gap-1.5">
+                    <Smartphone className="h-3 w-3 text-purple-500" />
+                    Stories Only
+                  </span>
+                </SelectItem>
+                <SelectItem value="BOTH">
+                  <span className="flex items-center gap-1.5">
+                    <Layers className="h-3 w-3 text-emerald-500" />
+                    Feed & Stories
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </EcosystemActionBar.Group>
 
           <EcosystemActionBar.Group align="right">
             {/* View Mode Toggle */}
-            <div className="flex items-center rounded-lg border border-border/60 bg-muted/30 p-0.5">
+            <div className="flex items-center rounded-lg border border-border/70 bg-muted/30 p-0.5">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
                 className={cn(
-                  "p-1.5 rounded-md text-muted-foreground transition-colors",
-                  viewMode === "grid" && "bg-background text-foreground shadow-2xs"
+                  "p-1.5 rounded-md text-muted-foreground transition-all cursor-pointer",
+                  viewMode === "grid" && "bg-background text-foreground shadow-2xs font-semibold"
                 )}
                 title="Grid View"
               >
@@ -241,8 +356,8 @@ export function FeedCampaignManagerDashboard() {
                 type="button"
                 onClick={() => setViewMode("table")}
                 className={cn(
-                  "p-1.5 rounded-md text-muted-foreground transition-colors",
-                  viewMode === "table" && "bg-background text-foreground shadow-2xs"
+                  "p-1.5 rounded-md text-muted-foreground transition-all cursor-pointer",
+                  viewMode === "table" && "bg-background text-foreground shadow-2xs font-semibold"
                 )}
                 title="Table View"
               >
@@ -254,7 +369,7 @@ export function FeedCampaignManagerDashboard() {
 
         {/* Campaign Listings */}
         {campaigns.length === 0 && !loading ? (
-          <div className="py-16 flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-border/80 bg-muted/10 p-8">
+          <div className="py-16 flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-border/80 bg-card/40 p-8">
             <div className="h-12 w-12 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 shadow-2xs">
               <Sparkles className="h-6 w-6" />
             </div>
@@ -264,86 +379,164 @@ export function FeedCampaignManagerDashboard() {
                 ? "No campaigns match your selected filters. Try resetting search or filter options."
                 : "Get started by creating your first photo frame campaign for member posts and stories."}
             </p>
-            <Button asChild size="sm" className="h-8 text-xs bg-indigo-600 hover:bg-indigo-700 text-white">
-              <Link href="/feed/campaigns/create">
+            <Link href="/feed/campaigns/create">
+              <Button
+                size="sm"
+                className="h-8 text-xs font-semibold bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 cursor-pointer shadow-2xs"
+              >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Create Feed Campaign
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         ) : viewMode === "table" ? (
           <FeedCampaignsTable
             campaigns={campaigns}
-            onDelete={(id) => setCampaignToDelete(id)}
+            onDelete={(id) => {
+              const target = campaigns.find((c) => c.id === id);
+              if (target) setCampaignToDelete(target);
+            }}
             onToggleStatus={handleToggleStatus}
           />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {campaigns.map((campaign) => {
               const frameSrc = getPreferredMediaUrl(campaign.frameUrl);
+              const isBoth =
+                campaign.placements.includes("BOTH") ||
+                (campaign.placements.includes("FEED") &&
+                  campaign.placements.includes("STORIES"));
+
               return (
                 <Card
                   key={campaign.id}
-                  className="group border-border/60 bg-card hover:border-border transition-all shadow-2xs rounded-xl overflow-hidden flex flex-col justify-between"
+                  className="group border-border/70 bg-card hover:border-indigo-500/40 hover:shadow-md transition-all shadow-2xs rounded-xl overflow-hidden flex flex-col justify-between"
                 >
-                  <CardContent className="p-0">
-                    {/* Visual Frame Thumbnail Container */}
-                    <div className="relative aspect-video w-full bg-neutral-900/90 border-b border-border/40 flex items-center justify-center overflow-hidden p-3">
-                      {frameSrc ? (
-                        <img
-                          src={frameSrc}
-                          alt={campaign.title}
-                          className="h-full w-full object-contain pointer-events-none transition-transform group-hover:scale-105 duration-300"
-                        />
-                      ) : (
-                        <Sparkles className="h-8 w-8 text-neutral-600" />
-                      )}
+                  <CardContent className="p-0 flex flex-col h-full justify-between">
+                    <div>
+                      {/* Visual Frame Thumbnail Container */}
+                      <div className="relative aspect-video w-full bg-gradient-to-b from-zinc-900 via-zinc-950 to-indigo-950/30 border-b border-border/50 flex items-center justify-center overflow-hidden p-3">
+                        {frameSrc ? (
+                          <div className="h-full aspect-square relative rounded overflow-hidden flex items-center justify-center">
+                            <img
+                              src={frameSrc}
+                              alt={campaign.title}
+                              className="h-full w-full object-contain pointer-events-none transition-transform group-hover:scale-105 duration-300"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center text-zinc-600">
+                            <Sparkles className="h-8 w-8" />
+                          </div>
+                        )}
 
-                      {/* Top Badges */}
-                      <div className="absolute top-2 left-2 flex items-center gap-1.5">
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "text-[9px] px-1.5 py-0 font-bold backdrop-blur-md",
-                            campaign.status === "ACTIVE"
-                              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                              : "bg-black/40 text-neutral-300 border border-white/10"
+                        {/* Top Left Status Badge */}
+                        <div className="absolute top-2.5 left-2.5">
+                          {getStatusBadge(campaign.status, campaign)}
+                        </div>
+
+                        {/* Top Right Placement Badge */}
+                        <div className="absolute top-2.5 right-2.5">
+                          {isBoth ? (
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] px-1.5 py-0 font-bold backdrop-blur-md">
+                              Both
+                            </Badge>
+                          ) : campaign.placements.includes("STORIES") ? (
+                            <Badge className="bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[9px] px-1.5 py-0 font-bold backdrop-blur-md">
+                              Stories
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[9px] px-1.5 py-0 font-bold backdrop-blur-md">
+                              Feed
+                            </Badge>
                           )}
-                        >
-                          {campaign.status}
-                        </Badge>
+                        </div>
                       </div>
 
-                      {/* Aspect Ratio Badge */}
-                      <div className="absolute top-2 right-2">
-                        <Badge className="bg-black/60 backdrop-blur-md text-white text-[9px] px-1.5 py-0 border-white/10">
-                          {campaign.aspectRatio || "1:1"}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="p-4 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
+                      {/* Card Content Details */}
+                      <div className="p-4 space-y-2.5">
                         <div>
                           <Link
                             href={`/feed/campaigns/${campaign.id}/edit`}
-                            className="text-sm font-bold text-foreground hover:underline line-clamp-1"
+                            className="font-bold text-sm text-foreground group-hover:text-indigo-600 transition-colors block truncate"
+                            title={campaign.title}
                           >
                             {campaign.title}
                           </Link>
-                          <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
-                            /{campaign.slug}
-                          </p>
+                          <div className="text-[11px] font-mono text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <span>slug:</span>
+                            <span className="text-indigo-600 dark:text-indigo-400 font-semibold truncate">
+                              {campaign.slug}
+                            </span>
+                          </div>
                         </div>
+
+                        {campaign.description && (
+                          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                            {campaign.description}
+                          </p>
+                        )}
+
+                        {/* Format & Posts Counts */}
+                        <div className="flex items-center justify-between text-[11px] pt-1">
+                          <Badge variant="outline" className="font-mono text-[10px] px-1.5 py-0">
+                            {campaign.aspectRatio || "1:1"} Canvas
+                          </Badge>
+
+                          <span className="text-muted-foreground flex items-center gap-1 text-[11px]">
+                            <ImageIcon className="h-3 w-3 text-indigo-500" />
+                            <span className="font-bold text-foreground">
+                              {(campaign.totalPosts || 0).toLocaleString()}
+                            </span>{" "}
+                            posts
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Actions Footer */}
+                    <div className="p-3 bg-muted/20 border-t border-border/50 flex items-center justify-between gap-2">
+                      <Link
+                        href={`/feed/campaigns/${campaign.id}/edit`}
+                        className="flex-1"
+                      >
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full h-8 text-xs font-semibold border-border/70 hover:border-indigo-400 text-foreground flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                        >
+                          <Edit3 className="h-3.5 w-3.5 text-indigo-500" />
+                          <span>Edit Campaign</span>
+                        </Button>
+                      </Link>
+
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleCopyLink(campaign)}
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                          title="Copy Feed Link"
+                        >
+                          {copiedId === campaign.id ? (
+                            <Check className="h-3.5 w-3.5 text-emerald-500" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 -mr-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer"
+                            >
                               <MoreHorizontal className="h-3.5 w-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuContent align="end" className="w-40 text-xs">
                             <DropdownMenuItem asChild>
                               <Link
                                 href={`/feed/campaigns/${campaign.id}/edit`}
@@ -358,26 +551,27 @@ export function FeedCampaignManagerDashboard() {
                               onClick={() => handleCopyLink(campaign)}
                               className="flex items-center gap-2 cursor-pointer"
                             >
-                              {copiedId === campaign.id ? (
-                                <Check className="h-3.5 w-3.5 text-emerald-500" />
-                              ) : (
-                                <Copy className="h-3.5 w-3.5" />
-                              )}
-                              <span>Copy Member Link</span>
+                              <Copy className="h-3.5 w-3.5" />
+                              <span>Copy Link</span>
                             </DropdownMenuItem>
 
                             <DropdownMenuItem
-                              onClick={() => handleToggleStatus(campaign)}
+                              onClick={() =>
+                                handleToggleStatus(
+                                  campaign,
+                                  campaign.status === "ACTIVE" ? "PAUSED" : "ACTIVE"
+                                )
+                              }
                               className="flex items-center gap-2 cursor-pointer"
                             >
                               {campaign.status === "ACTIVE" ? (
                                 <>
-                                  <PauseCircle className="h-3.5 w-3.5" />
+                                  <PauseCircle className="h-3.5 w-3.5 text-amber-500" />
                                   <span>Pause Campaign</span>
                                 </>
                               ) : (
                                 <>
-                                  <PlayCircle className="h-3.5 w-3.5" />
+                                  <PlayCircle className="h-3.5 w-3.5 text-emerald-500" />
                                   <span>Activate Campaign</span>
                                 </>
                               )}
@@ -386,40 +580,14 @@ export function FeedCampaignManagerDashboard() {
                             <DropdownMenuSeparator />
 
                             <DropdownMenuItem
-                              onClick={() => setCampaignToDelete(campaign.id)}
+                              onClick={() => setCampaignToDelete(campaign)}
                               className="flex items-center gap-2 text-destructive cursor-pointer"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
-                              <span>Delete</span>
+                              <span>Delete Campaign</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </div>
-
-                      {campaign.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {campaign.description}
-                        </p>
-                      )}
-
-                      {/* Placements and Post Count */}
-                      <div className="flex items-center justify-between pt-2 border-t border-border/40 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          {campaign.placements.map((plc) => (
-                            <Badge
-                              key={plc}
-                              variant="outline"
-                              className="text-[9px] px-1 py-0 font-medium"
-                            >
-                              {plc === "FEED" && "Feed"}
-                              {plc === "STORIES" && "Stories"}
-                              {plc === "BOTH" && "Feed & Stories"}
-                            </Badge>
-                          ))}
-                        </div>
-                        <span className="font-semibold text-foreground">
-                          {(campaign.totalPosts || 0).toLocaleString()} posts
-                        </span>
                       </div>
                     </div>
                   </CardContent>
@@ -433,23 +601,30 @@ export function FeedCampaignManagerDashboard() {
       {/* Delete Confirmation Alert Dialog */}
       <AlertDialog
         open={Boolean(campaignToDelete)}
-        onOpenChange={(open) => !open && setCampaignToDelete(null)}
+        onOpenChange={(open) => {
+          if (!open) setCampaignToDelete(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Feed Campaign?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this frame campaign. Existing posts that used this frame will remain intact in the feed.
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-foreground">
+                {campaignToDelete?.title}
+              </span>
+              ? This action cannot be undone. Members will no longer be able to use this frame overlay when posting to Feed or Stories.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setCampaignToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground cursor-pointer"
             >
-              {isDeleting ? "Deleting..." : "Delete Campaign"}
+              Delete Campaign
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

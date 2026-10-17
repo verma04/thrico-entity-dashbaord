@@ -6,27 +6,21 @@ import * as Yup from "yup";
 import {
   Sparkles,
   Camera,
-  Share2,
   Smartphone,
-  Maximize2,
   Loader2,
   Check,
   Upload,
   Radio,
   Layers,
   Palette,
-  Image as ImageIcon,
-  Calendar,
-  X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { FeedFramePreviewCanvas } from "./feed-frame-preview-canvas";
 import {
   FeedCampaign,
@@ -48,7 +42,7 @@ export function FeedCampaignForm({
   isLoading = false,
   onSubmit,
   title = "Create Feed Campaign",
-  description = "Upload a decorative transparent PNG frame and select where it applies: in Feed, Stories, or Both.",
+  description = "Upload a decorative transparent PNG frame overlay and select where it applies: in Feed, Stories, or Both.",
 }: FeedCampaignFormProps) {
   const [generateUploadUrl] = useGenerateFeedCampaignAssetUploadUrl();
   const [isUploadingFrame, setIsUploadingFrame] = useState(false);
@@ -66,8 +60,12 @@ export function FeedCampaignForm({
     aspectRatio: Yup.string().default("1:1"),
     festiveImageUrl: Yup.string().nullable(),
     ctaButtonText: Yup.string().max(50, "CTA label must be 50 characters or less").nullable(),
-    ctaBgColor: Yup.string().matches(/^#([0-9a-fA-F]{3}){1,2}$/, "Must be a valid hex color code").nullable(),
-    ctaTextColor: Yup.string().matches(/^#([0-9a-fA-F]{3}){1,2}$/, "Must be a valid hex color code").nullable(),
+    ctaBgColor: Yup.string()
+      .matches(/^#([0-9a-fA-F]{3}){1,2}$/, "Must be a valid hex color code")
+      .nullable(),
+    ctaTextColor: Yup.string()
+      .matches(/^#([0-9a-fA-F]{3}){1,2}$/, "Must be a valid hex color code")
+      .nullable(),
     isFilterActive: Yup.boolean().default(true),
     allowCameraRecording: Yup.boolean().default(true),
     allowFileUpload: Yup.boolean().default(true),
@@ -89,7 +87,10 @@ export function FeedCampaignForm({
             height: typeof initialValues.frameMetadata.height === "number" ? initialValues.frameMetadata.height : undefined,
           }
         : null,
-      placements: initialValues?.placements && initialValues.placements.length > 0 ? initialValues.placements : ["FEED"],
+      placements:
+        initialValues?.placements && initialValues.placements.length > 0
+          ? initialValues.placements
+          : ["FEED"],
       aspectRatio: initialValues?.aspectRatio || "1:1",
       festiveImageUrl: initialValues?.festiveImageUrl || "",
       ctaButtonText: initialValues?.ctaButtonText || "Use Frame",
@@ -103,16 +104,27 @@ export function FeedCampaignForm({
     },
     validationSchema,
     onSubmit: async (values) => {
-      await onSubmit(values);
+      const rawMeta = values.frameMetadata as { width?: unknown; height?: unknown } | null | undefined;
+      const cleanFrameMetadata =
+        rawMeta && (typeof rawMeta.width === "number" || typeof rawMeta.height === "number")
+          ? {
+              width: typeof rawMeta.width === "number" ? rawMeta.width : undefined,
+              height: typeof rawMeta.height === "number" ? rawMeta.height : undefined,
+            }
+          : null;
+
+      await onSubmit({
+        ...values,
+        frameMetadata: cleanFrameMetadata,
+      });
     },
   });
 
-  // Auto slug generation from title
+  // Auto-slugify title if slug is empty
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    formik.setFieldValue("title", val);
-    if (!formik.touched.slug || !formik.values.slug) {
-      const generatedSlug = val
+    formik.handleChange(e);
+    if (!formik.values.slug || formik.values.slug === formik.initialValues.slug) {
+      const generatedSlug = e.target.value
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)+/g, "");
@@ -120,20 +132,32 @@ export function FeedCampaignForm({
     }
   };
 
-  // Upload frame handler
-  const handleFrameUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Upload asset directly to S3 via presigned PUT
+  const uploadAssetToS3 = (url: string, file: File): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", url);
+      xhr.setRequestHeader("Content-Type", file.type || "image/png");
 
-    if (!file.type.includes("png") && !file.type.includes("webp")) {
-      toast.error("Please upload a transparent PNG or WebP image frame");
-      return;
-    }
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`S3 upload failed with status ${xhr.status}`));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error("Network error during asset upload."));
+      xhr.send(file);
+    });
+  };
+
+  // Custom upload handler for Transparent PNG Frame
+  const handleFrameCustomUpload = async (file: File): Promise<string> => {
+    setIsUploadingFrame(true);
 
     try {
-      setIsUploadingFrame(true);
-
-      // Measure dimensions
+      // 1. Calculate natural image dimensions
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
       await new Promise<void>((resolve) => {
@@ -145,601 +169,723 @@ export function FeedCampaignForm({
           URL.revokeObjectURL(objectUrl);
           resolve();
         };
-        img.src = objectUrl;
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve();
+        };
       });
 
+      // 2. Request presigned upload URL from backend
       const { data } = await generateUploadUrl({
         variables: {
           input: {
-            fileName: file.name,
-            fileType: file.type,
+            fileName: file.name || "feed-campaign-frame.png",
+            fileType: file.type || "image/png",
             fileSize: file.size,
             type: "FRAME",
           },
         },
       });
 
-      const uploadInfo = data?.generateFeedCampaignAssetUploadUrl;
-      if (!uploadInfo?.uploadUrl) throw new Error("Failed to get asset upload URL");
+      if (!data?.generateFeedCampaignAssetUploadUrl?.uploadUrl) {
+        throw new Error("Failed to get asset upload URL from server.");
+      }
 
-      const res = await fetch(uploadInfo.uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      const { uploadUrl, fileUrl } = data.generateFeedCampaignAssetUploadUrl;
 
-      if (!res.ok) throw new Error("Frame upload failed");
+      // 3. Direct upload to S3 via PUT
+      await uploadAssetToS3(uploadUrl, file);
 
-      formik.setFieldValue("frameUrl", uploadInfo.fileUrl);
-      toast.success("Frame uploaded successfully!");
+      toast.success("Frame uploaded to cloud storage!");
+      return fileUrl;
     } catch (err: unknown) {
-      toast.error((err as Error).message || "Frame upload failed.");
+      toast.error((err as Error).message || "Failed to upload frame.");
+      throw err;
     } finally {
       setIsUploadingFrame(false);
     }
   };
 
-  // Banner image upload handler
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Custom upload handler for Festive CTA Banner
+  const handleBannerCustomUpload = async (file: File): Promise<string> => {
+    setIsUploadingBanner(true);
 
     try {
-      setIsUploadingBanner(true);
       const { data } = await generateUploadUrl({
         variables: {
           input: {
-            fileName: file.name,
-            fileType: file.type,
+            fileName: file.name || "feed-festive-banner.webp",
+            fileType: file.type || "image/webp",
             fileSize: file.size,
             type: "BANNER",
           },
         },
       });
 
-      const uploadInfo = data?.generateFeedCampaignAssetUploadUrl;
-      if (!uploadInfo?.uploadUrl) throw new Error("Failed to get upload URL");
+      if (!data?.generateFeedCampaignAssetUploadUrl?.uploadUrl) {
+        throw new Error("Failed to get asset upload URL from server.");
+      }
 
-      const res = await fetch(uploadInfo.uploadUrl, {
-        method: "PUT",
-        headers: { "Content-Type": file.type },
-        body: file,
-      });
+      const { uploadUrl, fileUrl } = data.generateFeedCampaignAssetUploadUrl;
+      await uploadAssetToS3(uploadUrl, file);
 
-      if (!res.ok) throw new Error("Banner upload failed");
-
-      formik.setFieldValue("festiveImageUrl", uploadInfo.fileUrl);
-      toast.success("Banner image uploaded successfully!");
+      toast.success("Festive banner uploaded!");
+      return fileUrl;
     } catch (err: unknown) {
-      toast.error((err as Error).message || "Banner upload failed.");
+      toast.error((err as Error).message || "Failed to upload festive banner.");
+      throw err;
     } finally {
       setIsUploadingBanner(false);
     }
   };
 
-  // Helper to toggle placements
-  const togglePlacement = (placement: "FEED" | "STORIES" | "BOTH") => {
-    if (placement === "BOTH") {
-      formik.setFieldValue("placements", ["FEED", "STORIES", "BOTH"]);
-      return;
-    }
-    const current = [...(formik.values.placements || [])];
-    const withoutBoth = current.filter((p) => p !== "BOTH");
-    if (withoutBoth.includes(placement)) {
-      if (withoutBoth.length === 1) {
-        toast.warning("At least one placement must be selected.");
-        return;
-      }
-      formik.setFieldValue(
-        "placements",
-        withoutBoth.filter((p) => p !== placement)
-      );
-    } else {
-      formik.setFieldValue("placements", [...withoutBoth, placement]);
-    }
-  };
-
-  const isFeedSelected = formik.values.placements.includes("FEED") || formik.values.placements.includes("BOTH");
-  const isStoriesSelected = formik.values.placements.includes("STORIES") || formik.values.placements.includes("BOTH");
-  const isBothSelected = (isFeedSelected && isStoriesSelected) || formik.values.placements.includes("BOTH");
+  const isFeedSelected =
+    formik.values.placements.includes("FEED") || formik.values.placements.includes("BOTH");
+  const isStoriesSelected =
+    formik.values.placements.includes("STORIES") || formik.values.placements.includes("BOTH");
+  const isBothSelected =
+    (isFeedSelected && isStoriesSelected) || formik.values.placements.includes("BOTH");
 
   return (
     <FormikProvider value={formik}>
-      <form onSubmit={formik.handleSubmit} className="space-y-6">
-        {/* Header Summary */}
-        <div className="pb-4 border-b border-border/60">
+      <form onSubmit={formik.handleSubmit} className="space-y-6 pb-24">
+        {/* Header Bar */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-indigo-500" />
+              {title}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+          </div>
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/40 shadow-2xs">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
-              <p className="text-xs text-muted-foreground">{description}</p>
-            </div>
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs font-semibold px-2.5 py-1",
+                formik.values.status === "ACTIVE"
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                  : "bg-muted text-muted-foreground"
+              )}
+            >
+              {formik.values.status}
+            </Badge>
           </div>
         </div>
 
+        {/* 2-Column Responsive Layout Standard: 8-col Main Form + 4-col Sticky Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Form Controls (7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* 1. Placement Selection */}
-            <Card className="border-border/60 bg-card shadow-2xs rounded-xl overflow-hidden">
-              <CardContent className="p-5 space-y-4">
-                <div>
-                  <Label className="text-xs font-bold text-foreground uppercase tracking-wider">
-                    Placement & Destination *
+          {/* Main Form Fields (8 Cols) */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Step 1: Campaign Details */}
+            <div className="rounded-xl border border-border/70 p-4 bg-card shadow-2xs space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+                  1
+                </span>
+                <h3 className="text-xs font-bold uppercase tracking-wide text-foreground">
+                  Campaign Information
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="title" className="text-xs font-semibold text-foreground">
+                    Campaign Name <span className="text-destructive">*</span>
                   </Label>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Choose whether this decorative frame is available for standard Feed posts, Stories, or Both.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  {/* Option 1: Feed Only */}
-                  <button
-                    type="button"
-                    onClick={() => formik.setFieldValue("placements", ["FEED"])}
+                  <Input
+                    id="title"
+                    name="title"
+                    placeholder="e.g. Alumni Homecoming 2026"
+                    value={formik.values.title}
+                    onChange={handleTitleChange}
+                    onBlur={formik.handleBlur}
                     className={cn(
-                      "p-3 rounded-xl border text-left transition-all flex flex-col justify-between h-24",
-                      !isStoriesSelected && isFeedSelected
-                        ? "border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 ring-1 ring-indigo-500"
-                        : "border-border/60 bg-background hover:border-border text-muted-foreground"
+                      "h-9 text-xs",
+                      formik.touched.title &&
+                        formik.errors.title &&
+                        "border-destructive focus-visible:ring-destructive"
                     )}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <Radio className="h-4 w-4 text-indigo-600" />
-                      {!isStoriesSelected && isFeedSelected && (
-                        <Check className="h-3.5 w-3.5 text-indigo-600" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">Feed Only</p>
-                      <p className="text-[10px] text-muted-foreground">Square & portrait post grid</p>
-                    </div>
-                  </button>
-
-                  {/* Option 2: Stories Only */}
-                  <button
-                    type="button"
-                    onClick={() => formik.setFieldValue("placements", ["STORIES"])}
-                    className={cn(
-                      "p-3 rounded-xl border text-left transition-all flex flex-col justify-between h-24",
-                      isStoriesSelected && !isFeedSelected
-                        ? "border-purple-600 bg-purple-50/40 dark:bg-purple-950/30 text-purple-900 dark:text-purple-200 ring-1 ring-purple-500"
-                        : "border-border/60 bg-background hover:border-border text-muted-foreground"
-                    )}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <Smartphone className="h-4 w-4 text-purple-600" />
-                      {isStoriesSelected && !isFeedSelected && (
-                        <Check className="h-3.5 w-3.5 text-purple-600" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">Stories Only</p>
-                      <p className="text-[10px] text-muted-foreground">9:16 Fullscreen vertical</p>
-                    </div>
-                  </button>
-
-                  {/* Option 3: Both (Feed & Stories) */}
-                  <button
-                    type="button"
-                    onClick={() => formik.setFieldValue("placements", ["FEED", "STORIES", "BOTH"])}
-                    className={cn(
-                      "p-3 rounded-xl border text-left transition-all flex flex-col justify-between h-24",
-                      isBothSelected
-                        ? "border-emerald-600 bg-emerald-50/40 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 ring-1 ring-emerald-500"
-                        : "border-border/60 bg-background hover:border-border text-muted-foreground"
-                    )}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <Layers className="h-4 w-4 text-emerald-600" />
-                      {isBothSelected && (
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">Feed & Stories</p>
-                      <p className="text-[10px] text-muted-foreground">Universal campaign frame</p>
-                    </div>
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 2. Transparent Frame Upload (Frame Only) */}
-            <Card className="border-border/60 bg-card shadow-2xs rounded-xl overflow-hidden">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs font-bold text-foreground uppercase tracking-wider">
-                      Transparent Frame Overlay *
-                    </Label>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Upload a transparent PNG overlay frame with cutouts where the user&apos;s photo appears.
+                  />
+                  {formik.touched.title && formik.errors.title && (
+                    <p className="text-[11px] text-destructive font-medium mt-1">
+                      {formik.errors.title}
                     </p>
-                  </div>
-                  {formik.values.frameUrl && (
-                    <Badge variant="outline" className="text-[10px] border-emerald-200 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-300">
-                      Frame Uploaded
-                    </Badge>
                   )}
                 </div>
 
-                {formik.values.frameUrl ? (
-                  <div className="relative rounded-xl border border-border/60 bg-neutral-900/90 p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-14 w-14 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden p-1">
-                        <img
-                          src={formik.values.frameUrl}
-                          alt="Frame"
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-white">Custom PNG Frame</p>
-                        <p className="text-[11px] text-neutral-400">
-                          {formik.values.frameMetadata?.width && formik.values.frameMetadata?.height
-                            ? `${formik.values.frameMetadata.width} × ${formik.values.frameMetadata.height} px`
-                            : "Transparent PNG"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="cursor-pointer">
-                        <span className="text-xs font-medium text-indigo-400 hover:text-indigo-300 underline">
-                          Replace
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/png,image/webp"
-                          className="hidden"
-                          onChange={handleFrameUpload}
-                          disabled={isUploadingFrame}
-                        />
-                      </label>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-neutral-400 hover:text-red-400"
-                        onClick={() => {
-                          formik.setFieldValue("frameUrl", "");
-                          formik.setFieldValue("frameMetadata", null);
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed border-border/80 hover:border-indigo-500 bg-muted/20 hover:bg-muted/40 cursor-pointer transition-all">
-                    {isUploadingFrame ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="h-7 w-7 animate-spin text-indigo-600" />
-                        <span className="text-xs text-muted-foreground font-medium">Uploading & analyzing frame...</span>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="h-10 w-10 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2">
-                          <Upload className="h-5 w-5" />
-                        </div>
-                        <span className="text-xs font-semibold text-foreground">Click to upload frame</span>
-                        <span className="text-[11px] text-muted-foreground mt-0.5">Transparent PNG or WebP up to 10MB</span>
-                      </>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/png,image/webp"
-                      className="hidden"
-                      onChange={handleFrameUpload}
-                      disabled={isUploadingFrame}
-                    />
-                  </label>
-                )}
-
-                {formik.touched.frameUrl && formik.errors.frameUrl && (
-                  <p className="text-[11px] text-destructive font-medium">
-                    {String(formik.errors.frameUrl)}
-                  </p>
-                )}
-
-                {/* Aspect Ratio Preference */}
-                <div className="pt-2 border-t border-border/40">
-                  <Label className="text-xs font-semibold text-foreground">Frame Canvas Ratio</Label>
-                  <p className="text-[11px] text-muted-foreground mb-2">
-                    Default framing ratio applied when members open this campaign lens.
-                  </p>
-                  <div className="flex items-center gap-2">
-                    {[
-                      { label: "1:1 Square", val: "1:1" },
-                      { label: "4:5 Portrait", val: "4:5" },
-                      { label: "9:16 Story", val: "9:16" },
-                    ].map((ratio) => (
-                      <button
-                        key={ratio.val}
-                        type="button"
-                        onClick={() => formik.setFieldValue("aspectRatio", ratio.val)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
-                          formik.values.aspectRatio === ratio.val
-                            ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
-                            : "bg-background border-border/60 text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        {ratio.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 3. Campaign General Information */}
-            <Card className="border-border/60 bg-card shadow-2xs rounded-xl overflow-hidden">
-              <CardContent className="p-5 space-y-4">
-                <Label className="text-xs font-bold text-foreground uppercase tracking-wider">
-                  Campaign Details
-                </Label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Title */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Title *</Label>
-                    <Input
-                      name="title"
-                      placeholder="e.g. Alumni Homecoming 2026"
-                      value={formik.values.title}
-                      onChange={handleTitleChange}
-                      onBlur={formik.handleBlur}
-                      className="h-9 text-xs"
-                    />
-                    {formik.touched.title && formik.errors.title && (
-                      <p className="text-[11px] text-destructive">{String(formik.errors.title)}</p>
-                    )}
-                  </div>
-
-                  {/* Slug */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Slug *</Label>
-                    <Input
-                      name="slug"
-                      placeholder="alumni-homecoming-2026"
-                      value={formik.values.slug}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      className="h-9 text-xs font-mono"
-                    />
-                    {formik.touched.slug && formik.errors.slug && (
-                      <p className="text-[11px] text-destructive">{String(formik.errors.slug)}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Description */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Description</Label>
-                  <Textarea
-                    name="description"
-                    placeholder="Describe the occasion, hashtag guidelines, and instructions for members..."
-                    value={formik.values.description}
+                  <Label htmlFor="slug" className="text-xs font-semibold text-foreground">
+                    URL Slug <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="slug"
+                    name="slug"
+                    placeholder="alumni-homecoming-2026"
+                    value={formik.values.slug}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    rows={2}
-                    className="text-xs resize-none"
+                    className={cn(
+                      "h-9 text-xs font-mono",
+                      formik.touched.slug &&
+                        formik.errors.slug &&
+                        "border-destructive focus-visible:ring-destructive"
+                    )}
+                  />
+                  {formik.touched.slug && formik.errors.slug && (
+                    <p className="text-[11px] text-destructive font-medium mt-1">
+                      {formik.errors.slug}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="description" className="text-xs font-semibold text-foreground">
+                  Description / Creator Prompt
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  rows={2}
+                  placeholder="Explain the occasion, hashtag guidelines, and instructions for members taking photos..."
+                  value={formik.values.description || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="text-xs resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="p-2.5 rounded-lg border border-border/60 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">Campaign Status</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Set whether campaign is active or paused
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formik.values.status === "ACTIVE"}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("status", checked ? "ACTIVE" : "PAUSED")
+                    }
                   />
                 </div>
 
-                {/* Status Picker */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Status</Label>
-                  <div className="flex items-center gap-2">
-                    {[
-                      { label: "Active", val: "ACTIVE" },
-                      { label: "Draft", val: "DRAFT" },
-                      { label: "Paused", val: "PAUSED" },
-                      { label: "Archived", val: "ARCHIVED" },
-                    ].map((st) => (
-                      <button
-                        key={st.val}
-                        type="button"
-                        onClick={() => formik.setFieldValue("status", st.val)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
-                          formik.values.status === st.val
-                            ? "bg-foreground text-background border-foreground shadow-2xs font-semibold"
-                            : "bg-background border-border/60 text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        {st.label}
-                      </button>
-                    ))}
+                <div className="p-2.5 rounded-lg border border-border/60 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">Filter On for Users</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Publish festive banner and camera frame overlay to user app
+                    </p>
                   </div>
+                  <Switch
+                    checked={formik.values.isFilterActive}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("isFilterActive", checked)
+                    }
+                  />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* 4. CTA Button & Visual Branding */}
-            <Card className="border-border/60 bg-card shadow-2xs rounded-xl overflow-hidden">
-              <CardContent className="p-5 space-y-4">
-                <Label className="text-xs font-bold text-foreground uppercase tracking-wider">
-                  Action Button & Branding
-                </Label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {/* CTA Label */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">CTA Button Text</Label>
-                    <Input
-                      name="ctaButtonText"
-                      placeholder="e.g. Share Post"
-                      value={formik.values.ctaButtonText}
-                      onChange={formik.handleChange}
-                      className="h-9 text-xs"
-                    />
-                  </div>
-
-                  {/* CTA BG Color */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Button Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={formik.values.ctaBgColor || "#4F46E5"}
-                        onChange={(e) => formik.setFieldValue("ctaBgColor", e.target.value)}
-                        className="h-9 w-9 rounded-md border border-border cursor-pointer p-0.5 bg-background"
-                      />
-                      <Input
-                        name="ctaBgColor"
-                        value={formik.values.ctaBgColor}
-                        onChange={formik.handleChange}
-                        className="h-9 text-xs font-mono uppercase"
-                      />
-                    </div>
-                  </div>
-
-                  {/* CTA Text Color */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Text Color</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={formik.values.ctaTextColor || "#FFFFFF"}
-                        onChange={(e) => formik.setFieldValue("ctaTextColor", e.target.value)}
-                        className="h-9 w-9 rounded-md border border-border cursor-pointer p-0.5 bg-background"
-                      />
-                      <Input
-                        name="ctaTextColor"
-                        value={formik.values.ctaTextColor}
-                        onChange={formik.handleChange}
-                        className="h-9 text-xs font-mono uppercase"
-                      />
-                    </div>
-                  </div>
+            {/* Step 2: Placement & Surface Destination */}
+            <div className="rounded-xl border border-border/70 p-4 bg-card shadow-2xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+                    2
+                  </span>
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-foreground">
+                    Placement & Destination Surfaces
+                  </h3>
                 </div>
+                <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                  Feed & Story Channels
+                </Badge>
+              </div>
 
-                {/* Optional Festive / Banner Image */}
-                <div className="pt-2 border-t border-border/40">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <Label className="text-xs font-semibold">Campaign Banner / Badge (Optional)</Label>
-                      <p className="text-[11px] text-muted-foreground">Appears on campaign discovery carousels.</p>
-                    </div>
-                    {formik.values.festiveImageUrl && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs text-destructive hover:bg-destructive/10"
-                        onClick={() => formik.setFieldValue("festiveImageUrl", "")}
-                      >
-                        Remove
-                      </Button>
+              <p className="text-[11px] text-muted-foreground">
+                Choose where this decorative frame applies: in the main feed post creator, 24-hour stories, or universally across both.
+              </p>
+
+              {/* Placement Tiles */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div
+                  onClick={() => formik.setFieldValue("placements", ["FEED"])}
+                  className={cn(
+                    "p-3 rounded-xl border text-left cursor-pointer transition-all space-y-1.5 flex flex-col justify-between",
+                    !isStoriesSelected && isFeedSelected
+                      ? "border-indigo-600 bg-indigo-500/5 ring-1 ring-indigo-500/20 shadow-xs"
+                      : "border-border/60 hover:border-foreground/30"
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <Radio className="h-3.5 w-3.5 text-indigo-500" />
+                      Feed Posts Only
+                    </span>
+                    {!isStoriesSelected && isFeedSelected && (
+                      <Check className="h-3.5 w-3.5 text-indigo-600" />
                     )}
                   </div>
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    Standard community post creator (Square 1:1 & Portrait 4:5).
+                  </p>
+                </div>
 
-                  {formik.values.festiveImageUrl ? (
-                    <div className="h-20 w-48 rounded-lg overflow-hidden border border-border">
-                      <img
-                        src={formik.values.festiveImageUrl}
-                        alt="Festive banner"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border/80 hover:border-border cursor-pointer text-xs text-muted-foreground bg-muted/20 w-fit">
-                      <Upload className="h-3.5 w-3.5" />
-                      <span>{isUploadingBanner ? "Uploading..." : "Upload banner image"}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleBannerUpload}
-                        disabled={isUploadingBanner}
-                      />
-                    </label>
+                <div
+                  onClick={() => formik.setFieldValue("placements", ["STORIES"])}
+                  className={cn(
+                    "p-3 rounded-xl border text-left cursor-pointer transition-all space-y-1.5 flex flex-col justify-between",
+                    isStoriesSelected && !isFeedSelected
+                      ? "border-purple-600 bg-purple-500/5 ring-1 ring-purple-500/20 shadow-xs"
+                      : "border-border/60 hover:border-foreground/30"
                   )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <Smartphone className="h-3.5 w-3.5 text-purple-500" />
+                      Stories Only
+                    </span>
+                    {isStoriesSelected && !isFeedSelected && (
+                      <Check className="h-3.5 w-3.5 text-purple-600" />
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    Vertical 9:16 fullscreen story camera lens and composer.
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* 5. Participation Controls & Schedule */}
-            <Card className="border-border/60 bg-card shadow-2xs rounded-xl overflow-hidden">
-              <CardContent className="p-5 space-y-4">
-                <Label className="text-xs font-bold text-foreground uppercase tracking-wider">
-                  Member Controls & Schedule
+                <div
+                  onClick={() => formik.setFieldValue("placements", ["FEED", "STORIES", "BOTH"])}
+                  className={cn(
+                    "p-3 rounded-xl border text-left cursor-pointer transition-all space-y-1.5 flex flex-col justify-between",
+                    isBothSelected
+                      ? "border-emerald-600 bg-emerald-500/5 ring-1 ring-emerald-500/20 shadow-xs"
+                      : "border-border/60 hover:border-foreground/30"
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <Layers className="h-3.5 w-3.5 text-emerald-500" />
+                      Feed & Stories
+                    </span>
+                    {isBothSelected && (
+                      <Check className="h-3.5 w-3.5 text-emerald-600" />
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    Universal overlay available in both feed uploads and story lenses.
+                  </p>
+                </div>
+              </div>
+
+              {/* Aspect Ratio Selection */}
+              <div className="space-y-1.5 pt-2 border-t border-border/50">
+                <Label className="text-xs font-semibold text-foreground">
+                  Default Canvas Aspect Ratio
                 </Label>
+                <p className="text-[11px] text-muted-foreground">
+                  Recommended ratio applied when members activate this frame lens.
+                </p>
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  {[
+                    { label: "1:1 Square", val: "1:1", desc: "Classic feed post (1080×1080)" },
+                    { label: "4:5 Portrait", val: "4:5", desc: "Mobile feed portrait (1080×1350)" },
+                    { label: "9:16 Story", val: "9:16", desc: "Fullscreen vertical (1080×1920)" },
+                  ].map((ratio) => (
+                    <button
+                      key={ratio.val}
+                      type="button"
+                      onClick={() => formik.setFieldValue("aspectRatio", ratio.val)}
+                      className={cn(
+                        "p-2.5 rounded-xl border text-left transition-all cursor-pointer",
+                        formik.values.aspectRatio === ratio.val
+                          ? "border-indigo-600 bg-indigo-500/5 ring-1 ring-indigo-500/20 shadow-xs"
+                          : "border-border/60 hover:border-foreground/30"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-foreground">{ratio.label}</span>
+                        {formik.values.aspectRatio === ratio.val && (
+                          <Check className="h-3 w-3 text-indigo-600" />
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{ratio.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">Active for Community</p>
-                      <p className="text-[11px] text-muted-foreground">Members see this frame in Feed & Story creators.</p>
-                    </div>
-                    <Switch
-                      checked={formik.values.isFilterActive}
-                      onCheckedChange={(val) => formik.setFieldValue("isFilterActive", val)}
-                    />
-                  </div>
+              {/* Schedule (Start & End Dates) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/50">
+                <div className="space-y-1.5">
+                  <Label htmlFor="startDate" className="text-xs font-semibold text-foreground">
+                    Start Date (Optional)
+                  </Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    name="startDate"
+                    value={formik.values.startDate}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-9 text-xs"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Campaign becomes active on this date.
+                  </p>
+                </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">Allow Camera Recording</p>
-                      <p className="text-[11px] text-muted-foreground">Allow snapping new photos directly through camera.</p>
-                    </div>
-                    <Switch
-                      checked={formik.values.allowCameraRecording}
-                      onCheckedChange={(val) => formik.setFieldValue("allowCameraRecording", val)}
-                    />
-                  </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="endDate" className="text-xs font-semibold text-foreground">
+                    End Date (Optional)
+                  </Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    name="endDate"
+                    value={formik.values.endDate}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="h-9 text-xs"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Campaign automatically unpublishes after this date.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">Allow Device Photo Upload</p>
-                      <p className="text-[11px] text-muted-foreground">Allow choosing existing photos from phone/computer.</p>
-                    </div>
-                    <Switch
-                      checked={formik.values.allowFileUpload}
-                      onCheckedChange={(val) => formik.setFieldValue("allowFileUpload", val)}
-                    />
+            {/* Step 3: Visual Branding & Decorative Assets */}
+            <div className="rounded-xl border border-border/70 p-4 bg-card shadow-2xs space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+                    3
+                  </span>
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-foreground">
+                    Visual Branding & Decorative Assets
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(isUploadingFrame || isUploadingBanner) && (
+                    <Badge
+                      variant="outline"
+                      className="text-[10px] text-indigo-500 bg-indigo-500/10 border-indigo-500/20 flex items-center gap-1"
+                    >
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Uploading asset...
+                    </Badge>
+                  )}
+                  <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                    PNG Frame • 16:9 Banner
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Sub-section A: Transparent PNG Frame */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold text-foreground">
+                    Camera Overlay Frame (Transparent PNG) <span className="text-destructive">*</span>
+                  </Label>
+                  <span className="text-[10px] text-muted-foreground">
+                    {formik.values.aspectRatio} Overlay
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Upload a transparent PNG frame with decorative borders and cutouts. Member photos or videos will show through beneath the frame.
+                </p>
+
+                <ImageUploadWithCrop
+                  currentImage={formik.values.frameUrl || undefined}
+                  onImageUpdate={(_cdnUrl: string, url: string) => {
+                    formik.setFieldValue("frameUrl", url || "");
+                    if (!url) {
+                      formik.setFieldValue("frameMetadata", null);
+                    }
+                  }}
+                  customUploadHandler={handleFrameCustomUpload}
+                  label="Feed Overlay Frame"
+                  aspectRatio={
+                    formik.values.aspectRatio === "4:5"
+                      ? 4 / 5
+                      : formik.values.aspectRatio === "9:16"
+                      ? 9 / 16
+                      : 1
+                  }
+                  recommendedWidth={1080}
+                  recommendedHeight={
+                    formik.values.aspectRatio === "4:5"
+                      ? 1350
+                      : formik.values.aspectRatio === "9:16"
+                      ? 1920
+                      : 1080
+                  }
+                  allowedFormats={["image/png"]}
+                  defaultFormat="png"
+                  showFormatSelector={false}
+                  allowFreeDimensions={true}
+                  showAspectRatioPresets={true}
+                  aspectRatioPresets={[
+                    { label: "1:1 Square", value: 1 },
+                    { label: "4:5 Portrait", value: 4 / 5 },
+                    { label: "9:16 Story", value: 9 / 16 },
+                    { label: "Free Dimensions", value: undefined },
+                  ]}
+                  customDescription="Upload a transparent PNG frame. Transparent center cutouts let member photos show through."
+                />
+
+                {formik.touched.frameUrl && formik.errors.frameUrl && (
+                  <p className="text-[11px] text-destructive font-medium mt-1">
+                    {formik.errors.frameUrl}
+                  </p>
+                )}
+              </div>
+
+              {/* Sub-section B: Festive / Hero Banner Image */}
+              <div className="space-y-2 pt-2 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold text-foreground">
+                    Festive / CTA Campaign Hero Banner
+                  </Label>
+                  <span className="text-[10px] text-muted-foreground">16:9 Banner</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Displayed as a prominent festive challenge card on the community feed when &quot;Filter On for Users&quot; is enabled.
+                </p>
+                <ImageUploadWithCrop
+                  currentImage={formik.values.festiveImageUrl || undefined}
+                  onImageUpdate={(_cdnUrl: string, url: string) => {
+                    formik.setFieldValue("festiveImageUrl", url || "");
+                  }}
+                  customUploadHandler={handleBannerCustomUpload}
+                  label="Festive Banner"
+                  aspectRatio={16 / 9}
+                  recommendedWidth={1200}
+                  recommendedHeight={675}
+                  allowedFormats={["image/jpeg", "image/png", "image/webp"]}
+                  defaultFormat="webp"
+                  showFormatSelector={false}
+                  allowFreeDimensions={true}
+                  showAspectRatioPresets={true}
+                  aspectRatioPresets={[
+                    { label: "16:9 Banner", value: 16 / 9 },
+                    { label: "21:9 Ultra Wide", value: 21 / 9 },
+                    { label: "Free Dimensions", value: undefined },
+                  ]}
+                  customDescription="16:9 festive visual (e.g. Alumni Homecoming, contest announcement, holiday theme)."
+                />
+              </div>
+
+              {/* Sub-section C: Custom CTA Button Text */}
+              <div className="space-y-1.5 pt-2 border-t border-border/50">
+                <Label htmlFor="ctaButtonText" className="text-xs font-semibold text-foreground">
+                  Custom CTA Button Label
+                </Label>
+                <Input
+                  id="ctaButtonText"
+                  name="ctaButtonText"
+                  placeholder="e.g. Use Frame, Share Post, Try Filter, Join Challenge"
+                  value={formik.values.ctaButtonText || ""}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-9 text-xs"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Text for the action button on the user app feed hero banner and post lens preview (defaults to &apos;Use Frame&apos; if left blank).
+                </p>
+              </div>
+
+              {/* Sub-section D: CTA Button Color & Style */}
+              <div className="space-y-3 pt-2 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <Palette className="h-3.5 w-3.5 text-indigo-500" />
+                    CTA Button Styling & Palette
+                  </Label>
+                  <span className="text-[10px] text-muted-foreground">Button Color Scheme</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Customize the background color and text contrast for the call-to-action button in the member feed and story lens composer.
+                </p>
+
+                {/* Preset Themes Chips */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
+                    Preset Themes
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {[
+                      { name: "Indigo", bg: "#4F46E5", text: "#FFFFFF" },
+                      { name: "Crimson", bg: "#E11D48", text: "#FFFFFF" },
+                      { name: "Gold", bg: "#D97706", text: "#FFFFFF" },
+                      { name: "Emerald", bg: "#059669", text: "#FFFFFF" },
+                      { name: "Violet", bg: "#7C3AED", text: "#FFFFFF" },
+                      { name: "Amber", bg: "#F59E0B", text: "#000000" },
+                      { name: "Zinc", bg: "#18181B", text: "#FFFFFF" },
+                    ].map((preset) => {
+                      const isSelected =
+                        formik.values.ctaBgColor?.toUpperCase() === preset.bg.toUpperCase();
+                      return (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => {
+                            formik.setFieldValue("ctaBgColor", preset.bg);
+                            formik.setFieldValue("ctaTextColor", preset.text);
+                          }}
+                          className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all border cursor-pointer",
+                            isSelected
+                              ? "border-primary ring-2 ring-primary/30 font-semibold"
+                              : "border-border/60 hover:border-foreground/30"
+                          )}
+                        >
+                          <span
+                            className="h-3 w-3 rounded-full border border-black/10 shadow-xs"
+                            style={{ backgroundColor: preset.bg }}
+                          />
+                          <span className="text-[11px] text-foreground">{preset.name}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border/40">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Start Date (Optional)</Label>
-                    <Input
-                      type="date"
-                      name="startDate"
-                      value={formik.values.startDate}
-                      onChange={formik.handleChange}
-                      className="h-9 text-xs"
-                    />
+                {/* Color pickers */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div className="space-y-1">
+                    <Label htmlFor="ctaBgColor" className="text-[11px] font-medium text-muted-foreground">
+                      Background Color (HEX)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        id="ctaBgColorPicker"
+                        aria-label="CTA Button Background Color"
+                        value={formik.values.ctaBgColor || "#4F46E5"}
+                        onChange={(e) => formik.setFieldValue("ctaBgColor", e.target.value)}
+                        className="h-9 w-9 rounded-lg border border-border/70 cursor-pointer p-0.5 bg-background shrink-0"
+                      />
+                      <Input
+                        id="ctaBgColor"
+                        name="ctaBgColor"
+                        placeholder="#4F46E5"
+                        value={formik.values.ctaBgColor || ""}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className="h-9 text-xs font-mono uppercase"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">End Date (Optional)</Label>
-                    <Input
-                      type="date"
-                      name="endDate"
-                      value={formik.values.endDate}
-                      onChange={formik.handleChange}
-                      className="h-9 text-xs"
-                    />
+
+                  <div className="space-y-1">
+                    <Label htmlFor="ctaTextColor" className="text-[11px] font-medium text-muted-foreground">
+                      Text & Icon Color (HEX)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        id="ctaTextColorPicker"
+                        aria-label="CTA Button Text & Icon Color"
+                        value={formik.values.ctaTextColor || "#FFFFFF"}
+                        onChange={(e) => formik.setFieldValue("ctaTextColor", e.target.value)}
+                        className="h-9 w-9 rounded-lg border border-border/70 cursor-pointer p-0.5 bg-background shrink-0"
+                      />
+                      <Input
+                        id="ctaTextColor"
+                        name="ctaTextColor"
+                        placeholder="#FFFFFF"
+                        value={formik.values.ctaTextColor || ""}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className="h-9 text-xs font-mono uppercase"
+                      />
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Live Preview Button */}
+                <div className="p-3 rounded-lg border border-border/50 bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="text-[11px] text-muted-foreground">
+                    <span className="font-semibold text-foreground">Live CTA Preview:</span> Button as members will see it
+                  </div>
+                  <button
+                    type="button"
+                    style={{
+                      backgroundColor: formik.values.ctaBgColor || "#4F46E5",
+                      color: formik.values.ctaTextColor || "#FFFFFF",
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold shadow-xs flex items-center gap-2 transition-transform active:scale-95 pointer-events-none"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>{formik.values.ctaButtonText?.trim() || "Use Frame"}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4: User Participation Controls */}
+            <div className="rounded-xl border border-border/70 p-4 bg-card shadow-2xs space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+                  4
+                </span>
+                <h3 className="text-xs font-bold uppercase tracking-wide text-foreground">
+                  User Participation & Creation Rules
+                </h3>
+              </div>
+
+              <div className="space-y-2">
+                <div className="p-2.5 rounded-lg border border-border/60 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                      <Camera className="h-3.5 w-3.5 text-indigo-500" /> Allow Live Camera Capture
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Users can snap new photos directly using the device camera with PNG frame overlay
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formik.values.allowCameraRecording}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("allowCameraRecording", checked)
+                    }
+                  />
+                </div>
+
+                <div className="p-2.5 rounded-lg border border-border/60 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                      <Upload className="h-3.5 w-3.5 text-indigo-500" /> Allow Device Photo Upload
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      Users can pick existing photos or images from their camera roll or desktop
+                    </p>
+                  </div>
+                  <Switch
+                    checked={formik.values.allowFileUpload}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("allowFileUpload", checked)
+                    }
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Right Column: Live Interactive Frame Preview (5 cols) */}
-          <div className="lg:col-span-5 sticky top-20 space-y-4">
-            <div className="rounded-xl border border-border/60 bg-card p-4 shadow-2xs">
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-border/40">
-                <span className="text-xs font-bold text-foreground uppercase tracking-wider">
-                  Live Overlay Preview
+          {/* Right Column: Sticky Live Preview Sidebar (4 Cols) */}
+          <div className="lg:col-span-4 lg:sticky lg:top-6 space-y-4">
+            <div className="rounded-xl border border-border/70 p-4 bg-card shadow-2xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Live Viewport Preview
                 </span>
-                <Badge variant="secondary" className="text-[9px]">
-                  Real-time Canvas
+                <Badge variant="outline" className="text-[10px]">
+                  {formik.values.aspectRatio}
                 </Badge>
               </div>
 
@@ -755,15 +901,16 @@ export function FeedCampaignForm({
           </div>
         </div>
 
-        {/* Floating Save Panel */}
+        {/* Floating Save Panel Bottom Dock Standard */}
         <FloatingSavePanel
-          hasChanged={formik.dirty || !initialValues?.id}
+          hasChanged={formik.dirty}
           saved={false}
-          isSaving={isLoading}
-          onSave={() => formik.handleSubmit()}
-          onReset={() => formik.resetForm()}
-          title={initialValues?.id ? "Unsaved changes" : "Ready to create campaign"}
-          buttonText={initialValues?.id ? "Save Changes" : "Create Campaign"}
+          isSaving={formik.isSubmitting || isLoading || isUploadingFrame || isUploadingBanner}
+          onSave={formik.handleSubmit}
+          onReset={formik.resetForm}
+          title={initialValues?.id ? "Unsaved Campaign Changes" : "Create New Campaign"}
+          saveButtonText={initialValues?.id ? "Save Campaign Changes" : "Publish Campaign"}
+          discardButtonText="Discard"
         />
       </form>
     </FormikProvider>
