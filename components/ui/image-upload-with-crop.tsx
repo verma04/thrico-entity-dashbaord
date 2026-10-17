@@ -423,6 +423,7 @@ export const ImageUploadWithCrop = ({
   const uploading = defaultUploading || isCustomUploading;
 
   const handleUploadSuccess = (cdnUrl: string, url: string) => {
+    setIsCustomUploading(false);
     onImageUpdate(cdnUrl, url);
     onUploadComplete?.(cdnUrl, url);
     toast({
@@ -958,6 +959,8 @@ export const ImageUploadWithCrop = ({
             handleUploadSuccess(url, url);
           } catch (error) {
             handleUploadError(error);
+          } finally {
+            setIsCustomUploading(false);
           }
         } else {
           await uploadImage({ variables: { file: fileToUpload } });

@@ -28,6 +28,7 @@ import {
   MomentCampaign,
   useGenerateCampaignAssetUploadUrl,
 } from "@/graphql/actions/moments/campaigns";
+import { useUploadImage } from "@/graphql/actions";
 import { Moment } from "@/graphql/actions/moments";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ export function CampaignForm({
   description = "Configure branded intro/outro videos, transparent PNG frame overlay, and user participation rules.",
 }: CampaignFormProps) {
   const [generateUploadUrl] = useGenerateCampaignAssetUploadUrl();
+  const [uploadImageFallback] = useUploadImage();
   const [isUploadingFrame, setIsUploadingFrame] = useState(false);
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 
@@ -170,49 +172,123 @@ export function CampaignForm({
     });
   };
 
+  // Safe dimension reader that never hangs
+  const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      // Fast path: createImageBitmap if supported
+      if (typeof window !== "undefined" && "createImageBitmap" in window) {
+        createImageBitmap(file)
+          .then((bmp) => {
+            const dims = { width: bmp.width || 1080, height: bmp.height || 1920 };
+            bmp.close();
+            resolve(dims);
+          })
+          .catch(() => {
+            fallbackLoad();
+          });
+        return;
+      }
+      fallbackLoad();
+
+      function fallbackLoad() {
+        if (typeof window === "undefined") {
+          resolve({ width: 1080, height: 1920 });
+          return;
+        }
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        let settled = false;
+
+        const cleanup = () => {
+          if (!settled) {
+            settled = true;
+            try {
+              URL.revokeObjectURL(objectUrl);
+            } catch {
+              // ignore
+            }
+          }
+        };
+
+        const timer = setTimeout(() => {
+          cleanup();
+          resolve({ width: 1080, height: 1920 });
+        }, 2500);
+
+        img.onload = () => {
+          clearTimeout(timer);
+          const width = img.naturalWidth || 1080;
+          const height = img.naturalHeight || 1920;
+          cleanup();
+          resolve({ width, height });
+        };
+
+        img.onerror = () => {
+          clearTimeout(timer);
+          cleanup();
+          resolve({ width: 1080, height: 1920 });
+        };
+
+        img.src = objectUrl;
+      }
+    });
+  };
+
   // Custom upload handler for ImageUploadWithCrop
   const handleFrameCustomUpload = async (file: File): Promise<string> => {
     setIsUploadingFrame(true);
 
     try {
-      // 1. Calculate natural image dimensions
-      const img = new Image();
-      img.src = URL.createObjectURL(file);
-      await new Promise<void>((resolve) => {
-        img.onload = () => {
-          formik.setFieldValue("frameMetadata", {
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-          });
-          resolve();
-        };
-        img.onerror = () => resolve();
-      });
-
-      // 2. Request presigned upload URL from backend
-      const { data } = await generateUploadUrl({
-        variables: {
-          input: {
-            fileName: file.name || "campaign-frame.png",
-            fileType: "image/png",
-            type: "FRAME",
-          },
-        },
-      });
-
-      if (!data?.generateCampaignAssetUploadUrl?.uploadUrl) {
-        throw new Error("Failed to get asset upload URL from server.");
+      // 1. Calculate natural image dimensions safely without blocking
+      try {
+        const dims = await getImageDimensions(file);
+        formik.setFieldValue("frameMetadata", dims);
+      } catch (dimErr) {
+        console.warn("Failed to extract image dimensions:", dimErr);
+        formik.setFieldValue("frameMetadata", { width: 1080, height: 1920 });
       }
 
-      const { uploadUrl, fileUrl } = data.generateCampaignAssetUploadUrl;
+      // 2. Request presigned upload URL from backend, with direct uploadImage fallback
+      let directUrl: string | null = null;
+      try {
+        const { data } = await generateUploadUrl({
+          variables: {
+            input: {
+              fileName: file.name || "campaign-frame.png",
+              fileType: file.type || "image/png",
+              type: "FRAME",
+            },
+          },
+        });
 
-      // 3. Direct upload to S3 via PUT
-      await uploadFrameToS3(uploadUrl, file);
+        if (data?.generateCampaignAssetUploadUrl?.uploadUrl) {
+          const { uploadUrl, fileUrl } = data.generateCampaignAssetUploadUrl;
+          await uploadFrameToS3(uploadUrl, file);
+          directUrl = fileUrl;
+        }
+      } catch (presignedErr) {
+        console.warn("Presigned S3 upload failed, trying standard uploadImage mutation fallback:", presignedErr);
+      }
 
-      toast.success("Frame uploaded to cloud storage!");
-      return fileUrl;
+      if (directUrl) {
+        toast.success("Frame uploaded to cloud storage!");
+        return directUrl;
+      }
+
+      // 3. Fallback to standard uploadImage GraphQL mutation
+      const uploadRes = await uploadImageFallback({
+        variables: { file },
+      });
+
+      if (uploadRes?.data?.uploadImage) {
+        toast.success("Frame uploaded successfully!");
+        return uploadRes.data.uploadImage;
+      }
+
+      throw new Error("Failed to upload frame. Please try again.");
     } catch (err: unknown) {
-      toast.error((err as Error).message || "Failed to upload frame.");
+      const msg = (err as Error).message || "Failed to upload frame.";
+      toast.error(msg);
       throw err;
     } finally {
       setIsUploadingFrame(false);
@@ -224,25 +300,43 @@ export function CampaignForm({
     setIsUploadingBanner(true);
 
     try {
-      const { data } = await generateUploadUrl({
-        variables: {
-          input: {
-            fileName: file.name || "festive-banner.webp",
-            fileType: file.type || "image/webp",
-            type: "BANNER",
+      let directUrl: string | null = null;
+      try {
+        const { data } = await generateUploadUrl({
+          variables: {
+            input: {
+              fileName: file.name || "festive-banner.webp",
+              fileType: file.type || "image/webp",
+              type: "BANNER",
+            },
           },
-        },
-      });
+        });
 
-      if (!data?.generateCampaignAssetUploadUrl?.uploadUrl) {
-        throw new Error("Failed to get asset upload URL from server.");
+        if (data?.generateCampaignAssetUploadUrl?.uploadUrl) {
+          const { uploadUrl, fileUrl } = data.generateCampaignAssetUploadUrl;
+          await uploadFrameToS3(uploadUrl, file);
+          directUrl = fileUrl;
+        }
+      } catch (presignedErr) {
+        console.warn("Presigned banner upload failed, trying standard uploadImage fallback:", presignedErr);
       }
 
-      const { uploadUrl, fileUrl } = data.generateCampaignAssetUploadUrl;
-      await uploadFrameToS3(uploadUrl, file);
+      if (directUrl) {
+        toast.success("Festive banner uploaded!");
+        return directUrl;
+      }
 
-      toast.success("Festive banner uploaded!");
-      return fileUrl;
+      // Fallback
+      const uploadRes = await uploadImageFallback({
+        variables: { file },
+      });
+
+      if (uploadRes?.data?.uploadImage) {
+        toast.success("Festive banner uploaded!");
+        return uploadRes.data.uploadImage;
+      }
+
+      throw new Error("Failed to upload festive banner.");
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to upload festive banner.");
       throw err;
@@ -486,7 +580,7 @@ export function CampaignForm({
                   aspectRatio={9 / 16}
                   recommendedWidth={1080}
                   recommendedHeight={1920}
-                  allowedFormats={["image/png"]}
+                  allowedFormats={["image/png", "image/x-png", "image/webp"]}
                   defaultFormat="png"
                   showFormatSelector={false}
                   allowFreeDimensions={true}

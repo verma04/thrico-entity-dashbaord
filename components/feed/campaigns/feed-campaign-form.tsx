@@ -26,6 +26,7 @@ import {
   FeedCampaign,
   useGenerateFeedCampaignAssetUploadUrl,
 } from "@/graphql/actions/feed/campaigns";
+import { useUploadImage } from "@/graphql/actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,7 @@ export function FeedCampaignForm({
   description = "Upload a decorative transparent PNG frame overlay and select where it applies: in Feed, Stories, or Both.",
 }: FeedCampaignFormProps) {
   const [generateUploadUrl] = useGenerateFeedCampaignAssetUploadUrl();
+  const [uploadImageFallback] = useUploadImage();
   const [isUploadingFrame, setIsUploadingFrame] = useState(false);
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 
@@ -132,6 +134,68 @@ export function FeedCampaignForm({
     }
   };
 
+  // Safe dimension reader that never hangs
+  const getImageDimensions = (file: File): Promise<{ width: number; height: number }> => {
+    return new Promise((resolve) => {
+      // Fast path: createImageBitmap if supported
+      if (typeof window !== "undefined" && "createImageBitmap" in window) {
+        createImageBitmap(file)
+          .then((bmp) => {
+            const dims = { width: bmp.width || 1080, height: bmp.height || 1080 };
+            bmp.close();
+            resolve(dims);
+          })
+          .catch(() => {
+            fallbackLoad();
+          });
+        return;
+      }
+      fallbackLoad();
+
+      function fallbackLoad() {
+        if (typeof window === "undefined") {
+          resolve({ width: 1080, height: 1080 });
+          return;
+        }
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        let settled = false;
+
+        const cleanup = () => {
+          if (!settled) {
+            settled = true;
+            try {
+              URL.revokeObjectURL(objectUrl);
+            } catch {
+              // ignore
+            }
+          }
+        };
+
+        const timer = setTimeout(() => {
+          cleanup();
+          resolve({ width: 1080, height: 1080 });
+        }, 2500);
+
+        img.onload = () => {
+          clearTimeout(timer);
+          const width = img.naturalWidth || 1080;
+          const height = img.naturalHeight || 1080;
+          cleanup();
+          resolve({ width, height });
+        };
+
+        img.onerror = () => {
+          clearTimeout(timer);
+          cleanup();
+          resolve({ width: 1080, height: 1080 });
+        };
+
+        img.src = objectUrl;
+      }
+    });
+  };
+
   // Upload asset directly to S3 via presigned PUT
   const uploadAssetToS3 = (url: string, file: File): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -157,49 +221,57 @@ export function FeedCampaignForm({
     setIsUploadingFrame(true);
 
     try {
-      // 1. Calculate natural image dimensions
-      const img = new Image();
-      const objectUrl = URL.createObjectURL(file);
-      await new Promise<void>((resolve) => {
-        img.onload = () => {
-          formik.setFieldValue("frameMetadata", {
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-          });
-          URL.revokeObjectURL(objectUrl);
-          resolve();
-        };
-        img.onerror = () => {
-          URL.revokeObjectURL(objectUrl);
-          resolve();
-        };
-      });
-
-      // 2. Request presigned upload URL from backend
-      const { data } = await generateUploadUrl({
-        variables: {
-          input: {
-            fileName: file.name || "feed-campaign-frame.png",
-            fileType: file.type || "image/png",
-            fileSize: file.size,
-            type: "FRAME",
-          },
-        },
-      });
-
-      if (!data?.generateFeedCampaignAssetUploadUrl?.uploadUrl) {
-        throw new Error("Failed to get asset upload URL from server.");
+      // 1. Calculate natural image dimensions safely without blocking
+      try {
+        const dims = await getImageDimensions(file);
+        formik.setFieldValue("frameMetadata", dims);
+      } catch (dimErr) {
+        console.warn("Failed to extract image dimensions:", dimErr);
+        formik.setFieldValue("frameMetadata", { width: 1080, height: 1080 });
       }
 
-      const { uploadUrl, fileUrl } = data.generateFeedCampaignAssetUploadUrl;
+      // 2. Request presigned upload URL from backend, with direct uploadImage fallback
+      let directUrl: string | null = null;
+      try {
+        const { data } = await generateUploadUrl({
+          variables: {
+            input: {
+              fileName: file.name || "feed-campaign-frame.png",
+              fileType: file.type || "image/png",
+              fileSize: file.size,
+              type: "FRAME",
+            },
+          },
+        });
 
-      // 3. Direct upload to S3 via PUT
-      await uploadAssetToS3(uploadUrl, file);
+        if (data?.generateFeedCampaignAssetUploadUrl?.uploadUrl) {
+          const { uploadUrl, fileUrl } = data.generateFeedCampaignAssetUploadUrl;
+          await uploadAssetToS3(uploadUrl, file);
+          directUrl = fileUrl;
+        }
+      } catch (presignedErr) {
+        console.warn("Presigned S3 upload failed, trying standard uploadImage mutation fallback:", presignedErr);
+      }
 
-      toast.success("Frame uploaded to cloud storage!");
-      return fileUrl;
+      if (directUrl) {
+        toast.success("Frame uploaded to cloud storage!");
+        return directUrl;
+      }
+
+      // 3. Fallback to standard uploadImage GraphQL mutation
+      const uploadRes = await uploadImageFallback({
+        variables: { file },
+      });
+
+      if (uploadRes?.data?.uploadImage) {
+        toast.success("Frame uploaded successfully!");
+        return uploadRes.data.uploadImage;
+      }
+
+      throw new Error("Failed to upload frame. Please try again.");
     } catch (err: unknown) {
-      toast.error((err as Error).message || "Failed to upload frame.");
+      const msg = (err as Error).message || "Failed to upload frame.";
+      toast.error(msg);
       throw err;
     } finally {
       setIsUploadingFrame(false);
@@ -211,26 +283,44 @@ export function FeedCampaignForm({
     setIsUploadingBanner(true);
 
     try {
-      const { data } = await generateUploadUrl({
-        variables: {
-          input: {
-            fileName: file.name || "feed-festive-banner.webp",
-            fileType: file.type || "image/webp",
-            fileSize: file.size,
-            type: "BANNER",
+      let directUrl: string | null = null;
+      try {
+        const { data } = await generateUploadUrl({
+          variables: {
+            input: {
+              fileName: file.name || "feed-festive-banner.webp",
+              fileType: file.type || "image/webp",
+              fileSize: file.size,
+              type: "BANNER",
+            },
           },
-        },
-      });
+        });
 
-      if (!data?.generateFeedCampaignAssetUploadUrl?.uploadUrl) {
-        throw new Error("Failed to get asset upload URL from server.");
+        if (data?.generateFeedCampaignAssetUploadUrl?.uploadUrl) {
+          const { uploadUrl, fileUrl } = data.generateFeedCampaignAssetUploadUrl;
+          await uploadAssetToS3(uploadUrl, file);
+          directUrl = fileUrl;
+        }
+      } catch (presignedErr) {
+        console.warn("Presigned banner upload failed, trying standard uploadImage fallback:", presignedErr);
       }
 
-      const { uploadUrl, fileUrl } = data.generateFeedCampaignAssetUploadUrl;
-      await uploadAssetToS3(uploadUrl, file);
+      if (directUrl) {
+        toast.success("Festive banner uploaded!");
+        return directUrl;
+      }
 
-      toast.success("Festive banner uploaded!");
-      return fileUrl;
+      // Fallback
+      const uploadRes = await uploadImageFallback({
+        variables: { file },
+      });
+
+      if (uploadRes?.data?.uploadImage) {
+        toast.success("Festive banner uploaded!");
+        return uploadRes.data.uploadImage;
+      }
+
+      throw new Error("Failed to upload festive banner.");
     } catch (err: unknown) {
       toast.error((err as Error).message || "Failed to upload festive banner.");
       throw err;
@@ -624,7 +714,7 @@ export function FeedCampaignForm({
                       ? 1920
                       : 1080
                   }
-                  allowedFormats={["image/png"]}
+                  allowedFormats={["image/png", "image/x-png", "image/webp"]}
                   defaultFormat="png"
                   showFormatSelector={false}
                   allowFreeDimensions={true}
