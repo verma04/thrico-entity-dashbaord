@@ -1,10 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { LayoutDashboard, Radio, History, Settings } from "lucide-react";
+import { Radio, History, Settings, Sparkles } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
-
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 function FeedRootLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +12,11 @@ function FeedRootLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: "Community Feed",
       icon: <Radio className="h-4 w-4" />,
+    },
+    {
+      key: "campaigns",
+      label: "Campaign Manager",
+      icon: <Sparkles className="h-4 w-4" />,
     },
     {
       key: "reports",
