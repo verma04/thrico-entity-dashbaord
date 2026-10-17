@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { FeedFramePreviewCanvas } from "./feed-frame-preview-canvas";
@@ -51,28 +52,31 @@ export function FeedCampaignForm({
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 
   const validationSchema = Yup.object().shape({
-    title: Yup.string().required("Campaign title is required"),
+    title: Yup.string().trim().required("Campaign title is required"),
     slug: Yup.string()
+      .trim()
       .matches(/^[a-z0-9-]+$/, "Slug must only contain lowercase letters, numbers, and dashes")
       .required("Slug is required"),
-    description: Yup.string().nullable(),
+    description: Yup.string().nullable().notRequired(),
     status: Yup.string().oneOf(["DRAFT", "ACTIVE", "PAUSED", "ARCHIVED"]).default("ACTIVE"),
-    frameUrl: Yup.string().required("Transparent PNG frame is required"),
+    frameUrl: Yup.string().trim().required("Transparent PNG frame is required"),
     placements: Yup.array().of(Yup.string()).min(1, "Select at least one placement").default(["FEED"]),
     aspectRatio: Yup.string().default("1:1"),
-    festiveImageUrl: Yup.string().nullable(),
-    ctaButtonText: Yup.string().max(50, "CTA label must be 50 characters or less").nullable(),
+    festiveImageUrl: Yup.string().nullable().notRequired(),
+    ctaButtonText: Yup.string().max(50, "CTA label must be 50 characters or less").nullable().notRequired(),
     ctaBgColor: Yup.string()
-      .matches(/^#([0-9a-fA-F]{3}){1,2}$/, "Must be a valid hex color code")
-      .nullable(),
+      .nullable()
+      .notRequired()
+      .test("is-hex", "Must be a valid hex color code (e.g. #4F46E5)", (val) => !val || /^#([0-9a-fA-F]{3}){1,2}$/.test(val)),
     ctaTextColor: Yup.string()
-      .matches(/^#([0-9a-fA-F]{3}){1,2}$/, "Must be a valid hex color code")
-      .nullable(),
+      .nullable()
+      .notRequired()
+      .test("is-hex", "Must be a valid hex color code (e.g. #FFFFFF)", (val) => !val || /^#([0-9a-fA-F]{3}){1,2}$/.test(val)),
     isFilterActive: Yup.boolean().default(true),
     allowCameraRecording: Yup.boolean().default(true),
     allowFileUpload: Yup.boolean().default(true),
-    startDate: Yup.string().nullable(),
-    endDate: Yup.string().nullable(),
+    startDate: Yup.string().nullable().notRequired(),
+    endDate: Yup.string().nullable().notRequired(),
   });
 
   const formik = useFormik({
@@ -105,20 +109,26 @@ export function FeedCampaignForm({
       endDate: initialValues?.endDate ? initialValues.endDate.slice(0, 10) : "",
     },
     validationSchema,
-    onSubmit: async (values) => {
-      const rawMeta = values.frameMetadata as { width?: unknown; height?: unknown } | null | undefined;
-      const cleanFrameMetadata =
-        rawMeta && (typeof rawMeta.width === "number" || typeof rawMeta.height === "number")
-          ? {
-              width: typeof rawMeta.width === "number" ? rawMeta.width : undefined,
-              height: typeof rawMeta.height === "number" ? rawMeta.height : undefined,
-            }
-          : null;
+    onSubmit: async (values, helpers) => {
+      try {
+        const rawMeta = values.frameMetadata as { width?: unknown; height?: unknown } | null | undefined;
+        const cleanFrameMetadata =
+          rawMeta && (typeof rawMeta.width === "number" || typeof rawMeta.height === "number")
+            ? {
+                width: typeof rawMeta.width === "number" ? Math.round(rawMeta.width) : undefined,
+                height: typeof rawMeta.height === "number" ? Math.round(rawMeta.height) : undefined,
+              }
+            : null;
 
-      await onSubmit({
-        ...values,
-        frameMetadata: cleanFrameMetadata,
-      });
+        await onSubmit({
+          ...values,
+          frameMetadata: cleanFrameMetadata,
+        });
+      } catch (err: unknown) {
+        toast.error((err as Error).message || "Failed to submit campaign.");
+      } finally {
+        helpers.setSubmitting(false);
+      }
     },
   });
 
@@ -132,6 +142,56 @@ export function FeedCampaignForm({
         .replace(/(^-|-$)+/g, "");
       formik.setFieldValue("slug", generatedSlug);
     }
+  };
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitized = e.target.value
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "-")
+      .replace(/-+/g, "-");
+    formik.setFieldValue("slug", sanitized);
+  };
+
+  const isSubmittingActive = formik.isSubmitting || isLoading || isUploadingFrame || isUploadingBanner;
+
+  const handlePublish = async (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+
+    if (isUploadingFrame || isUploadingBanner) {
+      toast.info("Please wait for the image upload to complete.");
+      return;
+    }
+
+    const errors = await formik.validateForm();
+    if (errors && Object.keys(errors).length > 0) {
+      // Mark touched so error borders display
+      formik.setTouched(
+        Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+      );
+
+      const firstKey = Object.keys(errors)[0];
+      const firstError = errors[firstKey as keyof typeof errors];
+      const errorMsg =
+        typeof firstError === "string"
+          ? firstError
+          : `Please fill in required fields (${firstKey}).`;
+
+      toast.error(errorMsg);
+
+      // Auto-scroll to the first invalid field
+      const el =
+        document.getElementById(firstKey) ||
+        document.querySelector(`[name="${firstKey}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        (el as HTMLElement).focus?.();
+      }
+      return;
+    }
+
+    await formik.submitForm();
   };
 
   // Safe dimension reader that never hangs
@@ -348,7 +408,7 @@ export function FeedCampaignForm({
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Badge
               variant="outline"
               className={cn(
@@ -360,6 +420,20 @@ export function FeedCampaignForm({
             >
               {formik.values.status}
             </Badge>
+
+            <Button
+              type="button"
+              onClick={handlePublish}
+              disabled={isSubmittingActive}
+              className="bg-[#303030] text-white hover:bg-[#202020] dark:bg-zinc-100 dark:text-zinc-900 shadow-2xs text-xs h-9 font-medium cursor-pointer flex items-center gap-1.5 px-4"
+            >
+              {(formik.isSubmitting || isLoading) ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              <span>{initialValues?.id ? "Save Changes" : "Publish Campaign"}</span>
+            </Button>
           </div>
         </div>
 
@@ -413,7 +487,7 @@ export function FeedCampaignForm({
                     name="slug"
                     placeholder="alumni-homecoming-2026"
                     value={formik.values.slug}
-                    onChange={formik.handleChange}
+                    onChange={handleSlugChange}
                     onBlur={formik.handleBlur}
                     className={cn(
                       "h-9 text-xs font-mono",
@@ -993,10 +1067,10 @@ export function FeedCampaignForm({
 
         {/* Floating Save Panel Bottom Dock Standard */}
         <FloatingSavePanel
-          hasChanged={formik.dirty}
+          hasChanged={formik.dirty || !initialValues?.id}
           saved={false}
-          isSaving={formik.isSubmitting || isLoading || isUploadingFrame || isUploadingBanner}
-          onSave={formik.handleSubmit}
+          isSaving={isSubmittingActive}
+          onSave={handlePublish}
           onReset={formik.resetForm}
           title={initialValues?.id ? "Unsaved Campaign Changes" : "Create New Campaign"}
           saveButtonText={initialValues?.id ? "Save Campaign Changes" : "Publish Campaign"}
